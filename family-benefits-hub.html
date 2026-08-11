@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Family Benefits & Resource Hub</title>
+<style>
+  :root{
+    --navy:#0a2342;
+    --navy-dark:#061730;
+    --gold:#c8a24a;
+    --gold-light:#e6d3a3;
+    --bg:#f5f6f8;
+    --card:#ffffff;
+    --text:#1b2431;
+    --muted:#5b6572;
+    --border:#dfe3e8;
+    --danger:#8a2e2e;
+    --danger-bg:#fbeaea;
+    /* Actual measured header height, kept in sync by JS — the header can
+       wrap to 2-3 lines on narrow screens (title + toggle + two print
+       buttons), so a hardcoded pixel value here would leave the mobile
+       menu's top edge tucked under the header and its top items clipped. */
+    --header-h:56px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.5;
+  }
+  .skip-link{
+    position:fixed;
+    left:14px;
+    top:10px;
+    z-index:100;
+    transform:translateY(-160%);
+    background:#fff;
+    color:var(--navy);
+    padding:9px 13px;
+    border-radius:6px;
+    font-weight:700;
+    box-shadow:0 3px 12px rgba(0,0,0,.25);
+  }
+  .skip-link:focus{transform:translateY(0);}
+  header{
+    background:var(--navy);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:10px 14px;
+    padding:14px 18px;
+    position:sticky;
+    top:0;
+    z-index:50;
+    box-shadow:0 2px 6px rgba(0,0,0,.15);
+  }
+  #hamburger{
+    background:none;
+    border:none;
+    cursor:pointer;
+    padding:6px;
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+  }
+  #hamburger:hover{background:rgba(255,255,255,.1);border-radius:6px;}
+  #hamburger span{
+    width:26px;
+    height:3px;
+    background:#fff;
+    border-radius:2px;
+    display:block;
+  }
+  header h1{
+    font-size:18px;
+    margin:0;
+    font-weight:600;
+    letter-spacing:.3px;
+  }
+  header .sub{
+    font-size:12px;
+    color:var(--gold-light);
+    display:none;
+  }
+  @media (min-width:700px){
+    header .sub{display:inline;margin-left:14px;}
+  }
+  .layout{
+    display:flex;
+    min-height:calc(100vh - var(--header-h));
+  }
+  nav#sidebar{
+    background:var(--navy-dark);
+    width:270px;
+    flex-shrink:0;
+    padding:14px 0;
+    transition:margin-left .25s ease;
+    position:sticky;
+    top:var(--header-h);
+    align-self:flex-start;
+    height:calc(100vh - var(--header-h));
+    overflow-y:auto;
+    overflow-x:hidden;
+    overscroll-behavior:contain;
+    touch-action:pan-y;
+    scrollbar-gutter:stable;
+  }
+  nav#sidebar.collapsed{
+    margin-left:-270px;
+  }
+  nav#sidebar a{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color:#cdd6e2;
+    text-decoration:none;
+    padding:12px 20px;
+    font-size:14.5px;
+    border-left:3px solid transparent;
+  }
+  nav#sidebar a .ico{font-size:16px;width:20px;text-align:center;}
+  nav#sidebar a:hover{background:rgba(255,255,255,.06);color:#fff;}
+  nav#sidebar a:focus-visible{outline:2px solid var(--gold-light);outline-offset:-4px;color:#fff;}
+  nav#sidebar a.active{
+    background:rgba(200,162,74,.12);
+    color:#fff;
+    border-left-color:var(--gold);
+    font-weight:600;
+  }
+  main{
+    flex:1;
+    padding:26px 30px 60px;
+    max-width:980px;
+    width:100%;
+  }
+  .page{display:none;}
+  .page.active{display:block;animation:fade .2s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+  h2{
+    color:var(--navy);
+    border-bottom:2px solid var(--gold);
+    padding-bottom:10px;
+    margin-top:0;
+  }
+  h3{color:var(--navy);margin-top:26px;}
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:18px 20px;
+    margin-bottom:16px;
+    box-shadow:0 1px 2px rgba(10,35,66,.04);
+  }
+  button:focus-visible, input:focus-visible, textarea:focus-visible, a:focus-visible{
+    outline:3px solid rgba(200,162,74,.7);
+    outline-offset:2px;
+  }
+  .callout{
+    background:#eef3fb;
+    border-left:4px solid var(--navy);
+    padding:12px 16px;
+    border-radius:6px;
+    margin:14px 0;
+    font-size:14.5px;
+  }
+  .warning{
+    background:var(--danger-bg);
+    border-left:4px solid var(--danger);
+    color:var(--danger);
+    padding:12px 16px;
+    border-radius:6px;
+    margin:14px 0;
+    font-size:14.5px;
+  }
+  a.link{color:#1c4e9c;}
+  .fact-list li{margin-bottom:8px;}
+  table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:10px;
+    font-size:14px;
+    table-layout:fixed;
+  }
+  th,td{
+    border:1px solid var(--border);
+    padding:8px;
+    text-align:left;
+    vertical-align:top;
+    word-wrap:break-word;
+    overflow-wrap:break-word;
+  }
+  th{background:var(--navy);color:#fff;font-weight:600;font-size:13px;}
+  td input, td textarea{
+    width:100%;
+    border:1px solid transparent;
+    background:transparent;
+    font-family:inherit;
+    font-size:14px;
+    padding:4px;
+    border-radius:4px;
+    white-space:normal;
+    word-break:break-word;
+    overflow:hidden;
+    resize:none;
+    line-height:1.35;
+  }
+  td input:focus, td textarea:focus{
+    border-color:var(--gold);
+    background:#fffdf6;
+    outline:none;
+  }
+  td textarea{min-height:32px;display:block;}
+  .row-actions{white-space:nowrap;text-align:center;}
+  button.small{
+    background:var(--navy);
+    color:#fff;
+    border:none;
+    border-radius:6px;
+    padding:6px 12px;
+    font-size:13px;
+    cursor:pointer;
+  }
+  button.small.danger{background:var(--danger);}
+  button.small.add{background:var(--gold);color:#3a2c07;font-weight:600;}
+  .toolbar{display:flex;gap:10px;margin:12px 0;flex-wrap:wrap;align-items:center;}
+  .save-note{font-size:12.5px;color:var(--muted);}
+  .notes-box{
+    width:100%;
+    min-height:80px;
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:10px;
+    font-family:inherit;
+    font-size:14px;
+  }
+  .quick-notes{margin:2px 0 20px;}
+  .qn-label{
+    display:block;
+    font-size:11.5px;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:.5px;
+    margin-bottom:4px;
+  }
+  .qn-box{
+    min-height:54px;
+    font-size:13.5px;
+    background:#fbfbfc;
+  }
+  .checklist label{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    padding:8px 0;
+    border-bottom:1px dashed var(--border);
+    font-size:14.5px;
+  }
+  .checklist input[type=text]{
+    flex:1;
+    min-width:120px;
+    border:1px solid var(--border);
+    border-radius:4px;
+    padding:6px 8px;
+    font-family:inherit;
+  }
+  .checklist label{flex-wrap:wrap;}
+  .checklist .doc-label{
+    flex:1 1 240px;
+    min-width:200px;
+    word-break:break-word;
+  }
+  .checklist input[type=checkbox]{margin-top:4px;transform:scale(1.15);}
+  .checklist textarea{
+    flex:1;
+    min-width:120px;
+    border:1px solid var(--border);
+    border-radius:4px;
+    padding:6px 8px;
+    font-family:inherit;
+    font-size:14.5px;
+    line-height:1.35;
+    resize:none;
+    overflow:hidden;
+    min-height:34px;
+  }
+  .checklist textarea:focus{border-color:var(--gold);outline:none;background:#fffdf6;}
+  .checklist.numbered{counter-reset:step;}
+  .checklist.numbered label::before{
+    counter-increment:step;
+    content:counter(step) ".";
+    font-weight:700;
+    color:var(--navy);
+    flex:0 0 auto;
+    padding-top:6px;
+    min-width:20px;
+  }
+  .sequence-card{
+    background:#fff9ec;
+    border:1px solid var(--gold);
+  }
+  .nav-group{width:100%;display:flex;align-items:center;justify-content:space-between;background:transparent;border:0;border-top:1px solid rgba(255,255,255,.08);color:#b9c6d6;font-family:inherit;font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;padding:16px 20px 10px;cursor:pointer;text-align:left;}
+  .nav-group:first-child{border-top:0;padding-top:8px;}
+  .nav-group:hover{background:rgba(255,255,255,.06);color:#fff;}
+  .nav-group .chevron{font-size:15px;line-height:1;transition:transform .2s ease;}
+  .nav-group[aria-expanded="true"] .chevron{transform:rotate(90deg);}
+  .nav-group-panel[hidden]{display:none;}
+  .welcome-card{background:linear-gradient(135deg,#fffaf0 0%,#fff 68%);border:1px solid var(--gold-light);padding:24px;}
+  .welcome-card h3{margin:0 0 8px;font-size:24px;line-height:1.25;}
+  .welcome-card p{font-size:16px;max-width:680px;}
+  .choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:20px;}
+  .choice-card{display:block;border:1px solid var(--border);border-radius:10px;padding:18px;color:var(--text);text-decoration:none;background:#fff;}
+  .choice-card:hover{border-color:var(--gold);box-shadow:0 3px 12px rgba(10,35,66,.08);}
+  .choice-card strong{display:block;color:var(--navy);font-size:17px;margin-bottom:5px;}
+  .choice-card span{display:block;color:var(--muted);font-size:14px;}
+  .choice-card.primary{background:var(--navy);border-color:var(--navy);color:#fff;}
+  .choice-card.primary strong,.choice-card.primary span{color:#fff;}
+  .calm-note{font-size:14px;color:var(--muted);margin-top:18px;}
+  .timeline-details{margin-top:18px;border-top:1px solid var(--border);padding-top:14px;}
+  .timeline-details summary{cursor:pointer;color:var(--navy);font-weight:700;padding:8px 0;}
+  .timeline-details[open] summary{margin-bottom:8px;}
+  .current-card{
+    background:#eef7f0;
+    border:1px solid #3f8f5f;
+  }
+  .field-row{margin-bottom:16px;}
+  .field-row label{
+    display:block;
+    font-size:13.5px;
+    color:var(--muted);
+    margin-bottom:4px;
+    font-weight:600;
+  }
+  .field-row input, .field-row textarea{
+    max-width:100%;
+  }
+  footer.pagefoot{
+    margin-top:26px;
+    font-size:12px;
+    color:var(--muted);
+    border-top:1px solid var(--border);
+    padding-top:10px;
+  }
+  #menuBackdrop{display:none;}
+  @media (max-width:820px){
+    body.menu-open-mobile{overflow:hidden;}
+    nav#sidebar{
+      position:fixed;
+      top:var(--header-h);
+      bottom:auto;
+      left:0;
+      height:calc(100vh - var(--header-h));
+      height:calc(100dvh - var(--header-h));
+      max-height:calc(100vh - var(--header-h));
+      max-height:calc(100dvh - var(--header-h));
+      min-height:0;
+      max-width:88vw;
+      z-index:40;
+      box-shadow:2px 0 10px rgba(0,0,0,.2);
+      overflow-x:hidden;
+      overflow-y:scroll;
+      overscroll-behavior-y:contain;
+      -webkit-overflow-scrolling:touch;
+    }
+    nav#sidebar.collapsed{margin-left:-270px;}
+    main{padding:20px 16px 60px;}
+    #menuBackdrop{
+      position:fixed;
+      inset:var(--header-h) 0 0 0;
+      z-index:35;
+      background:rgba(6,23,48,.45);
+      backdrop-filter:blur(1px);
+    }
+    #menuBackdrop.visible{display:block;}
+  }
+  @media (max-width:480px){
+    header{padding:10px 12px;gap:8px 10px;}
+    header h1{font-size:15.5px;}
+    #printBtn, #printAllBtn{font-size:11.5px;padding:5px 8px;}
+    label[for="autoHideToggle"], header label{font-size:11px;}
+  }
+  @media print{
+    header, nav#sidebar, .no-print, .toolbar, .row-actions, button{display:none !important;}
+    .layout{display:block;}
+    main{padding:0;max-width:100%;}
+    .page{display:none !important;}
+    .page.active{display:block !important;}
+    .card{border:none;padding:0;margin-bottom:14px;}
+    body{background:#fff;}
+    td textarea, td input, .notes-box{border:1px solid #ccc !important;background:#fff !important;}
+    /* "Print Entire Site" mode: show every section, one per printed page,
+       instead of just whichever one is currently active on screen */
+    body.print-all .page{display:block !important;}
+    body.print-all .page:not(:last-of-type){page-break-after:always;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{scroll-behavior:auto !important;animation-duration:.01ms !important;transition-duration:.01ms !important;}
+  }
+  @media (max-width:620px){.choice-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body><a id="masterAppBackBtn" href="master-app.html" title="Back to Master App" style="position:fixed;left:14px;bottom:14px;z-index:2147483000;display:inline-flex;align-items:center;gap:7px;background:#14161a;color:#fff;text-decoration:none;font:600 12.5px -apple-system,Segoe UI,Roboto,Arial,sans-serif;padding:9px 14px 9px 11px;border-radius:999px;box-shadow:0 6px 18px rgba(0,0,0,.28);opacity:.88;border:1px solid rgba(255,255,255,.12)" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.88">⌂ Master App</a>
+
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+<header>
+  <button id="hamburger" aria-label="Collapse menu" title="Collapse menu" aria-controls="sidebar" aria-expanded="true"><span></span><span></span><span></span></button>
+  <h1>Family Benefits &amp; Resource Hub</h1>
+  <label class="no-print" title="When on, the menu automatically slides closed after you pick a section" style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--gold-light);margin-left:auto;white-space:nowrap;cursor:pointer;">
+    <input type="checkbox" id="autoHideToggle" style="accent-color:var(--gold);cursor:pointer;">
+    Auto-hide menu
+  </label>
+  <button id="printBtn" class="no-print" onclick="window.print()" title="Print the currently open section" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:6px;padding:6px 12px;font-size:13px;cursor:pointer;">&#128424; Print This Section</button>
+  <button id="printAllBtn" class="no-print" onclick="printAllSections()" title="Print every section — a full paper backup" style="background:var(--gold);color:#3a2c07;border:1px solid var(--gold);border-radius:6px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer;">&#128196; Print Entire Site</button>
+  <span class="sub no-print">Personal &amp; Private — stored only on this device</span>
+</header>
+
+<div class="layout">
+  <nav id="sidebar" aria-label="Resource sections">
+    <button class="nav-group" type="button" aria-expanded="true" aria-controls="nav-survivor" data-group="survivor"><span>For my survivor</span><span class="chevron" aria-hidden="true">›</span></button>
+    <div class="nav-group-panel" id="nav-survivor">
+    <a href="#overview" class="nav-link active" data-target="overview"><span class="ico">&#127968;</span> Start Here</a>
+    <a href="#firstdays" class="nav-link" data-target="firstdays"><span class="ico">&#128680;</span> What To Do Next</a>
+    <a href="#contacts" class="nav-link" data-target="contacts"><span class="ico">&#128222;</span> Key Contacts</a>
+    <a href="#documents" class="nav-link" data-target="documents"><span class="ico">&#128193;</span> Important Documents</a>
+    <a href="#passwords" class="nav-link" data-target="passwords"><span class="ico">&#128274;</span> Accounts &amp; Passwords</a>
+    </div>
+    <button class="nav-group" type="button" aria-expanded="false" aria-controls="nav-prepare" data-group="prepare"><span>Prepare now</span><span class="chevron" aria-hidden="true">›</span></button>
+    <div class="nav-group-panel" id="nav-prepare" hidden>
+    <a href="#advdirective" class="nav-link" data-target="advdirective"><span class="ico">&#9877;&#65039;</span> Advance Directive &amp; POA</a>
+    <a href="#wishes" class="nav-link" data-target="wishes"><span class="ico">&#128220;</span> My Wishes</a>
+    <a href="#beneficiaries" class="nav-link" data-target="beneficiaries"><span class="ico">&#128203;</span> Beneficiary Designations</a>
+    <a href="#dates" class="nav-link" data-target="dates"><span class="ico">&#128197;</span> Important Dates</a>
+    <a href="#backup" class="nav-link" data-target="backup"><span class="ico">&#128190;</span> Backup &amp; Restore</a>
+    </div>
+    <button class="nav-group" type="button" aria-expanded="false" aria-controls="nav-benefits" data-group="benefits"><span>Benefit reference</span><span class="chevron" aria-hidden="true">›</span></button>
+    <div class="nav-group-panel" id="nav-benefits" hidden>
+    <a href="#sbp" class="nav-link" data-target="sbp"><span class="ico">&#127890;</span> Military SBP</a>
+    <a href="#dic" class="nav-link" data-target="dic"><span class="ico">&#128196;</span> DIC Benefits</a>
+    <a href="#vabenefits" class="nav-link" data-target="vabenefits"><span class="ico">&#127973;</span> VA Benefits</a>
+    <a href="#fers" class="nav-link" data-target="fers"><span class="ico">&#127970;</span> Federal (FERS) Retirement</a>
+    <a href="#insurance" class="nav-link" data-target="insurance"><span class="ico">&#128176;</span> Life Insurance &amp; TSP</a>
+    <a href="#incomeloss" class="nav-link" data-target="incomeloss"><span class="ico">&#128200;</span> Income After Loss</a>
+    <a href="#statebenefits" class="nav-link" data-target="statebenefits"><span class="ico">&#128506;&#65039;</span> Idaho Survivor Benefits</a>
+    </div>
+  </nav>
+  <div id="menuBackdrop" aria-hidden="true"></div>
+
+  <main id="main-content" tabindex="-1">
+
+    <!-- OVERVIEW -->
+    <section id="overview" class="page active">
+      <h2>Start Here</h2>
+      <div class="card welcome-card">
+        <h3>If you are here because I died, you only need to take the next step.</h3>
+        <p>I'm sorry you have to handle this. You do not need to understand every benefit or finish everything today. Ask someone you trust to sit with you, then choose what you need below.</p>
+        <div class="choice-grid">
+          <a href="#firstdays" class="choice-card primary nav-link" data-target="firstdays"><strong>I need to know what to do now</strong><span>Open the five immediate actions, followed by a quieter timeline for later.</span></a>
+          <a href="#contacts" class="choice-card nav-link" data-target="contacts"><strong>I need a person to call</strong><span>Open the names, phone numbers, and organizations that can help.</span></a>
+          <a href="#documents" class="choice-card nav-link" data-target="documents"><strong>I need to find a document</strong><span>See what is needed and where each item is stored.</span></a>
+          <a href="#incomeloss" class="choice-card nav-link" data-target="incomeloss"><strong>I need the financial picture</strong><span>See expected income sources after the loss.</span></a>
+        </div>
+        <p class="calm-note">All detailed explanations remain under <strong>Benefit reference</strong> in the menu. They can wait until you need them.</p>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0;">For preparation before a loss</h3>
+        <p>Use the <strong>Prepare now</strong> group in the menu for wishes, advance directives, beneficiaries, important dates, and backups. Information entered here stays in this browser on this device.</p>
+        <div class="warning"><strong>Privacy:</strong> saved information is not encrypted. A dedicated password manager is safer for banking, primary email, and other sensitive passwords.</div>
+      </div>
+    </section>
+
+    <!-- FIRST DAYS CHECKLIST -->
+    <section id="firstdays" class="page">
+      <h2>What To Do Next</h2>
+      <div class="quick-notes"><label class="qn-label">Notes</label><textarea class="notes-box qn-box" id="qn-firstdays" placeholder="Quick notes for this section..."></textarea></div>
+      <div class="card sequence-card">
+        <h3 style="margin-top:0;">Start with these five things</h3>
+        <p>Do only what the situation requires today. A funeral home, family member, or trusted friend can help make calls and keep notes. Check off each step as it is handled.</p>
+        <div class="checklist numbered" id="fd-sequence"></div>
+        <div class="toolbar"><button class="small add no-print" onclick="fdSeq.addItem()">+ Add Step</button></div>
+      </div>
+
+      <div class="card">
+        <p><strong>Nothing below must be read all at once.</strong> Open the longer timeline only when you are ready. A Veterans Service Officer, funeral home, or benefits contact can help decide what applies.</p>
+        <details class="timeline-details">
+        <summary>Show the detailed timeline for the coming weeks and months</summary>
+
+        <h3>First 24–72 hours</h3>
+        <div class="checklist" id="fd-checklist-1"></div>
+        <div class="toolbar"><button class="small add no-print" onclick="fd1.addItem()">+ Add Item</button></div>
+
+        <h3>First 1–2 weeks</h3>
+        <div class="checklist" id="fd-checklist-2"></div>
+        <div class="toolbar"><button class="small add no-print" onclick="fd2.addItem()">+ Add Item</button></div>
+
+        <h3>First 1–3 months</h3>
+        <div class="checklist" id="fd-checklist-3"></div>
+        <div class="toolbar"><button class="small add no-print" onclick="fd3.addItem()">+ Add Item</button></div>
+
+        <div class="warning">
+          Don't rush to cancel accounts, subscriptions, or insurance policies before you understand what's tied to them (e.g., FEGLI/SGLI claims reference the policy, some benefits require proof of prior coverage). Get certified copies of the death certificate first — most agencies need their own copy.
+        </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ADVANCE DIRECTIVE & HEALTHCARE POA -->
+    <section id="advdirective" class="page">
+      <h2>Advance Directive &amp; Healthcare POA</h2>
+      <div class="quick-notes"><label class="qn-label">Notes</label><textarea class="notes-box qn-box" id="qn-advdirective" placeholder="Quick notes for this section..."></textarea></div>
+      <div class="card">
+        <p>Everything else on this site assumes you've passed. This section is different — it's about <strong>incapacity</strong>: a coma, stroke, or medical crisis where you're alive but can't speak for yourself. A regular power of attorney becomes void the moment you die, so it's no help after death — but it (and a healthcare-specific version) is exactly what your spouse needs while you're alive and unable to communicate.</p>
+
+        <h3>Idaho's Advance Directive (two parts)</h3>
+        <ul class="fact-list">
+          <li><strong>Durable Power of Attorney for Healthcare:</strong> names a Healthcare Agent (typically your spouse) who can make medical decisions and talk to your care team if you can't. Only takes effect once you're unable to communicate.</li>
+          <li><strong>Living Will:</strong> states your wishes about life-sustaining treatment at the end of life — bundled with the Healthcare POA in Idaho's standard form.</li>
+          <li>Idaho also has a <strong>POST form</strong> (Physician Orders for Scope of Treatment) for anyone with a serious illness — actual medical orders signed by a physician/APRN/PA. If one exists, it takes precedence over and effectively updates the living will.</li>
+        </ul>
+
+        <h3>Idaho Healthcare Directive Registry</h3>
+        <p>You can complete and store your Advance Directive online through Idaho's Healthcare Directive Registry — free, and once submitted it's immediately accessible to any Idaho provider who needs it, so your spouse doesn't have to produce a paper copy in an emergency.</p>
+
+        <h3>Durable Financial / General Power of Attorney (a separate document)</h3>
+        <p>A <strong>durable power of attorney for finances</strong> is different from the healthcare one — it lets your spouse handle bills, benefits paperwork, and accounts if you're incapacitated but alive. Like the healthcare POA, it becomes void at death (the will/executor takes over at that point). Worth having both, ideally drafted together with an attorney.</p>
+
+        <div class="callout">
+          References: <a class="link" href="https://healthandwelfare.idaho.gov/services-programs/birth-marriage-death-records/start-your-advance-directive" target="_blank" rel="noopener">Idaho Dept. of Health &amp; Welfare – Start Your Advance Directive</a> · <a class="link" href="https://healthandwelfare.idaho.gov/services-programs/birth-marriage-death-records/advance-directives-and-registry-services" target="_blank" rel="noopener">Idaho Healthcare Directive Registry</a>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0;">On file</h3>
+        <div class="field-row">
+          <label>Healthcare Agent (name &amp; phone)</label>
+          <input type="text" class="notes-box" id="ad-healthagent" placeholder="Name and phone number">
+        </div>
+        <div class="field-row">
+          <label>Alternate Healthcare Agent</label>
+          <input type="text" class="notes-box" id="ad-altagent" placeholder="Backup, if primary agent is unavailable">
+        </div>
+        <div class="field-row">
+          <label>Financial / General POA Agent</label>
+          <input type="text" class="notes-box" id="ad-financialpoa" placeholder="Name and phone number">
+        </div>
+        <div class="field-row">
+          <label>Where the signed documents are stored</label>
+          <input type="text" class="notes-box" id="ad-doclocation" placeholder="e.g. fireproof safe, attorney's office">
+        </div>
+        <div class="field-row">
+          <label>Idaho Healthcare Directive Registry status</label>
+          <input type="text" class="notes-box" id="ad-registered" placeholder="Registered? Date? Confirmation number?">
+        </div>
+      </div>
+    </section>
+
+    <!-- MY WISHES -->
+    <section id="wishes" class="page">
+      <h2>My Wishes (Funeral &amp; Burial)</h2>
+      <div class="quick-notes"><label class="qn-label">Notes</label><textarea class="notes-box qn-box" id="qn-wishes" placeholder="Quick notes for this section..."></textarea></div>
+      <div class="card">
+        <p>So she's not left guessing during the hardest week of her life. Fill in what actually matters to you — leave anything blank if you don't have a preference, and let her decide.</p>
+        <div class="field-row">
+          <label>Burial or cremation</label>
+          <input type="text" class="notes-box" id="wish-burial" placeholder="Your preference">
+        </div>
+        <div class="field-row">
+          <label>Cemetery / final resting place</label>
+          <textarea class="notes-box" id="wish-cemetery" placeholder="e.g. Idaho State Veterans Cemetery (Boise), a specific VA national cemetery, family plot, etc."></textarea>
+        </div>
+        <div class="field-row">
+          <label>Headstone / marker inscription wishes</label>
+          <textarea class="notes-box" id="wish-headstone" placeholder="Anything specific you want said"></textarea>
+        </div>
+        <div class="field-row">
+          <label>Service preferences</label>
+          <textarea class="notes-box" id="wish-service" placeholder="Military honors, religious/non-religious, location, who should speak, etc."></textarea>
+        </div>
+        <div class="field-row">
+          <label>Who to notify / invite</label>
+          <textarea class="notes-box" id="wish-notify" placeholder="Old friends, units, organizations she might not think to contact"></textarea>
+        </div>
+        <div class="field-row">
+          <label>Other wishes</label>
+          <textarea class="notes-box" id="wish-other" placeholder="Music, readings, charitable donations instead of flowers, anything else"></textarea>
+        </div>
+        <div class="warning">
+          <strong>The funeral itself isn't covered.</strong> VA benefits pay for the cemetery plot, headstone, and burial flag — but not the funeral home: casket, embalming, service fees, and transportation typically run <strong>$7,000–$15,000 out of pocket</strong>, and none of the survivor income (DIC, SBP) arrives fast enough to cover it up front.
+        </div>
+        <div class="field-row">
+          <label>Funeral cost funding plan</label>
+          <textarea class="notes-box" id="wish-funeralfunding" placeholder="Pre-need funeral insurance policy, a designated savings account, or where the money would come from"></textarea>
+        </div>
+        <div class="callout">
+          <strong>Idaho State Veterans Cemetery (Boise):</strong> burial at no cost for you, your spouse, and dependents, with military funeral honors (Taps, flag folding and presentation, an honor guard) provided automatically. No Idaho residency requirement. <strong>Pre-registration is free</strong>, doesn't obligate you to anything, and takes about 4–6 weeks to process — worth doing now rather than leaving it for her to sort out during an already difficult week. <a class="link" href="https://veterans.idaho.gov/cemeteries/boise-cemetery/" target="_blank" rel="noopener">Idaho Division of Veterans Services – Boise Cemetery</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- SBP -->
+    <section id="sbp" class="page">
+      <h2>Military Survivor Benefit Plan (SBP)</h2>
+      <div class="quick-notes"><label class="qn-label">Notes</label><textarea class="notes-box qn-box" id="notes-sbp" placeholder="Annuitant number, claim status, monthly amount, dates filed, etc."></textarea></div>
+      <div class="card">
+        <p>SBP is a Department of Defense program, administered by <strong>DFAS</strong> (not the VA), that pays an eligible surviving spouse a monthly annuity for life, replacing a portion of the retired pay that stops when the retiree dies.</p>
+        <h3>Key facts</h3>
+        <ul class="fact-list">
+          <li>A spouse named as beneficiary who was married to the service member on their date of retirement is eligible immediately, regardless of how long they were married.</li>
+          <li>A retiree who was unmarried at retirement can add Spouse SBP later; the election must be made within one year of the first marriage after retirement.</li>
+          <li>SBP annuities receive an annual COLA — a 2.8% increase took effect December 1, 2025.</li>
+          <li>The "widow's tax" offset has been eliminated — SBP and DIC can now be received in full at the same time (no more dollar-for-dollar reduction).</li>
+        </ul>
+        <h3>How to file / report a death</h3>
+        <ul class="fact-list">
+          <li>Contact DFAS to report the retiree's death using the online "Report a Retiree's Death" tool via AskDFAS, or call the DFAS Customer Care Center: <strong>1-800-321-1080</strong>.</li>
+          <li>DFAS will need a certified copy of the death certificate and the retiree's SBP annuitant/claim information.</li>
+        </ul>
+        <div class="callout">
+          Official references: <a class="link" href="https://www.militaryonesource.mil/benefits/survivor-benefit-plan/" target="_blank" rel="noopener">Military OneSource – About SBP</a> · <a class="link" href="https://www.military.com/the-survivor-benefit-plan-in-2026-what-it-is-what-it-costs-and-what-changed" target="_blank" rel="noopener">Military.com – SBP in 2026</a> · <a class="link" href="https://www.dfas.mil" target="_blank" rel="noopener">DFAS.mil</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- DIC -->
+    <section id="dic" class="page">
+      <h2>Dependency and Indemnity Compensation (DIC)</h2>
+      <div class="quick-notes"><label class="qn-label">Notes</label><textarea class="notes-box qn-box" id="notes-dic" placeholder="VA file/claim number, filing date, decision status, monthly amount, etc."></textarea></div>
+      <div class="card">
+        <p>DIC is a tax-free monthly benefit paid by the <strong>VA</strong> to eligible surviving spouses, children, or parents when a veteran's death was connected to military service, or when the veteran had a permanent, total (100%) service-connected disability rating for at least 10 years before death.</p>
+        <h3>Key facts</h3>
+        <ul class="fact-list">
+          <li>2026 base DIC rate for a surviving spouse: <strong>$1,699.36/month</strong> (effective Dec. 1, 2025, after a 2.8% COLA).</li>
+          <li>Surviving spouse eligibility generally requires marriage to the veteran for at least 1 year before death (or a child together), and continuous cohabitation unless separation wasn't the spouse's fault.</li>
+          <li>Dependent children may qualify if under 18, between 18–23 and in a VA-approved school program, or permanently incapable of self-support due to a disability that began before age 18.</li>
+          <li>Some low-income surviving parents may qualify for an income-based DIC benefit.</li>
+          <li>DIC and SBP can now be received in full simultaneously (the offset was repealed).</li>
+        </ul>
+        <h3>How to apply</h3>
+        <ul class="fact-list">
+          <li>Primary form: <strong>VA Form 21P-534EZ</strong> (covers DIC, Survivors Pension, and accrued benefits).</li>
+          <li>Apply online at VA.gov, by mail, in person at a VA regional office, or with help from a <strong>Veterans Service Officer (VSO)</strong> — VSO help is free.</li>
+        </ul>
+        <div class="callout">
+          Official references: <a class="link" href="https://www.va.gov/family-and-caregiver-benefits/survivor-compensation/dependency-indemnity-compensation/" target="_blank" rel="noopener">VA.gov – About DIC</a> · <a class="link" href="https://www.va.gov/family-and-caregiver-benefits/survivor-compensation/dependency-indemnity-compensation/parent-rates/" target="_blank" rel="noopener">VA.gov – DIC Parent Rates</a>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Your 100% P&amp;T status &amp; the DIC "10-year rule"</h3>
+        <p>Since a veteran's death connected to service isn't the only path to DIC, a surviving spouse can also qualify if the veteran was rated <strong>totally disabled (100% P&amp;T) for at least 10 years before death</strong> — or at least 5 years from the date of discharge, or at least 1 year if a former POW — even if the service-connected condition wasn't the actual cause of death. Track the date your P&amp;T rating became effective below so it's easy to see whether the 10-year (or 5-year) threshold has been met.</p>
+        <label style="display:block;font-size:13.5px;color:var(--muted);margin-bottom:4px;">P&amp;T rating effective date</label>
+        <input type="text" class="notes-box" id="ptdate-dic" style="max-width:260px;min-height:auto;" placeholder="MM/DD/YYYY">
+      </div>
+    </section>
+
+    <!-- VA BENEFITS -->
+    <section id="vabenefits" class="page">
+      <h2>Other VA Survivor Benefits</h2>
+      <div class="quick-notes"><label class="qn-label">Notes</label><textarea class="notes-box qn-box" id="notes-va" placeholder="Which of these you've applied for, application dates, VSO contact, etc."></textarea></div>
+      <div class="card current-card">
+        <h3 style="margin-top:0;">VA Caregiver Support (PCAFC) — a current benefit, not a survivor benefit</h3>
+        <p>Everything else on this page is about what happens after your death. This one is different — if your spouse provides regular hands-on care for you, this VA program supports her directly, right now.</p>
+        <ul class="fact-list">
+          <li>Eligibility: you need a combined service-connected disability rating of <strong>70% or higher</strong> (your 100% P&amp;T rating qualifies) and require at least 6 months of continuous in-person personal care.</li>
+          <li>Benefits for the caregiver: a <strong>monthly tax-free stipend</strong> (2026 figures run roughly $1,900–$3,800/month depending on location and level of care needed), respite care, mental health counseling, and beneficiary travel support.</li>
+          <li>Health insurance through CHAMPVA is available to the caregiver only if she isn't otherwise insured — since she's already covered under your TRICARE, this specific piece likely won't apply to her.</li>
+          <li>Apply with <strong>VA Form 10-10CG</strong>; a VA social worker completes an in-home assessment as part of the process.</li>
+        </ul>
+        <div class="callout">Reference: <a class="link" href="https://www.caregiver.va.gov/support/support_benefits.asp" target="_blank" rel="noopener">VA Caregiver Support Program</a></div>
+      </div>
+      <div class="card">
+        <h3>Survivors Pension</h3>
+        <p>A separate, tax-free, income-based monthly benefit for low-income, unremarried surviving spouses (and dependent children) of wartime veterans whose death was <em>not</em> service-connected. Filed on the same Form 21P-534EZ as DIC.</p>
+
+        <h3>TRICARE (health coverage)</h3>
+        <p>As a military retiree, your spouse is already TRICARE-eligible as your dependent, and stays eligible after your death.</p>
+        <ul class="fact-list">
+          <li>When a retiree dies, the <strong>surviving spouse automatically remains TRICARE-eligible</strong> (Prime, Select, or TRICARE For Life, whichever applied) with no application needed and no coverage gap, as long as she doesn't remarry.</li>
+          <li><strong>Remarriage rule is strict:</strong> if she remarries, TRICARE eligibility ends permanently at any age — unlike SBP/DIC, which have a "remarriage after 55 is protected" rule, TRICARE has no such protection unless she remarries another TRICARE-eligible retiree or service member.</li>
+          <li>Report the death in <strong>DEERS</strong> (Defense Enrollment Eligibility Reporting System) promptly — this is what keeps her TRICARE record accurate and claims processing without interruption. A funeral home or the DFAS/casualty assistance process can point her to the nearest ID card/DEERS office if a new ID card is needed.</li>
+        </ul>
+
+        <h3>Social Security Survivor Benefits</h3>
+        <p>Separate from VA/DFAS — administered by the <strong>Social Security Administration</strong>, not the VA. Two distinct benefits:</p>
+        <ul class="fact-list">
+          <li>A <strong>monthly survivor benefit</strong> for a surviving spouse, available starting at age 60 (age 50 if disabled), or at any age if caring for the deceased's child under 16 or disabled. The amount ranges from about 71.5% of the worker's benefit (claimed early) up to 100% at the survivor's full retirement age. Generally requires the marriage to have lasted at least 9 months (exceptions apply).</li>
+          <li>A one-time <strong>$255 lump-sum death payment</strong> to an eligible spouse or child — must be claimed within 2 years of death.</li>
+        </ul>
+        <div class="callout">Call SSA directly to start either benefit: <strong>1-800-772-1213</strong>.</div>
+
+        <h3>Survivors' &amp; Dependents' Educational Assistance (Chapter 35 / DEA)</h3>
+        <p>Up to 36 months of education/training benefits for spouses and children of veterans who died from a service-connected condition, or who are permanently and totally disabled from one.</p>
+
+        <h3>Burial &amp; Memorial Benefits</h3>
+        <ul class="fact-list">
+          <li>Burial in a VA national cemetery at no cost (spouse/dependents may also be eligible).</li>
+          <li>Government-furnished headstone or marker.</li>
+          <li>U.S. burial flag.</li>
+          <li>Presidential Memorial Certificate.</li>
+        </ul>
+
+        <h3>Home Loan & Fee Waivers</h3>
+        <p>Some surviving spouses (e.g., DIC recipients) may qualify for a VA home loan Certificate of Eligibility and funding fee exemption.</p>
+
+        <div class="callout">
+          Start here: <a class="link" href="https://www.va.gov/family-and-caregiver-benefits/" target="_blank" rel="noopener">VA.gov – Family &amp; Caregiver Benefits</a> · Local help: your county Veterans Service Officer (VSO)
+        </div>
+      </div>
+    </section>
+
+    <!-- FERS / FEDERAL RETIREMENT -->
+    <section id="fers" class="page">
+      <h2>Federal (FERS) Retirement &amp; Survivor Benefit</h2>
+      <div class="quick-notes"><label class="qn-label">Notes</label><textarea class="notes-box qn-box" id="notes-fers" placeholder="Retirement date plan, survivor election chosen, FEGLI options carried, HR/benefits contact, etc."></textarea></div>
+      <div class="card">
+        <p>As a federal civilian employee (VA), you separately accrue a <strong>FERS</strong> (Federal Employees Retirement System) pension through OPM — this is distinct from military retired pay and SBP. FERS lets you elect a survivor annuity for your spouse, which is the "federal government survivor benefit at 62" referenced elsewhere on this site.</p>
+
+        <h3>Survivor annuity election options</h3>
+        <ul class="fact-list">
+          <li><strong>Full survivor benefit:</strong> spouse receives 50% of your unreduced annual basic annuity; your own annuity is reduced by 10% to pay for it.</li>
+          <li><strong>Partial survivor benefit:</strong> spouse receives 25% of your unreduced annual basic annuity; your own annuity is reduced by 5%.</li>
+          <li><strong>No survivor benefit:</strong> requires your spouse's notarized consent at the time you file for retirement.</li>
+        </ul>
+
+        <h3>Age 62 &amp; deferred retirement</h3>
+        <p>If you leave federal service before your Minimum Retirement Age with at least 5 years of creditable civilian service (and don't withdraw your retirement contributions), you're eligible for a <strong>deferred annuity starting at age 62</strong>, unreduced. Two things to plan around: deferred retirement doesn't carry FEHB (health insurance) or FEGLI (life insurance) into retirement, and it isn't eligible for the FERS Special Retirement Supplement. If instead you retire directly from federal service at/after your Minimum Retirement Age with enough years of service, different rules and supplement eligibility may apply — confirm your specific path with your HR benefits office or OPM before you separate.</p>
+
+        <h3>FEGLI (Federal Employees' Group Life Insurance)</h3>
+        <ul class="fact-list">
+          <li><strong>Basic:</strong> annual basic pay (rounded up to the next $1,000) plus $2,000.</li>
+          <li><strong>Option A:</strong> flat additional $10,000.</li>
+          <li><strong>Option B:</strong> up to 5 multiples of basic pay.</li>
+          <li><strong>Option C (family):</strong> up to 5 multiples of $5,000 for a spouse and $2,500 per multiple for each eligible child.</li>
+          <li>At retirement you elect whether Option B/C coverage reduces over time; Option A can continue into retirement. FEGLI does <em>not</em> carry over if you separate via deferred retirement rather than retiring directly.</li>
+        </ul>
+
+        <div class="callout">
+          References: <a class="link" href="https://www.opm.gov/support/retirement/faq/survivor-benefits/" target="_blank" rel="noopener">OPM.gov – Survivor Benefits FAQ</a> · <a class="link" href="https://www.opm.gov/retirement-center/fers-information/types-of-retirement/" target="_blank" rel="noopener">OPM.gov – FERS Types of Retirement</a> · <a class="link" href="https://www.opm.gov/healthcare-insurance/life-insurance/" target="_blank" rel="noopener">OPM.gov – FEGLI</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- INSURANCE / TSP -->
+    <section id="insurance" class="page">
+      <h2>Life Insurance &amp; TSP</h2>
+      <div class="quick-notes"><label class="qn-label">Notes</label><textarea class="notes-box qn-box" id="notes-ins" placeholder="Policy numbers, beneficiary designations, TSP account info (not passwords — use the Passwords tab for logins)."></textarea></div>
+      <div class="card">
+        <h3>SGLI / VGLI (life insurance)</h3>
+        <ul class="fact-list">
+          <li><strong>SGLI</strong> (Servicemembers' Group Life Insurance) pays out to the beneficiaries the service member designated while on active duty.</li>
+          <li><strong>VGLI</strong> (Veterans' Group Life Insurance) is the renewable term policy a veteran converts SGLI into after leaving service — coverage on file: <strong>$400,000</strong>. VGLI is available in $10,000 increments up to a $500,000 maximum.</li>
+          <li>Veterans have <strong>485 days</strong> (1 year + 120 days) from separation/retirement to convert SGLI to VGLI; the first <strong>240 days</strong> of that window is "guaranteed issue" — no medical exam required. After 240 days, proof of good health is required to enroll.</li>
+          <li>Free VA Beneficiary Financial Counseling and online will-preparation services are available to SGLI/VGLI/TSGLI beneficiaries.</li>
+          <li>When an active-duty service member dies, a Casualty Assistance Officer (CAO) is normally assigned within 24 hours to help the family file the SGLI/VGLI claim and coordinate other benefits.</li>
+        </ul>
+        <h3>TSP (Thrift Savings Plan)</h3>
+        <ul class="fact-list">
+          <li>If a designated beneficiary is on file, funds go directly to them.</li>
+          <li>If no beneficiary is designated, TSP pays out by statutory order of precedence: spouse → children (equally) → parents → estate → next of kin.</li>
+          <li>Check/update TSP beneficiary designations regularly at <a class="link" href="https://www.tsp.gov" target="_blank" rel="noopener">tsp.gov</a>.</li>
+        </ul>
+        <div class="callout">
+          References: <a class="link" href="https://www.militaryonesource.mil/benefits/servicemembers-group-life-insurance/" target="_blank" rel="noopener">Military OneSource – SGLI</a> · <a class="link" href="https://www.va.gov/life-insurance/options-eligibility/vgli/" target="_blank" rel="noopener">VA.gov – VGLI</a> · <a class="link" href="https://www.tsp.gov" target="_blank" rel="noopener">TSP.gov</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- BENEFICIARY DESIGNATIONS -->
+    <section id="beneficiaries" class="page">
+      <h2>Beneficiary Designations</h2>
+      <div class="quick-notes"><label class="qn-label">Notes</label><textarea class="notes-box qn-box" id="qn-beneficiaries" placeholder="Quick notes for this section..."></textarea></div>
+      <div class="card">
+        <p>Beneficiary forms on file with each account or policy override what your will says — it's the single most common estate-planning mistake, an outdated form still naming the wrong person. Track what's on file everywhere here, and revisit it after any major life event (marriage, birth, death in the family).</p>
+        <div class="toolbar">
+          <button class="small add" onclick="benTable.addRow()">+ Add Account</button>
+        </div>
+        <table id="beneficiary-table">
+          <thead>
+            <tr><th style="width:20%">Account / Benefit</th><th style="width:18%">Primary Beneficiary</th><th style="width:18%">Contingent Beneficiary</th><th style="width:14%">Last Verified</th><th style="width:22%">Notes</th><th style="width:8%">Del</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- INCOME AFTER LOSS -->
+    <section id="incomeloss" class="page">
+      <h2>Income After Loss</h2>
+      <div class="quick-notes"><label class="qn-label">Notes</label><textarea class="notes-box qn-box" id="qn-incomeloss" placeholder="Quick notes for this section..."></textarea></div>
+      <div class="card">
+        <p>A rough picture of what changes financially, so she's not piecing it together from five different sections. Fill in actual dollar amounts as you confirm them — the notes column says where to get exact figures.</p>
+        <div class="toolbar">
+          <button class="small add" onclick="incomeTable.addRow()">+ Add Row</button>
+        </div>
+        <table id="income-table">
+          <thead>
+            <tr><th style="width:18%">Income Source</th><th style="width:16%">What Happens</th><th style="width:16%">Approx. Amount</th><th style="width:42%">Notes</th><th style="width:8%">Del</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div class="warning">
+          Most of these take anywhere from a few weeks (VGLI, TSP) to a couple of months (DIC, SBP) to actually start paying out. Keep some cash reachable — a joint account or an amount she can access immediately — to cover the gap before the first checks arrive.
+        </div>
+        <p class="save-note">SBP and DIC can now be paid in full at the same time — the old dollar-for-dollar offset was repealed.</p>
+      </div>
+    </section>
+
+    <!-- PASSWORDS -->
+    <section id="passwords" class="page">
+      <h2>Websites &amp; Passwords</h2>
+      <div class="quick-notes"><label class="qn-label">Notes</label><textarea class="notes-box qn-box" id="qn-passwords" placeholder="Quick notes for this section..."></textarea></div>
+      <div class="warning">
+        Stored in this browser's local storage on this device only — not encrypted, not synced anywhere. Keep this device secure. For your most critical accounts (primary email, banking), consider a real password manager instead.
+      </div>
+      <div class="card">
+        <div class="toolbar">
+          <button class="small add" onclick="addRow('passwords-table','pw')">+ Add Site</button>
+          <span class="save-note" id="passwords-save-note"></span>
+        </div>
+        <table id="passwords-table">
+          <thead>
+            <tr><th style="width:16%">Site / Service</th><th style="width:22%">URL</th><th style="width:16%">Username</th><th style="width:16%">Password</th><th style="width:22%">Notes</th><th style="width:8%">Del</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- DOCUMENTS -->
+    <section id="documents" class="page">
+      <h2>Important Documents &amp; ID Numbers</h2>
+      <div class="quick-notes"><label class="qn-label">Notes</label><textarea class="notes-box qn-box" id="qn-documents" placeholder="Quick notes for this section..."></textarea></div>
+      <div class="card">
+        <p>Check off what you have on hand and note where each is stored (safe, filing cabinet, safe deposit box, digital folder, etc.).</p>
+        <div class="toolbar">
+          <button class="small add" onclick="addChecklistRow()">+ Add Item</button>
+        </div>
+        <div class="checklist" id="doc-checklist"></div>
+      </div>
+    </section>
+
+    <!-- CONTACTS -->
+    <section id="contacts" class="page">
+      <h2>Key Contacts</h2>
+      <div class="quick-notes"><label class="qn-label">Notes</label><textarea class="notes-box qn-box" id="qn-contacts" placeholder="Quick notes for this section..."></textarea></div>
+      <div class="card">
+        <div class="toolbar">
+          <button class="small add" onclick="addRow('contacts-table','ct')">+ Add Contact</button>
+        </div>
+        <table id="contacts-table">
+          <thead>
+            <tr><th style="width:20%">Name / Organization</th><th style="width:16%">Role</th><th style="width:16%">Phone</th><th style="width:26%">Email / Notes</th><th style="width:8%">Del</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- DATES -->
+    <section id="dates" class="page">
+      <h2>Important Dates &amp; Deadlines</h2>
+      <div class="quick-notes"><label class="qn-label">Notes</label><textarea class="notes-box qn-box" id="qn-dates" placeholder="Quick notes for this section..."></textarea></div>
+      <div class="card">
+        <div class="toolbar">
+          <button class="small add" onclick="addRow('dates-table','dt')">+ Add Date</button>
+        </div>
+        <table id="dates-table">
+          <thead>
+            <tr><th style="width:22%">Date</th><th style="width:26%">What</th><th style="width:44%">Notes</th><th style="width:8%">Del</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- STATE BENEFITS -->
+    <section id="statebenefits" class="page">
+      <h2>Idaho Survivor Benefits</h2>
+      <div class="quick-notes"><label class="qn-label">Notes</label><textarea class="notes-box qn-box" id="notes-state" placeholder="State-specific benefits, deadlines, contacts, links, etc."></textarea></div>
+      <div class="card">
+        <p>What Idaho offers your surviving spouse specifically — not your current veteran benefits, just what carries over or applies to her after your death.</p>
+
+        <h3>Property tax reduction continues for your unremarried surviving spouse</h3>
+        <ul class="fact-list">
+          <li>Idaho law (Idaho Code §63-705A) lets an <strong>unremarried surviving spouse keep the disabled veteran property tax reduction</strong> you currently have — up to $1,500 off property tax — on the same home, for as long as she doesn't remarry, sell, or move.</li>
+          <li>It is <strong>not transferable</strong> to a different property if she moves.</li>
+          <li>She'll want to notify the county assessor of the death to keep the reduction applied correctly going forward.</li>
+        </ul>
+
+        <h3>State income tax on her survivor income</h3>
+        <ul class="fact-list">
+          <li><strong>DIC is not taxed</strong> by Idaho (it's already federally tax-free).</li>
+          <li><strong>Your SBP annuity to her:</strong> up to roughly <strong>$40,536</strong> (indexed, recalculated yearly) can be deducted from Idaho taxable income under the "Retired Service Member" category of Idaho's Retirement Benefits Deduction, as long as she hasn't remarried and meets the same age/disability test that applied to you.</li>
+          <li><strong>Your FERS survivor annuity to her will likely not qualify</strong> for this state deduction — Idaho's deduction for federal civilian pensions only covers CSRS/Foreign Service (FSRDS) pensions and specifically excludes FERS, regardless of who's receiving it. Worth confirming with a tax preparer.</li>
+        </ul>
+
+        <div class="callout">
+          References: <a class="link" href="https://legislature.idaho.gov/statutesrules/idstat/title63/t63ch7/sect63-705a/" target="_blank" rel="noopener">Idaho Code §63-705A – Surviving Spouse Property Tax Reduction</a> · <a class="link" href="https://tax.idaho.gov/taxes/income-tax/individual-income/popular-credits-and-deductions/idaho-retirement-benefits-deduction/" target="_blank" rel="noopener">Idaho State Tax Commission – Retirement Benefits Deduction</a> · <a class="link" href="https://veterans.idaho.gov/" target="_blank" rel="noopener">Idaho Division of Veterans Services</a>
+        </div>
+        <p class="save-note">State rules and dollar amounts change yearly — verify current figures with the Idaho State Tax Commission or your county assessor before relying on them.</p>
+      </div>
+    </section>
+
+    <!-- BACKUP & RESTORE -->
+    <section id="backup" class="page">
+      <h2>Backup &amp; Restore</h2>
+      <div class="quick-notes"><label class="qn-label">Notes</label><textarea class="notes-box qn-box" id="qn-backup" placeholder="Quick notes for this section..."></textarea></div>
+      <div class="card">
+        <p>Everything on this site — passwords, contacts, dates, documents, and notes — lives only in this browser's local storage on this device. There is no cloud sync. Clearing your browser's site data, switching browsers, or getting a new computer will erase it all unless you back it up first.</p>
+        <div class="warning">
+          The exported file is a plain, unencrypted JSON file containing everything you've entered, including passwords. Store it somewhere as secure as this page itself (encrypted drive, password-protected archive, or a safe/safe deposit box if printed) — not in a random cloud folder.
+        </div>
+        <div class="toolbar">
+          <button class="small add" onclick="exportData()">&#11015;&#65039; Export Backup</button>
+          <label class="small" style="background:var(--navy);color:#fff;border-radius:6px;padding:6px 12px;font-size:13px;cursor:pointer;">
+            &#11014;&#65039; Import Backup
+            <input type="file" id="importFile" accept="application/json" style="display:none;">
+          </label>
+          <span class="save-note" id="backup-status"></span>
+        </div>
+        <p class="save-note">Export creates a dated <code>.json</code> file. Import reads a previously exported file and restores everything (this will overwrite any current entries with the same name/date), then reloads the page.</p>
+      </div>
+    </section>
+
+    <footer class="pagefoot">
+      Personal reference tool — not affiliated with DoD, DFAS, or VA. Verify current rules, forms, and rates at <a class="link" href="https://www.va.gov" target="_blank" rel="noopener">va.gov</a> and <a class="link" href="https://www.dfas.mil" target="_blank" rel="noopener">dfas.mil</a>, or with an accredited Veterans Service Officer (VSO).
+    </footer>
+
+  </main>
+</div>
+
+<script>
+// ---------- Navigation ----------
+const sidebar = document.getElementById('sidebar');
+const hamburger = document.getElementById('hamburger');
+const headerEl = document.querySelector('header');
+const links = document.querySelectorAll('.nav-link');
+const pages = document.querySelectorAll('.page');
+const menuBackdrop = document.getElementById('menuBackdrop');
+const navGroupButtons = document.querySelectorAll('.nav-group');
+
+function setNavGroup(button, isOpen, remember){
+  const panel = document.getElementById(button.getAttribute('aria-controls'));
+  button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  panel.hidden = !isOpen;
+  if(remember !== false) localStorage.setItem('navGroup_' + button.dataset.group, isOpen ? 'open' : 'closed');
+}
+
+navGroupButtons.forEach((button, index) => {
+  const saved = localStorage.getItem('navGroup_' + button.dataset.group);
+  const startsOpen = saved ? saved === 'open' : index === 0;
+  setNavGroup(button, startsOpen, false);
+  button.addEventListener('click', () => setNavGroup(button, button.getAttribute('aria-expanded') !== 'true'));
+});
+
+function revealNavGroupFor(target){
+  const groupLink = sidebar.querySelector('.nav-link[data-target="' + target + '"]');
+  if(!groupLink) return;
+  const panel = groupLink.closest('.nav-group-panel');
+  if(panel && panel.hidden){
+    const button = sidebar.querySelector('[aria-controls="' + panel.id + '"]');
+    if(button) setNavGroup(button, true);
+  }
+}
+
+function updateMenuState(){
+  const isOpen = !sidebar.classList.contains('collapsed');
+  hamburger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  hamburger.setAttribute('aria-label', isOpen ? 'Collapse menu' : 'Expand menu');
+  hamburger.title = isOpen ? 'Collapse menu' : 'Expand menu';
+  sidebar.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+  sidebar.inert = !isOpen;
+  menuBackdrop.classList.toggle('visible', isOpen && window.innerWidth <= 820);
+  document.body.classList.toggle('menu-open-mobile', isOpen && window.innerWidth <= 820);
+}
+
+// The header wraps to 2-3 lines on narrow screens (title + auto-hide toggle
+// + two print buttons), so its real height varies. The mobile menu is
+// position:fixed and needs to start exactly below it — otherwise its top
+// items end up tucked under the header and get visually clipped. Keep a
+// CSS variable in sync with the header's actual measured height.
+function syncHeaderHeight(){
+  document.documentElement.style.setProperty('--header-h', headerEl.offsetHeight + 'px');
+}
+syncHeaderHeight();
+window.addEventListener('resize', syncHeaderHeight);
+window.addEventListener('orientationchange', () => setTimeout(syncHeaderHeight, 200));
+if(window.ResizeObserver) new ResizeObserver(syncHeaderHeight).observe(headerEl);
+
+hamburger.addEventListener('click', () => { sidebar.classList.toggle('collapsed'); updateMenuState(); });
+menuBackdrop.addEventListener('click', () => { sidebar.classList.add('collapsed'); updateMenuState(); hamburger.focus(); });
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'Escape' && !sidebar.classList.contains('collapsed')){
+    sidebar.classList.add('collapsed');
+    updateMenuState();
+    hamburger.focus();
+  }
+});
+
+// Auto-hide menu toggle: when on, the sidebar slides closed (to the left)
+// automatically after picking a section, on any screen size. Off by default
+// on wide screens (narrow/mobile screens already auto-collapse regardless).
+const autoHideToggle = document.getElementById('autoHideToggle');
+autoHideToggle.checked = localStorage.getItem('autoHideMenu') === 'true';
+autoHideToggle.addEventListener('change', () => {
+  localStorage.setItem('autoHideMenu', autoHideToggle.checked ? 'true' : 'false');
+  // give immediate feedback that the setting took effect, rather than
+  // waiting for the next section click
+  if(autoHideToggle.checked) sidebar.classList.add('collapsed');
+  updateMenuState();
+});
+
+// Switches the visible page, updates the nav highlight, remembers the
+// choice (so a refresh reopens the same section instead of Overview),
+// and reflects it in the URL hash for bookmarking/back-button support.
+function activatePage(target, opts){
+  opts = opts || {};
+  if(!document.getElementById(target)) target = 'overview';
+  revealNavGroupFor(target);
+  pages.forEach(p => p.classList.toggle('active', p.id === target));
+  links.forEach(l => l.classList.toggle('active', l.dataset.target === target));
+  localStorage.setItem('lastSection', target);
+  if(!opts.skipHistory && window.history && history.replaceState){
+    history.replaceState(null, '', '#' + target);
+  }
+}
+
+links.forEach(link => {
+  link.addEventListener('click', (e) => {
+    e.preventDefault();
+    activatePage(link.dataset.target);
+    if (window.innerWidth <= 820 || autoHideToggle.checked) sidebar.classList.add('collapsed');
+    updateMenuState();
+    window.scrollTo(0,0);
+    // the page we just switched to may contain tables/checklists that were
+    // rendered while hidden (scrollHeight 0) — re-measure now that it's visible
+    requestAnimationFrame(() => { if (typeof reflowAutosizeTextareas === 'function') reflowAutosizeTextareas(); });
+  });
+});
+if (window.innerWidth <= 820) sidebar.classList.add('collapsed');
+updateMenuState();
+window.addEventListener('resize', updateMenuState);
+
+// Restore whichever section was open before a refresh (URL hash wins if
+// present, e.g. from a bookmark; otherwise fall back to the last-viewed
+// section saved in local storage).
+(function restoreLastSection(){
+  const hashId = location.hash ? location.hash.slice(1) : null;
+  const savedId = localStorage.getItem('lastSection');
+  const target = (hashId && document.getElementById(hashId)) ? hashId
+    : (savedId && document.getElementById(savedId)) ? savedId
+    : 'overview';
+  activatePage(target, {skipHistory: true});
+  requestAnimationFrame(() => { if (typeof reflowAutosizeTextareas === 'function') reflowAutosizeTextareas(); });
+})();
+
+// ---------- Storage helpers ----------
+function loadJSON(key, fallback){
+  try{ const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
+  catch(e){ return fallback; }
+}
+function saveJSON(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
+
+// ---------- Notes fields (per-section quick notes + reference page notes) ----------
+document.querySelectorAll('.notes-box').forEach(box => {
+  const key = 'notes_' + box.id;
+  const stored = localStorage.getItem(key);
+  box.value = (stored !== null) ? stored : box.value;
+  box.addEventListener('input', () => localStorage.setItem(key, box.value));
+});
+
+// ---------- Generic editable table (Passwords, Contacts, Dates) ----------
+function autoGrow(el){
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
+}
+function buildTable(tableId, storageKey, colDefs, defaultRows){
+  const tbody = document.querySelector('#' + tableId + ' tbody');
+  let rows = loadJSON(storageKey, defaultRows);
+
+  function render(){
+    tbody.innerHTML = '';
+    rows.forEach((row, idx) => {
+      const tr = document.createElement('tr');
+      colDefs.forEach(col => {
+        const td = document.createElement('td');
+        const input = document.createElement('textarea');
+        input.rows = 1;
+        input.value = row[col.key] || '';
+        input.placeholder = col.placeholder || '';
+        input.addEventListener('input', () => {
+          rows[idx][col.key] = input.value;
+          saveJSON(storageKey, rows);
+          autoGrow(input);
+        });
+        td.appendChild(input);
+        tr.appendChild(td);
+        // size to content once inserted in the DOM
+        requestAnimationFrame(() => autoGrow(input));
+      });
+      const delTd = document.createElement('td');
+      delTd.className = 'row-actions';
+      const delBtn = document.createElement('button');
+      delBtn.className = 'small danger';
+      delBtn.textContent = '✕';
+      delBtn.onclick = () => { rows.splice(idx,1); saveJSON(storageKey, rows); render(); };
+      delTd.appendChild(delBtn);
+      tr.appendChild(delTd);
+      tbody.appendChild(tr);
+    });
+  }
+  render();
+  return {
+    addRow(){ rows.push({}); saveJSON(storageKey, rows); render(); }
+  };
+}
+
+const passwordCols = [
+  {key:'site', placeholder:'e.g. Gmail'},
+  {key:'url', placeholder:'https://'},
+  {key:'user', placeholder:'username / email'},
+  {key:'pass', placeholder:'password'},
+  {key:'notes', placeholder:'security question, 2FA, etc.', multiline:true}
+];
+const contactCols = [
+  {key:'name', placeholder:'Name / Org'},
+  {key:'role', placeholder:'Role'},
+  {key:'phone', placeholder:'Phone'},
+  {key:'notes', placeholder:'Email / notes', multiline:true}
+];
+const dateCols = [
+  {key:'date', placeholder:'MM/DD/YYYY'},
+  {key:'what', placeholder:'e.g. VGLI conversion deadline'},
+  {key:'notes', placeholder:'Notes', multiline:true}
+];
+
+const defaultContacts = [
+  {name:'DFAS Customer Care (SBP)', role:'DFAS', phone:'1-800-321-1080', notes:'Report retiree death, SBP annuity questions'},
+  {name:'VA Benefits Hotline', role:'VA', phone:'1-800-827-1000', notes:'DIC, Pension, general VA benefits'},
+  {name:'Veterans Service Officer (VSO)', role:'Claims assistance', phone:'', notes:'Free help filing VA claims — fill in local contact'},
+  {name:'Casualty Assistance Officer (CAO)', role:'DoD', phone:'', notes:'Assigned point of contact after an active-duty death'},
+  {name:'TSP ThriftLine', role:'TSP', phone:'1-877-968-3778', notes:'tsp.gov'},
+];
+
+const defaultDates = [
+  {date:'', what:'SGLI → VGLI conversion window', notes:'485 days total from separation to convert; first 240 days no medical exam required. Coverage on file: $400,000'},
+  {date:'', what:'DIC / Pension claim filed', notes:'Form 21P-534EZ'},
+  {date:'', what:'SBP annuity claim reported to DFAS', notes:''},
+];
+
+const beneficiaryCols = [
+  {key:'account', placeholder:'e.g. TSP'},
+  {key:'primary', placeholder:'Primary beneficiary'},
+  {key:'contingent', placeholder:'Contingent beneficiary'},
+  {key:'verified', placeholder:'MM/DD/YYYY'},
+  {key:'notes', placeholder:'Notes', multiline:true}
+];
+const defaultBeneficiaries = [
+  {account:'TSP', primary:'', contingent:'', verified:'', notes:'Update at tsp.gov'},
+  {account:'FEGLI (Basic / Option A / B / C)', primary:'', contingent:'', verified:'', notes:'Update via your HR/benefits office or OPM'},
+  {account:'VGLI ($400,000 policy)', primary:'', contingent:'', verified:'', notes:'Update via VGLI/OSGLI'},
+  {account:'Bank accounts (POD)', primary:'', contingent:'', verified:'', notes:'"Payable on Death" designation, set at your bank'},
+  {account:'Investment / brokerage accounts (TOD)', primary:'', contingent:'', verified:'', notes:'"Transfer on Death" designation'},
+  {account:'Will / Estate', primary:'', contingent:'', verified:'', notes:'Confirm this matches the beneficiary forms above'},
+];
+
+const incomeCols = [
+  {key:'source', placeholder:'Income source'},
+  {key:'happens', placeholder:'Stops / starts'},
+  {key:'amount', placeholder:'Approx. amount'},
+  {key:'notes', placeholder:'Notes', multiline:true}
+];
+const defaultIncome = [
+  {source:'Military Retired Pay', happens:'Stops on date of death', amount:'', notes:'Report the death to DFAS immediately'},
+  {source:'SBP Annuity', happens:'Starts', amount:'', notes:'Roughly 55% of the elected base amount; paid monthly by DFAS — see Military SBP section'},
+  {source:'DIC', happens:'Starts once claim is approved', amount:'$1,699.36/mo (2026 base)', notes:'Can take weeks to months to process — see DIC Benefits section'},
+  {source:'Social Security Survivor Benefit', happens:'Starts whenever she chooses to claim', amount:'', notes:'71.5%–100% of your benefit depending on her age when she claims; call SSA 1-800-772-1213'},
+  {source:'FERS Survivor Annuity', happens:'Starts once payable', amount:'', notes:'50% or 25% of your unreduced annuity, per your election; paid by OPM — see Federal (FERS) Retirement section'},
+  {source:'TSP', happens:'Lump sum or continued, per beneficiary election', amount:'', notes:'Processed once a claim is filed — see Beneficiary Designations'},
+  {source:'VGLI', happens:'One-time payout', amount:'$400,000', notes:'Filed as a claim, typically processed within weeks'},
+];
+
+const pwTable = buildTable('passwords-table', 'tbl_passwords', passwordCols, []);
+const ctTable = buildTable('contacts-table', 'tbl_contacts', contactCols, defaultContacts);
+const dtTable = buildTable('dates-table', 'tbl_dates', dateCols, defaultDates);
+const benTable = buildTable('beneficiary-table', 'tbl_beneficiaries', beneficiaryCols, defaultBeneficiaries);
+const incomeTable = buildTable('income-table', 'tbl_income', incomeCols, defaultIncome);
+
+function addRow(tableId, which){
+  if(which === 'pw') pwTable.addRow();
+  if(which === 'ct') ctTable.addRow();
+  if(which === 'dt') dtTable.addRow();
+}
+
+// ---------- Documents checklist ----------
+const defaultDocs = [
+  {label:'DD214 (discharge/retirement papers)', loc:''},
+  {label:'Marriage certificate', loc:''},
+  {label:'Death certificate (certified copies, get 10+)', loc:''},
+  {label:'Social Security cards', loc:''},
+  {label:'VA claim / file number', loc:''},
+  {label:'SBP annuitant number', loc:''},
+  {label:'Life insurance policy numbers (SGLI/VGLI/private)', loc:''},
+  {label:'Will / Power of Attorney', loc:''},
+  {label:'Bank & investment account info', loc:''},
+  {label:'TSP account number', loc:''},
+  {label:'Birth certificates (children, if applicable)', loc:''},
+  {label:'Recent tax returns', loc:''},
+  {label:'House deed / title', loc:''},
+  {label:'Vehicle title(s)', loc:''},
+  {label:'Mortgage / loan account info', loc:''},
+];
+
+function renderDocChecklist(){
+  const wrap = document.getElementById('doc-checklist');
+  let items = loadJSON('doc_checklist', defaultDocs.map(d => ({...d, done:false})));
+  wrap.innerHTML = '';
+  items.forEach((item, idx) => {
+    const label = document.createElement('label');
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = !!item.done;
+    cb.addEventListener('change', () => { items[idx].done = cb.checked; saveJSON('doc_checklist', items); });
+
+    const span = document.createElement('span');
+    span.className = 'doc-label';
+    span.textContent = item.label;
+
+    const locInput = document.createElement('input');
+    locInput.type = 'text';
+    locInput.value = item.loc || '';
+    locInput.placeholder = 'Where is it stored?';
+    locInput.addEventListener('input', () => { items[idx].loc = locInput.value; saveJSON('doc_checklist', items); });
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'small danger';
+    delBtn.textContent = '✕';
+    delBtn.style.marginLeft = '6px';
+    delBtn.onclick = () => { items.splice(idx,1); saveJSON('doc_checklist', items); renderDocChecklist(); };
+
+    label.appendChild(cb);
+    label.appendChild(span);
+    label.appendChild(locInput);
+    label.appendChild(delBtn);
+    wrap.appendChild(label);
+  });
+  window._docItems = items;
+}
+function addChecklistRow(){
+  let items = loadJSON('doc_checklist', defaultDocs.map(d => ({...d, done:false})));
+  items.push({label:'New item', loc:'', done:false});
+  saveJSON('doc_checklist', items);
+  renderDocChecklist();
+}
+renderDocChecklist();
+
+// ---------- First Days checklists (simple label + checkbox) ----------
+function renderSimpleChecklist(containerId, storageKey, defaultLabels){
+  const wrap = document.getElementById(containerId);
+  let items = loadJSON(storageKey, defaultLabels.map(l => ({label:l, done:false})));
+
+  function render(){
+    wrap.innerHTML = '';
+    items.forEach((item, idx) => {
+      const label = document.createElement('label');
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = !!item.done;
+      cb.addEventListener('change', () => { items[idx].done = cb.checked; saveJSON(storageKey, items); });
+
+      const txt = document.createElement('textarea');
+      txt.rows = 1;
+      txt.value = item.label;
+      txt.addEventListener('input', () => {
+        items[idx].label = txt.value;
+        saveJSON(storageKey, items);
+        autoGrow(txt);
+      });
+
+      const delBtn = document.createElement('button');
+      delBtn.className = 'small danger no-print';
+      delBtn.textContent = '✕';
+      delBtn.onclick = () => { items.splice(idx,1); saveJSON(storageKey, items); render(); };
+
+      label.appendChild(cb);
+      label.appendChild(txt);
+      label.appendChild(delBtn);
+      wrap.appendChild(label);
+      requestAnimationFrame(() => autoGrow(txt));
+    });
+  }
+  render();
+  return { addItem(){ items.push({label:'New item', done:false}); saveJSON(storageKey, items); render(); } };
+}
+
+const fd1DefaultItems = [
+  'Get the official pronouncement/certification of death (hospital, hospice, or medical examiner)',
+  'Contact a funeral home; discuss burial vs. cremation and VA national cemetery eligibility',
+  'Notify immediate family and close friends',
+  'If active duty: confirm your assigned Casualty Assistance Officer (CAO) name and phone number',
+  'If retired: report the death to DFAS (1-800-321-1080) to start the SBP claim and stop retired pay',
+  'Request at least 10–15 certified copies of the death certificate from the funeral home',
+  'Locate the will, DD214, marriage certificate, and life insurance policy info',
+];
+const fd2DefaultItems = [
+  'Call Social Security (1-800-772-1213) to report the death and ask about the $255 payment and survivor benefits',
+  'File the SGLI/VGLI claim (via CAO if active duty, or directly with OSGLI for VGLI)',
+  'Notify TSP if applicable and confirm the beneficiary payout process',
+  'Notify employer HR/benefits office — FEGLI claim and FERS survivor annuity election if a federal employee',
+  'Notify banks, mortgage/lender, and any joint account holders',
+  'Notify any private life insurance companies and start claims',
+  'Hold off canceling utilities, phone, and subscriptions until you\'re sure nothing else depends on them',
+  'Set up mail forwarding if needed',
+];
+const fd3DefaultItems = [
+  'File VA DIC / Survivors Pension claim (Form 21P-534EZ) — a VSO can help for free',
+  'Report the death in DEERS to keep TRICARE coverage active with no gap',
+  'Update or close joint bank accounts once appropriate',
+  'Update beneficiary designations on your own accounts (TSP, FEGLI, life insurance, will)',
+  'Meet with an estate attorney, or use free VA Beneficiary Financial Counseling / online will prep if eligible',
+  'File the final tax return; ask a tax professional about DIC/SBP/FERS survivor annuity tax treatment',
+  'Update your own emergency contacts, POA, and estate plan',
+];
+const fdSeqDefaultItems = [
+  'Pause and call one trusted person to be with you. You do not have to make these calls alone.',
+  'If the death was unexpected at home, call 911. Otherwise, the hospital, hospice, or medical examiner will provide the official pronouncement.',
+  'Call a funeral home. Tell them I am a veteran and ask them to help obtain 10–15 certified death certificates.',
+  'Find the Important Documents section. Start with my photo ID, DD214, marriage certificate, will, and insurance information.',
+  'When you have the death certificates, open Key Contacts and begin with DFAS, Social Security, my employer, and the life insurance contact. Ask a trusted person to record dates and names.',
+];
+const fdSeq = renderSimpleChecklist('fd-sequence', 'fd_start_here_v2', fdSeqDefaultItems);
+
+const fd1 = renderSimpleChecklist('fd-checklist-1', 'fd_checklist_1', fd1DefaultItems);
+const fd2 = renderSimpleChecklist('fd-checklist-2', 'fd_checklist_2', fd2DefaultItems);
+const fd3 = renderSimpleChecklist('fd-checklist-3', 'fd_checklist_3', fd3DefaultItems);
+
+// ---------- Backup: export / import ----------
+function exportData(){
+  const data = {};
+  for(let i=0;i<localStorage.length;i++){
+    const k = localStorage.key(i);
+    data[k] = localStorage.getItem(k);
+  }
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const ts = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = `family-benefits-hub-backup-${ts}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  const status = document.getElementById('backup-status');
+  if(status) status.textContent = 'Backup downloaded.';
+}
+document.getElementById('importFile').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try{
+      const data = JSON.parse(ev.target.result);
+      Object.keys(data).forEach(k => localStorage.setItem(k, data[k]));
+      alert('Backup restored. The page will now reload.');
+      location.reload();
+    }catch(err){
+      alert('Could not read that file — make sure it\'s a backup exported from this page.');
+    }
+  };
+  reader.readAsText(file);
+});
+
+// ---------- Print entire site (full paper backup) ----------
+// Temporarily shows every section at once (they're normally display:none
+// unless active) so the print dialog captures the whole site in one go,
+// then reverts back to whichever section was open on screen.
+function printAllSections(){
+  reflowAutosizeTextareas();
+  document.body.classList.add('print-all');
+  window.print();
+}
+window.addEventListener('afterprint', () => document.body.classList.remove('print-all'));
+// Safety net in case a browser doesn't fire 'afterprint' reliably
+setInterval(() => {
+  if(document.body.classList.contains('print-all') && !window.matchMedia('print').matches){
+    document.body.classList.remove('print-all');
+  }
+}, 1000);
+
+// Re-measure textarea heights after sidebar toggle, window resize, or switching
+// sections. Textareas rendered while their page is display:none report a
+// scrollHeight of 0, so they end up sized too short and wrapped text gets
+// visually clipped — this re-measures once the page is actually visible.
+function reflowAutosizeTextareas(){
+  document.querySelectorAll('table td textarea, .checklist textarea').forEach(autoGrow);
+}
+hamburger.addEventListener('click', () => setTimeout(reflowAutosizeTextareas, 260));
+window.addEventListener('resize', () => requestAnimationFrame(reflowAutosizeTextareas));
+requestAnimationFrame(reflowAutosizeTextareas);
+</script>
+
+</body>
+</html>

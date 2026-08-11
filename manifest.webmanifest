@@ -1,0 +1,10 @@
+{
+  "name": "Michael & Cynthia's Money — Budget & Net Worth Tracker",
+  "short_name": "Budget Tracker",
+  "description": "A private household budget and net worth tracker.",
+  "start_url": "./budget-tracker.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f7fb",
+  "theme_color": "#14161a"
+}

@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Master App</title>
+<style>
+  :root{
+    --ink:#14161a;
+    --bg:#f4f5f7;
+    --card:#ffffff;
+    --border:#e3e5e9;
+    --muted:#666b73;
+    --accent:#2f6fed;
+    --accent-ink:#0d2f80;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    line-height:1.5;
+  }
+  header{
+    background:var(--ink);
+    color:#fff;
+    padding:46px 6vw 40px;
+  }
+  header .eyebrow{
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:#9aa1ad;
+    font-weight:700;
+  }
+  header h1{
+    margin:10px 0 8px;
+    font-size:clamp(28px,4vw,42px);
+    letter-spacing:-.02em;
+  }
+  header p{
+    margin:0;
+    max-width:640px;
+    color:#c4c8cf;
+    font-size:15px;
+  }
+  main{
+    max-width:1100px;
+    margin:0 auto;
+    padding:38px 6vw 70px;
+  }
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:16px;
+  }
+  .card{
+    display:flex;
+    flex-direction:column;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:22px 22px 20px;
+    text-decoration:none;
+    color:var(--ink);
+    box-shadow:0 1px 2px rgba(20,22,26,.04);
+    transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease;
+  }
+  .card:hover{
+    transform:translateY(-2px);
+    box-shadow:0 10px 28px rgba(20,22,26,.10);
+    border-color:#cfd3da;
+  }
+  .card .icon{
+    width:44px;
+    height:44px;
+    border-radius:10px;
+    display:grid;
+    place-items:center;
+    font-size:21px;
+    margin-bottom:14px;
+  }
+  .card h2{
+    font-size:17px;
+    margin:0 0 6px;
+  }
+  .card p{
+    font-size:13.5px;
+    color:var(--muted);
+    margin:0 0 16px;
+    flex:1;
+  }
+  .card .tags{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-bottom:14px;
+  }
+  .card .tags span{
+    font-size:10.5px;
+    font-weight:700;
+    letter-spacing:.03em;
+    text-transform:uppercase;
+    background:#f0f1f3;
+    color:var(--muted);
+    padding:4px 8px;
+    border-radius:6px;
+  }
+  .card .open{
+    font-size:13px;
+    font-weight:700;
+    color:var(--accent-ink);
+  }
+  .finance .icon{background:#e7f0ff;color:#1c4ed8}
+  .life .icon{background:#eafbf1;color:#0f8a4c}
+  .money .icon{background:#fff3e0;color:#b45a09}
+  .lang .icon{background:#fdeaea;color:#b0392c}
+  .family .icon{background:#eef1f8;color:#1b2b52}
+
+  .note{
+    margin-top:30px;
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:16px 20px;
+    font-size:13px;
+    color:var(--muted);
+  }
+  .note b{color:var(--ink)}
+  footer{
+    text-align:center;
+    font-size:12px;
+    color:#9aa1ad;
+    padding:0 6vw 40px;
+  }
+  @media(max-width:520px){
+    header{padding:34px 5vw 30px}
+    main{padding:28px 5vw 50px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Personal Tools</div>
+  <h1>The Master App</h1>
+  <p>One place to reach everything — retirement &amp; credit, daily life planning, budgeting, Spanish practice, and the family benefits hub. Each tool keeps running exactly as it did before, with its own data saved locally on this device. Open a tool below, and use the ⌂ Master App button in the corner to come back here.</p>
+</header>
+
+<main>
+  <div class="grid">
+
+    <a class="card finance" href="retirement-planner.html">
+      <div class="icon">🧮</div>
+      <h2>Retirement &amp; Credit</h2>
+      <p>Michael &amp; Cynthia's retirement projections, plus Cindy's credit card register.</p>
+      <div class="tags"><span>Retirement</span><span>Credit Cards</span></div>
+      <div class="open">Open tool →</div>
+    </a>
+
+    <a class="card life" href="daily-planner.html">
+      <div class="icon">🧭</div>
+      <h2>Life Command Center</h2>
+      <p>Daily, weekly, monthly &amp; yearly planning — day scores, training plans, meditation, nutrition, blood pressure tracking, and your reading library.</p>
+      <div class="tags"><span>Planner</span><span>Fitness</span><span>Health</span><span>Habits</span></div>
+      <div class="open">Open tool →</div>
+    </a>
+
+    <a class="card money" href="budget-tracker.html">
+      <div class="icon">💰</div>
+      <h2>Budget &amp; Net Worth</h2>
+      <p>Accounts, transactions, subscriptions, cash flow, goals, and Budget AI for Michael &amp; Cynthia's money.</p>
+      <div class="tags"><span>Budget</span><span>Net Worth</span></div>
+      <div class="open">Open tool →</div>
+    </a>
+
+    <a class="card lang" href="spanish-learning.html">
+      <div class="icon">🗣️</div>
+      <h2>Luma — Spanish</h2>
+      <p>Lessons, the Practice Lab, your Personal Plan, and the Spanish immersion studio.</p>
+      <div class="tags"><span>Language</span><span>Daily Plan</span></div>
+      <div class="open">Open tool →</div>
+    </a>
+
+    <a class="card family" href="family-benefits-hub.html">
+      <div class="icon">🛡️</div>
+      <h2>Family Benefits Hub</h2>
+      <p>Survivor benefits reference, key contacts, documents, passwords, important dates, and estate-planning notes.</p>
+      <div class="tags"><span>Benefits</span><span>Estate Planning</span></div>
+      <div class="open">Open tool →</div>
+    </a>
+
+  </div>
+
+  <div class="note">
+    <b>How this works:</b> Master App is just a front door — each tool below is the original app, unchanged, running on its own. They each save their own data locally in this browser (nothing is shared between them), so opening one won't affect another. Keep using each tool's own backup/export feature to protect your data.
+  </div>
+</main>
+
+<footer>Master App · a home for five personal tools</footer>
+
+</body>
+</html>
