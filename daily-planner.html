@@ -210,7 +210,8 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;paddi
 .modal{background:white;border-radius:12px;padding:24px;max-width:420px;width:90%;box-shadow:0 8px 40px rgba(0,0,0,0.2);}
 #journalGrowthLogModal{overflow-y:auto;align-items:flex-start;padding:12px 0;box-sizing:border-box;}
 #journalGrowthLogModal .modal{max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px);overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;box-sizing:border-box;margin:auto 0;}
-#journalGrowthLogModal .journal-growth-actions{position:sticky;bottom:-24px;background:#fff;border-top:1px solid #e5e7eb;padding:12px 0 4px;z-index:2;}
+#journalGrowthLogModal .journal-growth-header{position:sticky;top:0;background:#fff;border-bottom:1px solid #e5e7eb;padding:4px 0 12px;z-index:3;}
+#journalGrowthLogModal .journal-growth-actions{position:sticky;bottom:0;background:#fff;border-top:1px solid #e5e7eb;padding:12px 0 4px;z-index:2;}
 .modal h2{font-size:1.1rem;color:#333;margin-bottom:6px;}
 .modal p{font-size:0.85rem;color:#666;margin-bottom:14px;line-height:1.5;}
 .modal input[type="text"],.modal input[type="password"]{width:100%;border:1px solid #e9ecef;border-radius:6px;padding:10px;font-size:0.95rem;outline:none;margin-bottom:10px;}
@@ -1378,7 +1379,7 @@ body{
 </details>
 <div class="modal-overlay" id="journalGrowthLogModal" style="display:none;">
   <div class="modal" style="max-width:520px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;"><h2 id="journalGrowthLogTitle" style="margin:0;font-size:1.05rem;">Log Learning &amp; Growth</h2><button type="button" class="btn-secondary" onclick="journalCloseGrowthLog()">Close</button></div>
+    <div class="journal-growth-header" style="display:flex;justify-content:space-between;align-items:center;gap:10px;"><h2 id="journalGrowthLogTitle" style="margin:0;font-size:1.05rem;">Log Learning &amp; Growth</h2><div style="display:flex;gap:7px;"><button type="button" class="btn-secondary" onclick="journalCloseGrowthLog()">Close</button><button type="button" class="btn-primary" onclick="journalSaveGrowthLog()">Save</button></div></div>
     <div class="lib-form-grid" style="margin-top:14px;">
       <div><label>Category</label><select id="journalGrowthLogCategory" class="act-input"><option>Financial Videos</option><option>Udemy</option><option>Gun Range</option><option>Language</option></select></div>
       <div><label>Time Spent</label><input id="journalGrowthLogTime" class="act-input" placeholder="45 min or 1:30"></div>
@@ -12531,7 +12532,6 @@ function journalOpenGrowthLog(kind){
   var names={financial:'Financial Videos',language:'Language',udemy:'Udemy',gun:'Gun Range'},categories={financial:'Financial Videos',language:'Language',udemy:'Udemy',gun:'Gun Range'},startTimes={financial:'18:30',udemy:'19:00',gun:'19:00',language:'12:45'};
   document.getElementById('journalGrowthLogTitle').textContent='Log '+(names[kind]||'Growth / Skill');
   document.getElementById('journalGrowthLogCategory').value=categories[kind]||'Udemy';document.getElementById('journalGrowthLogTime').value='';document.getElementById('journalGrowthLogDate').value=dk(today);document.getElementById('journalGrowthLogStartTime').value=startTimes[kind]||'19:00';document.getElementById('journalGrowthLogName').value='';document.getElementById('journalGrowthLogResource').value=kind==='udemy'?'Udemy':'';document.getElementById('journalGrowthLogLink').value='';document.getElementById('journalGrowthLogNotes').value='';modal.style.display='flex';
-  setTimeout(function(){document.getElementById('journalGrowthLogName').focus();},40);
 }
 function journalCloseGrowthLog(){var modal=document.getElementById('journalGrowthLogModal');if(modal)modal.style.display='none';_journalGrowthLogKind='';}
 function journalSaveGrowthLog(){
