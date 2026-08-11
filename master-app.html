@@ -55,6 +55,10 @@
     grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
     gap:16px;
   }
+  .section-title{margin:0 0 5px;font-size:18px;letter-spacing:-.01em}
+  .section-intro{margin:0 0 14px;font-size:13px;color:var(--muted)}
+  .growth-title{margin-top:30px}
+  .growth-grid{grid-template-columns:minmax(260px,360px)}
   .card{
     display:flex;
     flex-direction:column;
@@ -152,6 +156,7 @@
     header{padding:34px 5vw 30px}
     main{padding:28px 5vw 50px}
     .grid{grid-template-columns:1fr;gap:12px}
+    .growth-grid{grid-template-columns:1fr}
     .card{padding:16px}
     .card .icon{width:38px;height:38px;margin-bottom:10px}
     .card p{margin-bottom:11px}
@@ -170,6 +175,8 @@
 </header>
 
 <main>
+  <h2 class="section-title">Life Essentials</h2>
+  <p class="section-intro">The tools that support your daily life, finances, future, and family protection.</p>
   <div class="grid">
 
     <a class="card life" href="daily-planner.html">
@@ -196,14 +203,6 @@
       <div class="open">Open Retirement Planner →</div>
     </a>
 
-    <a class="card lang" href="spanish-learning.html">
-      <div class="icon">🗣️</div>
-      <h2>Luma — Spanish</h2>
-      <p>Lessons, the Practice Lab, your Personal Plan, and the Spanish immersion studio.</p>
-      <div class="tags"><span>This device</span><span>Backup available</span></div>
-      <div class="open">Open Spanish Learning →</div>
-    </a>
-
     <a class="card family" href="family-benefits-hub.html">
       <div class="icon">🛡️</div>
       <h2>Family Benefits Hub</h2>
@@ -212,6 +211,18 @@
       <div class="open">Open Family Benefits Hub →</div>
     </a>
 
+  </div>
+
+  <h2 class="section-title growth-title">Personal Growth</h2>
+  <p class="section-intro">Optional learning tools that support interests and long-term development.</p>
+  <div class="grid growth-grid">
+    <a class="card lang" href="spanish-learning.html">
+      <div class="icon">🗣️</div>
+      <h2>Spanish Learning — Luma</h2>
+      <p>Lessons, the Practice Lab, your Personal Plan, and the Spanish immersion studio.</p>
+      <div class="tags"><span>This device</span><span>Optional growth</span><span>Backup available</span></div>
+      <div class="open">Open Spanish Learning →</div>
+    </a>
   </div>
 
   <div class="info-grid">
