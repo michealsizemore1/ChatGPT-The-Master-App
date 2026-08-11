@@ -1291,9 +1291,6 @@ body{
         <span class="v26-weather" id="meridianWeather" title="Current temperature for Meridian, Idaho">&#x1F321;&#xFE0F; Meridian &mdash;&deg;</span>
       </div>
     </div>
-    <div class="header-status-row">
-      <a class="header-aqi-official" id="meridianAqi" href="https://www.deq.idaho.gov/air-quality/air-quality-index/real-time-map/" target="_blank" rel="noopener" title="Official monitor-based AQI from EPA AirNow and Idaho DEQ"><span class="header-aqi-dot" id="meridianAqiDot"></span><span id="meridianAqiText">Meridian AQI &mdash;</span></a>
-    </div>
   </div>
   <input type="file" id="importFile" accept=".json" style="display:none" onchange="importBackup(event)">
 </div>
@@ -1374,6 +1371,7 @@ body{
     <div class="journal-growth-pool-card" data-growth-kind="udemy" style="grid-template-columns:19px minmax(120px,1fr) minmax(80px,auto) auto;"><div class="tri-check" data-key="gaUdemy" onclick="triClick(this)" title="Mark Udemy complete"></div><strong style="font-size:.76rem;">Udemy</strong><span class="journal-growth-status" id="growthUdemyStatus"></span><button type="button" class="journal-growth-add" onclick="journalOpenGrowthLog('udemy')">Log</button></div>
     <div class="journal-growth-pool-card" data-growth-kind="gun" style="grid-template-columns:19px minmax(120px,1fr) minmax(80px,auto) auto;"><div class="tri-check" data-key="gaGunRange" onclick="triClick(this)" title="Mark Gun Range complete"></div><strong style="font-size:.76rem;">Gun Range</strong><span class="journal-growth-status" id="growthGunStatus"></span><button type="button" class="journal-growth-add" onclick="journalOpenGrowthLog('gun')">Log</button></div>
     <div class="journal-growth-pool-card" data-growth-kind="language" style="grid-template-columns:19px minmax(120px,1fr) minmax(80px,auto) auto;"><div class="tri-check" data-key="gaLanguage" onclick="triClick(this)" title="Mark Language Practice complete"></div><strong style="font-size:.76rem;">Language Practice</strong><span class="journal-growth-status" id="growthLanguageStatus"></span><button type="button" class="journal-growth-add" onclick="journalOpenGrowthLog('language')">Log</button></div>
+    <div class="journal-growth-pool-card" data-growth-kind="guitar" style="grid-template-columns:19px minmax(120px,1fr) minmax(80px,auto) auto;"><div class="tri-check" data-key="gaGuitar" onclick="triClick(this)" title="Mark Guitar complete"></div><strong style="font-size:.76rem;">Guitar</strong><span class="journal-growth-status" id="growthGuitarStatus"></span><button type="button" class="journal-growth-add" onclick="journalOpenGrowthLog('guitar')">Log</button></div>
     <div style="margin-top:7px;font-size:.64rem;color:#7c6f98;">Use an activity's Log button to enter its details, date and start time. Logged time appears under Growth / Skills in the Weekly screen.</div>
   </div>
 </details>
@@ -1381,7 +1379,7 @@ body{
   <div class="modal" style="max-width:520px;">
     <div class="journal-growth-header" style="display:flex;justify-content:space-between;align-items:center;gap:10px;"><h2 id="journalGrowthLogTitle" style="margin:0;font-size:1.05rem;">Log Learning &amp; Growth</h2><div style="display:flex;gap:7px;"><button type="button" class="btn-secondary" onclick="journalCloseGrowthLog()">Close</button><button type="button" class="btn-primary" onclick="journalSaveGrowthLog()">Save</button></div></div>
     <div class="lib-form-grid" style="margin-top:14px;">
-      <div><label>Category</label><select id="journalGrowthLogCategory" class="act-input"><option>Financial Videos</option><option>Udemy</option><option>Gun Range</option><option>Language</option></select></div>
+      <div><label>Category</label><select id="journalGrowthLogCategory" class="act-input"><option>Financial Videos</option><option>Udemy</option><option>Gun Range</option><option>Language</option><option>Guitar</option></select></div>
       <div><label>Time Spent</label><input id="journalGrowthLogTime" class="act-input" placeholder="45 min or 1:30"></div>
       <div><label>Scheduled Date</label><input type="date" id="journalGrowthLogDate" class="act-input"></div>
       <div><label>Start Time</label><input type="time" id="journalGrowthLogStartTime" class="act-input"></div>
@@ -1517,7 +1515,7 @@ body{
   <div id="aiWeeklyBox" class="ai-box"></div>
   <div id="wDigest" class="week-digest"></div>
   <h2 class="day-score-heading">Day Score</h2><div id="wDayScore"></div>
-  <h2>Growth / Skills <small style="font-size:.62rem;font-weight:500;color:#64748b;">Financial Videos, Udemy, Gun Range, Language and Reading / Audiobook</small></h2><div id="wGrowth"></div><h2>Fitness <small style="font-size:.62rem;font-weight:500;color:#64748b;">From Activities and Steps</small></h2><div id="wFitness"></div><h2>Wellness</h2><div id="wWellness"></div>
+  <h2>Growth / Skills <small style="font-size:.62rem;font-weight:500;color:#64748b;">Financial Videos, Udemy, Gun Range, Language, Guitar and Reading / Audiobook</small></h2><div id="wGrowth"></div><h2>Fitness <small style="font-size:.62rem;font-weight:500;color:#64748b;">From Activities and Steps</small></h2><div id="wFitness"></div><h2>Wellness</h2><div id="wWellness"></div>
 <h2>Nutrition</h2><div id="wNutrition"></div>
 <h2>Micronutrients</h2><div id="wNutritionMicro"></div>
 <h2>Spirituality</h2><div id="wSpirituality"></div>
@@ -2610,6 +2608,7 @@ body{
           <option value="Udemy">&#x1F393; Udemy</option>
           <option value="Language">&#x1F5E3; Language</option>
           <option value="Gun Range">&#x1F3AF; Gun Range</option>
+          <option value="Guitar">&#x1F3B8; Guitar</option>
           <option value="Finance">&#x1F4B0; Finance / Investing</option>
           <option value="Design">&#x1F3A8; Design</option>
           <option value="Writing">&#x270F;&#xFE0F; Writing</option>
@@ -2730,7 +2729,7 @@ body{
   <div id="mealSections" style="margin-bottom:8px;max-height:55vh;overflow-y:auto;-webkit-overflow-scrolling:touch;">
     <div class="meal-section" id="ms-breakfast" data-meal="breakfast">
       <div class="meal-header" onclick="toggleMealSection('breakfast')">
-        <span>🌅 Breakfast</span><div class="meal-right"><span class="meal-subtotal" id="st-breakfast" style="font-size:0.75rem;color:#888;"></span><button onclick="event.stopPropagation();saveMealFromSection('breakfast')" class="meal-action-btn">Create Meal</button><button onclick="event.stopPropagation();addFoodItem('breakfast')" class="meal-add-btn">+ Add</button><span class="meal-chevron" id="chev-breakfast">▸</span></div>
+        <span>🌅 Breakfast</span><div class="meal-right"><span class="meal-subtotal" id="st-breakfast" style="font-size:0.75rem;color:#888;"></span><button onclick="event.stopPropagation();saveMealFromSection('breakfast')" class="meal-action-btn" title="Save meal" aria-label="Save breakfast meal">&#x1F4BE;</button><button onclick="event.stopPropagation();addFoodItem('breakfast')" class="meal-add-btn">+ Add</button><span class="meal-chevron" id="chev-breakfast">▸</span></div>
       </div>
       <div class="meal-body" id="mb-breakfast" style="display:none;"><div id="foodList-breakfast"></div>
         <div style="padding:6px 8px 8px;"><textarea id="mnotes-breakfast" rows="1" placeholder="Breakfast notes..." oninput="save()" style="width:100%;border:1px solid #e9ecef;border-radius:5px;padding:4px 8px;font-size:0.78rem;resize:vertical;font-family:inherit;box-sizing:border-box;background:#fafafa;color:#555;"></textarea><div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;"><button onclick="openCopyMealToDate('breakfast')" class="meal-action-btn">&#x1F4C5; Copy to Date</button></div></div>
@@ -2738,7 +2737,7 @@ body{
     </div>
     <div class="meal-section" id="ms-lunch" data-meal="lunch">
       <div class="meal-header" onclick="toggleMealSection('lunch')">
-        <span>🥗 Lunch</span><div class="meal-right"><span class="meal-subtotal" id="st-lunch" style="font-size:0.75rem;color:#888;"></span><button onclick="event.stopPropagation();saveMealFromSection('lunch')" class="meal-action-btn">Create Meal</button><button onclick="event.stopPropagation();addFoodItem('lunch')" class="meal-add-btn">+ Add</button><span class="meal-chevron" id="chev-lunch">▸</span></div>
+        <span>🥗 Lunch</span><div class="meal-right"><span class="meal-subtotal" id="st-lunch" style="font-size:0.75rem;color:#888;"></span><button onclick="event.stopPropagation();saveMealFromSection('lunch')" class="meal-action-btn" title="Save meal" aria-label="Save lunch meal">&#x1F4BE;</button><button onclick="event.stopPropagation();addFoodItem('lunch')" class="meal-add-btn">+ Add</button><span class="meal-chevron" id="chev-lunch">▸</span></div>
       </div>
       <div class="meal-body" id="mb-lunch" style="display:none;"><div id="foodList-lunch"></div>
         <div style="padding:6px 8px 8px;"><textarea id="mnotes-lunch" rows="1" placeholder="Lunch notes..." oninput="save()" style="width:100%;border:1px solid #e9ecef;border-radius:5px;padding:4px 8px;font-size:0.78rem;resize:vertical;font-family:inherit;box-sizing:border-box;background:#fafafa;color:#555;"></textarea><div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;"><button onclick="openCopyMealToDate('lunch')" class="meal-action-btn">&#x1F4C5; Copy to Date</button></div></div>
@@ -2746,7 +2745,7 @@ body{
     </div>
     <div class="meal-section" id="ms-dinner" data-meal="dinner">
       <div class="meal-header" onclick="toggleMealSection('dinner')">
-        <span>🍽️ Dinner</span><div class="meal-right"><span class="meal-subtotal" id="st-dinner" style="font-size:0.75rem;color:#888;"></span><button onclick="event.stopPropagation();saveMealFromSection('dinner')" class="meal-action-btn">Create Meal</button><button onclick="event.stopPropagation();addFoodItem('dinner')" class="meal-add-btn">+ Add</button><span class="meal-chevron" id="chev-dinner">▸</span></div>
+        <span>🍽️ Dinner</span><div class="meal-right"><span class="meal-subtotal" id="st-dinner" style="font-size:0.75rem;color:#888;"></span><button onclick="event.stopPropagation();saveMealFromSection('dinner')" class="meal-action-btn" title="Save meal" aria-label="Save dinner meal">&#x1F4BE;</button><button onclick="event.stopPropagation();addFoodItem('dinner')" class="meal-add-btn">+ Add</button><span class="meal-chevron" id="chev-dinner">▸</span></div>
       </div>
       <div class="meal-body" id="mb-dinner" style="display:none;"><div id="foodList-dinner"></div>
         <div style="padding:6px 8px 8px;"><textarea id="mnotes-dinner" rows="1" placeholder="Dinner notes..." oninput="save()" style="width:100%;border:1px solid #e9ecef;border-radius:5px;padding:4px 8px;font-size:0.78rem;resize:vertical;font-family:inherit;box-sizing:border-box;background:#fafafa;color:#555;"></textarea><div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;"><button onclick="openCopyMealToDate('dinner')" class="meal-action-btn">&#x1F4C5; Copy to Date</button></div></div>
@@ -2754,7 +2753,7 @@ body{
     </div>
     <div class="meal-section" id="ms-snack" data-meal="snack">
       <div class="meal-header" onclick="toggleMealSection('snack')">
-        <span>🍎 Snacks</span><div class="meal-right"><span class="meal-subtotal" id="st-snack" style="font-size:0.75rem;color:#888;"></span><button onclick="event.stopPropagation();saveMealFromSection('snack')" class="meal-action-btn">Create Meal</button><button onclick="event.stopPropagation();addFoodItem('snack')" class="meal-add-btn">+ Add</button><span class="meal-chevron" id="chev-snack">▸</span></div>
+        <span>🍎 Snacks</span><div class="meal-right"><span class="meal-subtotal" id="st-snack" style="font-size:0.75rem;color:#888;"></span><button onclick="event.stopPropagation();saveMealFromSection('snack')" class="meal-action-btn" title="Save meal" aria-label="Save snack meal">&#x1F4BE;</button><button onclick="event.stopPropagation();addFoodItem('snack')" class="meal-add-btn">+ Add</button><span class="meal-chevron" id="chev-snack">▸</span></div>
       </div>
       <div class="meal-body" id="mb-snack" style="display:none;"><div id="foodList-snack"></div>
         <div style="padding:6px 8px 8px;"><textarea id="mnotes-snack" rows="1" placeholder="Snack notes..." oninput="save()" style="width:100%;border:1px solid #e9ecef;border-radius:5px;padding:4px 8px;font-size:0.78rem;resize:vertical;font-family:inherit;box-sizing:border-box;background:#fafafa;color:#555;"></textarea><div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;"><button onclick="openCopyMealToDate('snack')" class="meal-action-btn">&#x1F4C5; Copy to Date</button></div></div>
@@ -2762,7 +2761,7 @@ body{
     </div>
     <div class="meal-section" id="ms-liquids" data-meal="liquids">
       <div class="meal-header" onclick="toggleMealSection('liquids')" style="border-left-color:#3498db;">
-        <span>💧 Liquids</span><div class="meal-right"><span class="meal-subtotal" id="st-liquids" style="font-size:0.75rem;color:#888;"></span><button onclick="event.stopPropagation();saveMealFromSection('liquids')" class="meal-action-btn">Create Meal</button><button onclick="event.stopPropagation();addFoodItem('liquids')" class="meal-add-btn" style="background:#3498db;">+ Add</button><span class="meal-chevron" id="chev-liquids">▸</span></div>
+        <span>💧 Liquids</span><div class="meal-right"><span class="meal-subtotal" id="st-liquids" style="font-size:0.75rem;color:#888;"></span><button onclick="event.stopPropagation();saveMealFromSection('liquids')" class="meal-action-btn" title="Save meal" aria-label="Save liquids meal">&#x1F4BE;</button><button onclick="event.stopPropagation();addFoodItem('liquids')" class="meal-add-btn" style="background:#3498db;">+ Add</button><span class="meal-chevron" id="chev-liquids">▸</span></div>
       </div>
       <div class="meal-body" id="mb-liquids" style="display:none;"><div id="foodList-liquids"></div>
         <div style="padding:6px 8px 8px;"><textarea id="mnotes-liquids" rows="1" placeholder="Liquids notes..." oninput="save()" style="width:100%;border:1px solid #e9ecef;border-radius:5px;padding:4px 8px;font-size:0.78rem;resize:vertical;font-family:inherit;box-sizing:border-box;background:#fafafa;color:#555;"></textarea></div>
@@ -2770,7 +2769,7 @@ body{
     </div>
     <div class="meal-section" id="ms-sports" data-meal="sports">
       <div class="meal-header" onclick="toggleMealSection('sports')" style="border-left-color:#27ae60;">
-        <span>💪 Sports Nutrition</span><div class="meal-right"><span class="meal-subtotal" id="st-sports" style="font-size:0.75rem;color:#888;"></span><button onclick="event.stopPropagation();saveMealFromSection('sports')" class="meal-action-btn">Create Meal</button><button onclick="event.stopPropagation();addFoodItem('sports')" class="meal-add-btn" style="background:#27ae60;">+ Add</button><span class="meal-chevron" id="chev-sports">▸</span></div>
+        <span>💪 Sports Nutrition</span><div class="meal-right"><span class="meal-subtotal" id="st-sports" style="font-size:0.75rem;color:#888;"></span><button onclick="event.stopPropagation();saveMealFromSection('sports')" class="meal-action-btn" title="Save meal" aria-label="Save sports nutrition meal">&#x1F4BE;</button><button onclick="event.stopPropagation();addFoodItem('sports')" class="meal-add-btn" style="background:#27ae60;">+ Add</button><span class="meal-chevron" id="chev-sports">▸</span></div>
       </div>
       <div class="meal-body" id="mb-sports" style="display:none;"><div id="foodList-sports"></div>
         <div style="padding:6px 8px 8px;"><textarea id="mnotes-sports" rows="1" placeholder="Sports nutrition notes..." oninput="save()" style="width:100%;border:1px solid #e9ecef;border-radius:5px;padding:4px 8px;font-size:0.78rem;resize:vertical;font-family:inherit;box-sizing:border-box;background:#fafafa;color:#555;"></textarea><div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;"><button onclick="openCopyMealToDate('sports')" class="meal-action-btn">&#x1F4C5; Copy to Date</button></div></div>
@@ -12284,7 +12283,7 @@ function renderGoals(){
   }
   const actuals=[
     {key:'Miles',label:'Miles',actual:parseFloat(miles.toFixed(1)),unit:'mi',fmt:v=>v.toFixed(1)},
-    {key:'Audio',label:'Audiobook',actual:audioMin,unit:'min',fmt:v=>v>=60?Math.floor(v/60)+'h '+(v%60?v%60+'m':''):v+'m'},
+    {key:'Audio',label:'Audiobook',actual:audioMin,unit:'min',fmt:v=>{const mins=Math.round(Number(v)||0);return mins>=60?Math.floor(mins/60)+'h '+(mins%60?mins%60+'m':''):mins+'m'}},
     {key:'Bible',label:'Bible',actual:bibleD,unit:'/7',fmt:v=>v+'/7'},
     {key:'Prayer',label:'Prayer',actual:prayerD,unit:'/7',fmt:v=>v+'/7'},
     {key:'Exercise',label:'Exercise',actual:exD,unit:'/7',fmt:v=>v+'/7'},
@@ -12525,11 +12524,11 @@ function journalScheduleOrderKey(dateKey){return'journal_schedule_order_'+dateKe
 function journalScheduleHiddenKey(dateKey){return'journal_schedule_hidden_'+dateKey;}
 function journalDeleteScheduleItem(event,id){event.preventDefault();event.stopPropagation();if(!confirm('Delete this item from My Schedule for this day?'))return;var dateKey=dk(today),hidden=[];try{hidden=JSON.parse(localStorage.getItem(journalScheduleHiddenKey(dateKey))||'[]');}catch(ignore){}if(!Array.isArray(hidden))hidden=[];if(hidden.indexOf(id)===-1)hidden.push(id);localStorage.setItem(journalScheduleHiddenKey(dateKey),JSON.stringify(hidden));renderJournalSchedule();v26Toast('Schedule item deleted for this day');}
 function journalScheduleGrowthKey(kind,dateKey){return kind==='financial'?'journal_schedule_financial_'+dateKey:'journal_schedule_growth_'+kind+'_'+dateKey;}
-function journalScheduleGrowthId(kind){return{financial:'schedule-financial-videos',udemy:'schedule-udemy',gun:'schedule-gun-range',language:'schedule-language-practice',reading:'schedule-reading-audiobook'}[kind]||'';}
+function journalScheduleGrowthId(kind){return{financial:'schedule-financial-videos',udemy:'schedule-udemy',gun:'schedule-gun-range',language:'schedule-language-practice',guitar:'schedule-guitar',reading:'schedule-reading-audiobook'}[kind]||'';}
 var _journalGrowthLogKind='';
 function journalOpenGrowthLog(kind){
   _journalGrowthLogKind=kind;var modal=document.getElementById('journalGrowthLogModal');if(!modal)return;
-  var names={financial:'Financial Videos',language:'Language',udemy:'Udemy',gun:'Gun Range'},categories={financial:'Financial Videos',language:'Language',udemy:'Udemy',gun:'Gun Range'},startTimes={financial:'18:30',udemy:'19:00',gun:'19:00',language:'12:45'};
+  var names={financial:'Financial Videos',language:'Language',udemy:'Udemy',gun:'Gun Range',guitar:'Guitar'},categories={financial:'Financial Videos',language:'Language',udemy:'Udemy',gun:'Gun Range',guitar:'Guitar'},startTimes={financial:'18:30',udemy:'19:00',gun:'19:00',language:'12:45',guitar:'19:00'};
   document.getElementById('journalGrowthLogTitle').textContent='Log '+(names[kind]||'Growth / Skill');
   document.getElementById('journalGrowthLogCategory').value=categories[kind]||'Udemy';document.getElementById('journalGrowthLogTime').value='';document.getElementById('journalGrowthLogDate').value=dk(today);document.getElementById('journalGrowthLogStartTime').value=startTimes[kind]||'19:00';document.getElementById('journalGrowthLogName').value='';document.getElementById('journalGrowthLogResource').value=kind==='udemy'?'Udemy':'';document.getElementById('journalGrowthLogLink').value='';document.getElementById('journalGrowthLogNotes').value='';modal.style.display='flex';
 }
@@ -12538,7 +12537,7 @@ function journalSaveGrowthLog(){
   var name=(document.getElementById('journalGrowthLogName').value||'').trim(),time=(document.getElementById('journalGrowthLogTime').value||'').trim();if(!name){alert('Please enter the topic or course.');return;}if(!time){alert('Please enter the time spent.');return;}
   var scheduledDate=document.getElementById('journalGrowthLogDate').value,startTime=document.getElementById('journalGrowthLogStartTime').value;if(!scheduledDate){alert('Please choose the scheduled date.');return;}if(!startTime){alert('Please choose the start time.');return;}var startMins=journalScheduleParseTime(startTime);if(startMins===null){alert('Please choose a valid start time.');return;}
   var rawLink=(document.getElementById('journalGrowthLogLink').value||'').trim(),link=skillSafeLink(rawLink);if(rawLink&&!link){alert('Please enter a valid website link.');return;}
-  var category=document.getElementById('journalGrowthLogCategory').value||'Udemy',kindByCategory={'Financial Videos':'financial','Udemy':'udemy','Gun Range':'gun','Language':'language'},kind=kindByCategory[category]||'udemy';
+  var category=document.getElementById('journalGrowthLogCategory').value||'Udemy',kindByCategory={'Financial Videos':'financial','Udemy':'udemy','Gun Range':'gun','Language':'language','Guitar':'guitar'},kind=kindByCategory[category]||'udemy';
   var entries=getSkillEntries();entries.push({id:'sk_'+Date.now(),date:scheduledDate,scheduledDate:scheduledDate,startTime:startTime,category:category,name:name,time:time,resource:(document.getElementById('journalGrowthLogResource').value||'').trim(),link:link,notes:(document.getElementById('journalGrowthLogNotes').value||'').trim()});saveSkillEntries(entries);
   localStorage.setItem(journalScheduleGrowthKey(kind,scheduledDate),'1');var scheduleId=journalScheduleGrowthId(kind),overrides={};try{overrides=JSON.parse(localStorage.getItem(journalScheduleOverridesKey(scheduledDate))||'{}');}catch(ignore){}overrides[scheduleId]={time:journalMinsToClock(startMins),mins:startMins};localStorage.setItem(journalScheduleOverridesKey(scheduledDate),JSON.stringify(overrides));
   journalCloseGrowthLog();renderSkillLog();renderSkillSectionCharts();renderJournalSchedule();var weekly=document.getElementById('tab-weekly');if(weekly&&weekly.classList.contains('active'))renderWeekly();v26Toast('Growth activity saved and scheduled for '+scheduledDate);
@@ -12629,7 +12628,8 @@ function renderJournalSchedule(){
   var udemyEntries=getSkillEntries().filter(function(entry){return entry.date===dateKey&&/\budemy\b/i.test([entry.resource,entry.name,entry.notes].filter(Boolean).join(' '));});
   var gunEntries=getSkillEntries().filter(function(entry){return entry.date===dateKey&&/^(gun range|shooting)$/i.test(String(entry.category||''));});
   var financialEntries=getSkillEntries().filter(function(entry){return entry.date===dateKey&&(/^(financial videos|retirement videos)$/i.test(String(entry.category||''))||/financial video|retirement video/i.test([entry.name,entry.resource,entry.notes].filter(Boolean).join(' ')));});
-  var udemyMinutes=udemyEntries.reduce(function(total,entry){return total+parseSkillTimeMins(entry.time);},0),gunMinutes=gunEntries.reduce(function(total,entry){return total+parseSkillTimeMins(entry.time);},0),languageMinutes=languageEntries.reduce(function(total,entry){return total+parseSkillTimeMins(entry.time);},0),financialMinutes=financialEntries.reduce(function(total,entry){return total+parseSkillTimeMins(entry.time);},0),readingMinutes=parseTimedMins(d.gaAudiobookTime);
+  var guitarEntries=getSkillEntries().filter(function(entry){return entry.date===dateKey&&/^guitar$/i.test(String(entry.category||''));});
+  var udemyMinutes=udemyEntries.reduce(function(total,entry){return total+parseSkillTimeMins(entry.time);},0),gunMinutes=gunEntries.reduce(function(total,entry){return total+parseSkillTimeMins(entry.time);},0),languageMinutes=languageEntries.reduce(function(total,entry){return total+parseSkillTimeMins(entry.time);},0),guitarMinutes=guitarEntries.reduce(function(total,entry){return total+parseSkillTimeMins(entry.time);},0),financialMinutes=financialEntries.reduce(function(total,entry){return total+parseSkillTimeMins(entry.time);},0),readingMinutes=parseTimedMins(d.gaAudiobookTime);
   var now=new Date(),isSelectedToday=dk(now)===dateKey,currentMinutes=now.getHours()*60+now.getMinutes(),selectedDay=new Date(dateKey+'T00:00:00'),realDay=new Date(now.getFullYear(),now.getMonth(),now.getDate()),isPastDay=selectedDay<realDay;
   function mealLogged(meal){
     meal=String(meal||'').toLowerCase();
@@ -12680,6 +12680,7 @@ function renderJournalSchedule(){
   if(localStorage.getItem(journalScheduleGrowthKey('udemy',dateKey))==='1')items.push({time:'7:00 PM',mins:1140,label:'Udemy',detail:udemyMinutes?fmtMinsSeconds(udemyMinutes)+' logged':'Tap to log the Udemy course session',done:d.gaUdemy==='green',tab:'skill-log',growthKind:'udemy'});
   if(localStorage.getItem(journalScheduleGrowthKey('gun',dateKey))==='1')items.push({time:'7:00 PM',mins:1140,label:'Gun Range',detail:gunMinutes?fmtMinsSeconds(gunMinutes)+' logged':'Log range time and takeaways',done:d.gaGunRange==='green',tab:'skill-log',growthKind:'gun'});
   if(localStorage.getItem(journalScheduleGrowthKey('language',dateKey))==='1')items.push({time:'12:45 PM',mins:765,label:'Language Practice',detail:languageMinutes?fmtMinsSeconds(languageMinutes)+' logged':'Tap to log the language session',done:d.gaLanguage==='green',tab:'skill-log',growthKind:'language'});
+  if(localStorage.getItem(journalScheduleGrowthKey('guitar',dateKey))==='1')items.push({time:'7:00 PM',mins:1140,label:'Guitar',detail:guitarMinutes?fmtMinsSeconds(guitarMinutes)+' logged':'Tap to log guitar practice',done:d.gaGuitar==='green',tab:'skill-log',growthKind:'guitar'});
   journalManualScheduleItems().filter(function(entry){return entry.date===dateKey;}).forEach(function(entry){items.push({id:'schedule-'+entry.id,time:entry.time,mins:Number(entry.mins),label:entry.title,detail:entry.note||'Manual schedule item',done:localStorage.getItem('schedule_manualSchedule_'+entry.id+'_'+dateKey)==='1',tab:'daily',manual:'manualSchedule_'+entry.id,manualCreated:true,manualItemId:entry.id});});
   items.forEach(function(item,index){if(!item.id)item.id='schedule-'+String(item.label||index).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');});
   var hiddenSchedule=[];try{hiddenSchedule=JSON.parse(localStorage.getItem(journalScheduleHiddenKey(dateKey))||'[]');}catch(ignoreHidden){}if(Array.isArray(hiddenSchedule)&&hiddenSchedule.length)items=items.filter(function(item){return hiddenSchedule.indexOf(item.id)===-1;});
@@ -12697,16 +12698,17 @@ function renderJournalSchedule(){
   items.sort(function(a,b){var am=Number(a.mins),bm=Number(b.mins);if(!Number.isFinite(am))am=1440;if(!Number.isFinite(bm))bm=1440;return am-bm;});
   _journalScheduleItemsById={};items.forEach(function(item){_journalScheduleItemsById[item.id]=item;});
   var financialStatus=document.getElementById('financialVideoScheduleStatus');if(financialStatus)financialStatus.textContent='Use Log to record details and schedule a time';
-  ['udemy','gun','language'].forEach(function(kind){var card=document.querySelector('.journal-growth-pool-card[data-growth-kind="'+kind+'"]');if(card)card.style.display='grid';});
+  ['udemy','gun','language','guitar'].forEach(function(kind){var card=document.querySelector('.journal-growth-pool-card[data-growth-kind="'+kind+'"]');if(card)card.style.display='grid';});
   var financialScheduled=localStorage.getItem(journalScheduleGrowthKey('financial',dateKey))==='1';
   var financialGrowthStatus=document.getElementById('growthFinancialStatus');if(financialGrowthStatus)financialGrowthStatus.textContent=(financialMinutes?fmtMinsSeconds(financialMinutes):'No time logged')+(financialScheduled?' • scheduled':'');
   var udemyStatus=document.getElementById('growthUdemyStatus');if(udemyStatus)udemyStatus.textContent=(udemyMinutes?fmtMinsSeconds(udemyMinutes):'No time logged')+(localStorage.getItem(journalScheduleGrowthKey('udemy',dateKey))==='1'?' • scheduled':'');
   var gunStatus=document.getElementById('growthGunStatus');if(gunStatus)gunStatus.textContent=(gunMinutes?fmtMinsSeconds(gunMinutes):'No time logged')+(localStorage.getItem(journalScheduleGrowthKey('gun',dateKey))==='1'?' • scheduled':'');
   var languageStatus=document.getElementById('growthLanguageStatus');if(languageStatus)languageStatus.textContent=(languageMinutes?fmtMinsSeconds(languageMinutes):'No time logged')+(localStorage.getItem(journalScheduleGrowthKey('language',dateKey))==='1'?' • scheduled':'');
+  var guitarStatus=document.getElementById('growthGuitarStatus');if(guitarStatus)guitarStatus.textContent=(guitarMinutes?fmtMinsSeconds(guitarMinutes):'No time logged')+(localStorage.getItem(journalScheduleGrowthKey('guitar',dateKey))==='1'?' • scheduled':'');
   // Keep completed growth activities first, scheduled activities second, and
   // unscheduled activities last while preserving the requested order in each group.
   var growthPool=document.querySelector('.journal-growth-pool');if(growthPool){
-    var growthOrder=['financial','udemy','gun','language'],growthComplete={financial:d.gaFinancialVideos==='green',udemy:d.gaUdemy==='green',gun:d.gaGunRange==='green',language:d.gaLanguage==='green'};
+    var growthOrder=['financial','udemy','gun','language','guitar'],growthComplete={financial:d.gaFinancialVideos==='green',udemy:d.gaUdemy==='green',gun:d.gaGunRange==='green',language:d.gaLanguage==='green',guitar:d.gaGuitar==='green'};
     function growthRank(kind){if(growthComplete[kind])return 0;if(localStorage.getItem(journalScheduleGrowthKey(kind,dateKey))==='1')return 1;return 2;}
     var growthCards=Array.from(growthPool.querySelectorAll('.journal-growth-pool-card'));growthCards.sort(function(a,b){var ak=a.dataset.growthKind,bk=b.dataset.growthKind;return growthRank(ak)-growthRank(bk)||growthOrder.indexOf(ak)-growthOrder.indexOf(bk);});
     var growthHelp=growthPool.lastElementChild;growthCards.forEach(function(card){card.classList.toggle('completed',!!growthComplete[card.dataset.growthKind]);growthPool.insertBefore(card,growthHelp);});
@@ -12716,7 +12718,7 @@ function renderJournalSchedule(){
   if(isSelectedToday){for(var i=0;i<items.length;i++){if(!items[i].fixed&&!items[i].done&&items[i].mins>=currentMinutes){next=i;break;}}if(next<0)next=items.findIndex(function(item){return !item.fixed&&!item.done;});}
   if(summary)summary.textContent=complete+'/'+trackable.length+' complete';
   var nextText=next>=0?'Next: '+items[next].time+' — '+items[next].label:(complete===trackable.length?'Schedule complete':'Review remaining items');
-  body.innerHTML='<div class="journal-schedule-status"><strong>'+escHtml(nextText)+'</strong><span>Drag to reorder • Edit time or day • '+complete+' complete • '+(trackable.length-complete)+' remaining</span><button type="button" onclick="event.preventDefault();event.stopPropagation();journalOpenManualScheduleItem()" style="border:1px solid #4f46e5;background:#4f46e5;color:#fff;border-radius:6px;padding:5px 9px;font-size:.68rem;font-weight:800;cursor:pointer;">+ Schedule Item</button></div><div class="journal-schedule-list">'+items.map(function(item,index){var inlineGrowth=['language','udemy','gun'].indexOf(item.growthKind)!==-1,action=item.fixed?'':inlineGrowth?'journalOpenGrowthLog(\''+item.growthKind+'\')':item.detailKind?'journalToggleScheduleDetail(\''+item.detailKind+'\')':item.sleepRoutineChecklist?'journalToggleSleepRoutinePanel()':(item.manual?'journalToggleScheduleManual(\''+item.manual+'\')':'switchTab(\''+item.tab+'\',null)');var safeAction=JSON.stringify(action).replace(/"/g,'&quot;'),removeAction=item.manualCreated?'<span class="journal-schedule-remove" role="button" tabindex="0" onclick="journalDeleteManualScheduleItem(event,\''+item.manualItemId+'\',\''+(item._moveId||'')+'\')">Remove</span>':item.growthKind?'<span class="journal-schedule-remove" role="button" tabindex="0" onclick="journalScheduleRemoveGrowth(event,\''+item.growthKind+'\',\''+escHtml(item.id)+'\')">Remove</span>':'',linkedKey=item.growthKind==='reading'?'gaAudiobook':item.growthKind==='financial'?'gaFinancialVideos':item.growthKind==='udemy'?'gaUdemy':item.growthKind==='gun'?'gaGunRange':item.growthKind==='language'?'gaLanguage':'',checkClick=linkedKey?' onclick="journalScheduleToggleLinkedCheck(event,\''+linkedKey+'\')" title="Toggle completion"':'';return '<button type="button" draggable="true" data-schedule-id="'+escHtml(item.id)+'" class="journal-schedule-item '+(item.fixed?'fixed ':(item.done?'done ':''))+(index===next?'next':'')+'" onclick="journalScheduleCardClick('+safeAction+')" ondragstart="journalScheduleDragStart(event,\''+escHtml(item.id)+'\')" ondragover="journalScheduleDragOver(event)" ondrop="journalScheduleDrop(event,\''+escHtml(item.id)+'\')" ondragend="journalScheduleDragEnd()"><span class="journal-schedule-grip" title="Drag to reschedule" aria-hidden="true">&#x22EE;&#x22EE;</span><span class="journal-schedule-time">'+item.time+'</span><span class="journal-schedule-check"'+checkClick+'>'+(item.fixed?'&#x1F4BC;':(item.done?'&#x2713;':''))+'</span><span class="journal-schedule-name">'+escHtml(item.label)+'<span class="journal-schedule-detail">'+escHtml(item.detail)+'</span></span><span class="journal-schedule-actions"><span class="journal-schedule-edit" role="button" tabindex="0" onclick="journalScheduleEdit(event,\''+escHtml(item.id)+'\')">Edit</span>'+removeAction+'</span></button>'+(item.detailKind?journalScheduleDetailHtml(item.detailKind,d):'')+(item.sleepRoutineChecklist?journalSleepRoutineChecklistHtml(dateKey):'');}).join('')+'</div>'+journalEndSummaryHtml();
+  body.innerHTML='<div class="journal-schedule-status"><strong>'+escHtml(nextText)+'</strong><span>Drag to reorder • Edit time or day • '+complete+' complete • '+(trackable.length-complete)+' remaining</span><button type="button" onclick="event.preventDefault();event.stopPropagation();journalOpenManualScheduleItem()" style="border:1px solid #4f46e5;background:#4f46e5;color:#fff;border-radius:6px;padding:5px 9px;font-size:.68rem;font-weight:800;cursor:pointer;">+ Schedule Item</button></div><div class="journal-schedule-list">'+items.map(function(item,index){var inlineGrowth=['language','udemy','gun','guitar'].indexOf(item.growthKind)!==-1,action=item.fixed?'':inlineGrowth?'journalOpenGrowthLog(\''+item.growthKind+'\')':item.detailKind?'journalToggleScheduleDetail(\''+item.detailKind+'\')':item.sleepRoutineChecklist?'journalToggleSleepRoutinePanel()':(item.manual?'journalToggleScheduleManual(\''+item.manual+'\')':'switchTab(\''+item.tab+'\',null)');var safeAction=JSON.stringify(action).replace(/"/g,'&quot;'),removeAction=item.manualCreated?'<span class="journal-schedule-remove" role="button" tabindex="0" onclick="journalDeleteManualScheduleItem(event,\''+item.manualItemId+'\',\''+(item._moveId||'')+'\')">Remove</span>':item.growthKind?'<span class="journal-schedule-remove" role="button" tabindex="0" onclick="journalScheduleRemoveGrowth(event,\''+item.growthKind+'\',\''+escHtml(item.id)+'\')">Remove</span>':'',linkedKey=item.growthKind==='reading'?'gaAudiobook':item.growthKind==='financial'?'gaFinancialVideos':item.growthKind==='udemy'?'gaUdemy':item.growthKind==='gun'?'gaGunRange':item.growthKind==='language'?'gaLanguage':item.growthKind==='guitar'?'gaGuitar':'',checkClick=linkedKey?' onclick="journalScheduleToggleLinkedCheck(event,\''+linkedKey+'\')" title="Toggle completion"':'';return '<button type="button" draggable="true" data-schedule-id="'+escHtml(item.id)+'" class="journal-schedule-item '+(item.fixed?'fixed ':(item.done?'done ':''))+(index===next?'next':'')+'" onclick="journalScheduleCardClick('+safeAction+')" ondragstart="journalScheduleDragStart(event,\''+escHtml(item.id)+'\')" ondragover="journalScheduleDragOver(event)" ondrop="journalScheduleDrop(event,\''+escHtml(item.id)+'\')" ondragend="journalScheduleDragEnd()"><span class="journal-schedule-grip" title="Drag to reschedule" aria-hidden="true">&#x22EE;&#x22EE;</span><span class="journal-schedule-time">'+item.time+'</span><span class="journal-schedule-check"'+checkClick+'>'+(item.fixed?'&#x1F4BC;':(item.done?'&#x2713;':''))+'</span><span class="journal-schedule-name">'+escHtml(item.label)+'<span class="journal-schedule-detail">'+escHtml(item.detail)+'</span></span><span class="journal-schedule-actions"><span class="journal-schedule-edit" role="button" tabindex="0" onclick="journalScheduleEdit(event,\''+escHtml(item.id)+'\')">Edit</span>'+removeAction+'</span></button>'+(item.detailKind?journalScheduleDetailHtml(item.detailKind,d):'')+(item.sleepRoutineChecklist?journalSleepRoutineChecklistHtml(dateKey):'');}).join('')+'</div>'+journalEndSummaryHtml();
   body.querySelectorAll('.journal-schedule-item').forEach(function(card){var item=_journalScheduleItemsById[card.dataset.scheduleId];if(!item||item.manualCreated||item.growthKind)return;var actions=card.querySelector('.journal-schedule-actions');if(actions)actions.insertAdjacentHTML('beforeend','<span class="journal-schedule-remove" role="button" tabindex="0" onclick="journalDeleteScheduleItem(event,\''+escHtml(item.id)+'\')">Delete</span>');});
 }
 function renderJournalHome(){
@@ -13500,12 +13502,6 @@ window.addEventListener('DOMContentLoaded',function(){
 });
 </script>
 <button class="journal-float-top" id="journalFloatTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">&#x2191; Top</button>
-<nav class="journal-mobile-dock" aria-label="Quick journal navigation">
-  <button onclick="v26GoToday()"><span>&#x1F3E0;</span>Today</button>
-  <button onclick="openMobileCheckIn()"><span>&#x2705;</span>Check-In</button>
-  <button onclick="window.scrollTo({top:0,behavior:'smooth'})"><span>&#x2191;</span>Top</button>
-  <button onclick="toggleHamburger(event)"><span>&#x2630;</span>More</button>
-</nav>
 <div id="v26Toast" class="v26-toast" role="status" aria-live="polite"></div>
 </body>
 </html>
