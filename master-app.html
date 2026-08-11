@@ -108,6 +108,13 @@
     border-radius:6px;
   }
   .card .open{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+    min-height:38px;
+    border-radius:8px;
+    background:#eef3ff;
     font-size:13px;
     font-weight:700;
     color:var(--accent-ink);
@@ -128,6 +135,13 @@
     color:var(--muted);
   }
   .note b{color:var(--ink)}
+  .info-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:18px}
+  .info-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:17px 19px;font-size:13px;color:var(--muted)}
+  .info-card h2{margin:0 0 7px;font-size:15px;color:var(--ink)}
+  .info-card p{margin:0}
+  .privacy{border-left:4px solid #b45a09;background:#fffaf2}
+  .backup{border-left:4px solid #2f6fed;background:#f7f9ff}
+  .updated{margin-top:9px;font-size:11px;color:#9aa1ad;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
   footer{
     text-align:center;
     font-size:12px;
@@ -137,6 +151,12 @@
   @media(max-width:520px){
     header{padding:34px 5vw 30px}
     main{padding:28px 5vw 50px}
+    .grid{grid-template-columns:1fr;gap:12px}
+    .card{padding:16px}
+    .card .icon{width:38px;height:38px;margin-bottom:10px}
+    .card p{margin-bottom:11px}
+    .card .tags{margin-bottom:10px}
+    .info-grid{grid-template-columns:1fr}
   }
 </style>
 </head>
@@ -145,56 +165,68 @@
 <header>
   <div class="eyebrow">Personal Tools</div>
   <h1>My Life Master App</h1>
-  <p>One place to reach everything — retirement &amp; credit, daily life planning, budgeting, Spanish practice, and the family benefits hub. Each tool keeps running exactly as it did before, with its own data saved locally on this device. Open a tool below, and use the ⌂ Master App button in the corner to come back here.</p>
+  <p>One place for daily planning, budgeting, retirement, Spanish practice, and family-benefit information. Use the small ⌂ button in the bottom-left corner of any tool to return here.</p>
+  <div class="updated">Last updated August 11, 2026</div>
 </header>
 
 <main>
   <div class="grid">
 
-    <a class="card finance" href="retirement-planner.html">
-      <div class="icon">🧮</div>
-      <h2>Retirement &amp; Credit</h2>
-      <p>Michael &amp; Cynthia's retirement projections, plus Cindy's credit card register.</p>
-      <div class="tags"><span>Retirement</span><span>Credit Cards</span></div>
-      <div class="open">Open tool →</div>
-    </a>
-
     <a class="card life" href="daily-planner.html">
       <div class="icon">🧭</div>
-      <h2>Life Command Center</h2>
-      <p>Daily, weekly, monthly &amp; yearly planning — day scores, training plans, meditation, nutrition, blood pressure tracking, and your reading library.</p>
-      <div class="tags"><span>Planner</span><span>Fitness</span><span>Health</span><span>Habits</span></div>
-      <div class="open">Open tool →</div>
+      <h2>My Life Command Center</h2>
+      <p>Daily and long-range planning, training, meditation, nutrition, wellness, habits, journaling, and learning.</p>
+      <div class="tags"><span>Local + Supabase</span><span>Cross-device sync</span></div>
+      <div class="open">Open My Life Command Center →</div>
     </a>
 
     <a class="card money" href="budget-tracker.html">
       <div class="icon">💰</div>
       <h2>Budget &amp; Net Worth</h2>
       <p>Accounts, transactions, subscriptions, cash flow, goals, and Budget AI for Michael &amp; Cynthia's money.</p>
-      <div class="tags"><span>Budget</span><span>Net Worth</span></div>
-      <div class="open">Open tool →</div>
+      <div class="tags"><span>This device</span><span>Backup available</span></div>
+      <div class="open">Open Budget Tracker →</div>
+    </a>
+
+    <a class="card finance" href="retirement-planner.html">
+      <div class="icon">🧮</div>
+      <h2>Retirement &amp; Credit</h2>
+      <p>Michael &amp; Cynthia's retirement projections, planning tools, and Cindy's credit-card register.</p>
+      <div class="tags"><span>Local + Supabase</span><span>Cross-device sync</span></div>
+      <div class="open">Open Retirement Planner →</div>
     </a>
 
     <a class="card lang" href="spanish-learning.html">
       <div class="icon">🗣️</div>
       <h2>Luma — Spanish</h2>
       <p>Lessons, the Practice Lab, your Personal Plan, and the Spanish immersion studio.</p>
-      <div class="tags"><span>Language</span><span>Daily Plan</span></div>
-      <div class="open">Open tool →</div>
+      <div class="tags"><span>This device</span><span>Backup available</span></div>
+      <div class="open">Open Spanish Learning →</div>
     </a>
 
     <a class="card family" href="family-benefits-hub.html">
       <div class="icon">🛡️</div>
       <h2>Family Benefits Hub</h2>
       <p>Survivor benefits reference, key contacts, documents, passwords, important dates, and estate-planning notes.</p>
-      <div class="tags"><span>Benefits</span><span>Estate Planning</span></div>
-      <div class="open">Open tool →</div>
+      <div class="tags"><span>This device</span><span>Backup available</span></div>
+      <div class="open">Open Family Benefits Hub →</div>
     </a>
 
   </div>
 
+  <div class="info-grid">
+    <section class="info-card privacy">
+      <h2>Privacy &amp; security</h2>
+      <p>This website and its source files are public. Do not place passwords, account numbers, private documents, API secrets, or other sensitive information directly inside the published HTML files. Supabase-connected information is protected by your sign-in and database security rules.</p>
+    </section>
+    <section class="info-card backup">
+      <h2>Protect your data</h2>
+      <p>Each tool manages its own information. Use the backup or export feature inside every app regularly, and keep the downloaded copies somewhere safe. A GitHub update replaces app files but does not replace a personal data backup.</p>
+    </section>
+  </div>
+
   <div class="note">
-    <b>How this works:</b> Master App is just a front door — each tool below is the original app, unchanged, running on its own. They each save their own data locally in this browser (nothing is shared between them), so opening one won't affect another. Keep using each tool's own backup/export feature to protect your data.
+    <b>How storage works:</b> My Life Command Center and Retirement &amp; Credit save locally first and can synchronize through Supabase after sign-in. The other tools primarily store information in this browser on this device. Clearing browser data may remove local information that has not been backed up or synchronized.
   </div>
 </main>
 
