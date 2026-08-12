@@ -78,6 +78,13 @@
       });
     });
     function completeLesson(btn){state.xp+=5;if(btn){btn.textContent="✓";btn.disabled=true}render();notify("Nice work — +5 XP")}
+    document.addEventListener("DOMContentLoaded",()=>{
+      const removedOnlineTools=["Voice conversations","Conversation reports","Kumo memory"];
+      document.querySelectorAll("button.tool").forEach(button=>{
+        const title=button.querySelector("b");
+        if(title&&removedOnlineTools.includes(title.textContent.trim()))button.remove();
+      });
+    });
     function backup(){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify({version:1,...state},null,2)],{type:"application/json"}));a.download="luma-progress.json";a.click();notify("Backup downloaded")}
     function restoreFile(file){if(!file)return;const r=new FileReader();r.onload=()=>{try{const v=JSON.parse(r.result);if(typeof v.xp!=="number")throw 0;state={...state,...v};render();notify("Progress restored")}catch{notify("Invalid backup file")}};r.readAsText(file)}
     function send(){notify("Online tutor is not connected")}
