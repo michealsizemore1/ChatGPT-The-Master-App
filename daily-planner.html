@@ -3220,7 +3220,7 @@ function jumpToDailyCheck(btn){
 }
 
 function updateWaterDisplay(){const cups=(waterOz/8).toFixed(1);const el=document.getElementById('waterDisplay');if(el)el.textContent=waterOz+' oz ('+cups+' cups)';}
-function changeWater(delta){waterOz=Math.max(0,waterOz+delta);updateWaterDisplay();save();}
+function changeWater(delta){waterOz=Math.max(0,waterOz+delta);updateWaterDisplay();save();renderJournalSchedule();}
 function syncMassageMinutes(source){
   var daily=document.getElementById('dailyMassageMinutes'),activities=document.getElementById('exMassageMinutes');
   if(source==='daily'&&daily&&activities)activities.value=daily.value;
@@ -12712,14 +12712,14 @@ function renderJournalSchedule(){
     {time:journalMinsToClock(stretchMins+20),mins:stretchMins+20,label:'Massage',detail:d.exMassageMinutes?'Post-run recovery massage — '+d.exMassageMinutes+' min':'Post-run recovery massage',done:d.exMassage==='green',tab:'activities',skip:!runToday},
     {time:journalMinsToClock(breakfastMins),mins:breakfastMins,label:'Breakfast',detail:'Recovery meal and hydration after training',done:mealComplete('breakfast',breakfastMins),tab:'nutrition'},
     {time:'9:30 AM',mins:570,label:'Work',detail:'9:30 AM – 6:00 PM',done:true,tab:'daily',skip:!(today.getDay()>=1&&today.getDay()<=5),fixed:true},
-    {time:'12:00 PM',mins:720,label:'Water checkpoint: 32 oz',detail:'Drink at least 32 ounces by noon',done:water>=32,tab:'nutrition'},
+    {time:'12:00 PM',mins:720,label:'Water checkpoint: 32 oz',detail:'Cumulative total: reach 32 ounces by noon',done:water>=32,tab:'nutrition'},
     {time:'12:00 PM',mins:720,label:'Lunch',detail:'Midday meal and hydration',done:mealComplete('lunch',720),tab:'nutrition'},
     {time:'5:30 PM',mins:1050,label:'Dinner',detail:'Evening meal and nutrition update',done:mealComplete('dinner',1050),tab:'nutrition'},
-    {time:'6:00 PM',mins:1080,label:'Water checkpoint: 64 oz',detail:'Drink another 32 ounces by 6:00 PM',done:water>=64,tab:'nutrition'},
+    {time:'6:00 PM',mins:1080,label:'Water checkpoint: 64 oz',detail:'Cumulative total: reach 64 ounces by 6:00 PM',done:water>=64,tab:'nutrition'},
     {time:'6:30 PM',mins:1110,label:growth.label,detail:'Today’s rotating Growth focus',done:growth.done,tab:growth.tab,skip:!!growth.skip||growth.label!=='Gun Range'},
     {time:'8:15 PM',mins:1215,label:'Journal accomplishments and gratitude',detail:'Capture the day while it is fresh',done:reflected,tab:'daily'},
     {time:'8:30 PM',mins:1230,label:'Prepare priorities for tomorrow',detail:'Close the day intentionally',done:localStorage.getItem('schedule_eveningPlanning_'+dateKey)==='1'||!!d.prepJournalCheck,tab:'daily',manual:'eveningPlanning'},
-    {time:'9:00 PM',mins:1260,label:'Water checkpoint: 96 oz',detail:'Drink another 32 ounces by 9:00 PM',done:water>=96,tab:'nutrition'},
+    {time:'9:00 PM',mins:1260,label:'Water checkpoint: 75 oz',detail:'Cumulative total: reach 75 ounces by 9:00 PM',done:water>=75,tab:'nutrition'},
     {time:'9:30 PM',mins:1290,label:'Begin sleep routine',detail:sleepRoutine.count+' of 6 routine steps completed',done:sleepRoutine.count>=4,tab:'wellness',sleepRoutineChecklist:true}
   ].filter(function(item){return !item.skip;});
   if(localStorage.getItem(journalScheduleGrowthKey('financial',dateKey))==='1')items.push({time:'6:30 PM',mins:1110,label:'Financial Videos',detail:financialMinutes?fmtMinsSeconds(financialMinutes)+' logged':'Tap Log Details & Link to record time',done:d.gaFinancialVideos==='green',tab:'daily',growthKind:'financial'});
