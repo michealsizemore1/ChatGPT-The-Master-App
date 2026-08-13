@@ -3239,7 +3239,8 @@ const PTIDS=['pt0','pt1','pt2','dg0','dg1','dg2'];
 function save(){
   const d={};
   // Tri-state checkboxes
-  document.querySelectorAll('.tri-check').forEach(el=>{if(el.dataset.key)d[el.dataset.key]=el.dataset.state||'';});
+  const triRank={'':0,black:1,purple:2,red:3,green:4};
+  document.querySelectorAll('.tri-check').forEach(el=>{if(el.dataset.key){var next=el.dataset.state||'',current=d[el.dataset.key]||'';if((triRank[next]||0)>=(triRank[current]||0))d[el.dataset.key]=next;}});
   // Plain review checkbox
   const rc=document.getElementById('reviewCheck');if(rc)d.reviewCheck=rc.checked;
   const pjc=document.getElementById('prepJournalCheck');if(pjc)d.prepJournalCheck=pjc.checked;
@@ -12417,7 +12418,13 @@ function journalPrefs(){
   }catch(e){return defaults;}
 }
 function journalViewData(){
-  try{return JSON.parse(localStorage.getItem('planner_'+dk(today))||'{}');}catch(e){return{};}
+  var data={};try{data=JSON.parse(localStorage.getItem('planner_'+dk(today))||'{}');}catch(e){}
+  // My Schedule should reflect the checkmarks currently shown on the selected day.
+  // Some sections contain duplicate controls; prefer a visible green state over a
+  // stale hidden blank copy instead of showing 0 completed.
+  var triRank={'':0,black:1,purple:2,red:3,green:4};
+  document.querySelectorAll('.tri-check[data-key]').forEach(function(el){var key=el.dataset.key,next=el.dataset.state||'',current=data[key]||'';if((triRank[next]||0)>(triRank[current]||0))data[key]=next;});
+  return data;
 }
 function journalHomeCard(id,title,body){
   return'<div class="journal-home-card" data-home-card="'+id+'"><h3>'+title+'</h3><div class="home-value">'+body+'</div></div>';
@@ -12791,7 +12798,7 @@ function renderJournalSchedule(){
     growthCards.sort(function(a,b){var aScheduled=localStorage.getItem(journalScheduleGrowthKey(a.dataset.growthKind,dateKey))==='1',bScheduled=localStorage.getItem(journalScheduleGrowthKey(b.dataset.growthKind,dateKey))==='1';return Number(bScheduled)-Number(aScheduled);});
     growthCards.forEach(function(card){card.classList.toggle('completed',!!growthComplete[card.dataset.growthKind]);growthPool.insertBefore(card,growthHelp);});
   }
-  var scheduleStatuses=journalScheduleStatuses(dateKey);items.forEach(function(item){var hasManual=Object.prototype.hasOwnProperty.call(scheduleStatuses,item.id),manual=hasManual?scheduleStatuses[item.id]:'';item.scheduleStatus=hasManual?(manual==='blank'?'':manual):(item.done?'green':'');item.done=item.scheduleStatus==='green';});
+  var scheduleStatuses=journalScheduleStatuses(dateKey);items.forEach(function(item){var hasManual=Object.prototype.hasOwnProperty.call(scheduleStatuses,item.id),manual=hasManual?scheduleStatuses[item.id]:'';item.scheduleStatus=(item.detailKind&&item.done)?'green':hasManual?(manual==='blank'?'':manual):(item.done?'green':'');item.done=item.scheduleStatus==='green';});
   var trackable=items.filter(function(item){return !item.fixed;});
   var complete=trackable.filter(function(item){return item.done;}).length,next=-1;
   if(isSelectedToday){for(var i=0;i<items.length;i++){if(!items[i].fixed&&!items[i].done&&items[i].mins>=currentMinutes){next=i;break;}}if(next<0)next=items.findIndex(function(item){return !item.fixed&&!item.done;});}
