@@ -1388,7 +1388,7 @@ body{
     <div class="journal-growth-pool-card" data-growth-kind="language" style="grid-template-columns:19px minmax(120px,1fr) minmax(80px,auto) auto;"><div class="tri-check" data-key="gaLanguage" onclick="triClick(this)" title="Mark Language Practice complete"></div><strong style="font-size:.76rem;">Language Practice</strong><span class="journal-growth-status" id="growthLanguageStatus"></span><button type="button" class="journal-growth-add" onclick="journalOpenGrowthLog('language')">Schedule / Log</button></div>
     <div class="journal-growth-pool-card" data-growth-kind="guitar" style="grid-template-columns:19px minmax(120px,1fr) minmax(80px,auto) auto;"><div class="tri-check" data-key="gaGuitar" onclick="triClick(this)" title="Mark Guitar complete"></div><strong style="font-size:.76rem;">Guitar</strong><span class="journal-growth-status" id="growthGuitarStatus"></span><button type="button" class="journal-growth-add" onclick="journalOpenGrowthLog('guitar')">Schedule / Log</button></div>
     <div class="journal-growth-pool-card" data-growth-kind="reading" style="grid-template-columns:19px minmax(120px,1fr) minmax(80px,auto) auto;"><div class="tri-check" data-key="gaAudiobook" onclick="triClick(this)" title="Mark Audiobook complete"></div><strong style="font-size:.76rem;">Audiobook</strong><span class="journal-growth-status" id="growthReadingStatus"></span><button type="button" class="journal-growth-add" onclick="journalOpenGrowthLog('reading')">Schedule / Log</button></div>
-    <div style="margin-top:7px;font-size:.64rem;color:#7c6f98;">Choose Schedule / Log to place an activity on My Schedule. Time spent is optional until you complete the activity; completed time appears under Growth / Skills in the Weekly, Monthly and Yearly screens.</div>
+    <div class="journal-growth-help" style="margin-top:7px;font-size:.64rem;color:#7c6f98;">Choose Schedule / Log to place an activity on My Schedule. Time spent is optional until you complete the activity; completed time appears under Growth / Skills in the Weekly, Monthly and Yearly screens.</div>
   </div>
 </details>
 <div class="modal-overlay" id="journalGrowthLogModal" style="display:none;">
@@ -12770,7 +12770,7 @@ function renderJournalSchedule(){
   // existing drag order.
   items.sort(function(a,b){var am=Number(a.mins),bm=Number(b.mins);if(!Number.isFinite(am))am=1440;if(!Number.isFinite(bm))bm=1440;return am-bm;});
   _journalScheduleItemsById={};items.forEach(function(item){_journalScheduleItemsById[item.id]=item;});
-  var financialStatus=document.getElementById('financialVideoScheduleStatus');if(financialStatus)financialStatus.textContent='Use Log to record details and schedule a time';
+  var financialStatus=document.getElementById('financialVideoScheduleStatus');if(financialStatus)financialStatus.textContent='Scheduled activities appear first';
   ['udemy','gun','language','guitar','reading'].forEach(function(kind){var card=document.querySelector('.journal-growth-pool-card[data-growth-kind="'+kind+'"]');if(card)card.style.display='grid';});
   var financialScheduled=localStorage.getItem(journalScheduleGrowthKey('financial',dateKey))==='1';
   var financialGrowthStatus=document.getElementById('growthFinancialStatus');if(financialGrowthStatus)financialGrowthStatus.textContent=(financialMinutes?fmtMinsSeconds(financialMinutes):'No time logged')+(financialScheduled?' • scheduled':'');
@@ -12779,11 +12779,13 @@ function renderJournalSchedule(){
   var languageStatus=document.getElementById('growthLanguageStatus');if(languageStatus)languageStatus.textContent=(languageMinutes?fmtMinsSeconds(languageMinutes):'No time logged')+(localStorage.getItem(journalScheduleGrowthKey('language',dateKey))==='1'?' • scheduled':'');
   var guitarStatus=document.getElementById('growthGuitarStatus');if(guitarStatus)guitarStatus.textContent=(guitarMinutes?fmtMinsSeconds(guitarMinutes):'No time logged')+(localStorage.getItem(journalScheduleGrowthKey('guitar',dateKey))==='1'?' • scheduled':'');
   var readingStatus=document.getElementById('growthReadingStatus');if(readingStatus)readingStatus.textContent=(readingMinutes?fmtMinsSeconds(readingMinutes):'No Library time logged')+(localStorage.getItem(journalScheduleGrowthKey('reading',dateKey))==='1'?' · scheduled':'');
-  // Keep Growth Activities in their original positions. Checking an activity changes
-  // only its completion styling; it must not jump to another position.
+  // Group scheduled activities first while preserving the original order inside each
+  // group. Completion checkmarks only change styling and never move a card.
   var growthPool=document.querySelector('.journal-growth-pool');if(growthPool){
     var growthComplete={financial:d.gaFinancialVideos==='green',udemy:d.gaUdemy==='green',gun:d.gaGunRange==='green',language:d.gaLanguage==='green',guitar:d.gaGuitar==='green',reading:readingMinutes>0||d.gaAudiobook==='green'};
-    growthPool.querySelectorAll('.journal-growth-pool-card').forEach(function(card){card.classList.toggle('completed',!!growthComplete[card.dataset.growthKind]);});
+    var growthCards=Array.from(growthPool.querySelectorAll('.journal-growth-pool-card')),growthHelp=growthPool.querySelector('.journal-growth-help');
+    growthCards.sort(function(a,b){var aScheduled=localStorage.getItem(journalScheduleGrowthKey(a.dataset.growthKind,dateKey))==='1',bScheduled=localStorage.getItem(journalScheduleGrowthKey(b.dataset.growthKind,dateKey))==='1';return Number(bScheduled)-Number(aScheduled);});
+    growthCards.forEach(function(card){card.classList.toggle('completed',!!growthComplete[card.dataset.growthKind]);growthPool.insertBefore(card,growthHelp);});
   }
   var scheduleStatuses=journalScheduleStatuses(dateKey);items.forEach(function(item){var hasManual=Object.prototype.hasOwnProperty.call(scheduleStatuses,item.id),manual=hasManual?scheduleStatuses[item.id]:'';item.scheduleStatus=hasManual?(manual==='blank'?'':manual):(item.done?'green':'');item.done=item.scheduleStatus==='green';});
   var trackable=items.filter(function(item){return !item.fixed;});
