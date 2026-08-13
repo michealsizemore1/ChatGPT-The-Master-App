@@ -145,6 +145,10 @@
   .info-card p{margin:0}
   .privacy{border-left:4px solid #b45a09;background:#fffaf2}
   .backup{border-left:4px solid #2f6fed;background:#f7f9ff}
+  .backup-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:13px}
+  .backup-btn{border:1px solid #2f6fed;border-radius:9px;padding:10px 14px;background:#2f6fed;color:#fff;font:inherit;font-weight:800;cursor:pointer}
+  .backup-btn.secondary{background:#fff;color:#244fad}
+  .backup-status{margin-top:9px;min-height:18px;font-size:12px;font-weight:700;color:#2457bf}
   .updated{margin-top:9px;font-size:11px;color:#9aa1ad;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
   footer{
     text-align:center;
@@ -171,7 +175,7 @@
   <div class="eyebrow">Personal Tools</div>
   <h1>My Life Master App</h1>
   <p>One place for daily planning, budgeting, retirement, Spanish practice, and family-benefit information. Use the small &#8962; button in the bottom-left corner of any tool to return here.</p>
-  <div class="updated">Last updated August 11, 2026</div>
+  <div class="updated">Last updated August 13, 2026</div>
 </header>
 
 <main>
@@ -231,8 +235,14 @@
       <p>This website and its source files are public. Do not place passwords, account numbers, private documents, API secrets, or other sensitive information directly inside the published HTML files. Supabase-connected information is protected by your sign-in and database security rules.</p>
     </section>
     <section class="info-card backup">
-      <h2>Protect your data</h2>
-      <p>Each tool manages its own information. Use the backup or export feature inside every app regularly, and keep the downloaded copies somewhere safe. A GitHub update replaces app files but does not replace a personal data backup.</p>
+      <h2>Back up the entire Master App</h2>
+      <p>Download one backup containing the information saved by all five tools in this browser. Keep the file somewhere safe. Supabase remains a separate online copy.</p>
+      <div class="backup-actions">
+        <button class="backup-btn" type="button" onclick="downloadMasterBackup()">Download Full Backup</button>
+        <button class="backup-btn secondary" type="button" onclick="document.getElementById('masterBackupFile').click()">Restore Full Backup</button>
+        <input id="masterBackupFile" type="file" accept="application/json,.json" hidden onchange="restoreMasterBackup(this)">
+      </div>
+      <div class="backup-status" id="masterBackupStatus" role="status" aria-live="polite"></div>
     </section>
   </div>
 
@@ -242,6 +252,63 @@
 </main>
 
 <footer>My Life Master App &middot; a home for five personal tools</footer>
+
+<script>
+function masterBackupStatus(message,isError){
+  var el=document.getElementById('masterBackupStatus');
+  if(!el)return;
+  el.textContent=message;
+  el.style.color=isError?'#b42318':'#2457bf';
+}
+function downloadMasterBackup(){
+  try{
+    var saved={};
+    for(var i=0;i<localStorage.length;i++){
+      var key=localStorage.key(i);
+      saved[key]=localStorage.getItem(key);
+    }
+    var backup={
+      format:'my-life-master-app-backup',
+      version:1,
+      createdAt:new Date().toISOString(),
+      origin:location.origin,
+      itemCount:Object.keys(saved).length,
+      localStorage:saved
+    };
+    var stamp=new Date().toISOString().slice(0,10);
+    var blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
+    var url=URL.createObjectURL(blob),link=document.createElement('a');
+    link.href=url;link.download='my-life-master-app-backup-'+stamp+'.json';
+    document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);
+    masterBackupStatus('Full backup downloaded: '+backup.itemCount+' saved items.');
+  }catch(error){
+    masterBackupStatus('The backup could not be created. Please try again.',true);
+  }
+}
+function restoreMasterBackup(input){
+  var file=input.files&&input.files[0];
+  if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(){
+    try{
+      var backup=JSON.parse(reader.result);
+      if(!backup||backup.format!=='my-life-master-app-backup'||!backup.localStorage||typeof backup.localStorage!=='object')throw new Error('Invalid backup');
+      var count=Object.keys(backup.localStorage).length;
+      if(!confirm('Restore '+count+' saved items from this Master App backup?\n\nThis will replace matching information currently saved in this browser.')){input.value='';return;}
+      Object.keys(backup.localStorage).forEach(function(key){
+        var value=backup.localStorage[key];
+        if(typeof value==='string')localStorage.setItem(key,value);
+      });
+      masterBackupStatus('Full backup restored. Open an app or refresh it to see the restored information.');
+    }catch(error){
+      masterBackupStatus('That file is not a valid My Life Master App backup.',true);
+    }
+    input.value='';
+  };
+  reader.onerror=function(){masterBackupStatus('The backup file could not be read.',true);input.value='';};
+  reader.readAsText(file);
+}
+</script>
 
 </body>
 </html>
