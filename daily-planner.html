@@ -1386,14 +1386,15 @@ body{
     <div class="journal-growth-pool-card" data-growth-kind="gun" style="grid-template-columns:19px minmax(120px,1fr) minmax(80px,auto) auto;"><div class="tri-check" data-key="gaGunRange" onclick="triClick(this)" title="Mark Gun Range complete"></div><strong style="font-size:.76rem;">Gun Range</strong><span class="journal-growth-status" id="growthGunStatus"></span><button type="button" class="journal-growth-add" onclick="journalOpenGrowthLog('gun')">Log</button></div>
     <div class="journal-growth-pool-card" data-growth-kind="language" style="grid-template-columns:19px minmax(120px,1fr) minmax(80px,auto) auto;"><div class="tri-check" data-key="gaLanguage" onclick="triClick(this)" title="Mark Language Practice complete"></div><strong style="font-size:.76rem;">Language Practice</strong><span class="journal-growth-status" id="growthLanguageStatus"></span><button type="button" class="journal-growth-add" onclick="journalOpenGrowthLog('language')">Log</button></div>
     <div class="journal-growth-pool-card" data-growth-kind="guitar" style="grid-template-columns:19px minmax(120px,1fr) minmax(80px,auto) auto;"><div class="tri-check" data-key="gaGuitar" onclick="triClick(this)" title="Mark Guitar complete"></div><strong style="font-size:.76rem;">Guitar</strong><span class="journal-growth-status" id="growthGuitarStatus"></span><button type="button" class="journal-growth-add" onclick="journalOpenGrowthLog('guitar')">Log</button></div>
-    <div style="margin-top:7px;font-size:.64rem;color:#7c6f98;">Use an activity's Log button to enter its details, date and start time. Logged time appears under Growth / Skills in the Weekly screen.</div>
+    <div class="journal-growth-pool-card" data-growth-kind="reading" style="grid-template-columns:19px minmax(120px,1fr) minmax(80px,auto) auto;"><div class="tri-check" data-key="gaAudiobook" onclick="triClick(this)" title="Mark Audiobook complete"></div><strong style="font-size:.76rem;">Audiobook</strong><span class="journal-growth-status" id="growthReadingStatus"></span><button type="button" class="journal-growth-add" onclick="journalOpenGrowthLog('reading')">Log</button></div>
+    <div style="margin-top:7px;font-size:.64rem;color:#7c6f98;">Use an activity's Log button to enter its details, date and start time. Logged time appears under Growth / Skills in the Weekly, Monthly and Yearly screens.</div>
   </div>
 </details>
 <div class="modal-overlay" id="journalGrowthLogModal" style="display:none;">
   <div class="modal" style="max-width:520px;">
     <div class="journal-growth-header" style="display:flex;justify-content:space-between;align-items:center;gap:10px;"><h2 id="journalGrowthLogTitle" style="margin:0;font-size:1.05rem;">Log Learning &amp; Growth</h2><div style="display:flex;gap:7px;"><button type="button" class="btn-secondary" onclick="journalCloseGrowthLog()">Close</button><button type="button" class="btn-primary" onclick="journalSaveGrowthLog()">Save</button></div></div>
     <div class="lib-form-grid" style="margin-top:14px;">
-      <div><label>Category</label><select id="journalGrowthLogCategory" class="act-input"><option>Financial Videos</option><option>Udemy</option><option>Gun Range</option><option>Language</option><option>Guitar</option></select></div>
+      <div><label>Category</label><select id="journalGrowthLogCategory" class="act-input"><option>Financial Videos</option><option>Udemy</option><option>Gun Range</option><option>Language</option><option>Guitar</option><option>Reading / Audiobook</option></select></div>
       <div><label>Time Spent (M:SS)</label><input id="journalGrowthLogTime" class="act-input" placeholder="12:49 or 45 min" title="Use minutes:seconds, such as 12:49, or enter whole minutes."></div>
       <div><label>Scheduled Date</label><input type="date" id="journalGrowthLogDate" class="act-input"></div>
       <div><label>Start Time</label><input type="time" id="journalGrowthLogStartTime" class="act-input"></div>
@@ -1791,13 +1792,8 @@ body{
 
 <div id="tab-library" class="tab-panel"><div class="panel">
   <div id="libraryChartsGrid" class="dash-grid" style="padding:0 0 16px;"></div>
-  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-    <div class="tri-check" data-key="gaAudiobook" onclick="triClick(this)" title="Mark today's Reading / Audiobook complete"></div>
-    <h2 style="margin:0;font-size:1.1rem;color:#667eea;">&#x1F4DA; Audiobook Library</h2>
-  </div>
   <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
-    <label for="gaAudiobookTime" style="font-size:0.85rem;font-weight:600;color:#555;white-space:nowrap;">&#x23F1; Reading/Listening Time:</label>
-    <input type="text" id="gaAudiobookTime" inputmode="text" placeholder="45 min or 1h 30m" title="Enter minutes with a unit, for example 45 min or 1h 30m" style="flex:1;max-width:220px;border:1px solid #e9ecef;border-radius:6px;padding:6px 10px;font-size:0.85rem;">
+    <h2 style="margin:0;font-size:1.1rem;color:#667eea;">&#x1F4DA; Audiobook Library</h2>
   </div>
   <div style="border:1px solid #cfd5ff;background:#f8f9ff;border-radius:10px;margin-bottom:14px;overflow:hidden;">
     <div onclick="toggleAudiobookFinishPlanner()" style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;cursor:pointer;color:#4f46a5;font-size:0.84rem;font-weight:700;">
@@ -3738,7 +3734,7 @@ function load(){
 function attachListeners(){
   const rc=document.getElementById('reviewCheck');if(rc)rc.onchange=save;
   const pjc=document.getElementById('prepJournalCheck');if(pjc)pjc.onchange=save;
-  TXS.forEach(id=>{const e=document.getElementById(id);if(e)e.oninput=save;});
+  TXS.forEach(id=>{const e=document.getElementById(id);if(e)e.oninput=function(){save();if(id==='gaAudiobookTime')renderJournalSchedule();};});
   NMS.forEach(id=>{const e=document.getElementById(id);if(e)e.oninput=function(){if(id==='exMassageMinutes'){syncMassageMinutes('activities');return;}save();if(id==='exSteps')renderDailyCheckOverview();if(id==='gaFinancialVideosTime')renderJournalSchedule();};});
   PTIDS.forEach(id=>{const row=document.getElementById(id);if(row){const tx=row.querySelector('input[type=text]');if(tx)tx.oninput=save;}});
   const jc=document.getElementById('jCombined');if(jc)jc.oninput=function(){syncJournalCombinedToFields();save();};
@@ -4407,11 +4403,12 @@ function renderWeeklyDigest(days,tot,wDayKeys,lbls){
 }
 function renderWeekly(){const ws=wkStart(weekOff2),days=[],lbls=[];for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);const r=localStorage.getItem('planner_'+dk(d));var _dk=dk(d);days.push(r?getDM(JSON.parse(r),_dk):{miles:0,pace:0,watts:0,time:0,steps:0,score:0,weight:0,sleep:0,sleepScore:0,calories:0,water:0,audiobook:0,bpSys:0,bpDia:0,pulse:0,dogWalk:0,headache:0});lbls.push(d.toLocaleDateString('en-US',{weekday:'short',month:'numeric',day:'numeric'}));}const we=new Date(ws);we.setDate(ws.getDate()+6);document.getElementById('weekLabel').textContent=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' - '+we.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});const tot=agg(days);document.getElementById('wDayScore').innerHTML=mkT(dsH,days.map((m,i)=>dsRow(lbls[i],m)),dsRow('AVG',tot,true));document.getElementById('wGrowth').innerHTML=mkT(gH,days.map((m,i)=>gRow(lbls[i],m)),gRow('TOTAL',tot,true));document.getElementById('wFitness').innerHTML=mkT(fH,days.map((m,i)=>fRow(lbls[i],m)),fRow('TOTAL/AVG',tot,true));document.getElementById('wWellness').innerHTML=mkT(wH,days.map((m,i)=>wRow(lbls[i],m)),wRow('TOTAL/AVG',tot,true));
   renderWeeklyGrowthTable(ws,we,days,lbls);
+  renderGrowthActivityReport('wGrowth',lbls.map(function(label,i){var d=new Date(ws);d.setDate(ws.getDate()+i);return{label:label,start:dk(d),end:dk(d)};}));
   const wDayKeys=[];for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);wDayKeys.push(dk(d));}renderNutritionSpirit(wDayKeys,lbls,'wNutrition','wSpirituality','wNutritionMicro');}
 function changeWeekOff(n){weekOff2+=n;renderWeekly();renderGoals();}
 let monthOff2=0;
 function renderMonthly(){const now=new Date(),ref=new Date(now.getFullYear(),now.getMonth()+monthOff2,1);const yr=ref.getFullYear(),mo=ref.getMonth(),dim=new Date(yr,mo+1,0).getDate();const wmap={};for(let d=1;d<=dim;d++){const dt=new Date(yr,mo,d);const ws=wkStartOf(dt);const k=dk(ws);if(!wmap[k])wmap[k]={ws,ms:[]};const r=localStorage.getItem('planner_'+dk(dt));if(r)wmap[k].ms.push(getDM(JSON.parse(r),dk(dt)));}document.getElementById('monthLabel').textContent=ref.toLocaleDateString('en-US',{month:'long',year:'numeric'});const wks=Object.values(wmap).sort((a,b)=>a.ws-b.ws),allM=[],gR=[],fR=[],wR=[],dsR=[];wks.forEach(({ws,ms})=>{const we=new Date(ws);we.setDate(ws.getDate()+6);const lb=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+'-'+we.toLocaleDateString('en-US',{day:'numeric'});const a=agg(ms);allM.push(...ms);gR.push(gRow('Wk '+lb,a));fR.push(fRow('Wk '+lb,a));wR.push(wRow('Wk '+lb,a));dsR.push(dsRow('Wk '+lb,a));});const tot=agg(allM);document.getElementById('mDayScore').innerHTML=mkT(dsH,dsR,dsRow('AVG',tot,true));document.getElementById('mGrowth').innerHTML=mkT(gH,gR,gRow('TOTAL',tot,true));document.getElementById('mFitness').innerHTML=mkT(fH,fR,fRow('TOTAL/AVG',tot,true));document.getElementById('mWellness').innerHTML=mkT(wH,wR,wRow('TOTAL/AVG',tot,true));
-  const mWkKeys=[],mWkLbls=[];wks.forEach(({ws,ms})=>{const we=new Date(ws);we.setDate(ws.getDate()+6);const lb=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+'-'+we.toLocaleDateString('en-US',{day:'numeric'});const keys=[];for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);keys.push(dk(d));}mWkKeys.push(keys);mWkLbls.push('Wk '+lb);});renderNutritionSpirit(mWkKeys,mWkLbls,'mNutrition','mSpirituality','mNutritionMicro');
+  const mWkKeys=[],mWkLbls=[],mGrowthPeriods=[],monthStartKey=dk(new Date(yr,mo,1)),monthEndKey=dk(new Date(yr,mo,dim));wks.forEach(({ws,ms})=>{const we=new Date(ws);we.setDate(ws.getDate()+6);const lb=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+'-'+we.toLocaleDateString('en-US',{day:'numeric'});const keys=[];for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);keys.push(dk(d));}mWkKeys.push(keys);mWkLbls.push('Wk '+lb);mGrowthPeriods.push({label:'Wk '+lb,start:dk(ws)<monthStartKey?monthStartKey:dk(ws),end:dk(we)>monthEndKey?monthEndKey:dk(we)});});renderGrowthActivityReport('mGrowth',mGrowthPeriods);renderNutritionSpirit(mWkKeys,mWkLbls,'mNutrition','mSpirituality','mNutritionMicro');
   // Render heatmap
   const hmGrid=document.getElementById('hmGrid');
   const hmMonth=document.getElementById('hmMonth');
@@ -4449,8 +4446,8 @@ let yearOff2=0;
 function renderYearly(){const yr=new Date().getFullYear()+yearOff2;document.getElementById('yearLabel').textContent=yr;const mns=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],allM=[],gR=[],fR=[],wR=[],dsR=[];mns.forEach((mn,mi)=>{const dim=new Date(yr,mi+1,0).getDate(),ms=[];for(let d=1;d<=dim;d++){const dt=new Date(yr,mi,d);const r=localStorage.getItem('planner_'+dk(dt));if(r)ms.push(getDM(JSON.parse(r)));}allM.push(...ms);const a=agg(ms);gR.push(gRow(mn,a));fR.push(fRow(mn,a));wR.push(wRow(mn,a));dsR.push(dsRow(mn,a));});const tot=agg(allM);document.getElementById('yDayScore').innerHTML=mkT(dsH,dsR,dsRow('AVG',tot,true));document.getElementById('yGrowth').innerHTML=mkT(gH,gR,gRow('TOTAL',tot,true));document.getElementById('yFitness').innerHTML=mkT(fH,fR,fRow('TOTAL/AVG',tot,true));document.getElementById('yWellness').innerHTML=mkT(wH,wR,wRow('TOTAL/AVG',tot,true));
   const yr2=new Date().getFullYear()+yearOff2;
   const yMoKeys=[],yMoLbls=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  for(let mi=0;mi<12;mi++){const dim=new Date(yr2,mi+1,0).getDate();const keys=[];for(let d=1;d<=dim;d++)keys.push(dk(new Date(yr2,mi,d)));yMoKeys.push(keys);}
-  renderNutritionSpirit(yMoKeys,yMoLbls,'yNutrition','ySpirituality','yNutritionMicro');}
+  const yGrowthPeriods=[];for(let mi=0;mi<12;mi++){const dim=new Date(yr2,mi+1,0).getDate();const keys=[];for(let d=1;d<=dim;d++)keys.push(dk(new Date(yr2,mi,d)));yMoKeys.push(keys);yGrowthPeriods.push({label:yMoLbls[mi],start:dk(new Date(yr2,mi,1)),end:dk(new Date(yr2,mi,dim))});}
+  renderGrowthActivityReport('yGrowth',yGrowthPeriods);renderNutritionSpirit(yMoKeys,yMoLbls,'yNutrition','ySpirituality','yNutritionMicro');}
 function changeYearOff(n){yearOff2+=n;renderYearly();}
 let dashOff2=0;
 function renderDashboard(){
@@ -10230,6 +10227,15 @@ function meditInitTab(){
 }
 /* ========= END MEDITATION JS ========= */
 
+function renderGrowthActivityReport(hostId,periods){
+  var host=document.getElementById(hostId);if(!host)return;
+  var entries=getSkillEntries(),specs=[['financial','Financial Videos'],['udemy','Udemy'],['gun','Gun Range'],['language','Language'],['guitar','Guitar'],['reading','Reading / Audiobook']];
+  function kind(entry){var cat=String(entry&&entry.category||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();if(cat==='financial videos'||cat==='retirement videos')return'financial';if(cat==='udemy')return'udemy';if(cat==='gun range'||cat==='shooting')return'gun';if(cat==='language'||cat==='spanish'||cat==='language learning')return'language';if(cat==='guitar')return'guitar';if(cat==='reading audiobook'||cat==='reading'||cat==='audiobook')return'reading';return'';}
+  function totals(period){var latest={};entries.forEach(function(entry){if(!entry||!entry.date||entry.date<period.start||entry.date>period.end)return;var k=kind(entry);if(k)latest[entry.date+'|'+k]=entry;});var out={};Object.keys(latest).forEach(function(key){var k=kind(latest[key]);out[k]=(out[k]||0)+parseSkillTimeMins(latest[key].time);});return out;}
+  var grand={},rows=periods.map(function(period){var values=totals(period);specs.forEach(function(spec){grand[spec[0]]=(grand[spec[0]]||0)+(values[spec[0]]||0);});return'<tr><td>'+escHtml(period.label)+'</td>'+specs.map(function(spec){return'<td>'+((values[spec[0]]||0)?fmtMinsSeconds(values[spec[0]]):'-')+'</td>';}).join('')+'</tr>';});
+  rows.push('<tr style="background:#f8f9fa;font-weight:700"><td>TOTAL</td>'+specs.map(function(spec){return'<td>'+((grand[spec[0]]||0)?fmtMinsSeconds(grand[spec[0]]):'-')+'</td>';}).join('')+'</tr>');
+  host.innerHTML='<table class="summary-table"><thead><tr><th>Period</th>'+specs.map(function(spec){return'<th>'+spec[1]+'</th>';}).join('')+'</tr></thead><tbody>'+rows.join('')+'</tbody></table>';
+}
 function renderWeeklyGrowthTable(start,end,days,labels){
   var host=document.getElementById('wGrowth');if(!host)return;
   removeObsoleteQuickGrowthEntries();
@@ -12547,16 +12553,16 @@ function journalScheduleGrowthId(kind){return{financial:'schedule-financial-vide
 var _journalGrowthLogKind='';
 function journalOpenGrowthLog(kind){
   _journalGrowthLogKind=kind;var modal=document.getElementById('journalGrowthLogModal');if(!modal)return;
-  var names={financial:'Financial Videos',language:'Language',udemy:'Udemy',gun:'Gun Range',guitar:'Guitar'},categories={financial:'Financial Videos',language:'Language',udemy:'Udemy',gun:'Gun Range',guitar:'Guitar'},startTimes={financial:'18:30',udemy:'19:00',gun:'19:00',language:'12:45',guitar:'19:00'};
+  var names={financial:'Financial Videos',language:'Language',udemy:'Udemy',gun:'Gun Range',guitar:'Guitar',reading:'Audiobook'},categories={financial:'Financial Videos',language:'Language',udemy:'Udemy',gun:'Gun Range',guitar:'Guitar',reading:'Reading / Audiobook'},startTimes={financial:'18:30',udemy:'19:00',gun:'19:00',language:'12:45',guitar:'19:00',reading:'19:30'};
   document.getElementById('journalGrowthLogTitle').textContent='Log '+(names[kind]||'Growth / Skill');
-  document.getElementById('journalGrowthLogCategory').value=categories[kind]||'Udemy';document.getElementById('journalGrowthLogTime').value='';document.getElementById('journalGrowthLogDate').value=dk(today);document.getElementById('journalGrowthLogStartTime').value=startTimes[kind]||'19:00';document.getElementById('journalGrowthLogName').value='';document.getElementById('journalGrowthLogResource').value=kind==='udemy'?'Udemy':'';document.getElementById('journalGrowthLogLink').value='';document.getElementById('journalGrowthLogNotes').value='';modal.style.display='flex';
+  document.getElementById('journalGrowthLogCategory').value=categories[kind]||'Udemy';document.getElementById('journalGrowthLogTime').value='';document.getElementById('journalGrowthLogDate').value=dk(today);document.getElementById('journalGrowthLogStartTime').value=startTimes[kind]||'19:00';document.getElementById('journalGrowthLogName').value='';document.getElementById('journalGrowthLogResource').value=kind==='udemy'?'Udemy':kind==='reading'?'Audiobook':'';document.getElementById('journalGrowthLogLink').value='';document.getElementById('journalGrowthLogNotes').value='';modal.style.display='flex';
 }
 function journalCloseGrowthLog(){var modal=document.getElementById('journalGrowthLogModal');if(modal)modal.style.display='none';_journalGrowthLogKind='';}
 function journalSaveGrowthLog(){
   var name=(document.getElementById('journalGrowthLogName').value||'').trim(),time=(document.getElementById('journalGrowthLogTime').value||'').trim();if(!name){alert('Please enter the topic or course.');return;}if(!time){alert('Please enter the time spent.');return;}
   var scheduledDate=document.getElementById('journalGrowthLogDate').value,startTime=document.getElementById('journalGrowthLogStartTime').value;if(!scheduledDate){alert('Please choose the scheduled date.');return;}if(!startTime){alert('Please choose the start time.');return;}var startMins=journalScheduleParseTime(startTime);if(startMins===null){alert('Please choose a valid start time.');return;}
   var rawLink=(document.getElementById('journalGrowthLogLink').value||'').trim(),link=skillSafeLink(rawLink);if(rawLink&&!link){alert('Please enter a valid website link.');return;}
-  var category=document.getElementById('journalGrowthLogCategory').value||'Udemy',kindByCategory={'Financial Videos':'financial','Udemy':'udemy','Gun Range':'gun','Language':'language','Guitar':'guitar'},kind=kindByCategory[category]||'udemy';
+  var category=document.getElementById('journalGrowthLogCategory').value||'Udemy',kindByCategory={'Financial Videos':'financial','Udemy':'udemy','Gun Range':'gun','Language':'language','Guitar':'guitar','Reading / Audiobook':'reading'},kind=kindByCategory[category]||'udemy';
   var entries=getSkillEntries();entries.push({id:'sk_'+Date.now(),date:scheduledDate,scheduledDate:scheduledDate,startTime:startTime,category:category,name:name,time:time,resource:(document.getElementById('journalGrowthLogResource').value||'').trim(),link:link,notes:(document.getElementById('journalGrowthLogNotes').value||'').trim()});saveSkillEntries(entries);
   localStorage.setItem(journalScheduleGrowthKey(kind,scheduledDate),'1');var scheduleId=journalScheduleGrowthId(kind),overrides={};try{overrides=JSON.parse(localStorage.getItem(journalScheduleOverridesKey(scheduledDate))||'{}');}catch(ignore){}overrides[scheduleId]={time:journalMinsToClock(startMins),mins:startMins};localStorage.setItem(journalScheduleOverridesKey(scheduledDate),JSON.stringify(overrides));
   journalCloseGrowthLog();renderSkillLog();renderSkillSectionCharts();renderJournalSchedule();var weekly=document.getElementById('tab-weekly');if(weekly&&weekly.classList.contains('active'))renderWeekly();v26Toast('Growth activity saved and scheduled for '+scheduledDate);
@@ -12626,7 +12632,7 @@ function journalScheduleCopyDay(event){
   var sourceManual=journalManualScheduleItems().filter(function(item){return item.date===sourceDate;}),allManual=journalManualScheduleItems(),stamp=Date.now();
   sourceManual.forEach(function(item,index){allManual.push({id:'manual-'+stamp+'-'+index,date:targetDate,time:item.time,mins:Number(item.mins),title:item.title,note:item.note||''});});
   localStorage.setItem('journal_manual_schedule_items',JSON.stringify(allManual));
-  ['financial','udemy','gun','language','guitar'].forEach(function(kind){if(localStorage.getItem(journalScheduleGrowthKey(kind,sourceDate))==='1')localStorage.setItem(journalScheduleGrowthKey(kind,targetDate),'1');});
+  ['financial','udemy','gun','language','guitar','reading'].forEach(function(kind){if(localStorage.getItem(journalScheduleGrowthKey(kind,sourceDate))==='1')localStorage.setItem(journalScheduleGrowthKey(kind,targetDate),'1');});
   ['journal_schedule_order_','journal_schedule_overrides_','journal_schedule_hidden_'].forEach(function(prefix){var value=localStorage.getItem(prefix+sourceDate);if(value!=null)localStorage.setItem(prefix+targetDate,value);});
   v26Toast('Entire schedule copied to '+targetDate);
 }
@@ -12681,7 +12687,8 @@ function renderJournalSchedule(){
   var gunEntries=getSkillEntries().filter(function(entry){return entry.date===dateKey&&/^(gun range|shooting)$/i.test(String(entry.category||''));});
   var financialEntries=getSkillEntries().filter(function(entry){return entry.date===dateKey&&(/^(financial videos|retirement videos)$/i.test(String(entry.category||''))||/financial video|retirement video/i.test([entry.name,entry.resource,entry.notes].filter(Boolean).join(' ')));});
   var guitarEntries=getSkillEntries().filter(function(entry){return entry.date===dateKey&&/^guitar$/i.test(String(entry.category||''));});
-  var udemyMinutes=udemyEntries.reduce(function(total,entry){return total+parseSkillTimeMins(entry.time);},0),gunMinutes=gunEntries.reduce(function(total,entry){return total+parseSkillTimeMins(entry.time);},0),languageMinutes=languageEntries.reduce(function(total,entry){return total+parseSkillTimeMins(entry.time);},0),guitarMinutes=guitarEntries.reduce(function(total,entry){return total+parseSkillTimeMins(entry.time);},0),financialMinutes=financialEntries.reduce(function(total,entry){return total+parseSkillTimeMins(entry.time);},0),readingMinutes=parseTimedMins(d.gaAudiobookTime);
+  var readingEntries=getSkillEntries().filter(function(entry){return entry.date===dateKey&&/^(reading \/ audiobook|reading|audiobook)$/i.test(String(entry.category||''));});
+  var udemyMinutes=udemyEntries.length?parseSkillTimeMins(udemyEntries[udemyEntries.length-1].time):0,gunMinutes=gunEntries.reduce(function(total,entry){return total+parseSkillTimeMins(entry.time);},0),languageMinutes=languageEntries.reduce(function(total,entry){return total+parseSkillTimeMins(entry.time);},0),guitarMinutes=guitarEntries.reduce(function(total,entry){return total+parseSkillTimeMins(entry.time);},0),financialMinutes=financialEntries.reduce(function(total,entry){return total+parseSkillTimeMins(entry.time);},0),readingMinutes=readingEntries.length?parseSkillTimeMins(readingEntries[readingEntries.length-1].time):0;
   var now=new Date(),isSelectedToday=dk(now)===dateKey,currentMinutes=now.getHours()*60+now.getMinutes(),selectedDay=new Date(dateKey+'T00:00:00'),realDay=new Date(now.getFullYear(),now.getMonth(),now.getDate()),isPastDay=selectedDay<realDay;
   function mealLogged(meal){
     meal=String(meal||'').toLowerCase();
@@ -12732,6 +12739,7 @@ function renderJournalSchedule(){
   if(localStorage.getItem(journalScheduleGrowthKey('gun',dateKey))==='1')items.push({time:'7:00 PM',mins:1140,label:'Gun Range',detail:gunMinutes?fmtMinsSeconds(gunMinutes)+' logged':'Log range time and takeaways',done:d.gaGunRange==='green',tab:'skill-log',growthKind:'gun'});
   if(localStorage.getItem(journalScheduleGrowthKey('language',dateKey))==='1')items.push({time:'12:45 PM',mins:765,label:'Language Practice',detail:languageMinutes?fmtMinsSeconds(languageMinutes)+' logged':'Tap to log the language session',done:d.gaLanguage==='green',tab:'skill-log',growthKind:'language'});
   if(localStorage.getItem(journalScheduleGrowthKey('guitar',dateKey))==='1')items.push({time:'7:00 PM',mins:1140,label:'Guitar',detail:guitarMinutes?fmtMinsSeconds(guitarMinutes)+' logged':'Tap to log guitar practice',done:d.gaGuitar==='green',tab:'skill-log',growthKind:'guitar'});
+  if(localStorage.getItem(journalScheduleGrowthKey('reading',dateKey))==='1')items.push({time:'7:30 PM',mins:1170,label:'Audiobook',detail:readingMinutes?fmtMinsSeconds(readingMinutes)+' logged in Library':'Enter reading/listening time in Library',done:readingMinutes>0||d.gaAudiobook==='green',tab:'library',growthKind:'reading'});
   journalManualScheduleItems().filter(function(entry){return entry.date===dateKey;}).forEach(function(entry){items.push({id:'schedule-'+entry.id,time:entry.time,mins:Number(entry.mins),label:entry.title,detail:entry.note||'Manual schedule item',done:localStorage.getItem('schedule_manualSchedule_'+entry.id+'_'+dateKey)==='1',tab:'daily',manual:'manualSchedule_'+entry.id,manualCreated:true,manualItemId:entry.id});});
   items.forEach(function(item,index){if(!item.id)item.id='schedule-'+String(item.label||index).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');});
   var hiddenSchedule=[];try{hiddenSchedule=JSON.parse(localStorage.getItem(journalScheduleHiddenKey(dateKey))||'[]');}catch(ignoreHidden){}if(Array.isArray(hiddenSchedule)&&hiddenSchedule.length)items=items.filter(function(item){return hiddenSchedule.indexOf(item.id)===-1;});
@@ -12749,17 +12757,18 @@ function renderJournalSchedule(){
   items.sort(function(a,b){var am=Number(a.mins),bm=Number(b.mins);if(!Number.isFinite(am))am=1440;if(!Number.isFinite(bm))bm=1440;return am-bm;});
   _journalScheduleItemsById={};items.forEach(function(item){_journalScheduleItemsById[item.id]=item;});
   var financialStatus=document.getElementById('financialVideoScheduleStatus');if(financialStatus)financialStatus.textContent='Use Log to record details and schedule a time';
-  ['udemy','gun','language','guitar'].forEach(function(kind){var card=document.querySelector('.journal-growth-pool-card[data-growth-kind="'+kind+'"]');if(card)card.style.display='grid';});
+  ['udemy','gun','language','guitar','reading'].forEach(function(kind){var card=document.querySelector('.journal-growth-pool-card[data-growth-kind="'+kind+'"]');if(card)card.style.display='grid';});
   var financialScheduled=localStorage.getItem(journalScheduleGrowthKey('financial',dateKey))==='1';
   var financialGrowthStatus=document.getElementById('growthFinancialStatus');if(financialGrowthStatus)financialGrowthStatus.textContent=(financialMinutes?fmtMinsSeconds(financialMinutes):'No time logged')+(financialScheduled?' • scheduled':'');
   var udemyStatus=document.getElementById('growthUdemyStatus');if(udemyStatus)udemyStatus.textContent=(udemyMinutes?fmtMinsSeconds(udemyMinutes):'No time logged')+(localStorage.getItem(journalScheduleGrowthKey('udemy',dateKey))==='1'?' • scheduled':'');
   var gunStatus=document.getElementById('growthGunStatus');if(gunStatus)gunStatus.textContent=(gunMinutes?fmtMinsSeconds(gunMinutes):'No time logged')+(localStorage.getItem(journalScheduleGrowthKey('gun',dateKey))==='1'?' • scheduled':'');
   var languageStatus=document.getElementById('growthLanguageStatus');if(languageStatus)languageStatus.textContent=(languageMinutes?fmtMinsSeconds(languageMinutes):'No time logged')+(localStorage.getItem(journalScheduleGrowthKey('language',dateKey))==='1'?' • scheduled':'');
   var guitarStatus=document.getElementById('growthGuitarStatus');if(guitarStatus)guitarStatus.textContent=(guitarMinutes?fmtMinsSeconds(guitarMinutes):'No time logged')+(localStorage.getItem(journalScheduleGrowthKey('guitar',dateKey))==='1'?' • scheduled':'');
+  var readingStatus=document.getElementById('growthReadingStatus');if(readingStatus)readingStatus.textContent=(readingMinutes?fmtMinsSeconds(readingMinutes):'No Library time logged')+(localStorage.getItem(journalScheduleGrowthKey('reading',dateKey))==='1'?' · scheduled':'');
   // Keep Growth Activities in their original positions. Checking an activity changes
   // only its completion styling; it must not jump to another position.
   var growthPool=document.querySelector('.journal-growth-pool');if(growthPool){
-    var growthComplete={financial:d.gaFinancialVideos==='green',udemy:d.gaUdemy==='green',gun:d.gaGunRange==='green',language:d.gaLanguage==='green',guitar:d.gaGuitar==='green'};
+    var growthComplete={financial:d.gaFinancialVideos==='green',udemy:d.gaUdemy==='green',gun:d.gaGunRange==='green',language:d.gaLanguage==='green',guitar:d.gaGuitar==='green',reading:readingMinutes>0||d.gaAudiobook==='green'};
     growthPool.querySelectorAll('.journal-growth-pool-card').forEach(function(card){card.classList.toggle('completed',!!growthComplete[card.dataset.growthKind]);});
   }
   var trackable=items.filter(function(item){return !item.fixed;});
