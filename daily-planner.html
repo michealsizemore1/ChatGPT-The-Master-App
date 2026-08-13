@@ -12733,7 +12733,7 @@ function renderJournalSchedule(){
   var stretchMins=trainingMinsEstimate>15?(trainingStartMins+trainingMinsEstimate):405;
   var breakfastMins=Math.min(660,Math.max(465,stretchMins+25));
   var items=[
-    {time:'5:30 AM',mins:330,label:'Review priorities, goals, calendar and email',detail:'Check complete after your morning review',done:!!d.reviewCheck,tab:'daily',checkId:'reviewCheck'},
+    {time:'5:30 AM',mins:330,label:'Review priorities, goals, calendar, email and schedule',detail:'Check complete after your morning review',done:!!d.reviewCheck,tab:'daily',checkId:'reviewCheck'},
     {time:'5:30 AM',mins:330,label:'Meditation',detail:'Begin the day with meditation and stillness',done:d.spMeditation==='green',tab:'meditate'},
     {time:'5:30 AM',mins:330,label:'Wellness check and water',detail:wellnessRecorded+' of 5 wellness items recorded',done:wellnessRecorded===5,tab:'wellness',detailKind:'wellness'},
     {time:'5:45 AM',mins:345,label:'Bible reading and prayer',detail:faithDone+' of 3 faith practices complete',done:faithDone===3,tab:'bible',detailKind:'faith'},
