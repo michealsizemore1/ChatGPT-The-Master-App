@@ -3038,7 +3038,7 @@ function triClick(el){
   save();
   updateCompactSectionCounts();
   renderDailyCheckOverview();
-  if(['gaFinancialVideos','gaAudiobook','gaUdemy','gaGunRange','gaLanguage'].indexOf(key)!==-1)renderJournalSchedule();
+  if(['gaFinancialVideos','gaAudiobook','gaUdemy','gaGunRange','gaLanguage','gaGuitar','wBP','wMeds','wWght','wSleep','wHeadache'].indexOf(key)!==-1)renderJournalSchedule();
   const wt=document.getElementById('tab-weekly');
   if(wt&&wt.classList.contains('active'))try{renderWeekly();}catch(e){}
 }
@@ -12717,7 +12717,7 @@ function renderJournalSchedule(){
     return scheduledTimeReached&&mealLogged(meal);
   }
   var reflected=['jAccomplish','jImprov','jGratitude','jNotes'].some(function(key){return String(d[key]||'').trim();}),sleepRoutine=journalSleepRoutineState(dateKey);
-  var wellnessKeys=['wBP','wMeds','wWght','wSleep','wHeadache'],wellnessRecorded=wellnessKeys.filter(function(key){return journalCheckRecorded(d,key);}).length;
+  var wellnessKeys=['wBP','wMeds','wWght','wSleep','wHeadache'],wellnessRecorded=wellnessKeys.filter(function(key){return journalCheckState(d,key)==='green';}).length;
   var faithKeys=['spDailyBread','spBibleAudio','spAIPrayer'],faithDone=faithKeys.filter(function(key){return journalCheckState(d,key)==='green';}).length;
   var loggedRun=(getActivities()||[]).some(function(activity){return activity&&activity.date===dateKey&&/run/i.test([activity.type,activity.title].filter(Boolean).join(' '));});
   var noTraining=!String(training||'').trim(),restDay=noTraining||/rest day|no workout scheduled/i.test(training),activityDone=loggedRun||restDay;
@@ -12735,7 +12735,7 @@ function renderJournalSchedule(){
   var items=[
     {time:'5:30 AM',mins:330,label:'Review priorities, goals, calendar, email and schedule',detail:'Check complete after your morning review',done:!!d.reviewCheck,tab:'daily',checkId:'reviewCheck'},
     {time:'5:30 AM',mins:330,label:'Meditation',detail:'Begin the day with meditation and stillness',done:d.spMeditation==='green',tab:'meditate'},
-    {time:'5:30 AM',mins:330,label:'Wellness check and water',detail:wellnessRecorded+' of 5 wellness items recorded',done:wellnessRecorded===5,tab:'wellness',detailKind:'wellness'},
+    {time:'5:30 AM',mins:330,label:'Wellness check and water',detail:wellnessRecorded+' of 5 wellness items complete',done:wellnessRecorded===5,tab:'wellness',detailKind:'wellness'},
     {time:'5:45 AM',mins:345,label:'Bible reading and prayer',detail:faithDone+' of 3 faith practices complete',done:faithDone===3,tab:'bible',detailKind:'faith'},
     {time:journalMinsToClock(trainingStartMins),mins:trainingStartMins,label:restDay?'Rest day — no training scheduled':'Today’s training',detail:restDay?'Automatically complete because no workout is scheduled':training,done:activityDone,tab:'activities'},
     {time:journalMinsToClock(stretchMins),mins:stretchMins,label:'Stretching',detail:'Keep muscles loose and prevent injury',done:d.exStretch==='green',tab:'activities'},
