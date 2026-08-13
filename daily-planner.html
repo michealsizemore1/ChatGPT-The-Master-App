@@ -12615,7 +12615,7 @@ function journalScheduleCopyItem(event,id){
   if(item.growthKind){
     localStorage.setItem(journalScheduleGrowthKey(item.growthKind,targetDate),'1');
     var growthOverrides={};try{growthOverrides=JSON.parse(localStorage.getItem(journalScheduleOverridesKey(targetDate))||'{}');}catch(ignore){}
-    growthOverrides[journalScheduleGrowthId(item.growthKind)]={time:item.time,mins:Number(item.mins)};localStorage.setItem(journalScheduleOverridesKey(targetDate),JSON.stringify(growthOverrides));
+    growthOverrides[journalScheduleGrowthId(item.growthKind)]={time:item.time,mins:Number(item.mins),label:item.label,detail:item.detail};localStorage.setItem(journalScheduleOverridesKey(targetDate),JSON.stringify(growthOverrides));
   }else{
     var copies=journalManualScheduleItems();copies.push({id:'manual-'+Date.now(),date:targetDate,time:item.time,mins:Number(item.mins),title:item.label,note:item.detail||'Copied schedule item'});localStorage.setItem('journal_manual_schedule_items',JSON.stringify(copies));
   }
@@ -12632,12 +12632,17 @@ function journalScheduleCopyDay(event){
 }
 function journalScheduleEdit(event,id){
   event.preventDefault();event.stopPropagation();_journalScheduleSuppressClick=Date.now()+600;var item=_journalScheduleItemsById[id];if(!item)return;
+  var editedLabel=item.label,editedDetail=item.detail;
+  if(item.growthKind){
+    editedLabel=prompt('Edit the event name. It will remain connected to '+item.label+'.',item.label);if(editedLabel===null)return;editedLabel=String(editedLabel).trim();if(!editedLabel){alert('Please enter an event name.');return;}
+    editedDetail=prompt('Edit the event details or notes.',item.detail||'');if(editedDetail===null)return;editedDetail=String(editedDetail).trim();
+  }
   var enteredTime=prompt('Set the time for "'+item.label+'". Use 6:30 PM or 18:30.',item.time);if(enteredTime===null)return;var mins=journalScheduleParseTime(enteredTime);if(mins===null){alert('Please enter a valid time, such as 6:30 PM or 18:30.');return;}
   var currentDate=dk(today),tomorrow=new Date(today);tomorrow.setDate(tomorrow.getDate()+1);var targetDate=prompt('Keep '+currentDate+' or enter another date as YYYY-MM-DD.\nTomorrow is '+dk(tomorrow)+'.',currentDate);if(targetDate===null)return;targetDate=String(targetDate).trim();if(!/^\d{4}-\d{2}-\d{2}$/.test(targetDate)||isNaN(new Date(targetDate+'T12:00:00').getTime())){alert('Please enter a valid date in YYYY-MM-DD format.');return;}
-  if(item._moveId){var existingMoves=journalScheduleMoves(),existing=existingMoves.find(function(move){return move.id===item._moveId;});if(existing){existing.targetDate=targetDate;existing.time=journalMinsToClock(mins);existing.mins=mins;localStorage.setItem('journal_schedule_moves',JSON.stringify(existingMoves));}}
-  else if(targetDate!==currentDate){var moves=journalScheduleMoves();moves.push({id:'moved-'+Date.now()+'-'+item.id,sourceDate:currentDate,targetDate:targetDate,originalId:item.id,time:journalMinsToClock(mins),mins:mins,item:{label:item.label,detail:item.detail,tab:item.tab,fixed:!!item.fixed,manual:item.manual||'',sleepRoutineChecklist:!!item.sleepRoutineChecklist,detailKind:item.detailKind||'',growthKind:item.growthKind||'',manualCreated:!!item.manualCreated,manualItemId:item.manualItemId||''}});localStorage.setItem('journal_schedule_moves',JSON.stringify(moves));}
-  else{var overrides={};try{overrides=JSON.parse(localStorage.getItem(journalScheduleOverridesKey(currentDate))||'{}');}catch(ignore){}overrides[item.id]={time:journalMinsToClock(mins),mins:mins};localStorage.setItem(journalScheduleOverridesKey(currentDate),JSON.stringify(overrides));}
-  renderJournalSchedule();v26Toast(targetDate===currentDate?'Schedule time updated':'Moved to '+targetDate);
+  if(item._moveId){var existingMoves=journalScheduleMoves(),existing=existingMoves.find(function(move){return move.id===item._moveId;});if(existing){existing.targetDate=targetDate;existing.time=journalMinsToClock(mins);existing.mins=mins;existing.item.label=editedLabel;existing.item.detail=editedDetail;localStorage.setItem('journal_schedule_moves',JSON.stringify(existingMoves));}}
+  else if(targetDate!==currentDate){var moves=journalScheduleMoves();moves.push({id:'moved-'+Date.now()+'-'+item.id,sourceDate:currentDate,targetDate:targetDate,originalId:item.id,time:journalMinsToClock(mins),mins:mins,item:{label:editedLabel,detail:editedDetail,tab:item.tab,fixed:!!item.fixed,manual:item.manual||'',sleepRoutineChecklist:!!item.sleepRoutineChecklist,detailKind:item.detailKind||'',growthKind:item.growthKind||'',manualCreated:!!item.manualCreated,manualItemId:item.manualItemId||''}});localStorage.setItem('journal_schedule_moves',JSON.stringify(moves));}
+  else{var overrides={};try{overrides=JSON.parse(localStorage.getItem(journalScheduleOverridesKey(currentDate))||'{}');}catch(ignore){}overrides[item.id]={time:journalMinsToClock(mins),mins:mins,label:editedLabel,detail:editedDetail};localStorage.setItem(journalScheduleOverridesKey(currentDate),JSON.stringify(overrides));}
+  renderJournalSchedule();v26Toast(targetDate===currentDate?'Event updated':'Moved to '+targetDate);
 }
 function journalScheduleApplyOrder(items,dateKey){
   var saved=[];try{saved=JSON.parse(localStorage.getItem(journalScheduleOrderKey(dateKey))||'[]');}catch(ignore){}
@@ -12737,7 +12742,7 @@ function renderJournalSchedule(){
   items=journalScheduleApplyOrder(items,dateKey);
   items.forEach(function(item,index){item.time=scheduleSlots[index].time;item.mins=scheduleSlots[index].mins;});
   var scheduleOverrides={};try{scheduleOverrides=JSON.parse(localStorage.getItem(journalScheduleOverridesKey(dateKey))||'{}');}catch(ignore){}
-  items.forEach(function(item){var override=item._moveId?scheduleMoves.find(function(move){return move.id===item._moveId;}):scheduleOverrides[item.id];if(override&&override.time){item.time=override.time;item.mins=Number(override.mins);}});
+  items.forEach(function(item){var override=item._moveId?scheduleMoves.find(function(move){return move.id===item._moveId;}):scheduleOverrides[item.id];if(override){if(override.time){item.time=override.time;item.mins=Number(override.mins);}if(typeof override.label==='string'&&override.label.trim())item.label=override.label;if(typeof override.detail==='string')item.detail=override.detail;}});
   // A manual time override should immediately place the card in chronological order.
   // Modern JavaScript uses a stable sort, so cards sharing the same time retain their
   // existing drag order.
