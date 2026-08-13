@@ -4116,7 +4116,8 @@ function hasActivityOnDate(dateKey){
 function isRunningActivity(activity){var type=String(activity&&activity.type||'').toLowerCase().trim();return type==='run'||type==='running'||type.indexOf('run')!==-1;}
 function hasRunOnDate(dateKey){return getActivities().some(function(activity){return activity.date===dateKey&&isRunningActivity(activity);});}
 function uniqueRunActivities(startDate,endDate){
-  var start=typeof startDate==='string'?startDate:dk(startDate),end=typeof endDate==='string'?endDate:dk(endDate),seen={};return getActivities().filter(function(activity){if(!activity||activity.date<start||activity.date>end||!isRunningActivity(activity))return false;var signature=[activity.date,Number(activity.distance||0).toFixed(3),String(activity.duration||'').trim()].join('|');if(seen[signature])return false;seen[signature]=true;return true;});
+  function normalizedDate(value){var text=String(value||'').trim(),match=text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);if(match)return match[3]+'-'+match[1].padStart(2,'0')+'-'+match[2].padStart(2,'0');return text.slice(0,10);}
+  var start=typeof startDate==='string'?startDate:dk(startDate),end=typeof endDate==='string'?endDate:dk(endDate),seen={};return getActivities().filter(function(activity){if(!activity)return false;var activityDate=normalizedDate(activity.date),runText=[activity.type,activity.title,activity.name,activity.workout].filter(Boolean).join(' ');if(activityDate<start||activityDate>end||!/run/i.test(runText))return false;var signature=[activityDate,Number(activity.distance||activity.miles||0).toFixed(3),String(activity.duration||activity.time||'').trim()].join('|');if(seen[signature])return false;seen[signature]=true;activity._weeklyDate=activityDate;return true;});
 }
 function hasExerciseOnDate(dateKey,planner){var activity=getActivities().some(function(item){return item.date===dateKey&&!/rest day/i.test(String(item.type||''));});return activity||!!(planner&&(planner.exRun==='green'||planner.exStrength==='green'||planner.exBike==='green'||planner.exWalk==='green'));}
 // One-time migration: when "Chronological Bible"/"Daily Prayer" were retired in favor of
@@ -4187,8 +4188,8 @@ function getDM(d,dateKey){
   var actMiles=0,actTime=0,actWatts=0,actWattsN=0,actPace=0,actPaceN=0;
   if(dateKey){
     uniqueRunActivities(dateKey,dateKey).forEach(function(a){
-      actMiles+=parseFloat(a.distance)||0;
-      actTime+=parseTimedMins(a.duration);
+      actMiles+=parseFloat(a.distance)||parseFloat(a.miles)||0;
+      actTime+=parseTimedMins(a.duration||a.time);
       if(parseFloat(a.power)){actWatts+=parseFloat(a.power);actWattsN++;}
       if(a.pace&&parsePace(a.pace)){actPace+=parsePace(a.pace);actPaceN++;}
     });
@@ -9384,7 +9385,7 @@ async function hydrateActivitiesStorage(){
   }catch(ignore){}
   try{renderActivities();}catch(ignore2){}
   try{calculateDailyCalorieTarget();}catch(ignore3){}
-  try{var weeklyPanel=document.getElementById('tab-weekly');if(weeklyPanel&&weeklyPanel.classList.contains('active'))renderWeekly();}catch(ignoreWeekly){}
+  try{var weeklyPanel=document.getElementById('tab-weekly');if(weeklyPanel&&weeklyPanel.classList.contains('active')){renderWeekly();renderGoals();}}catch(ignoreWeekly){}
   // Habits reads activities via getActivities(), which falls back to an empty list until
   // this async IndexedDB hydration finishes. If the Habits screen already rendered before
   // this completed (e.g. the user switched tabs quickly after a reload), it would have
@@ -12298,7 +12299,7 @@ function toggleGoalsSettings(){
 function renderGoals(){
   const g=JSON.parse(localStorage.getItem('weekly_goals')||'{}');
   const ws=wkStart(weekOff2),we=new Date(ws);we.setDate(ws.getDate()+6);const weekRuns=uniqueRunActivities(ws,we);
-  let miles=weekRuns.reduce(function(total,run){return total+(parseFloat(run.distance)||0);},0),audioMin=0,bibleD=0,prayerD=0,exD=0;
+  let miles=weekRuns.reduce(function(total,run){return total+(parseFloat(run.distance)||parseFloat(run.miles)||0);},0),audioMin=0,bibleD=0,prayerD=0,exD=0;
   for(let i=0;i<7;i++){
     const d=new Date(ws);d.setDate(ws.getDate()+i);
     const dateKey=dk(d),r=localStorage.getItem('planner_'+dateKey),dd=r?JSON.parse(r):{};
