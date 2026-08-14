@@ -12576,16 +12576,17 @@ function journalSleepRoutineState(dateKey){
   return{values:values,count:values.filter(Boolean).length};
 }
 function journalToggleSleepRoutinePanel(){_journalSleepRoutineOpen=!_journalSleepRoutineOpen;renderJournalSchedule();}
-function journalToggleSleepRoutineStep(event,index){
+function journalToggleSleepRoutineStep(event,index,checked){
   if(event){event.preventDefault();event.stopPropagation();}
-  var dateKey=dk(today),state=journalSleepRoutineState(dateKey);state.values[index]=!state.values[index];
+  var dateKey=dk(today),state=journalSleepRoutineState(dateKey);
+  state.values[index]=typeof checked==='boolean'?checked:!state.values[index];
   localStorage.setItem('schedule_sleepRoutine_steps_'+dateKey,JSON.stringify(state.values));
   if(state.values.filter(Boolean).length>=4)localStorage.setItem('schedule_sleepRoutine_'+dateKey,'1');else localStorage.removeItem('schedule_sleepRoutine_'+dateKey);
   _journalSleepRoutineOpen=true;renderJournalSchedule();
 }
 function journalSleepRoutineChecklistHtml(dateKey){
   if(!_journalSleepRoutineOpen)return'';var state=journalSleepRoutineState(dateKey);
-  return'<div class="journal-sleep-checklist">'+JOURNAL_SLEEP_STEPS.map(function(label,index){return'<label><input type="checkbox" '+(state.values[index]?'checked ':'')+'onclick="journalToggleSleepRoutineStep(event,'+index+')"><span>'+escHtml(label)+'</span></label>';}).join('')+'<small>'+state.count+' of 6 completed &bull; Complete the habit with any 4 steps.</small></div>';
+  return'<div class="journal-sleep-checklist">'+JOURNAL_SLEEP_STEPS.map(function(label,index){return'<label><input type="checkbox" '+(state.values[index]?'checked ':'')+'onchange="journalToggleSleepRoutineStep(event,'+index+',this.checked)"><span>'+escHtml(label)+'</span></label>';}).join('')+'<small>'+state.count+' of 6 completed &bull; Complete the habit with any 4 steps.</small></div>';
 }
 var _journalScheduleDragged='',_journalScheduleSuppressClick=0;
 var _journalScheduleItemsById={};
