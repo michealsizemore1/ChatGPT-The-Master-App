@@ -12820,7 +12820,7 @@ function renderJournalSchedule(){
   items=journalScheduleApplyOrder(items,dateKey);
   items.forEach(function(item,index){item.time=scheduleSlots[index].time;item.mins=scheduleSlots[index].mins;});
   var scheduleOverrides={};try{scheduleOverrides=JSON.parse(localStorage.getItem(journalScheduleOverridesKey(dateKey))||'{}');}catch(ignore){}
-  items.forEach(function(item){var override=item._moveId?scheduleMoves.find(function(move){return move.id===item._moveId;}):scheduleOverrides[item.id];if(override){if(override.time){item.time=override.time;item.mins=Number(override.mins);}if(!item.detailKind&&typeof override.label==='string'&&override.label.trim())item.label=override.label;if(!item.detailKind&&typeof override.detail==='string')item.detail=override.detail;}});
+  items.forEach(function(item){var override=item._moveId?scheduleMoves.find(function(move){return move.id===item._moveId;}):scheduleOverrides[item.id];if(override){if(override.time){item.time=override.time;item.mins=Number(override.mins);}if(!item.detailKind&&typeof override.label==='string'&&override.label.trim())item.label=override.label;if(!item.detailKind&&!item.sleepRoutineChecklist&&typeof override.detail==='string')item.detail=override.detail;}if(item.sleepRoutineChecklist){var liveSleepRoutine=journalSleepRoutineState(dateKey);item.detail=liveSleepRoutine.count+' of 6 routine steps completed';item.done=liveSleepRoutine.count>=4;}});
   // A manual time override should immediately place the card in chronological order.
   // Modern JavaScript uses a stable sort, so cards sharing the same time retain their
   // existing drag order.
