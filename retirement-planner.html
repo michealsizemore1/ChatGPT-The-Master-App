@@ -724,7 +724,7 @@
      that don't have this problem). */
   @media (max-width:600px){
     .shell{padding:14px;}
-    .shared-notes-card{padding-left:14px; padding-right:14px;}
+    .shared-notes-card{padding-left:14px; padding-right:14px; width:100%; position:static; left:auto; right:auto; margin:0 0 16px;}
     .two-col, .three-col{grid-template-columns:1fr;}
   }
   /* Dynamic row-lists (Future Expenses, Windfalls, Insurance, Brokerage Pies, Debt, etc.) use a tight
@@ -2530,7 +2530,7 @@
         <div class="dn-hdr"><span>&#x1F4DD; Notes</span><small>auto-saved, same on every page</small></div>
         <textarea class="shared-notes-textarea" oninput="updateSharedNotes(this.value)" placeholder="Jot down anything — questions for your financial advisor, things to double-check, reminders…" rows="3"></textarea>
       </div>
-      <div class="page-header"><h2>Settings</h2><p>Instructions, backup, restore, and integrations. <b>Build 2026.07.30.2</b></p></div>
+      <div class="page-header"><h2>Settings</h2><p>Instructions, backup, restore, and integrations. <b>Build 2026.08.13.1</b></p></div>
 
       <div class="card">
         <h3 onclick="toggleCard(this)">Secure Cloud Synchronization<span class="sub-label">Supabase — the same plan on every signed-in device</span></h3>
