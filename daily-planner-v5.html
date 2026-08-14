@@ -2112,6 +2112,7 @@ body{
       <div><label class="act-label">Calories</label><input type="number" id="actCalories" class="act-input" placeholder="0"></div>
       <div><label class="act-label">Elev Gain (ft)</label><input type="number" id="actElevGain" class="act-input" placeholder="0"></div>
       <div><label class="act-label">Temp (°F)</label><input type="number" id="actTemp" class="act-input" placeholder="e.g. 68"></div>
+      <div><label class="act-label">Humidity (%)</label><input type="number" id="actHumidity" class="act-input" placeholder="e.g. 55" min="0" max="100" step="1" inputmode="numeric" title="Enter the relative humidity during the activity (0–100%)"></div>
       <div><label class="act-label">AQI (Air Quality)</label><input type="number" id="actAQI" class="act-input" placeholder="e.g. 42" min="0" max="500" title="Enter the Air Quality Index during the workout (0–500)"></div>
       <div><label class="act-label">Execution Score (0-100)</label><input type="number" id="actExecScore" class="act-input" placeholder="0-100" min="0" max="100"></div>
       <div><label class="act-label">Source</label>
@@ -11142,14 +11143,14 @@ function toggleAddActivity(){
 }
 function cancelAddActivity(){document.getElementById('addActivityForm').style.display='none';editingActivityId=null;}
 function clearActForm(){
-  ['actDate','actType','actTitle','actCode','actDistance','actDuration','actPace','actPower','actHR','actCadence','actCalories','actElevGain','actTemp','actAQI','actExecScore','actNotes'].forEach(id=>{
+  ['actDate','actType','actTitle','actCode','actDistance','actDuration','actPace','actPower','actHR','actCadence','actCalories','actElevGain','actTemp','actHumidity','actAQI','actExecScore','actNotes'].forEach(id=>{
     const e=document.getElementById(id);if(e)e.value='';
   });
   document.getElementById('actSource').value='manual';
   document.getElementById('actType').value='Run';
   handleActTypeChange();
 }
-var ACT_REST_DAY_FIELDS=['actTitle','actCode','actDistance','actDuration','actPace','actPower','actHR','actCadence','actCalories','actElevGain','actTemp','actAQI','actExecScore','actNotes'];
+var ACT_REST_DAY_FIELDS=['actTitle','actCode','actDistance','actDuration','actPace','actPower','actHR','actCadence','actCalories','actElevGain','actTemp','actHumidity','actAQI','actExecScore','actNotes'];
 function handleActTypeChange(){
   var typeEl=document.getElementById('actType');if(!typeEl)return;
   var isRestDay=typeEl.value==='Rest Day';
@@ -11177,6 +11178,7 @@ function getActFormValues(){
     elevGain:parseFloat(document.getElementById('actElevGain').value)||0,
     notes:(document.getElementById('actNotes').value||'').trim(),
     temp:(document.getElementById('actTemp').value||'').trim(),
+    humidity:Math.max(0,Math.min(100,parseFloat(document.getElementById('actHumidity').value)||0)),
     aqi:Math.max(0,Math.min(500,parseInt(document.getElementById('actAQI').value,10)||0)),
     execScore:parseFloat(document.getElementById('actExecScore').value)||0,
     source:document.getElementById('actSource').value
@@ -11241,6 +11243,7 @@ function editActivity(id){
   document.getElementById('actCalories').value=act.calories||'';
   document.getElementById('actElevGain').value=act.elevGain||'';
   document.getElementById('actTemp').value=act.temp||'';
+  document.getElementById('actHumidity').value=act.humidity||'';
   document.getElementById('actAQI').value=act.aqi||'';
   document.getElementById('actExecScore').value=act.execScore||'';
   document.getElementById('actNotes').value=act.notes||'';
@@ -11742,6 +11745,7 @@ function renderActivities(){
     if(a.calories)stats.push('<span class="act-stat">&#x1F525; <strong>'+a.calories+'</strong> cal</span>');
     if(a.elevGain)stats.push('<span class="act-stat">&#x26F0; <strong>'+a.elevGain+'</strong> ft</span>');
     if(a.temp)stats.push('<span class="act-stat">&#x1F321;&#xFE0F; <strong>'+a.temp+'</strong>°F</span>');
+    if(a.humidity)stats.push('<span class="act-stat">&#x1F4A7; Humidity <strong>'+a.humidity+'</strong>%</span>');
     if(a.aqi)stats.push('<span class="act-stat">&#x1F32C;&#xFE0F; AQI <strong>'+a.aqi+'</strong></span>');
     if(a.execScore)stats.push('<span class="act-stat">&#x1F3AF; <strong>'+a.execScore+'</strong>/100</span>');
     if(a.activityCode)stats.push('<span class="act-stat">&#x1F194; <strong>'+escHtml(a.activityCode)+'</strong></span>');
