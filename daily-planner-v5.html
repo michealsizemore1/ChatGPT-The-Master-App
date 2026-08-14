@@ -912,7 +912,7 @@ body.v26-compact .journal-col textarea{height:70px;}
   .journal-growth-add{font-size:.76rem;padding:5px 8px}
 }
 .journal-schedule-name{font-size:.76rem;font-weight:700;line-height:1.3;}.journal-schedule-detail{display:block;font-size:.66rem;font-weight:500;color:#7a8494;margin-top:2px;}
-.journal-sleep-checklist{margin:-2px 8px 6px 87px;padding:10px 12px;background:#f8f5ff;border:1px solid #d8b4fe;border-radius:0 0 9px 9px;display:grid;gap:7px}.journal-sleep-checklist label{display:flex;align-items:center;gap:8px;font-size:.7rem;font-weight:650;color:#475569;cursor:pointer}.journal-sleep-checklist input{width:16px;height:16px;accent-color:#16a34a}.journal-sleep-checklist small{color:#64748b;font-size:.64rem;margin-top:2px}
+.journal-sleep-checklist{margin:-2px 8px 6px 87px;padding:10px 12px;background:#f8f5ff;border:1px solid #d8b4fe;border-radius:0 0 9px 9px;display:grid;gap:7px}.journal-sleep-step{display:flex;align-items:center;gap:8px;width:100%;border:0;background:transparent;padding:3px 0;text-align:left;font:650 .7rem inherit;color:#475569;cursor:pointer}.journal-sleep-step i{display:flex;align-items:center;justify-content:center;width:17px;height:17px;flex:0 0 17px;border:2px solid #b8c0cc;border-radius:4px;background:#fff;color:transparent;font-style:normal;font-size:12px;font-weight:900}.journal-sleep-step.checked{color:#166534}.journal-sleep-step.checked i{background:#16a34a;border-color:#16a34a;color:#fff}.journal-sleep-checklist small{color:#64748b;font-size:.64rem;margin-top:2px}
 .journal-schedule-detail-panel{margin:-2px 8px 6px 87px;padding:8px 10px;background:#f8fafc;border:1px solid #cbd5e1;border-radius:0 0 9px 9px;display:grid;gap:5px}.journal-schedule-detail-row{display:grid;grid-template-columns:15px 1fr;gap:7px;align-items:center;border:0;background:transparent;padding:3px 0;text-align:left;color:#475569;font:650 .68rem inherit;cursor:pointer}.journal-schedule-detail-dot{width:11px;height:11px;border-radius:3px;background:#e2e8f0;border:1px solid #cbd5e1}.journal-schedule-detail-dot.green{background:#16a34a;border-color:#16a34a}.journal-schedule-detail-dot.purple{background:#9333ea;border-color:#9333ea}.journal-schedule-detail-dot.red{background:#dc2626;border-color:#dc2626}.journal-schedule-detail-dot.black{background:#475569;border-color:#475569}.journal-end-summary{margin:9px 0 2px;border:1px solid #cbd5e1;border-radius:9px;background:#fff}.journal-end-summary>button{width:100%;display:flex;justify-content:space-between;gap:8px;border:0;background:#f8fafc;padding:9px 11px;border-radius:9px;color:#334155;font:.78rem inherit;font-weight:800;cursor:pointer}.journal-end-counts{font-size:.65rem;color:#64748b}.journal-end-items{padding:8px 10px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}.journal-end-item{display:flex;align-items:center;gap:6px;border:1px solid #e2e8f0;border-radius:7px;background:#fff;padding:6px 7px;text-align:left;color:#475569;font:650 .66rem inherit;cursor:pointer}.journal-end-item i{width:9px;height:9px;border-radius:3px;background:#e2e8f0}.journal-end-item.purple i{background:#9333ea}.journal-end-item.red i{background:#dc2626}@media(max-width:620px){.journal-schedule-detail-panel{margin-left:8px}.journal-end-items{grid-template-columns:1fr}}
 @media(max-width:620px){.journal-schedule-name{font-size:1rem;line-height:1.35}.journal-schedule-detail{font-size:.84rem;line-height:1.35;margin-top:3px}.journal-schedule-detail-row{font-size:.82rem}}
 .journal-calendar{margin:10px 16px;border:1px solid #d8def0;border-radius:12px;background:#fff;overflow:hidden;}
@@ -12548,6 +12548,7 @@ function journalToggleScheduleManual(name){
   renderJournalSchedule();
 }
 var JOURNAL_SLEEP_STEPS=['Begin winding down by the target time','Put away the computer','Complete nighttime hygiene','Prepare bedroom and set alarm','Get into bed by the target bedtime','Finish journaling, then enable Do Not Disturb'];
+var _journalSleepRoutineDrafts={};
 var _journalSleepRoutineOpen=false;
 var _journalScheduleOpenDetail='',_journalEndSummaryOpen=false;
 function journalCheckState(data,key){var value=String(data&&data[key]||'');return['green','purple','red','black'].indexOf(value)!==-1?value:'';}
@@ -12574,23 +12575,30 @@ function journalEndSummaryHtml(){
   return'<div class="journal-end-summary"><button type="button" onclick="journalToggleEndSummary()"><span>'+(_journalEndSummaryOpen?'&#x25BC;':'&#x25B6;')+' End-of-Day Summary</span><span class="journal-end-counts">'+complete+' complete &bull; '+partial+' in progress &bull; '+remaining.length+' remaining</span></button>'+rows+'</div>';
 }
 function journalSleepRoutineState(dateKey){
-  var values=null;try{values=JSON.parse(localStorage.getItem('schedule_sleepRoutine_steps_'+dateKey)||'null');}catch(ignore){}
+  var values=Object.prototype.hasOwnProperty.call(_journalSleepRoutineDrafts,dateKey)?_journalSleepRoutineDrafts[dateKey].slice():null;
+  if(!Array.isArray(values)){try{values=JSON.parse(localStorage.getItem('schedule_sleepRoutine_steps_'+dateKey)||'null');}catch(ignore){}}
   if(!Array.isArray(values)){values=localStorage.getItem('schedule_sleepRoutine_'+dateKey)==='1'?[true,true,true,true,true,false]:[false,false,false,false,false,false];}
-  values=JOURNAL_SLEEP_STEPS.map(function(_,index){return values[index]===true;});
+  values=JOURNAL_SLEEP_STEPS.map(function(_,index){var value=values[index];return value===true||value===1||value==='true'||value==='green'||value==='checked';});
   return{values:values,count:values.filter(Boolean).length};
 }
 function journalToggleSleepRoutinePanel(){_journalSleepRoutineOpen=!_journalSleepRoutineOpen;renderJournalSchedule();}
-function journalToggleSleepRoutineStep(event,index,checked){
+function journalSaveSleepRoutineState(dateKey,values){
+  values=JOURNAL_SLEEP_STEPS.map(function(_,index){return values[index]===true;});
+  _journalSleepRoutineDrafts[dateKey]=values.slice();
+  localStorage.setItem('schedule_sleepRoutine_steps_'+dateKey,JSON.stringify(values));
+  if(values.filter(Boolean).length>=4)localStorage.setItem('schedule_sleepRoutine_'+dateKey,'1');else localStorage.removeItem('schedule_sleepRoutine_'+dateKey);
+  return values.filter(Boolean).length;
+}
+function journalToggleSleepRoutineStep(event,index){
   if(event){event.preventDefault();event.stopPropagation();}
   var dateKey=dk(today),state=journalSleepRoutineState(dateKey);
-  state.values[index]=typeof checked==='boolean'?checked:!state.values[index];
-  localStorage.setItem('schedule_sleepRoutine_steps_'+dateKey,JSON.stringify(state.values));
-  if(state.values.filter(Boolean).length>=4)localStorage.setItem('schedule_sleepRoutine_'+dateKey,'1');else localStorage.removeItem('schedule_sleepRoutine_'+dateKey);
+  state.values[index]=!state.values[index];
+  journalSaveSleepRoutineState(dateKey,state.values);
   _journalSleepRoutineOpen=true;renderJournalSchedule();
 }
 function journalSleepRoutineChecklistHtml(dateKey){
   if(!_journalSleepRoutineOpen)return'';var state=journalSleepRoutineState(dateKey);
-  return'<div class="journal-sleep-checklist">'+JOURNAL_SLEEP_STEPS.map(function(label,index){return'<label><input type="checkbox" '+(state.values[index]?'checked ':'')+'onchange="journalToggleSleepRoutineStep(event,'+index+',this.checked)"><span>'+escHtml(label)+'</span></label>';}).join('')+'<small>'+state.count+' of 6 completed &bull; Complete the habit with any 4 steps.</small></div>';
+  return'<div class="journal-sleep-checklist">'+JOURNAL_SLEEP_STEPS.map(function(label,index){var checked=state.values[index];return'<button type="button" class="journal-sleep-step '+(checked?'checked':'')+'" aria-pressed="'+(checked?'true':'false')+'" onclick="journalToggleSleepRoutineStep(event,'+index+')"><i>&#x2713;</i><span>'+escHtml(label)+'</span></button>';}).join('')+'<small>'+state.count+' of 6 completed &bull; Complete the habit with any 4 steps.</small></div>';
 }
 var _journalScheduleDragged='',_journalScheduleSuppressClick=0;
 var _journalScheduleItemsById={};
@@ -12605,6 +12613,7 @@ function journalScheduleCycleStatus(event,id){
   var linkedKey=item.growthKind==='reading'?'gaAudiobook':item.growthKind==='financial'?'gaFinancialVideos':item.growthKind==='udemy'?'gaUdemy':item.growthKind==='gun'?'gaGunRange':item.growthKind==='language'?'gaLanguage':item.growthKind==='guitar'?'gaGuitar':'';
   if(linkedKey){document.querySelectorAll('.tri-check[data-key="'+linkedKey+'"]').forEach(function(control){applyTriState(control,next==='blank'?'':next);});save();}
   if(item.checkId){var target=document.getElementById(item.checkId);if(target){target.checked=next==='green';save();}}
+  if(item.sleepRoutineChecklist&&next==='green')journalSaveSleepRoutineState(dateKey,[true,true,true,true,true,true]);
   renderJournalSchedule();
 }
 function journalDeleteScheduleItem(event,id){event.preventDefault();event.stopPropagation();if(!confirm('Delete this item from My Schedule for this day?'))return;var dateKey=dk(today),hidden=[];try{hidden=JSON.parse(localStorage.getItem(journalScheduleHiddenKey(dateKey))||'[]');}catch(ignore){}if(!Array.isArray(hidden))hidden=[];if(hidden.indexOf(id)===-1)hidden.push(id);localStorage.setItem(journalScheduleHiddenKey(dateKey),JSON.stringify(hidden));renderJournalSchedule();v26Toast('Schedule item deleted for this day');}
