@@ -1643,6 +1643,13 @@ body{
     <button type="button" id="aiFillReviewBtn" class="ai-btn" onclick="aiFillEntireReview(this)" style="margin:0;background:linear-gradient(135deg,#1d4ed8,#7c3aed);">&#x2728; AI Fill Review</button>
   </div>
   <div id="revStats" class="review-stats"></div>
+  <section id="revInjurySection" style="margin:14px 0 18px;padding:14px;border:1px solid #fecaca;border-left:5px solid #dc2626;border-radius:10px;background:#fff7f7;">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:8px;">
+      <div><strong style="color:#991b1b;font-size:0.98rem;">Injury Report Weekly Roll-Up</strong><div style="font-size:0.72rem;color:#7f1d1d;margin-top:2px;">Workout injury notes recorded during this review week</div></div>
+      <span id="revInjuryCount" style="font-size:0.72rem;font-weight:800;color:#991b1b;background:#fee2e2;border:1px solid #fecaca;border-radius:999px;padding:4px 9px;">0 reports</span>
+    </div>
+    <div id="revInjuryRollup"></div>
+  </section>
   <textarea id="revAnalysis" style="display:none;" aria-hidden="true"></textarea>
   <div class="review-grid">
     <div>
@@ -5323,9 +5330,37 @@ function aiReviewAnalysis(){
 }
 function changeDashOff(n){dashOff2+=n;renderDashboard();renderBPChart();}
 let revOff2=0;
-function renderReview(){const ws=wkStart(revOff2),we=new Date(ws);we.setDate(ws.getDate()+6);document.getElementById('revLabel').textContent=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' - '+we.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});const r=localStorage.getItem('review_'+dk(ws)),rv=r?JSON.parse(r):{};['revAnalysis','revWins','revImprove','revFocus','revLessons'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=rv[id]||'';});let logged=0,bible=0,prayer=0,steps=0;for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);const dateKey=dk(d),r2=localStorage.getItem('planner_'+dateKey);if(!r2)continue;logged++;const dd=JSON.parse(r2);if(dd.spBibleAudio==='green')bible++;if(dd.spAIPrayer==='green')prayer++;steps+=parseFloat(dd.exSteps)||0;}const runs=uniqueRunActivities(ws,we).length;document.getElementById('revStats').innerHTML=[{l:'Days Logged',v:logged+'/7'},{l:'Bible Days',v:bible+'/7'},{l:'Prayer Days',v:prayer+'/7'},{l:'Runs',v:runs},{l:'Total Steps',v:Math.round(steps).toLocaleString()}].map(({l,v})=>'<div class="review-stat"><strong>'+v+'</strong>'+l+'</div>').join('');}
+function renderReview(){const ws=wkStart(revOff2),we=new Date(ws);we.setDate(ws.getDate()+6);document.getElementById('revLabel').textContent=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' - '+we.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});const r=localStorage.getItem('review_'+dk(ws)),rv=r?JSON.parse(r):{};['revAnalysis','revWins','revImprove','revFocus','revLessons'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=rv[id]||'';});let logged=0,bible=0,prayer=0,steps=0;for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);const dateKey=dk(d),r2=localStorage.getItem('planner_'+dateKey);if(!r2)continue;logged++;const dd=JSON.parse(r2);if(dd.spBibleAudio==='green')bible++;if(dd.spAIPrayer==='green')prayer++;steps+=parseFloat(dd.exSteps)||0;}const runs=uniqueRunActivities(ws,we).length;document.getElementById('revStats').innerHTML=[{l:'Days Logged',v:logged+'/7'},{l:'Bible Days',v:bible+'/7'},{l:'Prayer Days',v:prayer+'/7'},{l:'Runs',v:runs},{l:'Total Steps',v:Math.round(steps).toLocaleString()}].map(({l,v})=>'<div class="review-stat"><strong>'+v+'</strong>'+l+'</div>').join('');renderReviewInjuryRollup();}
 function saveReview(){const ws=wkStart(revOff2),d={};['revAnalysis','revWins','revImprove','revFocus','revLessons'].forEach(id=>{const e=document.getElementById(id);if(e)d[id]=e.value;});localStorage.setItem('review_'+dk(ws),JSON.stringify(d));const btn=document.querySelector('[onclick="saveReview()"]');if(btn){btn.textContent='Saved!';btn.style.background='#27ae60';setTimeout(()=>{btn.textContent='Save Review';btn.style.background='#667eea';},2000);}}
 function changeRevOff(n){revOff2+=n;renderReview();}
+function getReviewWeekInjuryReports(){
+  const ws=wkStart(revOff2),we=new Date(ws);we.setDate(ws.getDate()+6);
+  const start=dk(ws),end=dk(we),seen={};
+  function normalizedDate(value){const text=String(value||'').trim(),match=text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);if(match)return match[3]+'-'+match[1].padStart(2,'0')+'-'+match[2].padStart(2,'0');return text.slice(0,10);}
+  return getActivities().filter(function(a){
+    if(!a||!String(a.injuryReport||'').trim())return false;
+    const date=normalizedDate(a.date);if(date<start||date>end)return false;
+    const signature=[a.id||'',date,a.type||'',a.title||'',a.injuryReport].join('|');if(seen[signature])return false;seen[signature]=true;
+    a._reviewInjuryDate=date;return true;
+  }).sort(function(a,b){return String(a._reviewInjuryDate).localeCompare(String(b._reviewInjuryDate));});
+}
+function reviewInjuryText(){
+  const reports=getReviewWeekInjuryReports();
+  if(!reports.length)return'No workout injury reports were recorded this week.';
+  return reports.map(function(a){
+    const d=new Date(a._reviewInjuryDate+'T12:00:00'),label=d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    return label+' — '+(a.title||a.type||'Workout')+': '+String(a.injuryReport||'').trim();
+  }).join('\n');
+}
+function renderReviewInjuryRollup(){
+  const box=document.getElementById('revInjuryRollup'),count=document.getElementById('revInjuryCount');if(!box)return;
+  const reports=getReviewWeekInjuryReports();if(count)count.textContent=reports.length+' report'+(reports.length===1?'':'s');
+  if(!reports.length){box.innerHTML='<div style="font-size:0.8rem;color:#7f1d1d;padding:8px 0;">No injury reports recorded this week.</div>';return;}
+  box.innerHTML=reports.map(function(a){
+    const d=new Date(a._reviewInjuryDate+'T12:00:00'),label=d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    return '<div style="background:#fff;border:1px solid #fecaca;border-radius:8px;padding:10px;margin-top:7px;"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;"><strong style="color:#991b1b;">'+escHtml(a.title||a.type||'Workout')+'</strong><span style="font-size:0.72rem;font-weight:700;color:#7f1d1d;">'+escHtml(label)+'</span></div><div style="font-size:0.8rem;color:#7f1d1d;margin-top:5px;white-space:pre-wrap;">'+escHtml(a.injuryReport)+'</div></div>';
+  }).join('');
+}
 function getReviewWeekJournalText(){
   const ws=wkStart(revOff2),entries=[];
   for(let i=0;i<7;i++){
@@ -5342,13 +5377,14 @@ function aiFillEntireReview(btn){
   const ws=wkStart(revOff2),we=new Date(ws);we.setDate(ws.getDate()+6);
   const weekLabel=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' - '+we.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
   const journal=getReviewWeekJournalText();
+  const injuries=reviewInjuryText();
   const stats=(document.getElementById('revStats')||{}).innerText||'';
   const current=['revWins','revImprove','revFocus','revLessons'].map(function(id){var el=document.getElementById(id);return el&&el.value.trim()?id+': '+el.value.trim():'';}).filter(Boolean).join('\n');
   const prompt='You are completing a personal weekly review for '+weekLabel+'. Use only the supplied weekly statistics, journal entries, and existing review notes. Return ONLY one valid JSON object with exactly these four string keys:\n'
     +'{"wins":"","improve":"","focus":"","lessons":""}\n\n'
     +'Writing requirements:\n- wins: 2-4 specific achievements or positive patterns\n- improve: 2-4 constructive, realistic improvements\n- focus: 1-3 specific priorities for next week\n- lessons: 2-4 concise takeaways from the week\n'
     +'Use short bullet-style lines inside each string. Do not invent events or accomplishments. If information is limited, acknowledge that briefly and make cautious suggestions.\n\n'
-    +'WEEKLY STATISTICS:\n'+(stats||'No statistics available')+'\n\nDAILY JOURNAL:\n'+(journal||'No written daily notes available')+'\n\nEXISTING REVIEW NOTES:\n'+(current||'None');
+    +'WEEKLY STATISTICS:\n'+(stats||'No statistics available')+'\n\nINJURY REPORT WEEKLY ROLL-UP:\n'+injuries+'\n\nDAILY JOURNAL:\n'+(journal||'No written daily notes available')+'\n\nEXISTING REVIEW NOTES:\n'+(current||'None');
   const original=btn.innerHTML;btn.disabled=true;btn.innerHTML='&#x23F3; Filling Review...';
   aiCall(prompt,2400,function(text){
     try{
@@ -5365,6 +5401,7 @@ function aiReviewField(type,btn){
   const key=journalAIKey();
   if(!key){alert('Add your AI key first.');return;}
   const journal=getReviewWeekJournalText();
+  const injuries=reviewInjuryText();
   const wins=(document.getElementById('revWins').value||'').trim();
   const improve=(document.getElementById('revImprove').value||'').trim();
   const lessons=(document.getElementById('revLessons').value||'').trim();
@@ -5373,7 +5410,7 @@ function aiReviewField(type,btn){
   const prompt=(isImprove
     ?'Review the week below and identify the 2-4 most useful areas to improve. Be specific, constructive, and concise. Format as short bullet points suitable for a weekly review field.'
     :'Review the week below and recommend the 1-3 highest-value priorities for next week. Make each focus specific and actionable. Format as short bullet points suitable for a weekly review field.')
-    +'\n\nWins:\n'+wins+'\n\nCurrent improvement notes:\n'+improve+'\n\nLessons:\n'+lessons+'\n\nDaily journal:\n'+journal;
+    +'\n\nWins:\n'+wins+'\n\nCurrent improvement notes:\n'+improve+'\n\nLessons:\n'+lessons+'\n\nInjury report weekly roll-up:\n'+injuries+'\n\nDaily journal:\n'+journal;
   aiBtnState(btn,true);
   aiCall(prompt,1800,function(text){aiBtnState(btn,false);target.value=text;target.dispatchEvent(new Event('input'));saveReview();v26Toast(isImprove?'What to Improve added':'Next-week focus added');},function(err){aiBtnState(btn,false);alert('AI error: '+err);});
 }
