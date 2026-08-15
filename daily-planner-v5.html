@@ -12807,8 +12807,9 @@ function renderJournalSchedule(){
     return foods.some(function(item){return String((item&&item.meal)||'').toLowerCase()===meal;});
   }
   function mealComplete(meal,mins){
-    var scheduledTimeReached=isPastDay||(isSelectedToday&&currentMinutes>=mins);
-    return scheduledTimeReached&&mealLogged(meal);
+    // A meal is complete as soon as food is recorded. The schedule time is a
+    // planning aid and should not keep an entered meal gray earlier in the day.
+    return mealLogged(meal);
   }
   var reflected=['jAccomplish','jImprov','jGratitude','jNotes'].some(function(key){return String(d[key]||'').trim();}),sleepRoutine=journalSleepRoutineState(dateKey);
   var wellnessKeys=['wBP','wMeds','wWght','wSleep'],wellnessRecorded=journalLinkedGreenCount(wellnessKeys,d);
