@@ -2102,7 +2102,6 @@ body{
         </select>
       </div>
       <div><label class="act-label">Title / Name</label><input type="text" id="actTitle" class="act-input" placeholder="e.g. Morning Run"></div>
-      <div><label class="act-label">Code / ID</label><input type="text" id="actCode" class="act-input" placeholder="e.g. 293WZ3"></div>
       <div><label class="act-label">Distance (miles)</label><input type="number" id="actDistance" class="act-input" placeholder="0.0" step="0.01"></div>
       <div><label class="act-label">Time (MM:SS, H:MM:SS, or minutes)</label><input type="text" id="actDuration" class="act-input" placeholder="32:15 or 1:32:15 or 32 min" title="Enter MM:SS for under an hour, H:MM:SS for over an hour, or a plain number of minutes"></div>
       <div><label class="act-label">Avg Pace (MM:SS/mi)</label><input type="text" id="actPace" class="act-input" placeholder="8:30"></div>
@@ -2122,6 +2121,7 @@ body{
       </div>
     </div>
     <div><label class="act-label">Notes</label><textarea id="actNotes" class="act-input" style="height:60px;resize:vertical;font-family:inherit;" placeholder="Any notes..."></textarea></div>
+    <div style="margin-top:9px;"><label class="act-label">Injury Report</label><textarea id="actInjuryReport" class="act-input" style="height:60px;resize:vertical;font-family:inherit;" placeholder="Pain, soreness, location, severity, or changes during the workout..."></textarea></div>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px;">
       <button onclick="cancelAddActivity()" style="background:#f0f0f0;color:#555;border:none;padding:7px 14px;border-radius:6px;cursor:pointer;font-size:0.88rem;">Cancel</button>
       <button onclick="saveActivity()" style="background:#e67e22;color:white;border:none;padding:7px 16px;border-radius:6px;cursor:pointer;font-size:0.88rem;font-weight:600;" id="actSaveBtn">Save Activity</button>
@@ -4865,7 +4865,8 @@ function nextDayRunContext(){
       a.duration||'',
       a.pace?a.pace+'/mi':'',
       a.power?a.power+' W':'',
-      a.notes||''
+      a.notes||'',
+      a.injuryReport?'Injury report: '+a.injuryReport:''
     ].filter(Boolean).join(' | '));
   });
   var cached=localStorage.getItem('workout_cache_'+nextKey);
@@ -4904,7 +4905,8 @@ function selectedDayRunContext(){
       a.power?a.power+' W':'',
       a.calories?a.calories+' calories':'',
       a.elevation?a.elevation+' ft elevation gain':'',
-      a.notes||''
+      a.notes||'',
+      a.injuryReport?'Injury report: '+a.injuryReport:''
     ].filter(Boolean).join(' | '));
   });
   var cached=localStorage.getItem('workout_cache_'+runKey);
@@ -5159,7 +5161,8 @@ function aiWeeklyRunWrapUp(btn){
       Number(a.power)>0?Math.round(Number(a.power))+' W':'power unavailable',
       Number(a.heartRate)>0?Math.round(Number(a.heartRate))+' bpm':'heart rate unavailable',
       Number(a.elevGain)>0?Math.round(Number(a.elevGain))+' ft gain':'elevation unavailable',
-      a.notes?'notes: '+a.notes:''
+      a.notes?'notes: '+a.notes:'',
+      a.injuryReport?'injury report: '+a.injuryReport:''
     ].filter(Boolean).join(' | ');
   }).join('\n');
   var prompt='Write a concise weekly running wrap-up for '+wrnLabel(wrnOff)+'. Use only the supplied facts and do not invent performance, recovery, injury, or health claims. Keep it encouraging, practical, and about 150-220 words. Use short headings: Week at a Glance, Strongest Session, Patterns & Recovery, and Focus for Next Week. If a conclusion is uncertain, say so. This is training reflection, not medical advice.\n\n'
@@ -7646,6 +7649,7 @@ async function submitAskJournal(){
     if(a.power)p.push(a.power+'W');
     if(a.elevGain)p.push(a.elevGain+'ft gain');
     if(a.notes)p.push(a.notes);
+    if(a.injuryReport)p.push('Injury report: '+a.injuryReport);
     return p.join(' | ');
   });
   // ── Training plan ──
@@ -8288,7 +8292,7 @@ function runJournalSearch(){
   const acts=getActivities();
   const actHits=[];
   acts.forEach(a=>{
-    const searchable=[a.notes,a.type,a.date,String(a.distance||''),a.pace].filter(Boolean).join(' ').toLowerCase();
+    const searchable=[a.notes,a.injuryReport,a.type,a.date,String(a.distance||''),a.pace].filter(Boolean).join(' ').toLowerCase();
     if(!searchable.includes(q))return;
     const parts=[];
     if(a.type)parts.push(a.type);
@@ -8296,6 +8300,7 @@ function runJournalSearch(){
     if(a.pace)parts.push(a.pace+'/mi');
     if(a.duration)parts.push(fmtDuration(a.duration));
     if(a.notes)parts.push(a.notes);
+    if(a.injuryReport)parts.push('Injury report: '+a.injuryReport);
     actHits.push({date:a.date,summary:parts.join(' · ')});
   });
   // ── Search training plan ──
@@ -11143,14 +11148,14 @@ function toggleAddActivity(){
 }
 function cancelAddActivity(){document.getElementById('addActivityForm').style.display='none';editingActivityId=null;}
 function clearActForm(){
-  ['actDate','actType','actTitle','actCode','actDistance','actDuration','actPace','actPower','actHR','actCadence','actCalories','actElevGain','actTemp','actHumidity','actAQI','actExecScore','actNotes'].forEach(id=>{
+  ['actDate','actType','actTitle','actDistance','actDuration','actPace','actPower','actHR','actCadence','actCalories','actElevGain','actTemp','actHumidity','actAQI','actExecScore','actNotes','actInjuryReport'].forEach(id=>{
     const e=document.getElementById(id);if(e)e.value='';
   });
   document.getElementById('actSource').value='manual';
   document.getElementById('actType').value='Run';
   handleActTypeChange();
 }
-var ACT_REST_DAY_FIELDS=['actTitle','actCode','actDistance','actDuration','actPace','actPower','actHR','actCadence','actCalories','actElevGain','actTemp','actHumidity','actAQI','actExecScore','actNotes'];
+var ACT_REST_DAY_FIELDS=['actTitle','actDistance','actDuration','actPace','actPower','actHR','actCadence','actCalories','actElevGain','actTemp','actHumidity','actAQI','actExecScore','actNotes','actInjuryReport'];
 function handleActTypeChange(){
   var typeEl=document.getElementById('actType');if(!typeEl)return;
   var isRestDay=typeEl.value==='Rest Day';
@@ -11167,7 +11172,6 @@ function getActFormValues(){
     date:document.getElementById('actDate').value,
     type:document.getElementById('actType').value,
     title:(document.getElementById('actTitle').value||'').trim(),
-    activityCode:(document.getElementById('actCode').value||'').trim(),
     distance:parseFloat(document.getElementById('actDistance').value)||0,
     duration:(document.getElementById('actDuration').value||'').trim(),
     pace:(document.getElementById('actPace').value||'').trim(),
@@ -11177,6 +11181,7 @@ function getActFormValues(){
     calories:parseFloat(document.getElementById('actCalories').value)||0,
     elevGain:parseFloat(document.getElementById('actElevGain').value)||0,
     notes:(document.getElementById('actNotes').value||'').trim(),
+    injuryReport:(document.getElementById('actInjuryReport').value||'').trim(),
     temp:(document.getElementById('actTemp').value||'').trim(),
     humidity:Math.max(0,Math.min(100,parseFloat(document.getElementById('actHumidity').value)||0)),
     aqi:Math.max(0,Math.min(500,parseInt(document.getElementById('actAQI').value,10)||0)),
@@ -11233,7 +11238,6 @@ function editActivity(id){
   document.getElementById('actDate').value=act.date||'';
   document.getElementById('actType').value=act.type||'Run';
   document.getElementById('actTitle').value=act.title||'';
-  document.getElementById('actCode').value=act.activityCode||'';
   document.getElementById('actDistance').value=act.distance||'';
   document.getElementById('actDuration').value=act.duration||'';
   document.getElementById('actPace').value=act.pace||'';
@@ -11247,6 +11251,7 @@ function editActivity(id){
   document.getElementById('actAQI').value=act.aqi||'';
   document.getElementById('actExecScore').value=act.execScore||'';
   document.getElementById('actNotes').value=act.notes||'';
+  document.getElementById('actInjuryReport').value=act.injuryReport||'';
   document.getElementById('actSource').value=act.source||'manual';
   handleActTypeChange();
   f.style.display='block';
@@ -11748,7 +11753,6 @@ function renderActivities(){
     if(a.humidity)stats.push('<span class="act-stat">&#x1F4A7; Humidity <strong>'+a.humidity+'</strong>%</span>');
     if(a.aqi)stats.push('<span class="act-stat">&#x1F32C;&#xFE0F; AQI <strong>'+a.aqi+'</strong></span>');
     if(a.execScore)stats.push('<span class="act-stat">&#x1F3AF; <strong>'+a.execScore+'</strong>/100</span>');
-    if(a.activityCode)stats.push('<span class="act-stat">&#x1F194; <strong>'+escHtml(a.activityCode)+'</strong></span>');
     var collapsed=actCollapsed.has(a.id);
     var chevron=collapsed?'&#x25B6;':'&#x25BC;';
     var bodyDisplay=collapsed?'none':'block';
@@ -11770,7 +11774,8 @@ function renderActivities(){
       +'</div>'
       +'<div id="actBody_'+a.id+'" style="display:'+bodyDisplay+';">'
       +'<div class="act-stats">'+stats.join('')+'</div>'
-      +(a.notes?'<div style="font-size:0.82rem;color:#666;margin-top:6px;white-space:pre-wrap;">'+escHtml(a.notes)+'</div>':'')
+      +(a.notes?'<div style="font-size:0.82rem;color:#666;margin-top:8px;white-space:pre-wrap;"><strong style="display:block;color:#475569;margin-bottom:2px;">Notes</strong>'+escHtml(a.notes)+'</div>':'')
+      +(a.injuryReport?'<div style="font-size:0.82rem;color:#7f1d1d;margin-top:8px;padding:8px 10px;background:#fff7f7;border:1px solid #fecaca;border-radius:7px;white-space:pre-wrap;"><strong style="display:block;color:#b91c1c;margin-bottom:2px;">Injury Report</strong>'+escHtml(a.injuryReport)+'</div>':'')
       +'<div id="noteWrap_'+a.id+'" style="display:none;margin-top:6px;">'
       +'<textarea class="act-note-edit" id="noteTA_'+a.id+'" placeholder="Add a note...">'+escHtml(a.notes||'')+'</textarea>'
       +'<div style="display:flex;gap:6px;margin-top:4px;">'
