@@ -2852,7 +2852,7 @@ body{
         <div style="background:#fff;border:1px solid #fed7aa;border-radius:7px;padding:7px;"><strong style="display:block;color:#92400e;font-size:0.72rem;margin-bottom:3px;">Carbohydrate Sources</strong><div style="font-size:0.68rem;color:#475569;line-height:1.55;">Complex / fiber-rich: <strong id="sourceCarbSupport">0%</strong><br>Simple / refined: <strong id="sourceCarbLimit">0%</strong><br>Unclassified: <strong id="sourceCarbUnknown">0%</strong></div></div>
         <div style="background:#fff;border:1px solid #bfdbfe;border-radius:7px;padding:7px;"><strong style="display:block;color:#1e40af;font-size:0.72rem;margin-bottom:3px;">Fat Sources</strong><div style="font-size:0.68rem;color:#475569;line-height:1.55;">Unsaturated: <strong id="sourceFatSupport">0%</strong><br>Saturated / trans: <strong id="sourceFatLimit">0%</strong><br>Unclassified: <strong id="sourceFatUnknown">0%</strong></div></div>
       </div>
-      <div style="font-size:0.64rem;color:#64748b;margin-top:6px;line-height:1.35;">Runner context: this shows source mix, not a medical “good/bad” score. Simple carbohydrates can be useful around training. Classify each food below for accurate percentages.</div>
+      <div style="font-size:0.64rem;color:#64748b;margin-top:6px;line-height:1.35;">Runner context: this shows source mix, not a medical “good/bad” score. Simple carbohydrates can be useful around training. Food types are selected automatically from the food name; use the dropdowns to correct mixed or unusual foods.</div>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;padding-top:6px;border-top:1px dashed #dcdcdc;font-size:0.74rem;color:#666;">
       <span>&#x1F33E; <strong id="totFiber">0</strong>g fiber</span>
@@ -5575,13 +5575,34 @@ function _mkMacroSourceSelect(labelTxt,field,val,options,itemId){
   lbl.textContent=labelTxt;
   var select=document.createElement('select');
   select.style.cssText='width:100%;min-width:0;border:1px solid #cbd5e1;border-radius:5px;padding:4px 3px;font-size:0.7rem;background:#fff;color:#334155;';
-  [{v:'',l:'Unclassified'}].concat(options).forEach(function(option){var el=document.createElement('option');el.value=option.v;el.textContent=option.l;if(option.v===val)el.selected=true;select.appendChild(el);});
+  [{v:'unknown',l:'Unclassified'}].concat(options).forEach(function(option){var el=document.createElement('option');el.value=option.v;el.textContent=option.l;if(option.v===(val||'unknown'))el.selected=true;select.appendChild(el);});
   select.onchange=(function(id,f){return function(){updateFoodField(id,f,this.value);};})(itemId,field);
   lbl.appendChild(select);return lbl;
+}
+function foodNameHasAny(name,terms){
+  var normalized=' '+String(name||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim()+' ';
+  return terms.some(function(term){return normalized.indexOf(' '+term+' ')!==-1||normalized.indexOf(' '+term+'s ')!==-1;});
+}
+function inferFoodMacroSources(item){
+  if(!item)return false;
+  var name=String(item.name||''),changed=false;
+  var proteinSupport=['chicken breast','chicken','turkey','fish','salmon','tuna','shrimp','lean beef','sirloin','egg','greek yogurt','yogurt','cottage cheese','milk','tofu','tempeh','bean','lentil','chickpea','pea','protein powder','whey','seitan'];
+  var proteinLimit=['bacon','sausage','hot dog','pepperoni','salami','bologna','fried chicken','processed meat','rib'];
+  var carbSupport=['oatmeal','oat','brown rice','wild rice','quinoa','whole grain','whole wheat','barley','farro','bean','lentil','chickpea','sweet potato','potato','fruit','apple','banana','berry','orange','vegetable','broccoli','spinach'];
+  var carbLimit=['candy','soda','soft drink','juice','sports drink','energy gel','gel','chew','sugar','honey','syrup','cookie','cake','pastry','donut','doughnut','white bread','white rice','sweetened cereal'];
+  var fatSupport=['olive oil','avocado','almond','walnut','peanut','nut butter','seed','chia','flax','salmon','tuna'];
+  var fatLimit=['butter','lard','shortening','coconut oil','cream','cheese','bacon','sausage','pepperoni','fried'];
+  if((parseFloat(item.prot)||0)>0&&!item.proteinSource){if(foodNameHasAny(name,proteinLimit)){item.proteinSource='limit';changed=true;}else if(foodNameHasAny(name,proteinSupport)){item.proteinSource='support';changed=true;}}
+  if((parseFloat(item.carbs)||0)>0&&!item.carbSource){if(foodNameHasAny(name,carbLimit)){item.carbSource='limit';changed=true;}else if(foodNameHasAny(name,carbSupport)){item.carbSource='support';changed=true;}}
+  if((parseFloat(item.fat)||0)>0&&!item.fatSource){if(foodNameHasAny(name,fatLimit)){item.fatSource='limit';changed=true;}else if(foodNameHasAny(name,fatSupport)){item.fatSource='support';changed=true;}}
+  if(changed)item.sourceClassificationAuto=true;
+  return changed;
 }
 
 function renderFoodItems(){
   var log=window._foodLog||[];
+  var autoClassChanged=false;
+  log.forEach(function(item){if(inferFoodMacroSources(item))autoClassChanged=true;});
   var favNames=(getFavorites()||[]).map(function(f){return (f.name||'').toLowerCase();});
   MEALS.forEach(function(meal){
     var listEl=document.getElementById('foodList-'+meal);
@@ -5730,6 +5751,7 @@ function renderFoodItems(){
     }
   });
   updateMacroTotals();
+  if(autoClassChanged)setTimeout(function(){save();},0);
 }
 function _setMealOpen(meal,isOpen){
   var mb=document.getElementById('mb-'+meal);
