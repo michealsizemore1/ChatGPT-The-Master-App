@@ -1840,6 +1840,7 @@ body{
         <div style="flex:2 1 180px;"><label style="display:block;font-size:0.72rem;font-weight:700;color:#555;margin-bottom:3px;">Audiobook name</label><input id="audioPlanBook" type="text" placeholder="Enter the book title" style="width:100%;box-sizing:border-box;border:1px solid #cfd5ff;border-radius:6px;padding:7px 9px;font-size:0.84rem;"></div>
         <div style="flex:2 1 180px;"><label style="display:block;font-size:0.72rem;font-weight:700;color:#555;margin-bottom:3px;">Author</label><input id="audioPlanAuthor" type="text" placeholder="Enter the author" style="width:100%;box-sizing:border-box;border:1px solid #cfd5ff;border-radius:6px;padding:7px 9px;font-size:0.84rem;"></div>
         <div style="flex:1.5 1 180px;"><label style="display:block;font-size:0.72rem;font-weight:700;color:#555;margin-bottom:3px;">Total audiobook length</label><div style="display:flex;gap:6px;"><input id="audioPlanHours" type="number" min="0" step="1" inputmode="numeric" placeholder="Hours" aria-label="Total audiobook hours" style="min-width:0;width:50%;box-sizing:border-box;border:1px solid #cfd5ff;border-radius:6px;padding:7px 9px;font-size:0.84rem;"><input id="audioPlanMinutes" type="number" min="0" max="59" step="1" inputmode="numeric" placeholder="Minutes" aria-label="Additional audiobook minutes" style="min-width:0;width:50%;box-sizing:border-box;border:1px solid #cfd5ff;border-radius:6px;padding:7px 9px;font-size:0.84rem;"></div></div>
+        <div style="flex:1 1 145px;"><label style="display:block;font-size:0.72rem;font-weight:700;color:#555;margin-bottom:3px;">Start date</label><input id="audioPlanStartDate" type="date" style="width:100%;box-sizing:border-box;border:1px solid #cfd5ff;border-radius:6px;padding:7px 9px;font-size:0.84rem;"></div>
         <div style="flex:1 1 145px;"><label style="display:block;font-size:0.72rem;font-weight:700;color:#555;margin-bottom:3px;">Finish by</label><input id="audioPlanDate" type="date" style="width:100%;box-sizing:border-box;border:1px solid #cfd5ff;border-radius:6px;padding:7px 9px;font-size:0.84rem;"></div>
         <button id="audioPlanCreateBtn" onclick="createAudiobookFinishPlan()" style="background:#667eea;color:#fff;border:none;border-radius:7px;padding:8px 13px;font-size:0.8rem;font-weight:700;cursor:pointer;white-space:nowrap;">Create Schedule</button>
       </div>
@@ -8680,19 +8681,21 @@ function toggleAudiobookFinishPlanner(forceOpen){
   var open=typeof forceOpen==='boolean'?forceOpen:(panel.style.display==='none'||!panel.style.display);
   panel.style.display=open?'block':'none';
   if(arrow)arrow.innerHTML=open?'&#x25BC;':'&#x25B6;';
-  var date=document.getElementById('audioPlanDate');
-  if(open&&date&&!date.value){var d=new Date();d.setDate(d.getDate()+30);date.value=dk(d);}
+  var startDate=document.getElementById('audioPlanStartDate'),date=document.getElementById('audioPlanDate');
+  if(open&&startDate&&!startDate.value)startDate.value=dk(new Date());
+  if(open&&date&&!date.value){var d=startDate&&startDate.value?new Date(startDate.value+'T00:00:00'):new Date();d.setDate(d.getDate()+30);date.value=dk(d);}
 }
 function createAudiobookFinishPlan(){
-  var title=((document.getElementById('audioPlanBook')||{}).value||'').trim(),author=((document.getElementById('audioPlanAuthor')||{}).value||'').trim(),hours=Math.max(0,parseInt((document.getElementById('audioPlanHours')||{}).value,10)||0),minutes=Math.max(0,parseInt((document.getElementById('audioPlanMinutes')||{}).value,10)||0),finish=(document.getElementById('audioPlanDate')||{}).value||'';
+  var title=((document.getElementById('audioPlanBook')||{}).value||'').trim(),author=((document.getElementById('audioPlanAuthor')||{}).value||'').trim(),hours=Math.max(0,parseInt((document.getElementById('audioPlanHours')||{}).value,10)||0),minutes=Math.max(0,parseInt((document.getElementById('audioPlanMinutes')||{}).value,10)||0),startKey=(document.getElementById('audioPlanStartDate')||{}).value||'',finish=(document.getElementById('audioPlanDate')||{}).value||'';
   if(!title){alert('Enter the audiobook name first.');return;}
   if(!author){alert('Enter the audiobook author.');return;}
   if(minutes>59){alert('Additional minutes must be between 0 and 59.');return;}
   var totalSec=(hours*60+minutes)*60;
   if(totalSec<=0){alert('Enter the total audiobook length.');return;}
+  if(!startKey){alert('Choose a start date.');return;}
   if(!finish){alert('Choose a finish date.');return;}
-  var startKey=dk(today),start=new Date(startKey+'T00:00:00'),end=new Date(finish+'T00:00:00'),days=Math.floor((end-start)/86400000)+1;
-  if(days<1){alert('The finish date must be today or later.');return;}
+  var start=new Date(startKey+'T00:00:00'),end=new Date(finish+'T00:00:00'),days=Math.floor((end-start)/86400000)+1;
+  if(days<1){alert('The finish date must be on or after the start date.');return;}
   var plan={query:title,queryAuthor:author,title:title,author:author,narrator:'',source:'the audiobook length you entered',startDate:startKey,finishDate:finish,totalSeconds:totalSec,dailySeconds:Math.ceil(totalSec/days),days:days,artwork:'',createdAt:new Date().toISOString()};
   localStorage.setItem('audiobook_finish_plan',JSON.stringify(plan));renderAudiobookFinishPlan();
 }
@@ -8720,6 +8723,7 @@ function renderAudiobookFinishPlan(){
   var title=document.getElementById('audioPlanBook');if(title&&!title.value)title.value=p.query||p.title||'';
   var author=document.getElementById('audioPlanAuthor');if(author&&!author.value)author.value=p.queryAuthor||p.author||'';
   var hours=document.getElementById('audioPlanHours'),minutes=document.getElementById('audioPlanMinutes'),totalMinutes=Math.round((Number(p.totalSeconds)||0)/60);if(hours&&!hours.value)hours.value=Math.floor(totalMinutes/60)||'';if(minutes&&!minutes.value)minutes.value=totalMinutes%60||'';
+  var startDate=document.getElementById('audioPlanStartDate');if(startDate&&!startDate.value)startDate.value=p.startDate||'';
   var date=document.getElementById('audioPlanDate');if(date&&!date.value)date.value=p.finishDate||'';
 }
 function deleteAudiobookFinishPlan(){if(!confirm('Remove this audiobook completion plan?'))return;localStorage.removeItem('audiobook_finish_plan');renderAudiobookFinishPlan();}
