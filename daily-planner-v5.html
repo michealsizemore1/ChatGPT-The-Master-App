@@ -2834,6 +2834,20 @@ body{
       <span>&#x1F35E; <strong id="totCarbs">0</strong>g carbs</span>
       <span>&#x1F4A7; <strong id="totWater">—</strong> water</span>
     </div>
+    <div id="macroRatioWrap" style="margin-top:8px;padding-top:7px;border-top:1px dashed #dcdcdc;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:5px;">
+        <strong style="font-size:0.75rem;color:#475569;">Daily Macro Ratio</strong>
+        <span style="font-size:0.66rem;color:#64748b;">Combined from all 6 meal sections &bull; percentage of macro calories</span>
+      </div>
+      <div style="height:9px;border-radius:999px;overflow:hidden;background:#e2e8f0;display:flex;" aria-label="Daily macronutrient calorie ratio">
+        <span id="ratioProtBar" style="width:0%;background:#dc2626;"></span><span id="ratioCarbsBar" style="width:0%;background:#d97706;"></span><span id="ratioFatBar" style="width:0%;background:#2563eb;"></span>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:5px;font-size:0.73rem;">
+        <span style="color:#991b1b;">&#x25CF; Protein <strong id="ratioProt">0%</strong></span>
+        <span style="color:#92400e;">&#x25CF; Carbohydrates <strong id="ratioCarbs">0%</strong></span>
+        <span style="color:#1e40af;">&#x25CF; Fat <strong id="ratioFat">0%</strong></span>
+      </div>
+    </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;padding-top:6px;border-top:1px dashed #dcdcdc;font-size:0.74rem;color:#666;">
       <span>&#x1F33E; <strong id="totFiber">0</strong>g fiber</span>
       <span>&#x1F36C; <strong id="totSugar">0</strong>g sugar</span>
@@ -5923,6 +5937,13 @@ function updateMacroTotals(){
   if(bar)bar.style.display=hasData?'block':'none';
   var set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=Math.round(v);};
   set('totCal',totals.cal);set('totProt',totals.prot);set('totFat',totals.fat);set('totCarbs',totals.carbs);
+  // Macro ratios use caloric contribution: protein/carbohydrates = 4 kcal/g, fat = 9 kcal/g.
+  // Since totals aggregate the full food log, all six meal sections are included.
+  var macroCalories={prot:totals.prot*4,carbs:totals.carbs*4,fat:totals.fat*9};
+  var macroCalTotal=macroCalories.prot+macroCalories.carbs+macroCalories.fat;
+  var macroRatios=macroCalTotal?{prot:macroCalories.prot/macroCalTotal*100,carbs:macroCalories.carbs/macroCalTotal*100,fat:macroCalories.fat/macroCalTotal*100}:{prot:0,carbs:0,fat:0};
+  var setRatio=function(kind,labelId,barId){var label=document.getElementById(labelId),segment=document.getElementById(barId),value=macroRatios[kind]||0;if(label)label.textContent=value.toFixed(1)+'%';if(segment)segment.style.width=value+'%';};
+  setRatio('prot','ratioProt','ratioProtBar');setRatio('carbs','ratioCarbs','ratioCarbsBar');setRatio('fat','ratioFat','ratioFatBar');
   MICRO_FIELDS.forEach(function(f){set(MICRO_META[f].elId,totals[f]||0);});
   // Update hidden fields for backward compat save
   var setHid=function(id,v){var e=document.getElementById(id);if(e)e.value=hasData?Math.round(v):'';};
