@@ -2766,11 +2766,11 @@ body{
     <div id="calorieAdvisorResult" style="background:rgba(255,255,255,.82);border:1px solid #bbf7d0;border-radius:9px;padding:10px 12px;color:#14532d;font-size:.8rem;line-height:1.55;"></div>
     <div style="font-size:.64rem;color:#78716c;margin-top:7px;">Estimate only. It uses your logged Activities and current weight when available; medical conditions and individual metabolism can change your needs.</div>
   </div>
-  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
-    <label title="Scan food label with camera" style="background:#e67e22;color:#fff;border:none;padding:5px 10px;border-radius:6px;font-size:0.78rem;cursor:pointer;">&#x1F4F7; Scan Label<input type="file" id="foodLabelScan" accept="image/*" capture="camera" style="display:none" onchange="scanFoodLabel(event)"></label>
-    <button onclick="openBarcodeScanner()" title="Scan a packaged food barcode" style="background:#0f766e;color:#fff;border:none;padding:5px 10px;border-radius:6px;font-size:0.78rem;cursor:pointer;">&#x25A5; Scan Barcode</button>
-    <button onclick="openFuelAIModal()" title="Analyze how a day's nutrition affected the next day's run" style="background:#8e44ad;color:#fff;border:none;padding:5px 10px;border-radius:6px;font-size:0.78rem;cursor:pointer;">&#x1F9E0; Fuel AI</button>
-    <button onclick="openCopyDayModal()" style="background:#16a085;color:#fff;border:none;padding:5px 10px;border-radius:6px;font-size:0.78rem;cursor:pointer;">&#x1F4C5; Copy Day</button>
+  <div style="display:flex;gap:4px;flex-wrap:nowrap;margin-bottom:8px;width:100%;">
+    <label title="Photograph the Nutrition Facts and ingredients together" style="flex:1 1 0;min-width:0;text-align:center;white-space:nowrap;background:#e67e22;color:#fff;border:none;padding:6px 3px;border-radius:6px;font-size:0.67rem;font-weight:700;cursor:pointer;">&#x1F4F7; Scan Label<input type="file" id="foodLabelScan" accept="image/*" capture="camera" style="display:none" onchange="scanFoodLabel(event)"></label>
+    <button onclick="openBarcodeScanner()" title="Scan a packaged food barcode" style="flex:1 1 0;min-width:0;white-space:nowrap;background:#0f766e;color:#fff;border:none;padding:6px 3px;border-radius:6px;font-size:0.67rem;font-weight:700;cursor:pointer;">&#x25A5; Barcode</button>
+    <button onclick="openFuelAIModal()" title="Analyze how a day's nutrition affected the next day's run" style="flex:1 1 0;min-width:0;white-space:nowrap;background:#8e44ad;color:#fff;border:none;padding:6px 3px;border-radius:6px;font-size:0.67rem;font-weight:700;cursor:pointer;">&#x1F9E0; Fuel AI</button>
+    <button onclick="openCopyDayModal()" style="flex:1 1 0;min-width:0;white-space:nowrap;background:#16a085;color:#fff;border:none;padding:6px 3px;border-radius:6px;font-size:0.67rem;font-weight:700;cursor:pointer;">&#x1F4C5; Copy Day</button>
   </div>
   <!-- Meal sections -->
   <div id="mealSections" style="margin-bottom:8px;max-height:55vh;overflow-y:auto;-webkit-overflow-scrolling:touch;">
@@ -5596,6 +5596,11 @@ function foodNameHasAny(name,terms){
   var normalized=' '+String(name||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim()+' ';
   return terms.some(function(term){return normalized.indexOf(' '+term+' ')!==-1||normalized.indexOf(' '+term+'s ')!==-1;});
 }
+function foodSourceChoice(name,supportTerms,limitTerms){
+  var normalized=' '+String(name||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim()+' ';
+  function first(terms){return terms.reduce(function(best,term){var at=normalized.indexOf(' '+term+' ');if(at<0)at=normalized.indexOf(' '+term+'s ');return at>=0&&at<best?at:best;},Number.POSITIVE_INFINITY);}
+  var supportAt=first(supportTerms),limitAt=first(limitTerms);if(!isFinite(supportAt)&&!isFinite(limitAt))return'';return supportAt<=limitAt?'support':'limit';
+}
 function foodSourceCorrections(){try{return JSON.parse(localStorage.getItem('food_source_corrections')||'{}')||{};}catch(e){return{};}}
 function foodSourceCorrectionKey(name){return String(name||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();}
 function rememberFoodSourceCorrection(item){
@@ -5610,14 +5615,14 @@ function inferFoodMacroSources(item){
   if(remembered){['proteinSource','carbSource','fatSource'].forEach(function(field){if(item[field]!==remembered[field]){item[field]=remembered[field]||'unknown';changed=true;}});item.sourceConfidence='High';item.sourceMethod='Remembered correction';return changed;}
   var proteinSupport=['chicken breast','chicken','turkey','fish','salmon','tuna','shrimp','lean beef','sirloin','egg','greek yogurt','yogurt','cottage cheese','milk','tofu','tempeh','bean','lentil','chickpea','pea','protein powder','whey','seitan'];
   var proteinLimit=['bacon','sausage','hot dog','pepperoni','salami','bologna','fried chicken','processed meat','rib'];
-  var carbSupport=['oatmeal','oat','brown rice','wild rice','quinoa','whole grain','whole wheat','barley','farro','bean','lentil','chickpea','sweet potato','potato','fruit','apple','banana','berry','orange','vegetable','broccoli','spinach'];
-  var carbLimit=['candy','soda','soft drink','juice','sports drink','energy gel','gel','chew','sugar','honey','syrup','cookie','cake','pastry','donut','doughnut','white bread','white rice','sweetened cereal'];
+  var carbSupport=['oatmeal','oat','brown rice','wild rice','quinoa','whole grain','whole wheat','whole rye','barley','farro','bran','bean','lentil','chickpea','sweet potato','potato','fruit','apple','banana','berry','berries','orange','vegetable','broccoli','spinach'];
+  var carbLimit=['candy','soda','soft drink','juice','sports drink','energy gel','gel','chew','sugar','cane sugar','corn syrup','high fructose corn syrup','honey','syrup','enriched wheat flour','refined flour','white flour','cookie','cake','pastry','donut','doughnut','white bread','white rice','sweetened cereal'];
   var fatSupport=['olive oil','avocado','almond','walnut','peanut','nut butter','seed','chia','flax','salmon','tuna'];
   var fatLimit=['butter','lard','shortening','coconut oil','cream','cheese','bacon','sausage','pepperoni','fried'];
-  if((parseFloat(item.prot)||0)>0&&!item.proteinSource){if(foodNameHasAny(classificationText,proteinLimit)){item.proteinSource='limit';changed=true;}else if(foodNameHasAny(classificationText,proteinSupport)){item.proteinSource='support';changed=true;}}
-  if((parseFloat(item.carbs)||0)>0&&!item.carbSource){if(foodNameHasAny(classificationText,carbLimit)){item.carbSource='limit';changed=true;}else if(foodNameHasAny(classificationText,carbSupport)){item.carbSource='support';changed=true;}}
-  if((parseFloat(item.fat)||0)>0&&!item.fatSource){if(foodNameHasAny(classificationText,fatLimit)){item.fatSource='limit';changed=true;}else if(foodNameHasAny(classificationText,fatSupport)){item.fatSource='support';changed=true;}}
-  if(changed){item.sourceClassificationAuto=true;item.sourceConfidence=item.source==='barcode'&&item.ingredientsText?'High':'Medium';item.sourceMethod=item.source==='barcode'?'Barcode + ingredients':'Food-name match';}
+  if((parseFloat(item.prot)||0)>0&&!item.proteinSource){var proteinChoice=foodSourceChoice(classificationText,proteinSupport,proteinLimit);if(proteinChoice){item.proteinSource=proteinChoice;changed=true;}}
+  if((parseFloat(item.carbs)||0)>0&&!item.carbSource){var carbChoice=foodSourceChoice(classificationText,carbSupport,carbLimit);if(carbChoice){item.carbSource=carbChoice;changed=true;}}
+  if((parseFloat(item.fat)||0)>0&&!item.fatSource){var fatChoice=foodSourceChoice(classificationText,fatSupport,fatLimit);if(fatChoice){item.fatSource=fatChoice;changed=true;}}
+  if(changed){item.sourceClassificationAuto=true;item.sourceConfidence=(item.source==='barcode'||item.source==='label')&&item.ingredientsText?'High':'Medium';item.sourceMethod=item.source==='barcode'?'Barcode + ingredients':item.source==='label'&&item.ingredientsText?'Label + ingredients':'Food-name match';}
   else if(!item.sourceConfidence){item.sourceConfidence='Low';item.sourceMethod='Needs review';}
   return changed;
 }
@@ -6418,7 +6423,7 @@ function scanFoodLabel(ev){
         max_tokens:400,
         messages:[{role:'user',content:[
           {type:'image',source:{type:'base64',media_type:mtype,data:b64}},
-          {type:'text',text:'Read this nutrition label image carefully. Extract the per-serving nutrition facts and any visible product name. Respond with ONLY a single JSON object — no markdown, no code fences, no explanation, nothing else before or after. The JSON must have these exact keys:\n- "name": the product or food name visible anywhere on the label/package (use "Scanned Food" if not visible)\n- "cal": Calories per serving as a plain number\n- "prot": Protein grams per serving as a plain number\n- "fat": Total Fat grams per serving as a plain number\n- "carbs": Total Carbohydrate grams per serving as a plain number\n- "fiber": Dietary Fiber grams per serving as a plain number\n- "sugar": Total Sugars grams per serving as a plain number\n- "sodium": Sodium milligrams per serving as a plain number\n- "vitA": Vitamin A in mcg per serving as a plain number\n- "vitC": Vitamin C in mg per serving as a plain number\n- "vitD": Vitamin D in mcg per serving as a plain number\n- "calcium": Calcium in mg per serving as a plain number\n- "iron": Iron in mg per serving as a plain number\n- "potassium": Potassium in mg per serving as a plain number\nAll numeric values must be numbers, not strings. Use 0 if a value cannot be read from the label (do not guess). Output the JSON object only.'}
+          {type:'text',text:'Read this food package image carefully. Extract the per-serving Nutrition Facts, any visible product name, and the complete visible ingredient list. Use the ingredients to distinguish whole/complex carbohydrate sources from simple/refined sources when possible. Respond with ONLY a single JSON object — no markdown, no code fences, no explanation, nothing else before or after. The JSON must have these exact keys:\n- "name": the product or food name visible anywhere on the label/package (use "Scanned Food" if not visible)\n- "ingredientsText": the complete ingredient list exactly as visible (use an empty string if it is not visible; do not guess)\n- "cal": Calories per serving as a plain number\n- "prot": Protein grams per serving as a plain number\n- "fat": Total Fat grams per serving as a plain number\n- "carbs": Total Carbohydrate grams per serving as a plain number\n- "fiber": Dietary Fiber grams per serving as a plain number\n- "sugar": Total Sugars grams per serving as a plain number\n- "sodium": Sodium milligrams per serving as a plain number\n- "vitA": Vitamin A in mcg per serving as a plain number\n- "vitC": Vitamin C in mg per serving as a plain number\n- "vitD": Vitamin D in mcg per serving as a plain number\n- "calcium": Calcium in mg per serving as a plain number\n- "iron": Iron in mg per serving as a plain number\n- "potassium": Potassium in mg per serving as a plain number\nAll numeric values must be numbers, not strings. Use 0 if a numeric value cannot be read from the label. Never invent missing ingredients. Output the JSON object only.'}
         ]}]
       })
     }).then(function(r){return r.json();}).then(function(data){
@@ -6431,7 +6436,7 @@ function scanFoodLabel(ev){
         if(m)try{parsed=JSON.parse(m[0]);}catch(e2){throw new Error('Could not parse AI response: '+txt.slice(0,100));}
         else throw new Error('No JSON found in response: '+txt.slice(0,100));
       }
-      window._pendingScanFood={name:parsed.name||'Scanned Food',cal:parsed.cal||null,prot:parsed.prot||null,fat:parsed.fat||null,carbs:parsed.carbs||null};
+      window._pendingScanFood={name:parsed.name||'Scanned Food',ingredientsText:String(parsed.ingredientsText||'').trim(),cal:parsed.cal||null,prot:parsed.prot||null,fat:parsed.fat||null,carbs:parsed.carbs||null};
       MICRO_FIELDS.forEach(function(f){window._pendingScanFood[f]=(parsed[f]!==undefined&&parsed[f]!==null&&parsed[f]!==0)?parsed[f]:null;});
       window._pendingScanFood.source='label';inferFoodMacroSources(window._pendingScanFood);var scanHeading=document.getElementById('scanConfirmTitle');if(scanHeading)scanHeading.textContent='Food Label Scanned';
       var nameEl=document.getElementById('scanResultName'),macroEl=document.getElementById('scanResultMacros'),modal=document.getElementById('scanConfirmModal');
@@ -6442,7 +6447,9 @@ function scanFoodLabel(ev){
           +(window._pendingScanFood.prot||0)+'g protein per serving &nbsp;|&nbsp; '
           +(window._pendingScanFood.fat||0)+'g fat per serving &nbsp;|&nbsp; '
           +(window._pendingScanFood.carbs||0)+'g carbs per serving'
-          +(microSummary?'<div style="margin-top:6px;font-size:0.76rem;color:#0f766e;">'+microSummary+'</div>':'');
+          +(microSummary?'<div style="margin-top:6px;font-size:0.76rem;color:#0f766e;">'+microSummary+'</div>':'')
+          +(window._pendingScanFood.ingredientsText?'<div style="margin-top:7px;padding-top:6px;border-top:1px solid #e2e8f0;font-size:.72rem;color:#475569;"><strong>Ingredients read:</strong> '+escHtml(window._pendingScanFood.ingredientsText)+'</div>':'<div style="margin-top:7px;font-size:.7rem;color:#92400e;">Ingredients were not visible; source classification may need review.</div>')
+          +'<div style="margin-top:5px;font-size:.68rem;color:#64748b;">'+escHtml(window._pendingScanFood.sourceConfidence||'Low')+' source confidence</div>';
       }
       if(modal)modal.style.display='flex';
     }).catch(function(err){
