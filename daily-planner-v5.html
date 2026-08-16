@@ -1839,8 +1839,9 @@ body{
       <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:end;">
         <div style="flex:2 1 180px;"><label style="display:block;font-size:0.72rem;font-weight:700;color:#555;margin-bottom:3px;">Audiobook name</label><input id="audioPlanBook" type="text" placeholder="Enter the book title" style="width:100%;box-sizing:border-box;border:1px solid #cfd5ff;border-radius:6px;padding:7px 9px;font-size:0.84rem;"></div>
         <div style="flex:2 1 180px;"><label style="display:block;font-size:0.72rem;font-weight:700;color:#555;margin-bottom:3px;">Author</label><input id="audioPlanAuthor" type="text" placeholder="Enter the author" style="width:100%;box-sizing:border-box;border:1px solid #cfd5ff;border-radius:6px;padding:7px 9px;font-size:0.84rem;"></div>
+        <div style="flex:1.5 1 180px;"><label style="display:block;font-size:0.72rem;font-weight:700;color:#555;margin-bottom:3px;">Total audiobook length</label><div style="display:flex;gap:6px;"><input id="audioPlanHours" type="number" min="0" step="1" inputmode="numeric" placeholder="Hours" aria-label="Total audiobook hours" style="min-width:0;width:50%;box-sizing:border-box;border:1px solid #cfd5ff;border-radius:6px;padding:7px 9px;font-size:0.84rem;"><input id="audioPlanMinutes" type="number" min="0" max="59" step="1" inputmode="numeric" placeholder="Minutes" aria-label="Additional audiobook minutes" style="min-width:0;width:50%;box-sizing:border-box;border:1px solid #cfd5ff;border-radius:6px;padding:7px 9px;font-size:0.84rem;"></div></div>
         <div style="flex:1 1 145px;"><label style="display:block;font-size:0.72rem;font-weight:700;color:#555;margin-bottom:3px;">Finish by</label><input id="audioPlanDate" type="date" style="width:100%;box-sizing:border-box;border:1px solid #cfd5ff;border-radius:6px;padding:7px 9px;font-size:0.84rem;"></div>
-        <button id="audioPlanCreateBtn" onclick="createAudiobookFinishPlan()" style="background:#667eea;color:#fff;border:none;border-radius:7px;padding:8px 13px;font-size:0.8rem;font-weight:700;cursor:pointer;white-space:nowrap;">Create Outline</button>
+        <button id="audioPlanCreateBtn" onclick="createAudiobookFinishPlan()" style="background:#667eea;color:#fff;border:none;border-radius:7px;padding:8px 13px;font-size:0.8rem;font-weight:700;cursor:pointer;white-space:nowrap;">Create Schedule</button>
       </div>
       <div id="audioPlanResult" style="display:none;margin-top:10px;"></div>
     </div>
@@ -8682,38 +8683,18 @@ function toggleAudiobookFinishPlanner(forceOpen){
   var date=document.getElementById('audioPlanDate');
   if(open&&date&&!date.value){var d=new Date();d.setDate(d.getDate()+30);date.value=dk(d);}
 }
-function audiobookCatalogSearch(title,author){
-  return journalProtectedFunction({action:'audible-search',title:title,author:author||''}).then(function(book){
-    return{title:book.title||title,author:book.author||'',narrator:book.narrator||'',totalSeconds:Number(book.totalSeconds)||0,artwork:book.artwork||'',source:'Audible'};
-  }).catch(function(){
-    return fetch('https://itunes.apple.com/search?term='+encodeURIComponent(title+' '+(author||''))+'&media=audiobook&entity=audiobook&limit=20')
-      .then(function(r){if(!r.ok)throw new Error('Audiobook catalogs are unavailable.');return r.json();})
-      .then(function(data){
-        var wanted=String(title||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
-        function score(item){var found=String(item.collectionName||item.trackName||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim(),points=found===wanted?1000:(found.indexOf(wanted)>=0||wanted.indexOf(found)>=0?500:wanted.split(' ').reduce(function(n,w){return n+(w&&found.indexOf(w)>=0?10:0);},0)),wantedAuthor=String(author||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim(),foundAuthor=String(item.artistName||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();if(wantedAuthor&&foundAuthor&&(foundAuthor.indexOf(wantedAuthor)>=0||wantedAuthor.indexOf(foundAuthor)>=0))points+=750;return points;}
-        var item=(data.results||[]).filter(function(x){return Number(x.trackTimeMillis)>0;}).sort(function(a,b){return score(b)-score(a);})[0];
-        if(!item)throw new Error('No timed edition was found in Audible or Apple. Try adding the author name.');
-        return{title:item.collectionName||item.trackName||title,author:item.artistName||'',narrator:'',totalSeconds:Math.round(Number(item.trackTimeMillis)/1000),artwork:(item.artworkUrl100||'').replace(/\/\d+x\d+bb\./,'/300x300bb.'),source:'Apple Audiobooks'};
-      });
-  });
-}
 function createAudiobookFinishPlan(){
-  var title=((document.getElementById('audioPlanBook')||{}).value||'').trim(),author=((document.getElementById('audioPlanAuthor')||{}).value||'').trim(),finish=(document.getElementById('audioPlanDate')||{}).value||'';
+  var title=((document.getElementById('audioPlanBook')||{}).value||'').trim(),author=((document.getElementById('audioPlanAuthor')||{}).value||'').trim(),hours=Math.max(0,parseInt((document.getElementById('audioPlanHours')||{}).value,10)||0),minutes=Math.max(0,parseInt((document.getElementById('audioPlanMinutes')||{}).value,10)||0),finish=(document.getElementById('audioPlanDate')||{}).value||'';
   if(!title){alert('Enter the audiobook name first.');return;}
   if(!author){alert('Enter the audiobook author.');return;}
+  if(minutes>59){alert('Additional minutes must be between 0 and 59.');return;}
+  var totalSec=(hours*60+minutes)*60;
+  if(totalSec<=0){alert('Enter the total audiobook length.');return;}
   if(!finish){alert('Choose a finish date.');return;}
   var startKey=dk(today),start=new Date(startKey+'T00:00:00'),end=new Date(finish+'T00:00:00'),days=Math.floor((end-start)/86400000)+1;
   if(days<1){alert('The finish date must be today or later.');return;}
-  var btn=document.getElementById('audioPlanCreateBtn'),result=document.getElementById('audioPlanResult');
-  if(btn){btn.disabled=true;btn.textContent='Finding audiobook...';}
-  if(result){result.style.display='block';result.innerHTML='<div style="color:#667eea;font-size:0.8rem;">Looking up the audiobook edition and duration...</div>';}
-  audiobookCatalogSearch(title,author).then(function(book){
-    if(!book)throw new Error('No timed audiobook edition was found. Try adding the author name.');
-    var totalSec=Math.round(Number(book.totalSeconds)||0);
-    var plan={query:title,queryAuthor:author,title:book.title||title,author:book.author||author,narrator:book.narrator||'',source:book.source||'Audiobook catalog',startDate:startKey,finishDate:finish,totalSeconds:totalSec,dailySeconds:Math.ceil(totalSec/days),days:days,artwork:book.artwork||'',createdAt:new Date().toISOString()};
-    localStorage.setItem('audiobook_finish_plan',JSON.stringify(plan));renderAudiobookFinishPlan();
-    if(btn){btn.disabled=false;btn.textContent='Create Outline';}
-  }).catch(function(err){if(result)result.innerHTML='<div style="color:#c0392b;font-size:0.8rem;">'+escHtml(err.message)+'</div>';if(btn){btn.disabled=false;btn.textContent='Create Outline';}});
+  var plan={query:title,queryAuthor:author,title:title,author:author,narrator:'',source:'the audiobook length you entered',startDate:startKey,finishDate:finish,totalSeconds:totalSec,dailySeconds:Math.ceil(totalSec/days),days:days,artwork:'',createdAt:new Date().toISOString()};
+  localStorage.setItem('audiobook_finish_plan',JSON.stringify(plan));renderAudiobookFinishPlan();
 }
 function formatSecondsLong(sec){
   sec=Math.max(0,Math.round(Number(sec)||0));var h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60,parts=[];
@@ -8733,6 +8714,7 @@ function renderAudiobookFinishPlan(){
     +'<button onclick="deleteAudiobookFinishPlan()" title="Remove plan" style="background:none;border:1px solid #ddd;border-radius:5px;color:#999;cursor:pointer;">&#x2715;</button></div><div style="font-size:0.75rem;color:#555;margin-top:9px;">'+milestones.join('')+'</div><div style="font-size:0.69rem;color:#888;margin-top:7px;">Based on the closest timed edition found in '+escHtml(p.source||'the audiobook catalog')+'.</div></div>';
   var title=document.getElementById('audioPlanBook');if(title&&!title.value)title.value=p.query||p.title||'';
   var author=document.getElementById('audioPlanAuthor');if(author&&!author.value)author.value=p.queryAuthor||p.author||'';
+  var hours=document.getElementById('audioPlanHours'),minutes=document.getElementById('audioPlanMinutes'),totalMinutes=Math.round((Number(p.totalSeconds)||0)/60);if(hours&&!hours.value)hours.value=Math.floor(totalMinutes/60)||'';if(minutes&&!minutes.value)minutes.value=totalMinutes%60||'';
   var date=document.getElementById('audioPlanDate');if(date&&!date.value)date.value=p.finishDate||'';
 }
 function deleteAudiobookFinishPlan(){if(!confirm('Remove this audiobook completion plan?'))return;localStorage.removeItem('audiobook_finish_plan');renderAudiobookFinishPlan();}
