@@ -2847,6 +2847,12 @@ body{
         <span style="color:#92400e;">&#x25CF; Carbohydrates <strong id="ratioCarbs">0%</strong></span>
         <span style="color:#1e40af;">&#x25CF; Fat <strong id="ratioFat">0%</strong></span>
       </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:6px;margin-top:8px;">
+        <div style="background:#fff;border:1px solid #fecaca;border-radius:7px;padding:7px;"><strong style="display:block;color:#991b1b;font-size:0.72rem;margin-bottom:3px;">Protein Sources</strong><div style="font-size:0.68rem;color:#475569;line-height:1.55;">Lean / plant: <strong id="sourceProtSupport">0%</strong><br>Higher-fat / processed: <strong id="sourceProtLimit">0%</strong><br>Unclassified: <strong id="sourceProtUnknown">0%</strong></div></div>
+        <div style="background:#fff;border:1px solid #fed7aa;border-radius:7px;padding:7px;"><strong style="display:block;color:#92400e;font-size:0.72rem;margin-bottom:3px;">Carbohydrate Sources</strong><div style="font-size:0.68rem;color:#475569;line-height:1.55;">Complex / fiber-rich: <strong id="sourceCarbSupport">0%</strong><br>Simple / refined: <strong id="sourceCarbLimit">0%</strong><br>Unclassified: <strong id="sourceCarbUnknown">0%</strong></div></div>
+        <div style="background:#fff;border:1px solid #bfdbfe;border-radius:7px;padding:7px;"><strong style="display:block;color:#1e40af;font-size:0.72rem;margin-bottom:3px;">Fat Sources</strong><div style="font-size:0.68rem;color:#475569;line-height:1.55;">Unsaturated: <strong id="sourceFatSupport">0%</strong><br>Saturated / trans: <strong id="sourceFatLimit">0%</strong><br>Unclassified: <strong id="sourceFatUnknown">0%</strong></div></div>
+      </div>
+      <div style="font-size:0.64rem;color:#64748b;margin-top:6px;line-height:1.35;">Runner context: this shows source mix, not a medical “good/bad” score. Simple carbohydrates can be useful around training. Classify each food below for accurate percentages.</div>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;padding-top:6px;border-top:1px dashed #dcdcdc;font-size:0.74rem;color:#666;">
       <span>&#x1F33E; <strong id="totFiber">0</strong>g fiber</span>
@@ -5563,6 +5569,16 @@ function _mkMacroCell(labelTxt, field, val, highlight, itemId){
   lbl.appendChild(inp);
   return lbl;
 }
+function _mkMacroSourceSelect(labelTxt,field,val,options,itemId){
+  var lbl=document.createElement('label');
+  lbl.style.cssText='font-size:0.66rem;color:#475569;display:flex;flex-direction:column;gap:2px;min-width:0;';
+  lbl.textContent=labelTxt;
+  var select=document.createElement('select');
+  select.style.cssText='width:100%;min-width:0;border:1px solid #cbd5e1;border-radius:5px;padding:4px 3px;font-size:0.7rem;background:#fff;color:#334155;';
+  [{v:'',l:'Unclassified'}].concat(options).forEach(function(option){var el=document.createElement('option');el.value=option.v;el.textContent=option.l;if(option.v===val)el.selected=true;select.appendChild(el);});
+  select.onchange=(function(id,f){return function(){updateFoodField(id,f,this.value);};})(itemId,field);
+  lbl.appendChild(select);return lbl;
+}
 
 function renderFoodItems(){
   var log=window._foodLog||[];
@@ -5622,6 +5638,15 @@ function renderFoodItems(){
         grid.appendChild(_mkMacroCell('Fat','fat',it.fat,false,it.id));
         grid.appendChild(_mkMacroCell('Carbs','carbs',it.carbs,false,it.id));
         div.appendChild(grid);
+
+        // Source classifications make the daily runner-focused source percentages explicit.
+        // They are user-selected so the app never guesses from a food name alone.
+        var sourceGrid=document.createElement('div');
+        sourceGrid.style.cssText='display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:5px;margin:5px 0 6px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:6px;';
+        sourceGrid.appendChild(_mkMacroSourceSelect('Protein source','proteinSource',it.proteinSource||'',[{v:'support',l:'Lean / plant'},{v:'limit',l:'Higher-fat / processed'}],it.id));
+        sourceGrid.appendChild(_mkMacroSourceSelect('Carb source','carbSource',it.carbSource||'',[{v:'support',l:'Complex / fiber-rich'},{v:'limit',l:'Simple / refined'}],it.id));
+        sourceGrid.appendChild(_mkMacroSourceSelect('Fat source','fatSource',it.fatSource||'',[{v:'support',l:'Unsaturated'},{v:'limit',l:'Saturated / trans'}],it.id));
+        div.appendChild(sourceGrid);
 
         // Total line (whenever servings isn't exactly 1 — covers partial servings like 0.25 too)
         if(svgs!==1){
@@ -5944,6 +5969,16 @@ function updateMacroTotals(){
   var macroRatios=macroCalTotal?{prot:macroCalories.prot/macroCalTotal*100,carbs:macroCalories.carbs/macroCalTotal*100,fat:macroCalories.fat/macroCalTotal*100}:{prot:0,carbs:0,fat:0};
   var setRatio=function(kind,labelId,barId){var label=document.getElementById(labelId),segment=document.getElementById(barId),value=macroRatios[kind]||0;if(label)label.textContent=value.toFixed(1)+'%';if(segment)segment.style.width=value+'%';};
   setRatio('prot','ratioProt','ratioProtBar');setRatio('carbs','ratioCarbs','ratioCarbsBar');setRatio('fat','ratioFat','ratioFatBar');
+  function macroSourceRatios(macroField,sourceField){
+    var grams={support:0,limit:0,unknown:0};
+    log.forEach(function(item){var amount=(parseFloat(item[macroField])||0)*(parseFloat(item.servings)||1);if(!amount)return;var source=item[sourceField];grams[source==='support'?'support':source==='limit'?'limit':'unknown']+=amount;});
+    var total=grams.support+grams.limit+grams.unknown;
+    return total?{support:grams.support/total*100,limit:grams.limit/total*100,unknown:grams.unknown/total*100}:{support:0,limit:0,unknown:0};
+  }
+  function showMacroSources(prefix,values){['Support','Limit','Unknown'].forEach(function(label){var key=label.toLowerCase(),el=document.getElementById('source'+prefix+label);if(el)el.textContent=(values[key]||0).toFixed(1)+'%';});}
+  showMacroSources('Prot',macroSourceRatios('prot','proteinSource'));
+  showMacroSources('Carb',macroSourceRatios('carbs','carbSource'));
+  showMacroSources('Fat',macroSourceRatios('fat','fatSource'));
   MICRO_FIELDS.forEach(function(f){set(MICRO_META[f].elId,totals[f]||0);});
   // Update hidden fields for backward compat save
   var setHid=function(id,v){var e=document.getElementById(id);if(e)e.value=hasData?Math.round(v):'';};
@@ -6024,7 +6059,7 @@ function saveFoodAsFavorite(itemId){
   var favs=getFavorites();
   var exists=favs.some(function(f){return f.name.toLowerCase()===item.name.toLowerCase();});
   if(exists){if(!confirm('"'+item.name+'" is already in favorites. Add again?'))return;}
-  var fav={name:item.name,cal:item.cal,prot:item.prot,fat:item.fat,carbs:item.carbs};
+  var fav={name:item.name,cal:item.cal,prot:item.prot,fat:item.fat,carbs:item.carbs,proteinSource:item.proteinSource||'',carbSource:item.carbSource||'',fatSource:item.fatSource||''};
   MICRO_FIELDS.forEach(function(f){fav[f]=item[f]!=null?item[f]:null;});
   favs.push(fav);saveFavorites(favs);
   alert('⭐ "'+item.name+'" saved to favorites!');
@@ -6079,7 +6114,7 @@ function loadFavoriteItem(idx){
   var favs=getFavorites();var f=favs[idx];if(!f)return;
   var target=(document.getElementById('favTargetMeal')||{value:'breakfast'}).value;
   if(!window._foodLog)window._foodLog=[];
-  var favItem={id:'f'+Date.now(),meal:target,name:f.name,cal:f.cal,prot:f.prot,fat:f.fat,carbs:f.carbs};
+  var favItem={id:'f'+Date.now(),meal:target,name:f.name,cal:f.cal,prot:f.prot,fat:f.fat,carbs:f.carbs,proteinSource:f.proteinSource||'',carbSource:f.carbSource||'',fatSource:f.fatSource||''};
   MICRO_FIELDS.forEach(function(fld){favItem[fld]=f[fld]!=null?f[fld]:null;});
   window._foodLog.push(favItem);
   _setMealOpen(target,true);
@@ -6109,7 +6144,7 @@ function confirmSaveMeal(){
   window._saveMealItems=null;
   var meals=getSavedMeals();
   meals.push({name:name,category:category,items:log.map(function(x){
-    var it={name:x.name,cal:x.cal,prot:x.prot,fat:x.fat,carbs:x.carbs};
+    var it={name:x.name,cal:x.cal,prot:x.prot,fat:x.fat,carbs:x.carbs,proteinSource:x.proteinSource||'',carbSource:x.carbSource||'',fatSource:x.fatSource||''};
     MICRO_FIELDS.forEach(function(f){it[f]=x[f]!=null?x[f]:null;});
     return it;
   })});
@@ -6175,7 +6210,7 @@ function loadMeal(idx){
   var target=perSel?perSel.value:(m.category||(document.getElementById('favTargetMeal')||{value:'breakfast'}).value);
   if(!window._foodLog)window._foodLog=[];
   m.items.forEach(function(it){
-    var loadedItem={id:'f'+Date.now()+'_'+Math.random().toString(36).slice(2,5),meal:target,name:it.name,cal:it.cal,prot:it.prot,fat:it.fat,carbs:it.carbs};
+    var loadedItem={id:'f'+Date.now()+'_'+Math.random().toString(36).slice(2,5),meal:target,name:it.name,cal:it.cal,prot:it.prot,fat:it.fat,carbs:it.carbs,proteinSource:it.proteinSource||'',carbSource:it.carbSource||'',fatSource:it.fatSource||''};
     MICRO_FIELDS.forEach(function(f){loadedItem[f]=it[f]!=null?it[f]:null;});
     window._foodLog.push(loadedItem);
   });
