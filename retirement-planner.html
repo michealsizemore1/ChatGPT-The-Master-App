@@ -724,7 +724,7 @@
      that don't have this problem). */
   @media (max-width:600px){
     .shell{padding:14px;}
-    .shared-notes-card{padding-left:14px; padding-right:14px;}
+    .shared-notes-card{padding-left:14px; padding-right:14px; width:100%; position:static; left:auto; right:auto; margin:0 0 16px;}
     .two-col, .three-col{grid-template-columns:1fr;}
   }
   /* Dynamic row-lists (Future Expenses, Windfalls, Insurance, Brokerage Pies, Debt, etc.) use a tight
@@ -1462,6 +1462,13 @@
             <div id="spousalStartAgeDateHint" class="age-date-hint"></div>
           </div>
         </div>
+        <div class="two-col" id="spouseOwnBenefitFields" style="display:none;">
+          <div class="field"><label>Spouse's own Social Security ($/mo, today's $)</label><input type="number" id="spouseSSMonthly" value="0" min="0" step="50"></div>
+          <div class="field"><label>Spouse's own SS start age</label><input type="number" id="spouseSSAge" value="67" min="62" max="70" oninput="syncDateFromAge('spouseSSAge','spouseSSAgeDate','spouseSSAgeDateHint','spouseAge')">
+            <input type="month" id="spouseSSAgeDate" class="age-date-input" value="" oninput="syncAgeDate('spouseSSAgeDate','spouseSSAge','spouseSSAgeDateHint','spouseAge')">
+            <div id="spouseSSAgeDateHint" class="age-date-hint"></div>
+          </div>
+        </div>
         <hr class="divider">
         <div class="mini-label">Annuity</div>
         <div class="three-col">
@@ -1472,7 +1479,7 @@
           </div>
           <div class="field"><label>Annuity yearly increase (%)</label><input type="number" id="annuityGrowth" value="0" step="0.1"></div>
         </div>
-        <p style="font-size:16.5px;color:var(--muted);margin:6px 0 0;line-height:1.6;">Social Security (85%) and the annuity are taxed (Federal + Idaho) before comparing guaranteed income to spending (see the Income Gap &amp; Withdrawals page). Pensions and VA disability are set in the Pensions &amp; VA Disability card near the top of this page — VA disability stays fully tax-free.</p>
+        <p style="font-size:16.5px;color:var(--muted);margin:6px 0 0;line-height:1.6;">Up to 85% of Social Security may be federally taxable under the provisional-income formula; Idaho does not tax Social Security. The annuity and pensions are taxable, while VA disability remains tax-free.</p>
       </div>
 
       <div class="card">
@@ -1526,7 +1533,7 @@
         <hr class="divider">
         <div class="mini-label">Survivor tax treatment</div>
         <div class="checkbox-row"><input type="checkbox" id="survivorQualifyingSpouseTwoYears"><label for="survivorQualifyingSpouseTwoYears">Use Qualifying Surviving Spouse tax rates for two years after death (requires a qualifying dependent child)</label></div>
-        <div class="field"><label>Single standard deduction ($/yr, 2026)</label><input type="number" id="survivorSingleStdDeduction" value="15750" min="0" step="50"></div>
+        <div class="field"><label>Single standard deduction ($/yr, 2026)</label><input type="number" id="survivorSingleStdDeduction" value="16100" min="0" step="50"></div>
         <div class="checkbox-row"><input type="checkbox" id="survivorSpousalRollover"><label for="survivorSpousalRollover">Assume spouse rolls the Traditional TSP into her own retirement account; use her age for RMDs</label></div>
         <div class="note" style="margin-top:8px;">The year of death uses Married Filing Jointly assumptions. After that, the planner uses Single federal, capital-gains, Idaho and IRMAA thresholds unless the qualifying-surviving-spouse option above is selected. That two-year status generally requires a qualifying dependent child. DIC and DIC Aid &amp; Attendance remain tax-free.</div>
         <p style="font-size:16.5px;color:var(--muted);margin:8px 0 0;line-height:1.5;">Military SBP pays 55% of your pension and is taxable income to your spouse; Government Civil Service survivor annuities max out at 50%. Both auto-calculate from your entered gross pension amounts and grow at that pension's own yearly increase rate. Your $162 monthly Military SBP deduction is modeled as an Insurance premium while you are alive, so the reference amount above is not added a second time. The Insurance premium stops in the separate survivorship scenario. DIC is tax-free and, since Jan. 2023, no longer offsets SBP.</p>
@@ -1895,7 +1902,7 @@
             <tbody id="gapRows"></tbody>
           </table>
         </div>
-        <p style="font-size:16.5px;color:var(--muted);margin:8px 0 0;line-height:1.5;">Guaranteed income here is shown after federal + Idaho income tax (progressive, using your standard deduction) — VA disability stays untaxed, but Social Security (85%), pension, and annuity income all have real tax owed on them before they're available to spend. A positive surplus means guaranteed income covers that year's spending with room to spare; a gap (shown in red) is the shortfall pulled from your accounts in the order set on the Money Flows page. Pre-retirement years aren't shown — spending and withdrawals aren't tracked against the portfolio until retirement.</p>
+        <p style="font-size:16.5px;color:var(--muted);margin:8px 0 0;line-height:1.5;">Guaranteed income here is shown after applicable federal and Idaho income tax. VA disability remains tax-free; up to 85% of Social Security may be federally taxable, but Idaho does not tax Social Security. A positive surplus means guaranteed income covers that year's spending; a red gap is funded from accounts in the order set on Money Flows.</p>
       </div>
     </div>
 
@@ -2530,7 +2537,7 @@
         <div class="dn-hdr"><span>&#x1F4DD; Notes</span><small>auto-saved, same on every page</small></div>
         <textarea class="shared-notes-textarea" oninput="updateSharedNotes(this.value)" placeholder="Jot down anything — questions for your financial advisor, things to double-check, reminders…" rows="3"></textarea>
       </div>
-      <div class="page-header"><h2>Settings</h2><p>Instructions, backup, restore, and integrations. <b>Build 2026.07.30.2</b></p></div>
+      <div class="page-header"><h2>Settings</h2><p>Instructions, backup, restore, and integrations. <b>Build 2026.08.13.1</b></p></div>
 
       <div class="card">
         <h3 onclick="toggleCard(this)">Secure Cloud Synchronization<span class="sub-label">Supabase — the same plan on every signed-in device</span></h3>
@@ -7949,6 +7956,7 @@ function recomputeAgesFromDates() {
     ['pension2AgeDate', 'pension2Age', 'pension2AgeDateHint', 'currentAge'],
     ['vaDisabilityAgeDate', 'vaDisabilityAge', 'vaDisabilityAgeDateHint', 'currentAge'],
     ['ssAgeDate', 'ssAge', 'ssAgeDateHint', 'currentAge'],
+    ['spouseSSAgeDate', 'spouseSSAge', 'spouseSSAgeDateHint', 'spouseAge'],
     ['spousalStartAgeDate', 'spousalStartAge', 'spousalStartAgeDateHint', 'spouseAge'],
     ['annuityStartAgeDate', 'annuityStartAge', 'annuityStartAgeDateHint', 'currentAge'],
     ['purchaseAgeDate', 'purchaseAge', 'purchaseAgeDateHint', 'currentAge'],
@@ -8540,11 +8548,13 @@ function readInputs() {
     ssCola: +els('ssCola').value/100,
     ssMonthly: +els('ssMonthly').value,
     ssAge: +els('ssAge').value,
+    ssStartDateRaw: els('ssAgeDate') ? els('ssAgeDate').value : '',
     pensionAnnual: +els('pensionAnnual').value,
     pensionGrowth: +els('pensionGrowth').value/100,
     pension2Annual: +els('pension2Annual').value,
     pension2Growth: +els('pension2Growth').value/100,
     pension2Age: +els('pension2Age').value,
+    pension2StartDateRaw: els('pension2AgeDate') ? els('pension2AgeDate').value : '',
     survivorshipDeathAge: +els('survivorshipDeathAge').value || 0,
     // survivorshipEnabled is intentionally omitted from the main inputs. It is enabled only by the
     // standalone Survivorship and Explorers scenario runs.
@@ -8563,7 +8573,7 @@ function readInputs() {
     dicAidAttendanceEnabled: els('dicAidAttendanceEnabled') ? els('dicAidAttendanceEnabled').checked : false,
     dicAidAttendanceMonthly: els('dicAidAttendanceMonthly') ? (+els('dicAidAttendanceMonthly').value || 0) : 0,
     survivorQualifyingSpouseTwoYears: els('survivorQualifyingSpouseTwoYears') ? els('survivorQualifyingSpouseTwoYears').checked : false,
-    survivorSingleStdDeduction: els('survivorSingleStdDeduction') ? (+els('survivorSingleStdDeduction').value || 15750) : 15750,
+    survivorSingleStdDeduction: els('survivorSingleStdDeduction') ? (+els('survivorSingleStdDeduction').value || 16100) : 16100,
     survivorSpousalRollover: els('survivorSpousalRollover') ? els('survivorSpousalRollover').checked : true,
     survivorFedvipMonthly: +els('survivorFedvipMonthly').value || 0,
     survivorMedicalContinues: els('survivorMedicalContinues') ? els('survivorMedicalContinues').checked : true,
@@ -8571,16 +8581,23 @@ function readInputs() {
     vaDisabilityAnnual: +els('vaDisabilityAnnual').value,
     vaDisabilityGrowth: +els('vaDisabilityGrowth').value/100,
     vaDisabilityAge: +els('vaDisabilityAge').value,
+    vaDisabilityStartDateRaw: els('vaDisabilityAgeDate') ? els('vaDisabilityAgeDate').value : '',
     pensionAge: +els('pensionAge').value,
+    pensionStartDateRaw: els('pensionAgeDate') ? els('pensionAgeDate').value : '',
     annuityMonthly: +els('annuityMonthly').value,
     annuityStartAge: +els('annuityStartAge').value,
+    annuityStartDateRaw: els('annuityStartAgeDate') ? els('annuityStartAgeDate').value : '',
     annuityGrowth: +els('annuityGrowth').value/100,
     spouseCurrentAge: +els('spouseAge').value,
     spouseLifeExpectancy: +els('spouseLifeExpectancy').value,
     spouseBirthMonth: +els('spouseBirthMonth').value || 1,
     spouseWorks: els('spouseWorks').checked,
+    spouseSSMonthly: els('spouseSSMonthly') ? (+els('spouseSSMonthly').value || 0) : 0,
+    spouseSSAge: els('spouseSSAge') ? (+els('spouseSSAge').value || 67) : 67,
+    spouseSSStartDateRaw: els('spouseSSAgeDate') ? els('spouseSSAgeDate').value : '',
     spousalPct: +els('spousalPct').value/100,
     spousalStartAge: +els('spousalStartAge').value,
+    spousalStartDateRaw: els('spousalStartAgeDate') ? els('spousalStartAgeDate').value : '',
     ltcEnabled: els('ltcEnabled').checked,
     ltcStartAge: +els('ltcStartAge').value,
     ltcDuration: +els('ltcDuration').value,
@@ -8650,9 +8667,12 @@ function readInputs() {
 // Only applies to a milestone strictly in the future (eligibilityAge > currentAge) — anything whose eligibility
 // age is already at or before today's age (e.g. a pension already being drawn) is treated as already fully
 // active for the whole current year, not freshly starting, so it isn't clipped down to a couple months.
-function prorateFirstYear(age, eligibilityAge, fullAmount, birthMonth, currentAge) {
+function prorateFirstYear(age, eligibilityAge, fullAmount, birthMonth, currentAge, startDateRaw = '') {
   if (age < eligibilityAge) return 0;
-  if (age === eligibilityAge && eligibilityAge > currentAge) return fullAmount * ((13 - (birthMonth || 1)) / 12);
+  if (age === eligibilityAge && eligibilityAge > currentAge) {
+    const selectedMonth = +(String(startDateRaw || '').split('-')[1]) || birthMonth || 1;
+    return fullAmount * ((13 - selectedMonth) / 12);
+  }
   return fullAmount;
 }
 // Job income is either fully counted (every age below retirementAge) or fully zeroed (every age at or
@@ -9093,7 +9113,7 @@ function projectRun(inputs, ctx, randomize, shocks) {
     // grossWithdrawal and withdrawalByAccount are declared earlier in this loop iteration (right after
     // jobLossActive, above the mortgage/LTC/Future Expenses pulls) so those pre-retirement-capable draws
     // can also feed into them — not redeclared here, just continuing to accumulate onto the same objects.
-    let contributions=0, withdrawal=0, guaranteedIncome=0, guaranteedIncomeAfterTax=0, spending=0, spousalBenefit=0, ssAmount=0, pensionAmount=0, pension2Amount=0, vaDisabilityAmount=0, annuityAmount=0, sbpAmount=0, dicAmount=0, dicAidAttendanceAmount=0, essentialFloor=0;
+    let contributions=0, withdrawal=0, guaranteedIncome=0, guaranteedIncomeAfterTax=0, spending=0, spousalBenefit=0, ssAmount=0, pensionAmount=0, pension2Amount=0, vaDisabilityAmount=0, annuityAmount=0, sbpAmount=0, dicAmount=0, dicAidAttendanceAmount=0, essentialFloor=0, transitionJobIncome=0, transitionTradContrib=0;
     let fedMarginal=null, ltcgMarginal=null;
     // Hoisted so the row-push below (shared by both branches) can expose the already-computed IRMAA
     // surcharge for display/charting purposes — irmaaSurchargeMonthly itself stays a local const right
@@ -9116,8 +9136,10 @@ function projectRun(inputs, ctx, randomize, shocks) {
     // Each stream is prorated for the single calendar year it first kicks in (see prorateFirstYear above),
     // using whichever spouse's birthday actually governs that milestone — the spousal SS benefit follows the
     // spouse's own birth month, everything else follows the primary's.
-    ssAmount = prorateFirstYear(age, inputs.ssAge, inputs.ssMonthly*12*ssInflator, inputs.birthMonth, inputs.currentAge);
-    spousalBenefit = !inputs.spouseWorks ? prorateFirstYear(age, ctx.effectiveSpousalStartAge, inputs.ssMonthly*inputs.spousalPct*12*ssInflator, inputs.spouseBirthMonth, inputs.currentAge) : 0;
+    ssAmount = prorateFirstYear(age, inputs.ssAge, inputs.ssMonthly*12*ssInflator, inputs.birthMonth, inputs.currentAge, inputs.ssStartDateRaw);
+    spousalBenefit = inputs.spouseWorks
+      ? prorateFirstYear(age, ctx.effectiveSpouseOwnSSStartAge, inputs.spouseSSMonthly*12*ssInflator, inputs.spouseBirthMonth, inputs.currentAge, inputs.spouseSSStartDateRaw)
+      : prorateFirstYear(age, ctx.effectiveSpousalStartAge, inputs.ssMonthly*inputs.spousalPct*12*ssInflator, inputs.spouseBirthMonth, inputs.currentAge, inputs.spousalStartDateRaw);
     // Real-world Social Security survivor rule: once you're past your own life expectancy, your spouse steps up
     // from the ~50% spousal benefit to your full benefit as a 100% survivor benefit. ssAmount itself doesn't
     // need to change to reflect that (it already computes your full benefit — the dollars just keep flowing,
@@ -9126,14 +9148,16 @@ function projectRun(inputs, ctx, randomize, shocks) {
     // additionally stops primary-only income and applies configured SBP/DIC and survivor expenses.
     // Death timing is intentionally modeled only when a separate survivorship scenario enables it.
     const primaryDeceased = survivorshipActive;
-    pensionAmount = prorateFirstYear(age, inputs.pensionAge, inputs.pensionAnnual*pensionInflator, inputs.birthMonth, inputs.currentAge);
-    pension2Amount = prorateFirstYear(age, inputs.pension2Age, inputs.pension2Annual*pension2Inflator, inputs.birthMonth, inputs.currentAge);
-    vaDisabilityAmount = prorateFirstYear(age, inputs.vaDisabilityAge, inputs.vaDisabilityAnnual*vaInflator, inputs.birthMonth, inputs.currentAge);
-    annuityAmount = prorateFirstYear(age, inputs.annuityStartAge, inputs.annuityMonthly*12*annuityInflator, inputs.birthMonth, inputs.currentAge);
+    pensionAmount = prorateFirstYear(age, inputs.pensionAge, inputs.pensionAnnual*pensionInflator, inputs.birthMonth, inputs.currentAge, inputs.pensionStartDateRaw);
+    pension2Amount = prorateFirstYear(age, inputs.pension2Age, inputs.pension2Annual*pension2Inflator, inputs.birthMonth, inputs.currentAge, inputs.pension2StartDateRaw);
+    vaDisabilityAmount = prorateFirstYear(age, inputs.vaDisabilityAge, inputs.vaDisabilityAnnual*vaInflator, inputs.birthMonth, inputs.currentAge, inputs.vaDisabilityStartDateRaw);
+    annuityAmount = prorateFirstYear(age, inputs.annuityStartAge, inputs.annuityMonthly*12*annuityInflator, inputs.birthMonth, inputs.currentAge, inputs.annuityStartDateRaw);
     if (survivorshipActive) {
       // Pension(s) and VA disability stopped with the primary member's death; the ~50% spousal SS rate is
       // replaced by the full 100% survivor benefit (already what ssAmount computes, so it's left as-is and
       // spousalBenefit is zeroed instead of double-counting both).
+      // The survivor receives the larger of the two Social Security records, not both benefits.
+      ssAmount = Math.max(ssAmount, spousalBenefit);
       pensionAmount = 0; pension2Amount = 0; vaDisabilityAmount = 0; ltcVaAidIncomeThisYear = 0; spousalBenefit = 0;
       sbpAmount = (inputs.sbp1Enabled ? inputs.sbp1Annual*pensionInflator : 0) + (inputs.sbp2Enabled ? inputs.sbp2Annual*pension2Inflator : 0);
       dicAmount = inputs.dicEligible ? inputs.dicMonthlyAmount*12*ssInflator : 0;
@@ -9162,7 +9186,10 @@ function projectRun(inputs, ctx, randomize, shocks) {
       // skipping this year's raise) means every dollar figure derived from income below (FICA, TSP/match
       // contributions, taxable wages) correctly falls to zero too, and it stays zero in every later year
       // since income only ever grows off its own prior value.
-      if (jobLossActive) income = 0;
+      // In a survivorship run Michael's salary and payroll contributions stop at death,
+      // even when the assumed death occurs before the planned retirement age.
+      const employmentEnded = jobLossActive || survivorshipActive;
+      if (employmentEnded) income = 0;
       // FICA payroll tax on job income (working years only — pension/SS/withdrawals aren't FICA-taxable).
       // Social Security's 6.2% share is capped at the wage base (grown here with General Inflation as a
       // stand-in for real wage-base growth, since it isn't itself an input); Medicare's 1.45% has no cap,
@@ -9185,13 +9212,16 @@ function projectRun(inputs, ctx, randomize, shocks) {
       // invested in the account, but the associated income tax reduces this year's spendable cash.
       taxableInterestIncome = taxableCashInterestForYear(inputs, balBrokeragePies, balHYSA, balSavings, balChecking);
       const otherTaxableWorkingYears = (income - tradContrib) + pensionAmount + pension2Amount + annuityAmount + taxableInterestIncome;
-      const taxableWorkingYears = Math.max(0, otherTaxableWorkingYears + taxableSocialSecurity(ssAmount+spousalBenefit, otherTaxableWorkingYears, taxFilingStatusThisYear) - standardDeductionThisYear);
+      const taxableSSWorkingYears = taxableSocialSecurity(ssAmount+spousalBenefit, otherTaxableWorkingYears, taxFilingStatusThisYear);
+      const taxableWorkingYears = Math.max(0, otherTaxableWorkingYears + taxableSSWorkingYears - standardDeductionThisYear);
       federalTaxAnnual += taxOwedFromBrackets(taxableWorkingYears, federalBracketsThisYear);
-      stateTaxAnnual += idahoTaxOwed(taxableWorkingYears, inputs.idahoRate, inflator, taxFilingStatusThisYear);
+      // Idaho excludes Social Security, including the portion taxable on the federal return.
+      const idahoTaxableWorkingYears = Math.max(0, otherTaxableWorkingYears - standardDeductionThisYear);
+      stateTaxAnnual += idahoTaxOwed(idahoTaxableWorkingYears, inputs.idahoRate, inflator, taxFilingStatusThisYear);
       fedMarginal = marginalRateFromBrackets(taxableWorkingYears, federalBracketsThisYear);
       // Brokerage pie contributions come from the same paycheck as the TSP %-based ones, so they grow with the
       // same raise assumption — and stop along with it once Job Loss is active, same reasoning as income above.
-      const pieContribsMonthly = jobLossActive ? (inputs.brokeragePieContributionsMonthly || []).map(() => 0) : (inputs.brokeragePieContributionsMonthly || []);
+      const pieContribsMonthly = employmentEnded ? (inputs.brokeragePieContributionsMonthly || []).map(() => 0) : (inputs.brokeragePieContributionsMonthly || []);
       const brokerageContribThisYear = pieContribsMonthly.reduce((s,c) => s + (+c||0), 0) * 12 * Math.pow(1+inputs.incomeGrowth, y);
       // Excess income savings: whatever's left of your paycheck (plus any guaranteed income already
       // flowing in, e.g. a military pension or VA disability that started before you actually retired)
@@ -9236,7 +9266,7 @@ function projectRun(inputs, ctx, randomize, shocks) {
       // reads a debt's schedule. Excluded: debts that never pay off, and any that started already at $0
       // balance (nothing to free). Capped at excessIncomeAvailable so this can never claim more than the
       // year's actual slack contains.
-      const paidOffDebtRedirectRaw = (inputs.redirectPaidOffDebtPayments && !jobLossActive) ? debts.reduce((sum, d, i) => {
+      const paidOffDebtRedirectRaw = (inputs.redirectPaidOffDebtPayments && !employmentEnded) ? debts.reduce((sum, d, i) => {
         const sched = ctx.debtSchedules[i];
         if (!sched || sched.neverPaysOff || (+d.balance || 0) <= 0) return sum;
         if ((sched.balanceAtYearEnd[y] ?? 0) > 0.01) return sum;
@@ -9251,15 +9281,15 @@ function projectRun(inputs, ctx, randomize, shocks) {
       // into HYSA rather than a brokerage pie — you're no longer making paycheck-style contributions,
       // but the pension/VA cash still needs somewhere to land. Pre-retirement surplus goes to HYSA;
       // post-retirement this is irrelevant (jobLossActive = false at and after retirementAge).
-      const jobLossSurplusToHYSA = jobLossActive ? excessIncomeAvailable : 0;
-      excessIncomeSaved = jobLossActive ? 0 : (Math.max(0, excessIncomeAvailable - paidOffDebtRedirect) * (inputs.excessIncomeSavingsPct || 0) + paidOffDebtRedirect);
+      const jobLossSurplusToHYSA = employmentEnded ? excessIncomeAvailable : 0;
+      excessIncomeSaved = employmentEnded ? 0 : (Math.max(0, excessIncomeAvailable - paidOffDebtRedirect) * (inputs.excessIncomeSavingsPct || 0) + paidOffDebtRedirect);
       // Job Loss test: pre-retirement years never had a withdrawal mechanism before this feature, because a
       // shortfall wasn't possible — your paycheck was always assumed to at least cover living costs, so any
       // gap just silently zeroed out excessIncomeSaved above instead of drawing anything down. With income
       // gone, that assumption breaks, so cover a real gap the same cash-first, then-brokerage, then-Roth,
       // then-Traditional order used everywhere else in this engine for an unplanned shortfall (LTC, future
       // expenses) — rather than pretending the bills simply don't get paid.
-      if (jobLossActive) {
+      if (employmentEnded) {
         const preRetireNeed = Math.max(0, recurringLivingCostThisYear + federalTaxAnnual + stateTaxAnnual + ficaTaxAnnual - (income + guaranteedIncome));
         if (preRetireNeed > 0.01) {
           let preRemaining = preRetireNeed;
@@ -9319,6 +9349,35 @@ function projectRun(inputs, ctx, randomize, shocks) {
       magiHistory[y] = Math.max(0, otherTaxableWorkingYears + taxableSocialSecurity(ssAmount+spousalBenefit, otherTaxableWorkingYears, taxFilingStatusThisYear));
       magiFilingStatusHistory[y] = taxFilingStatusThisYear;
     } else {
+      // The age-year in which retirement occurs can contain a partial final working period.
+      // Include that salary, payroll contributions, agency match, brokerage saving, and FICA in
+      // the actual cash-flow calculation—not merely in the chart's display value.
+      if (age === inputs.retirementAge && !survivorshipActive) {
+        const workFraction = workingFractionOfFinalYear(inputs);
+        transitionJobIncome = income * (y > 0 ? (1 + inputs.incomeGrowth) : 1) * workFraction;
+        transitionTradContrib = transitionJobIncome * inputs.tradPct;
+        const transitionRothContrib = transitionJobIncome * inputs.rothPct;
+        const transitionMatchContrib = transitionJobIncome * Math.min(inputs.tradPct + inputs.rothPct, inputs.matchCapPct);
+        const transitionPieContribs = (inputs.brokeragePieContributionsMonthly || []).map(c =>
+          (+c || 0) * 12 * Math.pow(1 + inputs.incomeGrowth, y) * workFraction
+        );
+        balTrad += transitionTradContrib + transitionMatchContrib;
+        balRoth += transitionRothContrib;
+        transitionPieContribs.forEach((amount, i) => {
+          if (balBrokeragePies[i] != null) balBrokeragePies[i] += amount;
+          if (amount > 0) contribByAccount['pie_'+i] = (contribByAccount['pie_'+i] || 0) + amount;
+        });
+        tradContribOut = transitionTradContrib;
+        rothContribOut = transitionRothContrib;
+        matchContribOut = transitionMatchContrib;
+        contributions = transitionTradContrib + transitionRothContrib + transitionMatchContrib + transitionPieContribs.reduce((s,v) => s+v, 0);
+        contribByAccount.trad = (contribByAccount.trad || 0) + transitionTradContrib + transitionMatchContrib;
+        contribByAccount.roth = (contribByAccount.roth || 0) + transitionRothContrib;
+        const ssWageBaseThisYear = inputs.ssWageBase * Math.pow(1 + inputs.inflation, y);
+        ficaTaxAnnual = Math.min(transitionJobIncome, ssWageBaseThisYear) * 0.062 +
+          transitionJobIncome * 0.0145 + Math.max(0, transitionJobIncome - 250000) * 0.009;
+        guaranteedIncome += transitionJobIncome;
+      }
       if (investableAtRetirement === null) {
         investableAtRetirement = startInvestable;
         cashAtRetirement = balChecking + balSavings + balHYSA;
@@ -9432,14 +9491,16 @@ function projectRun(inputs, ctx, randomize, shocks) {
       // SS/spousal benefit taxed via the real IRS provisional-income method (taxableSocialSecurity above),
       // not a flat 85% assumption; VA disability and DIC excluded (tax-free); pensions/annuity/SBP fully taxable.
       taxableInterestIncome = taxableCashInterestForYear(inputs, balBrokeragePies, balHYSA, balSavings, balChecking);
-      const otherTaxableGuaranteed = pensionAmount + pension2Amount + annuityAmount + sbpAmount + taxableInterestIncome;
+      const otherTaxableGuaranteed = pensionAmount + pension2Amount + annuityAmount + sbpAmount + taxableInterestIncome + Math.max(0, transitionJobIncome - transitionTradContrib);
       const taxableGuaranteed = otherTaxableGuaranteed + taxableSocialSecurity(ssAmount+spousalBenefit, otherTaxableGuaranteed, taxFilingStatusThisYear);
       const taxableBeforeWithdrawal = Math.max(0, taxableGuaranteed - standardDeductionThisYear);
       // Guaranteed income doesn't arrive tax-free — actual federal + Idaho tax owed on it (progressive, using the
       // standard deduction) is deducted before comparing it against spending, instead of treating it at face value.
       const fedTaxOnGuaranteed = taxOwedFromBrackets(taxableBeforeWithdrawal, federalBracketsThisYear);
-      const idahoTaxOnGuaranteed = idahoTaxOwed(taxableBeforeWithdrawal, inputs.idahoRate, inflator, taxFilingStatusThisYear);
-      guaranteedIncomeAfterTax = Math.max(0, guaranteedIncome - fedTaxOnGuaranteed - idahoTaxOnGuaranteed);
+      // Idaho starts from federal income but subtracts taxable Social Security.
+      const idahoTaxableGuaranteed = Math.max(0, otherTaxableGuaranteed - standardDeductionThisYear);
+      const idahoTaxOnGuaranteed = idahoTaxOwed(idahoTaxableGuaranteed, inputs.idahoRate, inflator, taxFilingStatusThisYear);
+      guaranteedIncomeAfterTax = Math.max(0, guaranteedIncome - fedTaxOnGuaranteed - idahoTaxOnGuaranteed - ficaTaxAnnual);
       // Seed this year's Federal/State totals with the guaranteed-income tax computed above; takeFrom()
       // (withdrawal loop, further down) adds each account's share on top as it runs.
       federalTaxAnnual += fedTaxOnGuaranteed;
@@ -9709,6 +9770,40 @@ function projectRun(inputs, ctx, randomize, shocks) {
         effectiveWithdrawalOrder.forEach(key => { if (remaining > 0.01) takeFrom(key, remaining); });
       }
 
+      // Taxable Traditional withdrawals and Roth conversions can cause a larger share of Social
+      // Security to become federally taxable. Recompute that share after the year's ordinary-income
+      // draws, then fund the incremental federal tax from after-tax accounts so it reduces the plan's
+      // real balances rather than appearing only as an informational tax number.
+      const ordinaryDrawsThisYear = (withdrawalByAccount.trad || 0) + rothConversionAmount;
+      const ssTaxableAfterWithdrawals = taxableSocialSecurity(
+        ssAmount + spousalBenefit,
+        otherTaxableGuaranteed + ordinaryDrawsThisYear,
+        taxFilingStatusThisYear
+      );
+      const correctedFederalTaxable = Math.max(0,
+        otherTaxableGuaranteed + ordinaryDrawsThisYear + ssTaxableAfterWithdrawals - standardDeductionThisYear
+      );
+      const priorFederalTaxable = Math.max(0, taxableBeforeWithdrawal + ordinaryDrawsThisYear);
+      const socialSecurityTaxCorrection = Math.max(0,
+        taxOwedFromBrackets(correctedFederalTaxable, federalBracketsThisYear) -
+        taxOwedFromBrackets(priorFederalTaxable, federalBracketsThisYear)
+      );
+      if (socialSecurityTaxCorrection > 0.01) {
+        federalTaxAnnual += socialSecurityTaxCorrection;
+        let taxRemaining = socialSecurityTaxCorrection;
+        const payTaxFrom = key => {
+          if (taxRemaining <= 0.01 || bal[key] == null) return;
+          const paid = Math.min(taxRemaining, Math.max(0, bal[key]));
+          bal[key] -= paid; taxRemaining -= paid; grossWithdrawal += paid;
+          withdrawalByAccount[key] = (withdrawalByAccount[key] || 0) + paid;
+        };
+        // Prefer truly after-tax sources. This avoids creating another ordinary-income withdrawal
+        // that would itself change the taxable Social Security calculation again.
+        payTaxFrom('hysa'); payTaxFrom('roth');
+        Object.keys(bal).filter(k => k.startsWith('pie_')).forEach(payTaxFrom);
+        if (taxRemaining > 1) markShortfall('taxOnSocialSecurity');
+      }
+
       withdrawal = need - remaining;
       if (remaining > 1) markShortfall('recurringSpending');
 
@@ -9747,7 +9842,7 @@ function projectRun(inputs, ctx, randomize, shocks) {
       balBrokeragePies.forEach((b, i) => { acctEnd['pie_'+i] = b; });
       rows.push({
         age, spouseAge: age - ctx.ageGap,
-        income: age < inputs.retirementAge ? income : (age === inputs.retirementAge ? income * workingFractionOfFinalYear(inputs) : null),
+        income: age < inputs.retirementAge ? income : (age === inputs.retirementAge ? transitionJobIncome : null),
         contributions, tradContribOut, rothContribOut, matchContribOut,
         guaranteedIncome, guaranteedIncomeAfterTax, spousalBenefit, ssAmount, pensionAmount, pension2Amount, vaDisabilityAmount, ltcVaAidIncome: ltcVaAidIncomeThisYear, annuityAmount, sbpAmount, dicAmount, dicAidAttendanceAmount, spending, withdrawal, grossWithdrawal, withdrawalByAccount, ltcCost: ltcCostThisYear,
         investable, cash, debtBalance: debtBalanceThisYear, homeEquity: homeEquityThisYear, vehicleAssets: vehicleAssetsThisYear, netWorth, housingCost, futureExpenseCost: futureExpenseCostThisYear,
@@ -9825,6 +9920,7 @@ function buildContext(inputs) {
   const effectiveLifeExpectancy = Math.max(inputs.lifeExpectancy, inputs.spouseLifeExpectancy + ageGap);
   const maxYears = effectiveLifeExpectancy - inputs.currentAge;
   const effectiveSpousalStartAge = Math.max(inputs.ssAge, ageGap + inputs.spousalStartAge);
+  const effectiveSpouseOwnSSStartAge = ageGap + inputs.spouseSSAge;
   // Job Loss test: Rule of 55 only waives the 10% early-withdrawal penalty (and, more fundamentally, only
   // makes a TSP "separation withdrawal" available at all before 59.5) if you separate from federal service
   // in the calendar year you turn 55 or later — a year-based test, not a birthday-precise one. The global
@@ -9880,7 +9976,7 @@ function buildContext(inputs) {
   const expensesJobLossMedicalSurvivor = expenses.filter(e => e.category === 'Healthcare' && e.survivorContinues !== false).reduce((s,e) => s + jobLossVal(e), 0) * 12;
   const expensesJobLossNonMedicalSurvivor = expensesJobLossTotalSurvivor - expensesJobLossMedicalSurvivor;
   return {
-    maxYears, ageGap, effectiveLifeExpectancy, effectiveSpousalStartAge, debtSchedules, mortgageSchedule,
+    maxYears, ageGap, effectiveLifeExpectancy, effectiveSpousalStartAge, effectiveSpouseOwnSSStartAge, debtSchedules, mortgageSchedule,
     jobLossQualifiesForRuleOf55,
     expensesTotal, expensesMedical, expensesNonMedical,
     expensesMustSpendTotal, expensesMustSpendMedical, expensesMustSpendNonMedical,
@@ -10282,8 +10378,8 @@ const WHAT_IF_SCENARIOS = [
   { name: 'Retire 2 years later', apply: inp => ({ ...inp, retirementAge: inp.retirementAge + 2 }) },
   { name: 'Spend 10% less in retirement', apply: inp => ({ ...inp, spendingMultiplier: 0.9 }) },
   { name: 'Spend 10% more in retirement', apply: inp => ({ ...inp, spendingMultiplier: 1.1 }) },
-  { name: 'Claim Social Security at 62', apply: inp => ({ ...inp, ssAge: 62, ssMonthly: inp.ssMonthly * 0.7 }) },
-  { name: 'Delay Social Security to 70', apply: inp => ({ ...inp, ssAge: 70, ssMonthly: inp.ssMonthly * 1.24 }) },
+  { name: 'Claim Social Security at 62', apply: inp => ({ ...inp, ssAge: 62, ssMonthly: ssMonthlyAtAge(inp, 62) }) },
+  { name: 'Delay Social Security to 70', apply: inp => ({ ...inp, ssAge: 70, ssMonthly: ssMonthlyAtAge(inp, 70) }) },
   { name: 'Contribute 5% more to TSP', apply: inp => ({ ...inp, tradPct: inp.tradPct + 0.05 }) },
   { name: 'Pay off all debt today', special: 'payoffDebt' },
   // Job income stops for good starting right now — TSP employee contributions and the agency match
@@ -10352,8 +10448,8 @@ const SENSITIVITY_LEVERS = [
     low: inp => ({ ...inp, preReturn: inp.preReturn - 0.01, postReturn: inp.postReturn - 0.01 }), lowLabel: '1%/yr lower',
     high: inp => ({ ...inp, preReturn: inp.preReturn + 0.01, postReturn: inp.postReturn + 0.01 }), highLabel: '1%/yr higher' },
   { name: 'Social Security claiming age',
-    low: inp => ({ ...inp, ssAge: 62, ssMonthly: inp.ssMonthly * 0.7 }), lowLabel: 'Claim at 62',
-    high: inp => ({ ...inp, ssAge: 70, ssMonthly: inp.ssMonthly * 1.24 }), highLabel: 'Delay to 70' },
+    low: inp => ({ ...inp, ssAge: 62, ssMonthly: ssMonthlyAtAge(inp, 62) }), lowLabel: 'Claim at 62',
+    high: inp => ({ ...inp, ssAge: 70, ssMonthly: ssMonthlyAtAge(inp, 70) }), highLabel: 'Delay to 70' },
   { name: 'Guardrail band width',
     low: inp => ({ ...inp, guardBand: Math.max(0.05, inp.guardBand - 0.10) }), lowLabel: '10pp narrower',
     high: inp => ({ ...inp, guardBand: Math.min(0.40, inp.guardBand + 0.10) }), highLabel: '10pp wider' }
@@ -11696,7 +11792,7 @@ function buildYearlyChartConfig(pageId, snap) {
       return yearlyBarConfig(ages, [
         { label: 'Job income (annual raise %)', data: rows.map(r => d(r.income, r.age)) },
         ...ssSeries,
-        { label: 'Spousal Benefit (SS COLA)', data: rows.map(r => d(r.spousalBenefit, r.age)) },
+        { label: inputs.spouseWorks ? "Spouse's Own Social Security (SS COLA)" : 'Spousal Benefit (SS COLA)', data: rows.map(r => d(r.spousalBenefit, r.age)) },
         { label: 'Military Pension (own yearly increase %)', data: rows.map(r => d(r.pensionAmount, r.age)) },
         { label: 'Govt Civil Service (own yearly increase %)', data: rows.map(r => d(r.pension2Amount, r.age)) },
         { label: 'VA Disability (own yearly increase %)', data: rows.map(r => d(r.vaDisabilityAmount, r.age)) },
@@ -12569,7 +12665,9 @@ function buildPlanSummaryForAI() {
   lines.push(`Cash: Checking ${fmtMoney(inputs.checkingBalance)}, Savings ${fmtMoney(inputs.savingsBalance)}, HYSA ${fmtMoney(inputs.hysaBalance)} (HYSA APY ${pct(inputs.hysaRate)}, Checking/Savings APY ${pct(inputs.cashRate)}).`);
 
   lines.push('\n=== GUARANTEED INCOME ===');
-  lines.push(`Social Security: $${inputs.ssMonthly}/mo starting age ${inputs.ssAge} (COLA ${pct(inputs.ssCola)}/yr). Spousal benefit: ${pct(inputs.spousalPct)} of your benefit starting age ${inputs.spousalStartAge}${inputs.spouseWorks ? ' (not used in the projection — spouse works and earns their own benefit instead)' : ''}.`);
+  lines.push(inputs.spouseWorks
+    ? `Social Security: $${inputs.ssMonthly}/mo starting age ${inputs.ssAge}; spouse's own benefit $${inputs.spouseSSMonthly}/mo starting at spouse age ${inputs.spouseSSAge} (both use ${pct(inputs.ssCola)}/yr COLA).`
+    : `Social Security: $${inputs.ssMonthly}/mo starting age ${inputs.ssAge} (COLA ${pct(inputs.ssCola)}/yr). Spousal benefit: ${pct(inputs.spousalPct)} of your benefit starting at spouse age ${inputs.spousalStartAge}.`);
   lines.push(`Military pension: $${inputs.pensionAnnual}/yr starting age ${inputs.pensionAge} (grows ${pct(inputs.pensionGrowth)}/yr). Govt Civil Service pension: $${inputs.pension2Annual}/yr starting age ${inputs.pension2Age} (grows ${pct(inputs.pension2Growth)}/yr).`);
   lines.push(`VA disability: $${inputs.vaDisabilityAnnual}/yr starting age ${inputs.vaDisabilityAge}, tax-free (grows ${pct(inputs.vaDisabilityGrowth)}/yr). Annuity: $${inputs.annuityMonthly}/mo starting age ${inputs.annuityStartAge} (grows ${pct(inputs.annuityGrowth)}/yr).`);
 
@@ -13784,7 +13882,11 @@ function renderFinancialWellness(inputs, ctx, result, confidenceScore) {
 }
 
 function render() {
-  els('spousalBenefitFields').style.display = els('spouseWorks').checked ? 'none' : 'grid';
+  // Leave the visible state to the stylesheet so a collapsed Guaranteed Income card
+  // can hide this row along with every other field. An inline "grid" value would
+  // otherwise override the card's collapsed-state rule.
+  els('spousalBenefitFields').style.display = els('spouseWorks').checked ? 'none' : '';
+  if (els('spouseOwnBenefitFields')) els('spouseOwnBenefitFields').style.display = els('spouseWorks').checked ? '' : 'none';
   els('buyHomeFields').style.display = els('buyHome').checked ? 'block' : 'none';
   els('ltcFields').style.display = els('ltcEnabled').checked ? 'block' : 'none';
   renderLtcVaAidReadout();
@@ -13903,7 +14005,7 @@ function render() {
   });
   spendingBasis = savedSpendingBasisForMini;
 
-  els('scoreLifeExp').textContent = lifeExpectancy;
+  if (els('scoreLifeExp')) els('scoreLifeExp').textContent = lifeExpectancy;
   const ring = els('scoreRing');
   ring.textContent = Math.round(score) + '%';
   if (els('standardComparableScore')) els('standardComparableScore').textContent = Math.round(standardComparableScore) + '%';
