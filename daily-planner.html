@@ -3270,6 +3270,8 @@ function save(){
   renderStreaks();
   updateIssuesCount();
   renderJournalHome();
+  // Daily checkmarks are now fully restored; refresh linked schedule counts once more.
+  setTimeout(renderJournalSchedule,0);
 }
 
 
@@ -12595,12 +12597,29 @@ function journalScheduleCycleStatus(event,id){
 function journalDeleteScheduleItem(event,id){event.preventDefault();event.stopPropagation();if(!confirm('Delete this item from My Schedule for this day?'))return;var dateKey=dk(today),hidden=[];try{hidden=JSON.parse(localStorage.getItem(journalScheduleHiddenKey(dateKey))||'[]');}catch(ignore){}if(!Array.isArray(hidden))hidden=[];if(hidden.indexOf(id)===-1)hidden.push(id);localStorage.setItem(journalScheduleHiddenKey(dateKey),JSON.stringify(hidden));renderJournalSchedule();v26Toast('Schedule item deleted for this day');}
 function journalScheduleGrowthKey(kind,dateKey){return kind==='financial'?'journal_schedule_financial_'+dateKey:'journal_schedule_growth_'+kind+'_'+dateKey;}
 function journalScheduleGrowthId(kind){return{financial:'schedule-financial-videos',udemy:'schedule-udemy',gun:'schedule-gun-range',language:'schedule-language-practice',guitar:'schedule-guitar',reading:'schedule-reading-audiobook'}[kind]||'';}
+function journalGrowthCategory(kind){return{financial:'Financial Videos',udemy:'Udemy',gun:'Gun Range',language:'Language',guitar:'Guitar',reading:'Reading / Audiobook'}[kind]||'Udemy';}
+function journalGrowthSavedDetails(kind,dateKey){
+  var id=journalScheduleGrowthId(kind),overrides={};try{overrides=JSON.parse(localStorage.getItem(journalScheduleOverridesKey(dateKey))||'{}');}catch(ignore){}
+  var saved=overrides[id]&&typeof overrides[id]==='object'?overrides[id]:{};
+  var entries=getSkillEntries().filter(function(entry){return(entry.scheduledDate||entry.date)===dateKey&&(entry.growthKind===kind||entry.scheduleId===id);});
+  var entry=entries.length?entries[entries.length-1]:null;
+  if(!entry){var category=journalGrowthCategory(kind);entries=getSkillEntries().filter(function(candidate){return candidate.date===dateKey&&candidate.category===category;});entry=entries.length?entries[entries.length-1]:null;}
+  var combined=Object.assign({},entry||{},saved||{});
+  // Older schedule overrides stored only their clock time. Preserve the matching
+  // Growth Log duration separately so legacy activities can still display it.
+  if(combined.loggedTime==null&&entry&&entry.time)combined.loggedTime=entry.time;
+  return combined;
+}
+function journalGrowthDetailText(name,resource,link,notes,time){
+  var parts=[];if(resource&&resource!==name)parts.push(resource);if(time)parts.push(time+' logged');if(link)parts.push(link);if(notes)parts.push(notes);return parts.join(' • ');
+}
 var _journalGrowthLogKind='';
 function journalOpenGrowthLog(kind){
   _journalGrowthLogKind=kind;var modal=document.getElementById('journalGrowthLogModal');if(!modal)return;
   var names={financial:'Financial Videos',language:'Language',udemy:'Udemy',gun:'Gun Range',guitar:'Guitar',reading:'Audiobook'},categories={financial:'Financial Videos',language:'Language',udemy:'Udemy',gun:'Gun Range',guitar:'Guitar',reading:'Reading / Audiobook'},startTimes={financial:'18:30',udemy:'19:00',gun:'19:00',language:'12:45',guitar:'19:00',reading:'19:30'};
+  var dateKey=dk(today),saved=journalGrowthSavedDetails(kind,dateKey),savedMins=journalScheduleParseTime(saved.time),savedClock=savedMins===null?'':String(Math.floor(savedMins/60)).padStart(2,'0')+':'+String(savedMins%60).padStart(2,'0');
   document.getElementById('journalGrowthLogTitle').textContent='Log '+(names[kind]||'Growth / Skill');
-  document.getElementById('journalGrowthLogCategory').value=categories[kind]||'Udemy';document.getElementById('journalGrowthLogTime').value='';document.getElementById('journalGrowthLogDate').value=dk(today);document.getElementById('journalGrowthLogStartTime').value=startTimes[kind]||'19:00';document.getElementById('journalGrowthLogName').value='';document.getElementById('journalGrowthLogResource').value=kind==='udemy'?'Udemy':kind==='reading'?'Audiobook':'';document.getElementById('journalGrowthLogLink').value='';document.getElementById('journalGrowthLogNotes').value='';modal.style.display='flex';
+  document.getElementById('journalGrowthLogCategory').value=categories[kind]||'Udemy';document.getElementById('journalGrowthLogTime').value=saved.loggedTime||'';document.getElementById('journalGrowthLogDate').value=dateKey;document.getElementById('journalGrowthLogStartTime').value=savedClock||startTimes[kind]||'19:00';document.getElementById('journalGrowthLogName').value=saved.name||saved.label||'';document.getElementById('journalGrowthLogResource').value=saved.resource||(kind==='udemy'?'Udemy':kind==='reading'?'Audiobook':'');document.getElementById('journalGrowthLogLink').value=saved.link||'';document.getElementById('journalGrowthLogNotes').value=saved.notes||'';modal.style.display='flex';
 }
 function journalCloseGrowthLog(){var modal=document.getElementById('journalGrowthLogModal');if(modal)modal.style.display='none';_journalGrowthLogKind='';}
 function journalSaveGrowthLog(){
@@ -12609,8 +12628,10 @@ function journalSaveGrowthLog(){
   var rawLink=(document.getElementById('journalGrowthLogLink').value||'').trim(),link=skillSafeLink(rawLink);if(rawLink&&!link){alert('Please enter a valid website link.');return;}
   var category=document.getElementById('journalGrowthLogCategory').value||'Udemy',kindByCategory={'Financial Videos':'financial','Udemy':'udemy','Gun Range':'gun','Language':'language','Guitar':'guitar','Reading / Audiobook':'reading'},kind=kindByCategory[category]||'udemy';
   if(!name)name=category;
-  if(time){var entries=getSkillEntries();entries.push({id:'sk_'+Date.now(),date:scheduledDate,scheduledDate:scheduledDate,startTime:startTime,category:category,name:name,time:time,resource:(document.getElementById('journalGrowthLogResource').value||'').trim(),link:link,notes:(document.getElementById('journalGrowthLogNotes').value||'').trim()});saveSkillEntries(entries);}
-  localStorage.setItem(journalScheduleGrowthKey(kind,scheduledDate),'1');var scheduleId=journalScheduleGrowthId(kind),overrides={};try{overrides=JSON.parse(localStorage.getItem(journalScheduleOverridesKey(scheduledDate))||'{}');}catch(ignore){}overrides[scheduleId]={time:journalMinsToClock(startMins),mins:startMins};localStorage.setItem(journalScheduleOverridesKey(scheduledDate),JSON.stringify(overrides));
+  var resource=(document.getElementById('journalGrowthLogResource').value||'').trim(),notes=(document.getElementById('journalGrowthLogNotes').value||'').trim(),scheduleId=journalScheduleGrowthId(kind),entryId='';
+  var entries=getSkillEntries(),existingIndex=entries.findIndex(function(entry){return(entry.scheduledDate||entry.date)===scheduledDate&&(entry.growthKind===kind||entry.scheduleId===scheduleId);});
+  if(time){var logged={id:existingIndex>=0?entries[existingIndex].id:'sk_'+Date.now(),date:scheduledDate,scheduledDate:scheduledDate,startTime:startTime,category:category,name:name,time:time,resource:resource,link:link,notes:notes,growthKind:kind,scheduleId:scheduleId};if(existingIndex>=0)entries[existingIndex]=logged;else entries.push(logged);entryId=logged.id;saveSkillEntries(entries);}
+  localStorage.setItem(journalScheduleGrowthKey(kind,scheduledDate),'1');var overrides={};try{overrides=JSON.parse(localStorage.getItem(journalScheduleOverridesKey(scheduledDate))||'{}');}catch(ignore){}var prior=overrides[scheduleId]&&typeof overrides[scheduleId]==='object'?overrides[scheduleId]:{};overrides[scheduleId]={time:journalMinsToClock(startMins),mins:startMins,label:name,detail:journalGrowthDetailText(name,resource,link,notes,time),resource:resource,link:link,notes:notes,loggedTime:time,entryId:entryId||prior.entryId||''};localStorage.setItem(journalScheduleOverridesKey(scheduledDate),JSON.stringify(overrides));
   journalCloseGrowthLog();renderSkillLog();renderSkillSectionCharts();renderJournalSchedule();var weekly=document.getElementById('tab-weekly');if(weekly&&weekly.classList.contains('active'))renderWeekly();v26Toast(time?'Growth activity completed, logged and scheduled for '+scheduledDate:'Growth activity scheduled for '+scheduledDate+' — add time after completion');
 }
 function journalManualScheduleItems(){try{var items=JSON.parse(localStorage.getItem('journal_manual_schedule_items')||'[]');return Array.isArray(items)?items:[];}catch(ignore){return[];}}
@@ -12667,7 +12688,7 @@ function journalScheduleCopyItem(event,id){
   if(item.growthKind){
     localStorage.setItem(journalScheduleGrowthKey(item.growthKind,targetDate),'1');
     var growthOverrides={};try{growthOverrides=JSON.parse(localStorage.getItem(journalScheduleOverridesKey(targetDate))||'{}');}catch(ignore){}
-    growthOverrides[journalScheduleGrowthId(item.growthKind)]={time:item.time,mins:Number(item.mins),label:item.label,detail:item.detail};localStorage.setItem(journalScheduleOverridesKey(targetDate),JSON.stringify(growthOverrides));
+    growthOverrides[journalScheduleGrowthId(item.growthKind)]={time:item.time,mins:Number(item.mins),label:item.label,detail:item.detail,resource:item.resource||'',link:item.link||'',notes:item.notes||'',loggedTime:''};localStorage.setItem(journalScheduleOverridesKey(targetDate),JSON.stringify(growthOverrides));
   }else{
     var copies=journalManualScheduleItems();copies.push({id:'manual-'+Date.now(),date:targetDate,time:item.time,mins:Number(item.mins),title:item.label,note:item.detail||'Copied schedule item'});localStorage.setItem('journal_manual_schedule_items',JSON.stringify(copies));
   }
@@ -12680,6 +12701,9 @@ function journalScheduleCopyDay(event){
   localStorage.setItem('journal_manual_schedule_items',JSON.stringify(allManual));
   ['financial','udemy','gun','language','guitar','reading'].forEach(function(kind){if(localStorage.getItem(journalScheduleGrowthKey(kind,sourceDate))==='1')localStorage.setItem(journalScheduleGrowthKey(kind,targetDate),'1');});
   ['journal_schedule_order_','journal_schedule_overrides_','journal_schedule_hidden_','journal_schedule_status_'].forEach(function(prefix){var value=localStorage.getItem(prefix+sourceDate);if(value!=null)localStorage.setItem(prefix+targetDate,value);});
+  var copiedOverrides={};try{copiedOverrides=JSON.parse(localStorage.getItem(journalScheduleOverridesKey(targetDate))||'{}');}catch(ignoreCopy){}
+  Object.keys(copiedOverrides).forEach(function(id){var value=copiedOverrides[id];if(!value||typeof value!=='object')return;value.entryId='';value.loggedTime='';if(/^schedule-(financial-videos|udemy|gun-range|language-practice|guitar|reading-audiobook)$/.test(id))value.detail=journalGrowthDetailText(value.label||'',value.resource||'',value.link||'',value.notes||'','');});
+  localStorage.setItem(journalScheduleOverridesKey(targetDate),JSON.stringify(copiedOverrides));
   v26Toast('Entire schedule copied to '+targetDate);
 }
 function journalScheduleEdit(event,id){
@@ -12691,9 +12715,9 @@ function journalScheduleEdit(event,id){
   }
   var enteredTime=prompt('Set the time for "'+item.label+'". Use 6:30 PM or 18:30.',item.time);if(enteredTime===null)return;var mins=journalScheduleParseTime(enteredTime);if(mins===null){alert('Please enter a valid time, such as 6:30 PM or 18:30.');return;}
   var currentDate=dk(today),tomorrow=new Date(today);tomorrow.setDate(tomorrow.getDate()+1);var targetDate=prompt('Keep '+currentDate+' or enter another date as YYYY-MM-DD.\nTomorrow is '+dk(tomorrow)+'.',currentDate);if(targetDate===null)return;targetDate=String(targetDate).trim();if(!/^\d{4}-\d{2}-\d{2}$/.test(targetDate)||isNaN(new Date(targetDate+'T12:00:00').getTime())){alert('Please enter a valid date in YYYY-MM-DD format.');return;}
-  if(item._moveId){var existingMoves=journalScheduleMoves(),existing=existingMoves.find(function(move){return move.id===item._moveId;});if(existing){existing.targetDate=targetDate;existing.time=journalMinsToClock(mins);existing.mins=mins;existing.item.label=editedLabel;existing.item.detail=editedDetail;localStorage.setItem('journal_schedule_moves',JSON.stringify(existingMoves));}}
-  else if(targetDate!==currentDate){var moves=journalScheduleMoves();moves.push({id:'moved-'+Date.now()+'-'+item.id,sourceDate:currentDate,targetDate:targetDate,originalId:item.id,time:journalMinsToClock(mins),mins:mins,item:{label:editedLabel,detail:editedDetail,tab:item.tab,fixed:!!item.fixed,manual:item.manual||'',sleepRoutineChecklist:!!item.sleepRoutineChecklist,detailKind:item.detailKind||'',growthKind:item.growthKind||'',manualCreated:!!item.manualCreated,manualItemId:item.manualItemId||''}});localStorage.setItem('journal_schedule_moves',JSON.stringify(moves));}
-  else{var overrides={};try{overrides=JSON.parse(localStorage.getItem(journalScheduleOverridesKey(currentDate))||'{}');}catch(ignore){}overrides[item.id]={time:journalMinsToClock(mins),mins:mins,label:editedLabel,detail:editedDetail};localStorage.setItem(journalScheduleOverridesKey(currentDate),JSON.stringify(overrides));}
+  if(item._moveId){var existingMoves=journalScheduleMoves(),existing=existingMoves.find(function(move){return move.id===item._moveId;});if(existing){existing.targetDate=targetDate;existing.time=journalMinsToClock(mins);existing.mins=mins;existing.item.label=editedLabel;existing.item.detail=editedDetail;existing.item.resource=item.resource||'';existing.item.link=item.link||'';existing.item.notes=item.notes||'';localStorage.setItem('journal_schedule_moves',JSON.stringify(existingMoves));}}
+  else if(targetDate!==currentDate){var moves=journalScheduleMoves();moves.push({id:'moved-'+Date.now()+'-'+item.id,sourceDate:currentDate,targetDate:targetDate,originalId:item.id,time:journalMinsToClock(mins),mins:mins,item:{label:editedLabel,detail:editedDetail,resource:item.resource||'',link:item.link||'',notes:item.notes||'',tab:item.tab,fixed:!!item.fixed,manual:item.manual||'',sleepRoutineChecklist:!!item.sleepRoutineChecklist,detailKind:item.detailKind||'',growthKind:item.growthKind||'',manualCreated:!!item.manualCreated,manualItemId:item.manualItemId||''}});localStorage.setItem('journal_schedule_moves',JSON.stringify(moves));}
+  else{var overrides={};try{overrides=JSON.parse(localStorage.getItem(journalScheduleOverridesKey(currentDate))||'{}');}catch(ignore){}var existingOverride=overrides[item.id]&&typeof overrides[item.id]==='object'?overrides[item.id]:{};overrides[item.id]=Object.assign({},existingOverride,{time:journalMinsToClock(mins),mins:mins,label:editedLabel,detail:editedDetail,resource:item.resource||existingOverride.resource||'',link:item.link||existingOverride.link||'',notes:item.notes||existingOverride.notes||''});localStorage.setItem(journalScheduleOverridesKey(currentDate),JSON.stringify(overrides));}
   renderJournalSchedule();v26Toast(targetDate===currentDate?'Event updated':'Moved to '+targetDate);
 }
 function journalScheduleApplyOrder(items,dateKey){
@@ -12745,7 +12769,7 @@ function renderJournalSchedule(){
     return scheduledTimeReached&&mealLogged(meal);
   }
   var reflected=['jAccomplish','jImprov','jGratitude','jNotes'].some(function(key){return String(d[key]||'').trim();}),sleepRoutine=journalSleepRoutineState(dateKey);
-  var wellnessKeys=['wBP','wMeds','wWght','wSleep','wHeadache'],wellnessRecorded=journalLinkedGreenCount(wellnessKeys,d);
+  var wellnessKeys=['wBP','wMeds','wWght','wSleep'],wellnessRecorded=journalLinkedGreenCount(wellnessKeys,d);
   var faithKeys=['spDailyBread','spBibleAudio','spAIPrayer'],faithDone=journalLinkedGreenCount(faithKeys,d);
   var loggedRun=(getActivities()||[]).some(function(activity){return activity&&activity.date===dateKey&&/run/i.test([activity.type,activity.title].filter(Boolean).join(' '));});
   var noTraining=!String(training||'').trim(),restDay=noTraining||/rest day|no workout scheduled/i.test(training),activityDone=loggedRun||restDay;
@@ -12763,7 +12787,7 @@ function renderJournalSchedule(){
   var items=[
     {time:'5:30 AM',mins:330,label:'Review priorities, goals, calendar, email and schedule',detail:'Check complete after your morning review',done:!!d.reviewCheck,tab:'daily',checkId:'reviewCheck'},
     {time:'5:30 AM',mins:330,label:'Meditation',detail:'Begin the day with meditation and stillness',done:d.spMeditation==='green',tab:'meditate'},
-    {time:'5:30 AM',mins:330,label:'Wellness check and water',detail:wellnessRecorded+' of 5 wellness items complete',done:wellnessRecorded===5,tab:'wellness',detailKind:'wellness'},
+    {time:'5:30 AM',mins:330,label:'Wellness check and water',detail:wellnessRecorded+' of 4 wellness items complete',done:wellnessRecorded===4,tab:'wellness',detailKind:'wellness'},
     {time:'5:45 AM',mins:345,label:'Bible reading and prayer',detail:faithDone+' of 3 faith practices complete',done:faithDone===3,tab:'bible',detailKind:'faith'},
     {time:journalMinsToClock(trainingStartMins),mins:trainingStartMins,label:restDay?'Rest day — no training scheduled':'Today’s training',detail:restDay?'Automatically complete because no workout is scheduled':training,done:activityDone,tab:'activities'},
     {time:journalMinsToClock(stretchMins),mins:stretchMins,label:'Stretching',detail:'Keep muscles loose and prevent injury',done:d.exStretch==='green',tab:'activities'},
@@ -12796,7 +12820,18 @@ function renderJournalSchedule(){
   items=journalScheduleApplyOrder(items,dateKey);
   items.forEach(function(item,index){item.time=scheduleSlots[index].time;item.mins=scheduleSlots[index].mins;});
   var scheduleOverrides={};try{scheduleOverrides=JSON.parse(localStorage.getItem(journalScheduleOverridesKey(dateKey))||'{}');}catch(ignore){}
-  items.forEach(function(item){var override=item._moveId?scheduleMoves.find(function(move){return move.id===item._moveId;}):scheduleOverrides[item.id];if(override){if(override.time){item.time=override.time;item.mins=Number(override.mins);}if(typeof override.label==='string'&&override.label.trim())item.label=override.label;if(typeof override.detail==='string')item.detail=override.detail;}});
+  items.forEach(function(item){var override=item._moveId?scheduleMoves.find(function(move){return move.id===item._moveId;}):scheduleOverrides[item.id];if(override){if(override.time){item.time=override.time;item.mins=Number(override.mins);}if(!item.detailKind&&typeof override.label==='string'&&override.label.trim())item.label=override.label;if(!item.detailKind&&typeof override.detail==='string')item.detail=override.detail;if(typeof override.link==='string')item.link=override.link;if(typeof override.resource==='string')item.resource=override.resource;if(typeof override.notes==='string')item.notes=override.notes;}});
+  // Backward compatibility: activities scheduled before detailed overrides existed
+  // still have their topic/resource/link/notes in the Growth Log. Join those records
+  // by date and Growth kind every time My Schedule renders.
+  items.forEach(function(item){
+    if(!item.growthKind)return;var saved=journalGrowthSavedDetails(item.growthKind,dateKey);
+    if(!saved||!Object.keys(saved).length)return;
+    if(saved.name&&(!item.label||/^Financial Videos$|^Udemy$|^Gun Range$|^Language Practice$|^Guitar$|^Audiobook$/.test(item.label)))item.label=saved.name;
+    item.resource=saved.resource||item.resource||'';item.link=saved.link||item.link||'';item.notes=saved.notes||item.notes||'';
+    var joinedDetail=journalGrowthDetailText(item.label,item.resource,item.link,item.notes,saved.loggedTime||'');
+    if(joinedDetail)item.detail=joinedDetail;
+  });
   // A manual time override should immediately place the card in chronological order.
   // Modern JavaScript uses a stable sort, so cards sharing the same time retain their
   // existing drag order.
