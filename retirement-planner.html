@@ -13784,7 +13784,7 @@ function renderFinancialWellness(inputs, ctx, result, confidenceScore) {
 }
 
 function render() {
-  els('spousalBenefitFields').style.display = els('spouseWorks').checked ? 'none' : 'grid';
+  // Leave the visible state to the stylesheet so a collapsed Guaranteed Income card can hide this row too.\n  els('spousalBenefitFields').style.display = els('spouseWorks').checked ? 'none' : '';
   els('buyHomeFields').style.display = els('buyHome').checked ? 'block' : 'none';
   els('ltcFields').style.display = els('ltcEnabled').checked ? 'block' : 'none';
   renderLtcVaAidReadout();
