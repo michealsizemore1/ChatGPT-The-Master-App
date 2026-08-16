@@ -2845,6 +2845,10 @@ body{
         <span id="ratioProtBar" style="width:0%;background:#dc2626;"></span><span id="ratioCarbsBar" style="width:0%;background:#d97706;"></span><span id="ratioFatBar" style="width:0%;background:#2563eb;"></span>
       </div>
       <style>
+        #ratioCarbsBar { background:#16a34a !important; }
+        #macroRatioWrap div:has(> #ratioCarbs) { color:#166534 !important; }
+        #macroRatioWrap div:has(> #ratioCarbs) + div { border-color:#86efac !important; }
+        #macroRatioWrap div:has(> #ratioCarbs) + div > strong { color:#166534 !important; }
         @media (max-width:600px) {
           #macroRatioWrap div:has(> strong[id^="source"]) { grid-template-columns:minmax(0,1fr) !important; gap:1px !important; }
           #macroRatioWrap strong[id^="source"] { justify-self:end; }
