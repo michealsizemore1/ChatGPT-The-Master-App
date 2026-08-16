@@ -7963,6 +7963,18 @@ function renderRunMetrics(){
   var avgPace=paceCount?paceSum/paceCount:0;
   var avgDist=runs.length?totalMiles/runs.length:0;
   var avgHR=hrCount?Math.round(hrSum/hrCount):0;
+  var mileageWeeks={},mileageMonths={};
+  runs.forEach(function(a){
+    var miles=parseFloat(a.distance)||0;if(!miles||!a.date)return;
+    var runDate=new Date(a.date+'T00:00:00');if(isNaN(runDate.getTime()))return;
+    var monday=new Date(runDate),daysFromMonday=(runDate.getDay()+6)%7;monday.setDate(runDate.getDate()-daysFromMonday);
+    var weekKey=dk(monday);mileageWeeks[weekKey]=(mileageWeeks[weekKey]||0)+miles;
+    var monthKey=runDate.getFullYear()+'-'+String(runDate.getMonth()+1).padStart(2,'0');mileageMonths[monthKey]=(mileageMonths[monthKey]||0)+miles;
+  });
+  function highestMileage(bucket){return Object.keys(bucket).reduce(function(best,key){return !best||bucket[key]>best.miles?{key:key,miles:bucket[key]}:best;},null);}
+  var highestWeek=highestMileage(mileageWeeks),highestMonth=highestMileage(mileageMonths);
+  function weekRangeLabel(key){if(!key)return'';var start=new Date(key+'T00:00:00'),end=new Date(start);end.setDate(start.getDate()+6);return fmtDateShort(dk(start))+' - '+fmtDateShort(dk(end));}
+  function monthLabel(key){if(!key)return'';var parts=key.split('-'),date=new Date(Number(parts[0]),Number(parts[1])-1,1);return date.toLocaleDateString('en-US',{month:'long',year:'numeric'});}
   var aqiValues=acts.map(function(a){return Number(a.aqi);}).filter(function(value){return Number.isFinite(value)&&value>0;});
   var avgAQI=aqiValues.length?Math.round(aqiValues.reduce(function(sum,value){return sum+value;},0)/aqiValues.length):0;
   function aqiCategory(value){return value<=50?'Good':value<=100?'Moderate':value<=150?'Unhealthy for sensitive groups':value<=200?'Unhealthy':value<=300?'Very unhealthy':'Hazardous';}
@@ -8008,6 +8020,8 @@ function renderRunMetrics(){
     +metBox('&#x23F3;','Total Time',totalDurSec?fmtSecs(totalDurSec):'-','all runs')
     +metBox('&#x1F4C5;','This Month',thisMonthMiles.toFixed(1)+' mi','')
     +metBox('&#x1F4C6;','This Year',thisYearMiles.toFixed(1)+' mi','')
+    +metBox('&#x1F4C8;','Highest Mileage Week',highestWeek?highestWeek.miles.toFixed(1)+' mi':'-',highestWeek?weekRangeLabel(highestWeek.key):'No mileage recorded yet')
+    +metBox('&#x1F5D3;&#xFE0F;','Highest Mileage Month',highestMonth?highestMonth.miles.toFixed(1)+' mi':'-',highestMonth?monthLabel(highestMonth.key):'No mileage recorded yet')
     +(peakPowerAct?metBox('&#x26A1;','Peak Average Watt',Math.round(parseFloat(peakPowerAct.power))+' W',recordSub(peakPowerAct)):'')
     +(mostElevAct?metBox('&#x26F0;','Most Elevation Gain',Math.round(parseFloat(mostElevAct.elevGain)).toLocaleString()+' ft',recordSub(mostElevAct)):'')
     +(mostCalAct?metBox('&#x1F525;','Most Calories Burned',Math.round(parseFloat(mostCalAct.calories)).toLocaleString()+' cal',recordSub(mostCalAct)):'')
