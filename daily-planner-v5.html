@@ -3226,7 +3226,7 @@ function collectDailyChecks(){
   var selectedKey=dk(today);
   var skillEntries=getSkillEntries();
   var hasLanguage=skillEntries.some(function(entry){return entry.date===selectedKey&&entry.category==='Language';});
-  items.push({key:'',id:'skillLogContainer',tab:'skill-log',group:'Growth',status:hasLanguage?'green':'blank',label:'Language'});
+  items.push({key:'',id:'journalScheduleBody',tab:'daily',group:'Growth',status:hasLanguage?'green':'blank',label:'Language'});
   return items;
 }
 function renderDailyCheckOverview(){
@@ -10543,6 +10543,9 @@ function makeHabitsInformational(){
   panel.querySelectorAll('.tri-check,input[type="checkbox"]').forEach(function(el){el.remove();});
 }
 function switchTab(tab,e){
+  // The former Skills screen is retained only as a private legacy data store.
+  // Never expose that retired screen through old links or saved navigation state.
+  if(tab==='skill-log')tab='daily';
   _cardTabs.forEach(function(t){document.body.classList.toggle('tab-'+t+'-active',tab===t);});
   saveTabNote();_currentNoteTab=tab;loadTabNote(tab);
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
@@ -10562,7 +10565,6 @@ function switchTab(tab,e){
   if(tab==='review')renderReview();if(tab==='library'){renderLibrary();renderLibrarySectionCharts();}
   if(tab==='activities'){_actFirstLoad=true;collapseAllActs();resetActivityAdvancedPanels();loadCurrentPlan();refreshTrainingPreview();renderActivitySectionCharts();initTodayWorkoutCard();updateCompactSectionCounts();}
   if(tab==='bible')renderBibleTab();
-  if(tab==='skill-log'){renderSkillLog();renderSkillSectionCharts();}
   if(tab==='nutrition'){renderFoodItems();renderFavsList();calculateDailyCalorieTarget();renderNutritionSectionCharts();}
   if(tab==='habits2')h2Render();
   if(tab==='meditate'){meditInitTab();}
@@ -10838,7 +10840,7 @@ window.addEventListener('load',function(){
   var lastTab=localStorage.getItem('last_active_tab');
   if(lastTab==='habits')lastTab='habits2';
   if(lastTab==='dashboard')lastTab='weekly';
-  var validTabs=['daily','weekly','monthly','yearly','review','nutrition','habits2','meditate','bible','library','activities','skill-log','wellness','file-uploads'];
+  var validTabs=['daily','weekly','monthly','yearly','review','nutrition','habits2','meditate','bible','library','activities','wellness','file-uploads'];
   if(lastTab&&lastTab!=='daily'&&validTabs.indexOf(lastTab)!==-1){
     if(_hmTabs.includes(lastTab)){hmSwitch(lastTab,null);}
     else{var btn=document.querySelector('[onclick*="switchTab(\''+lastTab+'\'"]');if(btn)btn.click();}
@@ -12740,7 +12742,7 @@ function journalScheduleGrowth(dateKey){
   var range=skills.some(function(entry){return entry.date===dateKey&&entry.category==='Gun Range';});
   // Gun Range has no "planned" schedule of its own (unlike training runs) — only surface it
   // once it's actually been logged for the day, instead of forcing it onto every Saturday.
-  if(range)return{label:'Gun Range',done:true,tab:'skill-log'};
+  if(range)return{label:'Gun Range',done:true,tab:'daily'};
   return{label:'',done:false,tab:'daily',skip:true};
 }
 function journalToggleScheduleManual(name){
