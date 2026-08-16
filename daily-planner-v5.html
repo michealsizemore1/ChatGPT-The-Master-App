@@ -12769,10 +12769,17 @@ function journalScheduleDetailHtml(kind,data){
 function journalToggleHiddenCheck(event,id){if(event){event.preventDefault();event.stopPropagation();}var target=document.getElementById(id);if(target){target.checked=!target.checked;save();renderJournalSchedule();}}
 function journalOpenDailyCheck(event,tab,key,id){if(event){event.preventDefault();event.stopPropagation();}switchTab(tab,null);setTimeout(function(){var target=id?document.getElementById(id):document.querySelector('.tri-check[data-key="'+key+'"]');if(target&&target.type==='checkbox'){target.checked=!target.checked;save();renderJournalSchedule();return;}if(target){target.scrollIntoView({behavior:'smooth',block:'center'});target.focus({preventScroll:true});}},80);}
 function journalToggleEndSummary(){_journalEndSummaryOpen=!_journalEndSummaryOpen;renderJournalSchedule();}
-function journalEndSummaryHtml(){
-  var items=collectDailyChecks().filter(function(item){return item.status!=='black';}),complete=items.filter(function(item){return item.status==='green';}).length,partial=items.filter(function(item){return item.status==='purple';}).length,remaining=items.filter(function(item){return item.status===''||item.status==='blank'||item.status==='red';}),unfinished=items.filter(function(item){return item.status!=='green';});
+function journalEndSummaryOpenScheduled(event,id){
+  if(event){event.preventDefault();event.stopPropagation();}
+  var card=document.querySelector('.journal-schedule-item[data-schedule-id="'+CSS.escape(id)+'"]');
+  if(card){card.scrollIntoView({behavior:'smooth',block:'center'});card.focus({preventScroll:true});}
+}
+function journalEndSummaryHtml(scheduleItems){
+  var scheduled=Array.isArray(scheduleItems)?scheduleItems:Object.keys(_journalScheduleItemsById||{}).map(function(id){return _journalScheduleItemsById[id];});
+  var items=scheduled.filter(function(item){return item&&!item.fixed;}).map(function(item){return{id:item.id,label:item.label,status:item.scheduleStatus||'blank'};});
+  var complete=items.filter(function(item){return item.status==='green';}).length,partial=items.filter(function(item){return item.status==='purple';}).length,remaining=items.filter(function(item){return item.status===''||item.status==='blank'||item.status==='red';}),unfinished=items.filter(function(item){return item.status!=='green';});
   var colorOrder={purple:0,red:1,blank:2,'':2};unfinished.sort(function(a,b){return(colorOrder[a.status]??3)-(colorOrder[b.status]??3)||a.label.localeCompare(b.label);});
-  var rows=_journalEndSummaryOpen?'<div class="journal-end-items">'+unfinished.map(function(item){return'<button type="button" class="journal-end-item '+item.status+'" onclick="journalOpenDailyCheck(event,\''+item.tab+'\',\''+item.key+'\',\''+item.id+'\')"><i></i><span>'+escHtml(item.label)+'</span></button>';}).join('')+'</div>':'';
+  var rows=_journalEndSummaryOpen?'<div class="journal-end-items">'+unfinished.map(function(item){return'<button type="button" class="journal-end-item '+item.status+'" onclick="journalEndSummaryOpenScheduled(event,\''+escHtml(item.id)+'\')"><i></i><span>'+escHtml(item.label)+'</span></button>';}).join('')+'</div>':'';
   return'<div class="journal-end-summary"><button type="button" onclick="journalToggleEndSummary()"><span>'+(_journalEndSummaryOpen?'&#x25BC;':'&#x25B6;')+' End-of-Day Summary</span><span class="journal-end-counts">'+complete+' complete &bull; '+partial+' in progress &bull; '+remaining.length+' remaining</span></button>'+rows+'</div>';
 }
 function journalSleepRoutineState(dateKey){
