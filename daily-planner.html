@@ -2750,19 +2750,19 @@ body{
         <div style="font-size:.9rem;font-weight:800;color:#9a3412;">&#x1F525; Daily Calorie Intake Target</div>
         <div id="calorieAdvisorDate" style="font-size:.7rem;color:#78716c;margin-top:2px;"></div>
       </div>
-      <button type="button" onclick="calculateDailyCalorieTarget(true)" style="background:#0f766e;color:#fff;border:0;border-radius:7px;padding:7px 12px;font-size:.76rem;font-weight:800;cursor:pointer;">Recalculate</button>
+      <button type="button" onclick="refreshNutritionTargets(true)" style="background:#0f766e;color:#fff;border:0;border-radius:7px;padding:7px 12px;font-size:.76rem;font-weight:800;cursor:pointer;">Recalculate</button>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:end;">
       <label style="flex:1 1 160px;font-size:.7rem;font-weight:700;color:#57534e;">Rest-day target
-        <input id="calorieBaseTarget" type="number" min="1000" max="5000" step="50" placeholder="Automatic" onchange="saveCalorieAdvisorSettings();calculateDailyCalorieTarget()" style="display:block;width:100%;box-sizing:border-box;margin-top:3px;border:1px solid #fed7aa;border-radius:6px;padding:6px 8px;font-size:.8rem;background:#fff;">
+        <input id="calorieBaseTarget" type="number" min="1000" max="5000" step="50" placeholder="Automatic" onchange="saveCalorieAdvisorSettings();refreshNutritionTargets()" style="display:block;width:100%;box-sizing:border-box;margin-top:3px;border:1px solid #fed7aa;border-radius:6px;padding:6px 8px;font-size:.8rem;background:#fff;">
       </label>
       <label style="flex:1 1 135px;font-size:.7rem;font-weight:700;color:#57534e;">Goal
-        <select id="calorieGoal" onchange="saveCalorieAdvisorSettings();calculateDailyCalorieTarget()" style="display:block;width:100%;box-sizing:border-box;margin-top:3px;border:1px solid #fed7aa;border-radius:6px;padding:6px 8px;font-size:.8rem;background:#fff;">
+        <select id="calorieGoal" onchange="saveCalorieAdvisorSettings();refreshNutritionTargets()" style="display:block;width:100%;box-sizing:border-box;margin-top:3px;border:1px solid #fed7aa;border-radius:6px;padding:6px 8px;font-size:.8rem;background:#fff;">
           <option value="maintain">Maintain weight</option><option value="loss">Gradual loss</option><option value="gain">Gradual gain</option>
         </select>
       </label>
       <label style="flex:1 1 135px;font-size:.7rem;font-weight:700;color:#57534e;">Replace workout calories
-        <select id="calorieRefuelPct" onchange="saveCalorieAdvisorSettings();calculateDailyCalorieTarget()" style="display:block;width:100%;box-sizing:border-box;margin-top:3px;border:1px solid #fed7aa;border-radius:6px;padding:6px 8px;font-size:.8rem;background:#fff;">
+        <select id="calorieRefuelPct" onchange="saveCalorieAdvisorSettings();refreshNutritionTargets()" style="display:block;width:100%;box-sizing:border-box;margin-top:3px;border:1px solid #fed7aa;border-radius:6px;padding:6px 8px;font-size:.8rem;background:#fff;">
           <option value="100">100%</option><option value="85">85%</option><option value="75">75%</option><option value="50">50%</option>
         </select>
       </label>
@@ -6042,10 +6042,7 @@ function runnerMacroTarget(){
   if(/race|long run|marathon|half marathon/.test(text)||longest>=8)target={prot:18,carbs:65,fat:17,label:'Long-run / race-day target'};
   else if(/tempo|interval|speed|threshold|track|hill repeat/.test(text))target={prot:20,carbs:60,fat:20,label:'Speed / quality-workout target'};
   else if(/run|cycle|bike|strength|weight|cross.train/.test(text)||activities.length)target={prot:25,carbs:50,fat:25,label:'Training-day target'};
-  var settings=calorieAdvisorSettings(),weight=calorieAdvisorLatestWeight(dateKey),base=parseFloat(settings.base)||0||(weight?Math.round(weight*12.5/50)*50:2200),active=0;
-  activities.forEach(function(a){active+=calorieAdvisorActivityCalories(a,weight).calories||0;});
-  var goalAdjust=settings.goal==='loss'?-300:(settings.goal==='gain'?250:0),refuel=Math.max(0,Math.min(100,parseInt(settings.refuel||100,10)))/100;
-  target.calories=Math.max(1200,Math.round((base+active*refuel+goalAdjust)/25)*25);return target;
+  target.calories=dailyCalorieTargetData().target;return target;
 }
 function renderRunnerMacroGuidance(log,totals,ratios){
   var target=runnerMacroTarget(),label=document.getElementById('macroTrainingLabel');if(label)label.textContent=target.label+' · '+target.calories.toLocaleString()+' kcal goal';
@@ -6140,9 +6137,21 @@ function calorieAdvisorActivityDescription(activity,calorieResult){
   parts.push(Math.round(calorieResult.calories||0).toLocaleString()+' kcal '+(calorieResult.estimated?'estimated':'recorded'));
   return name+' ('+parts.join(' · ')+')';
 }
+function dailyCalorieTargetData(){
+  var dateKey=dk(today),settings=calorieAdvisorSettings(),weight=calorieAdvisorLatestWeight(dateKey),manualBase=parseFloat(settings.base)||0,base=manualBase||(weight?Math.round(weight*12.5/50)*50:2200);
+  var activities=getActivities().filter(function(a){return a.date===dateKey;}),active=0,estimatedCount=0,activityDetails=[];
+  activities.forEach(function(a){var c=calorieAdvisorActivityCalories(a,weight);active+=c.calories;if(c.estimated&&c.calories)estimatedCount++;activityDetails.push(calorieAdvisorActivityDescription(a,c));});
+  active=Math.round(active);var refuel=Math.max(0,Math.min(100,parseInt(settings.refuel||100,10)))/100,goalAdjust=settings.goal==='loss'?-300:(settings.goal==='gain'?250:0);
+  var target=Math.max(1200,Math.round((base+active*refuel+goalAdjust)/25)*25),range=Math.max(100,Math.round(target*.05/25)*25);
+  return{dateKey:dateKey,settings:settings,weight:weight,manualBase:manualBase,base:base,activities:activities,active:active,estimatedCount:estimatedCount,activityDetails:activityDetails,refuel:refuel,goalAdjust:goalAdjust,target:target,range:range};
+}
+function refreshNutritionTargets(showMessage){
+  updateMacroTotals();
+  if(showMessage&&typeof v26Toast==='function')v26Toast('Calorie and macro targets recalculated together');
+}
 function calculateDailyCalorieTarget(showMessage){
   var result=document.getElementById('calorieAdvisorResult');if(!result)return;
-  var dateKey=dk(today),settings=calorieAdvisorSettings(),baseInput=document.getElementById('calorieBaseTarget'),goalInput=document.getElementById('calorieGoal'),refuelInput=document.getElementById('calorieRefuelPct');
+  var calc=dailyCalorieTargetData(),dateKey=calc.dateKey,settings=calc.settings,baseInput=document.getElementById('calorieBaseTarget'),goalInput=document.getElementById('calorieGoal'),refuelInput=document.getElementById('calorieRefuelPct');
   if(baseInput&&document.activeElement!==baseInput)baseInput.value=settings.base||'';
   if(goalInput)goalInput.value=settings.goal||'maintain';if(refuelInput)refuelInput.value=String(settings.refuel||100);
   var dateLabel=document.getElementById('calorieAdvisorDate');if(dateLabel)dateLabel.textContent=today.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
@@ -6151,7 +6160,8 @@ function calculateDailyCalorieTarget(showMessage){
   var activityDetails=[];
   activities.forEach(function(a){var c=calorieAdvisorActivityCalories(a,weight);active+=c.calories;if(c.estimated&&c.calories)estimatedCount++;activityDetails.push(calorieAdvisorActivityDescription(a,c));});
   active=Math.round(active);var refuel=Math.max(0,Math.min(100,parseInt(settings.refuel||100,10)))/100,goalAdjust=settings.goal==='loss'?-300:(settings.goal==='gain'?250:0);
-  var target=Math.max(1200,Math.round((base+active*refuel+goalAdjust)/25)*25),logged=Math.round((window._foodLog||[]).reduce(function(sum,x){return sum+(parseFloat(x.cal)||0)*(parseFloat(x.servings)||1);},0)),remaining=Math.max(0,target-logged),range=Math.max(100,Math.round(target*.05/25)*25);
+  var target=calc.target,range=calc.range;weight=calc.weight;manualBase=calc.manualBase;base=calc.base;activities=calc.activities;active=calc.active;estimatedCount=calc.estimatedCount;activityDetails=calc.activityDetails;refuel=calc.refuel;goalAdjust=calc.goalAdjust;
+  var logged=Math.round((window._foodLog||[]).reduce(function(sum,x){return sum+(parseFloat(x.cal)||0)*(parseFloat(x.servings)||1);},0)),remaining=Math.max(0,target-logged);
   var workoutText=activities.length?activities.length+' workout'+(activities.length===1?'':'s')+' • '+active.toLocaleString()+' active kcal':'No workout logged • 0 active kcal';
   result.innerHTML='<div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;"><strong style="font-size:1.45rem;color:#166534;">'+target.toLocaleString()+' kcal</strong><span style="color:#4d7c0f;font-weight:700;">suggested intake</span></div>'
     +'<div style="margin-top:4px;"><strong>Practical range:</strong> '+Math.max(1200,target-range).toLocaleString()+'–'+(target+range).toLocaleString()+' kcal</div>'
@@ -11375,7 +11385,7 @@ function getActivities(){
 }
 function saveActivities(a){
   _activitiesLargeCache=Array.isArray(a)?a:[];
-  try{calculateDailyCalorieTarget();}catch(ignore0){}
+  try{refreshNutritionTargets();}catch(ignore0){}
   journalLargeStoreSet('activities_data',_activitiesLargeCache).then(function(){
     try{localStorage.removeItem('activities_data');}catch(ignore){}
     if(journalCloudUser&&journalCloudReady){
