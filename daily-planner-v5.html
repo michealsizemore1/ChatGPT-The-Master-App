@@ -2853,9 +2853,12 @@ body{
         <div class="macro-target-card" style="border-color:#bfdbfe;"><strong style="color:#1e40af;">Fat</strong><div><span id="targetActualFat">0%</span> <small>/ <span id="targetFat">30%</span> target</small></div><p><span id="remainFat">0g</span> remaining</p><span id="statusFat" class="macro-status low">Low</span></div>
       </div>
       <div id="macroNextMeal" style="margin-top:8px;background:#eef6ff;border-left:4px solid #2563eb;border-radius:8px;padding:8px 9px;font-size:0.73rem;color:#1e3a5f;line-height:1.4;"><strong>Best next step:</strong> Log food to receive a recommendation.</div>
-      <div id="macroMealDistribution" class="meal-macro-grid"></div>
+      <details class="macro-meal-details">
+        <summary>Meal Macro Distribution</summary>
+        <div id="macroMealDistribution" class="meal-macro-grid"></div>
+      </details>
       <style>
-        .macro-source-details{margin-top:9px;border-top:1px dashed #d8dee8;padding-top:7px}.macro-source-details>summary{cursor:pointer;color:#475569;font-size:.74rem;font-weight:800;list-style-position:inside}.source-detail-grid>div>div:first-child{display:none!important}.source-detail-grid>div>div:last-child{height:auto!important}
+        .macro-source-details,.macro-meal-details{margin-top:9px;border-top:1px dashed #d8dee8;padding-top:7px}.macro-source-details>summary,.macro-meal-details>summary{cursor:pointer;color:#475569;font-size:.74rem;font-weight:800;list-style-position:inside}.source-detail-grid>div>div:first-child{display:none!important}.source-detail-grid>div>div:last-child{height:auto!important}
         .macro-target-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:8px}.macro-target-card{min-width:0;background:#fff;border:1px solid #e2e8f0;border-radius:9px;padding:8px}.macro-target-card>strong{display:block;font-size:.78rem}.macro-target-card>div{font-size:.95rem;font-weight:900;margin-top:3px;font-variant-numeric:tabular-nums}.macro-target-card small{font-size:.58rem;color:#64748b}.macro-target-card p{font-size:.64rem;color:#64748b;margin:3px 0}.macro-status{display:inline-block;border-radius:999px;padding:2px 7px;font-size:.62rem;font-weight:800}.macro-status.on{background:#dcfce7;color:#166534}.macro-status.low{background:#fef3c7;color:#92400e}.macro-status.high{background:#fee2e2;color:#991b1b}.meal-macro-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;margin-top:7px}.meal-macro-chip{background:#f8fafc;border-radius:7px;padding:5px;text-align:center;font-size:.62rem;color:#64748b}.meal-macro-chip strong{display:block;color:#334155;font-size:.68rem}@media(max-width:430px){.macro-target-card{padding:7px 5px}.macro-target-card>div{font-size:.82rem}.macro-target-card small{display:block;margin-top:2px}}
         #ratioCarbsBar { background:#eab308 !important; }
         #macroRatioWrap div:has(> #ratioCarbs) { color:#a16207 !important; }
@@ -2872,20 +2875,26 @@ body{
         <div style="min-width:0;"><div style="display:flex;justify-content:space-between;gap:4px;color:#92400e;font-size:0.82rem;font-weight:800;margin:0 2px 5px;"><span>&#x25CF; Carbs</span><span id="ratioCarbs">0%</span></div><div style="height:calc(100% - 24px);box-sizing:border-box;background:#fff;border:1px solid #fed7aa;border-radius:8px;padding:8px;"><strong style="display:block;color:#92400e;font-size:0.78rem;margin-bottom:6px;line-height:1.2;">Sources</strong><div style="display:grid;gap:5px;font-size:0.74rem;color:#475569;line-height:1.3;"><div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px;align-items:start;"><span>Complex / fiber-rich</span><strong id="sourceCarbSupport" style="min-width:36px;text-align:right;white-space:nowrap;font-size:0.78rem;font-variant-numeric:tabular-nums;">0%</strong></div><div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px;align-items:start;"><span>Simple / refined</span><strong id="sourceCarbLimit" style="min-width:36px;text-align:right;white-space:nowrap;font-size:0.78rem;font-variant-numeric:tabular-nums;">0%</strong></div><div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px;align-items:start;"><span>Unclassified</span><strong id="sourceCarbUnknown" style="min-width:36px;text-align:right;white-space:nowrap;font-size:0.78rem;font-variant-numeric:tabular-nums;">0%</strong></div></div></div></div>
         <div style="min-width:0;"><div style="display:flex;justify-content:space-between;gap:4px;color:#1e40af;font-size:0.82rem;font-weight:800;margin:0 2px 5px;"><span>&#x25CF; Fat</span><span id="ratioFat">0%</span></div><div style="height:calc(100% - 24px);box-sizing:border-box;background:#fff;border:1px solid #bfdbfe;border-radius:8px;padding:8px;"><strong style="display:block;color:#1e40af;font-size:0.78rem;margin-bottom:6px;line-height:1.2;">Sources</strong><div style="display:grid;gap:5px;font-size:0.74rem;color:#475569;line-height:1.3;"><div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px;align-items:start;"><span>Unsaturated</span><strong id="sourceFatSupport" style="min-width:36px;text-align:right;white-space:nowrap;font-size:0.78rem;font-variant-numeric:tabular-nums;">0%</strong></div><div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px;align-items:start;"><span>Saturated / trans</span><strong id="sourceFatLimit" style="min-width:36px;text-align:right;white-space:nowrap;font-size:0.78rem;font-variant-numeric:tabular-nums;">0%</strong></div><div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px;align-items:start;"><span>Unclassified</span><strong id="sourceFatUnknown" style="min-width:36px;text-align:right;white-space:nowrap;font-size:0.78rem;font-variant-numeric:tabular-nums;">0%</strong></div></div></div></div>
       </div>
-      <div style="font-size:0.64rem;color:#64748b;margin-top:6px;line-height:1.35;">Runner context: this shows source mix, not a medical “good/bad” score. Simple carbohydrates can be useful around training. Food types are selected automatically from the food name; use the dropdowns to correct mixed or unusual foods.</div>
+      <details style="margin-top:6px;"><summary style="cursor:pointer;font-size:.66rem;color:#64748b;font-weight:700;">&#9432; How source classifications work</summary><div style="font-size:0.64rem;color:#64748b;margin-top:5px;line-height:1.35;">Source mix is not a medical “good/bad” score. Simple carbohydrates can be useful around training. Foods are classified automatically from their names and available ingredient information; use each food’s dropdowns to correct mixed or unusual foods.</div></details>
       </details>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;padding-top:6px;border-top:1px dashed #dcdcdc;font-size:0.74rem;color:#666;">
       <span>&#x1F33E; <strong id="totFiber">0</strong>g fiber</span>
       <span>&#x1F36C; <strong id="totSugar">0</strong>g sugar</span>
       <span>&#x1F9C2; <strong id="totSodium">0</strong>mg sodium</span>
+    </div>
+    <details style="margin-top:6px;border-top:1px dashed #dcdcdc;padding-top:6px;">
+      <summary style="cursor:pointer;font-size:.72rem;color:#64748b;font-weight:800;">Micronutrient Details</summary>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:7px;font-size:0.74rem;color:#666;">
       <span>&#x1F955; <strong id="totVitA">0</strong>mcg vit A</span>
       <span>&#x1F34A; <strong id="totVitC">0</strong>mg vit C</span>
       <span>&#x2600;&#xFE0F; <strong id="totVitD">0</strong>mcg vit D</span>
       <span>&#x1F9B4; <strong id="totCalcium">0</strong>mg calcium</span>
       <span>&#x1FA78; <strong id="totIron">0</strong>mg iron</span>
       <span>&#x1F34C; <strong id="totPotassium">0</strong>mg potassium</span>
-    </div>
+      </div>
+      <div style="font-size:.62rem;color:#94a3b8;margin-top:5px;line-height:1.35;">These totals are only as complete as the nutrition information available for each logged food.</div>
+    </details>
   </div>
   <!-- Favorites / Meals panel -->
   <div id="favMealPanel" style="display:block;background:#fffdf5;border:1px solid #f0c080;border-radius:10px;padding:10px 12px;margin-bottom:8px;">
