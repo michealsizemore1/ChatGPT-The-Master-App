@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- Build: nutrition label ingredients and aligned nutrition actions -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -877,6 +878,10 @@ body.v26-compact .journal-col textarea{height:70px;}
 .journal-home-card .home-value{font-size:.86rem;color:#344054;line-height:1.4;}
 .journal-home-card .home-value strong{font-size:1rem;color:#172033;}
 .journal-schedule-body{padding:10px 12px 12px;}
+.journal-day-progress{padding:9px 12px 2px;background:#fff;border-top:1px solid #edf0f5;}
+.journal-day-progress-label{display:flex;justify-content:space-between;gap:8px;margin-bottom:5px;color:#596579;font-size:.68rem;font-weight:800;}
+.journal-day-progress-track{height:10px;overflow:hidden;border-radius:999px;background:#e4e9f2;box-shadow:inset 0 1px 2px rgba(23,32,51,.08);}
+.journal-day-progress-fill{height:100%;width:0;border-radius:inherit;background:linear-gradient(90deg,#315a9b,#22a06b);transition:width .3s ease;}
 .journal-schedule-status{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;font-size:.75rem;color:#667085;}
 .journal-schedule-status strong{color:#172033;font-size:.82rem;}
 .journal-schedule-list{display:grid;gap:6px;}
@@ -908,7 +913,7 @@ body.v26-compact .journal-col textarea{height:70px;}
   .journal-growth-add{font-size:.76rem;padding:5px 8px}
 }
 .journal-schedule-name{font-size:.76rem;font-weight:700;line-height:1.3;}.journal-schedule-detail{display:block;font-size:.66rem;font-weight:500;color:#7a8494;margin-top:2px;}
-.journal-sleep-checklist{margin:-2px 8px 6px 87px;padding:10px 12px;background:#f8f5ff;border:1px solid #d8b4fe;border-radius:0 0 9px 9px;display:grid;gap:7px}.journal-sleep-checklist label{display:flex;align-items:center;gap:8px;font-size:.7rem;font-weight:650;color:#475569;cursor:pointer}.journal-sleep-checklist input{width:16px;height:16px;accent-color:#16a34a}.journal-sleep-checklist small{color:#64748b;font-size:.64rem;margin-top:2px}
+.journal-sleep-checklist{margin:-2px 8px 6px 87px;padding:10px 12px;background:#f8f5ff;border:1px solid #d8b4fe;border-radius:0 0 9px 9px;display:grid;gap:7px}.journal-sleep-step{display:flex;align-items:center;gap:8px;width:100%;border:0;background:transparent;padding:3px 0;text-align:left;font:650 .7rem inherit;color:#475569;cursor:pointer}.journal-sleep-step i{display:flex;align-items:center;justify-content:center;width:17px;height:17px;flex:0 0 17px;border:2px solid #b8c0cc;border-radius:4px;background:#fff;color:transparent;font-style:normal;font-size:12px;font-weight:900}.journal-sleep-step.checked{color:#166534}.journal-sleep-step.checked i{background:#16a34a;border-color:#16a34a;color:#fff}.journal-sleep-checklist small{color:#64748b;font-size:.64rem;margin-top:2px}
 .journal-schedule-detail-panel{margin:-2px 8px 6px 87px;padding:8px 10px;background:#f8fafc;border:1px solid #cbd5e1;border-radius:0 0 9px 9px;display:grid;gap:5px}.journal-schedule-detail-row{display:grid;grid-template-columns:15px 1fr;gap:7px;align-items:center;border:0;background:transparent;padding:3px 0;text-align:left;color:#475569;font:650 .68rem inherit;cursor:pointer}.journal-schedule-detail-dot{width:11px;height:11px;border-radius:3px;background:#e2e8f0;border:1px solid #cbd5e1}.journal-schedule-detail-dot.green{background:#16a34a;border-color:#16a34a}.journal-schedule-detail-dot.purple{background:#9333ea;border-color:#9333ea}.journal-schedule-detail-dot.red{background:#dc2626;border-color:#dc2626}.journal-schedule-detail-dot.black{background:#475569;border-color:#475569}.journal-end-summary{margin:9px 0 2px;border:1px solid #cbd5e1;border-radius:9px;background:#fff}.journal-end-summary>button{width:100%;display:flex;justify-content:space-between;gap:8px;border:0;background:#f8fafc;padding:9px 11px;border-radius:9px;color:#334155;font:.78rem inherit;font-weight:800;cursor:pointer}.journal-end-counts{font-size:.65rem;color:#64748b}.journal-end-items{padding:8px 10px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}.journal-end-item{display:flex;align-items:center;gap:6px;border:1px solid #e2e8f0;border-radius:7px;background:#fff;padding:6px 7px;text-align:left;color:#475569;font:650 .66rem inherit;cursor:pointer}.journal-end-item i{width:9px;height:9px;border-radius:3px;background:#e2e8f0}.journal-end-item.purple i{background:#9333ea}.journal-end-item.red i{background:#dc2626}@media(max-width:620px){.journal-schedule-detail-panel{margin-left:8px}.journal-end-items{grid-template-columns:1fr}}
 @media(max-width:620px){.journal-schedule-name{font-size:1rem;line-height:1.35}.journal-schedule-detail{font-size:.84rem;line-height:1.35;margin-top:3px}.journal-schedule-detail-row{font-size:.82rem}}
 .journal-calendar{margin:10px 16px;border:1px solid #d8def0;border-radius:12px;background:#fff;overflow:hidden;}
@@ -1392,6 +1397,10 @@ body{
 <div id="todayGlance" style="display:flex;gap:18px;flex-wrap:wrap;padding:8px 16px;background:#f0f4ff;border-bottom:1px solid #dfe4f5;font-size:0.85rem;font-weight:600;color:#4338ca;"></div>
 <details class="journal-home journal-schedule" id="journalSchedule">
   <summary>&#x1F552; My Schedule <span id="journalScheduleSummary" style="font-size:.72rem;font-weight:600;color:#98a2b3;"></span></summary>
+  <div class="journal-day-progress" aria-label="Day's schedule progress">
+    <div class="journal-day-progress-label"><span>Day's Progress</span><span id="journalDayProgressText">0%</span></div>
+    <div class="journal-day-progress-track" role="progressbar" aria-label="Completed schedule items" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="journalDayProgressTrack"><div class="journal-day-progress-fill" id="journalDayProgressFill"></div></div>
+  </div>
   <div style="font-size:.66rem;color:#64748b;padding:7px 12px 0;">Sources: Training Plan, Nutrition, Growth, Library and journal entries</div>
   <div class="journal-schedule-body" id="journalScheduleBody"></div>
   <div class="journal-growth-pool">
@@ -1635,6 +1644,13 @@ body{
     <button type="button" id="aiFillReviewBtn" class="ai-btn" onclick="aiFillEntireReview(this)" style="margin:0;background:linear-gradient(135deg,#1d4ed8,#7c3aed);">&#x2728; AI Fill Review</button>
   </div>
   <div id="revStats" class="review-stats"></div>
+  <section id="revInjurySection" style="margin:14px 0 18px;padding:14px;border:1px solid #fecaca;border-left:5px solid #dc2626;border-radius:10px;background:#fff7f7;">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:8px;">
+      <div><strong style="color:#991b1b;font-size:0.98rem;">Injury Report Weekly Roll-Up</strong><div style="font-size:0.72rem;color:#7f1d1d;margin-top:2px;">Workout injury notes recorded during this review week</div></div>
+      <span id="revInjuryCount" style="font-size:0.72rem;font-weight:800;color:#991b1b;background:#fee2e2;border:1px solid #fecaca;border-radius:999px;padding:4px 9px;">0 reports</span>
+    </div>
+    <div id="revInjuryRollup"></div>
+  </section>
   <textarea id="revAnalysis" style="display:none;" aria-hidden="true"></textarea>
   <div class="review-grid">
     <div>
@@ -1822,8 +1838,11 @@ body{
     <div id="audioPlanPanel" style="display:none;border-top:1px solid #dfe3ff;padding:10px 12px;">
       <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:end;">
         <div style="flex:2 1 180px;"><label style="display:block;font-size:0.72rem;font-weight:700;color:#555;margin-bottom:3px;">Audiobook name</label><input id="audioPlanBook" type="text" placeholder="Enter the book title" style="width:100%;box-sizing:border-box;border:1px solid #cfd5ff;border-radius:6px;padding:7px 9px;font-size:0.84rem;"></div>
+        <div style="flex:2 1 180px;"><label style="display:block;font-size:0.72rem;font-weight:700;color:#555;margin-bottom:3px;">Author</label><input id="audioPlanAuthor" type="text" placeholder="Enter the author" style="width:100%;box-sizing:border-box;border:1px solid #cfd5ff;border-radius:6px;padding:7px 9px;font-size:0.84rem;"></div>
+        <div style="flex:1.5 1 180px;"><label style="display:block;font-size:0.72rem;font-weight:700;color:#555;margin-bottom:3px;">Total audiobook length</label><div style="display:flex;gap:6px;"><input id="audioPlanHours" type="number" min="0" step="1" inputmode="numeric" placeholder="Hours" aria-label="Total audiobook hours" style="min-width:0;width:50%;box-sizing:border-box;border:1px solid #cfd5ff;border-radius:6px;padding:7px 9px;font-size:0.84rem;"><input id="audioPlanMinutes" type="number" min="0" max="59" step="1" inputmode="numeric" placeholder="Minutes" aria-label="Additional audiobook minutes" style="min-width:0;width:50%;box-sizing:border-box;border:1px solid #cfd5ff;border-radius:6px;padding:7px 9px;font-size:0.84rem;"></div></div>
+        <div style="flex:1 1 145px;"><label style="display:block;font-size:0.72rem;font-weight:700;color:#555;margin-bottom:3px;">Start date</label><input id="audioPlanStartDate" type="date" style="width:100%;box-sizing:border-box;border:1px solid #cfd5ff;border-radius:6px;padding:7px 9px;font-size:0.84rem;"></div>
         <div style="flex:1 1 145px;"><label style="display:block;font-size:0.72rem;font-weight:700;color:#555;margin-bottom:3px;">Finish by</label><input id="audioPlanDate" type="date" style="width:100%;box-sizing:border-box;border:1px solid #cfd5ff;border-radius:6px;padding:7px 9px;font-size:0.84rem;"></div>
-        <button id="audioPlanCreateBtn" onclick="createAudiobookFinishPlan()" style="background:#667eea;color:#fff;border:none;border-radius:7px;padding:8px 13px;font-size:0.8rem;font-weight:700;cursor:pointer;white-space:nowrap;">Create Outline</button>
+        <button id="audioPlanCreateBtn" onclick="createAudiobookFinishPlan()" style="background:#667eea;color:#fff;border:none;border-radius:7px;padding:8px 13px;font-size:0.8rem;font-weight:700;cursor:pointer;white-space:nowrap;">Create Schedule</button>
       </div>
       <div id="audioPlanResult" style="display:none;margin-top:10px;"></div>
     </div>
@@ -2094,7 +2113,6 @@ body{
         </select>
       </div>
       <div><label class="act-label">Title / Name</label><input type="text" id="actTitle" class="act-input" placeholder="e.g. Morning Run"></div>
-      <div><label class="act-label">Code / ID</label><input type="text" id="actCode" class="act-input" placeholder="e.g. 293WZ3"></div>
       <div><label class="act-label">Distance (miles)</label><input type="number" id="actDistance" class="act-input" placeholder="0.0" step="0.01"></div>
       <div><label class="act-label">Time (MM:SS, H:MM:SS, or minutes)</label><input type="text" id="actDuration" class="act-input" placeholder="32:15 or 1:32:15 or 32 min" title="Enter MM:SS for under an hour, H:MM:SS for over an hour, or a plain number of minutes"></div>
       <div><label class="act-label">Avg Pace (MM:SS/mi)</label><input type="text" id="actPace" class="act-input" placeholder="8:30"></div>
@@ -2104,6 +2122,7 @@ body{
       <div><label class="act-label">Calories</label><input type="number" id="actCalories" class="act-input" placeholder="0"></div>
       <div><label class="act-label">Elev Gain (ft)</label><input type="number" id="actElevGain" class="act-input" placeholder="0"></div>
       <div><label class="act-label">Temp (°F)</label><input type="number" id="actTemp" class="act-input" placeholder="e.g. 68"></div>
+      <div><label class="act-label">Humidity (%)</label><input type="number" id="actHumidity" class="act-input" placeholder="e.g. 55" min="0" max="100" step="1" inputmode="numeric" title="Enter the relative humidity during the activity (0–100%)"></div>
       <div><label class="act-label">AQI (Air Quality)</label><input type="number" id="actAQI" class="act-input" placeholder="e.g. 42" min="0" max="500" title="Enter the Air Quality Index during the workout (0–500)"></div>
       <div><label class="act-label">Execution Score (0-100)</label><input type="number" id="actExecScore" class="act-input" placeholder="0-100" min="0" max="100"></div>
       <div><label class="act-label">Source</label>
@@ -2113,6 +2132,7 @@ body{
       </div>
     </div>
     <div><label class="act-label">Notes</label><textarea id="actNotes" class="act-input" style="height:60px;resize:vertical;font-family:inherit;" placeholder="Any notes..."></textarea></div>
+    <div style="margin-top:9px;"><label class="act-label">Injury Report</label><textarea id="actInjuryReport" class="act-input" style="height:60px;resize:vertical;font-family:inherit;" placeholder="Pain, soreness, location, severity, or changes during the workout..."></textarea></div>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px;">
       <button onclick="cancelAddActivity()" style="background:#f0f0f0;color:#555;border:none;padding:7px 14px;border-radius:6px;cursor:pointer;font-size:0.88rem;">Cancel</button>
       <button onclick="saveActivity()" style="background:#e67e22;color:white;border:none;padding:7px 16px;border-radius:6px;cursor:pointer;font-size:0.88rem;font-weight:600;" id="actSaveBtn">Save Activity</button>
@@ -2750,10 +2770,11 @@ body{
     <div id="calorieAdvisorResult" style="background:rgba(255,255,255,.82);border:1px solid #bbf7d0;border-radius:9px;padding:10px 12px;color:#14532d;font-size:.8rem;line-height:1.55;"></div>
     <div style="font-size:.64rem;color:#78716c;margin-top:7px;">Estimate only. It uses your logged Activities and current weight when available; medical conditions and individual metabolism can change your needs.</div>
   </div>
-  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
-    <label title="Scan food label with camera" style="background:#e67e22;color:#fff;border:none;padding:5px 10px;border-radius:6px;font-size:0.78rem;cursor:pointer;">&#x1F4F7; Scan Label<input type="file" id="foodLabelScan" accept="image/*" capture="camera" style="display:none" onchange="scanFoodLabel(event)"></label>
-    <button onclick="openFuelAIModal()" title="Analyze how a day's nutrition affected the next day's run" style="background:#8e44ad;color:#fff;border:none;padding:5px 10px;border-radius:6px;font-size:0.78rem;cursor:pointer;">&#x1F9E0; Fuel AI</button>
-    <button onclick="openCopyDayModal()" style="background:#16a085;color:#fff;border:none;padding:5px 10px;border-radius:6px;font-size:0.78rem;cursor:pointer;">&#x1F4C5; Copy Day</button>
+  <div style="display:flex;gap:4px;flex-wrap:nowrap;margin-bottom:8px;width:100%;">
+    <label title="Photograph the Nutrition Facts and ingredients together" style="flex:1 1 0;min-width:0;text-align:center;white-space:nowrap;background:#e67e22;color:#fff;border:none;padding:6px 3px;border-radius:6px;font-size:0.67rem;font-weight:700;cursor:pointer;">&#x1F4F7; Scan Label<input type="file" id="foodLabelScan" accept="image/*" capture="camera" style="display:none" onchange="scanFoodLabel(event)"></label>
+    <button onclick="openBarcodeScanner()" title="Scan a packaged food barcode" style="flex:1 1 0;min-width:0;white-space:nowrap;background:#0f766e;color:#fff;border:none;padding:6px 3px;border-radius:6px;font-size:0.67rem;font-weight:700;cursor:pointer;">&#x25A5; Barcode</button>
+    <button onclick="openFuelAIModal()" title="Analyze how a day's nutrition affected the next day's run" style="flex:1 1 0;min-width:0;white-space:nowrap;background:#8e44ad;color:#fff;border:none;padding:6px 3px;border-radius:6px;font-size:0.67rem;font-weight:700;cursor:pointer;">&#x1F9E0; Fuel AI</button>
+    <button onclick="openCopyDayModal()" style="flex:1 1 0;min-width:0;white-space:nowrap;background:#16a085;color:#fff;border:none;padding:6px 3px;border-radius:6px;font-size:0.67rem;font-weight:700;cursor:pointer;">&#x1F4C5; Copy Day</button>
   </div>
   <!-- Meal sections -->
   <div id="mealSections" style="margin-bottom:8px;max-height:55vh;overflow-y:auto;-webkit-overflow-scrolling:touch;">
@@ -2817,6 +2838,38 @@ body{
       <span>&#x1F9C8; <strong id="totFat">0</strong>g fat</span>
       <span>&#x1F35E; <strong id="totCarbs">0</strong>g carbs</span>
       <span>&#x1F4A7; <strong id="totWater">—</strong> water</span>
+    </div>
+    <div id="macroRatioWrap" style="margin-top:8px;padding-top:7px;border-top:1px dashed #dcdcdc;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:5px;">
+        <div><strong style="font-size:0.86rem;color:#334155;">Daily Macro Ratio</strong><div id="macroTrainingLabel" style="font-size:0.7rem;color:#475569;margin-top:2px;">Rest-day target</div></div>
+        <span style="font-size:0.66rem;color:#64748b;">Actual compared with today&rsquo;s runner target</span>
+      </div>
+      <div style="height:9px;border-radius:999px;overflow:hidden;background:#e2e8f0;display:flex;" aria-label="Daily macronutrient calorie ratio">
+        <span id="ratioProtBar" style="width:0%;background:#dc2626;"></span><span id="ratioCarbsBar" style="width:0%;background:#d97706;"></span><span id="ratioFatBar" style="width:0%;background:#2563eb;"></span>
+      </div>
+      <div class="macro-target-grid">
+        <div class="macro-target-card" style="border-color:#fecaca;"><strong style="color:#991b1b;">Protein</strong><div><span id="targetActualProt">0%</span> <small>/ <span id="targetProt">25%</span> target</small></div><p><span id="remainProt">0g</span> remaining</p><span id="statusProt" class="macro-status low">Low</span></div>
+        <div class="macro-target-card" style="border-color:#fde047;"><strong style="color:#a16207;">Carbs</strong><div><span id="targetActualCarbs">0%</span> <small>/ <span id="targetCarbs">45%</span> target</small></div><p><span id="remainCarbs">0g</span> remaining</p><span id="statusCarbs" class="macro-status low">Low</span></div>
+        <div class="macro-target-card" style="border-color:#bfdbfe;"><strong style="color:#1e40af;">Fat</strong><div><span id="targetActualFat">0%</span> <small>/ <span id="targetFat">30%</span> target</small></div><p><span id="remainFat">0g</span> remaining</p><span id="statusFat" class="macro-status low">Low</span></div>
+      </div>
+      <div id="macroNextMeal" style="margin-top:8px;background:#eef6ff;border-left:4px solid #2563eb;border-radius:8px;padding:8px 9px;font-size:0.73rem;color:#1e3a5f;line-height:1.4;"><strong>Best next step:</strong> Log food to receive a recommendation.</div>
+      <div id="macroMealDistribution" class="meal-macro-grid"></div>
+      <style>
+        .macro-target-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:8px}.macro-target-card{min-width:0;background:#fff;border:1px solid #e2e8f0;border-radius:9px;padding:8px}.macro-target-card>strong{display:block;font-size:.78rem}.macro-target-card>div{font-size:.95rem;font-weight:900;margin-top:3px;font-variant-numeric:tabular-nums}.macro-target-card small{font-size:.58rem;color:#64748b}.macro-target-card p{font-size:.64rem;color:#64748b;margin:3px 0}.macro-status{display:inline-block;border-radius:999px;padding:2px 7px;font-size:.62rem;font-weight:800}.macro-status.on{background:#dcfce7;color:#166534}.macro-status.low{background:#fef3c7;color:#92400e}.macro-status.high{background:#fee2e2;color:#991b1b}.meal-macro-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;margin-top:7px}.meal-macro-chip{background:#f8fafc;border-radius:7px;padding:5px;text-align:center;font-size:.62rem;color:#64748b}.meal-macro-chip strong{display:block;color:#334155;font-size:.68rem}@media(max-width:430px){.macro-target-card{padding:7px 5px}.macro-target-card>div{font-size:.82rem}.macro-target-card small{display:block;margin-top:2px}}
+        #ratioCarbsBar { background:#eab308 !important; }
+        #macroRatioWrap div:has(> #ratioCarbs) { color:#a16207 !important; }
+        #macroRatioWrap div:has(> #ratioCarbs) + div { border-color:#fde047 !important; }
+        #macroRatioWrap div:has(> #ratioCarbs) + div > strong { color:#a16207 !important; }
+        #macroRatioWrap div:has(> strong[id^="source"]) { grid-template-columns:minmax(0,1fr) !important; gap:2px !important; margin-bottom:5px; }
+        #macroRatioWrap div:has(> strong[id^="source"]) > span { font-size:0.82rem; line-height:1.25; }
+        #macroRatioWrap strong[id^="source"] { justify-self:start; text-align:left !important; font-size:0.86rem !important; }
+      </style>
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:8px;align-items:stretch;">
+        <div style="min-width:0;"><div style="display:flex;justify-content:space-between;gap:4px;color:#991b1b;font-size:0.82rem;font-weight:800;margin:0 2px 5px;"><span>&#x25CF; Protein</span><span id="ratioProt">0%</span></div><div style="height:calc(100% - 24px);box-sizing:border-box;background:#fff;border:1px solid #fecaca;border-radius:8px;padding:8px;"><strong style="display:block;color:#991b1b;font-size:0.78rem;margin-bottom:6px;line-height:1.2;">Sources</strong><div style="display:grid;gap:5px;font-size:0.74rem;color:#475569;line-height:1.3;"><div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px;align-items:start;"><span>Lean / plant</span><strong id="sourceProtSupport" style="min-width:36px;text-align:right;white-space:nowrap;font-size:0.78rem;font-variant-numeric:tabular-nums;">0%</strong></div><div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px;align-items:start;"><span>Higher-fat / processed</span><strong id="sourceProtLimit" style="min-width:36px;text-align:right;white-space:nowrap;font-size:0.78rem;font-variant-numeric:tabular-nums;">0%</strong></div><div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px;align-items:start;"><span>Unclassified</span><strong id="sourceProtUnknown" style="min-width:36px;text-align:right;white-space:nowrap;font-size:0.78rem;font-variant-numeric:tabular-nums;">0%</strong></div></div></div></div>
+        <div style="min-width:0;"><div style="display:flex;justify-content:space-between;gap:4px;color:#92400e;font-size:0.82rem;font-weight:800;margin:0 2px 5px;"><span>&#x25CF; Carbs</span><span id="ratioCarbs">0%</span></div><div style="height:calc(100% - 24px);box-sizing:border-box;background:#fff;border:1px solid #fed7aa;border-radius:8px;padding:8px;"><strong style="display:block;color:#92400e;font-size:0.78rem;margin-bottom:6px;line-height:1.2;">Sources</strong><div style="display:grid;gap:5px;font-size:0.74rem;color:#475569;line-height:1.3;"><div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px;align-items:start;"><span>Complex / fiber-rich</span><strong id="sourceCarbSupport" style="min-width:36px;text-align:right;white-space:nowrap;font-size:0.78rem;font-variant-numeric:tabular-nums;">0%</strong></div><div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px;align-items:start;"><span>Simple / refined</span><strong id="sourceCarbLimit" style="min-width:36px;text-align:right;white-space:nowrap;font-size:0.78rem;font-variant-numeric:tabular-nums;">0%</strong></div><div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px;align-items:start;"><span>Unclassified</span><strong id="sourceCarbUnknown" style="min-width:36px;text-align:right;white-space:nowrap;font-size:0.78rem;font-variant-numeric:tabular-nums;">0%</strong></div></div></div></div>
+        <div style="min-width:0;"><div style="display:flex;justify-content:space-between;gap:4px;color:#1e40af;font-size:0.82rem;font-weight:800;margin:0 2px 5px;"><span>&#x25CF; Fat</span><span id="ratioFat">0%</span></div><div style="height:calc(100% - 24px);box-sizing:border-box;background:#fff;border:1px solid #bfdbfe;border-radius:8px;padding:8px;"><strong style="display:block;color:#1e40af;font-size:0.78rem;margin-bottom:6px;line-height:1.2;">Sources</strong><div style="display:grid;gap:5px;font-size:0.74rem;color:#475569;line-height:1.3;"><div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px;align-items:start;"><span>Unsaturated</span><strong id="sourceFatSupport" style="min-width:36px;text-align:right;white-space:nowrap;font-size:0.78rem;font-variant-numeric:tabular-nums;">0%</strong></div><div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px;align-items:start;"><span>Saturated / trans</span><strong id="sourceFatLimit" style="min-width:36px;text-align:right;white-space:nowrap;font-size:0.78rem;font-variant-numeric:tabular-nums;">0%</strong></div><div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px;align-items:start;"><span>Unclassified</span><strong id="sourceFatUnknown" style="min-width:36px;text-align:right;white-space:nowrap;font-size:0.78rem;font-variant-numeric:tabular-nums;">0%</strong></div></div></div></div>
+      </div>
+      <div style="font-size:0.64rem;color:#64748b;margin-top:6px;line-height:1.35;">Runner context: this shows source mix, not a medical “good/bad” score. Simple carbohydrates can be useful around training. Food types are selected automatically from the food name; use the dropdowns to correct mixed or unusual foods.</div>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;padding-top:6px;border-top:1px dashed #dcdcdc;font-size:0.74rem;color:#666;">
       <span>&#x1F33E; <strong id="totFiber">0</strong>g fiber</span>
@@ -2950,10 +3003,22 @@ body{
   </div>
 </div>
 
+<!-- Barcode Scanner Modal -->
+<div id="barcodeScannerModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.62);z-index:9250;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;" onclick="if(event.target===this)closeBarcodeScanner()">
+  <div style="background:#fff;border-radius:14px;padding:18px;max-width:400px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.28);">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;"><strong style="color:#0f766e;font-size:1rem;">&#x25A5; Scan Food Barcode</strong><button onclick="closeBarcodeScanner()" aria-label="Close barcode scanner" style="background:none;border:none;font-size:1.2rem;color:#64748b;cursor:pointer;">&#x2715;</button></div>
+    <video id="barcodeVideo" playsinline muted style="display:none;width:100%;max-height:245px;object-fit:cover;background:#111;border-radius:9px;"></video>
+    <div id="barcodeStatus" style="font-size:.78rem;color:#475569;background:#f0fdfa;border:1px solid #ccfbf1;border-radius:7px;padding:8px;margin:9px 0;">Starting the rear camera…</div>
+    <label style="display:block;font-size:.72rem;font-weight:700;color:#475569;margin-bottom:4px;">Or enter the barcode number</label>
+    <div style="display:flex;gap:6px;"><input id="barcodeManualInput" inputmode="numeric" pattern="[0-9]*" placeholder="UPC / EAN barcode" onkeydown="if(event.key==='Enter')lookupFoodBarcode()" style="flex:1;min-width:0;border:1px solid #cbd5e1;border-radius:7px;padding:8px;font-size:.9rem;"><button onclick="lookupFoodBarcode()" style="background:#0f766e;color:#fff;border:none;border-radius:7px;padding:8px 12px;font-weight:700;cursor:pointer;">Look Up</button></div>
+    <div style="font-size:.64rem;color:#64748b;margin-top:8px;line-height:1.35;">Product information comes from Open Food Facts. Always verify the serving size and label values before saving.</div>
+  </div>
+</div>
+
 <!-- Scan Confirm Modal -->
 <div id="scanConfirmModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9200;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;" onclick="if(event.target===this)this.style.display='none'">
   <div style="background:#fff;border-radius:14px;padding:20px;max-width:380px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,0.25);">
-    <h3 style="margin:0 0 10px;font-size:1rem;color:#e67e22;">&#x1F4F7; Label Scanned</h3>
+    <h3 id="scanConfirmTitle" style="margin:0 0 10px;font-size:1rem;color:#e67e22;">&#x1F4F7; Food Scanned</h3>
     <div id="scanResultName" style="font-weight:700;font-size:1rem;margin-bottom:4px;color:#333;"></div>
     <div id="scanResultMacros" style="font-size:0.82rem;color:#666;background:#f8f8f8;border-radius:6px;padding:7px 10px;margin-bottom:12px;"></div>
     <label style="font-size:0.82rem;font-weight:600;color:#555;display:block;margin-bottom:4px;">Add to Meal:</label>
@@ -3172,7 +3237,7 @@ function collectDailyChecks(){
   var selectedKey=dk(today);
   var skillEntries=getSkillEntries();
   var hasLanguage=skillEntries.some(function(entry){return entry.date===selectedKey&&entry.category==='Language';});
-  items.push({key:'',id:'skillLogContainer',tab:'skill-log',group:'Growth',status:hasLanguage?'green':'blank',label:'Language'});
+  items.push({key:'',id:'journalScheduleBody',tab:'daily',group:'Growth',status:hasLanguage?'green':'blank',label:'Language'});
   return items;
 }
 function renderDailyCheckOverview(){
@@ -3746,6 +3811,8 @@ function load(){
     }
   })();
   renderJournalHome();
+  // Daily checkmarks are now fully restored; refresh linked schedule counts once more.
+  setTimeout(renderJournalSchedule,0);
   refreshJournalNavStatus();
   try{initHandwritingPad();}catch(e){console.error('handwriting pad:',e);}
   var calendar=document.getElementById('journalCalendar');
@@ -4187,6 +4254,17 @@ function _buildActivityDateIndex(){
   });
   return {any:any,run:run};
 }
+function journalAudiobookMinutesForDate(dateKey,plannerDay){
+  var dedicated=parseTimedMins((plannerDay||{}).gaAudiobookTime);
+  var audibleMinutes=getSkillEntries().filter(function(entry){
+    if(!entry||(entry.date||entry.scheduledDate)!==dateKey)return false;
+    var description=[entry.category,entry.resource,entry.name].filter(Boolean).join(' ');
+    return /reading|audiobook|audible/i.test(description);
+  }).reduce(function(total,entry){return total+parseSkillTimeMins(entry.time);},0);
+  // The dedicated daily value and a Schedule/Log entry can describe the same
+  // listening session. Prefer the daily total when present to avoid double counting.
+  return dedicated>0?dedicated:audibleMinutes;
+}
 function renderStreaks(){
   const actIdx=_buildActivityDateIndex();
   const _streakCache={};
@@ -4194,7 +4272,7 @@ function renderStreaks(){
     {id:'stBible',  label:'📖',  tip:'Bible',    fn:d=>d.spBibleAudio==='green'},
     {id:'stPrayer', label:'🙏',  tip:'Prayer',   fn:d=>d.spAIPrayer==='green'},
     {id:'stExercise',label:'🏃', tip:'Running',  fn:(d,dk)=>d.exRun==='green'||!!actIdx.run[dk]},
-    {id:'stWater',  label:'💧',  tip:'Water',    fn:d=>(parseFloat(d.waterOz)||parseFloat(d.waterCount)*8||0)>0}
+    {id:'stWater',  label:'💧',  tip:'Water',    fn:d=>(parseFloat(d.waterOz)||parseFloat(d.waterCount)*8||0)>=75}
   ];
   DEFS.forEach(({id,label,tip,fn})=>{
     const n=streak(fn,_streakCache);
@@ -4217,7 +4295,7 @@ function getDM(d,dateKey){
       if(a.pace&&parsePace(a.pace)){actPace+=parsePace(a.pace);actPaceN++;}
     });
   }
-  const bp=parseBP(d.wBPVal);return{miles:actMiles,pace:actPaceN?actPace/actPaceN:0,watts:actWattsN?actWatts/actWattsN:0,time:actTime,steps:parseFloat(d.exSteps)||0,stretch:parseTimedMins(d.exStretchVal)||0,massage:parseFloat(d.exMassageMinutes)||parseTimedMins(d.exMassageVal)||0,score:parseFloat(d.score)||0,weight:parseFloat(d.wWghtVal)||0,sleep:parseSleepMins(d.wSleepVal),sleepScore:parseFloat(d.wSleepScore)||0,calories:parseFloat(d.nuCalVal)||0,water:parseFloat(d.waterOz)||(parseFloat(d.waterCount)*8||0),audiobook:parseTimedMins(d.gaAudiobookTime),financialVideos:parseTimedMins(d.gaFinancialVideosTime),financialVideosDone:d.gaFinancialVideos==='green'?1:0,skill:parseMins(d.gaSkillTime),skillName:d.gaSkillText||'',skillDone:d.gaSkill==='green'?1:0,bpSys:bp.sys,bpDia:bp.dia,pulse:parseFloat(d.wPulseVal)||0,dogWalk:parseFloat(d.exDogWalkVal)||(d.exDogWalk==='green'?1:0),walk:parseFloat(d.exWalkVal)||(d.exWalk==='green'?1:0),headache:d.wHeadache==='green'?1:0};}
+  const bp=parseBP(d.wBPVal);return{miles:actMiles,pace:actPaceN?actPace/actPaceN:0,watts:actWattsN?actWatts/actWattsN:0,time:actTime,steps:parseFloat(d.exSteps)||0,stretch:parseTimedMins(d.exStretchVal)||0,massage:parseFloat(d.exMassageMinutes)||parseTimedMins(d.exMassageVal)||0,score:parseFloat(d.score)||0,weight:parseFloat(d.wWghtVal)||0,sleep:parseSleepMins(d.wSleepVal),sleepScore:parseFloat(d.wSleepScore)||0,calories:parseFloat(d.nuCalVal)||0,water:parseFloat(d.waterOz)||(parseFloat(d.waterCount)*8||0),audiobook:journalAudiobookMinutesForDate(dateKey,d),financialVideos:parseTimedMins(d.gaFinancialVideosTime),financialVideosDone:d.gaFinancialVideos==='green'?1:0,skill:parseMins(d.gaSkillTime),skillName:d.gaSkillText||'',skillDone:d.gaSkill==='green'?1:0,bpSys:bp.sys,bpDia:bp.dia,pulse:parseFloat(d.wPulseVal)||0,dogWalk:parseFloat(d.exDogWalkVal)||(d.exDogWalk==='green'?1:0),walk:parseFloat(d.exWalkVal)||(d.exWalk==='green'?1:0),headache:d.wHeadache==='green'?1:0};}
 function agg(arr){const t={miles:0,pace:0,watts:0,time:0,steps:0,stretch:0,massage:0,score:0,weight:0,sleep:0,sleepScore:0,calories:0,water:0,audiobook:0,skill:0,skillDone:0,bpSys:0,bpDia:0,pulse:0,dogWalk:0,walk:0,headache:0};const c={pace:0,watts:0,score:0,weight:0,sleep:0,sleepScore:0,bp:0,pulse:0};arr.forEach(m=>{t.miles+=m.miles;t.time+=m.time;t.steps+=m.steps;t.stretch+=(m.stretch||0);t.massage+=(m.massage||0);t.calories+=m.calories;t.water+=m.water;t.audiobook+=m.audiobook;t.skill+=m.skill||0;t.skillDone+=(m.skillDone||0);t.dogWalk+=(m.dogWalk||0);t.walk+=(m.walk||0);t.headache+=(m.headache||0);if(m.pace){t.pace+=m.pace;c.pace++;}if(m.watts){t.watts+=m.watts;c.watts++;}if(m.score){t.score+=m.score;c.score++;}if(m.weight){t.weight+=m.weight;c.weight++;}if(m.sleep){t.sleep+=m.sleep;c.sleep++;}if(m.sleepScore){t.sleepScore+=m.sleepScore;c.sleepScore++;}if(m.bpSys){t.bpSys+=m.bpSys;t.bpDia+=m.bpDia;c.bp++;}if(m.pulse){t.pulse+=m.pulse;c.pulse++;}});return{miles:t.miles,pace:c.pace?t.pace/c.pace:0,watts:c.watts?t.watts/c.watts:0,time:t.time,steps:t.steps,stretch:t.stretch,massage:t.massage,calories:t.calories,water:t.water,score:c.score?t.score/c.score:0,weight:c.weight?t.weight/c.weight:0,sleep:c.sleep?t.sleep/c.sleep:0,sleepScore:c.sleepScore?t.sleepScore/c.sleepScore:0,audiobook:t.audiobook,skill:t.skill,skillDone:t.skillDone,bpSys:c.bp?t.bpSys/c.bp:0,bpDia:c.bp?t.bpDia/c.bp:0,pulse:c.pulse?t.pulse/c.pulse:0,dogWalk:t.dogWalk,walk:t.walk,headache:t.headache};}
 function gRow(l,m,t){const b=t?'background:#f8f9fa;font-weight:700':'';const skillCell=m.skillDone?(t?m.skillDone+'d':'✅'):'-';return`<tr style="${b}"><td>${l}</td><td>${fmtMins(m.audiobook)}</td><td>${skillCell}</td></tr>`;}
 function fRow(l,m,t){const b=t?'background:#f8f9fa;font-weight:700':'';return`<tr style="${b}"><td>${l}</td><td>${m.miles?m.miles.toFixed(1):'-'}</td><td>${m.pace?fmtPace(m.pace):'-'}</td><td>${m.watts?Math.round(m.watts):'-'}</td><td>${fmtMins(m.time)}</td><td>${m.steps?Math.round(m.steps):'-'}</td><td>${m.dogWalk?(Math.round(m.dogWalk*10)/10)%1===0?Math.round(m.dogWalk):+(m.dogWalk.toFixed(1)):'-'}</td><td>${m.walk?(Math.round(m.walk*10)/10)%1===0?Math.round(m.walk):+(m.walk.toFixed(1)):'-'}</td></tr>`;}
@@ -4431,7 +4509,7 @@ function renderWeekly(){const ws=wkStart(weekOff2),days=[],lbls=[];for(let i=0;i
   const wDayKeys=[];for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);wDayKeys.push(dk(d));}renderNutritionSpirit(wDayKeys,lbls,'wNutrition','wSpirituality','wNutritionMicro');}
 function changeWeekOff(n){weekOff2+=n;renderWeekly();renderGoals();}
 let monthOff2=0;
-function renderMonthly(){const now=new Date(),ref=new Date(now.getFullYear(),now.getMonth()+monthOff2,1);const yr=ref.getFullYear(),mo=ref.getMonth(),dim=new Date(yr,mo+1,0).getDate();const wmap={};for(let d=1;d<=dim;d++){const dt=new Date(yr,mo,d);const ws=wkStartOf(dt);const k=dk(ws);if(!wmap[k])wmap[k]={ws,ms:[]};const r=localStorage.getItem('planner_'+dk(dt));if(r)wmap[k].ms.push(getDM(JSON.parse(r),dk(dt)));}document.getElementById('monthLabel').textContent=ref.toLocaleDateString('en-US',{month:'long',year:'numeric'});const wks=Object.values(wmap).sort((a,b)=>a.ws-b.ws),allM=[],gR=[],fR=[],wR=[],dsR=[];wks.forEach(({ws,ms})=>{const we=new Date(ws);we.setDate(ws.getDate()+6);const lb=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+'-'+we.toLocaleDateString('en-US',{day:'numeric'});const a=agg(ms);allM.push(...ms);gR.push(gRow('Wk '+lb,a));fR.push(fRow('Wk '+lb,a));wR.push(wRow('Wk '+lb,a));dsR.push(dsRow('Wk '+lb,a));});const tot=agg(allM);document.getElementById('mDayScore').innerHTML=mkT(dsH,dsR,dsRow('AVG',tot,true));document.getElementById('mGrowth').innerHTML=mkT(gH,gR,gRow('TOTAL',tot,true));document.getElementById('mFitness').innerHTML=mkT(fH,fR,fRow('TOTAL/AVG',tot,true));document.getElementById('mWellness').innerHTML=mkT(wH,wR,wRow('TOTAL/AVG',tot,true));
+function renderMonthly(){const now=new Date(),ref=new Date(now.getFullYear(),now.getMonth()+monthOff2,1);const yr=ref.getFullYear(),mo=ref.getMonth(),dim=new Date(yr,mo+1,0).getDate();const wmap={};for(let d=1;d<=dim;d++){const dt=new Date(yr,mo,d);const ws=wkStartOf(dt);const k=dk(ws),dateKey=dk(dt);if(!wmap[k])wmap[k]={ws,ms:[]};const r=localStorage.getItem('planner_'+dateKey);wmap[k].ms.push(getDM(r?JSON.parse(r):{},dateKey));}document.getElementById('monthLabel').textContent=ref.toLocaleDateString('en-US',{month:'long',year:'numeric'});const wks=Object.values(wmap).sort((a,b)=>a.ws-b.ws),allM=[],gR=[],fR=[],wR=[],dsR=[];wks.forEach(({ws,ms})=>{const we=new Date(ws);we.setDate(ws.getDate()+6);const lb=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+'-'+we.toLocaleDateString('en-US',{day:'numeric'});const a=agg(ms);allM.push(...ms);gR.push(gRow('Wk '+lb,a));fR.push(fRow('Wk '+lb,a));wR.push(wRow('Wk '+lb,a));dsR.push(dsRow('Wk '+lb,a));});const tot=agg(allM);document.getElementById('mDayScore').innerHTML=mkT(dsH,dsR,dsRow('AVG',tot,true));document.getElementById('mGrowth').innerHTML=mkT(gH,gR,gRow('TOTAL',tot,true));document.getElementById('mFitness').innerHTML=mkT(fH,fR,fRow('TOTAL/AVG',tot,true));document.getElementById('mWellness').innerHTML=mkT(wH,wR,wRow('TOTAL/AVG',tot,true));
   const mWkKeys=[],mWkLbls=[],mGrowthPeriods=[],monthStartKey=dk(new Date(yr,mo,1)),monthEndKey=dk(new Date(yr,mo,dim));wks.forEach(({ws,ms})=>{const we=new Date(ws);we.setDate(ws.getDate()+6);const lb=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+'-'+we.toLocaleDateString('en-US',{day:'numeric'});const keys=[];for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);keys.push(dk(d));}mWkKeys.push(keys);mWkLbls.push('Wk '+lb);mGrowthPeriods.push({label:'Wk '+lb,start:dk(ws)<monthStartKey?monthStartKey:dk(ws),end:dk(we)>monthEndKey?monthEndKey:dk(we)});});renderGrowthActivityReport('mGrowth',mGrowthPeriods);renderNutritionSpirit(mWkKeys,mWkLbls,'mNutrition','mSpirituality','mNutritionMicro');
   // Render heatmap
   const hmGrid=document.getElementById('hmGrid');
@@ -4456,7 +4534,7 @@ function renderMonthly(){const now=new Date(),ref=new Date(now.getFullYear(),now
           if(dd.spBibleAudio==='green')score++;
           if(dd.spAIPrayer==='green')score++;
           if(dd.exRun==='green'||dd.exStrength==='green'||dd.exBike==='green'||dd.exWalk==='green'||hasActivityOnDate(dStr))score++;
-          if((parseFloat(dd.waterOz)||parseFloat(dd.waterCount)*8||0)>=48)score++;
+          if((parseFloat(dd.waterOz)||parseFloat(dd.waterCount)*8||0)>=75)score++;
         }
         cell.classList.add('hm'+score);
         cell.title=dt.toLocaleDateString('en-US',{month:'short',day:'numeric'})+': '+score+'/4 habits';
@@ -4467,7 +4545,7 @@ function renderMonthly(){const now=new Date(),ref=new Date(now.getFullYear(),now
 }
 function changeMonthOff(n){monthOff2+=n;renderMonthly();}
 let yearOff2=0;
-function renderYearly(){const yr=new Date().getFullYear()+yearOff2;document.getElementById('yearLabel').textContent=yr;const mns=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],allM=[],gR=[],fR=[],wR=[],dsR=[];mns.forEach((mn,mi)=>{const dim=new Date(yr,mi+1,0).getDate(),ms=[];for(let d=1;d<=dim;d++){const dt=new Date(yr,mi,d);const r=localStorage.getItem('planner_'+dk(dt));if(r)ms.push(getDM(JSON.parse(r)));}allM.push(...ms);const a=agg(ms);gR.push(gRow(mn,a));fR.push(fRow(mn,a));wR.push(wRow(mn,a));dsR.push(dsRow(mn,a));});const tot=agg(allM);document.getElementById('yDayScore').innerHTML=mkT(dsH,dsR,dsRow('AVG',tot,true));document.getElementById('yGrowth').innerHTML=mkT(gH,gR,gRow('TOTAL',tot,true));document.getElementById('yFitness').innerHTML=mkT(fH,fR,fRow('TOTAL/AVG',tot,true));document.getElementById('yWellness').innerHTML=mkT(wH,wR,wRow('TOTAL/AVG',tot,true));
+function renderYearly(){const yr=new Date().getFullYear()+yearOff2;document.getElementById('yearLabel').textContent=yr;const mns=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],allM=[],gR=[],fR=[],wR=[],dsR=[];mns.forEach((mn,mi)=>{const dim=new Date(yr,mi+1,0).getDate(),ms=[];for(let d=1;d<=dim;d++){const dt=new Date(yr,mi,d),dateKey=dk(dt);const r=localStorage.getItem('planner_'+dateKey);ms.push(getDM(r?JSON.parse(r):{},dateKey));}allM.push(...ms);const a=agg(ms);gR.push(gRow(mn,a));fR.push(fRow(mn,a));wR.push(wRow(mn,a));dsR.push(dsRow(mn,a));});const tot=agg(allM);document.getElementById('yDayScore').innerHTML=mkT(dsH,dsR,dsRow('AVG',tot,true));document.getElementById('yGrowth').innerHTML=mkT(gH,gR,gRow('TOTAL',tot,true));document.getElementById('yFitness').innerHTML=mkT(fH,fR,fRow('TOTAL/AVG',tot,true));document.getElementById('yWellness').innerHTML=mkT(wH,wR,wRow('TOTAL/AVG',tot,true));
   const yr2=new Date().getFullYear()+yearOff2;
   const yMoKeys=[],yMoLbls=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const yGrowthPeriods=[];for(let mi=0;mi<12;mi++){const dim=new Date(yr2,mi+1,0).getDate();const keys=[];for(let d=1;d<=dim;d++)keys.push(dk(new Date(yr2,mi,d)));yMoKeys.push(keys);yGrowthPeriods.push({label:yMoLbls[mi],start:dk(new Date(yr2,mi,1)),end:dk(new Date(yr2,mi,dim))});}
@@ -4601,7 +4679,7 @@ function renderHabitStreakChart(ws){
     {k:'bible',   l:'Bible',    c:'#f0b429', fn:function(d,dateKey){return d.spBibleAudio==='green';}},
     {k:'prayer',  l:'Prayer',   c:'#8e44ad', fn:function(d,dateKey){return d.spAIPrayer==='green';}},
     {k:'exercise',l:'Exercise', c:'#e67e22', fn:function(d,dateKey){return d.exRun==='green'||d.exStrength==='green'||d.exBike==='green'||d.exWalk==='green'||hasActivityOnDate(dateKey);}},
-    {k:'water',   l:'Water',    c:'#3498db', fn:function(d){return (parseFloat(d.waterOz)||parseFloat(d.waterCount)*8||0)>0;}}
+    {k:'water',   l:'Water',    c:'#3498db', fn:function(d){return (parseFloat(d.waterOz)||parseFloat(d.waterCount)*8||0)>=75;}}
   ];
   var counts=habitDefs.map(function(){return 0;});
   for(var i=0;i<7;i++){
@@ -4856,7 +4934,8 @@ function nextDayRunContext(){
       a.duration||'',
       a.pace?a.pace+'/mi':'',
       a.power?a.power+' W':'',
-      a.notes||''
+      a.notes||'',
+      a.injuryReport?'Injury report: '+a.injuryReport:''
     ].filter(Boolean).join(' | '));
   });
   var cached=localStorage.getItem('workout_cache_'+nextKey);
@@ -4895,7 +4974,8 @@ function selectedDayRunContext(){
       a.power?a.power+' W':'',
       a.calories?a.calories+' calories':'',
       a.elevation?a.elevation+' ft elevation gain':'',
-      a.notes||''
+      a.notes||'',
+      a.injuryReport?'Injury report: '+a.injuryReport:''
     ].filter(Boolean).join(' | '));
   });
   var cached=localStorage.getItem('workout_cache_'+runKey);
@@ -5150,7 +5230,8 @@ function aiWeeklyRunWrapUp(btn){
       Number(a.power)>0?Math.round(Number(a.power))+' W':'power unavailable',
       Number(a.heartRate)>0?Math.round(Number(a.heartRate))+' bpm':'heart rate unavailable',
       Number(a.elevGain)>0?Math.round(Number(a.elevGain))+' ft gain':'elevation unavailable',
-      a.notes?'notes: '+a.notes:''
+      a.notes?'notes: '+a.notes:'',
+      a.injuryReport?'injury report: '+a.injuryReport:''
     ].filter(Boolean).join(' | ');
   }).join('\n');
   var prompt='Write a concise weekly running wrap-up for '+wrnLabel(wrnOff)+'. Use only the supplied facts and do not invent performance, recovery, injury, or health claims. Keep it encouraging, practical, and about 150-220 words. Use short headings: Week at a Glance, Strongest Session, Patterns & Recovery, and Focus for Next Week. If a conclusion is uncertain, say so. This is training reflection, not medical advice.\n\n'
@@ -5311,9 +5392,37 @@ function aiReviewAnalysis(){
 }
 function changeDashOff(n){dashOff2+=n;renderDashboard();renderBPChart();}
 let revOff2=0;
-function renderReview(){const ws=wkStart(revOff2),we=new Date(ws);we.setDate(ws.getDate()+6);document.getElementById('revLabel').textContent=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' - '+we.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});const r=localStorage.getItem('review_'+dk(ws)),rv=r?JSON.parse(r):{};['revAnalysis','revWins','revImprove','revFocus','revLessons'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=rv[id]||'';});let logged=0,bible=0,prayer=0,steps=0;for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);const dateKey=dk(d),r2=localStorage.getItem('planner_'+dateKey);if(!r2)continue;logged++;const dd=JSON.parse(r2);if(dd.spBibleAudio==='green')bible++;if(dd.spAIPrayer==='green')prayer++;steps+=parseFloat(dd.exSteps)||0;}const runs=uniqueRunActivities(ws,we).length;document.getElementById('revStats').innerHTML=[{l:'Days Logged',v:logged+'/7'},{l:'Bible Days',v:bible+'/7'},{l:'Prayer Days',v:prayer+'/7'},{l:'Runs',v:runs},{l:'Total Steps',v:Math.round(steps).toLocaleString()}].map(({l,v})=>'<div class="review-stat"><strong>'+v+'</strong>'+l+'</div>').join('');}
+function renderReview(){const ws=wkStart(revOff2),we=new Date(ws);we.setDate(ws.getDate()+6);document.getElementById('revLabel').textContent=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' - '+we.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});const r=localStorage.getItem('review_'+dk(ws)),rv=r?JSON.parse(r):{};['revAnalysis','revWins','revImprove','revFocus','revLessons'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=rv[id]||'';});let logged=0,bible=0,prayer=0,steps=0;for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);const dateKey=dk(d),r2=localStorage.getItem('planner_'+dateKey);if(!r2)continue;logged++;const dd=JSON.parse(r2);if(dd.spBibleAudio==='green')bible++;if(dd.spAIPrayer==='green')prayer++;steps+=parseFloat(dd.exSteps)||0;}const runs=uniqueRunActivities(ws,we).length;document.getElementById('revStats').innerHTML=[{l:'Days Logged',v:logged+'/7'},{l:'Bible Days',v:bible+'/7'},{l:'Prayer Days',v:prayer+'/7'},{l:'Runs',v:runs},{l:'Total Steps',v:Math.round(steps).toLocaleString()}].map(({l,v})=>'<div class="review-stat"><strong>'+v+'</strong>'+l+'</div>').join('');renderReviewInjuryRollup();}
 function saveReview(){const ws=wkStart(revOff2),d={};['revAnalysis','revWins','revImprove','revFocus','revLessons'].forEach(id=>{const e=document.getElementById(id);if(e)d[id]=e.value;});localStorage.setItem('review_'+dk(ws),JSON.stringify(d));const btn=document.querySelector('[onclick="saveReview()"]');if(btn){btn.textContent='Saved!';btn.style.background='#27ae60';setTimeout(()=>{btn.textContent='Save Review';btn.style.background='#667eea';},2000);}}
 function changeRevOff(n){revOff2+=n;renderReview();}
+function getReviewWeekInjuryReports(){
+  const ws=wkStart(revOff2),we=new Date(ws);we.setDate(ws.getDate()+6);
+  const start=dk(ws),end=dk(we),seen={};
+  function normalizedDate(value){const text=String(value||'').trim(),match=text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);if(match)return match[3]+'-'+match[1].padStart(2,'0')+'-'+match[2].padStart(2,'0');return text.slice(0,10);}
+  return getActivities().filter(function(a){
+    if(!a||!String(a.injuryReport||'').trim())return false;
+    const date=normalizedDate(a.date);if(date<start||date>end)return false;
+    const signature=[a.id||'',date,a.type||'',a.title||'',a.injuryReport].join('|');if(seen[signature])return false;seen[signature]=true;
+    a._reviewInjuryDate=date;return true;
+  }).sort(function(a,b){return String(a._reviewInjuryDate).localeCompare(String(b._reviewInjuryDate));});
+}
+function reviewInjuryText(){
+  const reports=getReviewWeekInjuryReports();
+  if(!reports.length)return'No workout injury reports were recorded this week.';
+  return reports.map(function(a){
+    const d=new Date(a._reviewInjuryDate+'T12:00:00'),label=d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    return label+' — '+(a.title||a.type||'Workout')+': '+String(a.injuryReport||'').trim();
+  }).join('\n');
+}
+function renderReviewInjuryRollup(){
+  const box=document.getElementById('revInjuryRollup'),count=document.getElementById('revInjuryCount');if(!box)return;
+  const reports=getReviewWeekInjuryReports();if(count)count.textContent=reports.length+' report'+(reports.length===1?'':'s');
+  if(!reports.length){box.innerHTML='<div style="font-size:0.8rem;color:#7f1d1d;padding:8px 0;">No injury reports recorded this week.</div>';return;}
+  box.innerHTML=reports.map(function(a){
+    const d=new Date(a._reviewInjuryDate+'T12:00:00'),label=d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    return '<div style="background:#fff;border:1px solid #fecaca;border-radius:8px;padding:10px;margin-top:7px;"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;"><strong style="color:#991b1b;">'+escHtml(a.title||a.type||'Workout')+'</strong><span style="font-size:0.72rem;font-weight:700;color:#7f1d1d;">'+escHtml(label)+'</span></div><div style="font-size:0.8rem;color:#7f1d1d;margin-top:5px;white-space:pre-wrap;">'+escHtml(a.injuryReport)+'</div></div>';
+  }).join('');
+}
 function getReviewWeekJournalText(){
   const ws=wkStart(revOff2),entries=[];
   for(let i=0;i<7;i++){
@@ -5330,13 +5439,14 @@ function aiFillEntireReview(btn){
   const ws=wkStart(revOff2),we=new Date(ws);we.setDate(ws.getDate()+6);
   const weekLabel=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' - '+we.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
   const journal=getReviewWeekJournalText();
+  const injuries=reviewInjuryText();
   const stats=(document.getElementById('revStats')||{}).innerText||'';
   const current=['revWins','revImprove','revFocus','revLessons'].map(function(id){var el=document.getElementById(id);return el&&el.value.trim()?id+': '+el.value.trim():'';}).filter(Boolean).join('\n');
   const prompt='You are completing a personal weekly review for '+weekLabel+'. Use only the supplied weekly statistics, journal entries, and existing review notes. Return ONLY one valid JSON object with exactly these four string keys:\n'
     +'{"wins":"","improve":"","focus":"","lessons":""}\n\n'
     +'Writing requirements:\n- wins: 2-4 specific achievements or positive patterns\n- improve: 2-4 constructive, realistic improvements\n- focus: 1-3 specific priorities for next week\n- lessons: 2-4 concise takeaways from the week\n'
     +'Use short bullet-style lines inside each string. Do not invent events or accomplishments. If information is limited, acknowledge that briefly and make cautious suggestions.\n\n'
-    +'WEEKLY STATISTICS:\n'+(stats||'No statistics available')+'\n\nDAILY JOURNAL:\n'+(journal||'No written daily notes available')+'\n\nEXISTING REVIEW NOTES:\n'+(current||'None');
+    +'WEEKLY STATISTICS:\n'+(stats||'No statistics available')+'\n\nINJURY REPORT WEEKLY ROLL-UP:\n'+injuries+'\n\nDAILY JOURNAL:\n'+(journal||'No written daily notes available')+'\n\nEXISTING REVIEW NOTES:\n'+(current||'None');
   const original=btn.innerHTML;btn.disabled=true;btn.innerHTML='&#x23F3; Filling Review...';
   aiCall(prompt,2400,function(text){
     try{
@@ -5353,6 +5463,7 @@ function aiReviewField(type,btn){
   const key=journalAIKey();
   if(!key){alert('Add your AI key first.');return;}
   const journal=getReviewWeekJournalText();
+  const injuries=reviewInjuryText();
   const wins=(document.getElementById('revWins').value||'').trim();
   const improve=(document.getElementById('revImprove').value||'').trim();
   const lessons=(document.getElementById('revLessons').value||'').trim();
@@ -5361,7 +5472,7 @@ function aiReviewField(type,btn){
   const prompt=(isImprove
     ?'Review the week below and identify the 2-4 most useful areas to improve. Be specific, constructive, and concise. Format as short bullet points suitable for a weekly review field.'
     :'Review the week below and recommend the 1-3 highest-value priorities for next week. Make each focus specific and actionable. Format as short bullet points suitable for a weekly review field.')
-    +'\n\nWins:\n'+wins+'\n\nCurrent improvement notes:\n'+improve+'\n\nLessons:\n'+lessons+'\n\nDaily journal:\n'+journal;
+    +'\n\nWins:\n'+wins+'\n\nCurrent improvement notes:\n'+improve+'\n\nLessons:\n'+lessons+'\n\nInjury report weekly roll-up:\n'+injuries+'\n\nDaily journal:\n'+journal;
   aiBtnState(btn,true);
   aiCall(prompt,1800,function(text){aiBtnState(btn,false);target.value=text;target.dispatchEvent(new Event('input'));saveReview();v26Toast(isImprove?'What to Improve added':'Next-week focus added');},function(err){aiBtnState(btn,false);alert('AI error: '+err);});
 }
@@ -5500,9 +5611,55 @@ function _mkMacroCell(labelTxt, field, val, highlight, itemId){
   lbl.appendChild(inp);
   return lbl;
 }
+function _mkMacroSourceSelect(labelTxt,field,val,options,itemId){
+  var lbl=document.createElement('label');
+  lbl.style.cssText='font-size:0.66rem;color:#475569;display:flex;flex-direction:column;gap:2px;min-width:0;';
+  lbl.textContent=labelTxt;
+  var select=document.createElement('select');
+  select.style.cssText='width:100%;min-width:0;border:1px solid #cbd5e1;border-radius:5px;padding:4px 3px;font-size:0.7rem;background:#fff;color:#334155;';
+  [{v:'unknown',l:'Unclassified'}].concat(options).forEach(function(option){var el=document.createElement('option');el.value=option.v;el.textContent=option.l;if(option.v===(val||'unknown'))el.selected=true;select.appendChild(el);});
+  select.onchange=(function(id,f){return function(){updateFoodField(id,f,this.value);};})(itemId,field);
+  lbl.appendChild(select);return lbl;
+}
+function foodNameHasAny(name,terms){
+  var normalized=' '+String(name||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim()+' ';
+  return terms.some(function(term){return normalized.indexOf(' '+term+' ')!==-1||normalized.indexOf(' '+term+'s ')!==-1;});
+}
+function foodSourceChoice(name,supportTerms,limitTerms){
+  var normalized=' '+String(name||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim()+' ';
+  function first(terms){return terms.reduce(function(best,term){var at=normalized.indexOf(' '+term+' ');if(at<0)at=normalized.indexOf(' '+term+'s ');return at>=0&&at<best?at:best;},Number.POSITIVE_INFINITY);}
+  var supportAt=first(supportTerms),limitAt=first(limitTerms);if(!isFinite(supportAt)&&!isFinite(limitAt))return'';return supportAt<=limitAt?'support':'limit';
+}
+function foodSourceCorrections(){try{return JSON.parse(localStorage.getItem('food_source_corrections')||'{}')||{};}catch(e){return{};}}
+function foodSourceCorrectionKey(name){return String(name||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();}
+function rememberFoodSourceCorrection(item){
+  var key=foodSourceCorrectionKey(item&&item.name);if(!key)return;
+  var saved=foodSourceCorrections();saved[key]={proteinSource:item.proteinSource||'unknown',carbSource:item.carbSource||'unknown',fatSource:item.fatSource||'unknown'};
+  localStorage.setItem('food_source_corrections',JSON.stringify(saved));
+}
+function inferFoodMacroSources(item){
+  if(!item)return false;
+  var name=String(item.name||''),classificationText=[name,item.ingredientsText,item.categoriesText].filter(Boolean).join(' '),changed=false;
+  var remembered=foodSourceCorrections()[foodSourceCorrectionKey(name)];
+  if(remembered){['proteinSource','carbSource','fatSource'].forEach(function(field){if(item[field]!==remembered[field]){item[field]=remembered[field]||'unknown';changed=true;}});item.sourceConfidence='High';item.sourceMethod='Remembered correction';return changed;}
+  var proteinSupport=['chicken breast','chicken','turkey','fish','salmon','tuna','shrimp','lean beef','sirloin','egg white','egg','greek yogurt','yogurt','cottage cheese','milk protein','casein','milk','tofu','tempeh','bean','lentil','chickpea','pea protein','soy protein','protein isolate','protein concentrate','protein powder','whey','seitan'];
+  var proteinLimit=['bacon','sausage','hot dog','pepperoni','salami','bologna','fried chicken','processed meat','mechanically separated','cured meat','pork rind','rib','cheese'];
+  var carbSupport=['oatmeal','oat','brown rice','wild rice','quinoa','whole grain','whole wheat','whole rye','barley','farro','bran','bean','lentil','chickpea','sweet potato','potato','fruit','apple','banana','berry','berries','orange','vegetable','broccoli','spinach'];
+  var carbLimit=['candy','soda','soft drink','juice','sports drink','energy gel','gel','chew','sugar','cane sugar','corn syrup','high fructose corn syrup','honey','syrup','enriched wheat flour','refined flour','white flour','cookie','cake','pastry','donut','doughnut','white bread','white rice','sweetened cereal'];
+  var fatSupport=['olive oil','canola oil','sunflower oil','safflower oil','soybean oil','sesame oil','avocado','almond','walnut','peanut','nut butter','seed','chia','flax','salmon','tuna'];
+  var fatLimit=['butter','lard','shortening','coconut oil','palm oil','palm kernel oil','hydrogenated oil','partially hydrogenated oil','cream','cheese','bacon','sausage','pepperoni','fried'];
+  if((parseFloat(item.prot)||0)>0&&!item.proteinSource){var proteinChoice=foodSourceChoice(classificationText,proteinSupport,proteinLimit);if(proteinChoice){item.proteinSource=proteinChoice;changed=true;}}
+  if((parseFloat(item.carbs)||0)>0&&!item.carbSource){var carbChoice=foodSourceChoice(classificationText,carbSupport,carbLimit);if(carbChoice){item.carbSource=carbChoice;changed=true;}}
+  if((parseFloat(item.fat)||0)>0&&!item.fatSource){var fatChoice=foodSourceChoice(classificationText,fatSupport,fatLimit);if(fatChoice){item.fatSource=fatChoice;changed=true;}}
+  if(changed){item.sourceClassificationAuto=true;item.sourceConfidence=(item.source==='barcode'||item.source==='label')&&item.ingredientsText?'High':'Medium';item.sourceMethod=item.source==='barcode'?'Barcode + ingredients':item.source==='label'&&item.ingredientsText?'Label + ingredients':'Food-name match';}
+  else if(!item.sourceConfidence){item.sourceConfidence='Low';item.sourceMethod='Needs review';}
+  return changed;
+}
 
 function renderFoodItems(){
   var log=window._foodLog||[];
+  var autoClassChanged=false;
+  log.forEach(function(item){if(inferFoodMacroSources(item))autoClassChanged=true;});
   var favNames=(getFavorites()||[]).map(function(f){return (f.name||'').toLowerCase();});
   MEALS.forEach(function(meal){
     var listEl=document.getElementById('foodList-'+meal);
@@ -5559,6 +5716,19 @@ function renderFoodItems(){
         grid.appendChild(_mkMacroCell('Fat','fat',it.fat,false,it.id));
         grid.appendChild(_mkMacroCell('Carbs','carbs',it.carbs,false,it.id));
         div.appendChild(grid);
+
+        // Source classifications make the daily runner-focused source percentages explicit.
+        // They are user-selected so the app never guesses from a food name alone.
+        var sourceGrid=document.createElement('div');
+        sourceGrid.style.cssText='display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:5px;margin:5px 0 6px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:6px;';
+        sourceGrid.appendChild(_mkMacroSourceSelect('Protein source','proteinSource',it.proteinSource||'',[{v:'support',l:'Lean / plant'},{v:'limit',l:'Higher-fat / processed'}],it.id));
+        sourceGrid.appendChild(_mkMacroSourceSelect('Carb source','carbSource',it.carbSource||'',[{v:'support',l:'Complex / fiber-rich'},{v:'limit',l:'Simple / refined'}],it.id));
+        sourceGrid.appendChild(_mkMacroSourceSelect('Fat source','fatSource',it.fatSource||'',[{v:'support',l:'Unsaturated'},{v:'limit',l:'Saturated / trans'}],it.id));
+        div.appendChild(sourceGrid);
+        var sourceConfidence=document.createElement('div'),confidence=it.sourceConfidence||'Low',confidenceColor=confidence==='High'?'#166534':confidence==='Medium'?'#92400e':'#64748b';
+        sourceConfidence.style.cssText='font-size:0.65rem;color:'+confidenceColor+';margin:-2px 0 5px;';
+        sourceConfidence.textContent='Source confidence: '+confidence+' · '+(it.sourceMethod||'Needs review');
+        div.appendChild(sourceConfidence);
 
         // Total line (whenever servings isn't exactly 1 — covers partial servings like 0.25 too)
         if(svgs!==1){
@@ -5642,6 +5812,7 @@ function renderFoodItems(){
     }
   });
   updateMacroTotals();
+  if(autoClassChanged)setTimeout(function(){save();},0);
 }
 function _setMealOpen(meal,isOpen){
   var mb=document.getElementById('mb-'+meal);
@@ -5829,6 +6000,9 @@ function updateFoodField(id,field,val){
   var it=log.find(function(x){return x.id===id;});
   if(!it)return;
   it[field]=val;
+  if(field==='proteinSource'||field==='carbSource'||field==='fatSource'){
+    it.sourceConfidence='High';it.sourceMethod='Remembered correction';it.sourceClassificationAuto=false;rememberFoodSourceCorrection(it);
+  }
   // Re-render only for numeric fields so totals update; name edits stay in-place
   if(field!=='name')renderFoodItems();
   save();
@@ -5861,6 +6035,33 @@ function isFav(item){
   return favs.some(function(f){return f.name&&item.name&&f.name.toLowerCase()===item.name.toLowerCase();});
 }
 
+function runnerMacroTarget(){
+  var dateKey=dk(today),activities=typeof getActivities==='function'?getActivities().filter(function(a){return a.date===dateKey;}):[];
+  var text=activities.map(function(a){return String(a.title||a.type||'');}).join(' ').toLowerCase();
+  var longest=activities.reduce(function(max,a){return Math.max(max,parseFloat(a.distance)||0);},0),target={prot:25,carbs:45,fat:30,label:'Rest / recovery day'};
+  if(/race|long run|marathon|half marathon/.test(text)||longest>=8)target={prot:18,carbs:65,fat:17,label:'Long-run / race-day target'};
+  else if(/tempo|interval|speed|threshold|track|hill repeat/.test(text))target={prot:20,carbs:60,fat:20,label:'Speed / quality-workout target'};
+  else if(/run|cycle|bike|strength|weight|cross.train/.test(text)||activities.length)target={prot:25,carbs:50,fat:25,label:'Training-day target'};
+  var settings=calorieAdvisorSettings(),weight=calorieAdvisorLatestWeight(dateKey),base=parseFloat(settings.base)||0||(weight?Math.round(weight*12.5/50)*50:2200),active=0;
+  activities.forEach(function(a){active+=calorieAdvisorActivityCalories(a,weight).calories||0;});
+  var goalAdjust=settings.goal==='loss'?-300:(settings.goal==='gain'?250:0),refuel=Math.max(0,Math.min(100,parseInt(settings.refuel||100,10)))/100;
+  target.calories=Math.max(1200,Math.round((base+active*refuel+goalAdjust)/25)*25);return target;
+}
+function renderRunnerMacroGuidance(log,totals,ratios){
+  var target=runnerMacroTarget(),label=document.getElementById('macroTrainingLabel');if(label)label.textContent=target.label+' · '+target.calories.toLocaleString()+' kcal goal';
+  var fields={prot:{grams:totals.prot,kcal:4,name:'protein'},carbs:{grams:totals.carbs,kcal:4,name:'carbohydrates'},fat:{grams:totals.fat,kcal:9,name:'fat'}};
+  Object.keys(fields).forEach(function(kind){
+    var cap=kind==='prot'?'Prot':kind.charAt(0).toUpperCase()+kind.slice(1),actual=ratios[kind]||0,goal=target[kind],gramsGoal=target.calories*(goal/100)/fields[kind].kcal,remaining=Math.max(0,Math.round(gramsGoal-fields[kind].grams)),difference=actual-goal,status=difference<-4?'Low':difference>4?'High':'On target';
+    var a=document.getElementById('targetActual'+cap),t=document.getElementById('target'+cap),r=document.getElementById('remain'+cap),s=document.getElementById('status'+cap);if(a)a.textContent=actual.toFixed(1)+'%';if(t)t.textContent=goal+'%';if(r)r.textContent=remaining+'g';if(s){s.textContent=status;s.className='macro-status '+(status==='On target'?'on':status.toLowerCase());}
+    fields[kind].remaining=remaining;fields[kind].difference=difference;
+  });
+  var priority=Object.keys(fields).sort(function(a,b){return fields[b].remaining-fields[a].remaining;})[0],next=document.getElementById('macroNextMeal'),advice='Your macro balance is close to today\'s target.';
+  if(fields[priority].remaining>5){var ideas=priority==='prot'?'a lean protein plus produce':priority==='carbs'?'complex carbohydrates with a lean protein':'an unsaturated-fat source with a balanced meal';advice='Prioritize about '+fields[priority].remaining+'g of '+fields[priority].name+' across the remaining meals; choose '+ideas+'.';}
+  if(next)next.innerHTML='<strong>Best next step:</strong> '+advice;
+  var meals=['breakfast','lunch','dinner','snack','liquids','sports'],names={breakfast:'Breakfast',lunch:'Lunch',dinner:'Dinner',snack:'Snacks',liquids:'Liquids',sports:'Sports'},dist=document.getElementById('macroMealDistribution');
+  if(dist)dist.innerHTML=meals.map(function(meal){var rows=log.filter(function(x){return (x.meal||'snack')===meal;}),p=0,c=0;rows.forEach(function(x){var n=parseFloat(x.servings)||1;p+=(parseFloat(x.prot)||0)*n;c+=(parseFloat(x.carbs)||0)*n;});return '<div class="meal-macro-chip"><strong>'+names[meal]+'</strong>'+Math.round(p)+'g P · '+Math.round(c)+'g C</div>';}).join('');
+}
+
 function updateMacroTotals(){
   var log=window._foodLog||[];
   var hasData=log.length>0;
@@ -5874,6 +6075,24 @@ function updateMacroTotals(){
   if(bar)bar.style.display=hasData?'block':'none';
   var set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=Math.round(v);};
   set('totCal',totals.cal);set('totProt',totals.prot);set('totFat',totals.fat);set('totCarbs',totals.carbs);
+  // Macro ratios use caloric contribution: protein/carbohydrates = 4 kcal/g, fat = 9 kcal/g.
+  // Since totals aggregate the full food log, all six meal sections are included.
+  var macroCalories={prot:totals.prot*4,carbs:totals.carbs*4,fat:totals.fat*9};
+  var macroCalTotal=macroCalories.prot+macroCalories.carbs+macroCalories.fat;
+  var macroRatios=macroCalTotal?{prot:macroCalories.prot/macroCalTotal*100,carbs:macroCalories.carbs/macroCalTotal*100,fat:macroCalories.fat/macroCalTotal*100}:{prot:0,carbs:0,fat:0};
+  var setRatio=function(kind,labelId,barId){var label=document.getElementById(labelId),segment=document.getElementById(barId),value=macroRatios[kind]||0;if(label)label.textContent=value.toFixed(1)+'%';if(segment)segment.style.width=value+'%';};
+  setRatio('prot','ratioProt','ratioProtBar');setRatio('carbs','ratioCarbs','ratioCarbsBar');setRatio('fat','ratioFat','ratioFatBar');
+  renderRunnerMacroGuidance(log,totals,macroRatios);
+  function macroSourceRatios(macroField,sourceField){
+    var grams={support:0,limit:0,unknown:0};
+    log.forEach(function(item){var amount=(parseFloat(item[macroField])||0)*(parseFloat(item.servings)||1);if(!amount)return;var source=item[sourceField];grams[source==='support'?'support':source==='limit'?'limit':'unknown']+=amount;});
+    var total=grams.support+grams.limit+grams.unknown;
+    return total?{support:grams.support/total*100,limit:grams.limit/total*100,unknown:grams.unknown/total*100}:{support:0,limit:0,unknown:0};
+  }
+  function showMacroSources(prefix,values){['Support','Limit','Unknown'].forEach(function(label){var key=label.toLowerCase(),el=document.getElementById('source'+prefix+label);if(el)el.textContent=(values[key]||0).toFixed(1)+'%';});}
+  showMacroSources('Prot',macroSourceRatios('prot','proteinSource'));
+  showMacroSources('Carb',macroSourceRatios('carbs','carbSource'));
+  showMacroSources('Fat',macroSourceRatios('fat','fatSource'));
   MICRO_FIELDS.forEach(function(f){set(MICRO_META[f].elId,totals[f]||0);});
   // Update hidden fields for backward compat save
   var setHid=function(id,v){var e=document.getElementById(id);if(e)e.value=hasData?Math.round(v):'';};
@@ -5954,7 +6173,7 @@ function saveFoodAsFavorite(itemId){
   var favs=getFavorites();
   var exists=favs.some(function(f){return f.name.toLowerCase()===item.name.toLowerCase();});
   if(exists){if(!confirm('"'+item.name+'" is already in favorites. Add again?'))return;}
-  var fav={name:item.name,cal:item.cal,prot:item.prot,fat:item.fat,carbs:item.carbs};
+  var fav={name:item.name,cal:item.cal,prot:item.prot,fat:item.fat,carbs:item.carbs,proteinSource:item.proteinSource||'',carbSource:item.carbSource||'',fatSource:item.fatSource||''};
   MICRO_FIELDS.forEach(function(f){fav[f]=item[f]!=null?item[f]:null;});
   favs.push(fav);saveFavorites(favs);
   alert('⭐ "'+item.name+'" saved to favorites!');
@@ -6009,7 +6228,7 @@ function loadFavoriteItem(idx){
   var favs=getFavorites();var f=favs[idx];if(!f)return;
   var target=(document.getElementById('favTargetMeal')||{value:'breakfast'}).value;
   if(!window._foodLog)window._foodLog=[];
-  var favItem={id:'f'+Date.now(),meal:target,name:f.name,cal:f.cal,prot:f.prot,fat:f.fat,carbs:f.carbs};
+  var favItem={id:'f'+Date.now(),meal:target,name:f.name,cal:f.cal,prot:f.prot,fat:f.fat,carbs:f.carbs,proteinSource:f.proteinSource||'',carbSource:f.carbSource||'',fatSource:f.fatSource||''};
   MICRO_FIELDS.forEach(function(fld){favItem[fld]=f[fld]!=null?f[fld]:null;});
   window._foodLog.push(favItem);
   _setMealOpen(target,true);
@@ -6039,7 +6258,7 @@ function confirmSaveMeal(){
   window._saveMealItems=null;
   var meals=getSavedMeals();
   meals.push({name:name,category:category,items:log.map(function(x){
-    var it={name:x.name,cal:x.cal,prot:x.prot,fat:x.fat,carbs:x.carbs};
+    var it={name:x.name,cal:x.cal,prot:x.prot,fat:x.fat,carbs:x.carbs,proteinSource:x.proteinSource||'',carbSource:x.carbSource||'',fatSource:x.fatSource||''};
     MICRO_FIELDS.forEach(function(f){it[f]=x[f]!=null?x[f]:null;});
     return it;
   })});
@@ -6105,7 +6324,7 @@ function loadMeal(idx){
   var target=perSel?perSel.value:(m.category||(document.getElementById('favTargetMeal')||{value:'breakfast'}).value);
   if(!window._foodLog)window._foodLog=[];
   m.items.forEach(function(it){
-    var loadedItem={id:'f'+Date.now()+'_'+Math.random().toString(36).slice(2,5),meal:target,name:it.name,cal:it.cal,prot:it.prot,fat:it.fat,carbs:it.carbs};
+    var loadedItem={id:'f'+Date.now()+'_'+Math.random().toString(36).slice(2,5),meal:target,name:it.name,cal:it.cal,prot:it.prot,fat:it.fat,carbs:it.carbs,proteinSource:it.proteinSource||'',carbSource:it.carbSource||'',fatSource:it.fatSource||''};
     MICRO_FIELDS.forEach(function(f){loadedItem[f]=it[f]!=null?it[f]:null;});
     window._foodLog.push(loadedItem);
   });
@@ -6206,6 +6425,43 @@ function confirmCopyDay(){
 }
 
 // ── Food Label Scanner ───────────────────────────────
+var _barcodeStream=null,_barcodeScanActive=false,_barcodeDetector=null;
+function barcodeStatus(message,isError){var el=document.getElementById('barcodeStatus');if(el){el.textContent=message;el.style.color=isError?'#991b1b':'#475569';el.style.background=isError?'#fff7f7':'#f0fdfa';el.style.borderColor=isError?'#fecaca':'#ccfbf1';}}
+function stopBarcodeCamera(){_barcodeScanActive=false;if(_barcodeStream){_barcodeStream.getTracks().forEach(function(track){track.stop();});_barcodeStream=null;}var video=document.getElementById('barcodeVideo');if(video){video.pause();video.srcObject=null;video.style.display='none';}}
+function closeBarcodeScanner(){stopBarcodeCamera();var modal=document.getElementById('barcodeScannerModal');if(modal)modal.style.display='none';}
+function openBarcodeScanner(){
+  var modal=document.getElementById('barcodeScannerModal'),input=document.getElementById('barcodeManualInput');if(!modal)return;
+  modal.style.display='flex';if(input)input.value='';barcodeStatus('Starting the rear camera…',false);
+  if(!('BarcodeDetector' in window)||!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){barcodeStatus('Automatic camera scanning is not supported by this browser. Enter the barcode number below.',false);if(input)input.focus();return;}
+  try{_barcodeDetector=new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e']});}catch(e){barcodeStatus('Camera barcode detection is unavailable. Enter the barcode number below.',false);if(input)input.focus();return;}
+  navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:false}).then(function(stream){
+    _barcodeStream=stream;_barcodeScanActive=true;var video=document.getElementById('barcodeVideo');if(!video)return;video.srcObject=stream;video.style.display='block';return video.play().then(function(){barcodeStatus('Point the camera at the barcode and hold steady.',false);scanBarcodeFrame();});
+  }).catch(function(){barcodeStatus('The camera could not be opened. Allow camera access or enter the barcode number below.',true);if(input)input.focus();});
+}
+function scanBarcodeFrame(){
+  if(!_barcodeScanActive||!_barcodeDetector)return;var video=document.getElementById('barcodeVideo');
+  _barcodeDetector.detect(video).then(function(results){if(!_barcodeScanActive)return;if(results&&results[0]&&results[0].rawValue){var code=String(results[0].rawValue).replace(/\D/g,'');stopBarcodeCamera();var input=document.getElementById('barcodeManualInput');if(input)input.value=code;lookupFoodBarcode(code);return;}setTimeout(scanBarcodeFrame,220);}).catch(function(){if(_barcodeScanActive)setTimeout(scanBarcodeFrame,350);});
+}
+function barcodeNutrient(nutrients,key){var serving=nutrients[key+'_serving'],per100=nutrients[key+'_100g'];var value=serving!==undefined&&serving!==null?serving:per100;return value!==undefined&&value!==null&&value!==''?Math.round((parseFloat(value)||0)*10)/10:null;}
+function showPendingFood(food,title){
+  window._pendingScanFood=food;var nameEl=document.getElementById('scanResultName'),macroEl=document.getElementById('scanResultMacros'),modal=document.getElementById('scanConfirmModal'),heading=document.getElementById('scanConfirmTitle');
+  if(heading)heading.textContent=title||'Food Scanned';if(nameEl)nameEl.textContent=food.name||'Scanned Food';
+  if(macroEl){var microSummary=MICRO_FIELDS.filter(function(f){return food[f];}).map(function(f){return MICRO_META[f].icon+' '+food[f]+MICRO_META[f].unit+' '+MICRO_META[f].label;}).join(' | ');macroEl.innerHTML='<strong style="color:#b45309;">'+(food.cal||0)+' calories '+escHtml(food.servingLabel||'per serving')+'</strong><br>'+(food.prot||0)+'g protein &nbsp;|&nbsp; '+(food.fat||0)+'g fat &nbsp;|&nbsp; '+(food.carbs||0)+'g carbs'+(microSummary?'<div style="margin-top:6px;font-size:0.76rem;color:#0f766e;">'+microSummary+'</div>':'')+(food.barcode?'<div style="margin-top:5px;font-size:.68rem;color:#64748b;">Barcode '+escHtml(food.barcode)+' · '+escHtml(food.sourceConfidence||'Low')+' source confidence</div>':'');}
+  if(modal)modal.style.display='flex';
+}
+function lookupFoodBarcode(scannedCode){
+  var input=document.getElementById('barcodeManualInput'),code=String(scannedCode||(input&&input.value)||'').replace(/\D/g,'');
+  if(code.length<8||code.length>14){barcodeStatus('Enter a valid 8–14 digit UPC or EAN barcode.',true);return;}
+  stopBarcodeCamera();barcodeStatus('Looking up product '+code+'…',false);
+  var fields='code,product_name,brands,serving_size,nutriments,ingredients_text,categories';
+  fetch('https://world.openfoodfacts.org/api/v2/product/'+encodeURIComponent(code)+'.json?fields='+encodeURIComponent(fields)).then(function(response){if(!response.ok)throw new Error('Product lookup failed');return response.json();}).then(function(data){
+    if(!data||data.status!==1||!data.product)throw new Error('This barcode was not found');var product=data.product,n=product.nutriments||{},hasServing=['energy-kcal','proteins','fat','carbohydrates'].some(function(key){return n[key+'_serving']!==undefined;});
+    var food={name:[product.product_name,product.brands].filter(Boolean).join(' — ')||'Barcode '+code,barcode:code,servingLabel:hasServing&&product.serving_size?'per '+product.serving_size:'per 100 g',cal:barcodeNutrient(n,'energy-kcal'),prot:barcodeNutrient(n,'proteins'),fat:barcodeNutrient(n,'fat'),carbs:barcodeNutrient(n,'carbohydrates'),fiber:barcodeNutrient(n,'fiber'),sugar:barcodeNutrient(n,'sugars'),sodium:(function(){var value=barcodeNutrient(n,'sodium');return value===null?null:Math.round(value*1000);})(),ingredientsText:product.ingredients_text||'',categoriesText:product.categories||'',source:'barcode'};
+    inferFoodMacroSources(food);if(!food.sourceConfidence){food.sourceConfidence='Low';food.sourceMethod='Needs review';}
+    closeBarcodeScanner();showPendingFood(food,'Barcode Product Found');
+  }).catch(function(error){barcodeStatus(error.message+'. You can scan the nutrition label instead or enter the food manually.',true);});
+}
+
 function scanFoodLabel(ev){
   var file=ev.target.files[0];if(!file)return;
   var key=journalAIKey();if(!key){alert('Sign in to use AI.');ev.target.value='';return;}
@@ -6224,7 +6480,7 @@ function scanFoodLabel(ev){
         max_tokens:400,
         messages:[{role:'user',content:[
           {type:'image',source:{type:'base64',media_type:mtype,data:b64}},
-          {type:'text',text:'Read this nutrition label image carefully. Extract the per-serving nutrition facts and any visible product name. Respond with ONLY a single JSON object — no markdown, no code fences, no explanation, nothing else before or after. The JSON must have these exact keys:\n- "name": the product or food name visible anywhere on the label/package (use "Scanned Food" if not visible)\n- "cal": Calories per serving as a plain number\n- "prot": Protein grams per serving as a plain number\n- "fat": Total Fat grams per serving as a plain number\n- "carbs": Total Carbohydrate grams per serving as a plain number\n- "fiber": Dietary Fiber grams per serving as a plain number\n- "sugar": Total Sugars grams per serving as a plain number\n- "sodium": Sodium milligrams per serving as a plain number\n- "vitA": Vitamin A in mcg per serving as a plain number\n- "vitC": Vitamin C in mg per serving as a plain number\n- "vitD": Vitamin D in mcg per serving as a plain number\n- "calcium": Calcium in mg per serving as a plain number\n- "iron": Iron in mg per serving as a plain number\n- "potassium": Potassium in mg per serving as a plain number\nAll numeric values must be numbers, not strings. Use 0 if a value cannot be read from the label (do not guess). Output the JSON object only.'}
+          {type:'text',text:'Read this food package image carefully. Extract the per-serving Nutrition Facts, any visible product name, and the complete visible ingredient list. Use the ingredients to classify the dominant source of ALL THREE macros for a runner: protein (lean/plant versus higher-fat/processed), carbohydrates (complex/fiber-rich versus simple/refined), and fat (unsaturated versus saturated/trans). Respond with ONLY a single JSON object — no markdown, no code fences, no explanation, nothing else before or after. The JSON must have these exact keys:\n- "name": the product or food name visible anywhere on the label/package (use "Scanned Food" if not visible)\n- "ingredientsText": the complete ingredient list exactly as visible (use an empty string if it is not visible; do not guess)\n- "proteinSource": use "support" for lean/plant, "limit" for higher-fat/processed, or "unknown" when not supported by visible evidence\n- "carbSource": use "support" for complex/fiber-rich, "limit" for simple/refined, or "unknown" when not supported by visible evidence\n- "fatSource": use "support" for unsaturated, "limit" for saturated/trans, or "unknown" when not supported by visible evidence\n- "cal": Calories per serving as a plain number\n- "prot": Protein grams per serving as a plain number\n- "fat": Total Fat grams per serving as a plain number\n- "carbs": Total Carbohydrate grams per serving as a plain number\n- "fiber": Dietary Fiber grams per serving as a plain number\n- "sugar": Total Sugars grams per serving as a plain number\n- "sodium": Sodium milligrams per serving as a plain number\n- "vitA": Vitamin A in mcg per serving as a plain number\n- "vitC": Vitamin C in mg per serving as a plain number\n- "vitD": Vitamin D in mcg per serving as a plain number\n- "calcium": Calcium in mg per serving as a plain number\n- "iron": Iron in mg per serving as a plain number\n- "potassium": Potassium in mg per serving as a plain number\nAll numeric values must be numbers, not strings. Use 0 if a numeric value cannot be read from the label. Never invent missing ingredients or classifications. Output the JSON object only.'}
         ]}]
       })
     }).then(function(r){return r.json();}).then(function(data){
@@ -6237,8 +6493,10 @@ function scanFoodLabel(ev){
         if(m)try{parsed=JSON.parse(m[0]);}catch(e2){throw new Error('Could not parse AI response: '+txt.slice(0,100));}
         else throw new Error('No JSON found in response: '+txt.slice(0,100));
       }
-      window._pendingScanFood={name:parsed.name||'Scanned Food',cal:parsed.cal||null,prot:parsed.prot||null,fat:parsed.fat||null,carbs:parsed.carbs||null};
+      var validSource=function(value){value=String(value||'').toLowerCase();return value==='support'||value==='limit'?value:'';};
+      window._pendingScanFood={name:parsed.name||'Scanned Food',ingredientsText:String(parsed.ingredientsText||'').trim(),proteinSource:validSource(parsed.proteinSource),carbSource:validSource(parsed.carbSource),fatSource:validSource(parsed.fatSource),cal:parsed.cal||null,prot:parsed.prot||null,fat:parsed.fat||null,carbs:parsed.carbs||null};
       MICRO_FIELDS.forEach(function(f){window._pendingScanFood[f]=(parsed[f]!==undefined&&parsed[f]!==null&&parsed[f]!==0)?parsed[f]:null;});
+      window._pendingScanFood.source='label';var relevantSources=[window._pendingScanFood.prot?'proteinSource':'',window._pendingScanFood.carbs?'carbSource':'',window._pendingScanFood.fat?'fatSource':''].filter(Boolean),classifiedSources=relevantSources.filter(function(field){return !!window._pendingScanFood[field];}).length;window._pendingScanFood.sourceConfidence=window._pendingScanFood.ingredientsText&&relevantSources.length&&classifiedSources===relevantSources.length?'High':window._pendingScanFood.ingredientsText&&classifiedSources?'Medium':'Low';window._pendingScanFood.sourceMethod=window._pendingScanFood.ingredientsText?'Label + ingredients':'Needs review';inferFoodMacroSources(window._pendingScanFood);var scanHeading=document.getElementById('scanConfirmTitle');if(scanHeading)scanHeading.textContent='Food Label Scanned';
       var nameEl=document.getElementById('scanResultName'),macroEl=document.getElementById('scanResultMacros'),modal=document.getElementById('scanConfirmModal');
       if(nameEl)nameEl.textContent=window._pendingScanFood.name;
       if(macroEl){
@@ -6247,7 +6505,9 @@ function scanFoodLabel(ev){
           +(window._pendingScanFood.prot||0)+'g protein per serving &nbsp;|&nbsp; '
           +(window._pendingScanFood.fat||0)+'g fat per serving &nbsp;|&nbsp; '
           +(window._pendingScanFood.carbs||0)+'g carbs per serving'
-          +(microSummary?'<div style="margin-top:6px;font-size:0.76rem;color:#0f766e;">'+microSummary+'</div>':'');
+          +(microSummary?'<div style="margin-top:6px;font-size:0.76rem;color:#0f766e;">'+microSummary+'</div>':'')
+          +(window._pendingScanFood.ingredientsText?'<div style="margin-top:7px;padding-top:6px;border-top:1px solid #e2e8f0;font-size:.72rem;color:#475569;"><strong>Ingredients read:</strong> '+escHtml(window._pendingScanFood.ingredientsText)+'</div>':'<div style="margin-top:7px;font-size:.7rem;color:#92400e;">Ingredients were not visible; source classification may need review.</div>')
+          +'<div style="margin-top:5px;font-size:.68rem;color:#64748b;">'+escHtml(window._pendingScanFood.sourceConfidence||'Low')+' source confidence</div>';
       }
       if(modal)modal.style.display='flex';
     }).catch(function(err){
@@ -6265,7 +6525,7 @@ function confirmScanAdd(){
   var meal=(document.getElementById('scanMealTarget')||{}).value||'snack';
   if(MEALS.indexOf(meal)<0)meal='snack';
   if(!window._foodLog)window._foodLog=[];
-  var scanItem={id:'f'+Date.now(),meal:meal,name:food.name,cal:food.cal,prot:food.prot,fat:food.fat,carbs:food.carbs,servings:1,source:'scan'};
+  var scanItem={id:'f'+Date.now(),meal:meal,name:food.name,cal:food.cal,prot:food.prot,fat:food.fat,carbs:food.carbs,servings:1,source:food.source||'scan',barcode:food.barcode||'',servingLabel:food.servingLabel||'',ingredientsText:food.ingredientsText||'',categoriesText:food.categoriesText||'',proteinSource:food.proteinSource||'',carbSource:food.carbSource||'',fatSource:food.fatSource||'',sourceConfidence:food.sourceConfidence||'Low',sourceMethod:food.sourceMethod||'Needs review'};
   MICRO_FIELDS.forEach(function(f){scanItem[f]=food[f]!=null?food[f]:null;});
   window._foodLog.push(scanItem);
   _setMealOpen(meal,true);renderFoodItems();save();
@@ -7637,6 +7897,7 @@ async function submitAskJournal(){
     if(a.power)p.push(a.power+'W');
     if(a.elevGain)p.push(a.elevGain+'ft gain');
     if(a.notes)p.push(a.notes);
+    if(a.injuryReport)p.push('Injury report: '+a.injuryReport);
     return p.join(' | ');
   });
   // ── Training plan ──
@@ -7740,6 +8001,18 @@ function renderRunMetrics(){
   var avgPace=paceCount?paceSum/paceCount:0;
   var avgDist=runs.length?totalMiles/runs.length:0;
   var avgHR=hrCount?Math.round(hrSum/hrCount):0;
+  var mileageWeeks={},mileageMonths={};
+  runs.forEach(function(a){
+    var miles=parseFloat(a.distance)||0;if(!miles||!a.date)return;
+    var runDate=new Date(a.date+'T00:00:00');if(isNaN(runDate.getTime()))return;
+    var monday=new Date(runDate),daysFromMonday=(runDate.getDay()+6)%7;monday.setDate(runDate.getDate()-daysFromMonday);
+    var weekKey=dk(monday);mileageWeeks[weekKey]=(mileageWeeks[weekKey]||0)+miles;
+    var monthKey=runDate.getFullYear()+'-'+String(runDate.getMonth()+1).padStart(2,'0');mileageMonths[monthKey]=(mileageMonths[monthKey]||0)+miles;
+  });
+  function highestMileage(bucket){return Object.keys(bucket).reduce(function(best,key){return !best||bucket[key]>best.miles?{key:key,miles:bucket[key]}:best;},null);}
+  var highestWeek=highestMileage(mileageWeeks),highestMonth=highestMileage(mileageMonths);
+  function weekRangeLabel(key){if(!key)return'';var start=new Date(key+'T00:00:00'),end=new Date(start);end.setDate(start.getDate()+6);return fmtDateShort(dk(start))+' - '+fmtDateShort(dk(end));}
+  function monthLabel(key){if(!key)return'';var parts=key.split('-'),date=new Date(Number(parts[0]),Number(parts[1])-1,1);return date.toLocaleDateString('en-US',{month:'long',year:'numeric'});}
   var aqiValues=acts.map(function(a){return Number(a.aqi);}).filter(function(value){return Number.isFinite(value)&&value>0;});
   var avgAQI=aqiValues.length?Math.round(aqiValues.reduce(function(sum,value){return sum+value;},0)/aqiValues.length):0;
   function aqiCategory(value){return value<=50?'Good':value<=100?'Moderate':value<=150?'Unhealthy for sensitive groups':value<=200?'Unhealthy':value<=300?'Very unhealthy':'Hazardous';}
@@ -7785,6 +8058,8 @@ function renderRunMetrics(){
     +metBox('&#x23F3;','Total Time',totalDurSec?fmtSecs(totalDurSec):'-','all runs')
     +metBox('&#x1F4C5;','This Month',thisMonthMiles.toFixed(1)+' mi','')
     +metBox('&#x1F4C6;','This Year',thisYearMiles.toFixed(1)+' mi','')
+    +metBox('&#x1F4C8;','Highest Mileage Week',highestWeek?highestWeek.miles.toFixed(1)+' mi':'-',highestWeek?weekRangeLabel(highestWeek.key):'No mileage recorded yet')
+    +metBox('&#x1F5D3;&#xFE0F;','Highest Mileage Month',highestMonth?highestMonth.miles.toFixed(1)+' mi':'-',highestMonth?monthLabel(highestMonth.key):'No mileage recorded yet')
     +(peakPowerAct?metBox('&#x26A1;','Peak Average Watt',Math.round(parseFloat(peakPowerAct.power))+' W',recordSub(peakPowerAct)):'')
     +(mostElevAct?metBox('&#x26F0;','Most Elevation Gain',Math.round(parseFloat(mostElevAct.elevGain)).toLocaleString()+' ft',recordSub(mostElevAct)):'')
     +(mostCalAct?metBox('&#x1F525;','Most Calories Burned',Math.round(parseFloat(mostCalAct.calories)).toLocaleString()+' cal',recordSub(mostCalAct)):'')
@@ -8279,7 +8554,7 @@ function runJournalSearch(){
   const acts=getActivities();
   const actHits=[];
   acts.forEach(a=>{
-    const searchable=[a.notes,a.type,a.date,String(a.distance||''),a.pace].filter(Boolean).join(' ').toLowerCase();
+    const searchable=[a.notes,a.injuryReport,a.type,a.date,String(a.distance||''),a.pace].filter(Boolean).join(' ').toLowerCase();
     if(!searchable.includes(q))return;
     const parts=[];
     if(a.type)parts.push(a.type);
@@ -8287,6 +8562,7 @@ function runJournalSearch(){
     if(a.pace)parts.push(a.pace+'/mi');
     if(a.duration)parts.push(fmtDuration(a.duration));
     if(a.notes)parts.push(a.notes);
+    if(a.injuryReport)parts.push('Injury report: '+a.injuryReport);
     actHits.push({date:a.date,summary:parts.join(' · ')});
   });
   // ── Search training plan ──
@@ -8457,40 +8733,23 @@ function toggleAudiobookFinishPlanner(forceOpen){
   var open=typeof forceOpen==='boolean'?forceOpen:(panel.style.display==='none'||!panel.style.display);
   panel.style.display=open?'block':'none';
   if(arrow)arrow.innerHTML=open?'&#x25BC;':'&#x25B6;';
-  var date=document.getElementById('audioPlanDate');
-  if(open&&date&&!date.value){var d=new Date();d.setDate(d.getDate()+30);date.value=dk(d);}
-}
-function audiobookCatalogSearch(title){
-  return journalProtectedFunction({action:'audible-search',title:title}).then(function(book){
-    return{title:book.title||title,author:book.author||'',narrator:book.narrator||'',totalSeconds:Number(book.totalSeconds)||0,artwork:book.artwork||'',source:'Audible'};
-  }).catch(function(){
-    return fetch('https://itunes.apple.com/search?term='+encodeURIComponent(title)+'&media=audiobook&entity=audiobook&limit=20')
-      .then(function(r){if(!r.ok)throw new Error('Audiobook catalogs are unavailable.');return r.json();})
-      .then(function(data){
-        var wanted=String(title||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
-        function score(item){var found=String(item.collectionName||item.trackName||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();if(found===wanted)return 1000;if(found.indexOf(wanted)>=0||wanted.indexOf(found)>=0)return 500;return wanted.split(' ').reduce(function(n,w){return n+(w&&found.indexOf(w)>=0?10:0);},0);}
-        var item=(data.results||[]).filter(function(x){return Number(x.trackTimeMillis)>0;}).sort(function(a,b){return score(b)-score(a);})[0];
-        if(!item)throw new Error('No timed edition was found in Audible or Apple. Try adding the author name.');
-        return{title:item.collectionName||item.trackName||title,author:item.artistName||'',narrator:'',totalSeconds:Math.round(Number(item.trackTimeMillis)/1000),artwork:(item.artworkUrl100||'').replace(/\/\d+x\d+bb\./,'/300x300bb.'),source:'Apple Audiobooks'};
-      });
-  });
+  var startDate=document.getElementById('audioPlanStartDate'),date=document.getElementById('audioPlanDate');
+  if(open&&startDate&&!startDate.value)startDate.value=dk(new Date());
+  if(open&&date&&!date.value){var d=startDate&&startDate.value?new Date(startDate.value+'T00:00:00'):new Date();d.setDate(d.getDate()+30);date.value=dk(d);}
 }
 function createAudiobookFinishPlan(){
-  var title=((document.getElementById('audioPlanBook')||{}).value||'').trim(),finish=(document.getElementById('audioPlanDate')||{}).value||'';
+  var title=((document.getElementById('audioPlanBook')||{}).value||'').trim(),author=((document.getElementById('audioPlanAuthor')||{}).value||'').trim(),hours=Math.max(0,parseInt((document.getElementById('audioPlanHours')||{}).value,10)||0),minutes=Math.max(0,parseInt((document.getElementById('audioPlanMinutes')||{}).value,10)||0),startKey=(document.getElementById('audioPlanStartDate')||{}).value||'',finish=(document.getElementById('audioPlanDate')||{}).value||'';
   if(!title){alert('Enter the audiobook name first.');return;}
+  if(!author){alert('Enter the audiobook author.');return;}
+  if(minutes>59){alert('Additional minutes must be between 0 and 59.');return;}
+  var totalSec=(hours*60+minutes)*60;
+  if(totalSec<=0){alert('Enter the total audiobook length.');return;}
+  if(!startKey){alert('Choose a start date.');return;}
   if(!finish){alert('Choose a finish date.');return;}
-  var startKey=dk(today),start=new Date(startKey+'T00:00:00'),end=new Date(finish+'T00:00:00'),days=Math.floor((end-start)/86400000)+1;
-  if(days<1){alert('The finish date must be today or later.');return;}
-  var btn=document.getElementById('audioPlanCreateBtn'),result=document.getElementById('audioPlanResult');
-  if(btn){btn.disabled=true;btn.textContent='Finding audiobook...';}
-  if(result){result.style.display='block';result.innerHTML='<div style="color:#667eea;font-size:0.8rem;">Looking up the audiobook edition and duration...</div>';}
-  audiobookCatalogSearch(title).then(function(book){
-    if(!book)throw new Error('No timed audiobook edition was found. Try adding the author name.');
-    var totalSec=Math.round(Number(book.totalSeconds)||0);
-    var plan={query:title,title:book.title||title,author:book.author||'',narrator:book.narrator||'',source:book.source||'Audiobook catalog',startDate:startKey,finishDate:finish,totalSeconds:totalSec,dailySeconds:Math.ceil(totalSec/days),days:days,artwork:book.artwork||'',createdAt:new Date().toISOString()};
-    localStorage.setItem('audiobook_finish_plan',JSON.stringify(plan));renderAudiobookFinishPlan();
-    if(btn){btn.disabled=false;btn.textContent='Create Outline';}
-  }).catch(function(err){if(result)result.innerHTML='<div style="color:#c0392b;font-size:0.8rem;">'+escHtml(err.message)+'</div>';if(btn){btn.disabled=false;btn.textContent='Create Outline';}});
+  var start=new Date(startKey+'T00:00:00'),end=new Date(finish+'T00:00:00'),days=Math.floor((end-start)/86400000)+1;
+  if(days<1){alert('The finish date must be on or after the start date.');return;}
+  var plan={query:title,queryAuthor:author,title:title,author:author,narrator:'',source:'the audiobook length you entered',startDate:startKey,finishDate:finish,totalSeconds:totalSec,dailySeconds:Math.ceil(totalSec/days),days:days,artwork:'',createdAt:new Date().toISOString()};
+  localStorage.setItem('audiobook_finish_plan',JSON.stringify(plan));renderAudiobookFinishPlan();
 }
 function formatSecondsLong(sec){
   sec=Math.max(0,Math.round(Number(sec)||0));var h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60,parts=[];
@@ -8501,14 +8760,22 @@ function renderAudiobookFinishPlan(){
   var raw=localStorage.getItem('audiobook_finish_plan');if(!raw){result.style.display='none';return;}
   var p;try{p=JSON.parse(raw);}catch(e){result.style.display='none';return;}
   var start=new Date(p.startDate+'T00:00:00'),end=new Date(p.finishDate+'T00:00:00'),milestones=[],cursor=new Date(start),week=1;
+  var now=new Date();now.setHours(0,0,0,0);var throughDate=now>end?new Date(end):new Date(now),actualSeconds=0,elapsedDays=0;
+  if(throughDate>=start){var listenDay=new Date(start);while(listenDay<=throughDate){var listenKey=dk(listenDay),listenData={};try{listenData=JSON.parse(localStorage.getItem('planner_'+listenKey)||'{}');}catch(ignoreListen){}actualSeconds+=journalAudiobookMinutesForDate(listenKey,listenData)*60;listenDay.setDate(listenDay.getDate()+1);}elapsedDays=Math.floor((throughDate-start)/86400000)+1;}
+  actualSeconds=Math.min(Number(p.totalSeconds)||0,actualSeconds);var plannedSeconds=Math.min(Number(p.totalSeconds)||0,Math.round((Number(p.totalSeconds)||0)*(elapsedDays/Math.max(1,Number(p.days)||1)))),actualPct=p.totalSeconds?Math.min(100,Math.round(actualSeconds/p.totalSeconds*100)):0,plannedPct=p.totalSeconds?Math.min(100,Math.round(plannedSeconds/p.totalSeconds*100)):0,tolerance=Math.max(300,Math.round((Number(p.dailySeconds)||0)*0.1)),progressLabel='On Track',progressColor='#16a34a';
+  if(actualSeconds>=Number(p.totalSeconds||0)&&Number(p.totalSeconds||0)>0){progressLabel='Complete';progressColor='#16a34a';}else if(actualSeconds>plannedSeconds+tolerance){progressLabel='Ahead';progressColor='#2563eb';}else if(actualSeconds+tolerance<plannedSeconds){progressLabel='Behind';progressColor='#dc2626';}
+  var remainingSeconds=Math.max(0,(Number(p.totalSeconds)||0)-actualSeconds),progressHtml='<div style="margin-top:11px;padding:9px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:6px;"><strong style="color:'+progressColor+';font-size:0.82rem;">'+progressLabel+'</strong><span style="font-size:0.75rem;font-weight:800;color:#475569;">'+actualPct+'% complete</span></div><div style="height:13px;background:#e2e8f0;border-radius:999px;position:relative;overflow:visible;"><div style="height:100%;width:'+actualPct+'%;background:'+progressColor+';border-radius:999px;"></div><span title="Planned progress by today" style="position:absolute;left:calc('+plannedPct+'% - 1px);top:-3px;width:2px;height:19px;background:#334155;border-radius:2px;"></span></div><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:6px;font-size:0.69rem;color:#64748b;"><span>Listened: <strong>'+formatSecondsLong(actualSeconds)+'</strong></span><span>Planned by today: <strong>'+formatSecondsLong(plannedSeconds)+'</strong></span><span>Remaining: <strong>'+formatSecondsLong(remainingSeconds)+'</strong></span></div></div>';
   while(cursor<=end){var weekEnd=new Date(cursor);weekEnd.setDate(weekEnd.getDate()+6);if(weekEnd>end)weekEnd=new Date(end);var through=Math.floor((weekEnd-start)/86400000)+1,pct=Math.min(100,Math.round(through/p.days*100));milestones.push('<div style="display:flex;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px solid #eceeff;"><span>Week '+week+': '+cursor.toLocaleDateString('en-US',{month:'short',day:'numeric'})+'–'+weekEnd.toLocaleDateString('en-US',{month:'short',day:'numeric'})+'</span><strong>'+pct+'%</strong></div>');cursor=new Date(weekEnd);cursor.setDate(cursor.getDate()+1);week++;}
   result.style.display='block';
   result.innerHTML='<div style="background:#fff;border:1px solid #dfe3ff;border-radius:8px;padding:10px;"><div style="display:flex;gap:10px;align-items:flex-start;">'
     +(p.artwork?'<img src="'+p.artwork+'" style="width:54px;height:54px;object-fit:cover;border-radius:6px;flex-shrink:0;">':'')
     +'<div style="flex:1;min-width:0;"><div style="font-weight:800;color:#37308f;">'+escHtml(p.title)+'</div>'+(p.author?'<div style="font-size:0.76rem;color:#666;">by '+escHtml(p.author)+'</div>':'')
     +'<div style="font-size:0.76rem;color:#555;margin-top:4px;">Total: <strong>'+formatSecondsLong(p.totalSeconds)+'</strong> &bull; '+p.days+' day'+(p.days===1?'':'s')+'</div><div style="font-size:0.84rem;color:#4338ca;margin-top:3px;">Listen <strong>'+formatSecondsLong(p.dailySeconds)+'</strong> per day</div></div>'
-    +'<button onclick="deleteAudiobookFinishPlan()" title="Remove plan" style="background:none;border:1px solid #ddd;border-radius:5px;color:#999;cursor:pointer;">&#x2715;</button></div><div style="font-size:0.75rem;color:#555;margin-top:9px;">'+milestones.join('')+'</div><div style="font-size:0.69rem;color:#888;margin-top:7px;">Based on the closest timed edition found in '+escHtml(p.source||'the audiobook catalog')+'.</div></div>';
+    +'<button onclick="deleteAudiobookFinishPlan()" title="Remove plan" style="background:none;border:1px solid #ddd;border-radius:5px;color:#999;cursor:pointer;">&#x2715;</button></div>'+progressHtml+'<div style="font-size:0.75rem;color:#555;margin-top:9px;">'+milestones.join('')+'</div><div style="font-size:0.69rem;color:#888;margin-top:7px;">Schedule based on '+escHtml(p.source||'the audiobook length you entered')+'.</div></div>';
   var title=document.getElementById('audioPlanBook');if(title&&!title.value)title.value=p.query||p.title||'';
+  var author=document.getElementById('audioPlanAuthor');if(author&&!author.value)author.value=p.queryAuthor||p.author||'';
+  var hours=document.getElementById('audioPlanHours'),minutes=document.getElementById('audioPlanMinutes'),totalMinutes=Math.round((Number(p.totalSeconds)||0)/60);if(hours&&!hours.value)hours.value=Math.floor(totalMinutes/60)||'';if(minutes&&!minutes.value)minutes.value=totalMinutes%60||'';
+  var startDate=document.getElementById('audioPlanStartDate');if(startDate&&!startDate.value)startDate.value=p.startDate||'';
   var date=document.getElementById('audioPlanDate');if(date&&!date.value)date.value=p.finishDate||'';
 }
 function deleteAudiobookFinishPlan(){if(!confirm('Remove this audiobook completion plan?'))return;localStorage.removeItem('audiobook_finish_plan');renderAudiobookFinishPlan();}
@@ -10333,6 +10600,9 @@ function makeHabitsInformational(){
   panel.querySelectorAll('.tri-check,input[type="checkbox"]').forEach(function(el){el.remove();});
 }
 function switchTab(tab,e){
+  // The former Skills screen is retained only as a private legacy data store.
+  // Never expose that retired screen through old links or saved navigation state.
+  if(tab==='skill-log')tab='daily';
   _cardTabs.forEach(function(t){document.body.classList.toggle('tab-'+t+'-active',tab===t);});
   saveTabNote();_currentNoteTab=tab;loadTabNote(tab);
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
@@ -10352,7 +10622,6 @@ function switchTab(tab,e){
   if(tab==='review')renderReview();if(tab==='library'){renderLibrary();renderLibrarySectionCharts();}
   if(tab==='activities'){_actFirstLoad=true;collapseAllActs();resetActivityAdvancedPanels();loadCurrentPlan();refreshTrainingPreview();renderActivitySectionCharts();initTodayWorkoutCard();updateCompactSectionCounts();}
   if(tab==='bible')renderBibleTab();
-  if(tab==='skill-log'){renderSkillLog();renderSkillSectionCharts();}
   if(tab==='nutrition'){renderFoodItems();renderFavsList();calculateDailyCalorieTarget();renderNutritionSectionCharts();}
   if(tab==='habits2')h2Render();
   if(tab==='meditate'){meditInitTab();}
@@ -10628,7 +10897,7 @@ window.addEventListener('load',function(){
   var lastTab=localStorage.getItem('last_active_tab');
   if(lastTab==='habits')lastTab='habits2';
   if(lastTab==='dashboard')lastTab='weekly';
-  var validTabs=['daily','weekly','monthly','yearly','review','nutrition','habits2','meditate','bible','library','activities','skill-log','wellness','file-uploads'];
+  var validTabs=['daily','weekly','monthly','yearly','review','nutrition','habits2','meditate','bible','library','activities','wellness','file-uploads'];
   if(lastTab&&lastTab!=='daily'&&validTabs.indexOf(lastTab)!==-1){
     if(_hmTabs.includes(lastTab)){hmSwitch(lastTab,null);}
     else{var btn=document.querySelector('[onclick*="switchTab(\''+lastTab+'\'"]');if(btn)btn.click();}
@@ -11134,14 +11403,14 @@ function toggleAddActivity(){
 }
 function cancelAddActivity(){document.getElementById('addActivityForm').style.display='none';editingActivityId=null;}
 function clearActForm(){
-  ['actDate','actType','actTitle','actCode','actDistance','actDuration','actPace','actPower','actHR','actCadence','actCalories','actElevGain','actTemp','actAQI','actExecScore','actNotes'].forEach(id=>{
+  ['actDate','actType','actTitle','actDistance','actDuration','actPace','actPower','actHR','actCadence','actCalories','actElevGain','actTemp','actHumidity','actAQI','actExecScore','actNotes','actInjuryReport'].forEach(id=>{
     const e=document.getElementById(id);if(e)e.value='';
   });
   document.getElementById('actSource').value='manual';
   document.getElementById('actType').value='Run';
   handleActTypeChange();
 }
-var ACT_REST_DAY_FIELDS=['actTitle','actCode','actDistance','actDuration','actPace','actPower','actHR','actCadence','actCalories','actElevGain','actTemp','actAQI','actExecScore','actNotes'];
+var ACT_REST_DAY_FIELDS=['actTitle','actDistance','actDuration','actPace','actPower','actHR','actCadence','actCalories','actElevGain','actTemp','actHumidity','actAQI','actExecScore','actNotes','actInjuryReport'];
 function handleActTypeChange(){
   var typeEl=document.getElementById('actType');if(!typeEl)return;
   var isRestDay=typeEl.value==='Rest Day';
@@ -11158,7 +11427,6 @@ function getActFormValues(){
     date:document.getElementById('actDate').value,
     type:document.getElementById('actType').value,
     title:(document.getElementById('actTitle').value||'').trim(),
-    activityCode:(document.getElementById('actCode').value||'').trim(),
     distance:parseFloat(document.getElementById('actDistance').value)||0,
     duration:(document.getElementById('actDuration').value||'').trim(),
     pace:(document.getElementById('actPace').value||'').trim(),
@@ -11168,7 +11436,9 @@ function getActFormValues(){
     calories:parseFloat(document.getElementById('actCalories').value)||0,
     elevGain:parseFloat(document.getElementById('actElevGain').value)||0,
     notes:(document.getElementById('actNotes').value||'').trim(),
+    injuryReport:(document.getElementById('actInjuryReport').value||'').trim(),
     temp:(document.getElementById('actTemp').value||'').trim(),
+    humidity:Math.max(0,Math.min(100,parseFloat(document.getElementById('actHumidity').value)||0)),
     aqi:Math.max(0,Math.min(500,parseInt(document.getElementById('actAQI').value,10)||0)),
     execScore:parseFloat(document.getElementById('actExecScore').value)||0,
     source:document.getElementById('actSource').value
@@ -11223,7 +11493,6 @@ function editActivity(id){
   document.getElementById('actDate').value=act.date||'';
   document.getElementById('actType').value=act.type||'Run';
   document.getElementById('actTitle').value=act.title||'';
-  document.getElementById('actCode').value=act.activityCode||'';
   document.getElementById('actDistance').value=act.distance||'';
   document.getElementById('actDuration').value=act.duration||'';
   document.getElementById('actPace').value=act.pace||'';
@@ -11233,9 +11502,11 @@ function editActivity(id){
   document.getElementById('actCalories').value=act.calories||'';
   document.getElementById('actElevGain').value=act.elevGain||'';
   document.getElementById('actTemp').value=act.temp||'';
+  document.getElementById('actHumidity').value=act.humidity||'';
   document.getElementById('actAQI').value=act.aqi||'';
   document.getElementById('actExecScore').value=act.execScore||'';
   document.getElementById('actNotes').value=act.notes||'';
+  document.getElementById('actInjuryReport').value=act.injuryReport||'';
   document.getElementById('actSource').value=act.source||'manual';
   handleActTypeChange();
   f.style.display='block';
@@ -11734,9 +12005,9 @@ function renderActivities(){
     if(a.calories)stats.push('<span class="act-stat">&#x1F525; <strong>'+a.calories+'</strong> cal</span>');
     if(a.elevGain)stats.push('<span class="act-stat">&#x26F0; <strong>'+a.elevGain+'</strong> ft</span>');
     if(a.temp)stats.push('<span class="act-stat">&#x1F321;&#xFE0F; <strong>'+a.temp+'</strong>°F</span>');
+    if(a.humidity)stats.push('<span class="act-stat">&#x1F4A7; Humidity <strong>'+a.humidity+'</strong>%</span>');
     if(a.aqi)stats.push('<span class="act-stat">&#x1F32C;&#xFE0F; AQI <strong>'+a.aqi+'</strong></span>');
     if(a.execScore)stats.push('<span class="act-stat">&#x1F3AF; <strong>'+a.execScore+'</strong>/100</span>');
-    if(a.activityCode)stats.push('<span class="act-stat">&#x1F194; <strong>'+escHtml(a.activityCode)+'</strong></span>');
     var collapsed=actCollapsed.has(a.id);
     var chevron=collapsed?'&#x25B6;':'&#x25BC;';
     var bodyDisplay=collapsed?'none':'block';
@@ -11758,7 +12029,8 @@ function renderActivities(){
       +'</div>'
       +'<div id="actBody_'+a.id+'" style="display:'+bodyDisplay+';">'
       +'<div class="act-stats">'+stats.join('')+'</div>'
-      +(a.notes?'<div style="font-size:0.82rem;color:#666;margin-top:6px;white-space:pre-wrap;">'+escHtml(a.notes)+'</div>':'')
+      +(a.notes?'<div style="font-size:0.82rem;color:#666;margin-top:8px;white-space:pre-wrap;"><strong style="display:block;color:#475569;margin-bottom:2px;">Notes</strong>'+escHtml(a.notes)+'</div>':'')
+      +(a.injuryReport?'<div style="font-size:0.82rem;color:#7f1d1d;margin-top:8px;padding:8px 10px;background:#fff7f7;border:1px solid #fecaca;border-radius:7px;white-space:pre-wrap;"><strong style="display:block;color:#b91c1c;margin-bottom:2px;">Injury Report</strong>'+escHtml(a.injuryReport)+'</div>':'')
       +'<div id="noteWrap_'+a.id+'" style="display:none;margin-top:6px;">'
       +'<textarea class="act-note-edit" id="noteTA_'+a.id+'" placeholder="Add a note...">'+escHtml(a.notes||'')+'</textarea>'
       +'<div style="display:flex;gap:6px;margin-top:4px;">'
@@ -12517,7 +12789,7 @@ function journalHomeStreakSummary(){
     {label:'Bible',fn:function(d){return d.spBibleAudio==='green';}},
     {label:'Prayer',fn:function(d){return d.spAIPrayer==='green';}},
     {label:'Running',fn:function(d,dateKey){return !!actIdx.run[dateKey];}},
-    {label:'Water',fn:function(d){return(parseFloat(d.waterOz)||parseFloat(d.waterCount)*8||0)>0;}}
+    {label:'Water',fn:function(d){return(parseFloat(d.waterOz)||parseFloat(d.waterCount)*8||0)>=75;}}
   ];
   return defs.map(function(item){return'<span style="white-space:nowrap;"><strong>'+streak(item.fn,cache)+'</strong> '+item.label+'</span>';}).join(' &nbsp;•&nbsp; ');
 }
@@ -12527,7 +12799,7 @@ function journalScheduleGrowth(dateKey){
   var range=skills.some(function(entry){return entry.date===dateKey&&entry.category==='Gun Range';});
   // Gun Range has no "planned" schedule of its own (unlike training runs) — only surface it
   // once it's actually been logged for the day, instead of forcing it onto every Saturday.
-  if(range)return{label:'Gun Range',done:true,tab:'skill-log'};
+  if(range)return{label:'Gun Range',done:true,tab:'daily'};
   return{label:'',done:false,tab:'daily',skip:true};
 }
 function journalToggleScheduleManual(name){
@@ -12536,6 +12808,7 @@ function journalToggleScheduleManual(name){
   renderJournalSchedule();
 }
 var JOURNAL_SLEEP_STEPS=['Begin winding down by the target time','Put away the computer','Complete nighttime hygiene','Prepare bedroom and set alarm','Get into bed by the target bedtime','Finish journaling, then enable Do Not Disturb'];
+var _journalSleepRoutineDrafts={};
 var _journalSleepRoutineOpen=false;
 var _journalScheduleOpenDetail='',_journalEndSummaryOpen=false;
 function journalCheckState(data,key){var value=String(data&&data[key]||'');return['green','purple','red','black'].indexOf(value)!==-1?value:'';}
@@ -12555,29 +12828,44 @@ function journalScheduleDetailHtml(kind,data){
 function journalToggleHiddenCheck(event,id){if(event){event.preventDefault();event.stopPropagation();}var target=document.getElementById(id);if(target){target.checked=!target.checked;save();renderJournalSchedule();}}
 function journalOpenDailyCheck(event,tab,key,id){if(event){event.preventDefault();event.stopPropagation();}switchTab(tab,null);setTimeout(function(){var target=id?document.getElementById(id):document.querySelector('.tri-check[data-key="'+key+'"]');if(target&&target.type==='checkbox'){target.checked=!target.checked;save();renderJournalSchedule();return;}if(target){target.scrollIntoView({behavior:'smooth',block:'center'});target.focus({preventScroll:true});}},80);}
 function journalToggleEndSummary(){_journalEndSummaryOpen=!_journalEndSummaryOpen;renderJournalSchedule();}
-function journalEndSummaryHtml(){
-  var items=collectDailyChecks().filter(function(item){return item.status!=='black';}),complete=items.filter(function(item){return item.status==='green';}).length,partial=items.filter(function(item){return item.status==='purple';}).length,remaining=items.filter(function(item){return item.status===''||item.status==='blank'||item.status==='red';}),unfinished=items.filter(function(item){return item.status!=='green';});
+function journalEndSummaryOpenScheduled(event,id){
+  if(event){event.preventDefault();event.stopPropagation();}
+  var card=document.querySelector('.journal-schedule-item[data-schedule-id="'+CSS.escape(id)+'"]');
+  if(card){card.scrollIntoView({behavior:'smooth',block:'center'});card.focus({preventScroll:true});}
+}
+function journalEndSummaryHtml(scheduleItems){
+  var scheduled=Array.isArray(scheduleItems)?scheduleItems:Object.keys(_journalScheduleItemsById||{}).map(function(id){return _journalScheduleItemsById[id];});
+  var items=scheduled.filter(function(item){return item&&!item.fixed;}).map(function(item){return{id:item.id,label:item.label,status:item.scheduleStatus||'blank'};});
+  var complete=items.filter(function(item){return item.status==='green';}).length,partial=items.filter(function(item){return item.status==='purple';}).length,remaining=items.filter(function(item){return item.status===''||item.status==='blank'||item.status==='red';}),unfinished=items.filter(function(item){return item.status!=='green';});
   var colorOrder={purple:0,red:1,blank:2,'':2};unfinished.sort(function(a,b){return(colorOrder[a.status]??3)-(colorOrder[b.status]??3)||a.label.localeCompare(b.label);});
-  var rows=_journalEndSummaryOpen?'<div class="journal-end-items">'+unfinished.map(function(item){return'<button type="button" class="journal-end-item '+item.status+'" onclick="journalOpenDailyCheck(event,\''+item.tab+'\',\''+item.key+'\',\''+item.id+'\')"><i></i><span>'+escHtml(item.label)+'</span></button>';}).join('')+'</div>':'';
+  var rows=_journalEndSummaryOpen?'<div class="journal-end-items">'+unfinished.map(function(item){return'<button type="button" class="journal-end-item '+item.status+'" onclick="journalEndSummaryOpenScheduled(event,\''+escHtml(item.id)+'\')"><i></i><span>'+escHtml(item.label)+'</span></button>';}).join('')+'</div>':'';
   return'<div class="journal-end-summary"><button type="button" onclick="journalToggleEndSummary()"><span>'+(_journalEndSummaryOpen?'&#x25BC;':'&#x25B6;')+' End-of-Day Summary</span><span class="journal-end-counts">'+complete+' complete &bull; '+partial+' in progress &bull; '+remaining.length+' remaining</span></button>'+rows+'</div>';
 }
 function journalSleepRoutineState(dateKey){
-  var values=null;try{values=JSON.parse(localStorage.getItem('schedule_sleepRoutine_steps_'+dateKey)||'null');}catch(ignore){}
+  var values=Object.prototype.hasOwnProperty.call(_journalSleepRoutineDrafts,dateKey)?_journalSleepRoutineDrafts[dateKey].slice():null;
+  if(!Array.isArray(values)){try{values=JSON.parse(localStorage.getItem('schedule_sleepRoutine_steps_'+dateKey)||'null');}catch(ignore){}}
   if(!Array.isArray(values)){values=localStorage.getItem('schedule_sleepRoutine_'+dateKey)==='1'?[true,true,true,true,true,false]:[false,false,false,false,false,false];}
-  values=JOURNAL_SLEEP_STEPS.map(function(_,index){return values[index]===true;});
+  values=JOURNAL_SLEEP_STEPS.map(function(_,index){var value=values[index];return value===true||value===1||value==='true'||value==='green'||value==='checked';});
   return{values:values,count:values.filter(Boolean).length};
 }
 function journalToggleSleepRoutinePanel(){_journalSleepRoutineOpen=!_journalSleepRoutineOpen;renderJournalSchedule();}
+function journalSaveSleepRoutineState(dateKey,values){
+  values=JOURNAL_SLEEP_STEPS.map(function(_,index){return values[index]===true;});
+  _journalSleepRoutineDrafts[dateKey]=values.slice();
+  localStorage.setItem('schedule_sleepRoutine_steps_'+dateKey,JSON.stringify(values));
+  if(values.filter(Boolean).length>=4)localStorage.setItem('schedule_sleepRoutine_'+dateKey,'1');else localStorage.removeItem('schedule_sleepRoutine_'+dateKey);
+  return values.filter(Boolean).length;
+}
 function journalToggleSleepRoutineStep(event,index){
   if(event){event.preventDefault();event.stopPropagation();}
-  var dateKey=dk(today),state=journalSleepRoutineState(dateKey);state.values[index]=!state.values[index];
-  localStorage.setItem('schedule_sleepRoutine_steps_'+dateKey,JSON.stringify(state.values));
-  if(state.values.filter(Boolean).length>=4)localStorage.setItem('schedule_sleepRoutine_'+dateKey,'1');else localStorage.removeItem('schedule_sleepRoutine_'+dateKey);
+  var dateKey=dk(today),state=journalSleepRoutineState(dateKey);
+  state.values[index]=!state.values[index];
+  journalSaveSleepRoutineState(dateKey,state.values);
   _journalSleepRoutineOpen=true;renderJournalSchedule();
 }
 function journalSleepRoutineChecklistHtml(dateKey){
   if(!_journalSleepRoutineOpen)return'';var state=journalSleepRoutineState(dateKey);
-  return'<div class="journal-sleep-checklist">'+JOURNAL_SLEEP_STEPS.map(function(label,index){return'<label><input type="checkbox" '+(state.values[index]?'checked ':'')+'onclick="journalToggleSleepRoutineStep(event,'+index+')"><span>'+escHtml(label)+'</span></label>';}).join('')+'<small>'+state.count+' of 6 completed &bull; Complete the habit with any 4 steps.</small></div>';
+  return'<div class="journal-sleep-checklist">'+JOURNAL_SLEEP_STEPS.map(function(label,index){var checked=state.values[index];return'<button type="button" class="journal-sleep-step '+(checked?'checked':'')+'" aria-pressed="'+(checked?'true':'false')+'" onclick="journalToggleSleepRoutineStep(event,'+index+')"><i>&#x2713;</i><span>'+escHtml(label)+'</span></button>';}).join('')+'<small>'+state.count+' of 6 completed &bull; Complete the habit with any 4 steps.</small></div>';
 }
 var _journalScheduleDragged='',_journalScheduleSuppressClick=0;
 var _journalScheduleItemsById={};
@@ -12765,8 +13053,9 @@ function renderJournalSchedule(){
     return foods.some(function(item){return String((item&&item.meal)||'').toLowerCase()===meal;});
   }
   function mealComplete(meal,mins){
-    var scheduledTimeReached=isPastDay||(isSelectedToday&&currentMinutes>=mins);
-    return scheduledTimeReached&&mealLogged(meal);
+    // A meal is complete as soon as food is recorded. The schedule time is a
+    // planning aid and should not keep an entered meal gray earlier in the day.
+    return mealLogged(meal);
   }
   var reflected=['jAccomplish','jImprov','jGratitude','jNotes'].some(function(key){return String(d[key]||'').trim();}),sleepRoutine=journalSleepRoutineState(dateKey);
   var wellnessKeys=['wBP','wMeds','wWght','wSleep'],wellnessRecorded=journalLinkedGreenCount(wellnessKeys,d);
@@ -12859,6 +13148,11 @@ function renderJournalSchedule(){
   var complete=trackable.filter(function(item){return item.done;}).length,next=-1;
   if(isSelectedToday){for(var i=0;i<items.length;i++){if(!items[i].fixed&&!items[i].done&&items[i].mins>=currentMinutes){next=i;break;}}if(next<0)next=items.findIndex(function(item){return !item.fixed&&!item.done;});}
   if(summary)summary.textContent=complete+'/'+trackable.length+' complete';
+  var progressPercent=trackable.length?Math.round((complete/trackable.length)*100):0;
+  var progressFill=document.getElementById('journalDayProgressFill'),progressText=document.getElementById('journalDayProgressText'),progressTrack=document.getElementById('journalDayProgressTrack');
+  if(progressFill)progressFill.style.width=progressPercent+'%';
+  if(progressText)progressText.textContent=progressPercent+'% \u2022 '+complete+' of '+trackable.length+' complete';
+  if(progressTrack)progressTrack.setAttribute('aria-valuenow',String(progressPercent));
   var nextText=next>=0?'Next: '+items[next].time+' — '+items[next].label:(complete===trackable.length?'Schedule complete':'Review remaining items');
   body.innerHTML='<div class="journal-schedule-status"><strong>'+escHtml(nextText)+'</strong><span>Drag to reorder • Edit or copy events • '+complete+' complete • '+(trackable.length-complete)+' remaining</span><span style="display:flex;gap:5px;flex-wrap:wrap;"><button type="button" onclick="journalScheduleCopyDay(event)" style="border:1px solid #2563eb;background:#fff;color:#1d4ed8;border-radius:6px;padding:5px 9px;font-size:.68rem;font-weight:800;cursor:pointer;">Copy Day</button><button type="button" onclick="event.preventDefault();event.stopPropagation();journalOpenManualScheduleItem()" style="border:1px solid #4f46e5;background:#4f46e5;color:#fff;border-radius:6px;padding:5px 9px;font-size:.68rem;font-weight:800;cursor:pointer;">+ Schedule Item</button></span></div><div class="journal-schedule-list">'+items.map(function(item,index){var inlineGrowth=['language','udemy','gun','guitar'].indexOf(item.growthKind)!==-1,action=item.fixed?'':inlineGrowth?'journalOpenGrowthLog(\''+item.growthKind+'\')':item.detailKind?'journalToggleScheduleDetail(\''+item.detailKind+'\')':item.sleepRoutineChecklist?'journalToggleSleepRoutinePanel()':(item.manual?'journalToggleScheduleManual(\''+item.manual+'\')':'switchTab(\''+item.tab+'\',null)');var safeAction=JSON.stringify(action).replace(/"/g,'&quot;'),removeAction=item.manualCreated?'<span class="journal-schedule-remove" role="button" tabindex="0" onclick="journalDeleteManualScheduleItem(event,\''+item.manualItemId+'\',\''+(item._moveId||'')+'\')">Remove</span>':item.growthKind?'<span class="journal-schedule-remove" role="button" tabindex="0" onclick="journalScheduleRemoveGrowth(event,\''+item.growthKind+'\',\''+escHtml(item.id)+'\')">Remove</span>':'',copyAction='<span class="journal-schedule-copy" role="button" tabindex="0" onclick="journalScheduleCopyItem(event,\''+escHtml(item.id)+'\')">Copy</span>',linkedKey=item.growthKind==='reading'?'gaAudiobook':item.growthKind==='financial'?'gaFinancialVideos':item.growthKind==='udemy'?'gaUdemy':item.growthKind==='gun'?'gaGunRange':item.growthKind==='language'?'gaLanguage':item.growthKind==='guitar'?'gaGuitar':'',checkClick=item.checkId?' onclick="journalToggleHiddenCheck(event,\''+item.checkId+'\')" title="Toggle completion"':linkedKey?' onclick="journalScheduleToggleLinkedCheck(event,\''+linkedKey+'\')" title="Toggle completion"':'';return '<button type="button" draggable="true" data-schedule-id="'+escHtml(item.id)+'" class="journal-schedule-item '+(item.fixed?'fixed ':(item.done?'done ':''))+(index===next?'next':'')+'" onclick="journalScheduleCardClick('+safeAction+')" ondragstart="journalScheduleDragStart(event,\''+escHtml(item.id)+'\')" ondragover="journalScheduleDragOver(event)" ondrop="journalScheduleDrop(event,\''+escHtml(item.id)+'\')" ondragend="journalScheduleDragEnd()"><span class="journal-schedule-grip" title="Drag to reschedule" aria-hidden="true">&#x22EE;&#x22EE;</span><span class="journal-schedule-time">'+item.time+'</span><span class="journal-schedule-check"'+checkClick+'>'+(item.fixed?'&#x1F4BC;':(item.done?'&#x2713;':''))+'</span><span class="journal-schedule-name">'+escHtml(item.label)+'<span class="journal-schedule-detail">'+escHtml(item.detail)+'</span></span><span class="journal-schedule-actions">'+copyAction+'<span class="journal-schedule-edit" role="button" tabindex="0" onclick="journalScheduleEdit(event,\''+escHtml(item.id)+'\')">Edit</span>'+removeAction+'</span></button>'+(item.detailKind?journalScheduleDetailHtml(item.detailKind,d):'')+(item.sleepRoutineChecklist?journalSleepRoutineChecklistHtml(dateKey):'');}).join('')+'</div>'+journalEndSummaryHtml();
   body.querySelectorAll('.journal-schedule-item').forEach(function(card){var item=_journalScheduleItemsById[card.dataset.scheduleId],check=card.querySelector('.journal-schedule-check');if(item&&check&&!item.fixed){check.removeAttribute('onclick');check.title='Tap: green complete, red not completed, then clear';check.onclick=function(event){journalScheduleCycleStatus(event,item.id);};if(item.scheduleStatus==='red'){card.classList.add('red');check.innerHTML='&#x2713;';}}if(!item||item.manualCreated||item.growthKind)return;var actions=card.querySelector('.journal-schedule-actions');if(actions)actions.insertAdjacentHTML('beforeend','<span class="journal-schedule-remove" role="button" tabindex="0" onclick="journalDeleteScheduleItem(event,\''+escHtml(item.id)+'\')">Delete</span>');});
