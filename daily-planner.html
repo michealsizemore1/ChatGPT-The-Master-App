@@ -2743,7 +2743,10 @@ body{
   </div>
 
   <!-- NUTRITION / FOOD LOG -->
-  <div class="section-title orange" style="margin-bottom:10px;">&#x1F957; Nutrition</div>
+  <div class="section-title orange" style="margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+    <span>&#x1F957; Nutrition</span>
+    <button type="button" onclick="openTomorrowMealPlanning()" style="border:1px solid #f59e0b;background:#fff7ed;color:#9a3412;border-radius:7px;padding:5px 8px;font-size:.66rem;font-weight:800;cursor:pointer;white-space:nowrap;">&#x1F4C5; Plan Tomorrow&#39;s Meals</button>
+  </div>
   <div id="dailyCalorieAdvisor" style="background:linear-gradient(135deg,#fff7ed,#f0fdf4);border:1px solid #fdba74;border-radius:12px;padding:13px 14px;margin-bottom:12px;">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:9px;">
       <div>
@@ -2879,18 +2882,18 @@ body{
       </details>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;padding-top:6px;border-top:1px dashed #dcdcdc;font-size:0.74rem;color:#666;">
-      <span>&#x1F33E; <strong id="totFiber">0</strong>g fiber</span>
-      <span>&#x1F36C; <strong id="totSugar">0</strong>g sugar</span>
-      <span>&#x1F9C2; <strong id="totSodium">0</strong>mg sodium</span>
+      <span>&#x1FA78; <strong id="totIron">0</strong>mg iron</span>
+      <span>&#x1F9B4; <strong id="totCalcium">0</strong>mg calcium</span>
+      <span>&#x2600;&#xFE0F; <strong id="totVitD">0</strong>mcg vitamin D</span>
     </div>
     <details style="margin-top:6px;border-top:1px dashed #dcdcdc;padding-top:6px;">
       <summary style="cursor:pointer;font-size:.72rem;color:#64748b;font-weight:800;">Micronutrient Details</summary>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:7px;font-size:0.74rem;color:#666;">
+      <span>&#x1F33E; <strong id="totFiber">0</strong>g fiber</span>
+      <span>&#x1F36C; <strong id="totSugar">0</strong>g sugar</span>
+      <span>&#x1F9C2; <strong id="totSodium">0</strong>mg sodium</span>
       <span>&#x1F955; <strong id="totVitA">0</strong>mcg vit A</span>
       <span>&#x1F34A; <strong id="totVitC">0</strong>mg vit C</span>
-      <span>&#x2600;&#xFE0F; <strong id="totVitD">0</strong>mcg vit D</span>
-      <span>&#x1F9B4; <strong id="totCalcium">0</strong>mg calcium</span>
-      <span>&#x1FA78; <strong id="totIron">0</strong>mg iron</span>
       <span>&#x1F34C; <strong id="totPotassium">0</strong>mg potassium</span>
       </div>
       <div style="font-size:.62rem;color:#94a3b8;margin-top:5px;line-height:1.35;">These totals are only as complete as the nutrition information available for each logged food.</div>
@@ -5597,6 +5600,24 @@ function toggleMealPlanning(){
   if(arrow)arrow.innerHTML=open?'&#x25BC;':'&#x25B6;';
   if(header)header.setAttribute('aria-expanded',open?'true':'false');
   localStorage.setItem('meal_planning_open',open?'1':'0');
+}
+
+function openTomorrowMealPlanning(){
+  try{save();}catch(ignore){}
+  localStorage.setItem('meal_planning_open','1');
+  changeDay(1);
+  setTimeout(function(){
+    var panel=document.getElementById('mealPlanningPanel');
+    var arrow=document.getElementById('mealPlanningArrow');
+    var header=panel&&panel.previousElementSibling;
+    if(panel)panel.style.display='block';
+    if(arrow)arrow.innerHTML='&#x25BC;';
+    if(header)header.setAttribute('aria-expanded','true');
+    if(panel)panel.scrollIntoView({behavior:'smooth',block:'start'});
+    if(typeof v26Toast==='function'){
+      v26Toast('Planning meals for '+today.toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'}));
+    }
+  },0);
 }
 
 function restoreMealPlanningState(){
