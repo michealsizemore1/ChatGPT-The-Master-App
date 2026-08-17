@@ -9684,7 +9684,7 @@ async function hydrateActivitiesStorage(){
     localStorage.removeItem('activities_data');
   }catch(ignore){}
   try{renderActivities();}catch(ignore2){}
-  try{calculateDailyCalorieTarget();}catch(ignore3){}
+  try{refreshNutritionTargets();}catch(ignore3){}
   try{var weeklyPanel=document.getElementById('tab-weekly');if(weeklyPanel&&weeklyPanel.classList.contains('active')){renderWeekly();renderGoals();}}catch(ignoreWeekly){}
   // Habits reads activities via getActivities(), which falls back to an empty list until
   // this async IndexedDB hydration finishes. If the Habits screen already rendered before
