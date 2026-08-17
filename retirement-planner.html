@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Michael & Cynthia's Retirement</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <!-- Document Vault: client-side text extraction only, nothing is uploaded anywhere. pdf.js reads PDF text
      content; mammoth.js reads .docx text content. Both loaded with `defer` so a slow/blocked CDN never
      holds up the rest of the page — Document Vault upload just checks `window.pdfjsLib`/`window.mammoth`
@@ -17,9 +16,7 @@
      Claude chat actually looks. Loaded with `defer` for the same reason as pdf.js/mammoth above; the chat
      send functions check `window.marked` exists before using it and fall back to plain text if it didn't load. -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/16.3.0/lib/marked.umd.min.js" defer></script>
-<!-- Supabase provides authenticated, cross-device planner synchronization. The publishable key used
-     below is intentionally safe for browser code; database access is restricted by Supabase Auth and
-     the retirement_plans table's Row Level Security policies. -->
+<!-- Planner records are stored locally in this browser. Use JSON Backup & Restore regularly. -->
 <style>
   :root{
     --navy:#132a3e;
@@ -1137,34 +1134,15 @@
 </head>
 <body><a id="homeButton" href="index.html" title="Home" aria-label="Return to My Life Master App home" style="position:fixed;left:10px;bottom:10px;z-index:2147483000;display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;background:#14161a;color:#fff;text-decoration:none;font:700 18px/1 -apple-system,Segoe UI,Roboto,Arial,sans-serif;padding:0;border-radius:50%;box-shadow:0 4px 12px rgba(0,0,0,.24);opacity:.68;border:1px solid rgba(255,255,255,.18)" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.68">⌂</a>
 
-<div class="cloud-auth-overlay" id="cloudAuthOverlay" role="dialog" aria-modal="true" aria-labelledby="cloudAuthTitle">
-  <div class="cloud-auth-card">
-    <h2 id="cloudAuthTitle">Michael &amp; Cynthia's Retirement</h2>
-    <p id="cloudAuthChecking">Checking this device for your saved sign-in&hellip;</p>
-    <p id="cloudAuthIntro" style="display:none;">Sign in to securely load and synchronize your retirement plan across your computers and phones.</p>
-    <form id="cloudAuthForm" style="display:none;" onsubmit="signInToPlanner(event)">
-      <div class="field"><label for="cloudAuthEmail">Email</label><input type="email" id="cloudAuthEmail" autocomplete="username" required></div>
-      <div class="field"><label for="cloudAuthPassword">Password</label><input type="password" id="cloudAuthPassword" autocomplete="current-password" required></div>
-      <div class="auth-actions">
-        <button type="submit" class="add-btn auth-primary" id="cloudSignInBtn">Sign in &amp; load plan</button>
-        <button type="button" class="add-btn auth-secondary" onclick="continuePlannerOffline()">Continue offline</button>
-      </div>
-    </form>
-    <button type="button" class="link-btn" id="cloudForgotPasswordBtn" style="margin-top:14px;display:none;" onclick="sendPlannerPasswordReset()">Forgot password?</button>
-    <div class="cloud-auth-message" id="cloudAuthMessage"></div>
-    <p id="cloudAuthOfflineHelp" style="display:none;font-size:13.5px;margin:16px 0 0;color:var(--muted);">Offline mode uses only the copy saved on this device. Sign in when internet access returns to synchronize it.</p>
-  </div>
-</div>
-
 <div class="sticky-app-bar">
   <button class="hamburger-btn" onclick="toggleMenu()" aria-label="Open menu">☰</button>
   <div class="sticky-section-info">
     <span class="sticky-section-caption">Current section</span>
     <span class="current-page-label" id="currentPageLabel">Overview</span>
   </div>
-  <button type="button" class="cloud-sync-badge" id="cloudSyncBadge" data-state="checking" onclick="showPage('settings')" title="Open synchronization settings">
-    <span class="cloud-sync-dot" aria-hidden="true"></span><span id="cloudSyncBadgeText">Checking</span>
-  </button>
+  <span class="cloud-sync-badge" id="cloudSyncBadge" data-state="saved" title="Saved automatically on this device">
+    <span class="cloud-sync-dot" aria-hidden="true"></span><span id="cloudSyncBadgeText">Saved locally</span>
+  </span>
 </div>
 
 <header>
@@ -2540,23 +2518,13 @@
       <div class="page-header"><h2>Settings</h2><p>Instructions, backup, restore, and integrations. <b>Build 2026.08.13.1</b></p></div>
 
       <div class="card">
-        <h3 onclick="toggleCard(this)">Secure Cloud Synchronization<span class="sub-label">Supabase — the same plan on every signed-in device</span></h3>
-        <div class="cloud-account-summary">
-          <div><strong id="cloudSettingsStatus">Checking connection…</strong><span id="cloudAccountEmail">No signed-in account detected yet</span></div>
-          <span id="cloudSettingsDot" class="cloud-sync-dot" aria-hidden="true"></span>
-        </div>
-        <div style="display:flex;gap:9px;flex-wrap:wrap;">
-          <button type="button" class="add-btn" id="cloudSyncNowBtn" onclick="syncCloudNow(true)">Synchronize now</button>
-          <button type="button" class="add-btn" style="background:#eef3f5;color:var(--navy);" id="cloudSignInSettingsBtn" onclick="showPlannerSignIn()">Sign in</button>
-          <button type="button" class="add-btn" style="background:#fdf3f1;color:var(--danger);display:none;" id="cloudSignOutBtn" onclick="signOutOfPlanner()">Sign out</button>
-        </div>
-        <p class="cloud-status-detail" id="cloudStatusDetail">Your local planner remains available while the secure connection is checked.</p>
-        <p style="font-size:14px;color:var(--muted);margin:10px 0 0;line-height:1.5;">The retirement plan and shared Notes synchronize after changes. Document Vault files, Coach conversations, and your Anthropic API key remain only on this device. Continue downloading an occasional JSON backup as an independent recovery copy.</p>
+        <h3 onclick="toggleCard(this)">Local Storage<span class="sub-label">Automatically saved on this device</span></h3>
+        <p style="font-size:15px;color:var(--muted);margin:0;line-height:1.55;">The retirement plan and shared Notes are stored only in this browser. Download a JSON backup after meaningful changes and keep it somewhere safe.</p>
       </div>
 
       <div class="card">
         <h3 onclick="toggleCard(this)">Backup &amp; Restore</h3>
-        <p style="font-size:16px;color:var(--muted);margin:0 0 12px;line-height:1.55;">Your planner data is saved automatically on this device and, while signed in, synchronized through Supabase. The JSON backup remains an independent recovery copy and never includes your Anthropic API key. Document Vault files remain separate; keep copies of the original files.</p>
+        <p style="font-size:16px;color:var(--muted);margin:0 0 12px;line-height:1.55;">Your planner data is saved automatically on this device. The JSON backup is your portable recovery copy and never includes your Anthropic API key. Document Vault files remain separate; keep copies of the original files.</p>
         <button class="add-btn" onclick="downloadBackup()">Download planner backup (.json)</button>
         <div class="field" style="margin-top:14px;">
           <label>Restore from backup</label>
@@ -2583,7 +2551,7 @@
                 <li>Use <b>index.html</b> for GitHub Pages and <b>retirement-planner.html</b> when opening the planner directly.</li>
                 <li>Enter household dates, income, expenses, insurance, debts, medical costs, and account balances before interpreting results.</li>
                 <li>Review Money Flows and Assumptions &amp; Guardrails, then return to Overview.</li>
-                <li>On multiple devices, sign in through Secure Cloud Synchronization and wait for <b>Saved</b>.</li>
+                <li>Use one primary device and download a dated JSON backup after meaningful changes.</li>
                 <li>Download a dated JSON backup after meaningful changes.</li>
               </ol>
               <p class="manual-note">The planner is a decision-support tool, not tax, legal, investment, insurance, or medical advice.</p>
@@ -2663,7 +2631,7 @@
             <summary>8. Document Vault, Coach &amp; Financial Wellness</summary>
             <div class="manual-body">
               <p><b>Document Vault:</b> Files and keyword search remain in the current browser and do not affect calculations. AI document questions send relevant text to Anthropic. Keep originals separately.</p>
-              <p><b>Coach / Ask AI:</b> Enter the Anthropic key in Settings on each device. The key, conversation, and Vault files are excluded from Supabase, JSON, GitHub source, and printing. AI answers never change plan inputs automatically.</p>
+              <p><b>Coach / Ask AI:</b> Enter the Anthropic key in Settings on each device. The key, conversation, and Vault files are excluded from JSON backups, GitHub source, and printing. AI answers never change plan inputs automatically.</p>
               <p><b>Financial Wellness:</b> Separates strengths and pressure points without creating a blended score. Resolve coverage, account-access, tax, medical, and data-quality issues first.</p>
             </div>
           </details>
@@ -2709,11 +2677,11 @@
           </details>
 
           <details class="manual-topic">
-            <summary>12. Settings, Cloud Sync, Backup &amp; Privacy</summary>
+            <summary>12. Settings, Local Storage, Backup &amp; Privacy</summary>
             <div class="manual-body">
               <ul>
-                <li>Secure Cloud Synchronization keeps the retirement plan and shared Notes consistent across authenticated devices.</li>
-                <li>Synchronize now requests an immediate check. Retain the local plan and JSON if an error appears.</li>
+                <li>The retirement plan and shared Notes save automatically in this browser.</li>
+                <li>Use Download planner backup to create a portable recovery copy.</li>
                 <li>JSON backup includes planner state, notes, and checkpoints; it excludes the API key and Vault files.</li>
                 <li>Data Quality flags patterns needing review but cannot verify real-world accuracy.</li>
                 <li>Print Full Plan opens the browser print dialog with planner sections; the API key and sensitive controls are omitted.</li>
@@ -2770,7 +2738,7 @@
             <button type="button" class="add-btn coach-secondary-btn" onclick="toggleFloatingAi(true)">View conversation</button>
           </div>
         </div>
-        <p style="font-size:16.5px;color:var(--muted);margin:0;line-height:1.55;">This file has no backend — adding a key here lets the Ask AI panel (and the Coach page) call the Anthropic API directly from your browser. The key is saved only in this device's browser so it survives a refresh. It is excluded from Supabase synchronization, JSON backups, GitHub source, and printing; enter it separately on each device. Each question sends a full snapshot of your plan to Anthropic's servers. The conversation itself is saved locally; use "New chat" to clear it. Leave the key blank to keep the AI fully offline.</p>
+        <p style="font-size:16.5px;color:var(--muted);margin:0;line-height:1.55;">This file has no backend — adding a key here lets the Ask AI panel (and the Coach page) call the Anthropic API directly from your browser. The key is saved only in this device's browser so it survives a refresh. It is excluded from JSON backups, GitHub source, and printing; enter it separately on each device. Each question sends a full snapshot of your plan to Anthropic's servers. The conversation itself is saved locally; use "New chat" to clear it. Leave the key blank to keep the AI fully offline.</p>
       </div>
     </div>
 
@@ -6456,12 +6424,8 @@ const BACKUP_REMINDER_DISMISSED_KEY = 'retirementPlannerBackupReminderDismissed_
 const BACKUP_REMINDER_STALE_DAYS = 30;
 const BACKUP_REMINDER_SNOOZE_DAYS = 7;
 
-// ---------- Secure cross-device synchronization (Supabase) ----------
-// These are public browser-application credentials, not secrets. Access to the retirement_plans table
-// is enforced by Supabase Auth plus Row Level Security (user_id must equal auth.uid()). Never add a
-// service-role/secret key here: those bypass RLS and belong only on a protected server.
-const PLANNER_SUPABASE_URL = 'https://awtpxvevjclnlljbndho.supabase.co';
-const PLANNER_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_SrBby33KWYdGRwo_wKeStg_mfmR_4UB';
+// ---------- Legacy cloud functions retained only for backup compatibility ----------
+// Network synchronization is disabled; the planner operates entirely from local browser storage.
 const PLANNER_SITE_URL = 'https://michealsizemore1.github.io/2026-ChatGPT-Retirement-Planner/';
 const CLOUD_LAST_SYNC_KEY = 'retirementPlannerCloudLastSync_v1';
 const CLOUD_DIRTY_KEY = 'retirementPlannerCloudDirty_v1';
@@ -6965,6 +6929,7 @@ function markPlannerCloudDirty() {
     navigator.onLine === false ? 'The latest changes are safe on this device and will synchronize when online.' : 'A recent change is waiting to be synchronized.');
 }
 function schedulePlannerCloudSync() {
+  return;
   if (!plannerCloudTrackChanges || plannerCloudApplying || plannerCloudSyncing) return;
   markPlannerCloudDirty();
   clearTimeout(plannerCloudSyncTimer);
@@ -7246,6 +7211,20 @@ async function readPlannerRecoverySessionFromUrl() {
   return session;
 }
 async function initPlannerCloudSync() {
+  plannerCloudSession = null;
+  plannerCloudUser = null;
+  plannerCloudReady = true;
+  plannerCloudTrackChanges = false;
+  try {
+    [CLOUD_DIRTY_KEY, CLOUD_LAST_SYNC_KEY, CLOUD_RESET_PENDING_KEY, CLOUD_EMAIL_KEY,
+      PLANNER_AUTH_STORAGE_KEY, PLANNER_REFRESH_STORAGE_KEY, PLANNER_ACCESS_STORAGE_KEY,
+      PLANNER_EXPIRY_STORAGE_KEY, PLANNER_USER_STORAGE_KEY].forEach(key => {
+        localStorage.removeItem(key);
+        sessionStorage.removeItem(key);
+      });
+    if (window.indexedDB) indexedDB.deleteDatabase(PLANNER_SESSION_DB_NAME);
+  } catch (e) {}
+  return;
   updateCloudAccountUi();
   setCloudStatus('checking', 'Restoringâ€¦', 'Restoring this deviceâ€™s saved secure session.');
   const remembered = cloudStorageGet(CLOUD_EMAIL_KEY);
@@ -7344,8 +7323,8 @@ function renderBackupReminder() {
   const textEl = els('backupReminderText');
   if (textEl) {
     textEl.textContent = lastBackup
-      ? `It's been over ${BACKUP_REMINDER_STALE_DAYS} days since your last independent JSON backup (Settings page). Cloud synchronization is convenient, but a downloaded recovery copy is still worthwhile.`
-      : "You haven't downloaded an independent JSON backup yet. Cloud synchronization is convenient, but the Settings page also provides a one-click recovery copy.";
+      ? `It's been over ${BACKUP_REMINDER_STALE_DAYS} days since your last JSON backup. Download a new recovery copy from Settings.`
+      : "You haven't downloaded a JSON backup yet. Settings provides a one-click recovery copy.";
   }
   banner.style.display = 'flex';
 }
@@ -13320,7 +13299,7 @@ window.addEventListener('beforeprint', () => {
 window.addEventListener('afterprint', restoreApiKeyAfterPrint);
 
 function resetAllData() {
-  if (!confirm('This resets the retirement plan, notes, checkpoints, and Coach conversation on this device and in the synchronized cloud plan. Document Vault files remain separate. Continue?')) return;
+  if (!confirm('This resets the retirement plan, notes, checkpoints, and Coach conversation on this device. Document Vault files remain separate. Continue?')) return;
   if (plannerCloudUser) cloudStorageSet(CLOUD_RESET_PENDING_KEY, '1');
   try {
     [STORAGE_KEY, ACTIVE_PAGE_KEY, EXPLORER_ANALYSIS_KEY, DOLLAR_VIEW_KEY, SPENDING_BASIS_KEY,
@@ -14294,7 +14273,7 @@ restoreAnthropicApiKeyLocal();
 // Let the locally saved plan finish its first render before starting authentication and network work.
 // On slower phones this prevents the initial Supabase request from competing with the planner's
 // calculation-heavy startup; a manual Sync succeeding immediately afterward was the telltale symptom.
-setTimeout(initPlannerCloudSync, 900);
+initPlannerCloudSync();
 
 renderExpenseRows();
 renderBrokeragePieRows();

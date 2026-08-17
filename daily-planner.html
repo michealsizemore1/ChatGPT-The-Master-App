@@ -1210,7 +1210,6 @@ body{
 .journal-mobile-dock button{color:#0a3161;}
 
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 .cloud-auth-gate{position:fixed;inset:0;z-index:30000;background:linear-gradient(145deg,#eef2ff,#f8fafc 48%,#ecfdf5);display:flex;align-items:center;justify-content:center;padding:20px}
 .cloud-auth-card{width:min(92vw,430px);background:#fff;border:1px solid #dbe4f0;border-radius:18px;padding:26px;box-shadow:0 24px 70px rgba(30,41,59,.2)}
@@ -1272,25 +1271,6 @@ body{
 </nav>
 
 <div class="container">
-<div class="cloud-auth-gate" id="cloudAuthGate" aria-live="polite">
-  <form class="cloud-auth-card" id="cloudLoginForm">
-    <h2>&#x1F512; Private Journal</h2>
-    <p>Sign in with the personal journal account you created in Supabase. Your entries remain available locally and synchronize only after you sign in.</p>
-    <label for="cloudEmail">Email address</label>
-    <input type="email" id="cloudEmail" autocomplete="username" required>
-    <label for="cloudPassword">Password</label>
-    <input type="password" id="cloudPassword" autocomplete="current-password" required>
-    <button type="submit" id="cloudLoginBtn">Sign In</button>
-    <div class="cloud-auth-error" id="cloudAuthError"></div>
-  </form>
-</div>
-<div class="cloud-sync-modal" id="cloudFirstSync">
-  <div class="cloud-sync-card">
-    <h2 id="cloudFirstSyncTitle">Choose the first cloud copy</h2>
-    <p id="cloudFirstSyncText">Your existing journal has not been changed.</p>
-    <div class="cloud-choice-grid" id="cloudFirstSyncActions"></div>
-  </div>
-</div>
 <div class="journal-sticky-shell">
 <div id="backupReminderBar" style="display:none;background:linear-gradient(135deg,#fff7ed,#ffedd5);border-bottom:1px solid #fdba74;padding:8px 16px;align-items:center;gap:10px;flex-wrap:wrap;font-size:0.82rem;color:#7c2d12;">
   <span>&#x1F4BE; <span id="backupReminderText">You haven't backed up your journal in a while.</span></span>
@@ -1324,7 +1304,6 @@ body{
           <button type="button" onclick="openSettings();closeHeaderTools()">&#x2699;&#xFE0F; Settings</button>
         </div>
       </details>
-      <button class="v26-quiet-btn" type="button" id="journalCloudSyncBtn" onclick="journalCloudSmartSync()" title="Check for newer information on this device and in the private cloud">Sync</button>
       <div class="v26-focus-pair" style="display:flex;align-items:center;gap:7px;flex-wrap:nowrap;">
         <button class="v26-quiet-btn v26-focus-btn" type="button" onclick="v26ToggleFocus()" id="v26FocusBtn" title="Hide distractions (F)">Focus</button>
         <span class="v26-weather" id="meridianWeather" title="Current temperature for Meridian, Idaho">&#x1F321;&#xFE0F; Meridian &mdash;&deg;</span>
@@ -2474,22 +2453,17 @@ body{
         <div id="journalStorageHealth" class="storage-health">Checking journal storage...</div>
       </div>
       <div class="journal-settings-group">
-        <h3>Private Cloud Sync</h3>
-        <div style="font-size:.8rem;color:#667085;line-height:1.45;">Your journal saves on this device first, then securely synchronizes with your Supabase account.</div>
+        <h3>Local Storage</h3>
+        <div style="font-size:.8rem;color:#667085;line-height:1.45;">Your journal saves automatically on this device. Download regular backups so you can restore it if the browser or phone is replaced.</div>
         <div class="cloud-account-bar">
-          <span class="cloud-status-dot" id="cloudSettingsDot"></span>
-          <span id="cloudSettingsStatus" style="font-size:.8rem;color:#475569;">Checking connection...</span>
-        </div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:9px;">
-          <button class="btn-secondary" type="button" onclick="journalCloudSmartSync()">Sync Now</button>
-          <button class="btn-secondary" type="button" onclick="journalCloudDownloadNow()">Get Latest from Cloud</button>
-          <button class="btn-secondary" type="button" onclick="journalCloudSignOut()">Sign Out</button>
+          <span class="cloud-status-dot ok"></span>
+          <span style="font-size:.8rem;color:#475569;">Local-only mode active</span>
         </div>
       </div>
     </div>
     <div class="journal-settings-group" style="margin-bottom:12px;">
       <h3>AI Connection</h3>
-      <p style="font-size:.8rem;margin:0;color:#667085;line-height:1.5;"><strong style="color:#15803d;">Protected by Supabase</strong><br>Your Anthropic API key is no longer stored in this browser or either HTML file. AI requests use your authenticated private server function.</p>
+      <p style="font-size:.8rem;margin:0;color:#667085;line-height:1.5;"><strong>Temporarily unavailable in local-only mode.</strong><br>The former AI connection used the removed cloud service. Planning, tracking, calculations, Backup, and Restore continue to work normally.</p>
     </div>
     <div class="journal-settings-group" style="margin-bottom:12px;">
       <h3>Data Connections &amp; Recent Updates</h3>
@@ -2512,7 +2486,7 @@ body{
       <h2 style="margin:0;">&#x1F6DF; Daily Recovery Backups</h2>
       <button type="button" class="btn-secondary" onclick="closeAutomaticBackups()">Close</button>
     </div>
-    <p style="font-size:.8rem;color:#667085;line-height:1.45;margin:4px 0 12px;">The journal automatically creates one recovery point per day before cloud synchronization. Seven recent days are retained on this browser.</p>
+    <p style="font-size:.8rem;color:#667085;line-height:1.45;margin:4px 0 12px;">The journal automatically creates one local recovery point per day. Seven recent days are retained on this browser.</p>
     <div id="automaticBackupsList" style="overflow-y:auto;min-height:120px;"><div style="text-align:center;color:#98a2b3;padding:28px;">Loading recovery points...</div></div>
   </div>
 </div>
@@ -13283,7 +13257,7 @@ function renderJournalRecentUpdates(){
   var nutrition='';for(var i=0;i<localStorage.length;i++){var key=localStorage.key(i)||'';if(key.indexOf('planner_')!==0)continue;try{var row=JSON.parse(localStorage.getItem(key)||'{}');if((row.foodLog&&row.foodLog.length)||(parseFloat(row.waterOz)||0)>0)nutrition=nutrition>key.slice(8)?nutrition:key.slice(8);}catch(ignore3){}}
   var rows=[
     ['Activities',newestDate(acts,'date')],['Skills',newestDate(skills,'date')],['Nutrition',nutrition],
-    ['Cloud sync',localStorage.getItem('journal_cloud_last_sync')],['Recovery backup',localStorage.getItem('journal_last_automatic_backup')||localStorage.getItem('last_backup_ts')]
+    ['Local save',localStorage.getItem('journal_last_saved')],['Recovery backup',localStorage.getItem('journal_last_automatic_backup')||localStorage.getItem('last_backup_ts')]
   ];
   el.innerHTML='<strong style="display:block;color:#0a3161;margin-bottom:5px;">Recently updated</strong>'+rows.map(function(row){return'<div style="display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px solid #eef2f6;"><span>'+row[0]+'</span><span style="text-align:right;color:#475569;">'+escHtml(journalStatusTime(row[1]))+'</span></div>';}).join('');
 }
@@ -13294,13 +13268,8 @@ async function runJournalDiagnostics(){
     var estimate=navigator.storage&&navigator.storage.estimate?await navigator.storage.estimate():null;
     var used=estimate&&Number(estimate.usage),quota=estimate&&Number(estimate.quota);add('Browser storage',true,Number.isFinite(used)&&Number.isFinite(quota)?(used/1048576).toFixed(1)+' MB used of '+(quota/1048576).toFixed(0)+' MB reported':'Local storage available');
   }catch(e){add('Browser storage',false,'Could not estimate available space');}
-  add('Supabase cloud',!!journalCloudUser,journalCloudUser?'Signed in':'Not signed in');
-  try{
-    if(!journalCloudUser||!journalCloudClient)throw new Error('Sign in first');
-    var sr=await journalCloudClient.auth.getSession(),token=sr.data&&sr.data.session&&sr.data.session.access_token;if(!token)throw new Error('Session expired');
-    var response=await journalCloudWithTimeout(journalOriginalFetch(JOURNAL_SUPABASE_URL+'/functions/v1/anthropic-proxy',{method:'OPTIONS',headers:{'Authorization':'Bearer '+token,'apikey':JOURNAL_SUPABASE_KEY}}),12000,'Timed out');
-    add('Protected AI gateway',response.status<500,'Reachable; no Anthropic credits used');
-  }catch(e2){add('Protected AI gateway',false,e2.message||'Not reachable');}
+  add('Local storage',true,'Local-only mode active');
+  add('AI tools',false,'Temporarily unavailable in local-only mode');
   var aq=null;try{aq=JSON.parse(localStorage.getItem('meridian_airnow_cache')||'null');}catch(ignore4){}var aqAge=aq&&aq.savedAt?Math.round((Date.now()-Number(aq.savedAt))/3600000):null;add('AirNow AQI',!!(aq&&aq.data),aq&&aq.data?'Last reading '+aqAge+' hour'+(aqAge===1?'':'s')+' ago':'No cached reading yet');
   var backup=localStorage.getItem('journal_last_automatic_backup')||localStorage.getItem('last_backup_ts');add('Recovery backup',!!backup,backup?journalStatusTime(backup):'No backup recorded');
   out.innerHTML=checks.map(function(c){return'<div style="display:grid;grid-template-columns:18px minmax(110px,.7fr) 1fr;gap:6px;padding:5px 0;border-bottom:1px solid #eef2f6;"><span style="color:'+(c.ok?'#15803d':'#b91c1c')+';font-weight:900;">'+(c.ok?'&#x2713;':'!')+'</span><strong>'+escHtml(c.name)+'</strong><span>'+escHtml(c.detail)+'</span></div>';}).join('');
@@ -13333,9 +13302,7 @@ function journalAIContext(){
   return parts.length?'\n\nRELEVANT JOURNAL CONTEXT ('+dk(today)+')\n'+parts.join('\n'):'';
 }
 
-/* ===== Private Supabase cloud sync ===== */
-var JOURNAL_SUPABASE_URL='https://dtsirzzklkdncmchwebr.supabase.co';
-var JOURNAL_SUPABASE_KEY='sb_publishable_FiX7PK2M6NKTI4hGZCg4OQ_ShVr0Aho';
+/* ===== Local-only storage mode ===== */
 var journalCloudClient=null,journalCloudUser=null,journalCloudTimer=null,journalCloudApplying=false,journalCloudBusy=false,journalCloudReady=false,journalCloudPreparedFor='',journalCloudChangeSeq=0;
 var journalOriginalFetch=window.fetch.bind(window);
 function journalCloudWithTimeout(promise,ms,message){
@@ -13349,6 +13316,7 @@ function journalCloudDirectLock(name,acquireTimeout,fn){
   return Promise.resolve().then(fn);
 }
 function journalInstallAIProxy(){
+  return;
   if(window.__journalAIProxyInstalled)return;
   window.__journalAIProxyInstalled=true;
   window.fetch=async function(input,init){
@@ -13369,9 +13337,9 @@ function journalInstallAIProxy(){
     });
   };
 }
-function journalAIAvailable(){return !!(journalCloudClient&&journalCloudUser);}
+function journalAIAvailable(){return false;}
 function journalAIKey(){
-  return journalAIAvailable()?'supabase-managed':'';
+  return '';
 }
 
 // ── AI Daily Goals: scan the last 7 days for shortcomings, suggest 3 goals ──
@@ -13450,6 +13418,7 @@ function aiAutoAttemptDailyGoals(){
   }catch(e){}
 }
 async function journalProtectedFunction(body){
+  throw new Error('AI is temporarily unavailable while the app is in local-only mode.');
   if(!journalCloudClient||!journalCloudUser)throw new Error('Sign in to your private journal first.');
   async function sendProtectedRequest(forceRefresh){
     var sessionResult=forceRefresh?await journalCloudClient.auth.refreshSession():await journalCloudClient.auth.getSession();
@@ -13790,6 +13759,13 @@ async function journalCloudDownloadNow(){
   journalCloudApply(result.data.journal_data,result.data.updated_at,result.data.revision);
 }
 function journalCloudInit(){
+  journalCloudClient=null;journalCloudUser=null;journalCloudReady=false;
+  localStorage.removeItem('journal_cloud_dirty');
+  localStorage.removeItem('journal_cloud_last_sync');
+  localStorage.removeItem('sb-dtsirzzklkdncmchwebr-auth-token');
+  sessionStorage.removeItem('sb-dtsirzzklkdncmchwebr-auth-token');
+  var localStatus=document.getElementById('v26SaveText');if(localStatus)localStatus.textContent='Saved on this device';
+  return;
   try{
     localStorage.removeItem('handwriting_2026-07-27');
     localStorage.removeItem('handwriting_2026-07-29');
