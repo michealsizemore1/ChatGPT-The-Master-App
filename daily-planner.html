@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-08-16-5">
+<meta name="app-build" content="2026-08-17-1">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#667eea">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,7 +16,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
 (function(){
-  var build='2026-08-16-5',checking=false;
+  var build='2026-08-17-1',checking=false;
   function checkForAppUpdate(){
     if(checking||location.protocol==='file:')return;checking=true;
     fetch(location.pathname+'?update-check='+Date.now(),{cache:'no-store'}).then(function(response){return response.text();}).then(function(html){var match=html.match(/name=["']app-build["']\s+content=["']([^"']+)/i);if(match&&match[1]!==build){location.replace(location.pathname+'?v='+encodeURIComponent(match[1]));}}).catch(function(){}).finally(function(){checking=false;});
@@ -12929,7 +12929,7 @@ function journalOpenGrowthLog(kind){
   _journalGrowthLogKind=kind;var modal=document.getElementById('journalGrowthLogModal');if(!modal)return;
   var names={financial:'Financial Videos',language:'Language',udemy:'Udemy',gun:'Gun Range',guitar:'Guitar',reading:'Audiobook'},categories={financial:'Financial Videos',language:'Language',udemy:'Udemy',gun:'Gun Range',guitar:'Guitar',reading:'Reading / Audiobook'},startTimes={financial:'18:30',udemy:'19:00',gun:'19:00',language:'12:45',guitar:'19:00',reading:'19:30'};
   var dateKey=dk(today),saved=journalGrowthSavedDetails(kind,dateKey),savedMins=journalScheduleParseTime(saved.time),savedClock=savedMins===null?'':String(Math.floor(savedMins/60)).padStart(2,'0')+':'+String(savedMins%60).padStart(2,'0');
-  document.getElementById('journalGrowthLogTitle').textContent='Log '+(names[kind]||'Growth / Skill');
+  document.getElementById('journalGrowthLogTitle').textContent='Schedule / Log '+(names[kind]||'Growth / Skill');
   document.getElementById('journalGrowthLogCategory').value=categories[kind]||'Udemy';document.getElementById('journalGrowthLogTime').value=saved.loggedTime||'';document.getElementById('journalGrowthLogDate').value=dateKey;document.getElementById('journalGrowthLogStartTime').value=savedClock||startTimes[kind]||'19:00';document.getElementById('journalGrowthLogName').value=saved.name||saved.label||'';document.getElementById('journalGrowthLogResource').value=saved.resource||(kind==='udemy'?'Udemy':kind==='reading'?'Audiobook':'');document.getElementById('journalGrowthLogLink').value=saved.link||'';document.getElementById('journalGrowthLogNotes').value=saved.notes||'';modal.style.display='flex';
 }
 function journalCloseGrowthLog(){var modal=document.getElementById('journalGrowthLogModal');if(modal)modal.style.display='none';_journalGrowthLogKind='';}
@@ -13019,11 +13019,10 @@ function journalScheduleCopyDay(event){
 }
 function journalScheduleEdit(event,id){
   event.preventDefault();event.stopPropagation();_journalScheduleSuppressClick=Date.now()+600;var item=_journalScheduleItemsById[id];if(!item)return;
+  // Use the same complete Growth Activities form whether the activity is
+  // opened from the Growth section or from its scheduled card.
+  if(item.growthKind){journalOpenGrowthLog(item.growthKind);return;}
   var editedLabel=item.label,editedDetail=item.detail;
-  if(item.growthKind){
-    editedLabel=prompt('Edit the event name. It will remain connected to '+item.label+'.',item.label);if(editedLabel===null)return;editedLabel=String(editedLabel).trim();if(!editedLabel){alert('Please enter an event name.');return;}
-    editedDetail=prompt('Edit the event details or notes.',item.detail||'');if(editedDetail===null)return;editedDetail=String(editedDetail).trim();
-  }
   var enteredTime=prompt('Set the time for "'+item.label+'". Use 6:30 PM or 18:30.',item.time);if(enteredTime===null)return;var mins=journalScheduleParseTime(enteredTime);if(mins===null){alert('Please enter a valid time, such as 6:30 PM or 18:30.');return;}
   var currentDate=dk(today),tomorrow=new Date(today);tomorrow.setDate(tomorrow.getDate()+1);var targetDate=prompt('Keep '+currentDate+' or enter another date as YYYY-MM-DD.\nTomorrow is '+dk(tomorrow)+'.',currentDate);if(targetDate===null)return;targetDate=String(targetDate).trim();if(!/^\d{4}-\d{2}-\d{2}$/.test(targetDate)||isNaN(new Date(targetDate+'T12:00:00').getTime())){alert('Please enter a valid date in YYYY-MM-DD format.');return;}
   if(item._moveId){var existingMoves=journalScheduleMoves(),existing=existingMoves.find(function(move){return move.id===item._moveId;});if(existing){existing.targetDate=targetDate;existing.time=journalMinsToClock(mins);existing.mins=mins;existing.item.label=editedLabel;existing.item.detail=editedDetail;existing.item.resource=item.resource||'';existing.item.link=item.link||'';existing.item.notes=item.notes||'';localStorage.setItem('journal_schedule_moves',JSON.stringify(existingMoves));}}
@@ -13181,6 +13180,10 @@ function renderJournalSchedule(){
   if(progressTrack)progressTrack.setAttribute('aria-valuenow',String(progressPercent));
   var nextText=next>=0?'Next: '+items[next].time+' — '+items[next].label:(complete===trackable.length?'Schedule complete':'Review remaining items');
   body.innerHTML='<div class="journal-schedule-status"><strong>'+escHtml(nextText)+'</strong><span>Drag to reorder • Edit or copy events • '+complete+' complete • '+(trackable.length-complete)+' remaining</span><span style="display:flex;gap:5px;flex-wrap:wrap;"><button type="button" onclick="journalScheduleCopyDay(event)" style="border:1px solid #2563eb;background:#fff;color:#1d4ed8;border-radius:6px;padding:5px 9px;font-size:.68rem;font-weight:800;cursor:pointer;">Copy Day</button><button type="button" onclick="event.preventDefault();event.stopPropagation();journalOpenManualScheduleItem()" style="border:1px solid #4f46e5;background:#4f46e5;color:#fff;border-radius:6px;padding:5px 9px;font-size:.68rem;font-weight:800;cursor:pointer;">+ Schedule Item</button></span></div><div class="journal-schedule-list">'+items.map(function(item,index){var inlineGrowth=['language','udemy','gun','guitar'].indexOf(item.growthKind)!==-1,action=item.fixed?'':inlineGrowth?'journalOpenGrowthLog(\''+item.growthKind+'\')':item.detailKind?'journalToggleScheduleDetail(\''+item.detailKind+'\')':item.sleepRoutineChecklist?'journalToggleSleepRoutinePanel()':(item.manual?'journalToggleScheduleManual(\''+item.manual+'\')':'switchTab(\''+item.tab+'\',null)');var safeAction=JSON.stringify(action).replace(/"/g,'&quot;'),removeAction=item.manualCreated?'<span class="journal-schedule-remove" role="button" tabindex="0" onclick="journalDeleteManualScheduleItem(event,\''+item.manualItemId+'\',\''+(item._moveId||'')+'\')">Remove</span>':item.growthKind?'<span class="journal-schedule-remove" role="button" tabindex="0" onclick="journalScheduleRemoveGrowth(event,\''+item.growthKind+'\',\''+escHtml(item.id)+'\')">Remove</span>':'',copyAction='<span class="journal-schedule-copy" role="button" tabindex="0" onclick="journalScheduleCopyItem(event,\''+escHtml(item.id)+'\')">Copy</span>',linkedKey=item.growthKind==='reading'?'gaAudiobook':item.growthKind==='financial'?'gaFinancialVideos':item.growthKind==='udemy'?'gaUdemy':item.growthKind==='gun'?'gaGunRange':item.growthKind==='language'?'gaLanguage':item.growthKind==='guitar'?'gaGuitar':'',checkClick=item.checkId?' onclick="journalToggleHiddenCheck(event,\''+item.checkId+'\')" title="Toggle completion"':linkedKey?' onclick="journalScheduleToggleLinkedCheck(event,\''+linkedKey+'\')" title="Toggle completion"':'';return '<button type="button" draggable="true" data-schedule-id="'+escHtml(item.id)+'" class="journal-schedule-item '+(item.fixed?'fixed ':(item.done?'done ':''))+(index===next?'next':'')+'" onclick="journalScheduleCardClick('+safeAction+')" ondragstart="journalScheduleDragStart(event,\''+escHtml(item.id)+'\')" ondragover="journalScheduleDragOver(event)" ondrop="journalScheduleDrop(event,\''+escHtml(item.id)+'\')" ondragend="journalScheduleDragEnd()"><span class="journal-schedule-grip" title="Drag to reschedule" aria-hidden="true">&#x22EE;&#x22EE;</span><span class="journal-schedule-time">'+item.time+'</span><span class="journal-schedule-check"'+checkClick+'>'+(item.fixed?'&#x1F4BC;':(item.done?'&#x2713;':''))+'</span><span class="journal-schedule-name">'+escHtml(item.label)+'<span class="journal-schedule-detail">'+escHtml(item.detail)+'</span></span><span class="journal-schedule-actions">'+copyAction+'<span class="journal-schedule-edit" role="button" tabindex="0" onclick="journalScheduleEdit(event,\''+escHtml(item.id)+'\')">Edit</span>'+removeAction+'</span></button>'+(item.detailKind?journalScheduleDetailHtml(item.detailKind,d):'')+(item.sleepRoutineChecklist?journalSleepRoutineChecklistHtml(dateKey):'');}).join('')+'</div>'+journalEndSummaryHtml();
+  // Every scheduled Growth card opens the same structured Schedule / Log form.
+  // This also covers Financial Videos and Audiobook, which previously opened
+  // different sections instead of the Growth Activities pop-up.
+  body.querySelectorAll('.journal-schedule-item').forEach(function(card){var growthItem=_journalScheduleItemsById[card.dataset.scheduleId];if(growthItem&&growthItem.growthKind)card.onclick=function(){journalOpenGrowthLog(growthItem.growthKind);};});
   body.querySelectorAll('.journal-schedule-item').forEach(function(card){var item=_journalScheduleItemsById[card.dataset.scheduleId],check=card.querySelector('.journal-schedule-check');if(item&&check&&!item.fixed){check.removeAttribute('onclick');check.title='Tap: green complete, red not completed, then clear';check.onclick=function(event){journalScheduleCycleStatus(event,item.id);};if(item.scheduleStatus==='red'){card.classList.add('red');check.innerHTML='&#x2713;';}}if(!item||item.manualCreated||item.growthKind)return;var actions=card.querySelector('.journal-schedule-actions');if(actions)actions.insertAdjacentHTML('beforeend','<span class="journal-schedule-remove" role="button" tabindex="0" onclick="journalDeleteScheduleItem(event,\''+escHtml(item.id)+'\')">Delete</span>');});
 }
 function renderJournalHome(){
