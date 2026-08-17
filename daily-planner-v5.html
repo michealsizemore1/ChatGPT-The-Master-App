@@ -6036,9 +6036,9 @@ function isFav(item){
 }
 
 function runnerMacroTarget(){
-  var dateKey=dk(today),activities=typeof getActivities==='function'?getActivities().filter(function(a){return a.date===dateKey;}):[];
-  var text=activities.map(function(a){return String(a.title||a.type||'');}).join(' ').toLowerCase();
-  var longest=activities.reduce(function(max,a){return Math.max(max,parseFloat(a.distance)||0);},0),target={prot:25,carbs:45,fat:30,label:'Rest / recovery day'};
+  var dateKey=dk(today),activities=typeof getActivities==='function'?getActivities().filter(function(a){return a.date===dateKey;}):[],workouts=activities.filter(function(a){return !/rest\s*day/i.test(String(a.type||a.title||''));});
+  var planSummary=typeof journalTodayTrainingSummary==='function'?journalTodayTrainingSummary():'',activityText=workouts.map(function(a){return [a.title,a.type].filter(Boolean).join(' ');}).join(' '),text=(activityText||planSummary||'').toLowerCase();
+  var longest=workouts.reduce(function(max,a){return Math.max(max,parseFloat(a.distance)||0);},0),target={prot:25,carbs:45,fat:30,label:'Rest / recovery day'};
   if(/race|long run|marathon|half marathon/.test(text)||longest>=8)target={prot:18,carbs:65,fat:17,label:'Long-run / race-day target'};
   else if(/tempo|interval|speed|threshold|track|hill repeat/.test(text))target={prot:20,carbs:60,fat:20,label:'Speed / quality-workout target'};
   else if(/run|cycle|bike|strength|weight|cross.train/.test(text)||activities.length)target={prot:25,carbs:50,fat:25,label:'Training-day target'};
@@ -12721,7 +12721,12 @@ function journalHomeCard(id,title,body){
 function journalTodayTrainingSummary(){
   var dateKey=dk(today);
   var acts=getActivities().filter(function(a){return a.date===dateKey;});
-  if(acts.some(function(a){return a.type==='Rest Day';}))return'Rest Day';
+  var completed=acts.filter(function(a){return !/rest\s*day/i.test(String(a.type||a.title||''));});
+  if(completed.length){
+    var logged=completed[completed.length-1],loggedName=String(logged.title||logged.type||'Activity logged').trim(),loggedDistance=parseFloat(logged.distance)||0;
+    return loggedName+(loggedDistance&&!new RegExp('\\b'+loggedDistance+'\\s*(?:mi|mile)','i').test(loggedName)?' - '+loggedDistance+' mi':'');
+  }
+  if(acts.some(function(a){return /rest\s*day/i.test(String(a.type||a.title||''));}))return'Rest Day';
   var text='';
   try{
     var raw=localStorage.getItem('current_training_plan'),plan=raw?JSON.parse(raw):null;
