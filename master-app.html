@@ -187,7 +187,7 @@
       <div class="icon">&#129517;</div>
       <h2>My Life Command Center</h2>
       <p>Daily and long-range planning, training, meditation, nutrition, wellness, habits, journaling, and learning.</p>
-      <div class="tags"><span>Local + Supabase</span><span>Cross-device sync</span></div>
+      <div class="tags"><span>Local storage</span><span>Backup available</span></div>
       <div class="open">Open My Life Command Center &rarr;</div>
     </a>
 
@@ -203,7 +203,7 @@
       <div class="icon">&#129518;</div>
       <h2>Retirement &amp; Credit</h2>
       <p>Michael &amp; Cynthia's retirement projections, planning tools, and Cindy's credit-card register.</p>
-      <div class="tags"><span>Local + Supabase</span><span>Cross-device sync</span></div>
+      <div class="tags"><span>Local storage</span><span>Backup available</span></div>
       <div class="open">Open Retirement Planner &rarr;</div>
     </a>
 
@@ -232,11 +232,11 @@
   <div class="info-grid">
     <section class="info-card privacy">
       <h2>Privacy &amp; security</h2>
-      <p>This website and its source files are public. Do not place passwords, account numbers, private documents, API secrets, or other sensitive information directly inside the published HTML files. Supabase-connected information is protected by your sign-in and database security rules.</p>
+      <p>This website and its source files are public. Do not place passwords, account numbers, private documents, API secrets, or other sensitive information directly inside the published HTML files. Information entered into the tools is stored in this browser on this device.</p>
     </section>
     <section class="info-card backup">
       <h2>Back up the entire Master App</h2>
-      <p>Download one backup containing the information saved by all five tools in this browser. Keep the file somewhere safe. Supabase remains a separate online copy.</p>
+      <p>Download one backup containing the information saved by all five tools in this browser. Keep the file somewhere safe because there is no automatic online copy.</p>
       <div class="backup-actions">
         <button class="backup-btn" type="button" onclick="downloadMasterBackup()">Download Full Backup</button>
         <button class="backup-btn secondary" type="button" onclick="document.getElementById('masterBackupFile').click()">Restore Full Backup</button>
@@ -247,7 +247,7 @@
   </div>
 
   <div class="note">
-    <b>How storage works:</b> My Life Command Center and Retirement &amp; Credit save locally first and can synchronize through Supabase after sign-in. The other tools primarily store information in this browser on this device. Clearing browser data may remove local information that has not been backed up or synchronized.
+    <b>How storage works:</b> All tools save information in this browser on this device. Clearing browser data may remove information that has not been downloaded in a backup.
   </div>
 </main>
 
@@ -297,7 +297,6 @@ function restoreMasterBackup(input){
 
 </body>
 </html>
-
 
 
 

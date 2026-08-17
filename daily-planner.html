@@ -2463,11 +2463,18 @@ body{
     </div>
     <div class="journal-settings-group" style="margin-bottom:12px;">
       <h3>AI Connection</h3>
-      <p style="font-size:.8rem;margin:0;color:#667085;line-height:1.5;"><strong>Temporarily unavailable in local-only mode.</strong><br>The former AI connection used the removed cloud service. Planning, tracking, calculations, Backup, and Restore continue to work normally.</p>
+      <p style="font-size:.8rem;margin:0 0 9px;color:#667085;line-height:1.5;"><strong>Direct Anthropic connection</strong><br>Your API key is stored only in this browser on this device and is excluded from backups and published files.</p>
+      <label for="journalAnthropicKey" style="display:block;font-size:.76rem;font-weight:700;color:#475569;margin-bottom:4px;">Anthropic API key</label>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <input type="password" id="journalAnthropicKey" autocomplete="off" placeholder="sk-ant-…" style="flex:1;min-width:0;border:1px solid #d0d5dd;border-radius:7px;padding:7px 9px;font-size:.8rem;">
+        <button class="btn-secondary" type="button" onclick="toggleJournalAIKeyVisibility()">Show</button>
+        <button class="btn-secondary" type="button" onclick="clearJournalAIKey()">Clear</button>
+      </div>
+      <p style="font-size:.7rem;margin:7px 0 0;color:#b45309;line-height:1.4;">Use this only on your personal phone. Anyone with access to this browser profile could potentially retrieve the locally stored key.</p>
     </div>
     <div class="journal-settings-group" style="margin-bottom:12px;">
       <h3>Data Connections &amp; Recent Updates</h3>
-      <p style="font-size:.76rem;margin:0 0 9px;color:#667085;line-height:1.45;">A read-only check of the services and information sources used by this journal. The AI gateway test does not use Anthropic credits.</p>
+      <p style="font-size:.76rem;margin:0 0 9px;color:#667085;line-height:1.45;">A read-only check of the services and information sources used by this journal. Checking whether an AI key is present does not use Anthropic credits.</p>
       <button class="btn-secondary" type="button" id="journalDiagnosticBtn" onclick="runJournalDiagnostics()">Run Connection Check</button>
       <div id="journalDiagnosticResults" style="margin-top:10px;font-size:.74rem;color:#475569;"></div>
       <div id="journalRecentUpdates" style="margin-top:10px;font-size:.72rem;color:#64748b;"></div>
@@ -4993,7 +5000,7 @@ function selectedDayRunContext(){
 }
 function aiRecoveryMealPlan(btn){
   if(!journalAIKey()){
-    alert('Sign in to your private journal before using AI.');
+    alert('Add your Anthropic API key in Settings first.');
     return;
   }
   var context=selectedDayRunContext();
@@ -5081,7 +5088,7 @@ function callAI(prompt,resultDivId,maxTok){
   );
 }
 function aiCall(prompt,maxTok,onResult,onErr){
-  if(!journalAIAvailable()){alert('Sign in to your private journal to use AI.');return false;}
+  if(!journalAIAvailable()){alert('Add your Anthropic API key in Settings first.');return false;}
   const context=journalAIContext();
   const enrichedPrompt=(context?context+'\n\n':'')+prompt;
   journalProtectedFunction({model:'claude-haiku-4-5-20251001',max_tokens:maxTok,messages:[{role:'user',content:enrichedPrompt}]}).then(data=>{
@@ -5425,7 +5432,7 @@ function getReviewWeekJournalText(){
   return entries.join('\n');
 }
 function aiFillEntireReview(btn){
-  if(!journalAIKey()){alert('Sign in to your private journal to use AI.');return;}
+  if(!journalAIKey()){alert('Add your Anthropic API key in Settings first.');return;}
   const ws=wkStart(revOff2),we=new Date(ws);we.setDate(ws.getDate()+6);
   const weekLabel=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' - '+we.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
   const journal=getReviewWeekJournalText();
@@ -6482,7 +6489,7 @@ function lookupFoodBarcode(scannedCode){
 
 function scanFoodLabel(ev){
   var file=ev.target.files[0];if(!file)return;
-  var key=journalAIKey();if(!key){alert('Sign in to use AI.');ev.target.value='';return;}
+  var key=journalAIKey();if(!key){alert('Add your Anthropic API key in Settings first.');ev.target.value='';return;}
   var reader=new FileReader();
   reader.onload=function(e){
     var b64=e.target.result.split(',')[1];
@@ -7946,7 +7953,7 @@ async function submitAskJournal(){
   var _ajEl=document.getElementById('askJournalResult');
   if(_ajEl){_ajEl.style.display='block';_ajEl.textContent='⏳ Thinking...';}
   var _ajKey=journalAIKey(),_ajBtn=document.getElementById('askJournalSubmitBtn');
-  if(!_ajKey){if(_ajEl)_ajEl.textContent='Sign in to your private journal to use Ask AI.';if(_ajBtn){_ajBtn.disabled=false;_ajBtn.textContent='Ask';}return;}
+  if(!_ajKey){if(_ajEl)_ajEl.textContent='Add your Anthropic API key in Settings to use Ask AI.';if(_ajBtn){_ajBtn.disabled=false;_ajBtn.textContent='Ask';}return;}
   if(_ajBtn){_ajBtn.disabled=true;_ajBtn.textContent='Asking...';}
   try{
     var data=await journalProtectedFunction({model:'claude-haiku-4-5-20251001',max_tokens:3000,messages:_ajMsgs});
@@ -13269,7 +13276,7 @@ async function runJournalDiagnostics(){
     var used=estimate&&Number(estimate.usage),quota=estimate&&Number(estimate.quota);add('Browser storage',true,Number.isFinite(used)&&Number.isFinite(quota)?(used/1048576).toFixed(1)+' MB used of '+(quota/1048576).toFixed(0)+' MB reported':'Local storage available');
   }catch(e){add('Browser storage',false,'Could not estimate available space');}
   add('Local storage',true,'Local-only mode active');
-  add('AI tools',false,'Temporarily unavailable in local-only mode');
+  add('AI tools',!!journalAIKey(),journalAIKey()?'Anthropic key saved on this device':'Add your Anthropic key in Settings');
   var aq=null;try{aq=JSON.parse(localStorage.getItem('meridian_airnow_cache')||'null');}catch(ignore4){}var aqAge=aq&&aq.savedAt?Math.round((Date.now()-Number(aq.savedAt))/3600000):null;add('AirNow AQI',!!(aq&&aq.data),aq&&aq.data?'Last reading '+aqAge+' hour'+(aqAge===1?'':'s')+' ago':'No cached reading yet');
   var backup=localStorage.getItem('journal_last_automatic_backup')||localStorage.getItem('last_backup_ts');add('Recovery backup',!!backup,backup?journalStatusTime(backup):'No backup recorded');
   out.innerHTML=checks.map(function(c){return'<div style="display:grid;grid-template-columns:18px minmax(110px,.7fr) 1fr;gap:6px;padding:5px 0;border-bottom:1px solid #eef2f6;"><span style="color:'+(c.ok?'#15803d':'#b91c1c')+';font-weight:900;">'+(c.ok?'&#x2713;':'!')+'</span><strong>'+escHtml(c.name)+'</strong><span>'+escHtml(c.detail)+'</span></div>';}).join('');
@@ -13280,6 +13287,7 @@ function loadJournalSettings(){
   document.querySelectorAll('[data-home-pref]').forEach(function(cb){cb.checked=p.homeCards.indexOf(cb.dataset.homePref)>=0;});
   var ai=document.getElementById('settingAIContext');if(ai)ai.checked=p.aiContext!==false;
   var days=document.getElementById('settingBackupDays');if(days)days.value=String(p.backupDays||7);
+  var keyInput=document.getElementById('journalAnthropicKey');if(keyInput)keyInput.value=journalAIKey();
   journalStorageHealth();
   renderJournalRecentUpdates();
 }
@@ -13287,7 +13295,17 @@ function saveJournalSettings(){
   var cards=Array.from(document.querySelectorAll('[data-home-pref]:checked')).map(function(cb){return cb.dataset.homePref;});
   var ai=document.getElementById('settingAIContext'),days=document.getElementById('settingBackupDays');
   localStorage.setItem('journal_ui_prefs',JSON.stringify({homeCards:cards,aiContext:!ai||ai.checked,backupDays:parseInt(days&&days.value||'7',10)}));
+  var keyInput=document.getElementById('journalAnthropicKey'),key=keyInput?keyInput.value.trim():'';
+  if(key)localStorage.setItem('ai_key',key);else localStorage.removeItem('ai_key');
   renderJournalHome();closeSettings();v26Toast('Settings saved');
+}
+function toggleJournalAIKeyVisibility(){
+  var input=document.getElementById('journalAnthropicKey');if(!input)return;
+  input.type=input.type==='password'?'text':'password';
+}
+function clearJournalAIKey(){
+  var input=document.getElementById('journalAnthropicKey');if(input)input.value='';
+  localStorage.removeItem('ai_key');v26Toast('Anthropic key removed from this device');
 }
 function journalAIContext(){
   if(journalPrefs().aiContext===false)return'';
@@ -13326,20 +13344,20 @@ function journalInstallAIProxy(){
     var sessionResult=await journalCloudClient.auth.getSession();
     var token=sessionResult.data&&sessionResult.data.session&&sessionResult.data.session.access_token;
     if(!token)throw new Error('Your journal session expired. Sign in again to use AI.');
-    return journalOriginalFetch(JOURNAL_SUPABASE_URL+'/functions/v1/anthropic-proxy',{
+    return journalOriginalFetch(JOURNAL_REMOTE_URL+'/functions/v1/anthropic-proxy',{
       method:'POST',
       headers:{
         'Content-Type':'application/json',
         'Authorization':'Bearer '+token,
-        'apikey':JOURNAL_SUPABASE_KEY
+        'apikey':JOURNAL_REMOTE_KEY
       },
       body:init&&init.body||'{}'
     });
   };
 }
-function journalAIAvailable(){return false;}
+function journalAIAvailable(){return !!journalAIKey();}
 function journalAIKey(){
-  return '';
+  try{return String(localStorage.getItem('ai_key')||'').trim();}catch(e){return'';}
 }
 
 // ── AI Daily Goals: scan the last 7 days for shortcomings, suggest 3 goals ──
@@ -13418,15 +13436,25 @@ function aiAutoAttemptDailyGoals(){
   }catch(e){}
 }
 async function journalProtectedFunction(body){
-  throw new Error('AI is temporarily unavailable while the app is in local-only mode.');
+  var key=journalAIKey();
+  if(!key)throw new Error('Add your Anthropic API key in Settings first.');
+  var response=await journalCloudWithTimeout(journalOriginalFetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify(body||{})
+  }),45000,'The Anthropic request timed out. Please try again.');
+  var data=await response.json().catch(function(){return{};});
+  if(!response.ok)throw new Error((data.error&&data.error.message)||('Anthropic returned error '+response.status+'.'));
+  return data;
+  /* Retained below only as unreachable migration history. */
   if(!journalCloudClient||!journalCloudUser)throw new Error('Sign in to your private journal first.');
   async function sendProtectedRequest(forceRefresh){
     var sessionResult=forceRefresh?await journalCloudClient.auth.refreshSession():await journalCloudClient.auth.getSession();
     var token=sessionResult.data&&sessionResult.data.session&&sessionResult.data.session.access_token;
     if(!token)throw new Error('Your journal session expired. Sign in again.');
-    return journalCloudWithTimeout(journalOriginalFetch(JOURNAL_SUPABASE_URL+'/functions/v1/anthropic-proxy',{
+    return journalCloudWithTimeout(journalOriginalFetch(JOURNAL_REMOTE_URL+'/functions/v1/anthropic-proxy',{
       method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token,'apikey':JOURNAL_SUPABASE_KEY},
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token,'apikey':JOURNAL_REMOTE_KEY},
       body:JSON.stringify(body||{})
     }),45000,'The protected AI service timed out. Please try again.');
   }
@@ -13779,11 +13807,11 @@ function journalCloudInit(){
     hydrateBibleReadingArchiveStorage().then(function(){compactBibleReadingArchiveStorage();});
     hydrateActivitiesStorage();
   }catch(e){}
-  if(!window.supabase||!window.supabase.createClient){
+  if(!window.legacyRemote||!window.legacyRemote.createClient){
     document.getElementById('cloudAuthError').textContent='The secure sign-in service could not load. Check your internet connection and refresh.';
     return;
   }
-  journalCloudClient=window.supabase.createClient(JOURNAL_SUPABASE_URL,JOURNAL_SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,lock:journalCloudDirectLock,storage:journalCloudAuthStorage}});
+  journalCloudClient=window.legacyRemote.createClient(JOURNAL_REMOTE_URL,JOURNAL_REMOTE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,lock:journalCloudDirectLock,storage:journalCloudAuthStorage}});
   journalInstallAIProxy();
   document.getElementById('cloudLoginForm').addEventListener('submit',journalCloudSignIn);
   journalCloudClient.auth.onAuthStateChange(function(event,session){
