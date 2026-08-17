@@ -9693,6 +9693,24 @@ async function hydrateActivitiesStorage(){
     if(seen[id])return;
     seen[id]=true;merged.push(activity);
   });
+  // If the primary activity store is unexpectedly empty, recover non-destructively
+  // from the retained daily recovery snapshots. This restores older runs without
+  // replacing any activity already present on the device.
+  if(!merged.length){
+    try{
+      var backups=await journalAutomaticBackups();
+      backups.forEach(function(snapshot){
+        var raw=snapshot&&snapshot.payload&&snapshot.payload.activities_data,rows=[];
+        try{rows=typeof raw==='string'?JSON.parse(raw):(Array.isArray(raw)?raw:[]);}catch(ignoreBackup){}
+        rows.forEach(function(activity){
+          if(!activity)return;
+          var id=String(activity.id||[activity.date||'',activity.title||'',activity.type||'',activity.distance||'',activity.duration||''].join('|'));
+          if(seen[id])return;
+          seen[id]=true;merged.push(activity);
+        });
+      });
+    }catch(ignoreBackups){}
+  }
   _activitiesLargeCache=merged;
   try{
     await journalLargeStoreSet('activities_data',merged);
@@ -13790,9 +13808,9 @@ function journalCloudInit(){
   journalCloudClient=null;journalCloudUser=null;journalCloudReady=false;
   localStorage.removeItem('journal_cloud_dirty');
   localStorage.removeItem('journal_cloud_last_sync');
-  localStorage.removeItem('sb-dtsirzzklkdncmchwebr-auth-token');
-  sessionStorage.removeItem('sb-dtsirzzklkdncmchwebr-auth-token');
   var localStatus=document.getElementById('v26SaveText');if(localStatus)localStatus.textContent='Saved on this device';
+  try{hydrateBibleReadingArchiveStorage().then(function(){compactBibleReadingArchiveStorage();});}catch(ignoreBible){}
+  try{hydrateActivitiesStorage();}catch(ignoreActivities){}
   return;
   try{
     localStorage.removeItem('handwriting_2026-07-27');
