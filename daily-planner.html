@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-08-20-1">
+<meta name="app-build" content="2026-08-21-1">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#667eea">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,7 +16,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
 (function(){
-  var build='2026-08-20-1',checking=false;
+  var build='2026-08-21-1',checking=false;
   function checkForAppUpdate(){
     if(checking||location.protocol==='file:')return;checking=true;
     fetch(location.pathname+'?update-check='+Date.now(),{cache:'no-store'}).then(function(response){return response.text();}).then(function(html){var match=html.match(/name=["']app-build["']\s+content=["']([^"']+)/i);if(match&&match[1]!==build){location.replace(location.pathname+'?v='+encodeURIComponent(match[1]));}}).catch(function(){}).finally(function(){checking=false;});
@@ -5991,7 +5991,7 @@ function renderRunnerMacroGuidance(log,totals,ratios){
   if(fields[priority].remaining>5){var ideas=priority==='prot'?'a lean protein plus produce':priority==='carbs'?'complex carbohydrates with a lean protein':'an unsaturated-fat source with a balanced meal';advice='Prioritize about '+fields[priority].remaining+'g of '+fields[priority].name+' across the remaining meals; choose '+ideas+'.';}
   if(next)next.innerHTML='<strong>Best next step:</strong> '+advice;
   var meals=['breakfast','lunch','dinner','snack','liquids','sports'],names={breakfast:'Breakfast',lunch:'Lunch',dinner:'Dinner',snack:'Snacks',liquids:'Liquids',sports:'Sports'},dist=document.getElementById('macroMealDistribution');
-  if(dist)dist.innerHTML=meals.map(function(meal){var rows=log.filter(function(x){return (x.meal||'snack')===meal;}),p=0,c=0;rows.forEach(function(x){var n=parseFloat(x.servings)||1;p+=(parseFloat(x.prot)||0)*n;c+=(parseFloat(x.carbs)||0)*n;});return '<div class="meal-macro-chip"><strong>'+names[meal]+'</strong>'+Math.round(p)+'g P · '+Math.round(c)+'g C</div>';}).join('');
+  if(dist)dist.innerHTML=meals.map(function(meal){var rows=log.filter(function(x){return (x.meal||'snack')===meal;}),p=0,c=0,f=0;rows.forEach(function(x){var n=parseFloat(x.servings)||1;p+=(parseFloat(x.prot)||0)*n;c+=(parseFloat(x.carbs)||0)*n;f+=(parseFloat(x.fat)||0)*n;});return '<div class="meal-macro-chip"><strong>'+names[meal]+'</strong>'+Math.round(p)+'g P · '+Math.round(c)+'g C · '+Math.round(f)+'g F</div>';}).join('');
 }
 
 function updateMacroTotals(){
@@ -12567,7 +12567,7 @@ function renderGoals(){
     const d=new Date(ws);d.setDate(ws.getDate()+i);
     const dateKey=dk(d),r=localStorage.getItem('planner_'+dateKey),dd=r?JSON.parse(r):{};
     if(hasExerciseOnDate(dateKey,dd))exD++;
-    audioMin+=parseTimedMins(dd.gaAudiobookTime);
+    audioMin+=journalAudiobookMinutesForDate(dateKey,dd);
     if(dd.spBibleAudio==='green')bibleD++;
     if(dd.spAIPrayer==='green')prayerD++;
   }
@@ -12601,7 +12601,7 @@ function autoFillWins(){
     const r=localStorage.getItem('planner_'+dk(d));if(!r)continue;
     logged++;const dd=JSON.parse(r);
     steps+=parseFloat(dd.exSteps)||0;
-    audioMin+=parseTimedMins(dd.gaAudiobookTime);
+    audioMin+=journalAudiobookMinutesForDate(dk(d),dd);
     if(dd.spBibleAudio==='green')bibleD++;
     if(dd.spAIPrayer==='green')prayerD++;
     const bp=parseBP(dd.wBPVal);if(bp.sys)bpReadings.push(bp);
@@ -13070,7 +13070,7 @@ function renderJournalSchedule(){
   if(localStorage.getItem(journalScheduleGrowthKey('gun',dateKey))==='1')items.push({id:journalScheduleGrowthId('gun'),time:'7:00 PM',mins:1140,label:'Gun Range',detail:gunMinutes?fmtMinsSeconds(gunMinutes)+' logged':'Log range time and takeaways',done:d.gaGunRange==='green',tab:'skill-log',growthKind:'gun'});
   if(localStorage.getItem(journalScheduleGrowthKey('language',dateKey))==='1')items.push({id:journalScheduleGrowthId('language'),time:'12:45 PM',mins:765,label:'Language Practice',detail:languageMinutes?fmtMinsSeconds(languageMinutes)+' logged':'Tap to log the language session',done:d.gaLanguage==='green',tab:'skill-log',growthKind:'language'});
   if(localStorage.getItem(journalScheduleGrowthKey('guitar',dateKey))==='1')items.push({id:journalScheduleGrowthId('guitar'),time:'7:00 PM',mins:1140,label:'Guitar',detail:guitarMinutes?fmtMinsSeconds(guitarMinutes)+' logged':'Tap to log guitar practice',done:d.gaGuitar==='green',tab:'skill-log',growthKind:'guitar'});
-  if(localStorage.getItem(journalScheduleGrowthKey('reading',dateKey))==='1')items.push({id:journalScheduleGrowthId('reading'),time:'7:30 PM',mins:1170,label:'Audiobook',detail:readingMinutes?fmtMinsSeconds(readingMinutes)+' logged in Library':'Enter reading/listening time in Library',done:readingMinutes>0||d.gaAudiobook==='green',tab:'library',growthKind:'reading'});
+  if(localStorage.getItem(journalScheduleGrowthKey('reading',dateKey))==='1')items.push({id:journalScheduleGrowthId('reading'),time:'7:30 PM',mins:1170,label:'Audiobook',detail:readingMinutes?fmtMinsSeconds(readingMinutes)+' logged':'Tap Schedule / Log to add listening time',done:readingMinutes>0||d.gaAudiobook==='green',tab:'library',growthKind:'reading',linkedCheckKey:'gaAudiobook'});
   journalManualScheduleItems().filter(function(entry){return entry.date===dateKey;}).forEach(function(entry){items.push({id:'schedule-'+entry.id,time:entry.time,mins:Number(entry.mins),label:entry.title,detail:entry.note||'Manual schedule item',done:localStorage.getItem('schedule_manualSchedule_'+entry.id+'_'+dateKey)==='1',tab:'daily',manual:'manualSchedule_'+entry.id,manualCreated:true,manualItemId:entry.id});});
   items.forEach(function(item,index){if(!item.id)item.id='schedule-'+String(item.label||index).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');});
   var hiddenSchedule=[];try{hiddenSchedule=JSON.parse(localStorage.getItem(journalScheduleHiddenKey(dateKey))||'[]');}catch(ignoreHidden){}if(Array.isArray(hiddenSchedule)&&hiddenSchedule.length)items=items.filter(function(item){return hiddenSchedule.indexOf(item.id)===-1;});
@@ -13942,3 +13942,4 @@ window.addEventListener('DOMContentLoaded',function(){
 <div id="v26Toast" class="v26-toast" role="status" aria-live="polite"></div>
 </body>
 </html>
+
