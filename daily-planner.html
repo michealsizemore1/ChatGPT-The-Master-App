@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-08-21-2">
+<meta name="app-build" content="2026-08-21-3">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#667eea">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,7 +16,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
 (function(){
-  var build='2026-08-21-2',checking=false;
+  var build='2026-08-21-3',checking=false;
   function checkForAppUpdate(){
     if(checking||location.protocol==='file:')return;checking=true;
     fetch(location.pathname+'?update-check='+Date.now(),{cache:'no-store'}).then(function(response){return response.text();}).then(function(html){var match=html.match(/name=["']app-build["']\s+content=["']([^"']+)/i);if(match&&match[1]!==build){location.replace(location.pathname+'?v='+encodeURIComponent(match[1]));}}).catch(function(){}).finally(function(){checking=false;});
@@ -2807,14 +2807,13 @@ body{
         <div class="macro-target-card" style="border-color:#fde047;"><strong style="color:#a16207;">Carbs</strong><div><span id="targetActualCarbs">0%</span> <small>/ <span id="targetCarbs">45%</span> target</small></div><p><span id="remainCarbs">0g</span> remaining</p><span id="statusCarbs" class="macro-status low">Low</span></div>
         <div class="macro-target-card" style="border-color:#bfdbfe;"><strong style="color:#1e40af;">Fat</strong><div><span id="targetActualFat">0%</span> <small>/ <span id="targetFat">30%</span> target</small></div><p><span id="remainFat">0g</span> remaining</p><span id="statusFat" class="macro-status low">Low</span></div>
       </div>
-      <div id="macroNextMeal" style="margin-top:8px;background:#eef6ff;border-left:4px solid #2563eb;border-radius:8px;padding:8px 9px;font-size:0.73rem;color:#1e3a5f;line-height:1.4;"><strong>Best next step:</strong> Log food to receive a recommendation.</div>
       <details class="macro-meal-details">
         <summary>Meal Macro Distribution</summary>
         <div id="macroMealDistribution" class="meal-macro-grid"></div>
       </details>
       <style>
         .macro-source-details,.macro-meal-details{margin-top:9px;border-top:1px dashed #d8dee8;padding-top:7px}.macro-source-details>summary,.macro-meal-details>summary{cursor:pointer;color:#475569;font-size:.74rem;font-weight:800;list-style-position:inside}.source-detail-grid>div>div:first-child{display:none!important}.source-detail-grid>div>div:last-child{height:auto!important}
-        .macro-target-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:8px}.macro-target-card{min-width:0;background:#fff;border:1px solid #e2e8f0;border-radius:9px;padding:8px}.macro-target-card>strong{display:block;font-size:.78rem}.macro-target-card>div{font-size:.95rem;font-weight:900;margin-top:3px;font-variant-numeric:tabular-nums}.macro-target-card small{font-size:.58rem;color:#64748b}.macro-target-card p{font-size:.64rem;color:#64748b;margin:3px 0}.macro-status{display:inline-block;border-radius:999px;padding:2px 7px;font-size:.62rem;font-weight:800}.macro-status.on{background:#dcfce7;color:#166534}.macro-status.low{background:#fef3c7;color:#92400e}.macro-status.high{background:#fee2e2;color:#991b1b}.meal-macro-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:9px}.meal-macro-chip{min-height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f8fafc;border:1px solid #e2e8f0;border-radius:9px;padding:9px 7px;text-align:center;font-size:.76rem;font-weight:750;line-height:1.45;color:#475569;font-variant-numeric:tabular-nums}.meal-macro-chip strong{display:block;margin-bottom:3px;color:#1e293b;font-size:.82rem}@media(max-width:430px){.macro-target-card{padding:7px 5px}.macro-target-card>div{font-size:.82rem}.macro-target-card small{display:block;margin-top:2px}.meal-macro-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.meal-macro-chip{min-height:72px;padding:11px 8px;font-size:.9rem;line-height:1.5}.meal-macro-chip strong{font-size:1rem;margin-bottom:4px}}
+        .macro-target-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:9px}.macro-target-card{min-width:0;background:#fff;border:1px solid #e2e8f0;border-radius:9px;padding:10px}.macro-target-card>strong{display:block;font-size:.86rem}.macro-target-card>div{font-size:1rem;font-weight:900;margin-top:4px;font-variant-numeric:tabular-nums}.macro-target-card small{font-size:.64rem;color:#64748b}.macro-target-card p{font-size:.74rem;font-weight:700;color:#64748b;margin:5px 0}.macro-status{display:inline-block;border-radius:999px;padding:3px 8px;font-size:.68rem;font-weight:800}.macro-status.on{background:#dcfce7;color:#166534}.macro-status.low{background:#fef3c7;color:#92400e}.macro-status.high{background:#fee2e2;color:#991b1b}.meal-macro-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:9px}.meal-macro-chip{min-height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f8fafc;border:1px solid #e2e8f0;border-radius:9px;padding:9px 7px;text-align:center;font-size:.76rem;font-weight:750;line-height:1.45;color:#475569;font-variant-numeric:tabular-nums}.meal-macro-chip strong{display:block;margin-bottom:3px;color:#1e293b;font-size:.82rem}@media(max-width:430px){.macro-target-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.macro-target-card{min-height:116px;padding:12px 11px}.macro-target-card:last-child{grid-column:1/-1}.macro-target-card>strong{font-size:1rem}.macro-target-card>div{font-size:1.12rem;margin-top:6px}.macro-target-card small{font-size:.76rem;margin-top:2px}.macro-target-card p{font-size:.9rem;margin:7px 0}.macro-status{padding:4px 10px;font-size:.78rem}.meal-macro-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.meal-macro-chip{min-height:72px;padding:11px 8px;font-size:.9rem;line-height:1.5}.meal-macro-chip strong{font-size:1rem;margin-bottom:4px}}
         #ratioCarbsBar { background:#eab308 !important; }
         #macroRatioWrap div:has(> #ratioCarbs) { color:#a16207 !important; }
         #macroRatioWrap div:has(> #ratioCarbs) + div { border-color:#fde047 !important; }
@@ -5987,9 +5986,6 @@ function renderRunnerMacroGuidance(log,totals,ratios){
     var a=document.getElementById('targetActual'+cap),t=document.getElementById('target'+cap),r=document.getElementById('remain'+cap),s=document.getElementById('status'+cap);if(a)a.textContent=actual.toFixed(1)+'%';if(t)t.textContent=goal+'%';if(r)r.textContent=remaining+'g';if(s){s.textContent=status;s.className='macro-status '+(status==='On target'?'on':status.toLowerCase());}
     fields[kind].remaining=remaining;fields[kind].difference=difference;
   });
-  var priority=Object.keys(fields).sort(function(a,b){return fields[b].remaining-fields[a].remaining;})[0],next=document.getElementById('macroNextMeal'),advice='Your macro balance is close to today\'s target.';
-  if(fields[priority].remaining>5){var ideas=priority==='prot'?'a lean protein plus produce':priority==='carbs'?'complex carbohydrates with a lean protein':'an unsaturated-fat source with a balanced meal';advice='Prioritize about '+fields[priority].remaining+'g of '+fields[priority].name+' across the remaining meals; choose '+ideas+'.';}
-  if(next)next.innerHTML='<strong>Best next step:</strong> '+advice;
   var meals=['breakfast','lunch','dinner','snack','liquids','sports'],names={breakfast:'Breakfast',lunch:'Lunch',dinner:'Dinner',snack:'Snacks',liquids:'Liquids',sports:'Sports'},dist=document.getElementById('macroMealDistribution');
   if(dist)dist.innerHTML=meals.map(function(meal){var rows=log.filter(function(x){return (x.meal||'snack')===meal;}),p=0,c=0,f=0;rows.forEach(function(x){var n=parseFloat(x.servings)||1;p+=(parseFloat(x.prot)||0)*n;c+=(parseFloat(x.carbs)||0)*n;f+=(parseFloat(x.fat)||0)*n;});return '<div class="meal-macro-chip"><strong>'+names[meal]+'</strong>'+Math.round(p)+'g P · '+Math.round(c)+'g C · '+Math.round(f)+'g F</div>';}).join('');
 }
