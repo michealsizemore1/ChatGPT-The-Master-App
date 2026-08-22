@@ -834,7 +834,7 @@ function Pill({ children, tone }) {
 function Modal({ open, onClose, title, children, wide, size }) {
   if (!open) return null;
   const widthClass = size === "xl" ? "max-w-5xl" : (wide || size === "lg") ? "max-w-2xl" : "max-w-md";
-  return (
+  return ReactDOM.createPortal((
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4" onClick={onClose}>
       <div
         className={"bg-white rounded-2xl shadow-xl w-full " + widthClass + " max-h-[90vh] overflow-y-auto"}
@@ -848,7 +848,7 @@ function Modal({ open, onClose, title, children, wide, size }) {
       </div>
 
     </div>
-  );
+  ), document.body);
 }
 
 function Field({ label, children }) {
