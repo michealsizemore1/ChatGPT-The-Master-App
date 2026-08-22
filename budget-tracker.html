@@ -1937,10 +1937,12 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
     if (!form.desc.trim() || isNaN(amt) || amt <= 0 || !form.date) return;
     const category = form.regType === "payment" ? "Transfer" : form.category;
     const amount = form.regType === "expense" ? -Math.abs(amt) : Math.abs(amt);
+    const existing = form.id ? allTx.find(t => t.id === form.id) : null;
     setSplitting({
-      id: uid(), date: form.date, merchant: form.desc.trim(), amount, category,
+      ...(existing || {}),
+      id: existing?.id || uid(), date: form.date, merchant: form.desc.trim(), amount, category,
       accountId: cindyAccount.id, person: form.who, receipt: form.receipt || null,
-      cleared: false, isDraftSplit: true,
+      cleared: existing ? existing.cleared : false, isDraftSplit: !existing,
     });
   };
 
@@ -1951,6 +1953,8 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
       resetForm();
     } else {
       actions.splitTransaction(splitting, parts);
+      applyBalance(allTx.map(t => t.id === splitting.id ? splitting : t));
+      if (form.id === splitting.id) resetForm();
     }
     setSplitting(null);
   };
@@ -2221,6 +2225,7 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
                     <td className="px-3 py-3"><Pill tone={CINDY_TYPE_META[rt].tone}>{CINDY_TYPE_META[rt].short}</Pill></td>
                     <td className="px-3 py-3 text-right font-semibold text-slate-700 whitespace-nowrap">{fmtCurrency(balanceById[t.id] ?? 0)}</td>
                     <td className="px-3 py-3 text-right opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                      <button className="text-slate-400 hover:text-indigo-600 mr-2" title="Split transaction" onClick={() => setSplitting(t)}>Split</button>
                       <button className="text-slate-400 hover:text-indigo-600 mr-2" title="Edit" onClick={() => startEdit(t)}>✏️</button>
                       <button className="text-slate-400 hover:text-rose-500" title="Delete" onClick={() => removeTx(t.id)}>✕</button>
                     </td>
@@ -2332,11 +2337,13 @@ function BankAccountRegister({ data, actions, account }) {
     const amt = parseFloat(form.amount);
     if (!form.desc.trim() || isNaN(amt) || amt <= 0 || !form.date) return;
     const amount = form.direction === "deposit" ? Math.abs(amt) : -Math.abs(amt);
+    const existing = form.id ? allTx.find(t => t.id === form.id) : null;
     setSplitting({
-      id: uid(), date: form.date, merchant: form.desc.trim(), amount,
+      ...(existing || {}),
+      id: existing?.id || uid(), date: form.date, merchant: form.desc.trim(), amount,
       category: form.category, accountId: account.id,
       person: defaultPersonForAccount(account.id), receipt: form.receipt || null,
-      cleared: false, isDraftSplit: true,
+      cleared: existing ? existing.cleared : false, isDraftSplit: !existing,
     });
   };
 
@@ -2347,6 +2354,8 @@ function BankAccountRegister({ data, actions, account }) {
       resetForm();
     } else {
       actions.splitTransaction(splitting, parts);
+      applyBalance(allTx.map(t => t.id === splitting.id ? splitting : t));
+      if (form.id === splitting.id) resetForm();
     }
     setSplitting(null);
   };
@@ -2604,6 +2613,7 @@ function BankAccountRegister({ data, actions, account }) {
                     <td className="px-3 py-3"><Pill tone={isDeposit ? "green" : "red"}>{isDeposit ? "Deposit" : "Withdrawal"}</Pill></td>
                     <td className="px-3 py-3 text-right font-semibold text-slate-700 whitespace-nowrap">{fmtCurrency(balanceById[t.id] ?? 0)}</td>
                     <td className="px-3 py-3 text-right opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                      <button className="text-slate-400 hover:text-indigo-600 mr-2" title="Split transaction" onClick={() => setSplitting(t)}>Split</button>
                       <button className="text-slate-400 hover:text-indigo-600 mr-2" title="Edit" onClick={() => startEdit(t)}>✏️</button>
                       <button className="text-slate-400 hover:text-rose-500" title="Delete" onClick={() => removeTx(t.id)}>✕</button>
                     </td>
@@ -5123,7 +5133,7 @@ function App() {
       return {
         ...d,
         transactions: d.transactions.map(t => t.id === original.id
-          ? { ...t, category: splits[0]?.category || t.category, splits, needsReview: false }
+          ? { ...t, ...original, category: splits[0]?.category || original.category || t.category, splits, needsReview: false, isDraftSplit: undefined }
           : t),
       };
     }, "Transaction split"),
