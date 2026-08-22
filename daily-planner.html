@@ -5525,6 +5525,22 @@ if(!window._foodLog)window._foodLog=[];
 const MEALS=['breakfast','lunch','dinner','snack','liquids','sports'];
 const MEAL_LABELS={breakfast:'🌅 Breakfast',lunch:'🥗 Lunch',dinner:'🍽️ Dinner',snack:'🍎 Snacks',liquids:'💧 Liquids',sports:'💪 Sports Nutrition'};
 const MEAL_HINTS={breakfast:'Food name',lunch:'Food name',dinner:'Food name',snack:'Snack name',liquids:'Drink name',sports:'Sports fuel / supplement'};
+const SERVING_UNITS=['serving','cup','tablespoon','teaspoon','fluid ounce','ounce','gram','milligram','milliliter','liter','piece','item','slice','scoop','packet','bar','bottle','can','container','handful'];
+
+function servingUnitFromLabel(label){
+  var text=String(label||'').toLowerCase();
+  var aliases={'tbsp':'tablespoon','tablespoons':'tablespoon','tsp':'teaspoon','teaspoons':'teaspoon','fl oz':'fluid ounce','fluid ounces':'fluid ounce','oz':'ounce','ounces':'ounce','g':'gram','grams':'gram','mg':'milligram','milligrams':'milligram','ml':'milliliter','milliliters':'milliliter','l':'liter','liters':'liter','cups':'cup','pieces':'piece','items':'item','slices':'slice','scoops':'scoop','packets':'packet','bars':'bar','bottles':'bottle','cans':'can','containers':'container','handfuls':'handful','servings':'serving'};
+  var keys=Object.keys(aliases).sort(function(a,b){return b.length-a.length;});
+  for(var i=0;i<keys.length;i++){if(new RegExp('(^|[^a-z])'+keys[i].replace(' ','\\s+')+'([^a-z]|$)','i').test(text))return aliases[keys[i]];}
+  for(var j=0;j<SERVING_UNITS.length;j++){if(text.indexOf(SERVING_UNITS[j])!==-1)return SERVING_UNITS[j];}
+  return '';
+}
+
+function applyFoodServingUnit(id,unit){
+  var item=(window._foodLog||[]).find(function(x){return x.id===id;});if(!item||!unit)return;
+  var current=String(item.servingLabel||'').replace(/^per\s+/i,'').trim(),match=current.match(/^\s*(\d+(?:\.\d+)?|\d+\/\d+)/),amount=match?match[1]:'1';
+  item.servingLabel=amount+' '+unit;renderFoodItems();save();
+}
 
 // Micronutrient fields tracked per food item, in addition to cal/prot/fat/carbs
 const MICRO_FIELDS=['fiber','sugar','sodium','vitA','vitC','vitD','calcium','iron','potassium'];
@@ -5638,13 +5654,19 @@ function renderFoodItems(){
         div.appendChild(row1);
 
         var servingEdit=document.createElement('label');
-        servingEdit.style.cssText='display:flex;align-items:center;gap:6px;font-size:0.72rem;font-weight:700;color:#475569;margin:0 0 5px;';
+        servingEdit.style.cssText='display:grid;grid-template-columns:auto minmax(0,1fr) minmax(104px,0.7fr);align-items:center;gap:6px;font-size:0.72rem;font-weight:700;color:#475569;margin:0 0 5px;';
         servingEdit.textContent='Serving size';
         var servingInput=document.createElement('input');
         servingInput.type='text';servingInput.value=servingSize;servingInput.placeholder='Example: 1 cup, 30 g, 8 oz';
         servingInput.style.cssText='flex:1;min-width:0;border:1px solid #cbd5e1;border-radius:5px;padding:4px 6px;font-size:0.76rem;';
         servingInput.onchange=(function(id){return function(){updateFoodField(id,'servingLabel',this.value.trim()||'1 serving');};})(it.id);
-        servingEdit.appendChild(servingInput);div.appendChild(servingEdit);
+        servingEdit.appendChild(servingInput);
+        var servingUnit=document.createElement('select');
+        servingUnit.style.cssText='min-width:0;border:1px solid #cbd5e1;border-radius:5px;padding:4px 5px;font-size:0.74rem;background:#fff;';
+        var detectedUnit=servingUnitFromLabel(servingSize),unitPlaceholder=document.createElement('option');unitPlaceholder.value='';unitPlaceholder.textContent='Choose unit';servingUnit.appendChild(unitPlaceholder);
+        SERVING_UNITS.forEach(function(unit){var option=document.createElement('option');option.value=unit;option.textContent=unit;if(unit===detectedUnit)option.selected=true;servingUnit.appendChild(option);});
+        servingUnit.onchange=(function(id){return function(){if(this.value)applyFoodServingUnit(id,this.value);};})(it.id);
+        servingEdit.appendChild(servingUnit);div.appendChild(servingEdit);
 
         var servingCalories=document.createElement('div');
         servingCalories.style.cssText='font-size:0.75rem;font-weight:700;color:#b45309;background:#fff7ed;border:1px solid #fed7aa;border-radius:6px;padding:4px 7px;margin:0 0 5px;';
@@ -5869,7 +5891,9 @@ function addFoodItem(meal){
   }
   var nameInp=mkInput('fe-name-','Food name','min(120px,40%)',null);
   nameInp.style.flex='2';
-  var servingInp=mkInput('fe-serving-','Serving size','92px',null);
+  var servingInp=mkInput('fe-serving-','Amount','72px',null);
+  var servingUnitInp=document.createElement('select');servingUnitInp.id='fe-serving-unit-'+meal;servingUnitInp.style.cssText='width:92px;border:1px solid #d1d5db;border-radius:4px;padding:5px 4px;font-size:0.78rem;box-sizing:border-box;background:#fff;';
+  servingUnitInp.innerHTML='<option value="">Unit</option>'+SERVING_UNITS.map(function(unit){return '<option value="'+unit+'">'+unit+'</option>';}).join('');
   var calInp=mkInput('fe-cal-','Cal','50px','number');
   var protInp=mkInput('fe-prot-','Pro','44px','number');
   var fatInp=mkInput('fe-fat-','Fat','44px','number');
@@ -5882,7 +5906,7 @@ function addFoodItem(meal){
   cancelBtn.textContent='✕';
   cancelBtn.style.cssText='background:#e5e7eb;color:#374151;border:none;border-radius:4px;padding:5px 8px;font-size:0.82rem;cursor:pointer;';
   cancelBtn.onclick=function(){cancelFoodEntry(meal);};
-  [nameInp,servingInp,calInp,protInp,fatInp,carbInp,addBtn,cancelBtn].forEach(function(el){entry.appendChild(el);});
+  [nameInp,servingInp,servingUnitInp,calInp,protInp,fatInp,carbInp,addBtn,cancelBtn].forEach(function(el){entry.appendChild(el);});
   entry.addEventListener('keydown',function(e){
     if(e.key==='Enter')submitFoodEntry(meal);
     else if(e.key==='Escape')cancelFoodEntry(meal);
@@ -5901,9 +5925,11 @@ function submitFoodEntry(meal){
   var fatEl=document.getElementById('fe-fat-'+meal);
   var carbEl=document.getElementById('fe-carbs-'+meal);
   var servingEl=document.getElementById('fe-serving-'+meal);
+  var servingUnitEl=document.getElementById('fe-serving-unit-'+meal);
+  var servingText=servingEl&&servingEl.value.trim()?servingEl.value.trim():'1';if(servingUnitEl&&servingUnitEl.value)servingText+=' '+servingUnitEl.value;else if(servingText==='1')servingText='1 serving';
   var item={
     id:'f'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
-    meal:meal,name:name,servingLabel:servingEl&&servingEl.value.trim()?servingEl.value.trim():'1 serving',servings:1,
+    meal:meal,name:name,servingLabel:servingText,servings:1,
     cal:calEl&&calEl.value!==''?Math.round(parseFloat(calEl.value)||0):null,
     prot:protEl&&protEl.value!==''?Math.round(parseFloat(protEl.value)||0):null,
     fat:fatEl&&fatEl.value!==''?Math.round(parseFloat(fatEl.value)||0):null,
@@ -5921,6 +5947,7 @@ function cancelFoodEntry(meal){
   ['fe-name-','fe-serving-','fe-cal-','fe-prot-','fe-fat-','fe-carbs-'].forEach(function(p){
     var el=document.getElementById(p+meal);if(el)el.value='';
   });
+  var servingUnitEl=document.getElementById('fe-serving-unit-'+meal);if(servingUnitEl)servingUnitEl.value='';
 }
 
 function removeFoodItem(id){
