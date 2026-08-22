@@ -1911,13 +1911,11 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
     return map;
   }, [allTx]);
 
-  const clearedExpenses = allTx.filter(t => t.cleared !== false && t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0);
-  const clearedReturns = allTx.filter(t => t.cleared !== false && t.amount > 0 && t.category !== "Transfer").reduce((s, t) => s + t.amount, 0);
-  const clearedPayments = allTx.filter(t => t.cleared !== false && t.amount > 0 && t.category === "Transfer").reduce((s, t) => s + t.amount, 0);
   const rawAmountOwed = -allTx.reduce((s, t) => s + Number(t.amount || 0), 0);
   const totalOwed = rawAmountOwed;
-  const unclearedCharges = allTx.filter(t => t.cleared === false && t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0);
-  const unclearedReturns = allTx.filter(t => t.cleared === false && t.amount > 0).reduce((s, t) => s + t.amount, 0);
+  const totalCharges = allTx.filter(t => Number(t.amount || 0) < 0).reduce((s, t) => s + Math.abs(Number(t.amount || 0)), 0);
+  const paymentsAndReturns = allTx.filter(t => Number(t.amount || 0) > 0).reduce((s, t) => s + Number(t.amount || 0), 0);
+  const pendingBalance = -allTx.filter(t => t.cleared === false).reduce((s, t) => s + Number(t.amount || 0), 0);
 
   const filtered = useMemo(() => {
     return allTx.filter(t => {
@@ -2043,20 +2041,15 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
             <div className="text-xs text-indigo-100">{cindyAccount.name} · {cindyAccount.institution}</div>
           </div>
         </div>
-          <div className="text-right">
-            <div className="text-xs text-indigo-100 uppercase tracking-wide">Total Owed</div>
-            <div className="text-2xl font-bold">{fmtCurrency(totalOwed)}</div>
-          </div>
+        <div className="text-xs text-indigo-100 uppercase tracking-wide">Transaction Register</div>
       </div>
 
       <div className="p-4 md:p-5 space-y-5">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 md:gap-3">
-          <RegStat label="Cleared Expenses" value={fmtCurrency(clearedExpenses)} tone="rose" />
-          <RegStat label="Cleared Returns" value={fmtCurrency(clearedReturns)} tone="emerald" />
-          <RegStat label="Cleared Payments" value={fmtCurrency(clearedPayments)} tone="indigo" />
-          <RegStat label="Total Owed" value={fmtCurrency(totalOwed)} tone="slate" />
-          <RegStat label="Uncleared Charges" value={fmtCurrency(unclearedCharges)} tone="amber" />
-          <RegStat label="Uncleared Returns" value={fmtCurrency(unclearedReturns)} tone="sky" />
+        <div className="grid grid-cols-2 gap-3">
+          <RegStat label="Card Balance" value={fmtCurrency(totalOwed)} tone={totalOwed < 0 ? "emerald" : "slate"} />
+          <RegStat label="Charges" value={fmtCurrency(totalCharges)} tone="rose" />
+          <RegStat label="Payments & Returns" value={fmtCurrency(paymentsAndReturns)} tone="indigo" />
+          <RegStat label="Pending" value={fmtCurrency(pendingBalance)} tone="amber" />
         </div>
 
         <div ref={editFormRef} className={"border rounded-xl p-3 md:p-4 transition-colors " + (form.id ? "border-indigo-300 bg-indigo-50/40 ring-2 ring-indigo-100" : "border-slate-200")}>
@@ -2735,7 +2728,7 @@ function AccountsAndCards({ data, actions }) {
               <div className="font-semibold text-slate-700">{fmtCurrency(cindyCheckingBalance)}</div>
             </div>
             <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-              <div className="text-xs text-slate-400">ICCU total owed</div>
+              <div className="text-xs text-slate-400">ICCU card balance</div>
               <div className="font-semibold text-rose-600">{fmtCurrency(iccuTotalOwed)}</div>
             </div>
           </div>
