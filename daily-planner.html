@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-08-21-6">
+<meta name="app-build" content="2026-08-21-7">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#667eea">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,7 +16,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
 (function(){
-  var build='2026-08-21-6',checking=false;
+  var build='2026-08-21-7',checking=false;
   function checkForAppUpdate(){
     if(checking||location.protocol==='file:')return;checking=true;
     fetch(location.pathname+'?update-check='+Date.now(),{cache:'no-store'}).then(function(response){return response.text();}).then(function(html){var match=html.match(/name=["']app-build["']\s+content=["']([^"']+)/i);if(match&&match[1]!==build){location.replace(location.pathname+'?v='+encodeURIComponent(match[1]));}}).catch(function(){}).finally(function(){checking=false;});
@@ -5956,7 +5956,17 @@ function isFav(item){
   return favs.some(function(f){return f.name&&item.name&&f.name.toLowerCase()===item.name.toLowerCase();});
 }
 
-function macroRatioSettings(){try{return Object.assign({enabled:false,prot:25,carbs:45,fat:30},JSON.parse(localStorage.getItem('macro_ratio_settings')||'{}'));}catch(ignore){return{enabled:false,prot:25,carbs:45,fat:30};}}
+function macroRatioStorageKey(dateKey){return'macro_ratio_settings_'+(dateKey||dk(today));}
+function macroRatioSettings(dateKey){
+  dateKey=dateKey||dk(today);var defaults={enabled:false,prot:25,carbs:45,fat:30},raw=localStorage.getItem(macroRatioStorageKey(dateKey));
+  // Migrate the former all-days setting once, preserving it only for the day
+  // being viewed when this version first opens. Every other date stays independent.
+  if(!raw&&localStorage.getItem('macro_ratio_settings_migrated_v2')!=='1'){
+    var legacy=localStorage.getItem('macro_ratio_settings');if(legacy){raw=legacy;localStorage.setItem(macroRatioStorageKey(dateKey),legacy);}
+    localStorage.setItem('macro_ratio_settings_migrated_v2','1');localStorage.removeItem('macro_ratio_settings');
+  }
+  try{return Object.assign({},defaults,raw?JSON.parse(raw):{});}catch(ignore){return defaults;}
+}
 function toggleMacroRatioEditor(){
   var panel=document.getElementById('macroRatioEditor');if(!panel)return;var opening=panel.style.display==='none';panel.style.display=opening?'block':'none';if(!opening)return;
   var current=runnerMacroTarget();document.getElementById('macroCustomProt').value=current.prot;document.getElementById('macroCustomCarbs').value=current.carbs;document.getElementById('macroCustomFat').value=current.fat;var note=document.getElementById('macroRatioEditorTotal');if(note)note.textContent='Current total: '+(current.prot+current.carbs+current.fat)+'%. Total must equal 100%.';
@@ -5964,9 +5974,9 @@ function toggleMacroRatioEditor(){
 function saveCustomMacroRatio(){
   var prot=Number(document.getElementById('macroCustomProt').value),carbs=Number(document.getElementById('macroCustomCarbs').value),fat=Number(document.getElementById('macroCustomFat').value),total=prot+carbs+fat,note=document.getElementById('macroRatioEditorTotal');
   if(!Number.isFinite(total)||prot<5||carbs<5||fat<5||prot>80||carbs>80||fat>80||Math.round(total)!==100){if(note){note.textContent='Protein, carbs, and fat must each be 5–80% and total exactly 100%. Current total: '+(Number.isFinite(total)?total:0)+'%.';note.style.color='#b91c1c';}return;}
-  localStorage.setItem('macro_ratio_settings',JSON.stringify({enabled:true,prot:prot,carbs:carbs,fat:fat}));if(note){note.textContent='Saved: '+prot+'% protein, '+carbs+'% carbs, '+fat+'% fat.';note.style.color='#166534';}updateMacroTotals();if(typeof v26Toast==='function')v26Toast('Daily Macro Ratio updated');
+  localStorage.setItem(macroRatioStorageKey(dk(today)),JSON.stringify({enabled:true,prot:prot,carbs:carbs,fat:fat}));if(note){note.textContent='Saved for '+dk(today)+': '+prot+'% protein, '+carbs+'% carbs, '+fat+'% fat.';note.style.color='#166534';}updateMacroTotals();if(typeof v26Toast==='function')v26Toast('Macro Ratio updated for this day only');
 }
-function useAutomaticMacroRatio(){localStorage.setItem('macro_ratio_settings',JSON.stringify({enabled:false}));var panel=document.getElementById('macroRatioEditor');if(panel)panel.style.display='none';updateMacroTotals();if(typeof v26Toast==='function')v26Toast('Automatic runner macro ratio restored');}
+function useAutomaticMacroRatio(){localStorage.setItem(macroRatioStorageKey(dk(today)),JSON.stringify({enabled:false}));var panel=document.getElementById('macroRatioEditor');if(panel)panel.style.display='none';updateMacroTotals();if(typeof v26Toast==='function')v26Toast('Automatic runner macro ratio restored for this day');}
 
 function runnerMacroTarget(){
   var dateKey=dk(today),activities=typeof getActivities==='function'?getActivities().filter(function(a){return a.date===dateKey;}):[],workouts=activities.filter(function(a){return !/rest\s*day/i.test(String(a.type||a.title||''));});
@@ -6359,6 +6369,13 @@ function confirmCopyDay(){
   });
   dest.foodLog=destLog;
   localStorage.setItem(destKey,JSON.stringify(dest));
+  // A complete-day copy includes an independent snapshot of that day's Macro
+  // Ratio. Editing the destination later can never alter the source date.
+  if(meal==='all'&&foodIdx==='all'){
+    var sourceRatio=localStorage.getItem(macroRatioStorageKey(from));
+    if(sourceRatio)localStorage.setItem(macroRatioStorageKey(to),sourceRatio);
+    else localStorage.removeItem(macroRatioStorageKey(to));
+  }
   document.getElementById('copyDayModal').style.display='none';
   // If destination is today, reload
   if(to===dk(today)){window._foodLog=destLog;renderFoodItems();save();}
