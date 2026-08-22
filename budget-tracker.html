@@ -1870,6 +1870,7 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [unclearedFirst, setUnclearedFirst] = useState(false);
+  const [dateSort, setDateSort] = useState(() => localStorage.getItem("register_date_sort_" + cindyAccount.id) || "desc");
   const [descriptionSort, setDescriptionSort] = useState(null);
   const [notes, setNotes] = useState(data.cindyRegisterNotes || "");
   const [viewingReceipt, setViewingReceipt] = useState(null);
@@ -1880,7 +1881,7 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
 
   const applyBalance = (nextList) => {
     const bal = Math.round(nextList.reduce((s, t) => s + t.amount, 0) * 100) / 100;
-    actions.updateAccount({ ...cindyAccount, balance: bal });
+    actions.syncAccountBalance({ ...cindyAccount, balance: bal });
   };
 
   const balanceById = useMemo(() => {
@@ -1922,11 +1923,12 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
         const comparison = String(a.merchant || "").localeCompare(String(b.merchant || ""), undefined, { sensitivity: "base" });
         return descriptionSort === "asc" ? comparison : -comparison;
       }
-      return a.date < b.date ? 1 : a.date > b.date ? -1 : 0;
+      const comparison = a.date < b.date ? -1 : a.date > b.date ? 1 : 0;
+      return dateSort === "asc" ? comparison : -comparison;
     });
     if (!unclearedFirst) return byDateDesc;
     return [...byDateDesc.filter(t => t.cleared === false), ...byDateDesc.filter(t => t.cleared !== false)];
-  }, [filtered, unclearedFirst, descriptionSort]);
+  }, [filtered, unclearedFirst, descriptionSort, dateSort]);
 
   const resetForm = () => setForm(blankForm);
 
@@ -2160,7 +2162,16 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
 
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="text-sm font-semibold text-slate-700">Transactions <span className="text-slate-400 font-normal">({sorted.length})</span></div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
+            <select
+              aria-label="Sort register transactions by date"
+              className="text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 bg-white"
+              value={dateSort}
+              onChange={e => { const value = e.target.value; setDateSort(value); setDescriptionSort(null); localStorage.setItem("register_date_sort_" + cindyAccount.id, value); }}
+            >
+              <option value="desc">Date: Newest first</option>
+              <option value="asc">Date: Oldest first</option>
+            </select>
             <button
               onClick={() => setUnclearedFirst(u => !u)}
               className={"text-xs font-medium px-3 py-1.5 rounded-lg border " + (unclearedFirst ? "bg-amber-100 border-amber-300 text-amber-800" : "border-slate-200 text-slate-500 hover:bg-slate-50")}
@@ -2259,6 +2270,7 @@ function BankAccountRegister({ data, actions, account }) {
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [unclearedFirst, setUnclearedFirst] = useState(false);
+  const [dateSort, setDateSort] = useState(() => localStorage.getItem("register_date_sort_" + account.id) || "desc");
   const [descriptionSort, setDescriptionSort] = useState(null);
   const [notes, setNotes] = useState((data.registerNotes && data.registerNotes[account.id]) || "");
   const [viewingReceipt, setViewingReceipt] = useState(null);
@@ -2270,7 +2282,7 @@ function BankAccountRegister({ data, actions, account }) {
 
   const applyBalance = (nextList) => {
     const bal = Math.round((opening + nextList.reduce((s, t) => s + t.amount, 0)) * 100) / 100;
-    actions.updateAccount({ ...account, balance: bal });
+    actions.syncAccountBalance({ ...account, balance: bal });
   };
 
   const balanceById = useMemo(() => {
@@ -2312,11 +2324,12 @@ function BankAccountRegister({ data, actions, account }) {
         const comparison = String(a.merchant || "").localeCompare(String(b.merchant || ""), undefined, { sensitivity: "base" });
         return descriptionSort === "asc" ? comparison : -comparison;
       }
-      return a.date < b.date ? 1 : a.date > b.date ? -1 : 0;
+      const comparison = a.date < b.date ? -1 : a.date > b.date ? 1 : 0;
+      return dateSort === "asc" ? comparison : -comparison;
     });
     if (!unclearedFirst) return byDateDesc;
     return [...byDateDesc.filter(t => t.cleared === false), ...byDateDesc.filter(t => t.cleared !== false)];
-  }, [filtered, unclearedFirst, descriptionSort]);
+  }, [filtered, unclearedFirst, descriptionSort, dateSort]);
 
   const resetForm = () => setForm(blankForm);
 
@@ -2538,7 +2551,16 @@ function BankAccountRegister({ data, actions, account }) {
 
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="text-sm font-semibold text-slate-700">Transactions <span className="text-slate-400 font-normal">({sorted.length})</span></div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
+            <select
+              aria-label="Sort register transactions by date"
+              className="text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 bg-white"
+              value={dateSort}
+              onChange={e => { const value = e.target.value; setDateSort(value); setDescriptionSort(null); localStorage.setItem("register_date_sort_" + account.id, value); }}
+            >
+              <option value="desc">Date: Newest first</option>
+              <option value="asc">Date: Oldest first</option>
+            </select>
             <button
               onClick={() => setUnclearedFirst(u => !u)}
               className={"text-xs font-medium px-3 py-1.5 rounded-lg border " + (unclearedFirst ? "bg-amber-100 border-amber-300 text-amber-800" : "border-slate-200 text-slate-500 hover:bg-slate-50")}
@@ -3119,6 +3141,7 @@ function Transactions({ data, actions }) {
           </div>
         </button>
         <div className="grid grid-cols-2 sm:flex sm:flex-row gap-2 w-full sm:w-auto">
+          <Button variant="secondary" disabled={!actions.canUndo} onClick={actions.undo} className="col-span-2 w-full sm:w-auto" title={actions.canUndo && actions.undoHistory[0] ? "Undo: " + actions.undoHistory[0].label : "No transaction changes to undo"}>↶ Undo Last Transaction Change</Button>
           <Button variant="secondary" className="w-full sm:w-auto" onClick={() => setImportOpen(true)}>⬆ Import Statement</Button>
           <Button variant="secondary" className="w-full sm:w-auto" onClick={() => exportTransactionsCSV(filtered, accountsById)}>⬇ Export CSV</Button>
           <Button className="col-span-2 w-full sm:w-auto" onClick={openAdd}>+ Add Transaction</Button>
@@ -4998,12 +5021,15 @@ function App() {
   });
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const setData = (updater, label) => {
+  const setData = (updater, label, options = {}) => {
     rawSetData(previous => {
       const next = typeof updater === "function" ? updater(previous) : updater;
       if (next === previous) return previous;
-      undoStack.current = [{ data: previous, label: label || "Budget data updated", at: new Date().toISOString() }, ...undoStack.current].slice(0, 25);
-      setUndoCount(undoStack.current.length);
+      if (!options.skipUndo) {
+        undoStack.current = [{ data: previous, label: label || "Budget data updated", at: new Date().toISOString() }, ...undoStack.current].slice(0, 25);
+        setUndoCount(undoStack.current.length);
+      }
+      if (options.skipAudit) return next;
       return {
         ...next,
         auditLog: [...(next.auditLog || []), { label: label || "Budget data updated", at: new Date().toISOString() }].slice(-100),
@@ -5099,9 +5125,9 @@ function App() {
   }, [data.notificationPrefs && data.notificationPrefs.enabled, JSON.stringify(derived.budgetAlerts), JSON.stringify(derived.recurringItems)]);
 
   const actions = {
-    addTransaction: (t) => setData(d => ({ ...d, transactions: [{ ...t, needsReview: false }, ...d.transactions].sort((a, b) => (a.date < b.date ? 1 : -1)) })),
-    updateTransaction: (t) => setData(d => ({ ...d, transactions: d.transactions.map(x => x.id === t.id ? t : x) })),
-    deleteTransaction: (id) => setData(d => ({ ...d, transactions: d.transactions.filter(x => x.id !== id) })),
+    addTransaction: (t) => setData(d => ({ ...d, transactions: [{ ...t, needsReview: false }, ...d.transactions].sort((a, b) => (a.date < b.date ? 1 : -1)) }), "Transaction added"),
+    updateTransaction: (t) => setData(d => ({ ...d, transactions: d.transactions.map(x => x.id === t.id ? t : x) }), "Transaction updated"),
+    deleteTransaction: (id) => setData(d => ({ ...d, transactions: d.transactions.filter(x => x.id !== id) }), "Transaction deleted"),
     splitTransaction: (original, parts) => setData(d => {
       const splits = parts.map(part => ({ category: part.category, amount: Number(part.amount) }));
       return {
@@ -5204,6 +5230,9 @@ function App() {
 
     addAccount: (a) => setData(d => ({ ...d, accounts: [...d.accounts, a] })),
     updateAccount: (a) => setData(d => ({ ...d, accounts: d.accounts.map(x => x.id === a.id ? a : x) })),
+    // Register balances are derived from their transactions. Keep this automatic follow-up
+    // inside the same undo step as the transaction that caused it.
+    syncAccountBalance: (a) => setData(d => ({ ...d, accounts: d.accounts.map(x => x.id === a.id ? a : x) }), "Account balance synchronized", { skipUndo: true, skipAudit: true }),
     deleteAccount: (id) => setData(d => ({ ...d, accounts: d.accounts.filter(x => x.id !== id) })),
     reconcileAccount: (id, statementBalance, difference) => setData(d => ({
       ...d,
@@ -5387,3 +5416,4 @@ root.render(<App />);
 </script>
 </body>
 </html>
+
