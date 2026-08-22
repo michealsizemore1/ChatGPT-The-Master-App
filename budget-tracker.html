@@ -1914,7 +1914,9 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
   const clearedExpenses = allTx.filter(t => t.cleared !== false && t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0);
   const clearedReturns = allTx.filter(t => t.cleared !== false && t.amount > 0 && t.category !== "Transfer").reduce((s, t) => s + t.amount, 0);
   const clearedPayments = allTx.filter(t => t.cleared !== false && t.amount > 0 && t.category === "Transfer").reduce((s, t) => s + t.amount, 0);
-  const totalOwed = -allTx.reduce((s, t) => s + t.amount, 0);
+  const rawAmountOwed = -allTx.reduce((s, t) => s + Number(t.amount || 0), 0);
+  const totalOwed = Math.max(0, rawAmountOwed);
+  const creditBalance = Math.max(0, -rawAmountOwed);
   const unclearedCharges = allTx.filter(t => t.cleared === false && t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0);
   const unclearedReturns = allTx.filter(t => t.cleared === false && t.amount > 0).reduce((s, t) => s + t.amount, 0);
 
@@ -2042,10 +2044,11 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
             <div className="text-xs text-indigo-100">{cindyAccount.name} · {cindyAccount.institution}</div>
           </div>
         </div>
-        <div className="text-right">
-          <div className="text-xs text-indigo-100 uppercase tracking-wide">Total Owed</div>
-          <div className="text-2xl font-bold">{fmtCurrency(totalOwed)}</div>
-        </div>
+          <div className="text-right">
+            <div className="text-xs text-indigo-100 uppercase tracking-wide">Total Owed</div>
+            <div className="text-2xl font-bold">{fmtCurrency(totalOwed)}</div>
+            {creditBalance > 0 && <div className="text-xs text-emerald-200 mt-1">Credit balance: {fmtCurrency(creditBalance)}</div>}
+          </div>
       </div>
 
       <div className="p-4 md:p-5 space-y-5">
