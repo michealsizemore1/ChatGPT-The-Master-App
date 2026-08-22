@@ -2163,15 +2163,6 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="text-sm font-semibold text-slate-700">Transactions <span className="text-slate-400 font-normal">({sorted.length})</span></div>
           <div className="flex gap-2 flex-wrap">
-            <select
-              aria-label="Sort register transactions by date"
-              className="text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 bg-white"
-              value={dateSort}
-              onChange={e => { const value = e.target.value; setDateSort(value); setDescriptionSort(null); localStorage.setItem("register_date_sort_" + cindyAccount.id, value); }}
-            >
-              <option value="desc">Date: Newest first</option>
-              <option value="asc">Date: Oldest first</option>
-            </select>
             <button
               onClick={() => setUnclearedFirst(u => !u)}
               className={"text-xs font-medium px-3 py-1.5 rounded-lg border " + (unclearedFirst ? "bg-amber-100 border-amber-300 text-amber-800" : "border-slate-200 text-slate-500 hover:bg-slate-50")}
@@ -2185,7 +2176,11 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
             <thead className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wide">
               <tr>
                 <th className="text-left px-3 py-3 font-medium w-8"></th>
-                <th className="text-left px-3 py-3 font-medium">Date</th>
+                <th className="text-left px-3 py-3 font-medium">
+                  <button type="button" className="hover:text-indigo-600" title={dateSort === "asc" ? "Oldest transactions first" : "Newest transactions first"} onClick={() => { const next = dateSort === "desc" ? "asc" : "desc"; setDateSort(next); setDescriptionSort(null); localStorage.setItem("register_date_sort_" + cindyAccount.id, next); }}>
+                    Date {descriptionSort ? "↕" : dateSort === "asc" ? "↑" : "↓"}
+                  </button>
+                </th>
                 <th className="text-left px-3 py-3 font-medium">
                   <button type="button" className="hover:text-indigo-600" onClick={() => setDescriptionSort(current => current === "asc" ? "desc" : "asc")}>
                     Description {descriptionSort === "asc" ? "↑" : descriptionSort === "desc" ? "↓" : "↕"}
@@ -2552,15 +2547,6 @@ function BankAccountRegister({ data, actions, account }) {
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="text-sm font-semibold text-slate-700">Transactions <span className="text-slate-400 font-normal">({sorted.length})</span></div>
           <div className="flex gap-2 flex-wrap">
-            <select
-              aria-label="Sort register transactions by date"
-              className="text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 bg-white"
-              value={dateSort}
-              onChange={e => { const value = e.target.value; setDateSort(value); setDescriptionSort(null); localStorage.setItem("register_date_sort_" + account.id, value); }}
-            >
-              <option value="desc">Date: Newest first</option>
-              <option value="asc">Date: Oldest first</option>
-            </select>
             <button
               onClick={() => setUnclearedFirst(u => !u)}
               className={"text-xs font-medium px-3 py-1.5 rounded-lg border " + (unclearedFirst ? "bg-amber-100 border-amber-300 text-amber-800" : "border-slate-200 text-slate-500 hover:bg-slate-50")}
@@ -2574,7 +2560,11 @@ function BankAccountRegister({ data, actions, account }) {
             <thead className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wide">
               <tr>
                 <th className="text-left px-3 py-3 font-medium w-8"></th>
-                <th className="text-left px-3 py-3 font-medium">Date</th>
+                <th className="text-left px-3 py-3 font-medium">
+                  <button type="button" className="hover:text-indigo-600" title={dateSort === "asc" ? "Oldest transactions first" : "Newest transactions first"} onClick={() => { const next = dateSort === "desc" ? "asc" : "desc"; setDateSort(next); setDescriptionSort(null); localStorage.setItem("register_date_sort_" + account.id, next); }}>
+                    Date {descriptionSort ? "↕" : dateSort === "asc" ? "↑" : "↓"}
+                  </button>
+                </th>
                 <th className="text-left px-3 py-3 font-medium">
                   <button type="button" className="hover:text-indigo-600" onClick={() => setDescriptionSort(current => current === "asc" ? "desc" : "asc")}>
                     Description {descriptionSort === "asc" ? "↑" : descriptionSort === "desc" ? "↓" : "↕"}
