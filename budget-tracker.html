@@ -1995,7 +1995,7 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
     const payload = {
       id: form.id || uid(), date: form.date, accountId: cindyAccount.id, merchant: form.desc.trim(),
       category, amount, person: form.who, notes: existing ? (existing.notes || "") : "",
-      cleared: existing ? existing.cleared : false, receipt: form.receipt || null,
+      cleared: existing ? existing.cleared : false, checkedOff: existing ? !!existing.checkedOff : false, receipt: form.receipt || null,
     };
     if (form.id) {
       actions.updateTransaction(payload);
@@ -2008,6 +2008,7 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
   };
 
   const toggleCleared = (t) => actions.updateTransaction({ ...t, cleared: t.cleared === false ? true : false });
+  const toggleCheckedOff = (t) => actions.updateTransaction({ ...t, checkedOff: !t.checkedOff });
 
   const removeTx = (id) => {
     if (!window.confirm("Delete this transaction?")) return;
@@ -2192,7 +2193,7 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
           <table className="w-full text-sm min-w-[720px]">
             <thead className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wide">
               <tr>
-                <th className="text-left px-3 py-3 font-medium w-8"></th>
+                <th className="text-left px-3 py-3 font-medium w-16"></th>
                 <th className="text-left px-3 py-3 font-medium">
                   <button type="button" className="hover:text-indigo-600" title={dateSort === "asc" ? "Oldest transactions first" : "Newest transactions first"} onClick={() => { const next = dateSort === "desc" ? "asc" : "desc"; setDateSort(next); setDescriptionSort(null); localStorage.setItem("register_date_sort_" + cindyAccount.id, next); }}>
                     Date {descriptionSort ? "↕" : dateSort === "asc" ? "↑" : "↓"}
@@ -2217,7 +2218,10 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
                 return (
                   <tr key={t.id} className={"border-t border-slate-100 hover:bg-slate-50 group " + (isCleared ? "" : "bg-amber-50/40")}>
                     <td className="px-3 py-3">
-                      <input type="checkbox" checked={isCleared} onChange={() => toggleCleared(t)} title={isCleared ? "Cleared" : "Uncleared"} className="w-4 h-4 accent-indigo-600" />
+                      <div className="flex items-center gap-2">
+                        <input type="checkbox" checked={!!t.checkedOff} onChange={() => toggleCheckedOff(t)} title={t.checkedOff ? "Checked off" : "Check off without moving"} aria-label="Check off transaction without moving it" className="w-4 h-4 accent-emerald-600" />
+                        <input type="checkbox" checked={isCleared} onChange={() => toggleCleared(t)} title={isCleared ? "Cleared" : "Uncleared"} aria-label="Cleared transaction" className="w-4 h-4 accent-indigo-600" />
+                      </div>
                     </td>
                     <td className="px-3 py-3 text-slate-500 whitespace-nowrap">{fmtDateShort(t.date)}</td>
                     <td className="px-3 py-3 font-medium text-slate-700">
@@ -2389,7 +2393,7 @@ function BankAccountRegister({ data, actions, account }) {
     const payload = {
       id: form.id || uid(), date: form.date, accountId: account.id, merchant: form.desc.trim(),
       category: form.category, amount, person: existing ? (existing.person || defaultPersonForAccount(account.id)) : defaultPersonForAccount(account.id),
-      notes: existing ? (existing.notes || "") : "", cleared: existing ? existing.cleared : false, receipt: form.receipt || null,
+      notes: existing ? (existing.notes || "") : "", cleared: existing ? existing.cleared : false, checkedOff: existing ? !!existing.checkedOff : false, receipt: form.receipt || null,
     };
     if (form.id) {
       actions.updateTransaction(payload);
@@ -2402,6 +2406,7 @@ function BankAccountRegister({ data, actions, account }) {
   };
 
   const toggleCleared = (t) => actions.updateTransaction({ ...t, cleared: t.cleared === false ? true : false });
+  const toggleCheckedOff = (t) => actions.updateTransaction({ ...t, checkedOff: !t.checkedOff });
 
   const removeTx = (id) => {
     if (!window.confirm("Delete this transaction?")) return;
@@ -2581,7 +2586,7 @@ function BankAccountRegister({ data, actions, account }) {
           <table className="w-full text-sm min-w-[720px]">
             <thead className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wide">
               <tr>
-                <th className="text-left px-3 py-3 font-medium w-8"></th>
+                <th className="text-left px-3 py-3 font-medium w-16"></th>
                 <th className="text-left px-3 py-3 font-medium">
                   <button type="button" className="hover:text-indigo-600" title={dateSort === "asc" ? "Oldest transactions first" : "Newest transactions first"} onClick={() => { const next = dateSort === "desc" ? "asc" : "desc"; setDateSort(next); setDescriptionSort(null); localStorage.setItem("register_date_sort_" + account.id, next); }}>
                     Date {descriptionSort ? "↕" : dateSort === "asc" ? "↑" : "↓"}
@@ -2605,7 +2610,10 @@ function BankAccountRegister({ data, actions, account }) {
                 return (
                   <tr key={t.id} className={"border-t border-slate-100 hover:bg-slate-50 group " + (isCleared ? "" : "bg-amber-50/40")}>
                     <td className="px-3 py-3">
-                      <input type="checkbox" checked={isCleared} onChange={() => toggleCleared(t)} title={isCleared ? "Cleared" : "Uncleared"} className="w-4 h-4 accent-indigo-600" />
+                      <div className="flex items-center gap-2">
+                        <input type="checkbox" checked={!!t.checkedOff} onChange={() => toggleCheckedOff(t)} title={t.checkedOff ? "Checked off" : "Check off without moving"} aria-label="Check off transaction without moving it" className="w-4 h-4 accent-emerald-600" />
+                        <input type="checkbox" checked={isCleared} onChange={() => toggleCleared(t)} title={isCleared ? "Cleared" : "Uncleared"} aria-label="Cleared transaction" className="w-4 h-4 accent-indigo-600" />
+                      </div>
                     </td>
                     <td className="px-3 py-3 text-slate-500 whitespace-nowrap">{fmtDateShort(t.date)}</td>
                     <td className="px-3 py-3 font-medium text-slate-700">
