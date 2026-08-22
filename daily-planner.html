@@ -5606,6 +5606,7 @@ function renderFoodItems(){
       items.forEach(function(it){
         if(!it.id)it.id='f'+Date.now()+'_'+Math.random().toString(36).slice(2,5);
         var svgs=parseFloat(it.servings)||1;
+        var servingSize=String(it.servingLabel||'').replace(/^per\s+/i,'').trim()||'1 serving';
         var totalCal=Math.round((parseFloat(it.cal)||0)*svgs);
         var totalProt=Math.round((parseFloat(it.prot)||0)*svgs);
         var isFavItem=favNames.indexOf((it.name||'').toLowerCase())!==-1;
@@ -5636,9 +5637,18 @@ function renderFoodItems(){
         row1.appendChild(nameInp); row1.appendChild(favBtn); row1.appendChild(delBtn);
         div.appendChild(row1);
 
+        var servingEdit=document.createElement('label');
+        servingEdit.style.cssText='display:flex;align-items:center;gap:6px;font-size:0.72rem;font-weight:700;color:#475569;margin:0 0 5px;';
+        servingEdit.textContent='Serving size';
+        var servingInput=document.createElement('input');
+        servingInput.type='text';servingInput.value=servingSize;servingInput.placeholder='Example: 1 cup, 30 g, 8 oz';
+        servingInput.style.cssText='flex:1;min-width:0;border:1px solid #cbd5e1;border-radius:5px;padding:4px 6px;font-size:0.76rem;';
+        servingInput.onchange=(function(id){return function(){updateFoodField(id,'servingLabel',this.value.trim()||'1 serving');};})(it.id);
+        servingEdit.appendChild(servingInput);div.appendChild(servingEdit);
+
         var servingCalories=document.createElement('div');
         servingCalories.style.cssText='font-size:0.75rem;font-weight:700;color:#b45309;background:#fff7ed;border:1px solid #fed7aa;border-radius:6px;padding:4px 7px;margin:0 0 5px;';
-        servingCalories.textContent=Math.round(parseFloat(it.cal)||0)+' calories per serving';
+        servingCalories.textContent='Actual serving: '+svgs+' × '+servingSize+' · '+Math.round(parseFloat(it.cal)||0)+' calories each';
         div.appendChild(servingCalories);
 
         // Row 2: macro grid using standalone _mkMacroCell
@@ -5819,7 +5829,7 @@ function aiAddFoodByIndex(idx){
   var meal=(document.getElementById('aiFoodTargetMeal')||{}).value||'snack';
   var item={
     id:'f'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
-    meal:meal,name:item_data.name,
+    meal:meal,name:item_data.name,servingLabel:item_data.servingLabel||'1 serving',servings:1,
     cal:item_data.cal||null,prot:item_data.prot||null,fat:item_data.fat||null,carbs:item_data.carbs||null
   };
   MICRO_FIELDS.forEach(function(f){item[f]=item_data[f]||null;});
@@ -5859,6 +5869,7 @@ function addFoodItem(meal){
   }
   var nameInp=mkInput('fe-name-','Food name','min(120px,40%)',null);
   nameInp.style.flex='2';
+  var servingInp=mkInput('fe-serving-','Serving size','92px',null);
   var calInp=mkInput('fe-cal-','Cal','50px','number');
   var protInp=mkInput('fe-prot-','Pro','44px','number');
   var fatInp=mkInput('fe-fat-','Fat','44px','number');
@@ -5871,7 +5882,7 @@ function addFoodItem(meal){
   cancelBtn.textContent='✕';
   cancelBtn.style.cssText='background:#e5e7eb;color:#374151;border:none;border-radius:4px;padding:5px 8px;font-size:0.82rem;cursor:pointer;';
   cancelBtn.onclick=function(){cancelFoodEntry(meal);};
-  [nameInp,calInp,protInp,fatInp,carbInp,addBtn,cancelBtn].forEach(function(el){entry.appendChild(el);});
+  [nameInp,servingInp,calInp,protInp,fatInp,carbInp,addBtn,cancelBtn].forEach(function(el){entry.appendChild(el);});
   entry.addEventListener('keydown',function(e){
     if(e.key==='Enter')submitFoodEntry(meal);
     else if(e.key==='Escape')cancelFoodEntry(meal);
@@ -5889,9 +5900,10 @@ function submitFoodEntry(meal){
   var protEl=document.getElementById('fe-prot-'+meal);
   var fatEl=document.getElementById('fe-fat-'+meal);
   var carbEl=document.getElementById('fe-carbs-'+meal);
+  var servingEl=document.getElementById('fe-serving-'+meal);
   var item={
     id:'f'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
-    meal:meal,name:name,
+    meal:meal,name:name,servingLabel:servingEl&&servingEl.value.trim()?servingEl.value.trim():'1 serving',servings:1,
     cal:calEl&&calEl.value!==''?Math.round(parseFloat(calEl.value)||0):null,
     prot:protEl&&protEl.value!==''?Math.round(parseFloat(protEl.value)||0):null,
     fat:fatEl&&fatEl.value!==''?Math.round(parseFloat(fatEl.value)||0):null,
@@ -5906,7 +5918,7 @@ function submitFoodEntry(meal){
 function cancelFoodEntry(meal){
   var entry=document.getElementById('food-entry-'+meal);
   if(entry)entry.style.display='none';
-  ['fe-name-','fe-cal-','fe-prot-','fe-fat-','fe-carbs-'].forEach(function(p){
+  ['fe-name-','fe-serving-','fe-cal-','fe-prot-','fe-fat-','fe-carbs-'].forEach(function(p){
     var el=document.getElementById(p+meal);if(el)el.value='';
   });
 }
@@ -6124,7 +6136,7 @@ function saveFoodAsFavorite(itemId){
   var favs=getFavorites();
   var exists=favs.some(function(f){return f.name.toLowerCase()===item.name.toLowerCase();});
   if(exists){if(!confirm('"'+item.name+'" is already in favorites. Add again?'))return;}
-  var fav={name:item.name,cal:item.cal,prot:item.prot,fat:item.fat,carbs:item.carbs,proteinSource:item.proteinSource||'',carbSource:item.carbSource||'',fatSource:item.fatSource||''};
+  var fav={name:item.name,cal:item.cal,prot:item.prot,fat:item.fat,carbs:item.carbs,servingLabel:item.servingLabel||'1 serving',servings:parseFloat(item.servings)||1,proteinSource:item.proteinSource||'',carbSource:item.carbSource||'',fatSource:item.fatSource||''};
   MICRO_FIELDS.forEach(function(f){fav[f]=item[f]!=null?item[f]:null;});
   favs.push(fav);saveFavorites(favs);
   alert('⭐ "'+item.name+'" saved to favorites!');
@@ -6179,7 +6191,7 @@ function loadFavoriteItem(idx){
   var favs=getFavorites();var f=favs[idx];if(!f)return;
   var target=(document.getElementById('favTargetMeal')||{value:'breakfast'}).value;
   if(!window._foodLog)window._foodLog=[];
-  var favItem={id:'f'+Date.now(),meal:target,name:f.name,cal:f.cal,prot:f.prot,fat:f.fat,carbs:f.carbs,proteinSource:f.proteinSource||'',carbSource:f.carbSource||'',fatSource:f.fatSource||''};
+  var favItem={id:'f'+Date.now(),meal:target,name:f.name,cal:f.cal,prot:f.prot,fat:f.fat,carbs:f.carbs,servingLabel:f.servingLabel||'1 serving',servings:parseFloat(f.servings)||1,proteinSource:f.proteinSource||'',carbSource:f.carbSource||'',fatSource:f.fatSource||''};
   MICRO_FIELDS.forEach(function(fld){favItem[fld]=f[fld]!=null?f[fld]:null;});
   window._foodLog.push(favItem);
   _setMealOpen(target,true);
@@ -6209,7 +6221,7 @@ function confirmSaveMeal(){
   window._saveMealItems=null;
   var meals=getSavedMeals();
   meals.push({name:name,category:category,items:log.map(function(x){
-    var it={name:x.name,cal:x.cal,prot:x.prot,fat:x.fat,carbs:x.carbs,proteinSource:x.proteinSource||'',carbSource:x.carbSource||'',fatSource:x.fatSource||''};
+    var it={name:x.name,cal:x.cal,prot:x.prot,fat:x.fat,carbs:x.carbs,servingLabel:x.servingLabel||'1 serving',servings:parseFloat(x.servings)||1,proteinSource:x.proteinSource||'',carbSource:x.carbSource||'',fatSource:x.fatSource||''};
     MICRO_FIELDS.forEach(function(f){it[f]=x[f]!=null?x[f]:null;});
     return it;
   })});
@@ -6275,7 +6287,7 @@ function loadMeal(idx){
   var target=perSel?perSel.value:(m.category||(document.getElementById('favTargetMeal')||{value:'breakfast'}).value);
   if(!window._foodLog)window._foodLog=[];
   m.items.forEach(function(it){
-    var loadedItem={id:'f'+Date.now()+'_'+Math.random().toString(36).slice(2,5),meal:target,name:it.name,cal:it.cal,prot:it.prot,fat:it.fat,carbs:it.carbs,proteinSource:it.proteinSource||'',carbSource:it.carbSource||'',fatSource:it.fatSource||''};
+    var loadedItem={id:'f'+Date.now()+'_'+Math.random().toString(36).slice(2,5),meal:target,name:it.name,cal:it.cal,prot:it.prot,fat:it.fat,carbs:it.carbs,servingLabel:it.servingLabel||'1 serving',servings:parseFloat(it.servings)||1,proteinSource:it.proteinSource||'',carbSource:it.carbSource||'',fatSource:it.fatSource||''};
     MICRO_FIELDS.forEach(function(f){loadedItem[f]=it[f]!=null?it[f]:null;});
     window._foodLog.push(loadedItem);
   });
@@ -6439,6 +6451,7 @@ function scanFoodLabel(ev){
         messages:[{role:'user',content:[
           {type:'image',source:{type:'base64',media_type:mtype,data:b64}},
           {type:'text',text:'Read this food package image carefully. Extract the per-serving Nutrition Facts, any visible product name, and the complete visible ingredient list. Use the ingredients to classify the dominant source of ALL THREE macros for a runner: protein (lean/plant versus higher-fat/processed), carbohydrates (complex/fiber-rich versus simple/refined), and fat (unsaturated versus saturated/trans). Respond with ONLY a single JSON object — no markdown, no code fences, no explanation, nothing else before or after. The JSON must have these exact keys:\n- "name": the product or food name visible anywhere on the label/package (use "Scanned Food" if not visible)\n- "ingredientsText": the complete ingredient list exactly as visible (use an empty string if it is not visible; do not guess)\n- "proteinSource": use "support" for lean/plant, "limit" for higher-fat/processed, or "unknown" when not supported by visible evidence\n- "carbSource": use "support" for complex/fiber-rich, "limit" for simple/refined, or "unknown" when not supported by visible evidence\n- "fatSource": use "support" for unsaturated, "limit" for saturated/trans, or "unknown" when not supported by visible evidence\n- "cal": Calories per serving as a plain number\n- "prot": Protein grams per serving as a plain number\n- "fat": Total Fat grams per serving as a plain number\n- "carbs": Total Carbohydrate grams per serving as a plain number\n- "fiber": Dietary Fiber grams per serving as a plain number\n- "sugar": Total Sugars grams per serving as a plain number\n- "sodium": Sodium milligrams per serving as a plain number\n- "vitA": Vitamin A in mcg per serving as a plain number\n- "vitC": Vitamin C in mg per serving as a plain number\n- "vitD": Vitamin D in mcg per serving as a plain number\n- "calcium": Calcium in mg per serving as a plain number\n- "iron": Iron in mg per serving as a plain number\n- "potassium": Potassium in mg per serving as a plain number\nAll numeric values must be numbers, not strings. Use 0 if a numeric value cannot be read from the label. Never invent missing ingredients or classifications. Output the JSON object only.'}
+          ,{type:'text',text:'Also include a string key named "servingLabel" containing the exact serving size printed on the label, including its unit (for example, "1 cup (240 mL)" or "30 g"). Use "1 serving" only when the serving size cannot be read.'}
         ]}]
       })
     }).then(function(r){return r.json();}).then(function(data){
@@ -6452,7 +6465,7 @@ function scanFoodLabel(ev){
         else throw new Error('No JSON found in response: '+txt.slice(0,100));
       }
       var validSource=function(value){value=String(value||'').toLowerCase();return value==='support'||value==='limit'?value:'';};
-      window._pendingScanFood={name:parsed.name||'Scanned Food',ingredientsText:String(parsed.ingredientsText||'').trim(),proteinSource:validSource(parsed.proteinSource),carbSource:validSource(parsed.carbSource),fatSource:validSource(parsed.fatSource),cal:parsed.cal||null,prot:parsed.prot||null,fat:parsed.fat||null,carbs:parsed.carbs||null};
+      window._pendingScanFood={name:parsed.name||'Scanned Food',ingredientsText:String(parsed.ingredientsText||'').trim(),servingLabel:String(parsed.servingLabel||'1 serving').trim(),proteinSource:validSource(parsed.proteinSource),carbSource:validSource(parsed.carbSource),fatSource:validSource(parsed.fatSource),cal:parsed.cal||null,prot:parsed.prot||null,fat:parsed.fat||null,carbs:parsed.carbs||null};
       MICRO_FIELDS.forEach(function(f){window._pendingScanFood[f]=(parsed[f]!==undefined&&parsed[f]!==null&&parsed[f]!==0)?parsed[f]:null;});
       window._pendingScanFood.source='label';var relevantSources=[window._pendingScanFood.prot?'proteinSource':'',window._pendingScanFood.carbs?'carbSource':'',window._pendingScanFood.fat?'fatSource':''].filter(Boolean),classifiedSources=relevantSources.filter(function(field){return !!window._pendingScanFood[field];}).length;window._pendingScanFood.sourceConfidence=window._pendingScanFood.ingredientsText&&relevantSources.length&&classifiedSources===relevantSources.length?'High':window._pendingScanFood.ingredientsText&&classifiedSources?'Medium':'Low';window._pendingScanFood.sourceMethod=window._pendingScanFood.ingredientsText?'Label + ingredients':'Needs review';inferFoodMacroSources(window._pendingScanFood);var scanHeading=document.getElementById('scanConfirmTitle');if(scanHeading)scanHeading.textContent='Food Label Scanned';
       var nameEl=document.getElementById('scanResultName'),macroEl=document.getElementById('scanResultMacros'),modal=document.getElementById('scanConfirmModal');
