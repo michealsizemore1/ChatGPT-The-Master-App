@@ -1531,7 +1531,7 @@ body{
       <div class="goal-input-row"><label style="width:110px;">Audiobook</label><input type="number" id="gAudio" min="0" placeholder="e.g. 120"> min</div>
       <div class="goal-input-row"><label style="width:110px;">Bible days</label><input type="number" id="gBible" min="0" max="7" placeholder="7"> /7</div>
       <div class="goal-input-row"><label style="width:110px;">Prayer days</label><input type="number" id="gPrayer" min="0" max="7" placeholder="7"> /7</div>
-      <div class="goal-input-row"><label style="width:110px;">Exercise days</label><input type="number" id="gExercise" min="0" max="7" placeholder="4"> /7</div>
+      <div class="goal-input-row"><label style="width:110px;">Running days</label><input type="number" id="gExercise" min="0" max="7" placeholder="4"> /7</div>
       <button onclick="saveGoals()" style="margin-top:6px;background:#667eea;color:white;border:none;border-radius:8px;padding:6px 18px;font-size:0.82rem;cursor:pointer;font-weight:600;">Save Goals</button>
     </div>
   </div>
@@ -4175,7 +4175,7 @@ function uniqueRunActivities(startDate,endDate){
   function normalizedDate(value){var text=String(value||'').trim(),match=text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);if(match)return match[3]+'-'+match[1].padStart(2,'0')+'-'+match[2].padStart(2,'0');return text.slice(0,10);}
   var start=typeof startDate==='string'?startDate:dk(startDate),end=typeof endDate==='string'?endDate:dk(endDate),seen={};return getActivities().filter(function(activity){if(!activity)return false;var activityDate=normalizedDate(activity.date),runText=[activity.type,activity.title,activity.name,activity.workout].filter(Boolean).join(' ');if(activityDate<start||activityDate>end||!/run/i.test(runText))return false;var signature=[activityDate,Number(activity.distance||activity.miles||0).toFixed(3),String(activity.duration||activity.time||'').trim()].join('|');if(seen[signature])return false;seen[signature]=true;activity._weeklyDate=activityDate;return true;});
 }
-function hasExerciseOnDate(dateKey,planner){var activity=getActivities().some(function(item){return item.date===dateKey&&!/rest day/i.test(String(item.type||''));});return activity||!!(planner&&(planner.exRun==='green'||planner.exStrength==='green'||planner.exBike==='green'||planner.exWalk==='green'));}
+function hasExerciseOnDate(dateKey,planner){return hasRunOnDate(dateKey)||!!(planner&&planner.exRun==='green');}
 // One-time migration: when "Chronological Bible"/"Daily Prayer" were retired in favor of
 // "Bible & Worship"/"AI Prayer", the code was repointed to the new field names, but already-
 // saved daily records still had their checked days under the OLD field names (spChronBible/
@@ -4443,7 +4443,7 @@ function renderWeeklyDigest(days,tot,wDayKeys,lbls){
   var daysLogged=days.filter(function(d){return d.score||d.miles||d.calories||d.audiobook||d.sleep;}).length;
   var activeDays=days.filter(function(d){return d.miles>0;}).length;
   var goals={};try{goals=JSON.parse(localStorage.getItem('weekly_goals')||'{}');}catch(ignore){}
-  var goalRows=[{name:'Miles',target:Number(goals.Miles)||0,actual:tot.miles||0},{name:'Audiobook',target:Number(goals.Audio)||0,actual:tot.audiobook||0},{name:'Bible',target:Number(goals.Bible)||0,actual:sp.bibleAudio||0},{name:'Prayer',target:Number(goals.Prayer)||0,actual:sp.aiPrayer||0},{name:'Exercise',target:Number(goals.Exercise)||0,actual:activeDays}].filter(function(goal){return goal.target>0;});
+  var goalRows=[{name:'Miles',target:Number(goals.Miles)||0,actual:tot.miles||0},{name:'Audiobook',target:Number(goals.Audio)||0,actual:tot.audiobook||0},{name:'Bible',target:Number(goals.Bible)||0,actual:sp.bibleAudio||0},{name:'Prayer',target:Number(goals.Prayer)||0,actual:sp.aiPrayer||0},{name:'Running',target:Number(goals.Exercise)||0,actual:activeDays}].filter(function(goal){return goal.target>0;});
   var reached=goalRows.filter(function(goal){return goal.actual>=goal.target;}).length;
   var goalText=goalRows.length?(reached+' of '+goalRows.length+' weekly targets reached'):'Set weekly targets to measure progress';
   var coverage=[
@@ -12629,7 +12629,7 @@ function renderGoals(){
     {key:'Audio',label:'Audiobook',actual:audioMin,unit:'min',fmt:v=>{const mins=Math.round(Number(v)||0);return mins>=60?Math.floor(mins/60)+'h '+(mins%60?mins%60+'m':''):mins+'m'}},
     {key:'Bible',label:'Bible',actual:bibleD,unit:'/7',fmt:v=>v+'/7'},
     {key:'Prayer',label:'Prayer',actual:prayerD,unit:'/7',fmt:v=>v+'/7'},
-    {key:'Exercise',label:'Exercise',actual:exD,unit:'/7',fmt:v=>v+'/7'},
+    {key:'Exercise',label:'Running',actual:exD,unit:'/7',fmt:v=>v+'/7'},
   ];
   const wrap=document.getElementById('goalBars');if(!wrap)return;
   const hasAnyGoal=actuals.some(a=>g[a.key]>0);
