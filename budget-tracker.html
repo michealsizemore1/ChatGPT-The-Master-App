@@ -731,6 +731,22 @@ const HYSA_ACCOUNT_NAME = "Household HYSA";
 const DISCOVER_ACCOUNT_ID = "acc_discover_cc";
 const DISCOVER_ACCOUNT_NAME = "Discovercard";
 
+function isIccuCreditAccount(account) {
+  if (!account) return false;
+  const label = `${account.name || ""} ${account.institution || ""}`.toLowerCase();
+  return account.id === CINDY_CC_ACCOUNT_ID
+    || account.name === CINDY_CC_ACCOUNT_NAME
+    || label.includes("iccu credit")
+    || label.includes("cindy's credit")
+    || label.includes("cynthia's credit");
+}
+
+function isIccuCreditTransaction(transaction, accounts) {
+  if (!transaction) return false;
+  if (transaction.accountId === CINDY_CC_ACCOUNT_ID) return true;
+  return isIccuCreditAccount((accounts || []).find(account => account.id === transaction.accountId));
+}
+
 function ensureCindyRegister(data) { return data; }
 function ensureHouseholdRegisters(data) { return data; }
 function ensureDiscoverRegister(data) { return data; }
@@ -1877,7 +1893,10 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
   const [splitting, setSplitting] = useState(null);
   const editFormRef = useRef(null);
 
-  const allTx = useMemo(() => data.transactions.filter(t => t.accountId === cindyAccount.id), [data.transactions, cindyAccount.id]);
+  const allTx = useMemo(
+    () => data.transactions.filter(t => t.accountId === cindyAccount.id || isIccuCreditTransaction(t, data.accounts)),
+    [data.transactions, data.accounts, cindyAccount.id]
+  );
 
   const applyBalance = (nextList) => {
     const bal = Math.round(nextList.reduce((s, t) => s + t.amount, 0) * 100) / 100;
@@ -2646,7 +2665,7 @@ function BankAccountRegister({ data, actions, account }) {
 function AccountsAndCards({ data, actions }) {
   const [activeTab, setActiveTab] = useState("cc");
 
-  const ccAccount = data.accounts.find(a => a.id === CINDY_CC_ACCOUNT_ID || a.name === CINDY_CC_ACCOUNT_NAME);
+  const ccAccount = data.accounts.find(a => a.id === CINDY_CC_ACCOUNT_ID) || data.accounts.find(isIccuCreditAccount);
   const chkAccount = data.accounts.find(a => a.id === CHK_ACCOUNT_ID);
   const mikeAccount = data.accounts.find(a => a.id === MIKE_ACCOUNT_ID);
   const savingsAccount = data.accounts.find(a => a.id === SAVINGS_ACCOUNT_ID);
@@ -2670,7 +2689,7 @@ function AccountsAndCards({ data, actions }) {
       account,
       kind: "bank",
     }));
-  const allowedIds = new Set([CINDY_CC_ACCOUNT_ID, CHK_ACCOUNT_ID, MIKE_ACCOUNT_ID, SAVINGS_ACCOUNT_ID, HYSA_ACCOUNT_ID]);
+  const allowedIds = new Set([CINDY_CC_ACCOUNT_ID, ccAccount?.id, CHK_ACCOUNT_ID, MIKE_ACCOUNT_ID, SAVINGS_ACCOUNT_ID, HYSA_ACCOUNT_ID].filter(Boolean));
   const requestedLabels = {
     chk: "Cindy's Checking Account",
     hysa: "HYSA",
@@ -2684,8 +2703,11 @@ function AccountsAndCards({ data, actions }) {
     .map(t => ({ ...t, label: requestedLabels[t.key] || t.label }))
     .sort((a, b) => requestedOrder.indexOf(a.key) - requestedOrder.indexOf(b.key));
   const cindyCheckingBalance = chkAccount ? Number(chkAccount.balance) || 0 : 0;
+  const iccuTransactions = data.transactions.filter(t => isIccuCreditTransaction(t, data.accounts));
+  const iccuRegisterBalance = iccuTransactions.reduce((sum, t) => sum + Number(t.amount || 0), 0);
+  const iccuStoredBalance = Number(ccAccount?.balance || 0);
   const iccuTotalOwed = ccAccount
-    ? Math.max(0, -data.transactions.filter(t => t.accountId === ccAccount.id).reduce((sum, t) => sum + Number(t.amount || 0), 0))
+    ? (iccuTransactions.length ? Math.max(0, -iccuRegisterBalance) : Math.max(0, -iccuStoredBalance))
     : 0;
   const afterIccuPayoff = cindyCheckingBalance - iccuTotalOwed;
 
