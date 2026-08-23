@@ -947,6 +947,10 @@ body.v26-compact .journal-col textarea{height:70px;}
 .my-calendar-event button{border:0;background:transparent;color:#98a2b3;cursor:pointer;font-size:.8rem;padding:0 2px;flex-shrink:0;}
 .my-calendar-event button:hover{color:#b91c1c;}
 .my-calendar-event .move-btn:hover{color:#4f46e5;}
+.my-calendar-reminder-label{display:inline-block;margin-top:3px;color:#7c3aed;font-size:.66rem;font-weight:700;}
+.calendar-reminder-overlay{position:fixed;inset:0;z-index:10050;background:rgba(15,23,42,.58);display:none;align-items:center;justify-content:center;padding:18px;box-sizing:border-box;}
+.calendar-reminder-popup{width:min(420px,100%);border:2px solid #7c3aed;border-radius:18px;background:#fff;padding:24px;box-shadow:0 22px 70px rgba(15,23,42,.35);text-align:center;}
+.calendar-reminder-icon{font-size:2.2rem;line-height:1;margin-bottom:10px}.calendar-reminder-popup h2{margin:0 0 8px;color:#312e81;font-size:1.35rem}.calendar-reminder-popup p{margin:5px 0;color:#475569;font-size:1rem;line-height:1.4}.calendar-reminder-popup button{margin-top:18px;border:0;border-radius:10px;background:#4f46e5;color:#fff;padding:11px 24px;font:800 1rem inherit;cursor:pointer;}
 .my-calendar-move-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:6px;}
 .my-calendar-move-row button{border:1px solid #4f46e5;background:#4f46e5;color:#fff;border-radius:6px;padding:5px 9px;font-size:.7rem;font-weight:700;cursor:pointer;}
 .my-calendar-empty{padding:7px 9px;font-size:.7rem;color:#667085;}
@@ -1445,10 +1449,20 @@ body{
     <input type="time" id="myCalendarEventTime" class="my-calendar-input" title="Time (optional)">
     <input type="text" id="myCalendarEventTitle" class="my-calendar-input" placeholder="Event title" style="flex:1;min-width:120px;">
     <input type="text" id="myCalendarEventNote" class="my-calendar-input" placeholder="Note (optional)" style="flex:1;min-width:100px;">
+    <select id="myCalendarEventReminder" class="my-calendar-input" title="Popup reminder"><option value="0">Remind at event time</option><option value="5">5 minutes before</option><option value="15">15 minutes before</option><option value="30">30 minutes before</option><option value="60">1 hour before</option></select>
     <button type="button" onclick="event.stopPropagation();saveCalendarEvent()">Save</button>
     <button type="button" onclick="event.stopPropagation();toggleAddCalendarEvent(false)" style="background:#f0f0f0;color:#555;">Cancel</button>
   </div>
 </details>
+<div id="calendarReminderOverlay" class="calendar-reminder-overlay" role="dialog" aria-modal="true" aria-labelledby="calendarReminderTitle">
+  <div class="calendar-reminder-popup">
+    <div class="calendar-reminder-icon">&#x1F514;</div>
+    <h2 id="calendarReminderTitle">Calendar reminder</h2>
+    <p id="calendarReminderTime"></p>
+    <p id="calendarReminderNote"></p>
+    <button type="button" onclick="dismissCalendarReminder()">Dismiss</button>
+  </div>
+</div>
 <input type="checkbox" id="reviewCheck" hidden>
 <input type="checkbox" id="prepJournalCheck" hidden>
 <div class="daily-grid">
@@ -3938,7 +3952,8 @@ function renderMyCalendarEventsForSelectedDay(){
   }
   wrap.innerHTML=events.map(function(ev){
     var moveRow=journalCalendarMovingId===ev.id?('<div class="my-calendar-move-row"><input type="date" id="moveDateInput_'+ev.id+'" value="'+escHtml(ev.date)+'" class="my-calendar-input"><button type="button" onclick="event.stopPropagation();confirmMoveCalendarEvent(\''+ev.id+'\')">Move</button><button type="button" onclick="event.stopPropagation();cancelMoveCalendarEvent()" style="background:#f0f0f0;color:#555;border-color:#ccc;">Cancel</button></div>'):'';
-    return'<div class="my-calendar-event"><span class="my-calendar-event-time">'+escHtml(ev.time?journalFormatEventTime(ev.time):'All day')+'</span><span style="flex:1;">'+escHtml(ev.title||'Untitled event')+(ev.note?'<div style="color:#667085;margin-top:2px;">'+escHtml(ev.note)+'</div>':'')+moveRow+'</span><button type="button" class="move-btn" onclick="event.stopPropagation();startMoveCalendarEvent(\''+ev.id+'\')" title="Move to another day">&#x1F4C5;</button><button type="button" onclick="event.stopPropagation();deleteCalendarEvent(\''+ev.id+'\')" title="Delete">&#x2715;</button></div>';
+    var reminder=Number(ev.reminderMinutes||0),reminderText=reminder===0?'Reminder at event time':reminder===60?'Reminder 1 hour before':'Reminder '+reminder+' minutes before';
+    return'<div class="my-calendar-event"><span class="my-calendar-event-time">'+escHtml(ev.time?journalFormatEventTime(ev.time):'All day')+'</span><span style="flex:1;">'+escHtml(ev.title||'Untitled event')+(ev.note?'<div style="color:#667085;margin-top:2px;">'+escHtml(ev.note)+'</div>':'')+'<span class="my-calendar-reminder-label">&#x1F514; '+reminderText+'</span>'+moveRow+'</span><button type="button" class="move-btn" onclick="event.stopPropagation();startMoveCalendarEvent(\''+ev.id+'\')" title="Move to another day">&#x1F4C5;</button><button type="button" onclick="event.stopPropagation();deleteCalendarEvent(\''+ev.id+'\')" title="Delete">&#x2715;</button></div>';
   }).join('');
 }
 function startMoveCalendarEvent(id){journalCalendarMovingId=id;renderMyCalendarEventsForSelectedDay();}
@@ -3960,21 +3975,47 @@ function toggleAddCalendarEvent(show){
   if(next)setTimeout(function(){var t=document.getElementById('myCalendarEventTitle');if(t)t.focus();},50);
 }
 function saveCalendarEvent(){
-  var titleEl=document.getElementById('myCalendarEventTitle'),timeEl=document.getElementById('myCalendarEventTime'),noteEl=document.getElementById('myCalendarEventNote');
+  var titleEl=document.getElementById('myCalendarEventTitle'),timeEl=document.getElementById('myCalendarEventTime'),noteEl=document.getElementById('myCalendarEventNote'),reminderEl=document.getElementById('myCalendarEventReminder');
   var title=(titleEl&&titleEl.value||'').trim();
   if(!title){alert('Please enter an event title.');return;}
   var events=journalCalendarEventsAll();
-  events.push({id:'ev-'+Date.now(),date:dk(today),time:timeEl?timeEl.value:'',title:title,note:(noteEl&&noteEl.value||'').trim()});
+  events.push({id:'ev-'+Date.now(),date:dk(today),time:timeEl?timeEl.value:'',title:title,note:(noteEl&&noteEl.value||'').trim(),reminderMinutes:Number(reminderEl&&reminderEl.value||0)});
   journalCalendarEventsSave(events);
-  if(titleEl)titleEl.value='';if(timeEl)timeEl.value='';if(noteEl)noteEl.value='';
+  if(titleEl)titleEl.value='';if(timeEl)timeEl.value='';if(noteEl)noteEl.value='';if(reminderEl)reminderEl.value='0';
   toggleAddCalendarEvent(false);
   decorateMyCalendarEvents();
+  checkCalendarReminders();
 }
 function deleteCalendarEvent(id){
   if(!confirm('Delete this event?'))return;
   var events=journalCalendarEventsAll().filter(function(ev){return ev.id!==id;});
   journalCalendarEventsSave(events);
   decorateMyCalendarEvents();
+}
+var journalCalendarReminderQueue=[];
+function journalCalendarRealDateKey(date){return date.getFullYear()+'-'+String(date.getMonth()+1).padStart(2,'0')+'-'+String(date.getDate()).padStart(2,'0');}
+function journalCalendarReminderSeenKey(ev){return'journal_calendar_reminder_seen_'+ev.id+'_'+ev.date+'_'+(ev.time||'all-day')+'_'+Number(ev.reminderMinutes||0);}
+function showCalendarReminder(ev){
+  var overlay=document.getElementById('calendarReminderOverlay');if(!overlay)return;
+  var title=document.getElementById('calendarReminderTitle'),time=document.getElementById('calendarReminderTime'),note=document.getElementById('calendarReminderNote');
+  if(title)title.textContent=ev.title||'Calendar event';
+  if(time)time.textContent=ev.time?journalFormatEventTime(ev.time):'Today · All-day event';
+  if(note){note.textContent=ev.note||'Your calendar event is coming up.';note.style.display='block';}
+  overlay.style.display='flex';
+}
+function dismissCalendarReminder(){
+  var overlay=document.getElementById('calendarReminderOverlay');if(overlay)overlay.style.display='none';
+  if(journalCalendarReminderQueue.length)showCalendarReminder(journalCalendarReminderQueue.shift());
+}
+function checkCalendarReminders(){
+  var overlay=document.getElementById('calendarReminderOverlay');if(!overlay||overlay.style.display==='flex')return;
+  var now=new Date(),todayKey=journalCalendarRealDateKey(now),due=[];
+  journalCalendarEventsAll().filter(function(ev){return ev.date===todayKey;}).forEach(function(ev){
+    var parts=String(ev.time||'09:00').split(':'),eventAt=new Date(now.getFullYear(),now.getMonth(),now.getDate(),Number(parts[0]||9),Number(parts[1]||0),0,0),reminderAt=new Date(eventAt.getTime()-Number(ev.reminderMinutes||0)*60000),seenKey=journalCalendarReminderSeenKey(ev);
+    if(now>=reminderAt&&now<=new Date(eventAt.getTime()+10*60000)&&localStorage.getItem(seenKey)!=='1'){localStorage.setItem(seenKey,'1');due.push({event:ev,time:reminderAt.getTime()});}
+  });
+  due.sort(function(a,b){return a.time-b.time;});
+  if(due.length){journalCalendarReminderQueue=due.slice(1).map(function(item){return item.event;});showCalendarReminder(due[0].event);}
 }
 
 // Import from another calendar via an exported .ics file (Google Calendar, Outlook, Apple
@@ -13973,6 +14014,9 @@ function v26SavedFeedback(){
 }
 window.addEventListener('DOMContentLoaded',function(){
   journalCreateAutomaticBackup(false);
+  checkCalendarReminders();
+  setInterval(checkCalendarReminders,20000);
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)checkCalendarReminders();});
   journalCloudInit();
   arrangeActivityTrainingCards();
   relocateDashboardCharts();
