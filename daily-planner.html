@@ -3923,6 +3923,17 @@ function clearHandwritingNotes(){
 function journalCalendarEventsAll(){
   try{var raw=localStorage.getItem('journal_calendar_events');var arr=raw?JSON.parse(raw):[];return Array.isArray(arr)?arr:[];}catch(e){return[];}
 }
+function journalTrainingCalendarLabel(section){
+  var text=String(section||''),labels=[[/\blong\s+run\b/i,'Long Run'],[/\b(intervals?|repeats?|speed\s*work)\b/i,'Interval Run'],[/\btempo\s+run\b|\bthreshold\b/i,'Tempo Run'],[/\brecovery\s+run\b/i,'Recovery Run'],[/\beasy\s+run\b/i,'Easy Run'],[/\bprogression\s+run\b/i,'Progression Run'],[/\brace\b/i,'Race'],[/\brun\b/i,'Scheduled Run']];
+  for(var i=0;i<labels.length;i++)if(labels[i][0].test(text))return labels[i][1];
+  return /\b\d+(?:\.\d+)?\s*(?:mi|miles?|km)\b/i.test(text)?'Scheduled Run':'';
+}
+function journalTrainingCalendarEvents(){
+  var plan=null;try{plan=JSON.parse(localStorage.getItem('current_training_plan')||'null');}catch(ignore){}if(!plan||!plan.text||!plan.startDate)return[];
+  var schedule=plan.schedule&&Object.keys(plan.schedule).length?plan.schedule:buildUploadedTrainingSchedule(plan.text,plan.startDate,plan.weeks||1).schedule;
+  return Object.keys(schedule||{}).map(function(date){var section=String(schedule[date]||''),label=journalTrainingCalendarLabel(section),hasRunWords=/\b(run|race|intervals?|repeats?|speed\s*work|tempo|threshold|recovery|progression)\b/i.test(section);if(!label||/\b(rest\s*day|no\s+(?:workout|run))\b/i.test(section)||(/\bwalk(?:ing)?\b/i.test(section)&&!hasRunWords)||(/\b(strength|cross[- ]training)\b/i.test(section)&&!hasRunWords))return null;var detail=section.split(/\r?\n/).map(function(line){return line.trim();}).filter(Boolean).slice(0,3).join(' · ');return{id:'training-plan-'+date,date:date,time:'06:30',title:label,note:detail,reminderMinutes:15,trainingPlan:true};}).filter(Boolean);
+}
+function journalCalendarCombinedEvents(){return journalCalendarEventsAll().concat(journalTrainingCalendarEvents());}
 function journalCalendarEventsSave(list){
   try{localStorage.setItem('journal_calendar_events',JSON.stringify(list));}catch(e){alert('This event could not be saved — device storage may be full.');}
 }
@@ -3932,7 +3943,7 @@ function journalFormatEventTime(t){
   return h12+':'+min+' '+ap;
 }
 function decorateMyCalendarEvents(){
-  var events=journalCalendarEventsAll();
+  var events=journalCalendarCombinedEvents();
   var dates=new Set(events.map(function(ev){return ev.date;}));
   document.querySelectorAll('#journalCalendarGrid .journal-calendar-day').forEach(function(button){
     var existingDot=button.querySelector('.my-calendar-dot'),hasEvent=dates.has(button.getAttribute('data-date'));
@@ -3946,7 +3957,7 @@ function renderMyCalendarEventsForSelectedDay(){
   var wrap=document.getElementById('myCalendarEvents');if(!wrap)return;
   var selected=dk(today);
   var label=document.getElementById('myCalendarEventDateLabel');if(label)label.textContent=today.toLocaleDateString('en-US',{month:'short',day:'numeric'});
-  var events=journalCalendarEventsAll().filter(function(ev){return ev.date===selected;}).sort(function(a,b){return(a.time||'99:99').localeCompare(b.time||'99:99');});
+  var events=journalCalendarCombinedEvents().filter(function(ev){return ev.date===selected;}).sort(function(a,b){return(a.time||'99:99').localeCompare(b.time||'99:99');});
   if(!events.length){
     wrap.innerHTML='<div class="my-calendar-empty">No events for '+today.toLocaleDateString('en-US',{month:'short',day:'numeric'})+'.</div>';
     return;
@@ -3954,7 +3965,9 @@ function renderMyCalendarEventsForSelectedDay(){
   wrap.innerHTML=events.map(function(ev){
     var moveRow=journalCalendarMovingId===ev.id?('<div class="my-calendar-move-row"><input type="date" id="moveDateInput_'+ev.id+'" value="'+escHtml(ev.date)+'" class="my-calendar-input"><button type="button" onclick="event.stopPropagation();confirmMoveCalendarEvent(\''+ev.id+'\')">Move</button><button type="button" onclick="event.stopPropagation();cancelMoveCalendarEvent()" style="background:#f0f0f0;color:#555;border-color:#ccc;">Cancel</button></div>'):'';
     var reminder=Number(ev.reminderMinutes||0),reminderText=reminder===0?'Reminder at event time':reminder===60?'Reminder 1 hour before':'Reminder '+reminder+' minutes before';
-    return'<div class="my-calendar-event"><span class="my-calendar-event-time">'+escHtml(ev.time?journalFormatEventTime(ev.time):'All day')+'</span><span style="flex:1;">'+escHtml(ev.title||'Untitled event')+(ev.note?'<div style="color:#667085;margin-top:2px;">'+escHtml(ev.note)+'</div>':'')+'<span class="my-calendar-reminder-label">&#x1F514; '+reminderText+'</span>'+moveRow+'</span><button type="button" class="move-btn" onclick="event.stopPropagation();startMoveCalendarEvent(\''+ev.id+'\')" title="Move to another day">&#x1F4C5;</button><button type="button" onclick="event.stopPropagation();deleteCalendarEvent(\''+ev.id+'\')" title="Delete">&#x2715;</button></div>';
+    var trainingBadge=ev.trainingPlan?'<span style="display:inline-block;margin-top:3px;margin-right:7px;color:#166534;font-size:.66rem;font-weight:800;">&#x1F3C3; Training Plan</span>':'';
+    var actions=ev.trainingPlan?'':'<button type="button" class="move-btn" onclick="event.stopPropagation();startMoveCalendarEvent(\''+ev.id+'\')" title="Move to another day">&#x1F4C5;</button><button type="button" onclick="event.stopPropagation();deleteCalendarEvent(\''+ev.id+'\')" title="Delete">&#x2715;</button>';
+    return'<div class="my-calendar-event"><span class="my-calendar-event-time">'+escHtml(ev.time?journalFormatEventTime(ev.time):'All day')+'</span><span style="flex:1;">'+escHtml(ev.title||'Untitled event')+(ev.note?'<div style="color:#667085;margin-top:2px;">'+escHtml(ev.note)+'</div>':'')+trainingBadge+'<span class="my-calendar-reminder-label">&#x1F514; '+reminderText+'</span>'+moveRow+'</span>'+actions+'</div>';
   }).join('');
 }
 function startMoveCalendarEvent(id){journalCalendarMovingId=id;renderMyCalendarEventsForSelectedDay();}
@@ -4012,7 +4025,7 @@ function testCalendarReminderPopup(){showCalendarReminder({title:'Calendar remin
 function checkCalendarReminders(){
   var overlay=document.getElementById('calendarReminderOverlay');if(!overlay||overlay.style.display==='flex')return;
   var now=new Date(),todayKey=journalCalendarRealDateKey(now),due=[];
-  journalCalendarEventsAll().filter(function(ev){return ev.date===todayKey;}).forEach(function(ev){
+  journalCalendarCombinedEvents().filter(function(ev){return ev.date===todayKey;}).forEach(function(ev){
     var parts=String(ev.time||'09:00').split(':'),eventAt=new Date(now.getFullYear(),now.getMonth(),now.getDate(),Number(parts[0]||9),Number(parts[1]||0),0,0),reminderAt=new Date(eventAt.getTime()-Number(ev.reminderMinutes||0)*60000),seenKey=journalCalendarReminderSeenKey(ev);
     if(now>=reminderAt&&now<=new Date(eventAt.getTime()+10*60000)&&localStorage.getItem(seenKey)!=='1'){localStorage.setItem(seenKey,'1');due.push({event:ev,time:reminderAt.getTime()});}
   });
