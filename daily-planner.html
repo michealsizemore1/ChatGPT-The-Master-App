@@ -1442,6 +1442,7 @@ body{
   <div class="my-calendar-events" id="myCalendarEvents"></div>
   <div class="my-calendar-add">
     <button type="button" onclick="event.stopPropagation();toggleAddCalendarEvent()">+ Add Event</button>
+    <button type="button" onclick="event.stopPropagation();testCalendarReminderPopup()" style="background:#7c3aed;border-color:#7c3aed;">&#x1F514; Test Popup</button>
     <label class="my-calendar-import-btn" onclick="event.stopPropagation();" title="Import events from an exported .ics file (Google Calendar, Outlook, Apple Calendar, etc.)">&#x1F4E5; Import .ics<input type="file" accept=".ics,text/calendar" style="display:none" onchange="importCalendarICS(event)"></label>
     <span style="font-size:.66rem;color:#667085;">for <strong id="myCalendarEventDateLabel"></strong></span>
   </div>
@@ -4007,6 +4008,7 @@ function dismissCalendarReminder(){
   var overlay=document.getElementById('calendarReminderOverlay');if(overlay)overlay.style.display='none';
   if(journalCalendarReminderQueue.length)showCalendarReminder(journalCalendarReminderQueue.shift());
 }
+function testCalendarReminderPopup(){showCalendarReminder({title:'Calendar reminders are working',time:'',note:'This is how your event reminder will appear on your phone.'});}
 function checkCalendarReminders(){
   var overlay=document.getElementById('calendarReminderOverlay');if(!overlay||overlay.style.display==='flex')return;
   var now=new Date(),todayKey=journalCalendarRealDateKey(now),due=[];
