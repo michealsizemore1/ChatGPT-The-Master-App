@@ -7977,7 +7977,7 @@ function renderRunMetrics(){
   function recordSub(a){return a?((a.title?escHtml(a.title)+' &bull; ':'')+fmtDateShort(a.date)):'';}
 
   var totalMiles=0,totalDurSec=0,longRun=0,longRunTitle='',longDate='',bestPaceSec=0,bestPaceTitle='',bestPaceDate='',paceSum=0,paceCount=0;
-  var runs10=[],totalElev=0,thisYearMiles=0,thisMonthMiles=0,hrSum=0,hrCount=0;
+  var runs10=[],totalElev=0,thisYearMiles=0,thisMonthMiles=0,hrSum=0,hrCount=0,cadenceSum=0,cadenceCount=0;
   var now=new Date();var thisYear=now.getFullYear();var thisMonth=now.getMonth();
   runs.forEach(function(a){
     var mi=parseFloat(a.distance)||0;
@@ -7985,6 +7985,7 @@ function renderRunMetrics(){
     totalDurSec+=durSecs(a.duration);
     totalElev+=parseFloat(a.elevGain)||0;
     if(a.heartRate){hrSum+=parseFloat(a.heartRate)||0;hrCount++;}
+    if((parseFloat(a.cadence)||0)>0){cadenceSum+=parseFloat(a.cadence)||0;cadenceCount++;}
     if(mi>=10)runs10.push(a);
     if(mi>longRun){longRun=mi;longDate=a.date||'';longRunTitle=a.title||'';}
     if(a.pace){var ps=parsePace(a.pace);if(ps&&(!bestPaceSec||ps<bestPaceSec)){bestPaceSec=ps;bestPaceDate=a.date||'';bestPaceTitle=a.title||'';}}
@@ -7999,6 +8000,7 @@ function renderRunMetrics(){
   var avgPace=paceCount?paceSum/paceCount:0;
   var avgDist=runs.length?totalMiles/runs.length:0;
   var avgHR=hrCount?Math.round(hrSum/hrCount):0;
+  var avgCadence=cadenceCount?Math.round(cadenceSum/cadenceCount):0;
   var mileageWeeks={},mileageMonths={};
   runs.forEach(function(a){
     var miles=parseFloat(a.distance)||0;if(!miles||!a.date)return;
@@ -8052,6 +8054,7 @@ function renderRunMetrics(){
         bestPaceSec?((bestPaceTitle?escHtml(bestPaceTitle)+' &bull; ':'')+fmtDateShort(bestPaceDate)):'')
     +metBox('&#x23F1;','Avg Pace',avgPace?fmtPace(avgPace)+'/mi':'-','per run')
     +metBox('&#x1F4D0;','Avg Distance',avgDist.toFixed(2)+' mi','per run')
+    +metBox('&#x1F9B5;','Average Cadence',avgCadence?avgCadence+' spm':'-',avgCadence?cadenceCount+' run'+(cadenceCount!==1?'s':'')+' averaged':'No cadence recorded yet')
     +metBox('&#x1F32C;&#xFE0F;','Average AQI',avgAQI||'-',avgAQI?aqiCategory(avgAQI)+' &bull; '+aqiValues.length+' recorded workout'+(aqiValues.length!==1?'s':''):'No AQI recorded yet')
     +metBox('&#x23F3;','Total Time',totalDurSec?fmtSecs(totalDurSec):'-','all runs')
     +metBox('&#x1F4C5;','This Month',thisMonthMiles.toFixed(1)+' mi','')
