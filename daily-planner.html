@@ -3929,12 +3929,12 @@ function journalTrainingCalendarEvents(){
 }
 function journalGrowthHabitCalendarInfo(habit){
   var source=String(habit.autoSource||'').toLowerCase(),name=String(habit.name||'').toLowerCase();
-  if(source==='retirement-videos'||/financial\s+videos?/.test(name))return{time:'18:30',kind:'financial'};
-  if(source==='udemy'||/udemy/.test(name))return{time:'19:00',kind:'udemy'};
-  if(source==='language'||/language/.test(name))return{time:'12:45',kind:'language'};
-  if(source==='library'||/read|audiobook|listen/.test(name))return{time:'19:30',kind:'reading'};
-  if(/guitar/.test(name))return{time:'19:00',kind:'guitar'};
-  if(/gun\s*range/.test(name))return{time:'19:00',kind:'gun'};
+  if(source==='retirement-videos'||/financial\s+videos?/.test(name))return{kind:'financial',label:'Financial Videos'};
+  if(source==='library'||/audiobook|read\s+or\s+listen/.test(name))return{kind:'reading',label:'Audiobook'};
+  if(source==='udemy'||/udemy/.test(name))return{kind:'udemy',label:'Udemy'};
+  if(/gun\s*range/.test(name))return{kind:'gun',label:'Gun Range'};
+  if(source==='language'||/language/.test(name))return{kind:'language',label:'Language Practice'};
+  if(/guitar/.test(name))return{kind:'guitar',label:'Guitar'};
   return null;
 }
 function journalGrowthHabitDueDays(habit,info){
@@ -3948,7 +3948,7 @@ function journalGrowthHabitCalendarEvents(){
   var state=null;try{state=h2State();}catch(ignore){}if(!state||!Array.isArray(state.habits))return[];
   var habits=state.habits.filter(function(h){return h&&!h.archived&&journalGrowthHabitCalendarInfo(h);}),now=new Date(),start=new Date(now.getFullYear()-1,0,1),end=new Date(now.getFullYear()+1,11,31),events=[];
   for(var date=new Date(start);date<=end;date.setDate(date.getDate()+1)){
-    habits.forEach(function(habit){var info=journalGrowthHabitCalendarInfo(habit),dueDays=journalGrowthHabitDueDays(habit,info);if(dueDays.indexOf(date.getDay())===-1)return;var dateKey=journalCalendarRealDateKey(date);events.push({id:'growth-habit-'+habit.id+'-'+dateKey,date:dateKey,time:info.time,title:habit.name||'Growth Activity',note:'Scheduled from the Habits section',reminderMinutes:15,habitGrowth:true,growthKind:info.kind});});
+    habits.forEach(function(habit){var info=journalGrowthHabitCalendarInfo(habit),dueDays=journalGrowthHabitDueDays(habit,info);if(dueDays.indexOf(date.getDay())===-1)return;var dateKey=journalCalendarRealDateKey(date);events.push({id:'growth-habit-'+habit.id+'-'+dateKey,date:dateKey,time:'',title:info.label,note:'Scheduled from the Habits section · Add the start time in My Schedule',reminderMinutes:0,habitGrowth:true,growthKind:info.kind});});
   }
   return events;
 }
