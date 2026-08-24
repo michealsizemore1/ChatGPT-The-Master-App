@@ -3927,7 +3927,32 @@ function journalTrainingCalendarEvents(){
   var schedule=plan.schedule&&Object.keys(plan.schedule).length?plan.schedule:buildUploadedTrainingSchedule(plan.text,plan.startDate,plan.weeks||1).schedule;
   return Object.keys(schedule||{}).map(function(date){var section=String(schedule[date]||''),label=journalTrainingCalendarLabel(section),hasRunWords=/\b(run|race|intervals?|repeats?|speed\s*work|tempo|threshold|recovery|progression)\b/i.test(section);if(!label||/\b(rest\s*day|no\s+(?:workout|run))\b/i.test(section)||(/\bwalk(?:ing)?\b/i.test(section)&&!hasRunWords)||(/\b(strength|cross[- ]training)\b/i.test(section)&&!hasRunWords))return null;var detail=section.split(/\r?\n/).map(function(line){return line.trim();}).filter(Boolean).slice(0,3).join(' · ');return{id:'training-plan-'+date,date:date,time:'06:30',title:label,note:detail,reminderMinutes:15,trainingPlan:true};}).filter(Boolean);
 }
-function journalCalendarCombinedEvents(){return journalCalendarEventsAll().concat(journalTrainingCalendarEvents());}
+function journalGrowthHabitCalendarInfo(habit){
+  var source=String(habit.autoSource||'').toLowerCase(),name=String(habit.name||'').toLowerCase();
+  if(source==='retirement-videos'||/financial\s+videos?/.test(name))return{time:'18:30',kind:'financial'};
+  if(source==='udemy'||/udemy/.test(name))return{time:'19:00',kind:'udemy'};
+  if(source==='language'||/language/.test(name))return{time:'12:45',kind:'language'};
+  if(source==='library'||/read|audiobook|listen/.test(name))return{time:'19:30',kind:'reading'};
+  if(/guitar/.test(name))return{time:'19:00',kind:'guitar'};
+  if(/gun\s*range/.test(name))return{time:'19:00',kind:'gun'};
+  return null;
+}
+function journalGrowthHabitDueDays(habit,info){
+  if(habit.schedule==='daily')return[0,1,2,3,4,5,6];
+  if(habit.schedule==='weekdays')return[1,2,3,4,5];
+  if(habit.schedule==='custom'&&Array.isArray(habit.days)&&habit.days.length)return habit.days.map(Number);
+  if(info.kind==='financial')return[1,3,5];
+  var target=Math.max(1,Math.min(7,Number(habit.weeklyTarget||1))),patterns={1:[3],2:[2,5],3:[1,3,5],4:[1,2,4,6],5:[1,2,3,4,5],6:[1,2,3,4,5,6],7:[0,1,2,3,4,5,6]};return patterns[target];
+}
+function journalGrowthHabitCalendarEvents(){
+  var state=null;try{state=h2State();}catch(ignore){}if(!state||!Array.isArray(state.habits))return[];
+  var habits=state.habits.filter(function(h){return h&&!h.archived&&journalGrowthHabitCalendarInfo(h);}),now=new Date(),start=new Date(now.getFullYear()-1,0,1),end=new Date(now.getFullYear()+1,11,31),events=[];
+  for(var date=new Date(start);date<=end;date.setDate(date.getDate()+1)){
+    habits.forEach(function(habit){var info=journalGrowthHabitCalendarInfo(habit),dueDays=journalGrowthHabitDueDays(habit,info);if(dueDays.indexOf(date.getDay())===-1)return;var dateKey=journalCalendarRealDateKey(date);events.push({id:'growth-habit-'+habit.id+'-'+dateKey,date:dateKey,time:info.time,title:habit.name||'Growth Activity',note:'Scheduled from the Habits section',reminderMinutes:15,habitGrowth:true,growthKind:info.kind});});
+  }
+  return events;
+}
+function journalCalendarCombinedEvents(){return journalCalendarEventsAll().concat(journalTrainingCalendarEvents(),journalGrowthHabitCalendarEvents());}
 function journalCalendarEventsSave(list){
   try{localStorage.setItem('journal_calendar_events',JSON.stringify(list));}catch(e){alert('This event could not be saved — device storage may be full.');}
 }
@@ -3959,9 +3984,9 @@ function renderMyCalendarEventsForSelectedDay(){
   wrap.innerHTML=events.map(function(ev){
     var moveRow=journalCalendarMovingId===ev.id?('<div class="my-calendar-move-row"><input type="date" id="moveDateInput_'+ev.id+'" value="'+escHtml(ev.date)+'" class="my-calendar-input"><button type="button" onclick="event.stopPropagation();confirmMoveCalendarEvent(\''+ev.id+'\')">Move</button><button type="button" onclick="event.stopPropagation();cancelMoveCalendarEvent()" style="background:#f0f0f0;color:#555;border-color:#ccc;">Cancel</button></div>'):'';
     var reminder=Number(ev.reminderMinutes||0),reminderText=reminder===0?'Reminder at event time':reminder===60?'Reminder 1 hour before':'Reminder '+reminder+' minutes before';
-    var trainingBadge=ev.trainingPlan?'<span style="display:inline-block;margin-top:3px;margin-right:7px;color:#166534;font-size:.66rem;font-weight:800;">&#x1F3C3; Training Plan</span>':'';
-    var actions=ev.trainingPlan?'':'<button type="button" class="move-btn" onclick="event.stopPropagation();startMoveCalendarEvent(\''+ev.id+'\')" title="Move to another day">&#x1F4C5;</button><button type="button" onclick="event.stopPropagation();deleteCalendarEvent(\''+ev.id+'\')" title="Delete">&#x2715;</button>';
-    return'<div class="my-calendar-event"><span class="my-calendar-event-time">'+escHtml(ev.time?journalFormatEventTime(ev.time):'All day')+'</span><span style="flex:1;">'+escHtml(ev.title||'Untitled event')+(ev.note?'<div style="color:#667085;margin-top:2px;">'+escHtml(ev.note)+'</div>':'')+trainingBadge+'<span class="my-calendar-reminder-label">&#x1F514; '+reminderText+'</span>'+moveRow+'</span>'+actions+'</div>';
+    var linkedBadge=ev.trainingPlan?'<span style="display:inline-block;margin-top:3px;margin-right:7px;color:#166534;font-size:.66rem;font-weight:800;">&#x1F3C3; Training Plan</span>':ev.habitGrowth?'<span style="display:inline-block;margin-top:3px;margin-right:7px;color:#7e22ce;font-size:.66rem;font-weight:800;">&#x1F4C8; Growth Habit</span>':'';
+    var actions=(ev.trainingPlan||ev.habitGrowth)?'':'<button type="button" class="move-btn" onclick="event.stopPropagation();startMoveCalendarEvent(\''+ev.id+'\')" title="Move to another day">&#x1F4C5;</button><button type="button" onclick="event.stopPropagation();deleteCalendarEvent(\''+ev.id+'\')" title="Delete">&#x2715;</button>';
+    return'<div class="my-calendar-event"><span class="my-calendar-event-time">'+escHtml(ev.time?journalFormatEventTime(ev.time):'All day')+'</span><span style="flex:1;">'+escHtml(ev.title||'Untitled event')+(ev.note?'<div style="color:#667085;margin-top:2px;">'+escHtml(ev.note)+'</div>':'')+linkedBadge+'<span class="my-calendar-reminder-label">&#x1F514; '+reminderText+'</span>'+moveRow+'</span>'+actions+'</div>';
   }).join('');
 }
 function startMoveCalendarEvent(id){journalCalendarMovingId=id;renderMyCalendarEventsForSelectedDay();}
@@ -8207,7 +8232,7 @@ function h2SyncFromJournal(){
     {id:'library',name:'Read or Listen Daily',category:'Growth',color:'#2563eb',schedule:'daily',weeklyTarget:7,why:'Learn from reading or audiobooks every day.'},
     {id:'language',name:'Language Lessons',category:'Growth',color:'#0891b2',schedule:'weekdays',weeklyTarget:5,why:'Complete language lessons five days each week.'},
     {id:'udemy',name:'Complete a Udemy Lesson',category:'Growth',color:'#7c3aed',schedule:'weekly',weeklyTarget:3,why:'Build consistent learning through current and future Udemy courses.'},
-    {id:'retirement-videos',name:'Watch Financial Videos',category:'Growth',color:'#b45309',schedule:'weekly',weeklyTarget:2,why:'Build financial knowledge through focused video learning.'},
+    {id:'retirement-videos',name:'Watch Financial Videos',category:'Growth',color:'#b45309',schedule:'custom',weeklyTarget:3,why:'Build financial knowledge through focused video learning.'},
     {id:'evening-planning',name:'Evening Planning',category:'Home',color:'#4f46e5',schedule:'daily',weeklyTarget:7,why:'Close the day with clear priorities for tomorrow.'},
     {id:'sleep-routine',name:'Sleep Routine',category:'Health',color:'#7c3aed',schedule:'daily',weeklyTarget:7,why:'Protect recovery with a consistent evening wind-down.'},
     {id:'daily-reflection',name:'Daily Reflection',category:'Growth',color:'#a855f7',schedule:'daily',weeklyTarget:7,why:'Reflect on accomplishments, gratitude, and lessons from the day.'}
@@ -8298,6 +8323,11 @@ function h2SyncFromJournal(){
   }
   var habitRenameMap={hydration:'Reach 75 oz Water',nutrition:'Log Meals & Nutrition',training:'Follow Training Plan',steps:'Reach 10,000 Steps',library:'Read or Listen Daily',udemy:'Complete a Udemy Lesson','retirement-videos':'Watch Financial Videos'};
   state.habits.forEach(function(h){if(habitRenameMap[h.autoSource])h.name=habitRenameMap[h.autoSource];if(h.autoSource==='hydration'){h.type='count';h.target=75;h.schedule='daily';h.weeklyTarget=7;h.category='Health';h.why='Support endurance, recovery, and long-distance running with consistent hydration.';}if(h.autoSource==='steps'){h.type='count';h.target=10000;h.schedule='daily';h.weeklyTarget=7;h.category='Fitness';h.why='Build consistent daily movement by reaching 10,000 steps.';}if(h.autoSource==='udemy'){h.type='duration';h.target=20;h.schedule='weekly';h.weeklyTarget=3;h.category='Growth';h.why='Build consistent learning through current and future Udemy courses.';h.minimum='Complete one lesson or log at least 20 minutes';}if(h.autoSource==='retirement-videos'){h.category='Growth';h.why='Build financial knowledge through focused video learning.';}});
+  if(!localStorage.getItem('habits2_financial_mwf_v1')){
+    var financialHabit=state.habits.find(function(h){return h.autoSource==='retirement-videos'||/financial\s+videos?/i.test(String(h.name||''));});
+    if(financialHabit){financialHabit.schedule='custom';financialHabit.days=[1,3,5];financialHabit.weeklyTarget=3;}
+    localStorage.setItem('habits2_financial_mwf_v1','1');
+  }
   if(!state.habits.some(function(h){return h.autoSource==='udemy';})){
     state.habits.push({id:'h2-auto-udemy',name:'Complete a Udemy Lesson',category:'Growth',color:'#7c3aed',type:'duration',target:20,schedule:'weekly',weeklyTarget:3,days:[0,1,2,3,4,5,6],why:'Build consistent learning through current and future Udemy courses.',cue:'',minimum:'Complete one lesson or log at least 20 minutes',created:(firstSeen.udemy||todayKey)+'T12:00:00',autoSource:'udemy'});
     state.dismissedAuto=(state.dismissedAuto||[]).filter(function(id){return id!=='udemy';});
@@ -8306,7 +8336,7 @@ function h2SyncFromJournal(){
   // "Financial Videos" also gets auto-created if it doesn't exist anywhere yet (once only), so it
   // shows up right away instead of waiting on 3+ days of logged evidence like a normal suggestion.
   if(!state.habits.some(function(h){return h.autoSource==='retirement-videos';})&&(state.dismissedAuto||[]).indexOf('retirement-videos')===-1){
-    state.habits.push({id:'h2-auto-retirement-videos',name:'Watch Financial Videos',category:'Growth',color:'#b45309',type:'check',target:1,schedule:'weekly',weeklyTarget:2,days:[0,1,2,3,4,5,6],why:'Build financial knowledge through focused video learning.',cue:'',minimum:'Watch one financial video',created:(firstSeen['retirement-videos']||todayKey)+'T12:00:00',autoSource:'retirement-videos'});
+    state.habits.push({id:'h2-auto-retirement-videos',name:'Watch Financial Videos',category:'Growth',color:'#b45309',type:'check',target:1,schedule:'custom',weeklyTarget:3,days:[1,3,5],why:'Build financial knowledge through focused video learning.',cue:'',minimum:'Watch one financial video',created:(firstSeen['retirement-videos']||todayKey)+'T12:00:00',autoSource:'retirement-videos'});
     state.dismissedAuto=(state.dismissedAuto||[]).filter(function(id){return id!=='retirement-videos';});
   }
   localStorage.setItem('habits2_retirement_videos_link_v1','1');
