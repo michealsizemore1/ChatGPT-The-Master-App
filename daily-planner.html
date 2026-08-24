@@ -1497,11 +1497,6 @@ body{
         <button type="button" onclick="copyItemsToNextDay(['dg0','dg1','dg2'],'copyGoalsConfirm')" style="background:#7c3aed;color:#fff;border:none;border-radius:7px;padding:5px 14px;font-size:0.8rem;font-weight:600;cursor:pointer;">&#x27A1;&#xFE0F; Copy Goals to Tomorrow</button>
         <span id="copyGoalsConfirm" style="font-size:0.78rem;color:#16a34a;display:none;">✓ Copied!</span>
       </div>
-      <div style="margin-top:6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-        <button type="button" id="aiGoalsBtn" onclick="aiSetDailyGoals(true)" style="background:#0f766e;color:#fff;border:none;border-radius:7px;padding:5px 14px;font-size:0.8rem;font-weight:600;cursor:pointer;">&#x2728; AI: Suggest Goals</button>
-        <span id="aiGoalsStatus" style="font-size:0.72rem;"></span>
-      </div>
-      <div style="font-size:0.68rem;color:#94a3b8;margin-top:4px;">Looks at your last 7 days and picks your weakest areas. Runs automatically each morning if your goals are still blank — tap the button anytime to refresh.</div>
       </div>
     </div>
   </div>
@@ -3799,7 +3794,6 @@ function load(){
   var calendar=document.getElementById('journalCalendar');
   if(calendar&&calendar.open){journalCalendarMonth=new Date(today.getFullYear(),today.getMonth(),1);renderJournalCalendar();}
   renderMyCalendarEventsForSelectedDay();
-  try{aiAutoAttemptDailyGoals();}catch(e){console.error('aiAutoAttemptDailyGoals:',e);}
 }
 
 function attachListeners(){
