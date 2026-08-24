@@ -8232,7 +8232,9 @@ function h2SyncFromJournal(){
     var dailySteps=Math.max(0,parseFloat(row.exSteps)||0);if(dailySteps>0){mark('steps',key);evidenceValues.steps[key]=dailySteps;}
     if(row.gaAudiobook==='green'||parseTimedMins(row.gaAudiobookTime)>0||String(row.gaAudiobookText||'').trim())mark('library',key);
     if(row.gaFinancialVideos==='green'||parseFloat(row.gaFinancialVideosTime)>0)mark('retirement-videos',key);
-    if(row.prepJournalCheck||localStorage.getItem('schedule_eveningPlanning_'+key)==='1')mark('evening-planning',key);
+    var savedScheduleStatuses={};try{savedScheduleStatuses=JSON.parse(localStorage.getItem('journal_schedule_status_'+key)||'{}')||{};}catch(ignoreEveningStatus){}
+    var eveningScheduleGreen=Object.keys(savedScheduleStatuses).some(function(statusId){return savedScheduleStatuses[statusId]==='green'&&(statusId==='schedule-prepare-priorities-for-tomorrow'||/prepare-priorities-for-tomorrow/.test(statusId));});
+    if(row.prepJournalCheck||localStorage.getItem('schedule_eveningPlanning_'+key)==='1'||eveningScheduleGreen)mark('evening-planning',key);
     var sleepProgress=journalSleepRoutineState(key);if(sleepProgress.count>0){mark('sleep-routine',key);evidenceValues['sleep-routine'][key]=sleepProgress.count;}
     if(['jAccomplish','jImprov','jGratitude','jNotes','jCombined'].some(function(field){return String(row[field]||'').trim();}))mark('daily-reflection',key);
   }
@@ -12956,6 +12958,11 @@ function journalScheduleStatuses(dateKey){try{var saved=JSON.parse(localStorage.
 function journalScheduleCycleStatus(event,id){
   if(event){event.preventDefault();event.stopPropagation();}_journalScheduleSuppressClick=Date.now()+600;
   var item=_journalScheduleItemsById[id];if(!item||item.fixed)return;var dateKey=dk(today),statuses=journalScheduleStatuses(dateKey),current=item.scheduleStatus||'',next=current==='green'?'red':current==='red'?'blank':'green';statuses[id]=next;localStorage.setItem(journalScheduleStatusKey(dateKey),JSON.stringify(statuses));
+  if(item.manual==='eveningPlanning'){
+    var eveningKey='schedule_eveningPlanning_'+dateKey;if(next==='green')localStorage.setItem(eveningKey,'1');else localStorage.removeItem(eveningKey);
+    var eveningRow={};try{eveningRow=JSON.parse(localStorage.getItem('planner_'+dateKey)||'{}')||{};}catch(ignoreEvening){}eveningRow.prepJournalCheck=next==='green';localStorage.setItem('planner_'+dateKey,JSON.stringify(eveningRow));
+    var eveningControl=document.getElementById('prepJournalCheck');if(eveningControl)eveningControl.checked=next==='green';
+  }
   var linkedKey=item.linkedCheckKey||(item.growthKind==='reading'?'gaAudiobook':item.growthKind==='financial'?'gaFinancialVideos':item.growthKind==='udemy'?'gaUdemy':item.growthKind==='gun'?'gaGunRange':item.growthKind==='language'?'gaLanguage':item.growthKind==='guitar'?'gaGuitar':'');
   if(linkedKey){document.querySelectorAll('.tri-check[data-key="'+linkedKey+'"]').forEach(function(control){applyTriState(control,next==='blank'?'':next);});save();}
   if(item.checkId){var target=document.getElementById(item.checkId);if(target){target.checked=next==='green';save();}}
