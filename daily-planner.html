@@ -3925,7 +3925,7 @@ function journalTrainingCalendarLabel(section){
 function journalTrainingCalendarEvents(){
   var plan=null;try{plan=JSON.parse(localStorage.getItem('current_training_plan')||'null');}catch(ignore){}if(!plan||!plan.text||!plan.startDate)return[];
   var schedule=plan.schedule&&Object.keys(plan.schedule).length?plan.schedule:buildUploadedTrainingSchedule(plan.text,plan.startDate,plan.weeks||1).schedule;
-  return Object.keys(schedule||{}).map(function(date){var section=String(schedule[date]||''),label=journalTrainingCalendarLabel(section),hasRunWords=/\b(run|race|intervals?|repeats?|speed\s*work|tempo|threshold|recovery|progression)\b/i.test(section);if(!label||/\b(rest\s*day|no\s+(?:workout|run))\b/i.test(section)||(/\bwalk(?:ing)?\b/i.test(section)&&!hasRunWords)||(/\b(strength|cross[- ]training)\b/i.test(section)&&!hasRunWords))return null;var detail=section.split(/\r?\n/).map(function(line){return line.trim();}).filter(Boolean).slice(0,3).join(' · ');return{id:'training-plan-'+date,date:date,time:'06:30',title:label,note:detail,reminderMinutes:15,trainingPlan:true};}).filter(Boolean);
+  return Object.keys(schedule||{}).map(function(date){var section=String(schedule[date]||''),label=journalTrainingCalendarLabel(section),hasRunWords=/\b(run|race|intervals?|repeats?|speed\s*work|tempo|threshold|recovery|progression)\b/i.test(section);if(!label||/\b(rest\s*day|no\s+(?:workout|run))\b/i.test(section)||(/\bwalk(?:ing)?\b/i.test(section)&&!hasRunWords)||(/\b(strength|cross[- ]training)\b/i.test(section)&&!hasRunWords))return null;var detail=section.split(/\r?\n/).map(function(line){return line.trim();}).filter(Boolean).slice(0,3).join(' · ');return{id:'training-plan-'+date,date:date,time:'',title:label,note:detail+' · Add the start time in My Schedule',noReminder:true,trainingPlan:true};}).filter(Boolean);
 }
 function journalGrowthHabitCalendarInfo(habit){
   var source=String(habit.autoSource||'').toLowerCase(),name=String(habit.name||'').toLowerCase();
@@ -8246,6 +8246,8 @@ function h2SyncFromJournal(){
   try{(getActivities()||[]).forEach(function(a){if(a&&a.date&&a.type!=='Rest Day'){activityDates[a.date]=true;mark('training',a.date);}});}catch(ignore){}
   var skills=[];try{skills=getSkillEntries()||[];}catch(ignore2){}
   skills.forEach(function(entry){var key=entry&&entry.date,cat=String(entry&&entry.category||'').toLowerCase(),search=String([entry&&entry.name,entry&&entry.resource,entry&&entry.notes].filter(Boolean).join(' ')).toLowerCase();if(!key)return;if(cat==='language')mark('language',key);if(cat==='udemy'||/\budemy\b/.test(search)){var udemyMins=parseSkillTimeMins(entry.time);if(udemyMins>0){mark('udemy',key);evidenceValues.udemy[key]=Number(evidenceValues.udemy[key]||0)+udemyMins;}}if(cat==='retirement videos'||cat==='financial videos')mark('retirement-videos',key);});
+  var scheduleClearedBySource={};
+  function scheduleSourceFromId(id){id=String(id||'').toLowerCase();if(/prepare-priorities-for-tomorrow/.test(id))return'evening-planning';if(/stretch/.test(id))return'stretch';if(/financial-videos/.test(id))return'retirement-videos';if(/udemy/.test(id))return'udemy';if(/audiobook|reading-audiobook/.test(id))return'library';if(/language/.test(id))return'language';if(/today.?s-training|todays-training/.test(id))return'training';return'';}
   for(var offset=89;offset>=0;offset--){
     var date=new Date(todayDate);date.setDate(todayDate.getDate()-offset);var key=h2Key(date),row={};
     try{row=JSON.parse(localStorage.getItem('planner_'+key)||'{}')||{};}catch(ignore4){}
@@ -8259,6 +8261,7 @@ function h2SyncFromJournal(){
     if(row.gaAudiobook==='green'||parseTimedMins(row.gaAudiobookTime)>0||String(row.gaAudiobookText||'').trim())mark('library',key);
     if(row.gaFinancialVideos==='green'||parseFloat(row.gaFinancialVideosTime)>0)mark('retirement-videos',key);
     var savedScheduleStatuses={};try{savedScheduleStatuses=JSON.parse(localStorage.getItem('journal_schedule_status_'+key)||'{}')||{};}catch(ignoreEveningStatus){}
+    Object.keys(savedScheduleStatuses).forEach(function(statusId){var sourceId=scheduleSourceFromId(statusId),status=savedScheduleStatuses[statusId];if(sourceId&&(status==='red'||status==='blank'))scheduleClearedBySource[sourceId+'|'+key]=true;});
     var eveningScheduleGreen=Object.keys(savedScheduleStatuses).some(function(statusId){return savedScheduleStatuses[statusId]==='green'&&(statusId==='schedule-prepare-priorities-for-tomorrow'||/prepare-priorities-for-tomorrow/.test(statusId));});
     if(row.prepJournalCheck||localStorage.getItem('schedule_eveningPlanning_'+key)==='1'||eveningScheduleGreen)mark('evening-planning',key);
     var sleepProgress=journalSleepRoutineState(key);if(sleepProgress.count>0){mark('sleep-routine',key);evidenceValues['sleep-routine'][key]=sleepProgress.count;}
@@ -8378,7 +8381,7 @@ function h2SyncFromJournal(){
         var trackedStatus=source.id==='steps'?(trackedValue>=10000?'done':'partial'):source.id==='hydration'?(trackedValue>=100?'done':'partial'):source.id==='sleep-routine'?(trackedValue>=4?'done':'partial'):source.id==='udemy'?(trackedValue>=20?'done':'partial'):'done';
         state.logs[logKey][habit.id]={status:trackedStatus,value:trackedValue,at:logKey+'T12:00:00',autoSource:source.id};
       }
-      else if(!has&&old&&old.autoSource===source.id){delete state.logs[logKey][habit.id];if(!Object.keys(state.logs[logKey]).length)delete state.logs[logKey];}
+      else if(!has&&old&&(old.autoSource===source.id||scheduleClearedBySource[source.id+'|'+logKey])){delete state.logs[logKey][habit.id];if(!Object.keys(state.logs[logKey]).length)delete state.logs[logKey];}
     }
   });
   if(JSON.stringify(state)!==before)h2SaveState(state);
