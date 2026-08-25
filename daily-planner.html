@@ -2815,7 +2815,7 @@ body{
     </details>
     <div id="macroRatioWrap" style="margin-top:8px;padding-top:7px;border-top:1px dashed #dcdcdc;">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:5px;">
-        <div><strong style="font-size:0.86rem;color:#334155;">Daily Macro Ratio</strong><div id="macroTrainingLabel" style="font-size:0.7rem;color:#475569;margin-top:2px;">Rest-day target</div></div>
+        <div><strong style="font-size:0.86rem;color:#334155;">Daily Macro Ratio</strong><div id="macroTrainingLabel" style="font-size:0.7rem;color:#475569;margin-top:2px;">Rest-day target</div><div id="performanceFuelNote" style="display:none;font-size:0.68rem;color:#1e40af;margin-top:4px;line-height:1.35;"></div></div>
         <button type="button" onclick="toggleMacroRatioEditor()" style="border:1px solid #94a3b8;background:#fff;color:#475569;border-radius:6px;padding:4px 8px;font-size:.68rem;font-weight:800;cursor:pointer;">Change Ratio</button>
       </div>
       <div id="macroRatioEditor" style="display:none;background:#fff;border:1px solid #cbd5e1;border-radius:8px;padding:8px;margin-bottom:8px;">
@@ -6095,6 +6095,23 @@ function saveCustomMacroRatio(){
 }
 function useAutomaticMacroRatio(){localStorage.setItem(macroRatioStorageKey(dk(today)),JSON.stringify({enabled:false}));var panel=document.getElementById('macroRatioEditor');if(panel)panel.style.display='none';updateMacroTotals();if(typeof v26Toast==='function')v26Toast('Automatic runner macro ratio restored for this day');}
 
+function nutritionHardWorkoutForDate(date){
+  var dateKey=dk(date),parts=[];
+  try{(getActivities()||[]).filter(function(a){return a&&a.date===dateKey;}).forEach(function(a){parts.push([a.title,a.type,a.workout].filter(Boolean).join(' '));});}catch(ignore){}
+  try{var plan=JSON.parse(localStorage.getItem('current_training_plan')||'null');if(plan&&plan.text&&plan.startDate){var planned=extractWorkoutFromActivePlan(plan,date);if(planned)parts.push(planned);}}catch(ignorePlan){}
+  var text=parts.join(' ').toLowerCase();
+  if(/\blong\s+run\b|\bhalf\s+marathon\b|\bmarathon\b/.test(text))return'long';
+  if(/\bintervals?\b|\brepeats?\b|\bspeed\s*work\b|\btrack\s+(?:workout|session)\b|\bhill\s+repeats?\b/.test(text))return'interval';
+  if(/\btempo\b|\bthreshold\b/.test(text))return'tempo';
+  return'';
+}
+function nutritionPerformancePreset(dateKey){
+  var date=new Date((dateKey||dk(today))+'T12:00:00'),tomorrow=new Date(date);tomorrow.setDate(date.getDate()+1);
+  var workout=nutritionHardWorkoutForDate(date),phase='day';if(!workout){workout=nutritionHardWorkoutForDate(tomorrow);phase='prior';}if(!workout)return null;
+  var table={long:{prior:{calories:3000,prot:20,carbs:56,fat:24},day:{calories:3200,prot:20,carbs:58,fat:22}},tempo:{prior:{calories:2700,prot:22,carbs:50,fat:28},day:{calories:2850,prot:22,carbs:53,fat:25}},interval:{prior:{calories:2750,prot:22,carbs:52,fat:26},day:{calories:2950,prot:21,carbs:54,fat:25}}},target=table[workout][phase],weight=calorieAdvisorLatestWeight(dateKey||dk(today))||185,scaledCalories=Math.round((target.calories*(weight/185))/25)*25,names={long:'Long Run',tempo:'Tempo Run',interval:'Interval Run'};
+  return{workout:workout,phase:phase,calories:scaledCalories,prot:target.prot,carbs:target.carbs,fat:target.fat,label:phase==='day'?'Today: '+names[workout]+' — Training & Recovery Target':'Tomorrow: '+names[workout]+' — Pre-Fueling Target'};
+}
+
 function runnerMacroTarget(){
   var dateKey=dk(today),activities=typeof getActivities==='function'?getActivities().filter(function(a){return a.date===dateKey;}):[],workouts=activities.filter(function(a){return !/rest\s*day/i.test(String(a.type||a.title||''));});
   var planSummary=typeof journalTodayTrainingSummary==='function'?journalTodayTrainingSummary():'',activityText=workouts.map(function(a){return [a.title,a.type].filter(Boolean).join(' ');}).join(' '),text=(activityText||planSummary||'').toLowerCase();
@@ -6102,11 +6119,14 @@ function runnerMacroTarget(){
   if(/race|long run|marathon|half marathon/.test(text)||longest>=8)target={prot:18,carbs:65,fat:17,label:'Long-run / race-day target'};
   else if(/tempo|interval|speed|threshold|track|hill repeat/.test(text))target={prot:20,carbs:60,fat:20,label:'Speed / quality-workout target'};
   else if(/run|cycle|bike|strength|weight|cross.train/.test(text)||activities.length)target={prot:25,carbs:50,fat:25,label:'Training-day target'};
+  var performance=nutritionPerformancePreset(dateKey);if(performance)target={prot:performance.prot,carbs:performance.carbs,fat:performance.fat,label:performance.label};
   var custom=macroRatioSettings();if(custom.enabled&&Number(custom.prot)+Number(custom.carbs)+Number(custom.fat)===100)target={prot:Number(custom.prot),carbs:Number(custom.carbs),fat:Number(custom.fat),label:'Custom macro target'};
   target.calories=dailyCalorieTargetData().target;return target;
 }
 function renderRunnerMacroGuidance(log,totals,ratios){
   var target=runnerMacroTarget(),label=document.getElementById('macroTrainingLabel');if(label)label.textContent=target.label+' · '+target.calories.toLocaleString()+' kcal goal';
+  var performance=nutritionPerformancePreset(dk(today)),fuelNote=document.getElementById('performanceFuelNote');
+  if(fuelNote){fuelNote.style.display=performance?'block':'none';fuelNote.textContent=performance?(performance.phase==='day'?'Morning workout: aim for 30–40g protein with the post-run meal, then spread the remaining protein across the day.':'Pre-fueling day: emphasize carbohydrates at lunch, dinner, and the evening snack.') : '';}
   var fields={prot:{grams:totals.prot,kcal:4,name:'protein'},carbs:{grams:totals.carbs,kcal:4,name:'carbohydrates'},fat:{grams:totals.fat,kcal:9,name:'fat'}};
   Object.keys(fields).forEach(function(kind){
     var cap=kind==='prot'?'Prot':kind.charAt(0).toUpperCase()+kind.slice(1),actual=ratios[kind]||0,goal=target[kind],gramsGoal=target.calories*(goal/100)/fields[kind].kcal,remaining=Math.max(0,Math.round(gramsGoal-fields[kind].grams)),difference=actual-goal,status=difference<-2.5?'Low':difference>2.5?'High':'On target';
@@ -6203,9 +6223,9 @@ function dailyCalorieTargetData(){
   var dateKey=dk(today),settings=calorieAdvisorSettings(),weight=calorieAdvisorLatestWeight(dateKey),manualBase=parseFloat(settings.base)||0,base=manualBase||(weight?Math.round(weight*12.5/50)*50:2200);
   var activities=getActivities().filter(function(a){return a.date===dateKey;}),active=0,estimatedCount=0,activityDetails=[];
   activities.forEach(function(a){var c=calorieAdvisorActivityCalories(a,weight);active+=c.calories;if(c.estimated&&c.calories)estimatedCount++;activityDetails.push(calorieAdvisorActivityDescription(a,c));});
-  active=Math.round(active);var refuel=Math.max(0,Math.min(100,parseInt(settings.refuel||100,10)))/100,goalAdjust=settings.goal==='loss'?-300:(settings.goal==='gain'?250:0);
-  var target=Math.max(1200,Math.round((base+active*refuel+goalAdjust)/25)*25),range=Math.max(100,Math.round(target*.05/25)*25);
-  return{dateKey:dateKey,settings:settings,weight:weight,manualBase:manualBase,base:base,activities:activities,active:active,estimatedCount:estimatedCount,activityDetails:activityDetails,refuel:refuel,goalAdjust:goalAdjust,target:target,range:range};
+  active=Math.round(active);var refuel=Math.max(0,Math.min(100,parseInt(settings.refuel||100,10)))/100,performance=nutritionPerformancePreset(dateKey),goalAdjust=performance?0:(settings.goal==='loss'?-300:(settings.goal==='gain'?250:0));
+  var activityBased=Math.max(1200,Math.round((base+active*refuel+goalAdjust)/25)*25),target=performance?Math.max(performance.calories,activityBased):activityBased,range=Math.max(100,Math.round(target*.05/25)*25);
+  return{dateKey:dateKey,settings:settings,weight:weight,manualBase:manualBase,base:base,activities:activities,active:active,estimatedCount:estimatedCount,activityDetails:activityDetails,refuel:refuel,goalAdjust:goalAdjust,target:target,range:range,performancePreset:performance,activityBased:activityBased};
 }
 function refreshNutritionTargets(showMessage){
   updateMacroTotals();
@@ -6226,8 +6246,9 @@ function calculateDailyCalorieTarget(showMessage){
   var logged=Math.round((window._foodLog||[]).reduce(function(sum,x){return sum+(parseFloat(x.cal)||0)*(parseFloat(x.servings)||1);},0)),remaining=Math.max(0,target-logged),over=Math.max(0,logged-target);
   var workoutText=activities.length?activities.length+' workout'+(activities.length===1?'':'s')+' • '+active.toLocaleString()+' active kcal':'No workout logged • 0 active kcal';
   result.innerHTML='<div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;"><strong style="font-size:1.45rem;color:#166534;">'+target.toLocaleString()+' kcal</strong><span style="color:#4d7c0f;font-weight:700;">suggested intake</span></div>'
+    +(calc.performancePreset?'<div style="margin:6px 0;padding:7px 9px;border-radius:9px;background:#eff6ff;color:#1e3a8a;"><strong>'+escHtml(calc.performancePreset.label)+'</strong><br><span style="font-size:.72rem;">Hard-workout fueling is active. The gradual-loss deduction is paused for this day.</span></div>':'')
     +'<div style="margin-top:4px;"><strong>Practical range:</strong> '+Math.max(1200,target-range).toLocaleString()+'–'+(target+range).toLocaleString()+' kcal</div>'
-    +'<div><strong>Calculation:</strong> '+base.toLocaleString()+' rest-day target + '+Math.round(active*refuel).toLocaleString()+' workout replacement'+(goalAdjust?' '+(goalAdjust>0?'+ ':'− ')+Math.abs(goalAdjust)+' goal adjustment':'')+'</div>'
+    +'<div><strong>Calculation:</strong> '+(calc.performancePreset?'Higher of '+calc.performancePreset.calories.toLocaleString()+' performance target or ':'')+base.toLocaleString()+' rest-day target + '+Math.round(active*refuel).toLocaleString()+' workout replacement'+(goalAdjust?' '+(goalAdjust>0?'+ ':'− ')+Math.abs(goalAdjust)+' goal adjustment':'')+'</div>'
     +'<div><strong>Activities:</strong> '+workoutText+(estimatedCount?' ('+estimatedCount+' estimated)':'')+'</div>'
     +(activityDetails.length?'<div style="margin-top:3px;font-size:.72rem;color:#3f6212;"><strong>Used from Activities:</strong> '+activityDetails.map(escHtml).join('; ')+'</div>':'<div style="margin-top:3px;font-size:.72rem;color:#78716c;">No saved Activities were found for this date.</div>')
     +'<div><strong>Logged so far:</strong> '+logged.toLocaleString()+' kcal • '+(over?'<strong style="color:#b91c1c;">Over target: '+over.toLocaleString()+' kcal</strong>':'<strong>Remaining:</strong> '+remaining.toLocaleString()+' kcal')+'</div>'
