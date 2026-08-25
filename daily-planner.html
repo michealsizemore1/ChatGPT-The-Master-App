@@ -2795,6 +2795,7 @@ body{
       <span>&#x1F35E; <strong id="totCarbs">0</strong>g carbs</span>
       <span>&#x1F4A7; <strong id="totWater">—</strong> water</span>
     </div>
+    <div id="calorieOverIndicator" role="status" aria-live="polite" style="display:none;margin-top:8px;border:1px solid #fca5a5;border-radius:8px;background:#fee2e2;color:#991b1b;padding:8px 10px;font-size:.8rem;font-weight:900;"></div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;padding-top:6px;border-top:1px dashed #dcdcdc;font-size:0.74rem;color:#666;">
       <span>&#x1FA78; <strong id="totIron">0</strong>mg iron</span>
       <span>&#x1F9B4; <strong id="totCalcium">0</strong>mg calcium</span>
@@ -6128,6 +6129,10 @@ function updateMacroTotals(){
   if(bar)bar.style.display=hasData?'block':'none';
   var set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=Math.round(v);};
   set('totCal',totals.cal);set('totProt',totals.prot);set('totFat',totals.fat);set('totCarbs',totals.carbs);
+  var calorieTarget=dailyCalorieTargetData().target,calorieOver=Math.max(0,Math.round(totals.cal-calorieTarget)),calorieIndicator=document.getElementById('calorieOverIndicator'),calorieTotal=document.getElementById('totCal');
+  if(calorieIndicator){calorieIndicator.style.display=calorieOver?'block':'none';calorieIndicator.innerHTML=calorieOver?'&#x26A0;&#xFE0F; Over daily calorie target by '+calorieOver.toLocaleString()+' kcal':'';}
+  if(calorieTotal)calorieTotal.style.color=calorieOver?'#b91c1c':'';
+  if(bar){bar.style.borderColor=calorieOver?'#ef4444':'#e9ecef';bar.style.background=calorieOver?'#fff7f7':'#f8f9fa';}
   // Macro ratios use caloric contribution: protein/carbohydrates = 4 kcal/g, fat = 9 kcal/g.
   // Since totals aggregate the full food log, all six meal sections are included.
   var macroCalories={prot:totals.prot*4,carbs:totals.carbs*4,fat:totals.fat*9};
@@ -6217,14 +6222,14 @@ function calculateDailyCalorieTarget(showMessage){
   activities.forEach(function(a){var c=calorieAdvisorActivityCalories(a,weight);active+=c.calories;if(c.estimated&&c.calories)estimatedCount++;activityDetails.push(calorieAdvisorActivityDescription(a,c));});
   active=Math.round(active);var refuel=Math.max(0,Math.min(100,parseInt(settings.refuel||100,10)))/100,goalAdjust=settings.goal==='loss'?-300:(settings.goal==='gain'?250:0);
   var target=calc.target,range=calc.range;weight=calc.weight;manualBase=calc.manualBase;base=calc.base;activities=calc.activities;active=calc.active;estimatedCount=calc.estimatedCount;activityDetails=calc.activityDetails;refuel=calc.refuel;goalAdjust=calc.goalAdjust;
-  var logged=Math.round((window._foodLog||[]).reduce(function(sum,x){return sum+(parseFloat(x.cal)||0)*(parseFloat(x.servings)||1);},0)),remaining=Math.max(0,target-logged);
+  var logged=Math.round((window._foodLog||[]).reduce(function(sum,x){return sum+(parseFloat(x.cal)||0)*(parseFloat(x.servings)||1);},0)),remaining=Math.max(0,target-logged),over=Math.max(0,logged-target);
   var workoutText=activities.length?activities.length+' workout'+(activities.length===1?'':'s')+' • '+active.toLocaleString()+' active kcal':'No workout logged • 0 active kcal';
   result.innerHTML='<div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;"><strong style="font-size:1.45rem;color:#166534;">'+target.toLocaleString()+' kcal</strong><span style="color:#4d7c0f;font-weight:700;">suggested intake</span></div>'
     +'<div style="margin-top:4px;"><strong>Practical range:</strong> '+Math.max(1200,target-range).toLocaleString()+'–'+(target+range).toLocaleString()+' kcal</div>'
     +'<div><strong>Calculation:</strong> '+base.toLocaleString()+' rest-day target + '+Math.round(active*refuel).toLocaleString()+' workout replacement'+(goalAdjust?' '+(goalAdjust>0?'+ ':'− ')+Math.abs(goalAdjust)+' goal adjustment':'')+'</div>'
     +'<div><strong>Activities:</strong> '+workoutText+(estimatedCount?' ('+estimatedCount+' estimated)':'')+'</div>'
     +(activityDetails.length?'<div style="margin-top:3px;font-size:.72rem;color:#3f6212;"><strong>Used from Activities:</strong> '+activityDetails.map(escHtml).join('; ')+'</div>':'<div style="margin-top:3px;font-size:.72rem;color:#78716c;">No saved Activities were found for this date.</div>')
-    +'<div><strong>Logged so far:</strong> '+logged.toLocaleString()+' kcal • <strong>Remaining:</strong> '+remaining.toLocaleString()+' kcal</div>'
+    +'<div><strong>Logged so far:</strong> '+logged.toLocaleString()+' kcal • '+(over?'<strong style="color:#b91c1c;">Over target: '+over.toLocaleString()+' kcal</strong>':'<strong>Remaining:</strong> '+remaining.toLocaleString()+' kcal')+'</div>'
     +(weight&&!manualBase?'<div style="font-size:.7rem;color:#78716c;margin-top:4px;">Automatic rest-day target uses your most recent weight of '+weight.toFixed(1)+' lb. Enter your own rest-day target above if you know it.</div>':'');
   if(showMessage&&typeof v26Toast==='function')v26Toast('Daily calorie target recalculated');
 }
