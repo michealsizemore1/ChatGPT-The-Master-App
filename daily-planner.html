@@ -4165,11 +4165,12 @@ function renderJournalCalendar(){
   decorateMyCalendarEvents();
 }
 function selectJournalCalendarDate(dateKey){
+  var calendar=document.getElementById('journalCalendar'),calendarTop=calendar?calendar.getBoundingClientRect().top:null;
   today=new Date(dateKey+'T00:00:00');
   journalCalendarMonth=new Date(today.getFullYear(),today.getMonth(),1);
   load();
   renderJournalCalendar();
-  window.scrollTo({top:0,behavior:'smooth'});
+  requestAnimationFrame(function(){var updated=document.getElementById('journalCalendar');if(updated&&calendarTop!==null)window.scrollBy(0,updated.getBoundingClientRect().top-calendarTop);});
 }
 
 function updateMobileWeekIndicator(){
