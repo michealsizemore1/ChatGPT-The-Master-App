@@ -4627,10 +4627,13 @@ function renderDashboard(){
   renderHabitStreakChart(ws);
 }
 function getCurrentWeekChartData(){
-  const ws=wkStart(0),labels=[],metrics=[];
+  const ws=wkStart(0),labels=[],metrics=[],todayKey=dk(new Date());
   for(let i=0;i<7;i++){
     const d=new Date(ws);d.setDate(ws.getDate()+i);const dateKey=dk(d),raw=localStorage.getItem('planner_'+dateKey);
-    labels.push(d.toLocaleDateString('en-US',{weekday:'short'}));metrics.push(getDM(raw?JSON.parse(raw):{},dateKey));
+    labels.push(d.toLocaleDateString('en-US',{weekday:'short'}));
+    // Foods copied or planned for a future date are meal plans, not calories
+    // already consumed. Keep future days blank until that date arrives.
+    metrics.push(dateKey>todayKey?{}:getDM(raw?JSON.parse(raw):{},dateKey));
   }
   return{labels:labels,metrics:metrics};
 }
