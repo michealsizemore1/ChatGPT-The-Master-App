@@ -1449,12 +1449,13 @@
           <p style="font-size:15px;color:var(--muted);margin:8px 0 0;line-height:1.45;">Selecting an age adjusts your monthly benefit using standard Social Security early/delayed claiming factors and recalculates the entire plan.</p>
         </div>
         <div class="two-col" id="spousalBenefitFields">
-          <div class="field"><label>Spousal benefit (% of your benefit)</label><input type="number" id="spousalPct" value="50" min="0" max="50" step="1"></div>
+          <div class="field"><label>Maximum spousal benefit (% of your full-retirement-age benefit)</label><input type="number" id="spousalPct" value="50" min="0" max="50" step="1"></div>
           <div class="field"><label>Spousal benefit start age (spouse's age)</label><input type="number" id="spousalStartAge" value="67" min="62" max="70" oninput="syncDateFromAge('spousalStartAge','spousalStartAgeDate','spousalStartAgeDateHint','spouseAge')">
             <input type="month" id="spousalStartAgeDate" class="age-date-input" value="" oninput="syncAgeDate('spousalStartAgeDate','spousalStartAge','spousalStartAgeDateHint','spouseAge')">
             <div id="spousalStartAgeDateHint" class="age-date-hint"></div>
           </div>
         </div>
+        <p id="spousalBenefitExplanation" style="font-size:15px;color:var(--muted);margin:8px 0 0;line-height:1.45;">The planner bases Cynthia's benefit on your age-67 benefit (PIA), not your selected early or delayed benefit. If she starts before age 67, the standard Social Security spousal reduction is applied automatically.</p>
         <div class="two-col" id="spouseOwnBenefitFields" style="display:none;">
           <div class="field"><label>Spouse's own Social Security ($/mo, today's $)</label><input type="number" id="spouseSSMonthly" value="0" min="0" step="50"></div>
           <div class="field"><label>Spouse's own SS start age</label><input type="number" id="spouseSSAge" value="67" min="62" max="70" oninput="syncDateFromAge('spouseSSAge','spouseSSAgeDate','spouseSSAgeDateHint','spouseAge')">
@@ -2129,7 +2130,12 @@
       <div class="card">
         <h3 onclick="toggleCard(this)">Idaho State Tax<span class="sub-label">0% opening band, then the entered rate</span></h3>
         <div class="field"><label>Idaho income tax rate above the 0% band (%)</label><input type="number" id="idahoRate" value="5.3" step="0.1"></div>
-        <p style="font-size:15.5px;color:var(--muted);margin:6px 0 0;line-height:1.5;">The first $9,622 of taxable income for Married Filing Jointly is modeled at 0%, indexed with General Inflation in later projection years. The planner does not automatically claim a military-retirement deduction because eligibility must be confirmed for your tax situation.</p>
+        <div class="checkbox-row">
+          <input type="checkbox" id="idahoMilitaryDeductionEnabled">
+          <label for="idahoMilitaryDeductionEnabled">Apply Idaho's qualifying retired service-member pension deduction</label>
+        </div>
+        <div class="field"><label>Maximum qualifying military-pension deduction ($/yr, today's dollars)</label><input type="number" id="idahoMilitaryDeductionAnnual" value="0" min="0" step="100"></div>
+        <p style="font-size:15.5px;color:var(--muted);margin:6px 0 0;line-height:1.5;">The first $9,622 of taxable income for Married Filing Jointly is modeled at 0%, indexed with General Inflation in later projection years. Enable the deduction only after confirming eligibility, and enter the applicable annual maximum from Idaho Form 39R/39NR. The planner deducts no more than the military pension received in that year and grows the entered maximum with General Inflation.</p>
       </div>
 
       <div class="card">
@@ -5444,6 +5450,24 @@ function idahoTaxOwed(taxableIncome, rate, inflationFactor = 1, filingStatus = '
   const zeroBand = filingStatus === 'single' ? IDAHO_ZERO_BAND_SINGLE : IDAHO_ZERO_BAND_MFJ;
   return Math.max(0, Math.max(0, taxableIncome) - zeroBand * inflationFactor) * Math.max(0, rate);
 }
+
+// A spouse's retirement benefit is based on the worker's Primary Insurance Amount (the age-67
+// benefit for this plan), not on the worker's reduced age-62 or delayed age-70 payment. For a spouse
+// born in 1960 or later, claiming before FRA 67 reduces the base spousal amount by 25/36 of 1% per
+// month for the first 36 months and 5/12 of 1% for each additional month. Waiting past FRA does not
+// increase a regular spousal benefit.
+function spousalEarlyClaimMultiplier(startAge, fraAge = 67) {
+  const monthsEarly = Math.max(0, Math.round((fraAge - Math.min(fraAge, +startAge || fraAge)) * 12));
+  const first36 = Math.min(36, monthsEarly);
+  const additional = Math.max(0, monthsEarly - 36);
+  return Math.max(0, 1 - first36 * (0.25 / 36) - additional * (0.05 / 12));
+}
+
+function spousalMonthlyBenefit(inputs) {
+  const workerPia = ssMonthlyAtAge(inputs, 67);
+  return workerPia * Math.max(0, Math.min(0.5, inputs.spousalPct || 0))
+    * spousalEarlyClaimMultiplier(inputs.spousalStartAge, 67);
+}
 function netReturnAfterFee(grossReturn, annualFee) {
   return Math.max(-0.999, (+grossReturn || 0) - Math.max(0, +annualFee || 0));
 }
@@ -8622,6 +8646,8 @@ function readInputs() {
     stdDeduction: +els('stdDeduction').value,
     brokerageTaxablePct: Math.max(0, Math.min(1, (+els('brokerageTaxablePct').value || 0) / 100)),
     idahoRate: +els('idahoRate').value/100,
+    idahoMilitaryDeductionEnabled: els('idahoMilitaryDeductionEnabled') ? els('idahoMilitaryDeductionEnabled').checked : false,
+    idahoMilitaryDeductionAnnual: els('idahoMilitaryDeductionAnnual') ? Math.max(0, +els('idahoMilitaryDeductionAnnual').value || 0) : 0,
     ssWageBase: +els('ssWageBase').value,
     ruleOf55Applies: els('ruleOf55Applies').checked,
     guardrailsEnabled: els('guardrailsEnabled').checked,
@@ -9149,7 +9175,7 @@ function projectRun(inputs, ctx, randomize, shocks) {
     ssAmount = prorateFirstYear(age, inputs.ssAge, inputs.ssMonthly*12*ssInflator, inputs.birthMonth, inputs.currentAge, inputs.ssStartDateRaw);
     spousalBenefit = inputs.spouseWorks
       ? prorateFirstYear(age, ctx.effectiveSpouseOwnSSStartAge, inputs.spouseSSMonthly*12*ssInflator, inputs.spouseBirthMonth, inputs.currentAge, inputs.spouseSSStartDateRaw)
-      : prorateFirstYear(age, ctx.effectiveSpousalStartAge, inputs.ssMonthly*inputs.spousalPct*12*ssInflator, inputs.spouseBirthMonth, inputs.currentAge, inputs.spousalStartDateRaw);
+      : prorateFirstYear(age, ctx.effectiveSpousalStartAge, spousalMonthlyBenefit(inputs)*12*ssInflator, inputs.spouseBirthMonth, inputs.currentAge, inputs.spousalStartDateRaw);
     // Real-world Social Security survivor rule: once you're past your own life expectancy, your spouse steps up
     // from the ~50% spousal benefit to your full benefit as a 100% survivor benefit. ssAmount itself doesn't
     // need to change to reflect that (it already computes your full benefit — the dollars just keep flowing,
@@ -9178,6 +9204,9 @@ function projectRun(inputs, ctx, randomize, shocks) {
         : 0;
     }
     guaranteedIncome = ssAmount + spousalBenefit + pensionAmount + pension2Amount + vaDisabilityAmount + ltcVaAidIncomeThisYear + annuityAmount + sbpAmount + dicAmount + dicAidAttendanceAmount;
+    const idahoMilitaryPensionDeduction = inputs.idahoMilitaryDeductionEnabled
+      ? Math.min(Math.max(0, pensionAmount), Math.max(0, inputs.idahoMilitaryDeductionAnnual || 0) * inflator)
+      : 0;
 
     // Start/end-dated expenses: which recurring expense rows actually count this year, filtered by age
     // against each row's optional startAge/endAge (see expenseActiveAtAge/computeExpenseTotals above) —
@@ -9226,7 +9255,7 @@ function projectRun(inputs, ctx, randomize, shocks) {
       const taxableWorkingYears = Math.max(0, otherTaxableWorkingYears + taxableSSWorkingYears - standardDeductionThisYear);
       federalTaxAnnual += taxOwedFromBrackets(taxableWorkingYears, federalBracketsThisYear);
       // Idaho excludes Social Security, including the portion taxable on the federal return.
-      const idahoTaxableWorkingYears = Math.max(0, otherTaxableWorkingYears - standardDeductionThisYear);
+      const idahoTaxableWorkingYears = Math.max(0, otherTaxableWorkingYears - idahoMilitaryPensionDeduction - standardDeductionThisYear);
       stateTaxAnnual += idahoTaxOwed(idahoTaxableWorkingYears, inputs.idahoRate, inflator, taxFilingStatusThisYear);
       fedMarginal = marginalRateFromBrackets(taxableWorkingYears, federalBracketsThisYear);
       // Brokerage pie contributions come from the same paycheck as the TSP %-based ones, so they grow with the
@@ -9346,12 +9375,17 @@ function projectRun(inputs, ctx, randomize, shocks) {
       }
       // Excess income goes entirely into the single chosen pie (e.g. a cash-like SGOV pie), not spread across all pies.
       const excessDestIdx = brokeragePies.findIndex(p => p.name === inputs.excessIncomeDestinationPieName);
+      let excessIncomeFallbackToHYSA = 0;
       if (excessDestIdx >= 0 && excessDestIdx < balBrokeragePies.length) {
         balBrokeragePies[excessDestIdx] += excessIncomeSaved;
         contribByAccount['pie_'+excessDestIdx] = (contribByAccount['pie_'+excessDestIdx]||0) + excessIncomeSaved;
       }
-      else applyPooledDelta(balBrokeragePies, excessIncomeSaved);
-      balChecking *= (1+inputs.cashRate); balSavings *= (1+inputs.cashRate); balHYSA = balHYSA*(1+inputs.hysaRate) + jobLossSurplusToHYSA;
+      else if (balBrokeragePies.length) applyPooledDelta(balBrokeragePies, excessIncomeSaved);
+      else {
+        excessIncomeFallbackToHYSA = excessIncomeSaved;
+        contribByAccount.hysa = (contribByAccount.hysa || 0) + excessIncomeSaved;
+      }
+      balChecking *= (1+inputs.cashRate); balSavings *= (1+inputs.cashRate); balHYSA = balHYSA*(1+inputs.hysaRate) + jobLossSurplusToHYSA + excessIncomeFallbackToHYSA;
       // IRMAA lookback proxy: this year's approximate MAGI (taxable wages after the pre-tax Traditional TSP
       // contribution, plus the taxable share of any guaranteed income already flowing), carried forward as
       // next year's IRMAA basis — see the post-retirement branch below for why a 1-year lookback is used
@@ -9508,7 +9542,7 @@ function projectRun(inputs, ctx, randomize, shocks) {
       // standard deduction) is deducted before comparing it against spending, instead of treating it at face value.
       const fedTaxOnGuaranteed = taxOwedFromBrackets(taxableBeforeWithdrawal, federalBracketsThisYear);
       // Idaho starts from federal income but subtracts taxable Social Security.
-      const idahoTaxableGuaranteed = Math.max(0, otherTaxableGuaranteed - standardDeductionThisYear);
+      const idahoTaxableGuaranteed = Math.max(0, otherTaxableGuaranteed - idahoMilitaryPensionDeduction - standardDeductionThisYear);
       const idahoTaxOnGuaranteed = idahoTaxOwed(idahoTaxableGuaranteed, inputs.idahoRate, inflator, taxFilingStatusThisYear);
       guaranteedIncomeAfterTax = Math.max(0, guaranteedIncome - fedTaxOnGuaranteed - idahoTaxOnGuaranteed - ficaTaxAnnual);
       // Seed this year's Federal/State totals with the guaranteed-income tax computed above; takeFrom()
@@ -9685,7 +9719,14 @@ function projectRun(inputs, ctx, randomize, shocks) {
         if (rmdSurplusNet > 0.01) {
           const rmdDestIdx = brokeragePies.findIndex(p => p.name === inputs.excessIncomeDestinationPieName);
           if (rmdDestIdx >= 0 && bal['pie_'+rmdDestIdx] !== undefined) bal['pie_'+rmdDestIdx] += rmdSurplusNet;
-          else { const pk = Object.keys(bal).find(k => k.startsWith('pie_')); if (pk) bal[pk] += rmdSurplusNet; }
+          else {
+            const pk = Object.keys(bal).find(k => k.startsWith('pie_'));
+            if (pk) bal[pk] += rmdSurplusNet;
+            else {
+              bal.hysa += rmdSurplusNet;
+              contribByAccount.hysa = (contribByAccount.hysa || 0) + rmdSurplusNet;
+            }
+          }
         }
       }
 
