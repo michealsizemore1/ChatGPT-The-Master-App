@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Michael & Cynthia's Retirement</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <!-- Document Vault: client-side text extraction only, nothing is uploaded anywhere. pdf.js reads PDF text
      content; mammoth.js reads .docx text content. Both loaded with `defer` so a slow/blocked CDN never
      holds up the rest of the page — Document Vault upload just checks `window.pdfjsLib`/`window.mammoth`
@@ -17,9 +16,7 @@
      Claude chat actually looks. Loaded with `defer` for the same reason as pdf.js/mammoth above; the chat
      send functions check `window.marked` exists before using it and fall back to plain text if it didn't load. -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/16.3.0/lib/marked.umd.min.js" defer></script>
-<!-- Supabase provides authenticated, cross-device planner synchronization. The publishable key used
-     below is intentionally safe for browser code; database access is restricted by Supabase Auth and
-     the retirement_plans table's Row Level Security policies. -->
+<!-- Planner records are stored locally in this browser. Use JSON Backup & Restore regularly. -->
 <style>
   :root{
     --navy:#132a3e;
@@ -1137,34 +1134,15 @@
 </head>
 <body><a id="homeButton" href="index.html" title="Home" aria-label="Return to My Life Master App home" style="position:fixed;left:10px;bottom:10px;z-index:2147483000;display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;background:#14161a;color:#fff;text-decoration:none;font:700 18px/1 -apple-system,Segoe UI,Roboto,Arial,sans-serif;padding:0;border-radius:50%;box-shadow:0 4px 12px rgba(0,0,0,.24);opacity:.68;border:1px solid rgba(255,255,255,.18)" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.68">⌂</a>
 
-<div class="cloud-auth-overlay" id="cloudAuthOverlay" role="dialog" aria-modal="true" aria-labelledby="cloudAuthTitle">
-  <div class="cloud-auth-card">
-    <h2 id="cloudAuthTitle">Michael &amp; Cynthia's Retirement</h2>
-    <p id="cloudAuthChecking">Checking this device for your saved sign-in&hellip;</p>
-    <p id="cloudAuthIntro" style="display:none;">Sign in to securely load and synchronize your retirement plan across your computers and phones.</p>
-    <form id="cloudAuthForm" style="display:none;" onsubmit="signInToPlanner(event)">
-      <div class="field"><label for="cloudAuthEmail">Email</label><input type="email" id="cloudAuthEmail" autocomplete="username" required></div>
-      <div class="field"><label for="cloudAuthPassword">Password</label><input type="password" id="cloudAuthPassword" autocomplete="current-password" required></div>
-      <div class="auth-actions">
-        <button type="submit" class="add-btn auth-primary" id="cloudSignInBtn">Sign in &amp; load plan</button>
-        <button type="button" class="add-btn auth-secondary" onclick="continuePlannerOffline()">Continue offline</button>
-      </div>
-    </form>
-    <button type="button" class="link-btn" id="cloudForgotPasswordBtn" style="margin-top:14px;display:none;" onclick="sendPlannerPasswordReset()">Forgot password?</button>
-    <div class="cloud-auth-message" id="cloudAuthMessage"></div>
-    <p id="cloudAuthOfflineHelp" style="display:none;font-size:13.5px;margin:16px 0 0;color:var(--muted);">Offline mode uses only the copy saved on this device. Sign in when internet access returns to synchronize it.</p>
-  </div>
-</div>
-
 <div class="sticky-app-bar">
   <button class="hamburger-btn" onclick="toggleMenu()" aria-label="Open menu">☰</button>
   <div class="sticky-section-info">
     <span class="sticky-section-caption">Current section</span>
     <span class="current-page-label" id="currentPageLabel">Overview</span>
   </div>
-  <button type="button" class="cloud-sync-badge" id="cloudSyncBadge" data-state="checking" onclick="showPage('settings')" title="Open synchronization settings">
-    <span class="cloud-sync-dot" aria-hidden="true"></span><span id="cloudSyncBadgeText">Checking</span>
-  </button>
+  <span class="cloud-sync-badge" id="cloudSyncBadge" data-state="saved" title="Saved automatically on this device">
+    <span class="cloud-sync-dot" aria-hidden="true"></span><span id="cloudSyncBadgeText">Saved locally</span>
+  </span>
 </div>
 
 <header>
@@ -1455,13 +1433,29 @@
             <div id="ssAgeDateHint" class="age-date-hint"></div>
           </div>
         </div>
+        <div class="field" style="margin-top:10px;">
+          <label>Select your Social Security claiming age</label>
+          <div class="pill-row" id="ssClaimAgePills">
+            <span class="pill" id="ssPill62" onclick="setSocialSecurityAge(62)">Age 62</span>
+            <span class="pill" id="ssPill63" onclick="setSocialSecurityAge(63)">Age 63</span>
+            <span class="pill" id="ssPill64" onclick="setSocialSecurityAge(64)">Age 64</span>
+            <span class="pill" id="ssPill65" onclick="setSocialSecurityAge(65)">Age 65</span>
+            <span class="pill" id="ssPill66" onclick="setSocialSecurityAge(66)">Age 66</span>
+            <span class="pill" id="ssPill67" onclick="setSocialSecurityAge(67)">Age 67</span>
+            <span class="pill" id="ssPill68" onclick="setSocialSecurityAge(68)">Age 68</span>
+            <span class="pill" id="ssPill69" onclick="setSocialSecurityAge(69)">Age 69</span>
+            <span class="pill" id="ssPill70" onclick="setSocialSecurityAge(70)">Age 70</span>
+          </div>
+          <p style="font-size:15px;color:var(--muted);margin:8px 0 0;line-height:1.45;">Selecting an age adjusts your monthly benefit using standard Social Security early/delayed claiming factors and recalculates the entire plan.</p>
+        </div>
         <div class="two-col" id="spousalBenefitFields">
-          <div class="field"><label>Spousal benefit (% of your benefit)</label><input type="number" id="spousalPct" value="50" min="0" max="50" step="1"></div>
+          <div class="field"><label>Maximum spousal benefit (% of your full-retirement-age benefit)</label><input type="number" id="spousalPct" value="50" min="0" max="50" step="1"></div>
           <div class="field"><label>Spousal benefit start age (spouse's age)</label><input type="number" id="spousalStartAge" value="67" min="62" max="70" oninput="syncDateFromAge('spousalStartAge','spousalStartAgeDate','spousalStartAgeDateHint','spouseAge')">
             <input type="month" id="spousalStartAgeDate" class="age-date-input" value="" oninput="syncAgeDate('spousalStartAgeDate','spousalStartAge','spousalStartAgeDateHint','spouseAge')">
             <div id="spousalStartAgeDateHint" class="age-date-hint"></div>
           </div>
         </div>
+        <p id="spousalBenefitExplanation" style="font-size:15px;color:var(--muted);margin:8px 0 0;line-height:1.45;">The planner bases Cynthia's benefit on your age-67 benefit (PIA), not your selected early or delayed benefit. If she starts before age 67, the standard Social Security spousal reduction is applied automatically.</p>
         <div class="two-col" id="spouseOwnBenefitFields" style="display:none;">
           <div class="field"><label>Spouse's own Social Security ($/mo, today's $)</label><input type="number" id="spouseSSMonthly" value="0" min="0" step="50"></div>
           <div class="field"><label>Spouse's own SS start age</label><input type="number" id="spouseSSAge" value="67" min="62" max="70" oninput="syncDateFromAge('spouseSSAge','spouseSSAgeDate','spouseSSAgeDateHint','spouseAge')">
@@ -2136,7 +2130,12 @@
       <div class="card">
         <h3 onclick="toggleCard(this)">Idaho State Tax<span class="sub-label">0% opening band, then the entered rate</span></h3>
         <div class="field"><label>Idaho income tax rate above the 0% band (%)</label><input type="number" id="idahoRate" value="5.3" step="0.1"></div>
-        <p style="font-size:15.5px;color:var(--muted);margin:6px 0 0;line-height:1.5;">The first $9,622 of taxable income for Married Filing Jointly is modeled at 0%, indexed with General Inflation in later projection years. The planner does not automatically claim a military-retirement deduction because eligibility must be confirmed for your tax situation.</p>
+        <div class="checkbox-row">
+          <input type="checkbox" id="idahoMilitaryDeductionEnabled">
+          <label for="idahoMilitaryDeductionEnabled">Apply Idaho's qualifying retired service-member pension deduction</label>
+        </div>
+        <div class="field"><label>Maximum qualifying military-pension deduction ($/yr, today's dollars)</label><input type="number" id="idahoMilitaryDeductionAnnual" value="0" min="0" step="100"></div>
+        <p style="font-size:15.5px;color:var(--muted);margin:6px 0 0;line-height:1.5;">The first $9,622 of taxable income for Married Filing Jointly is modeled at 0%, indexed with General Inflation in later projection years. Enable the deduction only after confirming eligibility, and enter the applicable annual maximum from Idaho Form 39R/39NR. The planner deducts no more than the military pension received in that year and grows the entered maximum with General Inflation.</p>
       </div>
 
       <div class="card">
@@ -2540,23 +2539,13 @@
       <div class="page-header"><h2>Settings</h2><p>Instructions, backup, restore, and integrations. <b>Build 2026.08.13.1</b></p></div>
 
       <div class="card">
-        <h3 onclick="toggleCard(this)">Secure Cloud Synchronization<span class="sub-label">Supabase — the same plan on every signed-in device</span></h3>
-        <div class="cloud-account-summary">
-          <div><strong id="cloudSettingsStatus">Checking connection…</strong><span id="cloudAccountEmail">No signed-in account detected yet</span></div>
-          <span id="cloudSettingsDot" class="cloud-sync-dot" aria-hidden="true"></span>
-        </div>
-        <div style="display:flex;gap:9px;flex-wrap:wrap;">
-          <button type="button" class="add-btn" id="cloudSyncNowBtn" onclick="syncCloudNow(true)">Synchronize now</button>
-          <button type="button" class="add-btn" style="background:#eef3f5;color:var(--navy);" id="cloudSignInSettingsBtn" onclick="showPlannerSignIn()">Sign in</button>
-          <button type="button" class="add-btn" style="background:#fdf3f1;color:var(--danger);display:none;" id="cloudSignOutBtn" onclick="signOutOfPlanner()">Sign out</button>
-        </div>
-        <p class="cloud-status-detail" id="cloudStatusDetail">Your local planner remains available while the secure connection is checked.</p>
-        <p style="font-size:14px;color:var(--muted);margin:10px 0 0;line-height:1.5;">The retirement plan and shared Notes synchronize after changes. Document Vault files, Coach conversations, and your Anthropic API key remain only on this device. Continue downloading an occasional JSON backup as an independent recovery copy.</p>
+        <h3 onclick="toggleCard(this)">Local Storage<span class="sub-label">Automatically saved on this device</span></h3>
+        <p style="font-size:15px;color:var(--muted);margin:0;line-height:1.55;">The retirement plan and shared Notes are stored only in this browser. Download a JSON backup after meaningful changes and keep it somewhere safe.</p>
       </div>
 
       <div class="card">
         <h3 onclick="toggleCard(this)">Backup &amp; Restore</h3>
-        <p style="font-size:16px;color:var(--muted);margin:0 0 12px;line-height:1.55;">Your planner data is saved automatically on this device and, while signed in, synchronized through Supabase. The JSON backup remains an independent recovery copy and never includes your Anthropic API key. Document Vault files remain separate; keep copies of the original files.</p>
+        <p style="font-size:16px;color:var(--muted);margin:0 0 12px;line-height:1.55;">Your planner data is saved automatically on this device. The JSON backup is your portable recovery copy and never includes your Anthropic API key. Document Vault files remain separate; keep copies of the original files.</p>
         <button class="add-btn" onclick="downloadBackup()">Download planner backup (.json)</button>
         <div class="field" style="margin-top:14px;">
           <label>Restore from backup</label>
@@ -2583,7 +2572,7 @@
                 <li>Use <b>index.html</b> for GitHub Pages and <b>retirement-planner.html</b> when opening the planner directly.</li>
                 <li>Enter household dates, income, expenses, insurance, debts, medical costs, and account balances before interpreting results.</li>
                 <li>Review Money Flows and Assumptions &amp; Guardrails, then return to Overview.</li>
-                <li>On multiple devices, sign in through Secure Cloud Synchronization and wait for <b>Saved</b>.</li>
+                <li>Use one primary device and download a dated JSON backup after meaningful changes.</li>
                 <li>Download a dated JSON backup after meaningful changes.</li>
               </ol>
               <p class="manual-note">The planner is a decision-support tool, not tax, legal, investment, insurance, or medical advice.</p>
@@ -2663,7 +2652,7 @@
             <summary>8. Document Vault, Coach &amp; Financial Wellness</summary>
             <div class="manual-body">
               <p><b>Document Vault:</b> Files and keyword search remain in the current browser and do not affect calculations. AI document questions send relevant text to Anthropic. Keep originals separately.</p>
-              <p><b>Coach / Ask AI:</b> Enter the Anthropic key in Settings on each device. The key, conversation, and Vault files are excluded from Supabase, JSON, GitHub source, and printing. AI answers never change plan inputs automatically.</p>
+              <p><b>Coach / Ask AI:</b> Enter the Anthropic key in Settings on each device. The key, conversation, and Vault files are excluded from JSON backups, GitHub source, and printing. AI answers never change plan inputs automatically.</p>
               <p><b>Financial Wellness:</b> Separates strengths and pressure points without creating a blended score. Resolve coverage, account-access, tax, medical, and data-quality issues first.</p>
             </div>
           </details>
@@ -2709,11 +2698,11 @@
           </details>
 
           <details class="manual-topic">
-            <summary>12. Settings, Cloud Sync, Backup &amp; Privacy</summary>
+            <summary>12. Settings, Local Storage, Backup &amp; Privacy</summary>
             <div class="manual-body">
               <ul>
-                <li>Secure Cloud Synchronization keeps the retirement plan and shared Notes consistent across authenticated devices.</li>
-                <li>Synchronize now requests an immediate check. Retain the local plan and JSON if an error appears.</li>
+                <li>The retirement plan and shared Notes save automatically in this browser.</li>
+                <li>Use Download planner backup to create a portable recovery copy.</li>
                 <li>JSON backup includes planner state, notes, and checkpoints; it excludes the API key and Vault files.</li>
                 <li>Data Quality flags patterns needing review but cannot verify real-world accuracy.</li>
                 <li>Print Full Plan opens the browser print dialog with planner sections; the API key and sensitive controls are omitted.</li>
@@ -2744,9 +2733,9 @@
                 <li>Audit dates, income, three expense alternatives, insurance, investments, withdrawals, debt, medical/LTC, taxes, and survivorship.</li>
                 <li>Confirm only the selected spending basis is counted and trace bridge years through Income Gap and Savings.</li>
                 <li>Compare Enhanced, Standard, first failure reason/age, and the deterministic ending balance.</li>
-                <li>Refresh, confirm the section and values persist, synchronize until Saved, and download the final JSON.</li>
+                <li>Refresh, confirm the section and values persist, then download the final JSON backup.</li>
               </ol>
-              <p><b>Blank data:</b> sign in/synchronize or restore JSON. <b>Sync error:</b> retain the local plan, check connectivity and account status, then use Synchronize now. <b>Device mismatch:</b> compare build, JSON, spending basis, job-loss date, and withdrawal exclusions.</p>
+              <p><b>Blank data:</b> restore your latest JSON backup. <b>Device mismatch:</b> compare the build and restore the newest JSON copy before editing. Also verify spending basis, job-loss date, and withdrawal exclusions.</p>
             </div>
           </details>
         </div>
@@ -2770,7 +2759,7 @@
             <button type="button" class="add-btn coach-secondary-btn" onclick="toggleFloatingAi(true)">View conversation</button>
           </div>
         </div>
-        <p style="font-size:16.5px;color:var(--muted);margin:0;line-height:1.55;">This file has no backend — adding a key here lets the Ask AI panel (and the Coach page) call the Anthropic API directly from your browser. The key is saved only in this device's browser so it survives a refresh. It is excluded from Supabase synchronization, JSON backups, GitHub source, and printing; enter it separately on each device. Each question sends a full snapshot of your plan to Anthropic's servers. The conversation itself is saved locally; use "New chat" to clear it. Leave the key blank to keep the AI fully offline.</p>
+        <p style="font-size:16.5px;color:var(--muted);margin:0;line-height:1.55;">This file has no backend — adding a key here lets the Ask AI panel (and the Coach page) call the Anthropic API directly from your browser. The key is saved only in this device's browser so it survives a refresh. It is excluded from JSON backups, GitHub source, and printing; enter it separately on each device. Each question sends a full snapshot of your plan to Anthropic's servers. The conversation itself is saved locally; use "New chat" to clear it. Leave the key blank to keep the AI fully offline.</p>
       </div>
     </div>
 
@@ -5461,6 +5450,24 @@ function idahoTaxOwed(taxableIncome, rate, inflationFactor = 1, filingStatus = '
   const zeroBand = filingStatus === 'single' ? IDAHO_ZERO_BAND_SINGLE : IDAHO_ZERO_BAND_MFJ;
   return Math.max(0, Math.max(0, taxableIncome) - zeroBand * inflationFactor) * Math.max(0, rate);
 }
+
+// A spouse's retirement benefit is based on the worker's Primary Insurance Amount (the age-67
+// benefit for this plan), not on the worker's reduced age-62 or delayed age-70 payment. For a spouse
+// born in 1960 or later, claiming before FRA 67 reduces the base spousal amount by 25/36 of 1% per
+// month for the first 36 months and 5/12 of 1% for each additional month. Waiting past FRA does not
+// increase a regular spousal benefit.
+function spousalEarlyClaimMultiplier(startAge, fraAge = 67) {
+  const monthsEarly = Math.max(0, Math.round((fraAge - Math.min(fraAge, +startAge || fraAge)) * 12));
+  const first36 = Math.min(36, monthsEarly);
+  const additional = Math.max(0, monthsEarly - 36);
+  return Math.max(0, 1 - first36 * (0.25 / 36) - additional * (0.05 / 12));
+}
+
+function spousalMonthlyBenefit(inputs) {
+  const workerPia = ssMonthlyAtAge(inputs, 67);
+  return workerPia * Math.max(0, Math.min(0.5, inputs.spousalPct || 0))
+    * spousalEarlyClaimMultiplier(inputs.spousalStartAge, 67);
+}
 function netReturnAfterFee(grossReturn, annualFee) {
   return Math.max(-0.999, (+grossReturn || 0) - Math.max(0, +annualFee || 0));
 }
@@ -6195,8 +6202,8 @@ function setRetirementAge(age) {
   if (!ageInput) return;
   ageInput.value = age;
   // Use precisely the same event path as entering the age manually. The field's own oninput handler
-  // synchronizes the retirement date, while the delegated input/change handlers protect the local
-  // value, save it, render the selected pill, and schedule cloud synchronization. Maintaining a
+  // updates the retirement date, while the delegated input/change handlers protect the local
+  // value, save it, and render the selected pill. Maintaining a
   // separate button-only save path allowed the control to say "Saved" while later restoring the
   // previous field value.
   ageInput.dispatchEvent(new Event('input', { bubbles:true }));
@@ -6456,23 +6463,19 @@ const BACKUP_REMINDER_DISMISSED_KEY = 'retirementPlannerBackupReminderDismissed_
 const BACKUP_REMINDER_STALE_DAYS = 30;
 const BACKUP_REMINDER_SNOOZE_DAYS = 7;
 
-// ---------- Secure cross-device synchronization (Supabase) ----------
-// These are public browser-application credentials, not secrets. Access to the retirement_plans table
-// is enforced by Supabase Auth plus Row Level Security (user_id must equal auth.uid()). Never add a
-// service-role/secret key here: those bypass RLS and belong only on a protected server.
-const PLANNER_SUPABASE_URL = 'https://awtpxvevjclnlljbndho.supabase.co';
-const PLANNER_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_SrBby33KWYdGRwo_wKeStg_mfmR_4UB';
+// ---------- Legacy cloud functions retained only for backup compatibility ----------
+// Network synchronization is disabled; the planner operates entirely from local browser storage.
 const PLANNER_SITE_URL = 'https://michealsizemore1.github.io/2026-ChatGPT-Retirement-Planner/';
 const CLOUD_LAST_SYNC_KEY = 'retirementPlannerCloudLastSync_v1';
 const CLOUD_DIRTY_KEY = 'retirementPlannerCloudDirty_v1';
 const CLOUD_RESET_PENDING_KEY = 'retirementPlannerCloudResetPending_v1';
 const CLOUD_EMAIL_KEY = 'retirementPlannerCloudEmail_v1';
 const RETIREMENT_AGE_PENDING_KEY = 'retirementPlannerRetirementAgePending_v1';
-// Version 2 deliberately isolates the official Supabase client from old planner tabs that used the
+// Version 2 deliberately isolates the official legacy online service client from old planner tabs that used the
 // original hand-built refresh-token code. Those older tabs can remain open in browser history and
 // rotate a shared v1 token, invalidating the current page's session. A one-time fresh sign-in creates
 // a clean v2 session that older builds cannot read or overwrite.
-const PLANNER_AUTH_STORAGE_KEY = 'retirementPlannerSupabaseAuth_v2';
+const PLANNER_AUTH_STORAGE_KEY = 'retirementPlannerLegacyRemoteAuth_v2';
 const PLANNER_REFRESH_STORAGE_KEY = 'retirementPlannerRefreshToken_v2';
 const PLANNER_ACCESS_STORAGE_KEY = 'retirementPlannerAccessToken_v2';
 const PLANNER_EXPIRY_STORAGE_KEY = 'retirementPlannerTokenExpiry_v2';
@@ -6491,7 +6494,7 @@ let plannerCloudSyncPending = false;
 let plannerCloudSyncTimer = null;
 let plannerCloudHandlingUserId = null;
 let plannerCloudRefreshPromise = null;
-let plannerSupabaseClient = null;
+let plannerLegacyRemoteClient = null;
 let plannerCloudLocalEditDuringInit = false;
 let plannerCloudStartupRetryCount = 0;
 let plannerCloudRecoveryCount = 0;
@@ -6616,7 +6619,7 @@ function plannerAuthCookieSet(key, value) {
 function plannerAuthCookieRemove(key) {
   try { document.cookie = `${encodeURIComponent(key)}=; Max-Age=0; Path=/; SameSite=Lax; Secure`; } catch (e) { /* unavailable */ }
 }
-// Supabase normally persists in localStorage. Mirroring the same session into sessionStorage and a
+// legacy online service normally persists in localStorage. Mirroring the same session into sessionStorage and a
 // first-party cookie makes ordinary refreshes resilient on browsers that selectively block one
 // storage mechanism. Sign out removes all three copies.
 const plannerAuthStorage = {
@@ -6644,12 +6647,12 @@ const plannerAuthStorage = {
     plannerAuthCookieRemove(key);
   }
 };
-function getPlannerSupabaseClient() {
-  if (plannerSupabaseClient) return plannerSupabaseClient;
-  if (!window.supabase || typeof window.supabase.createClient !== 'function') {
+function getPlannerLegacyRemoteClient() {
+  if (plannerLegacyRemoteClient) return plannerLegacyRemoteClient;
+  if (!window.legacyRemote || typeof window.legacyRemote.createClient !== 'function') {
     throw new Error('The secure synchronization library did not load. Check the internet connection and refresh once.');
   }
-  plannerSupabaseClient = window.supabase.createClient(PLANNER_SUPABASE_URL, PLANNER_SUPABASE_PUBLISHABLE_KEY, {
+  plannerLegacyRemoteClient = window.legacyRemote.createClient(PLANNER_REMOTE_URL, PLANNER_REMOTE_PUBLISHABLE_KEY, {
     auth:{
       storage:plannerAuthStorage,
       storageKey:PLANNER_AUTH_STORAGE_KEY,
@@ -6658,7 +6661,7 @@ function getPlannerSupabaseClient() {
       detectSessionInUrl:false
     }
   });
-  return plannerSupabaseClient;
+  return plannerLegacyRemoteClient;
 }
 function formatCloudTime(iso) {
   if (!iso) return '';
@@ -6773,15 +6776,15 @@ function readPlannerStoredSessionAny() {
     user:user && user.id ? user : null
   };
 }
-async function plannerSupabaseRequest(path, options = {}, timeoutMs = 10000) {
+async function plannerLegacyRemoteRequest(path, options = {}, timeoutMs = 10000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const headers = Object.assign({
-      apikey:PLANNER_SUPABASE_PUBLISHABLE_KEY,
+      apikey:PLANNER_REMOTE_PUBLISHABLE_KEY,
       'Content-Type':'application/json'
     }, options.headers || {});
-    const response = await fetch(PLANNER_SUPABASE_URL + path, Object.assign({}, options, { headers, signal:controller.signal }));
+    const response = await fetch(PLANNER_REMOTE_URL + path, Object.assign({}, options, { headers, signal:controller.signal }));
     const text = await response.text();
     let data = null;
     if (text) {
@@ -6790,7 +6793,7 @@ async function plannerSupabaseRequest(path, options = {}, timeoutMs = 10000) {
     if (!response.ok) {
       const message = data && (data.msg || data.message || data.error_description || data.error)
         ? (data.msg || data.message || data.error_description || data.error)
-        : `Supabase returned ${response.status}.`;
+        : `legacy online service returned ${response.status}.`;
       const requestError = new Error(message);
       requestError.status = response.status;
       throw requestError;
@@ -6809,7 +6812,7 @@ async function refreshPlannerCloudSession(session) {
   // from trying to reuse the just-rotated token and producing a false Sync error.
   if (plannerCloudRefreshPromise) return plannerCloudRefreshPromise;
   plannerCloudRefreshPromise = (async () => {
-    const client = getPlannerSupabaseClient();
+    const client = getPlannerLegacyRemoteClient();
     const result = await client.auth.refreshSession({ refresh_token:session.refresh_token });
     if (result.error) throw result.error;
     const refreshed = result.data && result.data.session;
@@ -6825,7 +6828,7 @@ async function refreshPlannerCloudSession(session) {
   }
 }
 async function ensurePlannerCloudSession() {
-  const client = getPlannerSupabaseClient();
+  const client = getPlannerLegacyRemoteClient();
   const result = await client.auth.getSession();
   if (result.error) throw result.error;
   let session = result.data && result.data.session;
@@ -6843,9 +6846,9 @@ async function plannerDatabaseRequest(path, options = {}, timeoutMs = 20000, all
   if (!session) throw new Error('Sign in before synchronizing.');
   options.headers = Object.assign({}, options.headers || {}, { Authorization:`Bearer ${session.access_token}` });
   try {
-    return await plannerSupabaseRequest('/rest/v1/' + path, options, timeoutMs);
+    return await plannerLegacyRemoteRequest('/rest/v1/' + path, options, timeoutMs);
   } catch (e) {
-    // Supabase can invalidate an otherwise unexpired access token after a browser refresh. Refresh the
+    // legacy online service can invalidate an otherwise unexpired access token after a browser refresh. Refresh the
     // session once and repeat the authenticated request instead of displaying a Sync error that vanishes
     // as soon as the user presses Synchronize now.
     if (allowAuthRetry && e && (e.status === 401 || e.status === 403) && session.refresh_token) {
@@ -6860,7 +6863,7 @@ async function plannerDatabaseRequest(path, options = {}, timeoutMs = 20000, all
 }
 
 async function loadPlannerCloudRow(userId) {
-  // Supabase projects and mobile connections can need an extra moment immediately after a refresh.
+  // legacy online service projects and mobile connections can need an extra moment immediately after a refresh.
   // The manual Sync button succeeding after the first load failed showed that the request itself was
   // valid. Retry this read once before presenting an error; GET is safe to repeat and no plan is changed.
   let lastError = null;
@@ -6896,10 +6899,10 @@ async function signInToPlanner(event) {
   if (button) { button.disabled = true; button.textContent = 'Signing in…'; }
   showCloudAuthMessage('Securely signing in…');
   try {
-    const result = await getPlannerSupabaseClient().auth.signInWithPassword({ email, password });
+    const result = await getPlannerLegacyRemoteClient().auth.signInWithPassword({ email, password });
     if (result.error) throw result.error;
     const session = result.data && result.data.session;
-    if (!session) throw new Error('Supabase did not return a secure session.');
+    if (!session) throw new Error('legacy online service did not return a secure session.');
     savePlannerCloudSession(session);
     await plannerSessionDbSet(session);
     cloudStorageSet(CLOUD_EMAIL_KEY, email);
@@ -6920,7 +6923,7 @@ async function sendPlannerPasswordReset() {
   const email = (els('cloudAuthEmail') && els('cloudAuthEmail').value || '').trim();
   if (!email) { showCloudAuthMessage('Enter your email address first, then select Forgot password.', true); return; }
   try {
-    await plannerSupabaseRequest('/auth/v1/recover?redirect_to=' + encodeURIComponent(PLANNER_SITE_URL), {
+    await plannerLegacyRemoteRequest('/auth/v1/recover?redirect_to=' + encodeURIComponent(PLANNER_SITE_URL), {
       method:'POST',
       body:JSON.stringify({ email })
     });
@@ -6943,7 +6946,7 @@ async function completePlannerPasswordRecovery() {
   try {
     const session = await ensurePlannerCloudSession();
     if (!session) throw new Error('The password-reset session has expired. Request a new reset email.');
-    const updatedUser = await plannerSupabaseRequest('/auth/v1/user', {
+    const updatedUser = await plannerLegacyRemoteRequest('/auth/v1/user', {
       method:'PUT',
       headers:{ Authorization:`Bearer ${session.access_token}` },
       body:JSON.stringify({ password:newPassword })
@@ -6965,6 +6968,7 @@ function markPlannerCloudDirty() {
     navigator.onLine === false ? 'The latest changes are safe on this device and will synchronize when online.' : 'A recent change is waiting to be synchronized.');
 }
 function schedulePlannerCloudSync() {
+  return;
   if (!plannerCloudTrackChanges || plannerCloudApplying || plannerCloudSyncing) return;
   markPlannerCloudDirty();
   clearTimeout(plannerCloudSyncTimer);
@@ -7069,7 +7073,7 @@ async function handlePlannerCloudSession(session) {
   plannerCloudUser = session.user;
   cloudStorageSet(CLOUD_EMAIL_KEY, session.user.email || '');
   updateCloudAccountUi();
-  setCloudStatus('syncing', 'Loading…', 'Checking Supabase for the latest saved plan.');
+  setCloudStatus('syncing', 'Loading…', 'Checking legacy online service for the latest saved plan.');
   try {
     plannerCloudSession = session;
     const data = await loadPlannerCloudRow(session.user.id);
@@ -7145,7 +7149,7 @@ async function handlePlannerCloudSession(session) {
     updateCloudAccountUi();
     clearPlannerCloudRecoveryTimer();
     setCloudStatus(navigator.onLine === false ? 'offline' : 'error', navigator.onLine === false ? 'Offline' : 'Sync error',
-      `The local copy is still available. ${e && e.message ? e.message : 'Supabase could not be reached.'}`);
+      `The local copy is still available. ${e && e.message ? e.message : 'legacy online service could not be reached.'}`);
   } finally {
     plannerCloudHandlingUserId = null;
   }
@@ -7198,7 +7202,7 @@ async function syncCloudNow(userInitiated = false) {
   } catch (e) {
     markPlannerCloudDirty();
     setCloudStatus(navigator.onLine === false ? 'offline' : 'error', navigator.onLine === false ? 'Offline' : 'Sync error',
-      `The local copy is safe. ${e && e.message ? e.message : 'Supabase could not be reached.'}`);
+      `The local copy is safe. ${e && e.message ? e.message : 'legacy online service could not be reached.'}`);
     return false;
   } finally {
     plannerCloudSyncing = false;
@@ -7211,7 +7215,7 @@ async function syncCloudNow(userInitiated = false) {
 async function signOutOfPlanner() {
   if (plannerCloudUser && cloudStorageGet(CLOUD_DIRTY_KEY)) await syncCloudNow(true);
   try {
-    const result = await getPlannerSupabaseClient().auth.signOut();
+    const result = await getPlannerLegacyRemoteClient().auth.signOut();
     if (result.error) throw result.error;
   } catch (e) { /* local sign-out must still complete if the network is unavailable */ }
   savePlannerCloudSession(null);
@@ -7228,7 +7232,7 @@ async function readPlannerRecoverySessionFromUrl() {
   const accessToken = params.get('access_token');
   const refreshToken = params.get('refresh_token');
   if (!accessToken || !refreshToken) return null;
-  const user = await plannerSupabaseRequest('/auth/v1/user', {
+  const user = await plannerLegacyRemoteRequest('/auth/v1/user', {
     method:'GET',
     headers:{ Authorization:`Bearer ${accessToken}` }
   });
@@ -7246,6 +7250,20 @@ async function readPlannerRecoverySessionFromUrl() {
   return session;
 }
 async function initPlannerCloudSync() {
+  plannerCloudSession = null;
+  plannerCloudUser = null;
+  plannerCloudReady = true;
+  plannerCloudTrackChanges = false;
+  try {
+    [CLOUD_DIRTY_KEY, CLOUD_LAST_SYNC_KEY, CLOUD_RESET_PENDING_KEY, CLOUD_EMAIL_KEY,
+      PLANNER_AUTH_STORAGE_KEY, PLANNER_REFRESH_STORAGE_KEY, PLANNER_ACCESS_STORAGE_KEY,
+      PLANNER_EXPIRY_STORAGE_KEY, PLANNER_USER_STORAGE_KEY].forEach(key => {
+        localStorage.removeItem(key);
+        sessionStorage.removeItem(key);
+      });
+    if (window.indexedDB) indexedDB.deleteDatabase(PLANNER_SESSION_DB_NAME);
+  } catch (e) {}
+  return;
   updateCloudAccountUi();
   setCloudStatus('checking', 'Restoringâ€¦', 'Restoring this deviceâ€™s saved secure session.');
   const remembered = cloudStorageGet(CLOUD_EMAIL_KEY);
@@ -7344,8 +7362,8 @@ function renderBackupReminder() {
   const textEl = els('backupReminderText');
   if (textEl) {
     textEl.textContent = lastBackup
-      ? `It's been over ${BACKUP_REMINDER_STALE_DAYS} days since your last independent JSON backup (Settings page). Cloud synchronization is convenient, but a downloaded recovery copy is still worthwhile.`
-      : "You haven't downloaded an independent JSON backup yet. Cloud synchronization is convenient, but the Settings page also provides a one-click recovery copy.";
+      ? `It's been over ${BACKUP_REMINDER_STALE_DAYS} days since your last JSON backup. Download a new recovery copy from Settings.`
+      : "You haven't downloaded a JSON backup yet. Settings provides a one-click recovery copy.";
   }
   banner.style.display = 'flex';
 }
@@ -8628,6 +8646,8 @@ function readInputs() {
     stdDeduction: +els('stdDeduction').value,
     brokerageTaxablePct: Math.max(0, Math.min(1, (+els('brokerageTaxablePct').value || 0) / 100)),
     idahoRate: +els('idahoRate').value/100,
+    idahoMilitaryDeductionEnabled: els('idahoMilitaryDeductionEnabled') ? els('idahoMilitaryDeductionEnabled').checked : false,
+    idahoMilitaryDeductionAnnual: els('idahoMilitaryDeductionAnnual') ? Math.max(0, +els('idahoMilitaryDeductionAnnual').value || 0) : 0,
     ssWageBase: +els('ssWageBase').value,
     ruleOf55Applies: els('ruleOf55Applies').checked,
     guardrailsEnabled: els('guardrailsEnabled').checked,
@@ -8674,6 +8694,22 @@ function prorateFirstYear(age, eligibilityAge, fullAmount, birthMonth, currentAg
     return fullAmount * ((13 - selectedMonth) / 12);
   }
   return fullAmount;
+}
+
+function setSocialSecurityAge(age) {
+  const ageInput = els('ssAge');
+  const monthlyInput = els('ssMonthly');
+  if (!ageInput || !monthlyInput || age < 62 || age > 70) return;
+  // Preserve the same underlying full-retirement-age benefit while moving between
+  // claiming ages. This prevents the selected age from changing only the start date
+  // while incorrectly leaving the monthly benefit unchanged.
+  const currentInputs = readInputs();
+  const adjustedMonthly = ssMonthlyAtAge(currentInputs, age);
+  monthlyInput.value = Math.round(adjustedMonthly * 100) / 100;
+  ageInput.value = age;
+  monthlyInput.dispatchEvent(new Event('input', { bubbles:true }));
+  ageInput.dispatchEvent(new Event('input', { bubbles:true }));
+  ageInput.dispatchEvent(new Event('change', { bubbles:true }));
 }
 // Job income is either fully counted (every age below retirementAge) or fully zeroed (every age at or
 // above it) — accurate for every full year on either side, but the ONE year you actually retire is
@@ -9139,7 +9175,7 @@ function projectRun(inputs, ctx, randomize, shocks) {
     ssAmount = prorateFirstYear(age, inputs.ssAge, inputs.ssMonthly*12*ssInflator, inputs.birthMonth, inputs.currentAge, inputs.ssStartDateRaw);
     spousalBenefit = inputs.spouseWorks
       ? prorateFirstYear(age, ctx.effectiveSpouseOwnSSStartAge, inputs.spouseSSMonthly*12*ssInflator, inputs.spouseBirthMonth, inputs.currentAge, inputs.spouseSSStartDateRaw)
-      : prorateFirstYear(age, ctx.effectiveSpousalStartAge, inputs.ssMonthly*inputs.spousalPct*12*ssInflator, inputs.spouseBirthMonth, inputs.currentAge, inputs.spousalStartDateRaw);
+      : prorateFirstYear(age, ctx.effectiveSpousalStartAge, spousalMonthlyBenefit(inputs)*12*ssInflator, inputs.spouseBirthMonth, inputs.currentAge, inputs.spousalStartDateRaw);
     // Real-world Social Security survivor rule: once you're past your own life expectancy, your spouse steps up
     // from the ~50% spousal benefit to your full benefit as a 100% survivor benefit. ssAmount itself doesn't
     // need to change to reflect that (it already computes your full benefit — the dollars just keep flowing,
@@ -9168,6 +9204,9 @@ function projectRun(inputs, ctx, randomize, shocks) {
         : 0;
     }
     guaranteedIncome = ssAmount + spousalBenefit + pensionAmount + pension2Amount + vaDisabilityAmount + ltcVaAidIncomeThisYear + annuityAmount + sbpAmount + dicAmount + dicAidAttendanceAmount;
+    const idahoMilitaryPensionDeduction = inputs.idahoMilitaryDeductionEnabled
+      ? Math.min(Math.max(0, pensionAmount), Math.max(0, inputs.idahoMilitaryDeductionAnnual || 0) * inflator)
+      : 0;
 
     // Start/end-dated expenses: which recurring expense rows actually count this year, filtered by age
     // against each row's optional startAge/endAge (see expenseActiveAtAge/computeExpenseTotals above) —
@@ -9216,7 +9255,7 @@ function projectRun(inputs, ctx, randomize, shocks) {
       const taxableWorkingYears = Math.max(0, otherTaxableWorkingYears + taxableSSWorkingYears - standardDeductionThisYear);
       federalTaxAnnual += taxOwedFromBrackets(taxableWorkingYears, federalBracketsThisYear);
       // Idaho excludes Social Security, including the portion taxable on the federal return.
-      const idahoTaxableWorkingYears = Math.max(0, otherTaxableWorkingYears - standardDeductionThisYear);
+      const idahoTaxableWorkingYears = Math.max(0, otherTaxableWorkingYears - idahoMilitaryPensionDeduction - standardDeductionThisYear);
       stateTaxAnnual += idahoTaxOwed(idahoTaxableWorkingYears, inputs.idahoRate, inflator, taxFilingStatusThisYear);
       fedMarginal = marginalRateFromBrackets(taxableWorkingYears, federalBracketsThisYear);
       // Brokerage pie contributions come from the same paycheck as the TSP %-based ones, so they grow with the
@@ -9336,12 +9375,17 @@ function projectRun(inputs, ctx, randomize, shocks) {
       }
       // Excess income goes entirely into the single chosen pie (e.g. a cash-like SGOV pie), not spread across all pies.
       const excessDestIdx = brokeragePies.findIndex(p => p.name === inputs.excessIncomeDestinationPieName);
+      let excessIncomeFallbackToHYSA = 0;
       if (excessDestIdx >= 0 && excessDestIdx < balBrokeragePies.length) {
         balBrokeragePies[excessDestIdx] += excessIncomeSaved;
         contribByAccount['pie_'+excessDestIdx] = (contribByAccount['pie_'+excessDestIdx]||0) + excessIncomeSaved;
       }
-      else applyPooledDelta(balBrokeragePies, excessIncomeSaved);
-      balChecking *= (1+inputs.cashRate); balSavings *= (1+inputs.cashRate); balHYSA = balHYSA*(1+inputs.hysaRate) + jobLossSurplusToHYSA;
+      else if (balBrokeragePies.length) applyPooledDelta(balBrokeragePies, excessIncomeSaved);
+      else {
+        excessIncomeFallbackToHYSA = excessIncomeSaved;
+        contribByAccount.hysa = (contribByAccount.hysa || 0) + excessIncomeSaved;
+      }
+      balChecking *= (1+inputs.cashRate); balSavings *= (1+inputs.cashRate); balHYSA = balHYSA*(1+inputs.hysaRate) + jobLossSurplusToHYSA + excessIncomeFallbackToHYSA;
       // IRMAA lookback proxy: this year's approximate MAGI (taxable wages after the pre-tax Traditional TSP
       // contribution, plus the taxable share of any guaranteed income already flowing), carried forward as
       // next year's IRMAA basis — see the post-retirement branch below for why a 1-year lookback is used
@@ -9498,7 +9542,7 @@ function projectRun(inputs, ctx, randomize, shocks) {
       // standard deduction) is deducted before comparing it against spending, instead of treating it at face value.
       const fedTaxOnGuaranteed = taxOwedFromBrackets(taxableBeforeWithdrawal, federalBracketsThisYear);
       // Idaho starts from federal income but subtracts taxable Social Security.
-      const idahoTaxableGuaranteed = Math.max(0, otherTaxableGuaranteed - standardDeductionThisYear);
+      const idahoTaxableGuaranteed = Math.max(0, otherTaxableGuaranteed - idahoMilitaryPensionDeduction - standardDeductionThisYear);
       const idahoTaxOnGuaranteed = idahoTaxOwed(idahoTaxableGuaranteed, inputs.idahoRate, inflator, taxFilingStatusThisYear);
       guaranteedIncomeAfterTax = Math.max(0, guaranteedIncome - fedTaxOnGuaranteed - idahoTaxOnGuaranteed - ficaTaxAnnual);
       // Seed this year's Federal/State totals with the guaranteed-income tax computed above; takeFrom()
@@ -9675,7 +9719,14 @@ function projectRun(inputs, ctx, randomize, shocks) {
         if (rmdSurplusNet > 0.01) {
           const rmdDestIdx = brokeragePies.findIndex(p => p.name === inputs.excessIncomeDestinationPieName);
           if (rmdDestIdx >= 0 && bal['pie_'+rmdDestIdx] !== undefined) bal['pie_'+rmdDestIdx] += rmdSurplusNet;
-          else { const pk = Object.keys(bal).find(k => k.startsWith('pie_')); if (pk) bal[pk] += rmdSurplusNet; }
+          else {
+            const pk = Object.keys(bal).find(k => k.startsWith('pie_'));
+            if (pk) bal[pk] += rmdSurplusNet;
+            else {
+              bal.hysa += rmdSurplusNet;
+              contribByAccount.hysa = (contribByAccount.hysa || 0) + rmdSurplusNet;
+            }
+          }
         }
       }
 
@@ -13320,7 +13371,7 @@ window.addEventListener('beforeprint', () => {
 window.addEventListener('afterprint', restoreApiKeyAfterPrint);
 
 function resetAllData() {
-  if (!confirm('This resets the retirement plan, notes, checkpoints, and Coach conversation on this device and in the synchronized cloud plan. Document Vault files remain separate. Continue?')) return;
+  if (!confirm('This resets the retirement plan, notes, checkpoints, and Coach conversation on this device. Document Vault files remain separate. Continue?')) return;
   if (plannerCloudUser) cloudStorageSet(CLOUD_RESET_PENDING_KEY, '1');
   try {
     [STORAGE_KEY, ACTIVE_PAGE_KEY, EXPLORER_ANALYSIS_KEY, DOLLAR_VIEW_KEY, SPENDING_BASIS_KEY,
@@ -13895,6 +13946,10 @@ function render() {
   els('pill57').classList.toggle('active', +els('retirementAge').value === 57);
   els('pill58').classList.toggle('active', +els('retirementAge').value === 58);
   els('pill59').classList.toggle('active', +els('retirementAge').value === 59);
+  for (let ssClaimAge = 62; ssClaimAge <= 70; ssClaimAge++) {
+    const ssPill = els('ssPill' + ssClaimAge);
+    if (ssPill) ssPill.classList.toggle('active', +els('ssAge').value === ssClaimAge);
+  }
   // Self-healing: if a saved state (e.g. restored on a different device) left these fields genuinely
   // blank, re-populate the visible box with its real default now — readInputs() below already treats a
   // blank field as this same default for the math, but without this the input itself keeps looking empty
@@ -14233,7 +14288,7 @@ function render() {
 
 const hadSavedState = loadState();
 // Restore an age-button selection before the first calculation even if the previous cloud attempt
-// ended during refresh. The pending marker is removed only after Supabase confirms the saved plan.
+// ended during refresh. The pending marker is removed only after legacy online service confirms the saved plan.
 applyPendingRetirementAgeSelection();
 // loadState() never touches sharedNotesText (see applyState()) — notes live only in their own
 // dedicated key, always updated on every keystroke, so this is the one and only source of truth for
@@ -14292,9 +14347,9 @@ restoreAnthropicApiKeyLocal();
 // built. A data-specific rendering exception must never prevent authentication from starting and
 // leave the badge permanently at its original "Checking" label.
 // Let the locally saved plan finish its first render before starting authentication and network work.
-// On slower phones this prevents the initial Supabase request from competing with the planner's
+// On slower phones this prevents the initial legacy online service request from competing with the planner's
 // calculation-heavy startup; a manual Sync succeeding immediately afterward was the telltale symptom.
-setTimeout(initPlannerCloudSync, 900);
+initPlannerCloudSync();
 
 renderExpenseRows();
 renderBrokeragePieRows();
