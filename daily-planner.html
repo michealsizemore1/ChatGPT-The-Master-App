@@ -4316,7 +4316,7 @@ function renderStreaks(){
     {id:'stBible',  label:'📖',  tip:'Bible',    fn:d=>d.spBibleAudio==='green'},
     {id:'stPrayer', label:'🙏',  tip:'Prayer',   fn:d=>d.spAIPrayer==='green'},
     {id:'stExercise',label:'🏃', tip:'Running',  fn:(d,dk)=>d.exRun==='green'||!!actIdx.run[dk]},
-    {id:'stWater',  label:'💧',  tip:'Water',    fn:d=>(parseFloat(d.waterOz)||parseFloat(d.waterCount)*8||0)>=75}
+    {id:'stWater',  label:'💧',  tip:'Water',    fn:d=>(parseFloat(d.waterOz)||parseFloat(d.waterCount)*8||0)>=64}
   ];
   DEFS.forEach(({id,label,tip,fn})=>{
     const n=streak(fn,_streakCache);
@@ -4578,7 +4578,7 @@ function renderMonthly(){const now=new Date(),ref=new Date(now.getFullYear(),now
           if(dd.spBibleAudio==='green')score++;
           if(dd.spAIPrayer==='green')score++;
           if(dd.exRun==='green'||dd.exStrength==='green'||dd.exBike==='green'||dd.exWalk==='green'||hasActivityOnDate(dStr))score++;
-          if((parseFloat(dd.waterOz)||parseFloat(dd.waterCount)*8||0)>=75)score++;
+          if((parseFloat(dd.waterOz)||parseFloat(dd.waterCount)*8||0)>=64)score++;
         }
         cell.classList.add('hm'+score);
         cell.title=dt.toLocaleDateString('en-US',{month:'short',day:'numeric'})+': '+score+'/4 habits';
@@ -4726,7 +4726,7 @@ function renderHabitStreakChart(ws){
     {k:'bible',   l:'Bible',    c:'#f0b429', fn:function(d,dateKey){return d.spBibleAudio==='green';}},
     {k:'prayer',  l:'Prayer',   c:'#8e44ad', fn:function(d,dateKey){return d.spAIPrayer==='green';}},
     {k:'exercise',l:'Exercise', c:'#e67e22', fn:function(d,dateKey){return d.exRun==='green'||d.exStrength==='green'||d.exBike==='green'||d.exWalk==='green'||hasActivityOnDate(dateKey);}},
-    {k:'water',   l:'Water',    c:'#3498db', fn:function(d){return (parseFloat(d.waterOz)||parseFloat(d.waterCount)*8||0)>=75;}}
+    {k:'water',   l:'Water',    c:'#3498db', fn:function(d){return (parseFloat(d.waterOz)||parseFloat(d.waterCount)*8||0)>=64;}}
   ];
   var counts=habitDefs.map(function(){return 0;});
   for(var i=0;i<7;i++){
@@ -8261,7 +8261,7 @@ function h2SyncFromJournal(){
     {id:'bible',name:'Bible Reading',category:'Faith',color:'#8b5e34',schedule:'daily',weeklyTarget:7,why:'Stay grounded in Scripture.'},
     {id:'prayer',name:'Prayer',category:'Faith',color:'#6d28d9',schedule:'daily',weeklyTarget:7,why:'Make time for prayer and reflection.'},
     {id:'meditation',name:'Meditation',category:'Faith',color:'#7c3aed',schedule:'daily',weeklyTarget:7,why:'Practice intentional quiet and reflection.'},
-    {id:'hydration',name:'Reach 75 oz Water',category:'Health',color:'#0284c7',schedule:'daily',weeklyTarget:7,why:'Support endurance, recovery, and long-distance running with consistent hydration.'},
+    {id:'hydration',name:'Reach 64 oz Water',category:'Health',color:'#0284c7',schedule:'daily',weeklyTarget:7,why:'Support endurance, recovery, and long-distance running with consistent hydration.'},
     {id:'nutrition',name:'Log Meals & Nutrition',category:'Health',color:'#16a34a',schedule:'daily',weeklyTarget:7,why:'Build awareness of daily nutrition.'},
     {id:'stretch',name:'Daily Stretching',category:'Health',color:'#0d9488',schedule:'daily',weeklyTarget:7,why:'Keep muscles loose and prevent injury.'},
     {id:'training',name:'Follow Training Plan',category:'Fitness',color:'#4f46e5',schedule:'weekly',weeklyTarget:4,why:'Follow the active training plan.'},
@@ -8358,11 +8358,11 @@ function h2SyncFromJournal(){
   }
   localStorage.setItem('habits2_stretch_link_v1','1');
   if(!state.habits.some(function(h){return h.autoSource==='hydration';})){
-    state.habits.push({id:'h2-auto-hydration',name:'Reach 75 oz Water',category:'Health',color:'#0284c7',type:'count',target:75,schedule:'daily',weeklyTarget:7,days:[0,1,2,3,4,5,6],why:'Support endurance, recovery, and long-distance running with consistent hydration.',cue:'',minimum:'Begin logging water early in the day',created:(firstSeen.hydration||todayKey)+'T12:00:00',autoSource:'hydration'});
+    state.habits.push({id:'h2-auto-hydration',name:'Reach 64 oz Water',category:'Health',color:'#0284c7',type:'count',target:64,schedule:'daily',weeklyTarget:7,days:[0,1,2,3,4,5,6],why:'Support endurance, recovery, and long-distance running with consistent hydration.',cue:'',minimum:'Begin logging water early in the day',created:(firstSeen.hydration||todayKey)+'T12:00:00',autoSource:'hydration'});
     state.dismissedAuto=(state.dismissedAuto||[]).filter(function(id){return id!=='hydration';});
   }
-  var habitRenameMap={hydration:'Reach 75 oz Water',nutrition:'Log Meals & Nutrition',training:'Follow Training Plan',steps:'Reach 10,000 Steps',library:'Read or Listen Daily',udemy:'Complete a Udemy Lesson','retirement-videos':'Watch Financial Videos'};
-  state.habits.forEach(function(h){if(habitRenameMap[h.autoSource])h.name=habitRenameMap[h.autoSource];if(h.autoSource==='hydration'){h.type='count';h.target=75;h.schedule='daily';h.weeklyTarget=7;h.category='Health';h.why='Support endurance, recovery, and long-distance running with consistent hydration.';}if(h.autoSource==='steps'){h.type='count';h.target=10000;h.schedule='daily';h.weeklyTarget=7;h.category='Fitness';h.why='Build consistent daily movement by reaching 10,000 steps.';}if(h.autoSource==='udemy'){h.type='duration';h.target=20;h.category='Growth';h.why='Build consistent learning through current and future Udemy courses.';h.minimum='Complete one lesson or log at least 20 minutes';}if(h.autoSource==='retirement-videos'){h.category='Growth';h.why='Build financial knowledge through focused video learning.';}});
+  var habitRenameMap={hydration:'Reach 64 oz Water',nutrition:'Log Meals & Nutrition',training:'Follow Training Plan',steps:'Reach 10,000 Steps',library:'Read or Listen Daily',udemy:'Complete a Udemy Lesson','retirement-videos':'Watch Financial Videos'};
+  state.habits.forEach(function(h){if(habitRenameMap[h.autoSource])h.name=habitRenameMap[h.autoSource];if(h.autoSource==='hydration'){h.type='count';h.target=64;h.schedule='daily';h.weeklyTarget=7;h.category='Health';h.why='Support endurance, recovery, and long-distance running with consistent hydration.';}if(h.autoSource==='steps'){h.type='count';h.target=10000;h.schedule='daily';h.weeklyTarget=7;h.category='Fitness';h.why='Build consistent daily movement by reaching 10,000 steps.';}if(h.autoSource==='udemy'){h.type='duration';h.target=20;h.category='Growth';h.why='Build consistent learning through current and future Udemy courses.';h.minimum='Complete one lesson or log at least 20 minutes';}if(h.autoSource==='retirement-videos'){h.category='Growth';h.why='Build financial knowledge through focused video learning.';}});
   if(!localStorage.getItem('habits2_udemy_tts_v1')){
     var scheduledUdemyHabit=state.habits.find(function(h){return h.autoSource==='udemy'||/udemy/i.test(String(h.name||''));});
     if(scheduledUdemyHabit){scheduledUdemyHabit.schedule='custom';scheduledUdemyHabit.days=[2,4,6];scheduledUdemyHabit.weeklyTarget=3;}
@@ -12945,7 +12945,7 @@ function journalHomeStreakSummary(){
     {label:'Bible',fn:function(d){return d.spBibleAudio==='green';}},
     {label:'Prayer',fn:function(d){return d.spAIPrayer==='green';}},
     {label:'Running',fn:function(d,dateKey){return !!actIdx.run[dateKey];}},
-    {label:'Water',fn:function(d){return(parseFloat(d.waterOz)||parseFloat(d.waterCount)*8||0)>=75;}}
+    {label:'Water',fn:function(d){return(parseFloat(d.waterOz)||parseFloat(d.waterCount)*8||0)>=64;}}
   ];
   return defs.map(function(item){return'<span style="white-space:nowrap;"><strong>'+streak(item.fn,cache)+'</strong> '+item.label+'</span>';}).join(' &nbsp;•&nbsp; ');
 }
@@ -13250,7 +13250,6 @@ function renderJournalSchedule(){
     {time:'6:30 PM',mins:1110,label:growth.label,detail:'Today’s rotating Growth focus',done:growth.done,tab:growth.tab,skip:!!growth.skip||growth.label!=='Gun Range'},
     {time:'8:15 PM',mins:1215,label:'Journal accomplishments and gratitude',detail:'Capture the day while it is fresh',done:reflected,tab:'daily'},
     {time:'8:30 PM',mins:1230,label:'Prepare priorities for tomorrow',detail:'Close the day intentionally',done:localStorage.getItem('schedule_eveningPlanning_'+dateKey)==='1'||!!d.prepJournalCheck,tab:'daily',manual:'eveningPlanning'},
-    {time:'9:00 PM',mins:1260,label:'Water checkpoint: 75 oz',detail:'Cumulative total: reach 75 ounces by 9:00 PM',done:water>=75,tab:'nutrition'},
     {time:'9:30 PM',mins:1290,label:'Begin sleep routine',detail:sleepRoutine.count+' of 6 routine steps completed',done:sleepRoutine.count>=4,tab:'wellness',sleepRoutineChecklist:true}
   ].filter(function(item){return !item.skip;});
   if(localStorage.getItem(journalScheduleGrowthKey('financial',dateKey))==='1')items.push({id:journalScheduleGrowthId('financial'),time:'6:30 PM',mins:1110,label:'Financial Videos',detail:financialMinutes?fmtMinsSeconds(financialMinutes)+' logged':'Tap Log Details & Link to record time',done:d.gaFinancialVideos==='green',tab:'daily',growthKind:'financial'});
@@ -14133,4 +14132,3 @@ window.addEventListener('DOMContentLoaded',function(){
 <div id="v26Toast" class="v26-toast" role="status" aria-live="polite"></div>
 </body>
 </html>
-
