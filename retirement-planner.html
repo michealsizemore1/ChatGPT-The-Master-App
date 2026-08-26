@@ -5803,7 +5803,7 @@ const PAGE_LABELS = {
   investments:'Investments', housing:'Housing', expenses:'Expenses', incomeexpenses:'Income vs Expenses', debt:'Debt',
   gap:'Income Gap & Withdrawals', medical:'Medical', estate:'Estate Planning', vault:'Document Vault', insurance:'Insurance',
   taxes:'Taxes', assumptions:'Assumptions & Guardrails',
-  explorers:'Explorers', coach:'Coach', wellness:'Financial Wellness', settings:'Settings'
+  explorers:'Explorers', coach:'Coach', wellness:'Financial Wellness', savings:'Savings', settings:'Settings'
 };
 const MY_PLAN_PAGES = ['personal','income','expenses','insurance','investments','assumptions','estate','debt','moneyflows','medical','housing'];
 const INSIGHTS_PAGES = ['incomeexpenses','gap','savings','taxes'];
@@ -8121,6 +8121,13 @@ let excessIncomeDestinationPieName = '';
 function renderExcessIncomeDestinationOptions() {
   const sel = els('excessIncomeDestinationPie');
   if (!sel) return;
+  if (!brokeragePies.length) {
+    excessIncomeDestinationPieName = '';
+    sel.innerHTML = '<option value="">HYSA (automatic fallback)</option>';
+    sel.disabled = true;
+    return;
+  }
+  sel.disabled = false;
   if (!brokeragePies.some(p => p.name === excessIncomeDestinationPieName) && brokeragePies.length) {
     excessIncomeDestinationPieName = brokeragePies[0].name;
   }
