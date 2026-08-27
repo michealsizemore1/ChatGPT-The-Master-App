@@ -13248,8 +13248,6 @@ function renderJournalSchedule(){
     {time:'6:30 AM',mins:390,label:'Wellness check and water',detail:wellnessRecorded+' of 4 wellness items complete',done:wellnessRecorded===4,tab:'wellness',detailKind:'wellness'},
     {time:'6:45 AM',mins:405,label:'Bible reading and prayer',detail:faithDone+' of 3 faith practices complete',done:faithDone===3,tab:'bible',detailKind:'faith'},
     {time:journalMinsToClock(trainingStartMins),mins:trainingStartMins,label:restDay?'Rest day — no training scheduled':'Today’s training',detail:restDay?'Automatically complete because no workout is scheduled':training,done:activityDone,tab:'activities'},
-    {time:journalMinsToClock(stretchMins),mins:stretchMins,label:'Stretching',detail:'Keep muscles loose and prevent injury',done:d.exStretch==='green',tab:'activities',linkedCheckKey:'exStretch'},
-    {time:journalMinsToClock(stretchMins+20),mins:stretchMins+20,label:'Massage',detail:d.exMassageMinutes?'Post-run recovery massage — '+d.exMassageMinutes+' min':'Post-run recovery massage',done:d.exMassage==='green',tab:'activities',linkedCheckKey:'exMassage',skip:!runToday},
     {time:journalMinsToClock(breakfastMins),mins:breakfastMins,label:'Breakfast',detail:'Recovery meal and hydration after training',done:mealComplete('breakfast',breakfastMins),tab:'nutrition'},
     {time:'9:30 AM',mins:570,label:'Work',detail:'9:30 AM – 6:00 PM',done:true,tab:'daily',skip:!(today.getDay()>=1&&today.getDay()<=5),fixed:true},
     {time:'12:00 PM',mins:720,label:'Water checkpoint: 32 oz',detail:'Cumulative total: reach 32 ounces by noon',done:water>=32,tab:'nutrition'},
