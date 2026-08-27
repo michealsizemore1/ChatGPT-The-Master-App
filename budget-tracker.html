@@ -1177,7 +1177,7 @@ function Sidebar({ tab, setTab, netWorth, mobileOpen, onClose, sectionNotes }) {
     { id: "dashboard", label: "Dashboard", icon: "📊" },
     { id: "budgets", label: "Budgets", icon: "🎯" },
     { id: "transactions", label: "Transactions", icon: "🧾" },
-    { id: "checking", label: "Checking Register", icon: "🏦" },
+    { id: "checking", label: "Accounts & Cards", icon: "🏦" },
     { id: "subscriptions", label: "Subscriptions & Bills", icon: "🔁" },
     { id: "cashflow", label: "Cash Flow", icon: "💵" },
     { id: "goals", label: "Goals", icon: "🏆" },
@@ -1274,6 +1274,12 @@ function SectionNotes({ section, data, actions }) {
 
 function Dashboard({ data, derived, actions }) {
   const [selectedPieCategory, setSelectedPieCategory] = useState(null);
+  const spendingMonths = useMemo(() => {
+    const months = [...new Set(data.transactions.map(t => monthKey(t.date)).filter(Boolean))].sort().reverse();
+    if (!months.includes(derived.curMonth)) months.unshift(derived.curMonth);
+    return months;
+  }, [data.transactions, derived.curMonth]);
+  const [spendingMonth, setSpendingMonth] = useState(derived.curMonth);
   const handlePieSliceClick = useCallback((category) => setSelectedPieCategory(category), []);
   const currentNetWorthMonth = todayISO().slice(0, 7);
   const netWorthHistory = [...(data.netWorthHistory || []).filter(item => item && item.month && Number.isFinite(Number(item.netWorth)))];
@@ -1285,14 +1291,25 @@ function Dashboard({ data, derived, actions }) {
   const nwLabels = visibleNetWorthHistory.map(h => new Date(h.month + "-01T00:00:00").toLocaleDateString("en-US", { month: "short", year: "2-digit" }));
   const nwValues = visibleNetWorthHistory.map(h => Number(h.netWorth));
 
-  const catEntries = Object.entries(derived.spendByCategory).filter(([, amount]) => amount >= 1).sort((a, b) => b[1] - a[1]);
+  const spendingByCategory = useMemo(() => {
+    const totals = {};
+    data.transactions
+      .filter(t => monthKey(t.date) === spendingMonth && t.amount < 0 && !t.excludeFromBudget && t.category !== "Transfer")
+      .forEach(t => {
+        const splits = transactionSplits(t);
+        if (splits.length) splits.forEach(part => { totals[part.category || "Other"] = (totals[part.category || "Other"] || 0) + Math.abs(Number(part.amount || 0)); });
+        else totals[t.category || "Other"] = (totals[t.category || "Other"] || 0) + Math.abs(Number(t.amount || 0));
+      });
+    return totals;
+  }, [data.transactions, spendingMonth]);
+  const catEntries = Object.entries(spendingByCategory).filter(([, amount]) => amount >= 1).sort((a, b) => b[1] - a[1]);
   const catLabels = catEntries.map(e => e[0]);
   const catValues = catEntries.map(e => e[1]);
   const catColors = catLabels.map(c => categoryColor(c));
   const accountsById = Object.fromEntries(data.accounts.map(a => [a.id, a]));
   const selectedCategoryExpenses = selectedPieCategory
     ? data.transactions
-        .filter(t => monthKey(t.date) === derived.curMonth && t.amount < 0 && !t.excludeFromBudget)
+        .filter(t => monthKey(t.date) === spendingMonth && t.amount < 0 && !t.excludeFromBudget)
         .map(t => ({ transaction: t, categoryAmount: transactionCategoryAmount(t, selectedPieCategory) }))
         .filter(item => item.categoryAmount > 0)
         .sort((a, b) => a.transaction.date < b.transaction.date ? 1 : -1)
@@ -1373,9 +1390,19 @@ function Dashboard({ data, derived, actions }) {
         </Card>
         <div className="space-y-5">
           <Card className="p-6">
-            <h3 className="font-semibold text-slate-700 mb-2">Spending by Category</h3>
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <h3 className="font-semibold text-slate-700">Spending by Category</h3>
+              <select
+                aria-label="Select spending month"
+                className="text-xs border border-slate-200 rounded-lg bg-white px-2 py-1.5 text-slate-600"
+                value={spendingMonth}
+                onChange={e => { setSpendingMonth(e.target.value); setSelectedPieCategory(null); }}
+              >
+                {spendingMonths.map(month => <option key={month} value={month}>{new Date(month + "-01T00:00:00").toLocaleDateString("en-US", { month: "short", year: "numeric" })}</option>)}
+              </select>
+            </div>
             {catLabels.length === 0 ? (
-              <div className="text-sm text-slate-400 py-10 text-center">No spending yet this month.</div>
+              <div className="text-sm text-slate-400 py-10 text-center">No spending recorded for this month.</div>
             ) : (
               <React.Fragment>
                 <DoughnutChartCanvas labels={catLabels} values={catValues} colors={catColors} height={170} onSliceClick={handlePieSliceClick} />
@@ -2692,7 +2719,7 @@ function AccountsAndCards({ data, actions }) {
       account,
       kind: "bank",
     }));
-  const allowedIds = new Set([CINDY_CC_ACCOUNT_ID, ccAccount?.id, SAVINGS_ACCOUNT_ID, HYSA_ACCOUNT_ID].filter(Boolean));
+  const allowedIds = new Set([CINDY_CC_ACCOUNT_ID, ccAccount?.id, CHK_ACCOUNT_ID, MIKE_ACCOUNT_ID, SAVINGS_ACCOUNT_ID, HYSA_ACCOUNT_ID].filter(Boolean));
   const requestedLabels = {
     chk: "Cindy's Checking Account",
     hysa: "HYSA",
@@ -2700,7 +2727,7 @@ function AccountsAndCards({ data, actions }) {
     mike: "Mike's Checking Account",
     savings: "Savings",
   };
-  const requestedOrder = ["cc", "hysa", "savings"];
+  const requestedOrder = ["cc", "chk", "mike", "hysa", "savings"];
   const tabs = [...knownTabs, ...otherTabs]
     .filter(t => allowedIds.has(t.account.id))
     .map(t => ({ ...t, label: requestedLabels[t.key] || t.label }))
@@ -2720,8 +2747,8 @@ function AccountsAndCards({ data, actions }) {
   return (
     <div className="space-y-3">
       <div>
-        <h2 className="text-lg md:text-xl font-bold text-slate-800">🗂️ Card &amp; Savings Registers</h2>
-        <p className="text-sm text-slate-500 mt-0.5">Credit-card, savings, and HYSA registers. Checking accounts have their own Checking Register section.</p>
+        <h2 className="text-lg md:text-xl font-bold text-slate-800">🗂️ Accounts &amp; Cards</h2>
+        <p className="text-sm text-slate-500 mt-0.5">All household registers together — credit card, both checking accounts, savings, and HYSA.</p>
       </div>
       <Card className={"p-4 md:p-5 " + (afterIccuPayoff >= 0 ? "border-emerald-300" : "border-rose-300")}>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -3422,8 +3449,6 @@ function Transactions({ data, actions }) {
       </Card>
         </React.Fragment>
       )}
-
-      <AccountsAndCards data={data} actions={actions} />
 
       <TransactionModal open={modalOpen} onClose={() => setModalOpen(false)} onSave={save} initial={editing} accounts={data.accounts} rules={data.rules} defaultAccountId={presetAccountId} />
 
@@ -4528,6 +4553,7 @@ function Accounts({ data, actions, derived }) {
 
 const AI_MODEL_STORAGE = "meridian_money_ai_model";
 const AI_CHAT_STORAGE = "meridian_money_ai_chat";
+const ANTHROPIC_KEY_STORAGE = "meridian_money_anthropic_key";
 const AI_GREETING = "Hi! I'm your Budget AI. I can search your budget and, when current outside information is needed, search the web. Try “How much did we spend on groceries?” or “Search the web for current high-yield savings rates.”";
 const ANTHROPIC_MODELS = [
   { id: "claude-haiku-4-5-20251001", label: "Claude Haiku 4.5 — fast & cheap" },
@@ -4555,8 +4581,27 @@ function buildFinancialContext(data, derived) {
   return lines.join("\n");
 }
 
-async function callClaude({ model, system, messages }) {
-  throw new Error("External Budget AI is temporarily disconnected. The local subscription scan remains available.");
+async function callClaude({ apiKey, model, system, messages }) {
+  if (!apiKey || !apiKey.trim()) throw new Error("Add your Anthropic API key above before using Budget AI.");
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-api-key": apiKey.trim(),
+      "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true",
+    },
+    body: JSON.stringify({ model, max_tokens: 1200, system, messages }),
+  });
+  let payload = null;
+  try { payload = await response.json(); } catch (e) {}
+  if (!response.ok) {
+    const detail = payload?.error?.message || `Anthropic connection failed (${response.status}).`;
+    throw new Error(detail);
+  }
+  const text = (payload?.content || []).filter(block => block.type === "text").map(block => block.text).join("\n").trim();
+  if (!text) throw new Error("Anthropic returned an empty response. Please try again.");
+  return text;
 }
 
 function isSubscriptionScanIntent(msg) {
@@ -4590,6 +4635,8 @@ function SubscriptionCandidateCard({ candidate, onAdd, onIgnore, status }) {
 
 function AIAssistant({ data, actions, derived }) {
   const [model, setModel] = useState(() => { try { return localStorage.getItem(AI_MODEL_STORAGE) || ANTHROPIC_MODELS[0].id; } catch (e) { return ANTHROPIC_MODELS[0].id; } });
+  const [apiKey, setApiKey] = useState(() => { try { return localStorage.getItem(ANTHROPIC_KEY_STORAGE) || ""; } catch (e) { return ""; } });
+  const [showApiKey, setShowApiKey] = useState(false);
   const [messages, setMessages] = useState(() => {
     try {
       const raw = localStorage.getItem(AI_CHAT_STORAGE);
@@ -4635,6 +4682,15 @@ function AIAssistant({ data, actions, derived }) {
     try { localStorage.setItem(AI_MODEL_STORAGE, id); } catch (e) {}
   };
 
+  const saveApiKey = (value) => {
+    setApiKey(value);
+    try {
+      if (value.trim()) localStorage.setItem(ANTHROPIC_KEY_STORAGE, value.trim());
+      else localStorage.removeItem(ANTHROPIC_KEY_STORAGE);
+    } catch (e) {}
+    setError("");
+  };
+
   const runSubscriptionScan = () => {
     const dismissed = data.dismissedSubscriptionCandidates || [];
     const all = detectUnknownSubscriptions(data);
@@ -4671,7 +4727,7 @@ function AIAssistant({ data, actions, derived }) {
         .filter(m => !m.candidates)
         .slice(-20)
         .map(m => ({ role: m.role, content: m.content }));
-      const reply = await callClaude({ model, system, messages: history });
+      const reply = await callClaude({ apiKey, model, system, messages: history });
       setMessages(m => [...m, { role: "assistant", content: reply }]);
     } catch (e) {
       setError(e.message || "Something went wrong talking to the AI.");
@@ -4700,17 +4756,35 @@ function AIAssistant({ data, actions, derived }) {
       <SectionNotes section="ai" data={data} actions={actions} />
 
       <Card className="p-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="text-sm">
             <span className="font-medium text-slate-700">External AI connection: </span>
-            <span className="text-amber-600 font-medium">Temporarily disconnected</span>
+            <span className={(apiKey.trim() ? "text-emerald-600" : "text-amber-600") + " font-medium"}>{apiKey.trim() ? "Anthropic key saved" : "Key required"}</span>
           </div>
           <select className={inputClass + " max-w-[260px]"} value={model} onChange={e => changeModel(e.target.value)}>
             {ANTHROPIC_MODELS.map(m => <option key={m.id} value={m.id}>{m.label}</option>)}
           </select>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-slate-600 mb-1.5">Anthropic API key</label>
+            <div className="flex gap-2">
+              <input
+                type={showApiKey ? "text" : "password"}
+                className={inputClass + " flex-1 min-w-0"}
+                value={apiKey}
+                onChange={e => saveApiKey(e.target.value)}
+                placeholder="sk-ant-api03-…"
+                autoComplete="off"
+                spellCheck="false"
+              />
+              <Button variant="secondary" className="shrink-0" onClick={() => setShowApiKey(value => !value)}>{showApiKey ? "Hide" : "Show"}</Button>
+              {apiKey && <Button variant="danger" className="shrink-0" onClick={() => saveApiKey("")}>Remove</Button>}
+            </div>
+          </div>
         </div>
         <p className="text-xs text-slate-400 mt-2">
-          Your budget remains stored locally in this browser. The built-in subscription scan still works, but outside AI and web research will remain unavailable until you connect a new secure provider.
+          The key is saved only in this browser on this device and is sent directly to Anthropic when you use Budget AI. Your household budget remains stored locally.
         </p>
       </Card>
 
@@ -5066,7 +5140,7 @@ function Settings({ data, actions }) {
 
 const TAB_LABELS = {
   dashboard: "Dashboard", budgets: "Budgets", transactions: "Transactions",
-  checking: "Checking Register",
+  checking: "Accounts & Cards",
   subscriptions: "Subscriptions & Bills", cashflow: "Cash Flow", goals: "Goals", accounts: "Accounts",
   ai: "AI Assistant", settings: "Settings",
 };
@@ -5454,7 +5528,12 @@ function App() {
           {tab === "dashboard" && <Dashboard data={visibleData} derived={derived} actions={actions} />}
           {tab === "budgets" && <Budgets data={visibleData} actions={actions} derived={derived} />}
           {tab === "transactions" && <Transactions data={visibleData} actions={actions} />}
-          {tab === "checking" && <CheckingRegister data={visibleData} actions={actions} />}
+          {tab === "checking" && (
+            <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-5">
+              <SectionNotes section="checking" data={visibleData} actions={actions} />
+              <AccountsAndCards data={visibleData} actions={actions} />
+            </div>
+          )}
           {tab === "subscriptions" && <Subscriptions data={visibleData} actions={actions} />}
           {tab === "cashflow" && <CashFlow data={visibleData} derived={derived} actions={actions} />}
           {tab === "goals" && <Goals data={visibleData} actions={actions} />}
