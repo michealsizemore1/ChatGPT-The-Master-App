@@ -66,7 +66,7 @@ const { useState, useEffect, useRef, useMemo, useCallback } = React;
 
 const STORAGE_KEY = "meridian_money_data_v5";
 const ACTIVE_TAB_KEY = "meridian_money_active_tab";
-const VALID_TABS = ["dashboard", "budgets", "transactions", "subscriptions", "cashflow", "goals", "accounts", "ai", "settings"];
+const VALID_TABS = ["dashboard", "budgets", "transactions", "checking", "subscriptions", "cashflow", "goals", "accounts", "ai", "settings"];
 
 const INVESTMENT_CATEGORY_META = {
   "US Stocks":            { color: "#4f46e5" },
@@ -731,6 +731,22 @@ const HYSA_ACCOUNT_NAME = "Household HYSA";
 const DISCOVER_ACCOUNT_ID = "acc_discover_cc";
 const DISCOVER_ACCOUNT_NAME = "Discovercard";
 
+function isIccuCreditAccount(account) {
+  if (!account) return false;
+  const label = `${account.name || ""} ${account.institution || ""}`.toLowerCase();
+  return account.id === CINDY_CC_ACCOUNT_ID
+    || account.name === CINDY_CC_ACCOUNT_NAME
+    || label.includes("iccu credit")
+    || label.includes("cindy's credit")
+    || label.includes("cynthia's credit");
+}
+
+function isIccuCreditTransaction(transaction, accounts) {
+  if (!transaction) return false;
+  if (transaction.accountId === CINDY_CC_ACCOUNT_ID) return true;
+  return isIccuCreditAccount((accounts || []).find(account => account.id === transaction.accountId));
+}
+
 function ensureCindyRegister(data) { return data; }
 function ensureHouseholdRegisters(data) { return data; }
 function ensureDiscoverRegister(data) { return data; }
@@ -818,7 +834,7 @@ function Pill({ children, tone }) {
 function Modal({ open, onClose, title, children, wide, size }) {
   if (!open) return null;
   const widthClass = size === "xl" ? "max-w-5xl" : (wide || size === "lg") ? "max-w-2xl" : "max-w-md";
-  return (
+  return ReactDOM.createPortal((
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4" onClick={onClose}>
       <div
         className={"bg-white rounded-2xl shadow-xl w-full " + widthClass + " max-h-[90vh] overflow-y-auto"}
@@ -832,7 +848,7 @@ function Modal({ open, onClose, title, children, wide, size }) {
       </div>
 
     </div>
-  );
+  ), document.body);
 }
 
 function Field({ label, children }) {
@@ -1161,6 +1177,7 @@ function Sidebar({ tab, setTab, netWorth, mobileOpen, onClose, sectionNotes }) {
     { id: "dashboard", label: "Dashboard", icon: "📊" },
     { id: "budgets", label: "Budgets", icon: "🎯" },
     { id: "transactions", label: "Transactions", icon: "🧾" },
+    { id: "checking", label: "Checking Register", icon: "🏦" },
     { id: "subscriptions", label: "Subscriptions & Bills", icon: "🔁" },
     { id: "cashflow", label: "Cash Flow", icon: "💵" },
     { id: "goals", label: "Goals", icon: "🏆" },
@@ -1870,17 +1887,21 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [unclearedFirst, setUnclearedFirst] = useState(false);
+  const [dateSort, setDateSort] = useState(() => localStorage.getItem("register_date_sort_" + cindyAccount.id) || "desc");
   const [descriptionSort, setDescriptionSort] = useState(null);
   const [notes, setNotes] = useState(data.cindyRegisterNotes || "");
   const [viewingReceipt, setViewingReceipt] = useState(null);
   const [splitting, setSplitting] = useState(null);
   const editFormRef = useRef(null);
 
-  const allTx = useMemo(() => data.transactions.filter(t => t.accountId === cindyAccount.id), [data.transactions, cindyAccount.id]);
+  const allTx = useMemo(
+    () => data.transactions.filter(t => t.accountId === cindyAccount.id || isIccuCreditTransaction(t, data.accounts)),
+    [data.transactions, data.accounts, cindyAccount.id]
+  );
 
   const applyBalance = (nextList) => {
     const bal = Math.round(nextList.reduce((s, t) => s + t.amount, 0) * 100) / 100;
-    actions.updateAccount({ ...cindyAccount, balance: bal });
+    actions.syncAccountBalance({ ...cindyAccount, balance: bal });
   };
 
   const balanceById = useMemo(() => {
@@ -1891,12 +1912,11 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
     return map;
   }, [allTx]);
 
-  const clearedExpenses = allTx.filter(t => t.cleared !== false && t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0);
-  const clearedReturns = allTx.filter(t => t.cleared !== false && t.amount > 0 && t.category !== "Transfer").reduce((s, t) => s + t.amount, 0);
-  const clearedPayments = allTx.filter(t => t.cleared !== false && t.amount > 0 && t.category === "Transfer").reduce((s, t) => s + t.amount, 0);
-  const totalOwed = -allTx.reduce((s, t) => s + t.amount, 0);
-  const unclearedCharges = allTx.filter(t => t.cleared === false && t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0);
-  const unclearedReturns = allTx.filter(t => t.cleared === false && t.amount > 0).reduce((s, t) => s + t.amount, 0);
+  const rawAmountOwed = -allTx.reduce((s, t) => s + Number(t.amount || 0), 0);
+  const totalOwed = rawAmountOwed;
+  const totalCharges = allTx.filter(t => Number(t.amount || 0) < 0).reduce((s, t) => s + Math.abs(Number(t.amount || 0)), 0);
+  const paymentsAndReturns = allTx.filter(t => Number(t.amount || 0) > 0).reduce((s, t) => s + Number(t.amount || 0), 0);
+  const pendingBalance = -allTx.filter(t => t.cleared === false).reduce((s, t) => s + Number(t.amount || 0), 0);
 
   const filtered = useMemo(() => {
     return allTx.filter(t => {
@@ -1922,11 +1942,12 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
         const comparison = String(a.merchant || "").localeCompare(String(b.merchant || ""), undefined, { sensitivity: "base" });
         return descriptionSort === "asc" ? comparison : -comparison;
       }
-      return a.date < b.date ? 1 : a.date > b.date ? -1 : 0;
+      const comparison = a.date < b.date ? -1 : a.date > b.date ? 1 : 0;
+      return dateSort === "asc" ? comparison : -comparison;
     });
     if (!unclearedFirst) return byDateDesc;
     return [...byDateDesc.filter(t => t.cleared === false), ...byDateDesc.filter(t => t.cleared !== false)];
-  }, [filtered, unclearedFirst, descriptionSort]);
+  }, [filtered, unclearedFirst, descriptionSort, dateSort]);
 
   const resetForm = () => setForm(blankForm);
 
@@ -1935,10 +1956,12 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
     if (!form.desc.trim() || isNaN(amt) || amt <= 0 || !form.date) return;
     const category = form.regType === "payment" ? "Transfer" : form.category;
     const amount = form.regType === "expense" ? -Math.abs(amt) : Math.abs(amt);
+    const existing = form.id ? allTx.find(t => t.id === form.id) : null;
     setSplitting({
-      id: uid(), date: form.date, merchant: form.desc.trim(), amount, category,
+      ...(existing || {}),
+      id: existing?.id || uid(), date: form.date, merchant: form.desc.trim(), amount, category,
       accountId: cindyAccount.id, person: form.who, receipt: form.receipt || null,
-      cleared: false, isDraftSplit: true,
+      cleared: existing ? existing.cleared : false, isDraftSplit: !existing,
     });
   };
 
@@ -1949,6 +1972,8 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
       resetForm();
     } else {
       actions.splitTransaction(splitting, parts);
+      applyBalance(allTx.map(t => t.id === splitting.id ? splitting : t));
+      if (form.id === splitting.id) resetForm();
     }
     setSplitting(null);
   };
@@ -1971,7 +1996,7 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
     const payload = {
       id: form.id || uid(), date: form.date, accountId: cindyAccount.id, merchant: form.desc.trim(),
       category, amount, person: form.who, notes: existing ? (existing.notes || "") : "",
-      cleared: existing ? existing.cleared : false, receipt: form.receipt || null,
+      cleared: existing ? existing.cleared : false, checkedOff: existing ? !!existing.checkedOff : false, receipt: form.receipt || null,
     };
     if (form.id) {
       actions.updateTransaction(payload);
@@ -1984,6 +2009,7 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
   };
 
   const toggleCleared = (t) => actions.updateTransaction({ ...t, cleared: t.cleared === false ? true : false });
+  const toggleCheckedOff = (t) => actions.updateTransaction({ ...t, checkedOff: !t.checkedOff });
 
   const removeTx = (id) => {
     if (!window.confirm("Delete this transaction?")) return;
@@ -2017,20 +2043,15 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
             <div className="text-xs text-indigo-100">{cindyAccount.name} · {cindyAccount.institution}</div>
           </div>
         </div>
-        <div className="text-right">
-          <div className="text-xs text-indigo-100 uppercase tracking-wide">Total Owed</div>
-          <div className="text-2xl font-bold">{fmtCurrency(totalOwed)}</div>
-        </div>
+        <div className="text-xs text-indigo-100 uppercase tracking-wide">Transaction Register</div>
       </div>
 
       <div className="p-4 md:p-5 space-y-5">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 md:gap-3">
-          <RegStat label="Cleared Expenses" value={fmtCurrency(clearedExpenses)} tone="rose" />
-          <RegStat label="Cleared Returns" value={fmtCurrency(clearedReturns)} tone="emerald" />
-          <RegStat label="Cleared Payments" value={fmtCurrency(clearedPayments)} tone="indigo" />
-          <RegStat label="Total Owed" value={fmtCurrency(totalOwed)} tone="slate" />
-          <RegStat label="Uncleared Charges" value={fmtCurrency(unclearedCharges)} tone="amber" />
-          <RegStat label="Uncleared Returns" value={fmtCurrency(unclearedReturns)} tone="sky" />
+        <div className="grid grid-cols-2 gap-3">
+          <RegStat label="Card Balance" value={fmtCurrency(totalOwed)} tone={totalOwed < 0 ? "emerald" : "slate"} />
+          <RegStat label="Charges" value={fmtCurrency(totalCharges)} tone="rose" />
+          <RegStat label="Payments & Returns" value={fmtCurrency(paymentsAndReturns)} tone="indigo" />
+          <RegStat label="Pending" value={fmtCurrency(pendingBalance)} tone="amber" />
         </div>
 
         <div ref={editFormRef} className={"border rounded-xl p-3 md:p-4 transition-colors " + (form.id ? "border-indigo-300 bg-indigo-50/40 ring-2 ring-indigo-100" : "border-slate-200")}>
@@ -2160,7 +2181,7 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
 
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="text-sm font-semibold text-slate-700">Transactions <span className="text-slate-400 font-normal">({sorted.length})</span></div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <button
               onClick={() => setUnclearedFirst(u => !u)}
               className={"text-xs font-medium px-3 py-1.5 rounded-lg border " + (unclearedFirst ? "bg-amber-100 border-amber-300 text-amber-800" : "border-slate-200 text-slate-500 hover:bg-slate-50")}
@@ -2173,8 +2194,12 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
           <table className="w-full text-sm min-w-[720px]">
             <thead className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wide">
               <tr>
-                <th className="text-left px-3 py-3 font-medium w-8"></th>
-                <th className="text-left px-3 py-3 font-medium">Date</th>
+                <th className="text-left px-3 py-3 font-medium w-16"></th>
+                <th className="text-left px-3 py-3 font-medium">
+                  <button type="button" className="hover:text-indigo-600" title={dateSort === "asc" ? "Oldest transactions first" : "Newest transactions first"} onClick={() => { const next = dateSort === "desc" ? "asc" : "desc"; setDateSort(next); setDescriptionSort(null); localStorage.setItem("register_date_sort_" + cindyAccount.id, next); }}>
+                    Date {descriptionSort ? "↕" : dateSort === "asc" ? "↑" : "↓"}
+                  </button>
+                </th>
                 <th className="text-left px-3 py-3 font-medium">
                   <button type="button" className="hover:text-indigo-600" onClick={() => setDescriptionSort(current => current === "asc" ? "desc" : "asc")}>
                     Description {descriptionSort === "asc" ? "↑" : descriptionSort === "desc" ? "↓" : "↕"}
@@ -2194,7 +2219,10 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
                 return (
                   <tr key={t.id} className={"border-t border-slate-100 hover:bg-slate-50 group " + (isCleared ? "" : "bg-amber-50/40")}>
                     <td className="px-3 py-3">
-                      <input type="checkbox" checked={isCleared} onChange={() => toggleCleared(t)} title={isCleared ? "Cleared" : "Uncleared"} className="w-4 h-4 accent-indigo-600" />
+                      <div className="flex items-center gap-2">
+                        <input type="checkbox" checked={!!t.checkedOff} onChange={() => toggleCheckedOff(t)} title={t.checkedOff ? "Checked off" : "Check off without moving"} aria-label="Check off transaction without moving it" className="w-4 h-4 accent-emerald-600" />
+                        <input type="checkbox" checked={isCleared} onChange={() => toggleCleared(t)} title={isCleared ? "Cleared" : "Uncleared"} aria-label="Cleared transaction" className="w-4 h-4 accent-indigo-600" />
+                      </div>
                     </td>
                     <td className="px-3 py-3 text-slate-500 whitespace-nowrap">{fmtDateShort(t.date)}</td>
                     <td className="px-3 py-3 font-medium text-slate-700">
@@ -2215,6 +2243,7 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
                     <td className="px-3 py-3"><Pill tone={CINDY_TYPE_META[rt].tone}>{CINDY_TYPE_META[rt].short}</Pill></td>
                     <td className="px-3 py-3 text-right font-semibold text-slate-700 whitespace-nowrap">{fmtCurrency(balanceById[t.id] ?? 0)}</td>
                     <td className="px-3 py-3 text-right opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                      <button className="text-slate-400 hover:text-indigo-600 mr-2" title="Split transaction" onClick={() => setSplitting(t)}>Split</button>
                       <button className="text-slate-400 hover:text-indigo-600 mr-2" title="Edit" onClick={() => startEdit(t)}>✏️</button>
                       <button className="text-slate-400 hover:text-rose-500" title="Delete" onClick={() => removeTx(t.id)}>✕</button>
                     </td>
@@ -2259,6 +2288,7 @@ function BankAccountRegister({ data, actions, account }) {
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [unclearedFirst, setUnclearedFirst] = useState(false);
+  const [dateSort, setDateSort] = useState(() => localStorage.getItem("register_date_sort_" + account.id) || "desc");
   const [descriptionSort, setDescriptionSort] = useState(null);
   const [notes, setNotes] = useState((data.registerNotes && data.registerNotes[account.id]) || "");
   const [viewingReceipt, setViewingReceipt] = useState(null);
@@ -2270,7 +2300,7 @@ function BankAccountRegister({ data, actions, account }) {
 
   const applyBalance = (nextList) => {
     const bal = Math.round((opening + nextList.reduce((s, t) => s + t.amount, 0)) * 100) / 100;
-    actions.updateAccount({ ...account, balance: bal });
+    actions.syncAccountBalance({ ...account, balance: bal });
   };
 
   const balanceById = useMemo(() => {
@@ -2312,11 +2342,12 @@ function BankAccountRegister({ data, actions, account }) {
         const comparison = String(a.merchant || "").localeCompare(String(b.merchant || ""), undefined, { sensitivity: "base" });
         return descriptionSort === "asc" ? comparison : -comparison;
       }
-      return a.date < b.date ? 1 : a.date > b.date ? -1 : 0;
+      const comparison = a.date < b.date ? -1 : a.date > b.date ? 1 : 0;
+      return dateSort === "asc" ? comparison : -comparison;
     });
     if (!unclearedFirst) return byDateDesc;
     return [...byDateDesc.filter(t => t.cleared === false), ...byDateDesc.filter(t => t.cleared !== false)];
-  }, [filtered, unclearedFirst, descriptionSort]);
+  }, [filtered, unclearedFirst, descriptionSort, dateSort]);
 
   const resetForm = () => setForm(blankForm);
 
@@ -2324,11 +2355,13 @@ function BankAccountRegister({ data, actions, account }) {
     const amt = parseFloat(form.amount);
     if (!form.desc.trim() || isNaN(amt) || amt <= 0 || !form.date) return;
     const amount = form.direction === "deposit" ? Math.abs(amt) : -Math.abs(amt);
+    const existing = form.id ? allTx.find(t => t.id === form.id) : null;
     setSplitting({
-      id: uid(), date: form.date, merchant: form.desc.trim(), amount,
+      ...(existing || {}),
+      id: existing?.id || uid(), date: form.date, merchant: form.desc.trim(), amount,
       category: form.category, accountId: account.id,
       person: defaultPersonForAccount(account.id), receipt: form.receipt || null,
-      cleared: false, isDraftSplit: true,
+      cleared: existing ? existing.cleared : false, isDraftSplit: !existing,
     });
   };
 
@@ -2339,6 +2372,8 @@ function BankAccountRegister({ data, actions, account }) {
       resetForm();
     } else {
       actions.splitTransaction(splitting, parts);
+      applyBalance(allTx.map(t => t.id === splitting.id ? splitting : t));
+      if (form.id === splitting.id) resetForm();
     }
     setSplitting(null);
   };
@@ -2359,7 +2394,7 @@ function BankAccountRegister({ data, actions, account }) {
     const payload = {
       id: form.id || uid(), date: form.date, accountId: account.id, merchant: form.desc.trim(),
       category: form.category, amount, person: existing ? (existing.person || defaultPersonForAccount(account.id)) : defaultPersonForAccount(account.id),
-      notes: existing ? (existing.notes || "") : "", cleared: existing ? existing.cleared : false, receipt: form.receipt || null,
+      notes: existing ? (existing.notes || "") : "", cleared: existing ? existing.cleared : false, checkedOff: existing ? !!existing.checkedOff : false, receipt: form.receipt || null,
     };
     if (form.id) {
       actions.updateTransaction(payload);
@@ -2372,6 +2407,7 @@ function BankAccountRegister({ data, actions, account }) {
   };
 
   const toggleCleared = (t) => actions.updateTransaction({ ...t, cleared: t.cleared === false ? true : false });
+  const toggleCheckedOff = (t) => actions.updateTransaction({ ...t, checkedOff: !t.checkedOff });
 
   const removeTx = (id) => {
     if (!window.confirm("Delete this transaction?")) return;
@@ -2538,7 +2574,7 @@ function BankAccountRegister({ data, actions, account }) {
 
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="text-sm font-semibold text-slate-700">Transactions <span className="text-slate-400 font-normal">({sorted.length})</span></div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <button
               onClick={() => setUnclearedFirst(u => !u)}
               className={"text-xs font-medium px-3 py-1.5 rounded-lg border " + (unclearedFirst ? "bg-amber-100 border-amber-300 text-amber-800" : "border-slate-200 text-slate-500 hover:bg-slate-50")}
@@ -2551,8 +2587,12 @@ function BankAccountRegister({ data, actions, account }) {
           <table className="w-full text-sm min-w-[720px]">
             <thead className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wide">
               <tr>
-                <th className="text-left px-3 py-3 font-medium w-8"></th>
-                <th className="text-left px-3 py-3 font-medium">Date</th>
+                <th className="text-left px-3 py-3 font-medium w-16"></th>
+                <th className="text-left px-3 py-3 font-medium">
+                  <button type="button" className="hover:text-indigo-600" title={dateSort === "asc" ? "Oldest transactions first" : "Newest transactions first"} onClick={() => { const next = dateSort === "desc" ? "asc" : "desc"; setDateSort(next); setDescriptionSort(null); localStorage.setItem("register_date_sort_" + account.id, next); }}>
+                    Date {descriptionSort ? "↕" : dateSort === "asc" ? "↑" : "↓"}
+                  </button>
+                </th>
                 <th className="text-left px-3 py-3 font-medium">
                   <button type="button" className="hover:text-indigo-600" onClick={() => setDescriptionSort(current => current === "asc" ? "desc" : "asc")}>
                     Description {descriptionSort === "asc" ? "↑" : descriptionSort === "desc" ? "↓" : "↕"}
@@ -2571,7 +2611,10 @@ function BankAccountRegister({ data, actions, account }) {
                 return (
                   <tr key={t.id} className={"border-t border-slate-100 hover:bg-slate-50 group " + (isCleared ? "" : "bg-amber-50/40")}>
                     <td className="px-3 py-3">
-                      <input type="checkbox" checked={isCleared} onChange={() => toggleCleared(t)} title={isCleared ? "Cleared" : "Uncleared"} className="w-4 h-4 accent-indigo-600" />
+                      <div className="flex items-center gap-2">
+                        <input type="checkbox" checked={!!t.checkedOff} onChange={() => toggleCheckedOff(t)} title={t.checkedOff ? "Checked off" : "Check off without moving"} aria-label="Check off transaction without moving it" className="w-4 h-4 accent-emerald-600" />
+                        <input type="checkbox" checked={isCleared} onChange={() => toggleCleared(t)} title={isCleared ? "Cleared" : "Uncleared"} aria-label="Cleared transaction" className="w-4 h-4 accent-indigo-600" />
+                      </div>
                     </td>
                     <td className="px-3 py-3 text-slate-500 whitespace-nowrap">{fmtDateShort(t.date)}</td>
                     <td className="px-3 py-3 font-medium text-slate-700">
@@ -2592,6 +2635,7 @@ function BankAccountRegister({ data, actions, account }) {
                     <td className="px-3 py-3"><Pill tone={isDeposit ? "green" : "red"}>{isDeposit ? "Deposit" : "Withdrawal"}</Pill></td>
                     <td className="px-3 py-3 text-right font-semibold text-slate-700 whitespace-nowrap">{fmtCurrency(balanceById[t.id] ?? 0)}</td>
                     <td className="px-3 py-3 text-right opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                      <button className="text-slate-400 hover:text-indigo-600 mr-2" title="Split transaction" onClick={() => setSplitting(t)}>Split</button>
                       <button className="text-slate-400 hover:text-indigo-600 mr-2" title="Edit" onClick={() => startEdit(t)}>✏️</button>
                       <button className="text-slate-400 hover:text-rose-500" title="Delete" onClick={() => removeTx(t.id)}>✕</button>
                     </td>
@@ -2624,7 +2668,7 @@ function BankAccountRegister({ data, actions, account }) {
 function AccountsAndCards({ data, actions }) {
   const [activeTab, setActiveTab] = useState("cc");
 
-  const ccAccount = data.accounts.find(a => a.id === CINDY_CC_ACCOUNT_ID || a.name === CINDY_CC_ACCOUNT_NAME);
+  const ccAccount = data.accounts.find(a => a.id === CINDY_CC_ACCOUNT_ID) || data.accounts.find(isIccuCreditAccount);
   const chkAccount = data.accounts.find(a => a.id === CHK_ACCOUNT_ID);
   const mikeAccount = data.accounts.find(a => a.id === MIKE_ACCOUNT_ID);
   const savingsAccount = data.accounts.find(a => a.id === SAVINGS_ACCOUNT_ID);
@@ -2648,7 +2692,7 @@ function AccountsAndCards({ data, actions }) {
       account,
       kind: "bank",
     }));
-  const allowedIds = new Set([CINDY_CC_ACCOUNT_ID, CHK_ACCOUNT_ID, MIKE_ACCOUNT_ID, SAVINGS_ACCOUNT_ID, HYSA_ACCOUNT_ID]);
+  const allowedIds = new Set([CINDY_CC_ACCOUNT_ID, ccAccount?.id, SAVINGS_ACCOUNT_ID, HYSA_ACCOUNT_ID].filter(Boolean));
   const requestedLabels = {
     chk: "Cindy's Checking Account",
     hysa: "HYSA",
@@ -2656,14 +2700,17 @@ function AccountsAndCards({ data, actions }) {
     mike: "Mike's Checking Account",
     savings: "Savings",
   };
-  const requestedOrder = ["cc", "chk", "mike", "hysa", "savings"];
+  const requestedOrder = ["cc", "hysa", "savings"];
   const tabs = [...knownTabs, ...otherTabs]
     .filter(t => allowedIds.has(t.account.id))
     .map(t => ({ ...t, label: requestedLabels[t.key] || t.label }))
     .sort((a, b) => requestedOrder.indexOf(a.key) - requestedOrder.indexOf(b.key));
   const cindyCheckingBalance = chkAccount ? Number(chkAccount.balance) || 0 : 0;
+  const iccuTransactions = data.transactions.filter(t => isIccuCreditTransaction(t, data.accounts));
+  const iccuRegisterBalance = iccuTransactions.reduce((sum, t) => sum + Number(t.amount || 0), 0);
+  const iccuStoredBalance = Number(ccAccount?.balance || 0);
   const iccuTotalOwed = ccAccount
-    ? Math.max(0, -data.transactions.filter(t => t.accountId === ccAccount.id).reduce((sum, t) => sum + Number(t.amount || 0), 0))
+    ? (iccuTransactions.length ? -iccuRegisterBalance : -iccuStoredBalance)
     : 0;
   const afterIccuPayoff = cindyCheckingBalance - iccuTotalOwed;
 
@@ -2673,8 +2720,8 @@ function AccountsAndCards({ data, actions }) {
   return (
     <div className="space-y-3">
       <div>
-        <h2 className="text-lg md:text-xl font-bold text-slate-800">🗂️ Accounts &amp; Cards</h2>
-        <p className="text-sm text-slate-500 mt-0.5">Your household transaction registers — credit cards, both checking accounts, savings, and the HYSA.</p>
+        <h2 className="text-lg md:text-xl font-bold text-slate-800">🗂️ Card &amp; Savings Registers</h2>
+        <p className="text-sm text-slate-500 mt-0.5">Credit-card, savings, and HYSA registers. Checking accounts have their own Checking Register section.</p>
       </div>
       <Card className={"p-4 md:p-5 " + (afterIccuPayoff >= 0 ? "border-emerald-300" : "border-rose-300")}>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -2690,7 +2737,7 @@ function AccountsAndCards({ data, actions }) {
               <div className="font-semibold text-slate-700">{fmtCurrency(cindyCheckingBalance)}</div>
             </div>
             <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-              <div className="text-xs text-slate-400">ICCU total owed</div>
+              <div className="text-xs text-slate-400">ICCU card balance</div>
               <div className="font-semibold text-rose-600">{fmtCurrency(iccuTotalOwed)}</div>
             </div>
           </div>
@@ -2707,6 +2754,42 @@ function AccountsAndCards({ data, actions }) {
       {active.kind === "credit"
         ? <CindyCreditCardRegister data={data} actions={actions} cindyAccount={active.account} />
         : <BankAccountRegister data={data} actions={actions} account={active.account} />}
+    </div>
+  );
+}
+
+function CheckingRegister({ data, actions }) {
+  const checkingAccounts = [
+    { key: "cindy", label: "Cindy's Checking", account: data.accounts.find(a => a.id === CHK_ACCOUNT_ID) },
+    { key: "michael", label: "Michael's Checking", account: data.accounts.find(a => a.id === MIKE_ACCOUNT_ID) },
+  ].filter(item => item.account);
+  const [activeKey, setActiveKey] = useState(checkingAccounts[0]?.key || "cindy");
+  const active = checkingAccounts.find(item => item.key === activeKey) || checkingAccounts[0];
+
+  return (
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-5">
+      <div>
+        <h1 className="text-xl md:text-2xl font-bold text-slate-800">🏦 Checking Register</h1>
+        <p className="text-sm text-slate-500 mt-1">Review, add, split, clear, and sort transactions for each checking account.</p>
+      </div>
+      <SectionNotes section="checking" data={data} actions={actions} />
+      {checkingAccounts.length ? (
+        <React.Fragment>
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
+            {checkingAccounts.map(item => (
+              <button
+                key={item.key}
+                type="button"
+                onClick={() => setActiveKey(item.key)}
+                className={"w-full sm:w-auto text-sm font-semibold px-4 py-2.5 rounded-xl border transition-colors " + (active?.key === item.key ? "bg-indigo-600 text-white border-indigo-600" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50")}
+              >{item.label}</button>
+            ))}
+          </div>
+          {active && <BankAccountRegister data={data} actions={actions} account={active.account} />}
+        </React.Fragment>
+      ) : (
+        <Card className="p-6 text-center text-slate-500">No checking accounts are currently available.</Card>
+      )}
     </div>
   );
 }
@@ -3119,6 +3202,7 @@ function Transactions({ data, actions }) {
           </div>
         </button>
         <div className="grid grid-cols-2 sm:flex sm:flex-row gap-2 w-full sm:w-auto">
+          <Button variant="secondary" disabled={!actions.canUndo} onClick={actions.undo} className="col-span-2 w-full sm:w-auto" title={actions.canUndo && actions.undoHistory[0] ? "Undo: " + actions.undoHistory[0].label : "No transaction changes to undo"}>↶ Undo Last Transaction Change</Button>
           <Button variant="secondary" className="w-full sm:w-auto" onClick={() => setImportOpen(true)}>⬆ Import Statement</Button>
           <Button variant="secondary" className="w-full sm:w-auto" onClick={() => exportTransactionsCSV(filtered, accountsById)}>⬇ Export CSV</Button>
           <Button className="col-span-2 w-full sm:w-auto" onClick={openAdd}>+ Add Transaction</Button>
@@ -4982,6 +5066,7 @@ function Settings({ data, actions }) {
 
 const TAB_LABELS = {
   dashboard: "Dashboard", budgets: "Budgets", transactions: "Transactions",
+  checking: "Checking Register",
   subscriptions: "Subscriptions & Bills", cashflow: "Cash Flow", goals: "Goals", accounts: "Accounts",
   ai: "AI Assistant", settings: "Settings",
 };
@@ -4998,12 +5083,15 @@ function App() {
   });
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const setData = (updater, label) => {
+  const setData = (updater, label, options = {}) => {
     rawSetData(previous => {
       const next = typeof updater === "function" ? updater(previous) : updater;
       if (next === previous) return previous;
-      undoStack.current = [{ data: previous, label: label || "Budget data updated", at: new Date().toISOString() }, ...undoStack.current].slice(0, 25);
-      setUndoCount(undoStack.current.length);
+      if (!options.skipUndo) {
+        undoStack.current = [{ data: previous, label: label || "Budget data updated", at: new Date().toISOString() }, ...undoStack.current].slice(0, 25);
+        setUndoCount(undoStack.current.length);
+      }
+      if (options.skipAudit) return next;
       return {
         ...next,
         auditLog: [...(next.auditLog || []), { label: label || "Budget data updated", at: new Date().toISOString() }].slice(-100),
@@ -5099,15 +5187,15 @@ function App() {
   }, [data.notificationPrefs && data.notificationPrefs.enabled, JSON.stringify(derived.budgetAlerts), JSON.stringify(derived.recurringItems)]);
 
   const actions = {
-    addTransaction: (t) => setData(d => ({ ...d, transactions: [{ ...t, needsReview: false }, ...d.transactions].sort((a, b) => (a.date < b.date ? 1 : -1)) })),
-    updateTransaction: (t) => setData(d => ({ ...d, transactions: d.transactions.map(x => x.id === t.id ? t : x) })),
-    deleteTransaction: (id) => setData(d => ({ ...d, transactions: d.transactions.filter(x => x.id !== id) })),
+    addTransaction: (t) => setData(d => ({ ...d, transactions: [{ ...t, needsReview: false }, ...d.transactions].sort((a, b) => (a.date < b.date ? 1 : -1)) }), "Transaction added"),
+    updateTransaction: (t) => setData(d => ({ ...d, transactions: d.transactions.map(x => x.id === t.id ? t : x) }), "Transaction updated"),
+    deleteTransaction: (id) => setData(d => ({ ...d, transactions: d.transactions.filter(x => x.id !== id) }), "Transaction deleted"),
     splitTransaction: (original, parts) => setData(d => {
       const splits = parts.map(part => ({ category: part.category, amount: Number(part.amount) }));
       return {
         ...d,
         transactions: d.transactions.map(t => t.id === original.id
-          ? { ...t, category: splits[0]?.category || t.category, splits, needsReview: false }
+          ? { ...t, ...original, category: splits[0]?.category || original.category || t.category, splits, needsReview: false, isDraftSplit: undefined }
           : t),
       };
     }, "Transaction split"),
@@ -5204,6 +5292,9 @@ function App() {
 
     addAccount: (a) => setData(d => ({ ...d, accounts: [...d.accounts, a] })),
     updateAccount: (a) => setData(d => ({ ...d, accounts: d.accounts.map(x => x.id === a.id ? a : x) })),
+    // Register balances are derived from their transactions. Keep this automatic follow-up
+    // inside the same undo step as the transaction that caused it.
+    syncAccountBalance: (a) => setData(d => ({ ...d, accounts: d.accounts.map(x => x.id === a.id ? a : x) }), "Account balance synchronized", { skipUndo: true, skipAudit: true }),
     deleteAccount: (id) => setData(d => ({ ...d, accounts: d.accounts.filter(x => x.id !== id) })),
     reconcileAccount: (id, statementBalance, difference) => setData(d => ({
       ...d,
@@ -5363,6 +5454,7 @@ function App() {
           {tab === "dashboard" && <Dashboard data={visibleData} derived={derived} actions={actions} />}
           {tab === "budgets" && <Budgets data={visibleData} actions={actions} derived={derived} />}
           {tab === "transactions" && <Transactions data={visibleData} actions={actions} />}
+          {tab === "checking" && <CheckingRegister data={visibleData} actions={actions} />}
           {tab === "subscriptions" && <Subscriptions data={visibleData} actions={actions} />}
           {tab === "cashflow" && <CashFlow data={visibleData} derived={derived} actions={actions} />}
           {tab === "goals" && <Goals data={visibleData} actions={actions} />}
