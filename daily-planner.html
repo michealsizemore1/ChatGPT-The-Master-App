@@ -13230,14 +13230,14 @@ function renderJournalSchedule(){
   // Training duration varies a lot — a 12 mile run and a rest day shouldn't both hand off
   // to stretching 15 minutes later. Estimate real duration and push stretching/breakfast
   // back accordingly instead of using fixed slots that only work for a short easy day.
-  var trainingStartMins=390,trainingMinsEstimate=journalTodayTrainingMinutesEstimate(training,dateKey);
-  var stretchMins=trainingMinsEstimate>15?(trainingStartMins+trainingMinsEstimate):405;
+  var trainingStartMins=510,trainingMinsEstimate=journalTodayTrainingMinutesEstimate(training,dateKey);
+  var stretchMins=trainingMinsEstimate>15?(trainingStartMins+trainingMinsEstimate):525;
   var breakfastMins=Math.min(660,Math.max(465,stretchMins+25));
   var items=[
-    {time:'5:30 AM',mins:330,label:'Review priorities, goals, calendar, email and schedule',detail:'Check complete after your morning review',done:!!d.reviewCheck,tab:'daily',checkId:'reviewCheck'},
-    {time:'5:30 AM',mins:330,label:'Meditation',detail:'Begin the day with meditation and stillness',done:d.spMeditation==='green',tab:'meditate'},
-    {time:'5:30 AM',mins:330,label:'Wellness check and water',detail:wellnessRecorded+' of 4 wellness items complete',done:wellnessRecorded===4,tab:'wellness',detailKind:'wellness'},
-    {time:'5:45 AM',mins:345,label:'Bible reading and prayer',detail:faithDone+' of 3 faith practices complete',done:faithDone===3,tab:'bible',detailKind:'faith'},
+    {time:'7:30 AM',mins:450,label:'Review priorities, goals, calendar, email and schedule',detail:'Check complete after your morning review',done:!!d.reviewCheck,tab:'daily',checkId:'reviewCheck'},
+    {time:'7:30 AM',mins:450,label:'Meditation',detail:'Begin the day with meditation and stillness',done:d.spMeditation==='green',tab:'meditate'},
+    {time:'7:30 AM',mins:450,label:'Wellness check and water',detail:wellnessRecorded+' of 4 wellness items complete',done:wellnessRecorded===4,tab:'wellness',detailKind:'wellness'},
+    {time:'7:45 AM',mins:465,label:'Bible reading and prayer',detail:faithDone+' of 3 faith practices complete',done:faithDone===3,tab:'bible',detailKind:'faith'},
     {time:journalMinsToClock(trainingStartMins),mins:trainingStartMins,label:restDay?'Rest day — no training scheduled':'Today’s training',detail:restDay?'Automatically complete because no workout is scheduled':training,done:activityDone,tab:'activities'},
     {time:journalMinsToClock(stretchMins),mins:stretchMins,label:'Stretching',detail:'Keep muscles loose and prevent injury',done:d.exStretch==='green',tab:'activities',linkedCheckKey:'exStretch'},
     {time:journalMinsToClock(stretchMins+20),mins:stretchMins+20,label:'Massage',detail:d.exMassageMinutes?'Post-run recovery massage — '+d.exMassageMinutes+' min':'Post-run recovery massage',done:d.exMassage==='green',tab:'activities',linkedCheckKey:'exMassage',skip:!runToday},
@@ -13250,7 +13250,7 @@ function renderJournalSchedule(){
     {time:'6:30 PM',mins:1110,label:growth.label,detail:'Today’s rotating Growth focus',done:growth.done,tab:growth.tab,skip:!!growth.skip||growth.label!=='Gun Range'},
     {time:'8:15 PM',mins:1215,label:'Journal accomplishments and gratitude',detail:'Capture the day while it is fresh',done:reflected,tab:'daily'},
     {time:'8:30 PM',mins:1230,label:'Prepare priorities for tomorrow',detail:'Close the day intentionally',done:localStorage.getItem('schedule_eveningPlanning_'+dateKey)==='1'||!!d.prepJournalCheck,tab:'daily',manual:'eveningPlanning'},
-    {time:'9:30 PM',mins:1290,label:'Begin sleep routine',detail:sleepRoutine.count+' of 6 routine steps completed',done:sleepRoutine.count>=4,tab:'wellness',sleepRoutineChecklist:true}
+    {time:'11:30 PM',mins:1410,label:'Begin sleep routine',detail:sleepRoutine.count+' of 6 routine steps completed',done:sleepRoutine.count>=4,tab:'wellness',sleepRoutineChecklist:true}
   ].filter(function(item){return !item.skip;});
   if(localStorage.getItem(journalScheduleGrowthKey('financial',dateKey))==='1')items.push({id:journalScheduleGrowthId('financial'),time:'6:30 PM',mins:1110,label:'Financial Videos',detail:financialMinutes?fmtMinsSeconds(financialMinutes)+' logged':'Tap Log Details & Link to record time',done:d.gaFinancialVideos==='green',tab:'daily',growthKind:'financial'});
   if(localStorage.getItem(journalScheduleGrowthKey('udemy',dateKey))==='1')items.push({id:journalScheduleGrowthId('udemy'),time:'7:00 PM',mins:1140,label:'Udemy',detail:udemyMinutes?fmtMinsSeconds(udemyMinutes)+' logged':'Tap to log the Udemy course session',done:d.gaUdemy==='green',tab:'skill-log',growthKind:'udemy'});
