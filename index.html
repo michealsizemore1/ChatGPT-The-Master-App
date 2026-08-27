@@ -128,6 +128,7 @@
   .money .icon{background:#fff3e0;color:#b45a09}
   .lang .icon{background:#fdeaea;color:#b0392c}
   .family .icon{background:#eef1f8;color:#1b2b52}
+  .ebay .icon{background:#fff4d6;color:#9a6500}
 
   .note{
     margin-top:30px;
@@ -174,8 +175,8 @@
 <header>
   <div class="eyebrow">Personal Tools</div>
   <h1>My Life Master App</h1>
-  <p>One place for daily planning, budgeting, retirement, Spanish practice, and family-benefit information. Use the small &#8962; button in the bottom-left corner of any tool to return here.</p>
-  <div class="updated">Last updated August 13, 2026</div>
+  <p>One place for daily planning, budgeting, retirement, family protection, personal growth, and your eBay resale business. Use the small &#8962; button in the bottom-left corner of any tool to return here.</p>
+  <div class="updated">Last updated August 27, 2026</div>
 </header>
 
 <main>
@@ -217,6 +218,18 @@
 
   </div>
 
+  <h2 class="section-title growth-title">Business</h2>
+  <p class="section-intro">Operate and grow MCS Second Hand Treasures from one dedicated workspace.</p>
+  <div class="grid growth-grid">
+    <a class="card ebay" href="ebay-tracker.html">
+      <div class="icon">&#128230;</div>
+      <h2>eBay Business Tracker</h2>
+      <p>Sales, inventory, expenses, returns, sourcing, mileage, buyers, analytics, goals, taxes, and the complete business plan.</p>
+      <div class="tags"><span>This device</span><span>Business plan included</span><span>Backup available</span></div>
+      <div class="open">Open eBay Business Tracker &rarr;</div>
+    </a>
+  </div>
+
   <h2 class="section-title growth-title">Personal Growth</h2>
   <p class="section-intro">Optional learning tools that support interests and long-term development.</p>
   <div class="grid growth-grid">
@@ -236,7 +249,7 @@
     </section>
     <section class="info-card backup">
       <h2>Back up the entire Master App</h2>
-      <p>Download one backup containing the information saved by all five tools in this browser. Keep the file somewhere safe because there is no automatic online copy.</p>
+      <p>Download one backup containing the information saved by all six tools in this browser. Keep the file somewhere safe because there is no automatic online copy.</p>
       <div class="backup-actions">
         <button class="backup-btn" type="button" onclick="downloadMasterBackup()">Download Full Backup</button>
         <button class="backup-btn secondary" type="button" onclick="document.getElementById('masterBackupFile').click()">Restore Full Backup</button>
@@ -251,7 +264,7 @@
   </div>
 </main>
 
-<footer>My Life Master App &middot; a home for five personal tools</footer>
+<footer>My Life Master App &middot; a home for six connected tools</footer>
 
 <script>
 function masterBackupStatus(message,isError){
@@ -309,9 +322,6 @@ function restoreMasterBackup(input){
   reader.readAsText(file);
 }
 </script>
-
 </body>
 </html>
-
-
 
