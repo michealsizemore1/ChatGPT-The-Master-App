@@ -3945,6 +3945,15 @@ function journalGrowthHabitDueDays(habit,info){
   if(info.kind==='financial')return[1,3,5];
   var target=Math.max(1,Math.min(7,Number(habit.weeklyTarget||1))),patterns={1:[3],2:[2,5],3:[1,3,5],4:[1,2,4,6],5:[1,2,3,4,5],6:[1,2,3,4,5,6],7:[0,1,2,3,4,5,6]};return patterns[target];
 }
+function journalGrowthHabitKindsForDate(dateKey){
+  var state=null;try{state=h2State();}catch(ignore){}if(!state||!Array.isArray(state.habits))return[];
+  var date=new Date(dateKey+'T00:00:00'),day=date.getDay(),kinds=[];
+  state.habits.forEach(function(habit){
+    if(!habit||habit.archived)return;var info=journalGrowthHabitCalendarInfo(habit);if(!info)return;
+    if(journalGrowthHabitDueDays(habit,info).indexOf(day)!==-1&&kinds.indexOf(info.kind)===-1)kinds.push(info.kind);
+  });
+  return kinds;
+}
 function journalGrowthHabitCalendarEvents(){
   var state=null;try{state=h2State();}catch(ignore){}if(!state||!Array.isArray(state.habits))return[];
   var habits=state.habits.filter(function(h){return h&&!h.archived&&journalGrowthHabitCalendarInfo(h);}),now=new Date(),start=new Date(now.getFullYear()-1,0,1),end=new Date(now.getFullYear()+1,11,31),events=[];
@@ -13065,7 +13074,7 @@ function journalGrowthDetailText(name,resource,link,notes,time){
 var _journalGrowthLogKind='';
 function journalOpenGrowthLog(kind){
   _journalGrowthLogKind=kind;var modal=document.getElementById('journalGrowthLogModal');if(!modal)return;
-  var names={financial:'Financial Videos',language:'Language',udemy:'Udemy',gun:'Gun Range',guitar:'Guitar',reading:'Audiobook'},categories={financial:'Financial Videos',language:'Language',udemy:'Udemy',gun:'Gun Range',guitar:'Guitar',reading:'Reading / Audiobook'},startTimes={financial:'18:30',udemy:'19:00',gun:'19:00',language:'12:45',guitar:'19:00',reading:'19:30'};
+  var names={financial:'Financial Videos',language:'Language',udemy:'Udemy',gun:'Gun Range',guitar:'Guitar',reading:'Audiobook'},categories={financial:'Financial Videos',language:'Language',udemy:'Udemy',gun:'Gun Range',guitar:'Guitar',reading:'Reading / Audiobook'},startTimes={financial:'13:00',reading:'13:45',udemy:'14:30',gun:'15:15',language:'16:00',guitar:'16:45'};
   var dateKey=dk(today),saved=journalGrowthSavedDetails(kind,dateKey),savedMins=journalScheduleParseTime(saved.time),savedClock=savedMins===null?'':String(Math.floor(savedMins/60)).padStart(2,'0')+':'+String(savedMins%60).padStart(2,'0');
   document.getElementById('journalGrowthLogTitle').textContent='Schedule / Log '+(names[kind]||'Growth / Skill');
   document.getElementById('journalGrowthLogCategory').value=categories[kind]||'Udemy';document.getElementById('journalGrowthLogTime').value=saved.loggedTime||'';document.getElementById('journalGrowthLogDate').value=dateKey;document.getElementById('journalGrowthLogStartTime').value=savedClock||startTimes[kind]||'19:00';document.getElementById('journalGrowthLogName').value=saved.name||saved.label||'';document.getElementById('journalGrowthLogResource').value=saved.resource||(kind==='udemy'?'Udemy':kind==='reading'?'Audiobook':'');document.getElementById('journalGrowthLogLink').value=saved.link||'';document.getElementById('journalGrowthLogNotes').value=saved.notes||'';modal.style.display='flex';
@@ -13247,17 +13256,26 @@ function renderJournalSchedule(){
     {time:'12:00 PM',mins:720,label:'Lunch',detail:'Midday meal and hydration',done:mealComplete('lunch',720),tab:'nutrition'},
     {time:'5:30 PM',mins:1050,label:'Dinner',detail:'Evening meal and nutrition update',done:mealComplete('dinner',1050),tab:'nutrition'},
     {time:'6:00 PM',mins:1080,label:'Water checkpoint: 64 oz',detail:'Cumulative total: reach 64 ounces by 6:00 PM',done:water>=64,tab:'nutrition'},
-    {time:'6:30 PM',mins:1110,label:growth.label,detail:'Today’s rotating Growth focus',done:growth.done,tab:growth.tab,skip:!!growth.skip||growth.label!=='Gun Range'},
     {time:'8:15 PM',mins:1215,label:'Journal accomplishments and gratitude',detail:'Capture the day while it is fresh',done:reflected,tab:'daily'},
     {time:'8:30 PM',mins:1230,label:'Prepare priorities for tomorrow',detail:'Close the day intentionally',done:localStorage.getItem('schedule_eveningPlanning_'+dateKey)==='1'||!!d.prepJournalCheck,tab:'daily',manual:'eveningPlanning'},
     {time:'11:30 PM',mins:1410,label:'Begin sleep routine',detail:sleepRoutine.count+' of 6 routine steps completed',done:sleepRoutine.count>=4,tab:'wellness',sleepRoutineChecklist:true}
   ].filter(function(item){return !item.skip;});
-  if(localStorage.getItem(journalScheduleGrowthKey('financial',dateKey))==='1')items.push({id:journalScheduleGrowthId('financial'),time:'6:30 PM',mins:1110,label:'Financial Videos',detail:financialMinutes?fmtMinsSeconds(financialMinutes)+' logged':'Tap Log Details & Link to record time',done:d.gaFinancialVideos==='green',tab:'daily',growthKind:'financial'});
-  if(localStorage.getItem(journalScheduleGrowthKey('udemy',dateKey))==='1')items.push({id:journalScheduleGrowthId('udemy'),time:'7:00 PM',mins:1140,label:'Udemy',detail:udemyMinutes?fmtMinsSeconds(udemyMinutes)+' logged':'Tap to log the Udemy course session',done:d.gaUdemy==='green',tab:'skill-log',growthKind:'udemy'});
-  if(localStorage.getItem(journalScheduleGrowthKey('gun',dateKey))==='1')items.push({id:journalScheduleGrowthId('gun'),time:'7:00 PM',mins:1140,label:'Gun Range',detail:gunMinutes?fmtMinsSeconds(gunMinutes)+' logged':'Log range time and takeaways',done:d.gaGunRange==='green',tab:'skill-log',growthKind:'gun'});
-  if(localStorage.getItem(journalScheduleGrowthKey('language',dateKey))==='1')items.push({id:journalScheduleGrowthId('language'),time:'12:45 PM',mins:765,label:'Language Practice',detail:languageMinutes?fmtMinsSeconds(languageMinutes)+' logged':'Tap to log the language session',done:d.gaLanguage==='green',tab:'skill-log',growthKind:'language'});
-  if(localStorage.getItem(journalScheduleGrowthKey('guitar',dateKey))==='1')items.push({id:journalScheduleGrowthId('guitar'),time:'7:00 PM',mins:1140,label:'Guitar',detail:guitarMinutes?fmtMinsSeconds(guitarMinutes)+' logged':'Tap to log guitar practice',done:d.gaGuitar==='green',tab:'skill-log',growthKind:'guitar'});
-  if(localStorage.getItem(journalScheduleGrowthKey('reading',dateKey))==='1')items.push({id:journalScheduleGrowthId('reading'),time:'7:30 PM',mins:1170,label:'Audiobook',detail:readingMinutes?fmtMinsSeconds(readingMinutes)+' logged':'Tap Schedule / Log to add listening time',done:readingMinutes>0||d.gaAudiobook==='green',tab:'library',growthKind:'reading',linkedCheckKey:'gaAudiobook'});
+  // Growth habits are placed directly onto My Schedule on the days selected in Habits. A manually
+  // scheduled activity is also retained even when it is not a normal habit day. Defaults are staggered
+  // between 1:00 PM and 4:45 PM; opening Schedule / Log still lets the user choose a different time.
+  var dueGrowthKinds=new Set(journalGrowthHabitKindsForDate(dateKey));
+  var growthScheduleSpecs={
+    financial:{time:'1:00 PM',mins:780,label:'Financial Videos',detail:financialMinutes?fmtMinsSeconds(financialMinutes)+' logged':'Tap Log Details & Link to record time',done:d.gaFinancialVideos==='green',tab:'daily'},
+    reading:{time:'1:45 PM',mins:825,label:'Audiobook',detail:readingMinutes?fmtMinsSeconds(readingMinutes)+' logged':'Tap Schedule / Log to add listening time',done:readingMinutes>0||d.gaAudiobook==='green',tab:'library',linkedCheckKey:'gaAudiobook'},
+    udemy:{time:'2:30 PM',mins:870,label:'Udemy',detail:udemyMinutes?fmtMinsSeconds(udemyMinutes)+' logged':'Tap to log the Udemy course session',done:d.gaUdemy==='green',tab:'skill-log'},
+    gun:{time:'3:15 PM',mins:915,label:'Gun Range',detail:gunMinutes?fmtMinsSeconds(gunMinutes)+' logged':'Log range time and takeaways',done:d.gaGunRange==='green',tab:'skill-log'},
+    language:{time:'4:00 PM',mins:960,label:'Language Practice',detail:languageMinutes?fmtMinsSeconds(languageMinutes)+' logged':'Tap to log the language session',done:d.gaLanguage==='green',tab:'skill-log'},
+    guitar:{time:'4:45 PM',mins:1005,label:'Guitar',detail:guitarMinutes?fmtMinsSeconds(guitarMinutes)+' logged':'Tap to log guitar practice',done:d.gaGuitar==='green',tab:'skill-log'}
+  };
+  ['financial','reading','udemy','gun','language','guitar'].forEach(function(kind){
+    if(!dueGrowthKinds.has(kind)&&localStorage.getItem(journalScheduleGrowthKey(kind,dateKey))!=='1')return;
+    items.push(Object.assign({id:journalScheduleGrowthId(kind),growthKind:kind},growthScheduleSpecs[kind]));
+  });
   journalManualScheduleItems().filter(function(entry){return entry.date===dateKey;}).forEach(function(entry){items.push({id:'schedule-'+entry.id,time:entry.time,mins:Number(entry.mins),label:entry.title,detail:entry.note||'Manual schedule item',done:localStorage.getItem('schedule_manualSchedule_'+entry.id+'_'+dateKey)==='1',tab:'daily',manual:'manualSchedule_'+entry.id,manualCreated:true,manualItemId:entry.id});});
   items.forEach(function(item,index){if(!item.id)item.id='schedule-'+String(item.label||index).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');});
   var hiddenSchedule=[];try{hiddenSchedule=JSON.parse(localStorage.getItem(journalScheduleHiddenKey(dateKey))||'[]');}catch(ignoreHidden){}if(Array.isArray(hiddenSchedule)&&hiddenSchedule.length)items=items.filter(function(item){return hiddenSchedule.indexOf(item.id)===-1;});
