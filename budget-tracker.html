@@ -66,7 +66,7 @@ const { useState, useEffect, useRef, useMemo, useCallback } = React;
 
 const STORAGE_KEY = "meridian_money_data_v5";
 const ACTIVE_TAB_KEY = "meridian_money_active_tab";
-const VALID_TABS = ["dashboard", "budgets", "transactions", "subscriptions", "cashflow", "goals", "accounts", "ai", "settings"];
+const VALID_TABS = ["dashboard", "budgets", "transactions", "checking", "subscriptions", "cashflow", "goals", "accounts", "ai", "settings"];
 
 const INVESTMENT_CATEGORY_META = {
   "US Stocks":            { color: "#4f46e5" },
@@ -1177,6 +1177,7 @@ function Sidebar({ tab, setTab, netWorth, mobileOpen, onClose, sectionNotes }) {
     { id: "dashboard", label: "Dashboard", icon: "📊" },
     { id: "budgets", label: "Budgets", icon: "🎯" },
     { id: "transactions", label: "Transactions", icon: "🧾" },
+    { id: "checking", label: "Checking Register", icon: "🏦" },
     { id: "subscriptions", label: "Subscriptions & Bills", icon: "🔁" },
     { id: "cashflow", label: "Cash Flow", icon: "💵" },
     { id: "goals", label: "Goals", icon: "🏆" },
@@ -2691,7 +2692,7 @@ function AccountsAndCards({ data, actions }) {
       account,
       kind: "bank",
     }));
-  const allowedIds = new Set([CINDY_CC_ACCOUNT_ID, ccAccount?.id, CHK_ACCOUNT_ID, MIKE_ACCOUNT_ID, SAVINGS_ACCOUNT_ID, HYSA_ACCOUNT_ID].filter(Boolean));
+  const allowedIds = new Set([CINDY_CC_ACCOUNT_ID, ccAccount?.id, SAVINGS_ACCOUNT_ID, HYSA_ACCOUNT_ID].filter(Boolean));
   const requestedLabels = {
     chk: "Cindy's Checking Account",
     hysa: "HYSA",
@@ -2699,7 +2700,7 @@ function AccountsAndCards({ data, actions }) {
     mike: "Mike's Checking Account",
     savings: "Savings",
   };
-  const requestedOrder = ["cc", "chk", "mike", "hysa", "savings"];
+  const requestedOrder = ["cc", "hysa", "savings"];
   const tabs = [...knownTabs, ...otherTabs]
     .filter(t => allowedIds.has(t.account.id))
     .map(t => ({ ...t, label: requestedLabels[t.key] || t.label }))
@@ -2719,8 +2720,8 @@ function AccountsAndCards({ data, actions }) {
   return (
     <div className="space-y-3">
       <div>
-        <h2 className="text-lg md:text-xl font-bold text-slate-800">🗂️ Accounts &amp; Cards</h2>
-        <p className="text-sm text-slate-500 mt-0.5">Your household transaction registers — credit cards, both checking accounts, savings, and the HYSA.</p>
+        <h2 className="text-lg md:text-xl font-bold text-slate-800">🗂️ Card &amp; Savings Registers</h2>
+        <p className="text-sm text-slate-500 mt-0.5">Credit-card, savings, and HYSA registers. Checking accounts have their own Checking Register section.</p>
       </div>
       <Card className={"p-4 md:p-5 " + (afterIccuPayoff >= 0 ? "border-emerald-300" : "border-rose-300")}>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -2753,6 +2754,42 @@ function AccountsAndCards({ data, actions }) {
       {active.kind === "credit"
         ? <CindyCreditCardRegister data={data} actions={actions} cindyAccount={active.account} />
         : <BankAccountRegister data={data} actions={actions} account={active.account} />}
+    </div>
+  );
+}
+
+function CheckingRegister({ data, actions }) {
+  const checkingAccounts = [
+    { key: "cindy", label: "Cindy's Checking", account: data.accounts.find(a => a.id === CHK_ACCOUNT_ID) },
+    { key: "michael", label: "Michael's Checking", account: data.accounts.find(a => a.id === MIKE_ACCOUNT_ID) },
+  ].filter(item => item.account);
+  const [activeKey, setActiveKey] = useState(checkingAccounts[0]?.key || "cindy");
+  const active = checkingAccounts.find(item => item.key === activeKey) || checkingAccounts[0];
+
+  return (
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-5">
+      <div>
+        <h1 className="text-xl md:text-2xl font-bold text-slate-800">🏦 Checking Register</h1>
+        <p className="text-sm text-slate-500 mt-1">Review, add, split, clear, and sort transactions for each checking account.</p>
+      </div>
+      <SectionNotes section="checking" data={data} actions={actions} />
+      {checkingAccounts.length ? (
+        <React.Fragment>
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
+            {checkingAccounts.map(item => (
+              <button
+                key={item.key}
+                type="button"
+                onClick={() => setActiveKey(item.key)}
+                className={"w-full sm:w-auto text-sm font-semibold px-4 py-2.5 rounded-xl border transition-colors " + (active?.key === item.key ? "bg-indigo-600 text-white border-indigo-600" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50")}
+              >{item.label}</button>
+            ))}
+          </div>
+          {active && <BankAccountRegister data={data} actions={actions} account={active.account} />}
+        </React.Fragment>
+      ) : (
+        <Card className="p-6 text-center text-slate-500">No checking accounts are currently available.</Card>
+      )}
     </div>
   );
 }
@@ -5029,6 +5066,7 @@ function Settings({ data, actions }) {
 
 const TAB_LABELS = {
   dashboard: "Dashboard", budgets: "Budgets", transactions: "Transactions",
+  checking: "Checking Register",
   subscriptions: "Subscriptions & Bills", cashflow: "Cash Flow", goals: "Goals", accounts: "Accounts",
   ai: "AI Assistant", settings: "Settings",
 };
@@ -5416,6 +5454,7 @@ function App() {
           {tab === "dashboard" && <Dashboard data={visibleData} derived={derived} actions={actions} />}
           {tab === "budgets" && <Budgets data={visibleData} actions={actions} derived={derived} />}
           {tab === "transactions" && <Transactions data={visibleData} actions={actions} />}
+          {tab === "checking" && <CheckingRegister data={visibleData} actions={actions} />}
           {tab === "subscriptions" && <Subscriptions data={visibleData} actions={actions} />}
           {tab === "cashflow" && <CashFlow data={visibleData} derived={derived} actions={actions} />}
           {tab === "goals" && <Goals data={visibleData} actions={actions} />}
@@ -5440,4 +5479,3 @@ root.render(<App />);
 </script>
 </body>
 </html>
-
