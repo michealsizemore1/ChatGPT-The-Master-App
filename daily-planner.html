@@ -1451,7 +1451,7 @@ body{
     <input type="text" id="myCalendarEventTitle" class="my-calendar-input" placeholder="Event title" style="flex:1;min-width:120px;">
     <input type="text" id="myCalendarEventNote" class="my-calendar-input" placeholder="Note (optional)" style="flex:1;min-width:100px;">
     <select id="myCalendarEventReminder" class="my-calendar-input" title="Popup reminder" disabled><option value="-1">Add a time to use a reminder</option><option value="0">At event time</option><option value="15">15 minutes before</option><option value="30">30 minutes before</option><option value="60">1 hour before</option><option value="1440">1 day before</option></select>
-    <button type="button" onclick="event.stopPropagation();saveCalendarEvent()">Save</button>
+    <button type="button" id="myCalendarEventSaveButton" onclick="event.stopPropagation();saveCalendarEvent()">Save</button>
     <button type="button" onclick="event.stopPropagation();toggleAddCalendarEvent(false)" style="background:#f0f0f0;color:#555;">Cancel</button>
   </div>
 </details>
@@ -3981,7 +3981,7 @@ function decorateMyCalendarEvents(){
   });
   renderMyCalendarEventsForSelectedDay();
 }
-var journalCalendarMovingId=null;
+var journalCalendarMovingId=null,journalCalendarEditingId=null;
 function renderMyCalendarEventsForSelectedDay(){
   var wrap=document.getElementById('myCalendarEvents');if(!wrap)return;
   var selected=dk(today);
@@ -3995,7 +3995,7 @@ function renderMyCalendarEventsForSelectedDay(){
     var moveRow=journalCalendarMovingId===ev.id?('<div class="my-calendar-move-row"><input type="date" id="moveDateInput_'+ev.id+'" value="'+escHtml(ev.date)+'" class="my-calendar-input"><button type="button" onclick="event.stopPropagation();confirmMoveCalendarEvent(\''+ev.id+'\')">Move</button><button type="button" onclick="event.stopPropagation();cancelMoveCalendarEvent()" style="background:#f0f0f0;color:#555;border-color:#ccc;">Cancel</button></div>'):'';
     var reminder=Number(ev.reminderMinutes||0),reminderText=reminder===0?'Reminder at event time':reminder===60?'Reminder 1 hour before':reminder===1440?'Reminder 1 day before':'Reminder '+reminder+' minutes before';
     var linkedBadge=ev.trainingPlan?'<span style="display:inline-block;margin-top:3px;margin-right:7px;color:#166534;font-size:.66rem;font-weight:800;">&#x1F3C3; Training Plan</span>':ev.habitGrowth?'<span style="display:inline-block;margin-top:3px;margin-right:7px;color:#7e22ce;font-size:.66rem;font-weight:800;">&#x1F4C8; Growth Habit</span>':'';
-    var actions=(ev.trainingPlan||ev.habitGrowth)?'':'<button type="button" class="move-btn" onclick="event.stopPropagation();startMoveCalendarEvent(\''+ev.id+'\')" title="Move to another day">&#x1F4C5;</button><button type="button" onclick="event.stopPropagation();deleteCalendarEvent(\''+ev.id+'\')" title="Delete">&#x2715;</button>';
+    var actions=(ev.trainingPlan||ev.habitGrowth)?'':'<button type="button" class="move-btn" onclick="event.stopPropagation();startEditCalendarEvent(\''+ev.id+'\')" title="Edit event">&#x270F;&#xFE0F;</button><button type="button" class="move-btn" onclick="event.stopPropagation();startMoveCalendarEvent(\''+ev.id+'\')" title="Move to another day">&#x1F4C5;</button><button type="button" onclick="event.stopPropagation();deleteCalendarEvent(\''+ev.id+'\')" title="Delete">&#x2715;</button>';
     var reminderMarkup=(ev.noReminder||!ev.time)?'':'<span class="my-calendar-reminder-label">&#x1F514; '+reminderText+'</span>';
     return'<div class="my-calendar-event"><span class="my-calendar-event-time">'+escHtml(ev.time?journalFormatEventTime(ev.time):'All day')+'</span><span style="flex:1;">'+escHtml(ev.title||'Untitled event')+(ev.note?'<div style="color:#667085;margin-top:2px;">'+escHtml(ev.note)+'</div>':'')+linkedBadge+reminderMarkup+moveRow+'</span>'+actions+'</div>';
   }).join('');
@@ -4012,9 +4012,22 @@ function confirmMoveCalendarEvent(id){
   journalCalendarMovingId=null;
   decorateMyCalendarEvents();
 }
+function resetCalendarEventForm(){
+  var titleEl=document.getElementById('myCalendarEventTitle'),timeEl=document.getElementById('myCalendarEventTime'),noteEl=document.getElementById('myCalendarEventNote'),reminderEl=document.getElementById('myCalendarEventReminder'),saveButton=document.getElementById('myCalendarEventSaveButton');
+  journalCalendarEditingId=null;if(titleEl)titleEl.value='';if(timeEl)timeEl.value='';if(noteEl)noteEl.value='';if(reminderEl){reminderEl.value='-1';reminderEl.disabled=true;}if(saveButton)saveButton.textContent='Save';
+}
+function startEditCalendarEvent(id){
+  var ev=journalCalendarEventsAll().find(function(item){return item.id===id;});if(!ev)return;
+  journalCalendarEditingId=id;journalCalendarMovingId=null;
+  var form=document.getElementById('myCalendarEventForm'),titleEl=document.getElementById('myCalendarEventTitle'),timeEl=document.getElementById('myCalendarEventTime'),noteEl=document.getElementById('myCalendarEventNote'),reminderEl=document.getElementById('myCalendarEventReminder'),saveButton=document.getElementById('myCalendarEventSaveButton');
+  if(form)form.style.display='flex';if(titleEl)titleEl.value=ev.title||'';if(timeEl)timeEl.value=ev.time||'';if(noteEl)noteEl.value=ev.note||'';
+  syncCalendarReminderAvailability();if(reminderEl&&ev.time)reminderEl.value=ev.noReminder?'-1':String(Number(ev.reminderMinutes||0));if(saveButton)saveButton.textContent='Update';
+  setTimeout(function(){if(titleEl){titleEl.focus();titleEl.select();}},50);
+}
 function toggleAddCalendarEvent(show){
   var form=document.getElementById('myCalendarEventForm');if(!form)return;
   var next=show===undefined?form.style.display==='none':show;
+  if(!next)resetCalendarEventForm();
   form.style.display=next?'flex':'none';
   if(next)setTimeout(function(){var t=document.getElementById('myCalendarEventTitle');if(t)t.focus();syncCalendarReminderAvailability();},50);
 }
@@ -4030,9 +4043,10 @@ function saveCalendarEvent(){
   if(!title){alert('Please enter an event title.');return;}
   var events=journalCalendarEventsAll();
   var eventTime=timeEl?timeEl.value:'',reminderMinutes=eventTime?Number(reminderEl&&reminderEl.value||60):-1;
-  events.push({id:'ev-'+Date.now(),date:dk(today),time:eventTime,title:title,note:(noteEl&&noteEl.value||'').trim(),reminderMinutes:reminderMinutes,noReminder:!eventTime||reminderMinutes<0});
+  var patch={time:eventTime,title:title,note:(noteEl&&noteEl.value||'').trim(),reminderMinutes:reminderMinutes,noReminder:!eventTime||reminderMinutes<0};
+  if(journalCalendarEditingId){events=events.map(function(ev){return ev.id===journalCalendarEditingId?Object.assign({},ev,patch):ev;});}
+  else events.push(Object.assign({id:'ev-'+Date.now(),date:dk(today)},patch));
   journalCalendarEventsSave(events);
-  if(titleEl)titleEl.value='';if(timeEl)timeEl.value='';if(noteEl)noteEl.value='';if(reminderEl){reminderEl.value='-1';reminderEl.disabled=true;}
   toggleAddCalendarEvent(false);
   decorateMyCalendarEvents();
   checkCalendarReminders();
