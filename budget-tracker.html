@@ -1080,12 +1080,14 @@ function useDerived(data) {
   return useMemo(() => {
     // Checking accounts are excluded from Net Worth — they're spending/cash-flow accounts,
     // not a store of wealth, per user preference.
-    const netWorthAccounts = data.accounts.filter(a => a.type !== "checking");
-    const isLiability = (account) => account.type === "credit" || account.type === "loan";
+    const accountType = (account) => String(account?.type || "").trim().toLowerCase();
+    const isChecking = (account) => accountType(account) === "checking";
+    const netWorthAccounts = data.accounts.filter(account => !isChecking(account));
+    const isLiability = (account) => accountType(account) === "credit" || accountType(account) === "loan";
     const netWorth = netWorthAccounts.reduce((sum, account) => (
       sum + (isLiability(account) ? -Math.abs(Number(account.balance) || 0) : (Number(account.balance) || 0))
     ), 0);
-    const totalAssets = data.accounts.filter(a => !isLiability(a) && a.balance > 0).reduce((s, a) => s + a.balance, 0);
+    const totalAssets = netWorthAccounts.filter(a => !isLiability(a) && a.balance > 0).reduce((s, a) => s + a.balance, 0);
     const totalDebt = data.accounts.filter(a => isLiability(a) || a.balance < 0).reduce((s, a) => s + Math.abs(Number(a.balance) || 0), 0);
 
     const now = new Date();
