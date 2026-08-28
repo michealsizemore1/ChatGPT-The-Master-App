@@ -3962,7 +3962,36 @@ function journalGrowthHabitCalendarEvents(){
   }
   return events;
 }
-function journalCalendarCombinedEvents(){return journalCalendarEventsAll().concat(journalTrainingCalendarEvents(),journalGrowthHabitCalendarEvents());}
+function journalMoneyCalendarEvents(){
+  var money=null;try{money=JSON.parse(localStorage.getItem('meridian_money_data_v5')||'null');}catch(ignore){}
+  if(!money)return[];
+  var now=new Date(),startYear=now.getFullYear()-1,endYear=now.getFullYear()+1,events=[];
+  function amountText(value){var amount=Number(value);return Number.isFinite(amount)?amount.toLocaleString('en-US',{style:'currency',currency:'USD'}):'';}
+  function addEvent(sourceType,item,year,month,day){
+    var lastDay=new Date(year,month,0).getDate(),safeDay=Math.max(1,Math.min(lastDay,Number(day)||1));
+    var dateKey=year+'-'+String(month).padStart(2,'0')+'-'+String(safeDay).padStart(2,'0'),amount=amountText(item.amount),monthKey=year+'-'+String(month).padStart(2,'0');
+    var paid=!!(money.paidBills&&money.paidBills[monthKey]&&money.paidBills[monthKey][item.id]);
+    events.push({id:'money-'+sourceType+'-'+item.id+'-'+dateKey,date:dateKey,time:'',title:(item.merchant||'Money event')+(amount?' — '+amount:''),note:(paid?'Paid · ':'Due · ')+(item.category||sourceType),noReminder:true,moneyEvent:true});
+  }
+  function subscriptionDue(item,year,month){
+    var cadence=item.cadence||'Monthly';if(cadence==='Monthly')return true;
+    var history=Array.isArray(item.priceHistory)?item.priceHistory:[],last=history.length?history[history.length-1].date:'';
+    if(!last)return true;
+    var parts=String(last).split('-').map(Number),interval=cadence==='Quarterly'?3:cadence==='Semi-Annual'?6:12,diff=(year-parts[0])*12+(month-parts[1]);
+    return ((diff%interval)+interval)%interval===0;
+  }
+  for(var year=startYear;year<=endYear;year++)for(var month=1;month<=12;month++){
+    (money.recurringBills||[]).forEach(function(item){if(item&&item.id)addEvent('bill',item,year,month,item.dayOfMonth);});
+    (money.subscriptions||[]).forEach(function(item){if(item&&item.id&&item.active!==false&&subscriptionDue(item,year,month))addEvent('subscription',item,year,month,item.dayOfMonth);});
+  }
+  (money.transactions||[]).forEach(function(item){
+    if(!item||item.category!=='Income'||!/^\d{4}-\d{2}-\d{2}$/.test(String(item.date||'')))return;
+    var year=Number(item.date.slice(0,4));if(year<startYear||year>endYear)return;
+    events.push({id:'money-income-'+item.id,date:item.date,time:'',title:(item.merchant||'Income')+' — '+amountText(Math.abs(Number(item.amount)||0)),note:'Income · Michael & Cynthia\'s Money',noReminder:true,moneyEvent:true});
+  });
+  return events;
+}
+function journalCalendarCombinedEvents(){return journalCalendarEventsAll().concat(journalTrainingCalendarEvents(),journalGrowthHabitCalendarEvents(),journalMoneyCalendarEvents());}
 function journalCalendarEventsSave(list){
   try{localStorage.setItem('journal_calendar_events',JSON.stringify(list));}catch(e){alert('This event could not be saved — device storage may be full.');}
 }
@@ -3994,8 +4023,8 @@ function renderMyCalendarEventsForSelectedDay(){
   wrap.innerHTML=events.map(function(ev){
     var moveRow=journalCalendarMovingId===ev.id?('<div class="my-calendar-move-row"><input type="date" id="moveDateInput_'+ev.id+'" value="'+escHtml(ev.date)+'" class="my-calendar-input"><button type="button" onclick="event.stopPropagation();confirmMoveCalendarEvent(\''+ev.id+'\')">Move</button><button type="button" onclick="event.stopPropagation();cancelMoveCalendarEvent()" style="background:#f0f0f0;color:#555;border-color:#ccc;">Cancel</button></div>'):'';
     var reminder=Number(ev.reminderMinutes||0),reminderText=reminder===0?'Reminder at event time':reminder===60?'Reminder 1 hour before':reminder===1440?'Reminder 1 day before':'Reminder '+reminder+' minutes before';
-    var linkedBadge=ev.trainingPlan?'<span style="display:inline-block;margin-top:3px;margin-right:7px;color:#166534;font-size:.66rem;font-weight:800;">&#x1F3C3; Training Plan</span>':ev.habitGrowth?'<span style="display:inline-block;margin-top:3px;margin-right:7px;color:#7e22ce;font-size:.66rem;font-weight:800;">&#x1F4C8; Growth Habit</span>':'';
-    var actions=(ev.trainingPlan||ev.habitGrowth)?'':'<button type="button" class="move-btn" onclick="event.stopPropagation();startEditCalendarEvent(\''+ev.id+'\')" title="Edit event">&#x270F;&#xFE0F;</button><button type="button" class="move-btn" onclick="event.stopPropagation();startMoveCalendarEvent(\''+ev.id+'\')" title="Move to another day">&#x1F4C5;</button><button type="button" onclick="event.stopPropagation();deleteCalendarEvent(\''+ev.id+'\')" title="Delete">&#x2715;</button>';
+    var linkedBadge=ev.trainingPlan?'<span style="display:inline-block;margin-top:3px;margin-right:7px;color:#166534;font-size:.66rem;font-weight:800;">&#x1F3C3; Training Plan</span>':ev.habitGrowth?'<span style="display:inline-block;margin-top:3px;margin-right:7px;color:#7e22ce;font-size:.66rem;font-weight:800;">&#x1F4C8; Growth Habit</span>':ev.moneyEvent?'<a href="budget-tracker.html" onclick="event.stopPropagation();" style="display:inline-block;margin-top:3px;margin-right:7px;color:#047857;font-size:.66rem;font-weight:800;text-decoration:none;">&#x1F4B5; Open in Money</a>':'';
+    var actions=(ev.trainingPlan||ev.habitGrowth||ev.moneyEvent)?'':'<button type="button" class="move-btn" onclick="event.stopPropagation();startEditCalendarEvent(\''+ev.id+'\')" title="Edit event">&#x270F;&#xFE0F;</button><button type="button" class="move-btn" onclick="event.stopPropagation();startMoveCalendarEvent(\''+ev.id+'\')" title="Move to another day">&#x1F4C5;</button><button type="button" onclick="event.stopPropagation();deleteCalendarEvent(\''+ev.id+'\')" title="Delete">&#x2715;</button>';
     var reminderMarkup=(ev.noReminder||!ev.time)?'':'<span class="my-calendar-reminder-label">&#x1F514; '+reminderText+'</span>';
     return'<div class="my-calendar-event"><span class="my-calendar-event-time">'+escHtml(ev.time?journalFormatEventTime(ev.time):'All day')+'</span><span style="flex:1;">'+escHtml(ev.title||'Untitled event')+(ev.note?'<div style="color:#667085;margin-top:2px;">'+escHtml(ev.note)+'</div>':'')+linkedBadge+reminderMarkup+moveRow+'</span>'+actions+'</div>';
   }).join('');
