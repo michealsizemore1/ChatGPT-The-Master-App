@@ -66,7 +66,7 @@ const { useState, useEffect, useRef, useMemo, useCallback } = React;
 
 const STORAGE_KEY = "meridian_money_data_v5";
 const ACTIVE_TAB_KEY = "meridian_money_active_tab";
-const VALID_TABS = ["dashboard", "budgets", "transactions", "checking", "subscriptions", "cashflow", "goals", "accounts", "ai", "settings"];
+const VALID_TABS = ["dashboard", "budgets", "transactions", "checking", "subscriptions", "cashflow", "goals", "accounts", "review", "ai", "settings"];
 
 const INVESTMENT_CATEGORY_META = {
   "US Stocks":            { color: "#4f46e5" },
@@ -717,7 +717,7 @@ function emptyData() {
     accounts: [], transactions: [], budgets: {}, budgetPlans: {}, subscriptions: [],
     goals: [], netWorthHistory: [], recurringBills: [], rules: [], investments: [],
     investmentContributions: [], investmentStartingValue: 0, paycheckItems: [],
-    watchlists: [], paidBills: {}, customCategories: [],
+    watchlists: [], paidBills: {}, customCategories: [], creditScores: [],
   };
 }
 
@@ -793,6 +793,7 @@ function normalizeBudgetData(data) {
     privacyPrefs: data.privacyPrefs || { hideBalances: false, viewer: "Household" },
     notificationPrefs: data.notificationPrefs || { enabled: false },
     auditLog: data.auditLog || [],
+    creditScores: data.creditScores || [],
   };
 }
 
@@ -1199,6 +1200,7 @@ function Sidebar({ tab, setTab, netWorth, mobileOpen, onClose, sectionNotes }) {
     { id: "cashflow", label: "Cash Flow", icon: "💵" },
     { id: "goals", label: "Goals", icon: "🏆" },
     { id: "accounts", label: "Accounts", icon: "🏛️" },
+    { id: "review", label: "Financial Review", icon: "🔎" },
     { id: "ai", label: "AI Assistant", icon: "✨" },
     { id: "settings", label: "Settings", icon: "⚙️" },
   ];
@@ -1964,7 +1966,7 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
 
   const filtered = useMemo(() => {
     return allTx.filter(t => {
-      if (search && !t.merchant.toLowerCase().includes(search.toLowerCase())) return false;
+      if (search && ![t.merchant, t.notes, ...(t.tags || [])].join(" ").toLowerCase().includes(search.toLowerCase())) return false;
       if (catFilter !== "All" && !transactionHasCategory(t, catFilter)) return false;
       if (typeFilter !== "All" && cindyRegType(t) !== typeFilter) return false;
       if (fromDate && t.date < fromDate) return false;
@@ -3145,6 +3147,7 @@ function Transactions({ data, actions }) {
   const [acctFilter, setAcctFilter] = useState("All");
   const [personFilter, setPersonFilter] = useState("All");
   const [monthFilter, setMonthFilter] = useState("All");
+  const [tagFilter, setTagFilter] = useState("All");
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [limit, setLimit] = useState(40);
@@ -3173,11 +3176,13 @@ function Transactions({ data, actions }) {
       if (acctFilter !== "All" && t.accountId !== acctFilter) return false;
       if (personFilter !== "All" && (t.person || "Joint") !== personFilter) return false;
       if (monthFilter !== "All" && monthKey(t.date) !== monthFilter) return false;
+      if (tagFilter !== "All" && !(t.tags || []).includes(tagFilter)) return false;
       return true;
     });
-  }, [data.transactions, search, catFilter, acctFilter, personFilter, monthFilter]);
+  }, [data.transactions, search, catFilter, acctFilter, personFilter, monthFilter, tagFilter]);
 
   const availableMonths = useMemo(() => [...new Set(data.transactions.map(t => monthKey(t.date)).filter(Boolean))].sort().reverse(), [data.transactions]);
+  const availableTags = useMemo(() => [...new Set(data.transactions.flatMap(t => t.tags || []))].sort((a, b) => a.localeCompare(b)), [data.transactions]);
 
   const accountsById = Object.fromEntries(data.accounts.map(a => [a.id, a]));
 
@@ -3277,8 +3282,12 @@ function Transactions({ data, actions }) {
           <option value="All">All Months</option>
           {availableMonths.map(month => <option key={month} value={month}>{new Date(month + "-01T00:00:00").toLocaleDateString("en-US", { month: "long", year: "numeric" })}</option>)}
         </select>
-        {(search || catFilter !== "All" || acctFilter !== "All" || personFilter !== "All" || monthFilter !== "All") && (
-          <button className="text-xs text-indigo-600 font-medium" onClick={() => { setSearch(""); setCatFilter("All"); setAcctFilter("All"); setPersonFilter("All"); setMonthFilter("All"); }}>Clear filters</button>
+        {availableTags.length > 0 && <select aria-label="Filter transactions by tag" className={inputClass + " w-full min-w-0 sm:max-w-[180px] pr-9"} value={tagFilter} onChange={e => setTagFilter(e.target.value)}>
+          <option value="All">All Tags</option>
+          {availableTags.map(tag => <option key={tag} value={tag}>{tag}</option>)}
+        </select>}
+        {(search || catFilter !== "All" || acctFilter !== "All" || personFilter !== "All" || monthFilter !== "All" || tagFilter !== "All") && (
+          <button className="text-xs text-indigo-600 font-medium" onClick={() => { setSearch(""); setCatFilter("All"); setAcctFilter("All"); setPersonFilter("All"); setMonthFilter("All"); setTagFilter("All"); }}>Clear filters</button>
         )}
       </Card>
 
@@ -3542,7 +3551,7 @@ function deriveSubDate(src) {
 }
 
 function SubscriptionModal({ open, onClose, onSave, onDelete, initial, prefill }) {
-  const blank = { merchant: "", category: "Subscriptions", amount: "", cadence: "Monthly", date: todayISO(), person: "Joint", active: true };
+  const blank = { merchant: "", category: "Subscriptions", amount: "", cadence: "Monthly", date: todayISO(), person: "Joint", active: true, cancellationStatus: "None", cancellationRequested: "", cancellationEffective: "", cancellationConfirmation: "", cancellationRefund: "" };
   const [form, setForm] = useState(blank);
 
   useEffect(() => {
@@ -3552,6 +3561,9 @@ function SubscriptionModal({ open, onClose, onSave, onDelete, initial, prefill }
       merchant: src.merchant || "", category: src.category || "Subscriptions",
       amount: src.amount != null ? String(Math.abs(src.amount)) : "", cadence: src.cadence || "Monthly",
       date: deriveSubDate(src), person: src.person || "Joint", active: src.active !== false,
+      cancellationStatus: src.cancellationStatus || "None", cancellationRequested: src.cancellationRequested || "",
+      cancellationEffective: src.cancellationEffective || "", cancellationConfirmation: src.cancellationConfirmation || "",
+      cancellationRefund: src.cancellationRefund == null ? "" : String(src.cancellationRefund),
     } : blank);
   }, [open, initial, prefill]);
 
@@ -3567,11 +3579,14 @@ function SubscriptionModal({ open, onClose, onSave, onDelete, initial, prefill }
       const nextHistory = lastEntry.amount !== amount
         ? [...priceHistory, { date: form.date, amount }]
         : priceHistory.map((h, i) => i === lastIdx ? { ...h, date: form.date } : h);
-      onSave({ ...initial, merchant: form.merchant, category: form.category, amount, cadence: form.cadence, dayOfMonth, person: form.person, active: form.active, priceHistory: nextHistory });
+      onSave({ ...initial, ...form, amount, dayOfMonth, cancellationRefund: Number(form.cancellationRefund) || 0, priceHistory: nextHistory });
     } else {
       onSave({
         id: uid(), merchant: form.merchant, category: form.category, amount, cadence: form.cadence,
-        dayOfMonth, person: form.person, active: form.active, priceHistory: [{ date: form.date, amount }],
+        dayOfMonth, person: form.person, active: form.active, cancellationStatus: form.cancellationStatus,
+        cancellationRequested: form.cancellationRequested, cancellationEffective: form.cancellationEffective,
+        cancellationConfirmation: form.cancellationConfirmation, cancellationRefund: Number(form.cancellationRefund) || 0,
+        priceHistory: [{ date: form.date, amount }],
       });
     }
   };
@@ -3613,6 +3628,20 @@ function SubscriptionModal({ open, onClose, onSave, onDelete, initial, prefill }
             Active
           </label>
         </Field>
+        <Card className="p-4 bg-slate-50 mb-3">
+          <div className="text-sm font-semibold text-slate-700 mb-3">Cancellation tracking</div>
+          <Field label="Cancellation status">
+            <select className={inputClass} value={form.cancellationStatus} onChange={e => setForm({ ...form, cancellationStatus: e.target.value })}>
+              {['None', 'Considering', 'Requested', 'Confirmed', 'Refund pending', 'Complete'].map(status => <option key={status}>{status}</option>)}
+            </select>
+          </Field>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Field label="Requested date"><input type="date" className={inputClass} value={form.cancellationRequested} onChange={e => setForm({ ...form, cancellationRequested: e.target.value })} /></Field>
+            <Field label="Effective date"><input type="date" className={inputClass} value={form.cancellationEffective} onChange={e => setForm({ ...form, cancellationEffective: e.target.value })} /></Field>
+          </div>
+          <Field label="Confirmation number"><input className={inputClass} value={form.cancellationConfirmation} onChange={e => setForm({ ...form, cancellationConfirmation: e.target.value })} /></Field>
+          <Field label="Expected refund ($)"><input type="number" min="0" step="0.01" className={inputClass} value={form.cancellationRefund} onChange={e => setForm({ ...form, cancellationRefund: e.target.value })} /></Field>
+        </Card>
         <div className="flex justify-between gap-2 mt-4">
           {initial && onDelete ? (
             <Button variant="danger" type="button" onClick={() => onDelete(initial.id)}>Delete</Button>
@@ -3644,6 +3673,11 @@ function Subscriptions({ data, actions }) {
   const priceIncreases = active.filter(s => s.priceHistory.length > 1);
   const cancelledYearlySavings = cancelled.reduce((s, x) => s + subYearlyAmount(x), 0);
   const cancelledMonthlySavings = cancelledYearlySavings / 12;
+  const renewalToday = new Date(todayISO() + "T00:00:00");
+  const upcomingRenewals = active.map(s => {
+    const next = subscriptionNextChargeDate(s);
+    return { subscription: s, next, days: Math.ceil((next - renewalToday) / 86400000) };
+  }).filter(item => item.days >= 0 && item.days <= 60).sort((a, b) => a.days - b.days);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
@@ -3708,6 +3742,20 @@ function Subscriptions({ data, actions }) {
         </Card>
       )}
 
+      <Card className="p-5">
+        <h3 className="font-semibold text-slate-700 mb-1">Upcoming renewals</h3>
+        <p className="text-xs text-slate-400 mb-3">Charges expected during the next 60 days. Tap one to edit or track a cancellation.</p>
+        <div className="space-y-3">
+          {upcomingRenewals.map(({ subscription: s, next, days }) => (
+            <button type="button" key={s.id} onClick={() => openEdit(s)} className="w-full text-left flex items-center justify-between gap-3 border-b border-slate-100 pb-3 last:border-0">
+              <div className="min-w-0"><div className="text-sm font-medium text-slate-700 truncate">{s.merchant}</div><div className="text-xs text-slate-400">{next.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} · {days === 0 ? 'today' : 'in ' + days + ' days'}</div></div>
+              <div className="text-sm font-semibold text-slate-700 shrink-0">{fmtCurrency(s.amount)}</div>
+            </button>
+          ))}
+          {upcomingRenewals.length === 0 && <div className="text-sm text-slate-400">No renewals due within 60 days.</div>}
+        </div>
+      </Card>
+
       <Card className="p-6">
         <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
           <h3 className="font-semibold text-slate-700">Active</h3>
@@ -3726,6 +3774,7 @@ function Subscriptions({ data, actions }) {
                 <div className="min-w-0">
                   <div className="text-sm font-medium text-slate-700 truncate">{s.merchant}</div>
                   <div className="text-xs text-slate-400 truncate">{subscriptionScheduleLabel(s)}</div>
+                  {s.cancellationStatus && s.cancellationStatus !== 'None' && <div className="text-xs text-amber-600 mt-0.5">Cancellation: {s.cancellationStatus}{s.cancellationEffective ? ' · effective ' + fmtDate(s.cancellationEffective) : ''}</div>}
                 </div>
               </div>
               <div className="flex items-center gap-4 shrink-0">
@@ -4609,6 +4658,103 @@ function Accounts({ data, actions, derived }) {
   );
 }
 
+/* ============================== FINANCIAL REVIEW ============================== */
+
+function median(values) {
+  if (!values.length) return 0;
+  const sorted = [...values].sort((a, b) => a - b);
+  const middle = Math.floor(sorted.length / 2);
+  return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
+}
+
+function FinancialReview({ data, derived, actions }) {
+  const months = useMemo(() => {
+    const result = [...new Set(data.transactions.map(t => monthKey(t.date)).filter(Boolean))].sort().reverse();
+    const current = todayISO().slice(0, 7);
+    if (!result.includes(current)) result.unshift(current);
+    return result;
+  }, [data.transactions]);
+  const [selectedMonth, setSelectedMonth] = useState(months[0] || todayISO().slice(0, 7));
+  const [score, setScore] = useState("");
+  const [scoreDate, setScoreDate] = useState(todayISO());
+
+  const monthTransactions = data.transactions.filter(t => monthKey(t.date) === selectedMonth && !t.excludeFromBudget && t.category !== "Transfer");
+  const income = monthTransactions.filter(t => t.amount > 0).reduce((sum, t) => sum + Number(t.amount || 0), 0);
+  const spending = monthTransactions.filter(t => t.amount < 0).reduce((sum, t) => sum + Math.abs(Number(t.amount || 0)), 0);
+  const savings = income - spending;
+  const savingsRate = income > 0 ? (savings / income) * 100 : 0;
+  const categoryTotals = {};
+  monthTransactions.filter(t => t.amount < 0).forEach(t => expenseCategoryAllocations(t).forEach(part => { categoryTotals[part.category] = (categoryTotals[part.category] || 0) + part.amount; }));
+  const topCategory = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1])[0];
+
+  const anomalies = useMemo(() => {
+    const expenses = data.transactions.filter(t => t.amount < 0 && t.category !== "Transfer" && !t.excludeFromBudget);
+    return expenses.filter(t => monthKey(t.date) === selectedMonth).map(t => {
+      const history = expenses.filter(old => old.id !== t.id && old.date < t.date && normalizeMerchantName(old.merchant) === normalizeMerchantName(t.merchant)).map(old => Math.abs(Number(old.amount || 0)));
+      const usual = median(history);
+      const amount = Math.abs(Number(t.amount || 0));
+      return { transaction: t, usual, amount, count: history.length, unusual: history.length >= 3 && amount >= usual + 25 && amount >= usual * 1.5 };
+    }).filter(item => item.unusual).sort((a, b) => (b.amount - b.usual) - (a.amount - a.usual)).slice(0, 10);
+  }, [data.transactions, selectedMonth]);
+
+  const scores = [...(data.creditScores || [])].sort((a, b) => a.date.localeCompare(b.date));
+  const latestScore = scores[scores.length - 1];
+  const previousScore = scores[scores.length - 2];
+  const addScore = () => {
+    const value = Number(score);
+    if (!scoreDate || value < 300 || value > 850) return;
+    actions.addCreditScore({ id: uid(), date: scoreDate, score: value, source: "Experian" });
+    setScore("");
+  };
+
+  return (
+    <div className="px-2 py-4 sm:p-4 md:p-8 space-y-5 md:space-y-6 w-full min-w-0">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div><h1 className="text-xl md:text-2xl font-bold text-slate-800">Financial Review</h1><p className="text-slate-500 text-sm mt-1">Monthly results, unusual spending, and credit-score history.</p></div>
+        <select className={inputClass + " sm:max-w-[210px]"} value={selectedMonth} onChange={e => setSelectedMonth(e.target.value)}>
+          {months.map(month => <option key={month} value={month}>{new Date(month + "-01T00:00:00").toLocaleDateString("en-US", { month: "long", year: "numeric" })}</option>)}
+        </select>
+      </div>
+      <SectionNotes section="review" data={data} actions={actions} />
+
+      <Card className="p-5">
+        <h3 className="font-semibold text-slate-700 mb-4">Monthly report</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <RegStat label="Income" value={fmtCurrency(income)} tone="emerald" />
+          <RegStat label="Spending" value={fmtCurrency(spending)} tone="rose" />
+          <RegStat label="Net cash flow" value={fmtCurrency(savings)} tone={savings >= 0 ? "emerald" : "rose"} />
+          <RegStat label="Savings rate" value={savingsRate.toFixed(1) + "%"} tone={savingsRate >= 0 ? "indigo" : "rose"} />
+        </div>
+        <div className="mt-4 rounded-xl bg-slate-50 p-4 text-sm text-slate-600 leading-6">
+          {topCategory ? <div><span className="font-semibold">Largest category:</span> {topCategory[0]} at {fmtCurrency(topCategory[1])}.</div> : <div>No spending has been recorded for this month.</div>}
+          <div><span className="font-semibold">Budget status:</span> {Object.entries(categoryTotals).filter(([category, amount]) => amount > Number(data.budgets[category] || 0) && Number(data.budgets[category] || 0) > 0).length || "No"} categor{Object.entries(categoryTotals).filter(([category, amount]) => amount > Number(data.budgets[category] || 0) && Number(data.budgets[category] || 0) > 0).length === 1 ? "y is" : "ies are"} over budget.</div>
+        </div>
+      </Card>
+
+      <Card className="p-5">
+        <h3 className="font-semibold text-slate-700">Unusual spending alerts</h3>
+        <p className="text-xs text-slate-400 mt-1 mb-4">Flags a purchase when it is at least 50% and $25 above your usual amount after three prior purchases at that merchant.</p>
+        <div className="space-y-3">
+          {anomalies.map(item => <div key={item.transaction.id} className="rounded-xl border border-amber-200 bg-amber-50/60 p-3 flex justify-between gap-3"><div><div className="text-sm font-semibold text-amber-800">{item.transaction.merchant}</div><div className="text-xs text-amber-700">{fmtDate(item.transaction.date)} · usual about {fmtCurrency(item.usual)}</div></div><div className="text-sm font-bold text-amber-800">{fmtCurrency(item.amount)}</div></div>)}
+          {anomalies.length === 0 && <div className="rounded-xl bg-emerald-50 p-4 text-sm text-emerald-700">No unusual purchases detected for this month.</div>}
+        </div>
+      </Card>
+
+      <Card className="p-5">
+        <h3 className="font-semibold text-slate-700">Credit score history</h3>
+        <p className="text-xs text-slate-400 mt-1 mb-4">Manually record your Experian score. Your credit report remains outside this app.</p>
+        {latestScore && <div className="grid grid-cols-2 gap-3 mb-4"><RegStat label="Latest score" value={String(latestScore.score)} tone="indigo" /><RegStat label="Change" value={previousScore ? ((latestScore.score - previousScore.score >= 0 ? "+" : "") + (latestScore.score - previousScore.score)) : "—"} tone={!previousScore || latestScore.score >= previousScore.score ? "emerald" : "rose"} /></div>}
+        <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-3 items-end">
+          <Field label="Score (300–850)"><input type="number" min="300" max="850" className={inputClass} value={score} onChange={e => setScore(e.target.value)} /></Field>
+          <Field label="Report date"><input type="date" className={inputClass} value={scoreDate} onChange={e => setScoreDate(e.target.value)} /></Field>
+          <Button className="mb-3" onClick={addScore}>Add Score</Button>
+        </div>
+        {scores.length > 0 && <div className="mt-2 space-y-2">{[...scores].reverse().slice(0, 12).map(entry => <div key={entry.id} className="flex items-center justify-between border-t border-slate-100 pt-2 text-sm"><span className="text-slate-500">{fmtDate(entry.date)} · {entry.source || "Credit report"}</span><span><strong className="text-slate-700 mr-3">{entry.score}</strong><button className="text-xs text-rose-500" onClick={() => actions.deleteCreditScore(entry.id)}>Delete</button></span></div>)}</div>}
+      </Card>
+    </div>
+  );
+}
+
 /* ============================== AI ASSISTANT ============================== */
 
 const AI_MODEL_STORAGE = "meridian_money_ai_model";
@@ -5202,7 +5348,7 @@ const TAB_LABELS = {
   dashboard: "Dashboard", budgets: "Budgets", transactions: "Transactions",
   checking: "Accounts & Cards",
   subscriptions: "Subscriptions & Bills", cashflow: "Cash Flow", goals: "Goals", accounts: "Accounts",
-  ai: "AI Assistant", settings: "Settings",
+  review: "Financial Review", ai: "AI Assistant", settings: "Settings",
 };
 
 function App() {
@@ -5474,6 +5620,8 @@ function App() {
       ...d,
       watchlists: (d.watchlists || []).filter(item => item.id !== id),
     }), "Watchlist deleted"),
+    addCreditScore: (entry) => setData(d => ({ ...d, creditScores: [...(d.creditScores || []), entry].sort((a, b) => a.date.localeCompare(b.date)) }), "Credit score added"),
+    deleteCreditScore: (id) => setData(d => ({ ...d, creditScores: (d.creditScores || []).filter(entry => entry.id !== id) }), "Credit score deleted"),
 
     addRule: (r) => setData(d => ({ ...d, rules: [...(d.rules || []), r] })),
     deleteRule: (id) => setData(d => ({ ...d, rules: (d.rules || []).filter(r => r.id !== id) })),
@@ -5598,6 +5746,7 @@ function App() {
           {tab === "cashflow" && <CashFlow data={visibleData} derived={derived} actions={actions} />}
           {tab === "goals" && <Goals data={visibleData} actions={actions} />}
           {tab === "accounts" && <Accounts data={data} actions={actions} derived={derived} />}
+          {tab === "review" && <FinancialReview data={visibleData} derived={derived} actions={actions} />}
           {tab === "ai" && <AIAssistant data={data} actions={actions} derived={derived} />}
           {tab === "settings" && <Settings data={data} actions={actions} />}
         </main>
