@@ -370,8 +370,12 @@ function fileToCompressedDataUrl(file) {
 }
 
 function estimateMinPayment(account) {
+  const enteredPayment = Number(account.monthlyPayment);
+  if (Number.isFinite(enteredPayment) && enteredPayment > 0) return enteredPayment;
   if (account.type === "credit") return Math.max(35, Math.abs(account.balance) * 0.03);
-  if (account.type === "loan") return 310;
+  // Existing car-loan records predate the required-payment field. Use the
+  // household's current payment as their migration fallback until edited.
+  if (account.type === "loan") return 650;
   return 0;
 }
 
@@ -4333,7 +4337,7 @@ function DebtPayoffPlanner({ debtAccounts }) {
 
   const result = useMemo(() => simulatePayoff(payable, extra, strategy), [JSON.stringify(payable), extra, strategy]);
   const payoffDate = useMemo(() => {
-    const d = new Date("2026-07-27T00:00:00");
+    const d = new Date(todayISO() + "T00:00:00");
     d.setMonth(d.getMonth() + result.months);
     return d.toLocaleDateString("en-US", { month: "long", year: "numeric" });
   }, [result.months]);
@@ -4379,14 +4383,19 @@ function DebtPayoffPlanner({ debtAccounts }) {
 /* ============================== ACCOUNTS ============================== */
 
 function AccountModal({ open, onClose, onSave, initial }) {
-  const blank = { name: "", institution: "", type: "checking", balance: "", apr: "" };
+  const blank = { name: "", institution: "", type: "checking", balance: "", apr: "", monthlyPayment: "" };
   const [form, setForm] = useState(initial || blank);
   useEffect(() => { setForm(initial || blank); }, [initial, open]);
 
   const submit = (e) => {
     e.preventDefault();
     if (!form.name) return;
-    onSave({ ...form, balance: parseFloat(form.balance) || 0, apr: form.apr === "" ? undefined : parseFloat(form.apr) });
+    onSave({
+      ...form,
+      balance: parseFloat(form.balance) || 0,
+      apr: form.apr === "" ? undefined : parseFloat(form.apr),
+      monthlyPayment: form.monthlyPayment === "" ? undefined : parseFloat(form.monthlyPayment),
+    });
   };
 
   const showApr = form.type === "credit" || form.type === "loan";
@@ -4411,9 +4420,14 @@ function AccountModal({ open, onClose, onSave, initial }) {
           </Field>
         </div>
         {showApr && (
-          <Field label="APR % (used by the Debt Payoff Planner)">
-            <input type="number" step="0.01" className={inputClass} value={form.apr} onChange={e => setForm({ ...form, apr: e.target.value })} />
-          </Field>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Field label="APR % (used by the Debt Payoff Planner)">
+              <input type="number" step="0.01" className={inputClass} value={form.apr} onChange={e => setForm({ ...form, apr: e.target.value })} />
+            </Field>
+            <Field label="Required monthly payment ($)">
+              <input type="number" min="0" step="0.01" className={inputClass} value={form.monthlyPayment || ""} onChange={e => setForm({ ...form, monthlyPayment: e.target.value })} />
+            </Field>
+          </div>
         )}
         <div className="flex justify-end gap-2 mt-4">
           <Button variant="secondary" onClick={onClose} type="button">Cancel</Button>
