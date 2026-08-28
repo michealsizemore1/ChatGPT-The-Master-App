@@ -1336,11 +1336,38 @@ function Dashboard({ data, derived, actions }) {
   const selectedCategoryTotal = selectedCategoryExpenses.reduce((sum, item) => sum + item.categoryAmount, 0);
 
   const recentTx = [...data.transactions].slice(0, 6);
-  const dashboardTodayDay = new Date(todayISO() + "T00:00:00").getDate();
-  const upcomingBills = derived.recurringItems
-    .filter(item => !item.paid && Number(item.dayOfMonth) >= dashboardTodayDay)
-    .slice()
-    .sort((a, b) => a.dayOfMonth - b.dayOfMonth)
+  const dashboardToday = new Date(todayISO() + "T00:00:00");
+  const dashboardMonth = todayISO().slice(0, 7);
+  const paidThisMonth = (data.paidBills && data.paidBills[dashboardMonth]) || {};
+  const nextMonthlyOccurrence = (dayOfMonth, paidCurrentMonth) => {
+    let year = dashboardToday.getFullYear();
+    let month = dashboardToday.getMonth() + 1;
+    let day = Math.min(Number(dayOfMonth) || 1, daysInMonth(year, month));
+    let candidate = new Date(year, month - 1, day);
+    if (candidate < dashboardToday || paidCurrentMonth) {
+      month += 1;
+      if (month > 12) { month = 1; year += 1; }
+      day = Math.min(Number(dayOfMonth) || 1, daysInMonth(year, month));
+      candidate = new Date(year, month - 1, day);
+    }
+    return candidate;
+  };
+  const recurringBillDates = (data.recurringBills || []).map(bill => ({
+    ...bill,
+    nextDate: nextMonthlyOccurrence(bill.dayOfMonth, !!paidThisMonth[bill.id]),
+  }));
+  const subscriptionDates = (data.subscriptions || []).filter(s => s.active).map(subscription => {
+    let nextDate = subscriptionNextChargeDate(subscription);
+    if (paidThisMonth[subscription.id] && monthKey(nextDate.toISOString().slice(0, 10)) === dashboardMonth) {
+      const interval = subCadence(subscription) === "Quarterly" ? 3 : subCadence(subscription) === "Semi-Annual" ? 6 : subCadence(subscription) === "Annual" ? 12 : 1;
+      const probe = new Date(nextDate.getFullYear(), nextDate.getMonth() + interval, 1);
+      nextDate = new Date(probe.getFullYear(), probe.getMonth(), Math.min(Number(subscription.dayOfMonth) || 1, daysInMonth(probe.getFullYear(), probe.getMonth() + 1)));
+    }
+    return { id: subscription.id, merchant: subscription.merchant, amount: subscription.amount, category: subscription.category, nextDate };
+  });
+  const upcomingBills = [...recurringBillDates, ...subscriptionDates]
+    .filter(item => item.nextDate instanceof Date && Number.isFinite(item.nextDate.getTime()))
+    .sort((a, b) => a.nextDate - b.nextDate)
     .slice(0, 6);
 
   const personEntries = PEOPLE.map(p => [p, derived.spendByPerson[p] || 0]).filter(([, amt]) => amt > 0);
@@ -1536,7 +1563,7 @@ function Dashboard({ data, derived, actions }) {
               <div key={i} className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <div className="text-sm font-medium text-slate-700 truncate">{b.merchant}</div>
-                  <div className="text-xs text-slate-400">Due on the {b.dayOfMonth}{[11, 12, 13].includes(Number(b.dayOfMonth)) ? "th" : Number(b.dayOfMonth) % 10 === 1 ? "st" : Number(b.dayOfMonth) % 10 === 2 ? "nd" : Number(b.dayOfMonth) % 10 === 3 ? "rd" : "th"}</div>
+                  <div className="text-xs text-slate-400">Due {b.nextDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: b.nextDate.getFullYear() !== dashboardToday.getFullYear() ? "numeric" : undefined })}</div>
                 </div>
                 <div className="text-sm font-semibold text-slate-700 shrink-0">{fmtCurrency(b.amount)}</div>
               </div>
@@ -2832,7 +2859,7 @@ function CheckingRegister({ data, actions }) {
                 className={"w-full sm:w-auto text-sm font-semibold px-4 py-2.5 rounded-xl border transition-colors " + (active?.key === item.key ? "bg-indigo-600 text-white border-indigo-600" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50")}
               >{item.label}</button>
             ))}
-            {upcomingBills.length === 0 && <div className="text-sm text-slate-400">No unpaid bills remain this month.</div>}
+            {upcomingBills.length === 0 && <div className="text-sm text-slate-400">No upcoming bills are scheduled.</div>}
           </div>
           {active && <BankAccountRegister data={data} actions={actions} account={active.account} />}
         </React.Fragment>
