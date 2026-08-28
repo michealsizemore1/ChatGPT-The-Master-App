@@ -3487,7 +3487,17 @@ function subDueInMonth(s, year, month) {
 function subscriptionScheduleLabel(s) {
   const cadence = subCadence(s);
   if (cadence === "Monthly") {
-    return `Bills on the ${s.dayOfMonth}${s.dayOfMonth === 1 ? "st" : "th"} · ${s.category}`;
+    const today = new Date(todayISO() + "T00:00:00");
+    let year = today.getFullYear();
+    let month = today.getMonth() + 1;
+    let day = Math.min(Number(s.dayOfMonth) || 1, daysInMonth(year, month));
+    if (new Date(year, month - 1, day) < today) {
+      month += 1;
+      if (month > 12) { month = 1; year += 1; }
+      day = Math.min(Number(s.dayOfMonth) || 1, daysInMonth(year, month));
+    }
+    const nextCharge = new Date(year, month - 1, day).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    return `Bills monthly · next charge ${nextCharge} · ${s.category}`;
   }
   const last = s.priceHistory && s.priceHistory.length ? s.priceHistory[s.priceHistory.length - 1].date : null;
   const cadenceText = cadence === "Quarterly" ? "quarterly" : cadence === "Semi-Annual" ? "twice a year" : "yearly";
