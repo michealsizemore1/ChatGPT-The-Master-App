@@ -530,6 +530,42 @@ function detectUnknownSubscriptions(data) {
   return candidates.sort((a, b) => b.occurrences - a.occurrences);
 }
 
+// Recognize ordinary household bills from transaction history. This is intentionally
+// narrower than general recurring-charge detection so groceries and routine shopping
+// never become scheduled bills simply because the same store was visited twice.
+function detectRecurringHouseholdBills(data) {
+  const billCategories = new Set(["Housing", "Utilities", "Transportation", "Health & Fitness", "Personal Care", "Pets"]);
+  const billWords = /\b(rent|mortgage|loan|electric|power|energy|gas|water|sewer|utility|utilities|internet|phone|wireless|insurance|hoa|trash|garbage)\b/i;
+  const knownNames = [...(data.subscriptions || []), ...(data.recurringBills || [])].map(item => normalizeMerchantName(item.merchant));
+  const isKnown = name => knownNames.some(known => known && (name.includes(known) || known.includes(name)));
+  const groups = {};
+  (data.transactions || []).forEach(transaction => {
+    if (transaction.amount >= 0 || transaction.category === "Transfer" || transaction.category === "Income" || transaction.category === "Subscriptions") return;
+    if (!billCategories.has(transaction.category) && !billWords.test(transaction.merchant || "")) return;
+    const normalized = normalizeMerchantName(transaction.merchant);
+    if (!normalized || isKnown(normalized)) return;
+    groups[normalized] = groups[normalized] || [];
+    groups[normalized].push(transaction);
+  });
+  return Object.entries(groups).flatMap(([normalized, transactions]) => {
+    const sorted = [...transactions].sort((a, b) => a.date.localeCompare(b.date));
+    const distinctMonths = new Set(sorted.map(item => monthKey(item.date)));
+    if (sorted.length < 2 || distinctMonths.size < 2) return [];
+    const gaps = sorted.slice(1).map((item, index) => (new Date(item.date + "T00:00:00") - new Date(sorted[index].date + "T00:00:00")) / 86400000);
+    const typicalGap = median(gaps);
+    if (typicalGap < 20 || typicalGap > 45) return [];
+    const latest = sorted[sorted.length - 1];
+    return [{
+      id: "detected_bill_" + normalized.replace(/\s+/g, "_"),
+      merchant: latest.merchant,
+      category: latest.category,
+      amount: Math.abs(Number(latest.amount || 0)),
+      dayOfMonth: new Date(latest.date + "T00:00:00").getDate(),
+      detected: true,
+    }];
+  });
+}
+
 /* ============================== SEED DATA GENERATOR ============================== */
 
 function generateSeedData() {
@@ -1356,6 +1392,17 @@ function Dashboard({ data, derived, actions }) {
     ...bill,
     nextDate: nextMonthlyOccurrence(bill.dayOfMonth, !!paidThisMonth[bill.id]),
   }));
+  const detectedBillDates = detectRecurringHouseholdBills(data).map(bill => ({
+    ...bill,
+    nextDate: nextMonthlyOccurrence(bill.dayOfMonth, false),
+  }));
+  const scheduledExpenseDates = (data.paycheckItems || []).filter(item => item.type === "expense" && item.date >= todayISO()).map(item => ({
+    id: item.id,
+    merchant: item.label,
+    category: "Scheduled expense",
+    amount: Number(item.amount || 0),
+    nextDate: new Date(item.date + "T00:00:00"),
+  }));
   const subscriptionDates = (data.subscriptions || []).filter(s => s.active).map(subscription => {
     let nextDate = subscriptionNextChargeDate(subscription);
     if (paidThisMonth[subscription.id] && monthKey(nextDate.toISOString().slice(0, 10)) === dashboardMonth) {
@@ -1365,7 +1412,7 @@ function Dashboard({ data, derived, actions }) {
     }
     return { id: subscription.id, merchant: subscription.merchant, amount: subscription.amount, category: subscription.category, nextDate };
   });
-  const upcomingBills = [...recurringBillDates, ...subscriptionDates]
+  const upcomingBills = [...recurringBillDates, ...detectedBillDates, ...scheduledExpenseDates, ...subscriptionDates]
     .filter(item => item.nextDate instanceof Date && Number.isFinite(item.nextDate.getTime()))
     .sort((a, b) => a.nextDate - b.nextDate)
     .slice(0, 6);
@@ -1564,6 +1611,7 @@ function Dashboard({ data, derived, actions }) {
                 <div className="min-w-0">
                   <div className="text-sm font-medium text-slate-700 truncate">{b.merchant}</div>
                   <div className="text-xs text-slate-400">Due {b.nextDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: b.nextDate.getFullYear() !== dashboardToday.getFullYear() ? "numeric" : undefined })}</div>
+                  {b.detected && <div className="text-[10px] text-indigo-500">Recognized from monthly transactions</div>}
                 </div>
                 <div className="text-sm font-semibold text-slate-700 shrink-0">{fmtCurrency(b.amount)}</div>
               </div>
