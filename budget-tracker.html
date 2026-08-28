@@ -375,7 +375,7 @@ function estimateMinPayment(account) {
   if (account.type === "credit") return Math.max(35, Math.abs(account.balance) * 0.03);
   // Existing car-loan records predate the required-payment field. Use the
   // household's current payment as their migration fallback until edited.
-  if (account.type === "loan") return 650;
+  if (account.type === "loan") return 712.15;
   return 0;
 }
 
