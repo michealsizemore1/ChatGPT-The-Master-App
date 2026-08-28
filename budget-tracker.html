@@ -94,6 +94,7 @@ const CATEGORY_META = {
   "Utilities":        { icon: "💡", color: "#f97316" },
   "Insurance":        { icon: "🛡️", color: "#0f766e" },
   "Service":          { icon: "🧰", color: "#7c3aed" },
+  "Credit Cards and Loans": { icon: "💳", color: "#be123c" },
   "Health & Fitness": { icon: "💪", color: "#22c55e" },
   "Travel":           { icon: "✈️", color: "#0ea5e9" },
   "Personal Care":    { icon: "🧴", color: "#d946ef" },
@@ -536,7 +537,7 @@ function detectUnknownSubscriptions(data) {
 // narrower than general recurring-charge detection so groceries and routine shopping
 // never become scheduled bills simply because the same store was visited twice.
 function detectRecurringHouseholdBills(data) {
-  const billCategories = new Set(["Housing", "Utilities", "Insurance", "Service", "Transportation", "Health & Fitness", "Personal Care", "Pets"]);
+  const billCategories = new Set(["Housing", "Utilities", "Insurance", "Service", "Credit Cards and Loans", "Transportation", "Health & Fitness", "Personal Care", "Pets"]);
   const billWords = /\b(rent|mortgage|loan|electric|power|energy|gas|water|sewer|utility|utilities|internet|phone|wireless|insurance|hoa|trash|garbage)\b/i;
   const knownNames = [...(data.subscriptions || []), ...(data.recurringBills || [])].map(item => normalizeMerchantName(item.merchant));
   const isKnown = name => knownNames.some(known => known && (name.includes(known) || known.includes(name)));
