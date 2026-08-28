@@ -797,6 +797,14 @@ function ensureUserNamedSubscriptions(data) { return data; }
 
 function normalizeBudgetData(data) {
   const normalizedSubscriptions = (data.subscriptions || []).map(subscription => {
+    if (/sirius\s*xm/i.test(String(subscription.merchant || ""))) {
+      return {
+        ...subscription,
+        cadence: "Semi-Annual",
+        dayOfMonth: 6,
+        billingDates: [{ month: 1, day: 6 }, { month: 7, day: 7 }],
+      };
+    }
     if (!/experian/i.test(String(subscription.merchant || ""))) return subscription;
     const now = new Date(todayISO() + "T00:00:00");
     let anchorYear = now.getFullYear();
@@ -1181,7 +1189,7 @@ function useDerived(data) {
       // Non-monthly subscriptions (Quarterly/Semi-Annual/Annual) only count toward this
       // month's bills/Safe-to-Spend when they're actually due this month — otherwise a
       // once-a-year charge would wrongly look like it's owed every single month.
-      ...data.subscriptions.filter(s => s.active && subDueInMonth(s, now.getFullYear(), now.getMonth() + 1)).map(s => ({ id: s.id, merchant: s.merchant, amount: s.amount, dayOfMonth: s.dayOfMonth, person: s.person, category: s.category, paid: !!paidForMonth[s.id] })),
+      ...data.subscriptions.filter(s => s.active && subDueInMonth(s, now.getFullYear(), now.getMonth() + 1)).map(s => ({ id: s.id, merchant: s.merchant, amount: s.amount, dayOfMonth: subscriptionDayForMonth(s, now.getFullYear(), now.getMonth() + 1), person: s.person, category: s.category, paid: !!paidForMonth[s.id] })),
     ];
     const upcomingBillsRemaining = recurringItems.filter(b => b.dayOfMonth > todayDay && !b.paid).reduce((s, b) => s + b.amount, 0);
     const checkingAccount = data.accounts.find(a => a.type === "checking");
@@ -1411,7 +1419,7 @@ function Dashboard({ data, derived, actions }) {
     if (paidThisMonth[subscription.id] && monthKey(nextDate.toISOString().slice(0, 10)) === dashboardMonth) {
       const interval = subCadence(subscription) === "Quarterly" ? 3 : subCadence(subscription) === "Semi-Annual" ? 6 : subCadence(subscription) === "Annual" ? 12 : 1;
       const probe = new Date(nextDate.getFullYear(), nextDate.getMonth() + interval, 1);
-      nextDate = new Date(probe.getFullYear(), probe.getMonth(), Math.min(Number(subscription.dayOfMonth) || 1, daysInMonth(probe.getFullYear(), probe.getMonth() + 1)));
+      nextDate = new Date(probe.getFullYear(), probe.getMonth(), Math.min(subscriptionDayForMonth(subscription, probe.getFullYear(), probe.getMonth() + 1), daysInMonth(probe.getFullYear(), probe.getMonth() + 1)));
     }
     return { id: subscription.id, merchant: subscription.merchant, amount: subscription.amount, category: subscription.category, nextDate };
   });
@@ -3570,11 +3578,17 @@ function subCadence(s) { return s.cadence || "Monthly"; }
 function subYearlyAmount(s) { return s.amount * (CADENCE_PER_YEAR[subCadence(s)] || 12); }
 function subMonthlyEquivalent(s) { return subYearlyAmount(s) / 12; }
 
+function subscriptionDayForMonth(s, year, month) {
+  const custom = (s.billingDates || []).find(date => Number(date.month) === Number(month));
+  return custom ? Number(custom.day) : Number(s.dayOfMonth) || 1;
+}
+
 // Whether a subscription actually bills in a given calendar month. Monthly ones always do.
 // Quarterly/Semi-Annual/Annual ones only recur every 3/6/12 months from their last billed
 // date (from priceHistory), so e.g. an Annual subscription last charged in April should only
 // show on the calendar in April of each year — not every month.
 function subDueInMonth(s, year, month) {
+  if ((s.billingDates || []).length) return s.billingDates.some(date => Number(date.month) === Number(month));
   const cadence = subCadence(s);
   if (cadence === "Monthly") return true;
   const last = s.priceHistory && s.priceHistory.length ? s.priceHistory[s.priceHistory.length - 1].date : null;
@@ -3587,6 +3601,10 @@ function subDueInMonth(s, year, month) {
 
 function subscriptionScheduleLabel(s) {
   const cadence = subCadence(s);
+  if ((s.billingDates || []).length) {
+    const dates = [...s.billingDates].sort((a, b) => Number(a.month) - Number(b.month)).map(date => new Date(2000, Number(date.month) - 1, Number(date.day)).toLocaleDateString("en-US", { month: "short", day: "numeric" })).join(" and ");
+    return `Bills twice a year · ${dates} · ${s.category}`;
+  }
   if (cadence === "Monthly") {
     const today = new Date(todayISO() + "T00:00:00");
     let year = today.getFullYear();
@@ -3612,7 +3630,7 @@ function subscriptionNextChargeDate(s) {
     const year = probe.getFullYear();
     const month = probe.getMonth() + 1;
     if (!subDueInMonth(s, year, month)) continue;
-    const day = Math.min(Number(s.dayOfMonth) || 1, daysInMonth(year, month));
+    const day = Math.min(subscriptionDayForMonth(s, year, month), daysInMonth(year, month));
     const candidate = new Date(year, month - 1, day);
     if (candidate >= today) return candidate;
   }
@@ -4166,7 +4184,7 @@ function CashFlow({ data, derived, actions }) {
   const paidForViewMonth = (data.paidBills && data.paidBills[viewMonthKey]) || {};
   const items = [
     ...(data.recurringBills || []).map(b => ({ id: b.id, merchant: b.merchant, amount: b.amount, dayOfMonth: Math.min(b.dayOfMonth, dimView), category: b.category, paid: !!paidForViewMonth[b.id], income: false })),
-    ...data.subscriptions.filter(s => s.active && subDueInMonth(s, viewYear, viewMonth)).map(s => ({ id: s.id, merchant: s.merchant, amount: s.amount, dayOfMonth: Math.min(s.dayOfMonth, dimView), category: s.category, paid: !!paidForViewMonth[s.id], income: false })),
+    ...data.subscriptions.filter(s => s.active && subDueInMonth(s, viewYear, viewMonth)).map(s => ({ id: s.id, merchant: s.merchant, amount: s.amount, dayOfMonth: Math.min(subscriptionDayForMonth(s, viewYear, viewMonth), dimView), category: s.category, paid: !!paidForViewMonth[s.id], income: false })),
     ...data.transactions.filter(t => t.category === "Income" && monthKey(t.date) === viewMonthKey).map(t => ({ merchant: t.merchant, amount: t.amount, dayOfMonth: new Date(t.date + "T00:00:00").getDate(), income: true })),
   ];
 
