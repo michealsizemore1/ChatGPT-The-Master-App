@@ -4532,8 +4532,6 @@ function Accounts({ data, actions, derived }) {
 
       <DebtPayoffPlanner debtAccounts={debtAccounts} />
 
-      <ReconciliationPanel data={data} actions={actions} />
-
       <AccountModal open={modalOpen} onClose={() => setModalOpen(false)} onSave={save} initial={editing} />
     </div>
   );
