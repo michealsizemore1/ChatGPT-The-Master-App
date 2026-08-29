@@ -2796,6 +2796,15 @@ body{
       <span>&#x1F4A7; <strong id="totWater">—</strong> water</span>
     </div>
     <div id="calorieOverIndicator" role="status" aria-live="polite" style="display:none;margin-top:8px;border:1px solid #fca5a5;border-radius:8px;background:#fee2e2;color:#991b1b;padding:8px 10px;font-size:.8rem;font-weight:900;"></div>
+    <div id="dailyFoodQuality" style="display:none;margin-top:8px;padding:8px 9px;background:#fff;border:1px solid #dbe3ec;border-radius:8px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.76rem;font-weight:800;color:#334155;margin-bottom:6px;">
+        <span>Daily food quality</span><span id="dailyFoodQualityLabel">—</span>
+      </div>
+      <div style="height:11px;position:relative;border-radius:999px;background:linear-gradient(90deg,#dc2626 0%,#f97316 25%,#facc15 50%,#84cc16 75%,#16a34a 100%);box-shadow:inset 0 0 0 1px rgba(15,23,42,.12);" role="meter" aria-label="Overall runner food quality for all meals" aria-valuemin="1" aria-valuemax="10" id="dailyFoodQualityTrack">
+        <span id="dailyFoodQualityMarker" style="position:absolute;top:50%;left:0%;width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #0f172a;box-sizing:border-box;transform:translate(-50%,-50%);box-shadow:0 1px 3px rgba(15,23,42,.35);"></span>
+      </div>
+      <div id="dailyFoodQualityNote" style="font-size:.66rem;color:#64748b;line-height:1.35;margin-top:5px;">Across all meals today</div>
+    </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;padding-top:6px;border-top:1px dashed #dcdcdc;font-size:0.74rem;color:#666;">
       <span>&#x1FA78; <strong id="totIron">0</strong>mg iron</span>
       <span>&#x1F9B4; <strong id="totCalcium">0</strong>mg calcium</span>
@@ -6263,6 +6272,19 @@ function updateMacroTotals(){
   if(calorieIndicator){calorieIndicator.style.display=calorieOver?'block':'none';calorieIndicator.innerHTML=calorieOver?'&#x26A0;&#xFE0F; Over daily calorie target by '+calorieOver.toLocaleString()+' kcal':'';}
   if(calorieTotal)calorieTotal.style.color=calorieOver?'#b91c1c':'';
   if(bar){bar.style.borderColor=calorieOver?'#ef4444':'#e9ecef';bar.style.background=calorieOver?'#fff7f7':'#f8f9fa';}
+  // Daily food quality is calorie-weighted across every logged food in all meal sections.
+  // This lets the overall bar reflect what made up most of the day's intake while still
+  // including zero-calorie entries with a small fallback weight.
+  var qualityWrap=document.getElementById('dailyFoodQuality'),qualityLabel=document.getElementById('dailyFoodQualityLabel'),qualityMarker=document.getElementById('dailyFoodQualityMarker'),qualityTrack=document.getElementById('dailyFoodQualityTrack'),qualityNote=document.getElementById('dailyFoodQualityNote');
+  if(qualityWrap){
+    if(!log.length){qualityWrap.style.display='none';}
+    else {
+      var qualityTotal=0,qualityWeight=0;
+      log.forEach(function(item){var quality=runnerFoodQuality(item),servings=Math.max(0.01,parseFloat(item.servings)||1),calories=Math.max(0,(parseFloat(item.cal)||0)*servings),weight=calories||servings;qualityTotal+=quality.score*weight;qualityWeight+=weight;});
+      var dailyScore=qualityWeight?qualityTotal/qualityWeight:5,dailyLabel=dailyScore>=9?'Excellent':dailyScore>=7?'Good':dailyScore>=5?'Fair':dailyScore>=3?'Low':'Poor',markerLeft=Math.max(0,Math.min(100,(dailyScore-1)/9*100));
+      qualityWrap.style.display='block';if(qualityLabel)qualityLabel.textContent=dailyScore.toFixed(1)+'/10 · '+dailyLabel;if(qualityMarker)qualityMarker.style.left=markerLeft+'%';if(qualityTrack)qualityTrack.setAttribute('aria-valuenow',dailyScore.toFixed(1));if(qualityNote)qualityNote.textContent='Across '+log.length+' food item'+(log.length===1?'':'s')+' in all meals today · weighted by calories';
+    }
+  }
   // Macro ratios use caloric contribution: protein/carbohydrates = 4 kcal/g, fat = 9 kcal/g.
   // Since totals aggregate the full food log, all six meal sections are included.
   var macroCalories={prot:totals.prot*4,carbs:totals.carbs*4,fat:totals.fat*9};
