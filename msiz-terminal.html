@@ -408,12 +408,31 @@
     .chart-tabs::-webkit-scrollbar-thumb,
     .chart-legend::-webkit-scrollbar-thumb,
     .mini-charts::-webkit-scrollbar-thumb { background:var(--accent-dim); border-radius:8px; }
-    .mobile-x-scroll > table { min-width:680px; width:680px !important; }
-    .panel table th { font-size:10px !important; padding:7px 8px !important; }
-    .panel table td { font-size:12px !important; padding:7px 8px !important; }
-    .holdings-table td:nth-child(2) { font-size:11px !important; }
-    .panel input, .panel select, .panel button { font-size:12px !important; min-height:32px; }
-    .watch-note, .news-item, .metric-label, .metric-value { font-size:12px !important; line-height:1.55; }
+    .mobile-x-scroll > table { min-width:540px; width:540px !important; }
+    .panel table th { font-size:11px !important; padding:6px !important; }
+    .panel table td { font-size:13px !important; padding:6px !important; }
+    .holdings-table td:nth-child(2) { font-size:12px !important; }
+    .panel input, .panel select, .panel button { font-size:13px !important; min-height:34px; }
+    .panel [style*="font-size:7px"],
+    .panel [style*="font-size:8px"],
+    .panel [style*="font-size:9px"],
+    .panel [style*="font-size:9.5px"] { font-size:11px !important; }
+    .alloc-group-label, .alloc-watch-note, .div-cal-header span,
+    .ss-k, .sm-block-title, .news-source, .news-time,
+    .etf-cmp-label, .tsp-note { font-size:11px !important; }
+    .alloc-row, .ss-v, .risk-row, .exposure-table,
+    .corr-table, .watch-note, .news-item, .metric-label,
+    .metric-value, .sm-kv-k, .sm-kv-v { font-size:12px !important; line-height:1.55; }
+    .ss-name, .news-headline { font-size:13px !important; line-height:1.5; }
+    .ss-sym { font-size:17px !important; }
+    .ss-price { font-size:16px !important; }
+    .risk-row { padding:7px 4px; }
+    .news-filter-chip { font-size:11px !important; padding:5px 7px; }
+    .news-ticker-tag, .watch-badge, .div-cal-soon, .div-cal-paid { font-size:10px !important; }
+    .corr-table th, .corr-table td, .exposure-table th, .exposure-table td { font-size:11px !important; padding:6px !important; }
+    #aiBriefText, #askAiResponse { font-size:13px !important; line-height:1.55 !important; }
+    #ptTotal { font-size:17px !important; }
+    #ptDayPnl { font-size:12px !important; }
     #holdingsWrap {
       display:block;
       width:100%;
@@ -429,7 +448,7 @@
     #holdingsWrap::-webkit-scrollbar { height:7px; }
     #holdingsWrap::-webkit-scrollbar-track { background:var(--bg-panel2); }
     #holdingsWrap::-webkit-scrollbar-thumb { background:var(--accent-dim); border-radius:8px; }
-    #holdingsTable { min-width:760px !important; width:760px; }
+    #holdingsTable { min-width:620px !important; width:620px; }
     #marketStripScroll {
       display:block;
       width:100%;
@@ -445,17 +464,18 @@
     #marketStripScroll::-webkit-scrollbar { height:7px; }
     #marketStripScroll::-webkit-scrollbar-track { background:var(--bg-panel2); }
     #marketStripScroll::-webkit-scrollbar-thumb { background:var(--accent-dim); border-radius:8px; }
-    #indicesRow, #futuresRow { width:920px; min-width:920px !important; height:58px !important; }
-    #indicesRow > div, #futuresRow > div { min-width:220px !important; padding:0 16px !important; }
+    #indicesRow, #futuresRow { width:960px; min-width:960px !important; height:58px !important; }
+    #indicesRow > div, #futuresRow > div { min-width:230px !important; padding:0 12px !important; overflow:hidden; }
     #indicesRow > div > div:first-child,
     #futuresRow > div > div:first-child { font-size:10px !important; }
     #indicesRow [id$="-price"], #futuresRow [id$="-price"] { font-size:18px !important; }
     #indicesRow [id$="-chg"], #futuresRow [id$="-chg"] { font-size:14px !important; }
     #indicesRow [id$="-pt"] { font-size:12px !important; }
-    .chart-tab, .range-tab { font-size:11px !important; padding:9px 11px !important; white-space:nowrap; }
+    .chart-tab, .range-tab { font-size:12px !important; padding:9px !important; white-space:nowrap; }
     .chart-tabs { display:flex; min-height:42px; }
     .chart-tabs > * { flex:0 0 auto; }
-    .chart-legend { white-space:nowrap; padding-bottom:5px; }
+    .chart-legend { white-space:nowrap; padding-bottom:5px; gap:9px; }
+    .legend-item, .mini-chart-label { font-size:12px !important; }
     #selectedInfoStrip { white-space:nowrap; font-size:12px !important; min-height:38px !important; }
     .mini-charts { display:flex !important; gap:8px; }
     .mini-charts > * { flex:0 0 230px; min-width:230px; }
@@ -1736,17 +1756,20 @@ function buildMainChart(){
   const isNorm=activeChartType==='normalized', isCum=activeChartType==='cumreturn';
   const isVol=activeChartType==='rollingvol', isPrice=activeChartType==='prices';
   const yLabel=isNorm?'Normalized (Base=100)':isCum?'Cumul Return %':isVol?'Rolling Vol % (ann)':'Price (USD)';
+  const mobileChart = window.matchMedia('(max-width: 760px)').matches;
+  const axisFont = mobileChart ? 11 : 8;
+  const tooltipFont = mobileChart ? 12 : 9;
   const scales={
-    x:{grid:{color:'rgba(26,40,64,0.5)',drawBorder:false},ticks:{maxTicksLimit:8,maxRotation:0,font:{size:8},callback:(v,i)=>{const d=new Date(dates[i]);return`${d.toLocaleString('en',{month:'short'})} '${String(d.getFullYear()).slice(2)}`}}},
-    y:{grid:{color:'rgba(26,40,64,0.6)',drawBorder:false},ticks:{font:{size:8},maxTicksLimit:7},title:{display:true,text:yLabel,color:'#4a6a84',font:{size:8}}},
+    x:{grid:{color:'rgba(26,40,64,0.5)',drawBorder:false},ticks:{maxTicksLimit:mobileChart?5:8,maxRotation:0,font:{size:axisFont},callback:(v,i)=>{const d=new Date(dates[i]);return`${d.toLocaleString('en',{month:'short'})} '${String(d.getFullYear()).slice(2)}`}}},
+    y:{grid:{color:'rgba(26,40,64,0.6)',drawBorder:false},ticks:{font:{size:axisFont},maxTicksLimit:7},title:{display:true,text:yLabel,color:'#4a6a84',font:{size:axisFont}}},
   };
-  if(isPrice)scales['ySGOV']={position:'right',grid:{drawOnChartArea:false},ticks:{font:{size:8},maxTicksLimit:5},title:{display:true,text:'SGOV',color:COLORS.SGOV,font:{size:7}}};
+  if(isPrice)scales['ySGOV']={position:'right',grid:{drawOnChartArea:false},ticks:{font:{size:axisFont},maxTicksLimit:5},title:{display:true,text:'SGOV',color:COLORS.SGOV,font:{size:axisFont}}};
   mainChartInstance=new Chart(canvas,{
     type:'line', data:{labels:dates,datasets},
     options:{responsive:false,maintainAspectRatio:false,animation:{duration:300},
       interaction:{mode:'index',intersect:false},
       plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(7,13,26,0.95)',borderColor:'#1a2840',borderWidth:1,
-        titleFont:{size:9,family:'IBM Plex Mono'},bodyFont:{size:9,family:'IBM Plex Mono'},
+        titleFont:{size:tooltipFont,family:'IBM Plex Mono'},bodyFont:{size:tooltipFont,family:'IBM Plex Mono'},
         callbacks:{label:(ctx)=>{const v=ctx.raw;if(v==null)return null;
           const pre=ctx.dataset.label+': ';
           if(isNorm)return pre+fmt(v,2);
