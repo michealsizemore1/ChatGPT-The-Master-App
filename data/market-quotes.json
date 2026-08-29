@@ -1,12 +1,12 @@
 {
-  "updatedAt": "2026-08-29T05:06:57+00:00",
+  "updatedAt": "2026-08-29T13:23:39+00:00",
   "source": "Yahoo Finance public chart data",
   "quotes": {
     "SCHD": {
       "price": 34.9,
-      "prev": 35.11,
-      "change": -0.21,
-      "changesPercentage": -0.5981,
+      "prev": 34.83,
+      "change": 0.07,
+      "changesPercentage": 0.201,
       "volume": 20950162,
       "avgVolume": 23829012,
       "yearHigh": 35.31,
@@ -16,9 +16,9 @@
     },
     "QQQM": {
       "price": 295.0,
-      "prev": 293.76,
-      "change": 1.24,
-      "changesPercentage": 0.4221,
+      "prev": 296.92,
+      "change": -1.92,
+      "changesPercentage": -0.6466,
       "volume": 2635688,
       "avgVolume": 2848677,
       "yearHigh": 308.21,
@@ -28,9 +28,9 @@
     },
     "SGOV": {
       "price": 100.69,
-      "prev": 100.63,
-      "change": 0.06,
-      "changesPercentage": 0.0596,
+      "prev": 100.66,
+      "change": 0.03,
+      "changesPercentage": 0.0298,
       "volume": 24268084,
       "avgVolume": 19297376,
       "yearHigh": 100.73,
@@ -40,9 +40,9 @@
     },
     "SMH": {
       "price": 553.11,
-      "prev": 560.42,
-      "change": -7.31,
-      "changesPercentage": -1.3044,
+      "prev": 573.0,
+      "change": -19.89,
+      "changesPercentage": -3.4712,
       "volume": 6301415,
       "avgVolume": 6102223,
       "yearHigh": 671.83,
@@ -52,9 +52,9 @@
     },
     "IBIT": {
       "price": 43.9,
-      "prev": 43.68,
-      "change": 0.22,
-      "changesPercentage": 0.5037,
+      "prev": 45.29,
+      "change": -1.39,
+      "changesPercentage": -3.0691,
       "volume": 76502152,
       "avgVolume": 68090030,
       "yearHigh": 71.82,
@@ -64,9 +64,9 @@
     },
     "^GSPC": {
       "price": 7711.76,
-      "prev": 7674.37,
-      "change": 37.39,
-      "changesPercentage": 0.4872,
+      "prev": 7730.99,
+      "change": -19.23,
+      "changesPercentage": -0.2487,
       "volume": 2589484000,
       "avgVolume": 3942672800,
       "yearHigh": 7816.7,
@@ -76,9 +76,9 @@
     },
     "^DJI": {
       "price": 53559.99,
-      "prev": 53277.01,
-      "change": 282.98,
-      "changesPercentage": 0.5311,
+      "prev": 53569.4,
+      "change": -9.41,
+      "changesPercentage": -0.0176,
       "volume": 507511504,
       "avgVolume": 476678300,
       "yearHigh": 54744.33,
@@ -88,9 +88,9 @@
     },
     "^IXIC": {
       "price": 26402.424,
-      "prev": 26180.46,
-      "change": 221.964,
-      "changesPercentage": 0.8478,
+      "prev": 26541.352,
+      "change": -138.928,
+      "changesPercentage": -0.5234,
       "volume": 7526280000,
       "avgVolume": 7368430000,
       "yearHigh": 27190.21,
@@ -100,9 +100,9 @@
     },
     "DX-Y.NYB": {
       "price": 99.677,
-      "prev": 99.0,
-      "change": 0.677,
-      "changesPercentage": 0.6838,
+      "prev": 99.702,
+      "change": -0.025,
+      "changesPercentage": -0.0251,
       "volume": 0,
       "avgVolume": 0,
       "yearHigh": 101.8,
@@ -112,9 +112,9 @@
     },
     "GC=F": {
       "price": 4529.9,
-      "prev": 4640.8,
-      "change": -110.9,
-      "changesPercentage": -2.3897,
+      "prev": 4664.0,
+      "change": -134.1,
+      "changesPercentage": -2.8752,
       "volume": 268759,
       "avgVolume": 54476,
       "yearHigh": 5586.2,
@@ -124,9 +124,9 @@
     },
     "CL=F": {
       "price": 83.4,
-      "prev": 85.01,
-      "change": -1.61,
-      "changesPercentage": -1.8939,
+      "prev": 83.53,
+      "change": -0.13,
+      "changesPercentage": -0.1556,
       "volume": 142318,
       "avgVolume": 231197,
       "yearHigh": 119.48,
@@ -135,12 +135,12 @@
       "currency": "USD"
     },
     "BTC-USD": {
-      "price": 77668.42,
-      "prev": 78564.98,
-      "change": -896.56,
-      "changesPercentage": -1.1412,
-      "volume": 33905477632,
-      "avgVolume": 35998915251,
+      "price": 77681.66,
+      "prev": 77838.39,
+      "change": -156.73,
+      "changesPercentage": -0.2014,
+      "volume": 30427854848,
+      "avgVolume": 35129509555,
       "yearHigh": 126198.07,
       "yearLow": 57747.766,
       "marketState": "",
@@ -148,9 +148,9 @@
     },
     "EURUSD=X": {
       "price": 1.1587,
-      "prev": 1.1682,
-      "change": -0.0095,
-      "changesPercentage": -0.8132,
+      "prev": 1.1659,
+      "change": -0.0072,
+      "changesPercentage": -0.6175,
       "volume": 0,
       "avgVolume": 0,
       "yearHigh": 1.2024,
@@ -160,9 +160,9 @@
     },
     "JPY=X": {
       "price": 160.038,
-      "prev": 158.904,
-      "change": 1.134,
-      "changesPercentage": 0.7136,
+      "prev": 159.371,
+      "change": 0.667,
+      "changesPercentage": 0.4185,
       "volume": 0,
       "avgVolume": 0,
       "yearHigh": 163.979,
@@ -172,9 +172,9 @@
     },
     "^VIX": {
       "price": 14.43,
-      "prev": 15.85,
-      "change": -1.42,
-      "changesPercentage": -8.959,
+      "prev": 14.51,
+      "change": -0.08,
+      "changesPercentage": -0.5513,
       "volume": 0,
       "avgVolume": 0,
       "yearHigh": 35.3,
@@ -184,9 +184,9 @@
     },
     "HG=F": {
       "price": 6.659,
-      "prev": 6.599,
-      "change": 0.06,
-      "changesPercentage": 0.9092,
+      "prev": 6.689,
+      "change": -0.03,
+      "changesPercentage": -0.4485,
       "volume": 37352,
       "avgVolume": 8123,
       "yearHigh": 6.75,
@@ -198,9 +198,9 @@
   "futures": {
     "ES=F": {
       "price": 7722.0,
-      "prev": 7669.75,
-      "change": 52.25,
-      "changesPercentage": 0.6812,
+      "prev": 7742.5,
+      "change": -20.5,
+      "changesPercentage": -0.2648,
       "volume": 1456221,
       "avgVolume": 1142861,
       "yearHigh": 7838.5,
@@ -210,9 +210,9 @@
     },
     "YM=F": {
       "price": 53584.0,
-      "prev": 53489.0,
-      "change": 95.0,
-      "changesPercentage": 0.1776,
+      "prev": 53621.0,
+      "change": -37.0,
+      "changesPercentage": -0.069,
       "volume": 56319,
       "avgVolume": 51622,
       "yearHigh": 54884.0,
@@ -222,9 +222,9 @@
     },
     "NQ=F": {
       "price": 29491.75,
-      "prev": 29105.75,
-      "change": 386.0,
-      "changesPercentage": 1.3262,
+      "prev": 29695.75,
+      "change": -204.0,
+      "changesPercentage": -0.687,
       "volume": 572237,
       "avgVolume": 501731,
       "yearHigh": 30968.0,
@@ -235,49 +235,45 @@
   },
   "gainers": [
     {
-      "sym": "IBIT",
-      "name": "IBIT",
-      "price": 43.9,
-      "chg": 0.5037
-    },
-    {
-      "sym": "QQQM",
-      "name": "QQQM",
-      "price": 295.0,
-      "chg": 0.4221
+      "sym": "SCHD",
+      "name": "SCHD",
+      "price": 34.9,
+      "chg": 0.201
     },
     {
       "sym": "SGOV",
       "name": "SGOV",
       "price": 100.69,
-      "chg": 0.0596
+      "chg": 0.0298
     },
     {
-      "sym": "SCHD",
-      "name": "SCHD",
-      "price": 34.9,
-      "chg": -0.5981
+      "sym": "QQQM",
+      "name": "QQQM",
+      "price": 295.0,
+      "chg": -0.6466
+    },
+    {
+      "sym": "IBIT",
+      "name": "IBIT",
+      "price": 43.9,
+      "chg": -3.0691
     },
     {
       "sym": "SMH",
       "name": "SMH",
       "price": 553.11,
-      "chg": -1.3044
+      "chg": -3.4712
     }
   ],
   "news": [
-    "Investors Expect Higher Rates After Fed Chairman\u2019s Inflation Pledge - The New York Times",
-    "The bond market prepares for a hike to interest rates, while US stocks drift lower - Orlando Sentinel",
+    "Investors bet on hike to interest rates as stocks dip - Northwest Arkansas Democrat-Gazette",
+    "What to Look Out for in Economic Data This Week (August 31-September 4) - Kiplinger",
     "If the Federal Reserve Hikes Interest Rates in 2026, History Has Good and Bad News for Investors - The Motley Fool",
-    "Investors, Fed watchers want one thing from Kevin Warsh in his Jackson Hole debut: Clarity - Yahoo Finance",
     "Markets Brace for Possible Rate Hike After Kevin Warsh\u2019s Hawkish Turn - WSJ",
-    "If the Federal Reserve Hikes Interest Rates in 2026, History Has Good and Bad News for Investors - The Globe and Mail",
-    "Stock Market Today: S&P 500, Nasdaq 100 Futures Slip Ahead of Kevin Warsh's Jackson Hole Speech \u2014 MRVL, PYPL, IREN, GAP in Focus - TradingView",
-    "\u3010US Pre-Market\u3011Market Focuses on Warsh Speech; Optical Communication and Storage Stocks Broadly Fall, PayPal Plunges Over 16%, Marvell Technology Drops Over 8% - TradingKey",
-    "Jackson Hole Focus: Why Nvidia Now Matters More Than the Fed for Markets - CryptoRank",
     "Investors heartened by Warsh inflation talk, still uncertain about Fed action - The Economic Times",
-    "KOSPI retreats as investors turn cautious ahead of Fed chair's rate clues - The Korea Times",
-    "US Stock Market: Warsh Jackson Hole speech puts Fed policy communication under scrutiny - The Economic Times"
+    "If the Federal Reserve Hikes Interest Rates in 2026, History Has Good and Bad News for Investors - The Globe and Mail",
+    "US Stocks Open Mixed as Investors Weigh Rate Path and Earnings - CryptoRank",
+    "US Stock Market Today: Dow Jones, NASDAQ & S&P 500 Major Indexes Trading Mix Amid Oil Prices Stemming from Regional Iran Conflict | Here\u2019s What Investors Should Watch - The Sunday Guardian"
   ],
   "economy": [
     "CPI 2026-07 | 3.5% YoY",
@@ -288,16 +284,14 @@
     "2-Year Treasury 2026-08-27 | 4.20%"
   ],
   "macro": [
-    "DXY  99.68 \u25b20.68%",
-    "Gold  $4,529.90 \u25bc2.39%",
-    "WTI  $83.40 \u25bc1.89%",
-    "Bitcoin  $77,668 \u25bc1.14%",
-    "EUR/USD  1.1587 \u25bc0.81%",
-    "USD/JPY  160.04 \u25b20.71%",
-    "VIX  14.43 \u25bc8.96%",
-    "Copper  $6.659 \u25b20.91%"
+    "DXY  99.68 \u25bc0.03%",
+    "Gold  $4,529.90 \u25bc2.88%",
+    "WTI  $83.40 \u25bc0.16%",
+    "Bitcoin  $77,682 \u25bc0.20%",
+    "EUR/USD  1.1587 \u25bc0.62%",
+    "USD/JPY  160.04 \u25b20.42%",
+    "VIX  14.43 \u25bc0.55%",
+    "Copper  $6.659 \u25bc0.45%"
   ],
-  "errors": {
-    "economy": "The read operation timed out"
-  }
+  "errors": {}
 }

@@ -58,9 +58,26 @@ def fetch_quote(symbol: str) -> dict:
     closes = [value for value in quote_rows.get("close", []) if value is not None]
     volumes = [value for value in quote_rows.get("volume", []) if value is not None]
     price = meta.get("regularMarketPrice") or (closes[-1] if closes else None)
-    previous = meta.get("chartPreviousClose") or meta.get("previousClose")
-    if previous is None and len(closes) > 1:
-        previous = closes[-2]
+    # With a multi-day range, Yahoo's chartPreviousClose can refer to the close
+    # before the whole range. A one-day intraday request returns the immediately
+    # preceding close used on Yahoo Finance's own quote cards.
+    prior_url = (
+        f"https://query1.finance.yahoo.com/v8/finance/chart/{encoded}"
+        "?interval=1h&range=1d"
+    )
+    prior_request = urllib.request.Request(
+        prior_url,
+        headers={
+            "User-Agent": "Mozilla/5.0 (compatible; MSIZ-Terminal-Updater/1.0)",
+            "Accept": "application/json",
+        },
+    )
+    with urllib.request.urlopen(prior_request, timeout=20) as response:
+        prior_payload = json.load(response)
+    prior_meta = prior_payload["chart"]["result"][0].get("meta", {})
+    previous = prior_meta.get("previousClose") or prior_meta.get("chartPreviousClose")
+    if previous is None:
+        previous = closes[-1] if closes else meta.get("chartPreviousClose")
     if price is None:
         raise ValueError(f"No price returned for {symbol}")
 
