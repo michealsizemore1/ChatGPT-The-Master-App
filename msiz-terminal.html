@@ -371,6 +371,22 @@
     .panel-body { overflow:visible; }
     #rightPanelBody { overflow:visible !important; }
     .hscroll-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+    #holdingsWrap {
+      display:block;
+      width:100%;
+      max-width:100vw;
+      overflow-x:auto !important;
+      overflow-y:hidden;
+      overscroll-behavior-x:contain;
+      -webkit-overflow-scrolling:touch;
+      touch-action:pan-x pan-y;
+      scrollbar-width:thin;
+      scrollbar-color:var(--accent-dim) var(--bg-panel2);
+    }
+    #holdingsWrap::-webkit-scrollbar { height:7px; }
+    #holdingsWrap::-webkit-scrollbar-track { background:var(--bg-panel2); }
+    #holdingsWrap::-webkit-scrollbar-thumb { background:var(--accent-dim); border-radius:8px; }
+    #holdingsTable { min-width:760px !important; width:760px; }
     .main-chart-wrap, .chart-area { min-width:0; }
   }
 </style>
