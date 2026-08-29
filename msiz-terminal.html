@@ -800,13 +800,13 @@
   </div>
   <!-- RIGHT PANEL -->
   <div class="panel" id="panel-right" style="border-right:none;overflow:hidden;">
-    <div class="panel-header"><span class="ph-title">Risk Analytics</span></div>
+    <div class="panel-header" id="riskAnalyticsHeader" style="display:none"><span class="ph-title">Risk Analytics</span></div>
     <div class="panel-body" id="rightPanelBody" style="display:flex;flex-direction:column;">
-    <div id="selectedStats"></div>
-    <div class="section-divider"><span>Risk Metrics</span></div>
-    <div class="risk-section" id="riskSection"></div>
-    <div class="section-divider"><span>Exposure / Overlap</span></div>
-    <div style="padding:4px 6px;">
+    <div id="selectedStats" style="display:none"></div>
+    <div class="section-divider" id="riskMetricsHeader" style="display:none"><span>Risk Metrics</span></div>
+    <div class="risk-section" id="riskSection" style="display:none"></div>
+    <div class="section-divider" id="exposureOverlapHeader" style="display:none"><span>Exposure / Overlap</span></div>
+    <div id="exposureOverlapSection" style="padding:4px 6px;display:none">
       <table class="exposure-table">
         <thead><tr><th>Fund</th><th>VS</th><th>Overlap</th></tr></thead>
         <tbody>
@@ -817,8 +817,8 @@
         </tbody>
       </table>
     </div>
-    <div class="section-divider"><span>Correlation Matrix</span></div>
-    <div class="corr-section" id="corrSection"></div>
+    <div class="section-divider" id="correlationHeader" style="display:none"><span>Correlation Matrix</span></div>
+    <div class="corr-section" id="corrSection" style="display:none"></div>
     <div class="section-divider"><span>Cash &amp; Liquidity</span></div>
     <div style="padding:4px 6px;">
       <table class="exposure-table" style="width:100%;">
