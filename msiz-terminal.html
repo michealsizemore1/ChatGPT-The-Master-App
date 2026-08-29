@@ -342,8 +342,8 @@
   .contrib-bal-input::placeholder { color:var(--text-dim); }
   .master-home { display:grid; place-items:center; width:24px; height:24px; flex:0 0 24px; border:1px solid var(--border-light); border-radius:3px; color:var(--accent); text-decoration:none; font-size:15px; line-height:1; }
   .master-home:hover, .master-home:focus-visible { background:var(--accent-glow); border-color:var(--accent); outline:none; }
-  #app { grid-template-columns:minmax(0,1fr) 242px; }
-  #panel-left, #newsFeedHeader, #newsSection { display:none !important; }
+  #app { grid-template-columns:minmax(0,1fr); }
+  #panel-left, #panel-right, #newsFeedHeader, #newsSection { display:none !important; }
   @media (max-width: 760px) {
     html, body { height:auto; min-height:100%; overflow-x:hidden; overflow-y:auto; font-size:14px; }
     #topbar, #news-bar, #app { min-width:0; width:100%; }
@@ -743,7 +743,7 @@
       </div>
     </div>
     <!-- ETF COMPARISON TOOL -->
-    <div style="border-top:2px solid var(--accent);margin-top:4px;">
+    <div id="etfComparisonTool" style="border-top:2px solid var(--accent);margin-top:4px;display:none">
       <div class="div-cal-header">
         <span class="div-cal-title">&#9670; ETF COMPARISON TOOL</span>
         <span style="margin-left:auto;">SELECT METRIC TO COMPARE</span>
