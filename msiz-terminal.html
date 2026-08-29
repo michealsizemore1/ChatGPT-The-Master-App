@@ -765,6 +765,14 @@
         </table>
       </div>
     </section>
+    <section id="centerCorrelationSection" aria-label="Correlation matrix">
+      <div class="panel-header">
+        <span class="ph-title">Correlation Matrix</span>
+      </div>
+      <div class="hscroll-wrap">
+        <div class="corr-section" id="centerCorrSection"></div>
+      </div>
+    </section>
     <!-- FUTURES ROW -->
     <div id="futuresRow" style="display:flex;align-items:stretch;border-bottom:1px solid var(--border);background:var(--bg-panel2);height:38px;flex-shrink:0;min-width:0;">
       <div style="display:flex;flex-direction:column;justify-content:center;padding:0 14px;border-right:1px solid var(--border);gap:2px;flex:1;min-width:0;overflow:hidden;">
@@ -1679,7 +1687,6 @@ function renderAllocSection(){
 }
 // CORRELATION
 function renderCorrelation(){
-  const el=document.getElementById('corrSection');
   const tickers=['SCHD','QQQM','SGOV','SMH','IBIT'];
   const corr=HIST.correlation;
   function corrColor(v){
@@ -1702,7 +1709,10 @@ function renderCorrelation(){
     h+=`</tr>`;
   });
   h+=`</tbody></table>`;
-  el.innerHTML=h;
+  ['corrSection','centerCorrSection'].forEach(function(id){
+    const el=document.getElementById(id);
+    if(el) el.innerHTML=h;
+  });
 }
 // RISK
 function renderRiskSection(){
