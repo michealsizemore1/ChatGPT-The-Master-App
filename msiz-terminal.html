@@ -2004,7 +2004,17 @@ function applyLiveData(data){
 function fetchLiveQuotes(){
   fetch(MARKET_DATA_URL + '?v=' + Date.now(), {cache:'no-store'})
     .then(function(r){ return r.json(); })
-    .then(function(snapshot){ applyLiveData(snapshot.quotes || {}); })
+    .then(function(snapshot){
+      applyLiveData(snapshot.quotes || {});
+      var asOfEl = document.getElementById('holdingsDate');
+      if(asOfEl && snapshot.updatedAt){
+        var refreshed = new Date(snapshot.updatedAt);
+        asOfEl.textContent = 'UPDATED ' + refreshed.toLocaleString([], {
+          month:'short', day:'numeric', hour:'numeric', minute:'2-digit', timeZoneName:'short'
+        }).toUpperCase();
+        asOfEl.title = 'Automatic market update from ' + (snapshot.source || 'the scheduled market feed');
+      }
+    })
     .catch(function(){});
 }
 // ── STOCK SEARCH MODAL + MONTHLY CONTRIBUTIONS ─────────────────────────────
