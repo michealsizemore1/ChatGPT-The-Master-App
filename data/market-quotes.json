@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-29T04:52:14+00:00",
+  "updatedAt": "2026-08-29T05:05:20+00:00",
   "source": "Yahoo Finance public chart data",
   "quotes": {
     "SCHD": {
@@ -97,6 +97,102 @@
       "yearLow": 20690.25,
       "marketState": "",
       "currency": "USD"
+    },
+    "DX-Y.NYB": {
+      "price": 99.677,
+      "prev": 99.0,
+      "change": 0.677,
+      "changesPercentage": 0.6838,
+      "volume": 0,
+      "avgVolume": 0,
+      "yearHigh": 101.8,
+      "yearLow": 95.55,
+      "marketState": "",
+      "currency": "USD"
+    },
+    "GC=F": {
+      "price": 4529.9,
+      "prev": 4640.8,
+      "change": -110.9,
+      "changesPercentage": -2.3897,
+      "volume": 268759,
+      "avgVolume": 54476,
+      "yearHigh": 5586.2,
+      "yearLow": 3485.7,
+      "marketState": "",
+      "currency": "USD"
+    },
+    "CL=F": {
+      "price": 83.4,
+      "prev": 85.01,
+      "change": -1.61,
+      "changesPercentage": -1.8939,
+      "volume": 142318,
+      "avgVolume": 231197,
+      "yearHigh": 119.48,
+      "yearLow": 54.98,
+      "marketState": "",
+      "currency": "USD"
+    },
+    "BTC-USD": {
+      "price": 77674.01,
+      "prev": 78564.98,
+      "change": -890.97,
+      "changesPercentage": -1.1341,
+      "volume": 33956818944,
+      "avgVolume": 36011750579,
+      "yearHigh": 126198.07,
+      "yearLow": 57747.766,
+      "marketState": "",
+      "currency": "USD"
+    },
+    "EURUSD=X": {
+      "price": 1.1587,
+      "prev": 1.1682,
+      "change": -0.0095,
+      "changesPercentage": -0.8132,
+      "volume": 0,
+      "avgVolume": 0,
+      "yearHigh": 1.2024,
+      "yearLow": 1.1325,
+      "marketState": "",
+      "currency": "USD"
+    },
+    "JPY=X": {
+      "price": 160.038,
+      "prev": 158.904,
+      "change": 1.134,
+      "changesPercentage": 0.7136,
+      "volume": 0,
+      "avgVolume": 0,
+      "yearHigh": 163.979,
+      "yearLow": 146.217,
+      "marketState": "",
+      "currency": "JPY"
+    },
+    "^VIX": {
+      "price": 14.43,
+      "prev": 15.85,
+      "change": -1.42,
+      "changesPercentage": -8.959,
+      "volume": 0,
+      "avgVolume": 0,
+      "yearHigh": 35.3,
+      "yearLow": 13.38,
+      "marketState": "",
+      "currency": "USD"
+    },
+    "HG=F": {
+      "price": 6.659,
+      "prev": 6.599,
+      "change": 0.06,
+      "changesPercentage": 0.9092,
+      "volume": 37352,
+      "avgVolume": 8123,
+      "yearHigh": 6.75,
+      "yearLow": 4.472,
+      "marketState": "",
+      "currency": "USD"
     }
   },
   "futures": {
@@ -168,6 +264,38 @@
       "price": 553.11,
       "chg": -1.3044
     }
+  ],
+  "news": [
+    "Investors Expect Higher Rates After Fed Chairman\u2019s Inflation Pledge - The New York Times",
+    "The bond market prepares for a hike to interest rates, while US stocks drift lower - Orlando Sentinel",
+    "If the Federal Reserve Hikes Interest Rates in 2026, History Has Good and Bad News for Investors - The Motley Fool",
+    "Investors, Fed watchers want one thing from Kevin Warsh in his Jackson Hole debut: Clarity - Yahoo Finance",
+    "Markets Brace for Possible Rate Hike After Kevin Warsh\u2019s Hawkish Turn - WSJ",
+    "If the Federal Reserve Hikes Interest Rates in 2026, History Has Good and Bad News for Investors - The Globe and Mail",
+    "US Stocks Open Mixed as Investors Weigh Rate Path and Earnings - CryptoRank",
+    "Stock Market Today: S&P 500, Nasdaq 100 Futures Slip Ahead of Kevin Warsh's Jackson Hole Speech \u2014 MRVL, PYPL, IREN, GAP in Focus - TradingView",
+    "\u3010US Pre-Market\u3011Market Focuses on Warsh Speech; Optical Communication and Storage Stocks Broadly Fall, PayPal Plunges Over 16%, Marvell Technology Drops Over 8% - TradingKey",
+    "Investors heartened by Warsh inflation talk, still uncertain about Fed action - The Economic Times",
+    "KOSPI retreats as investors turn cautious ahead of Fed chair's rate clues - The Korea Times",
+    "US Stock Market: Warsh Jackson Hole speech puts Fed policy communication under scrutiny - The Economic Times"
+  ],
+  "economy": [
+    "CPI 2026-07 | 3.5% YoY",
+    "Core PCE 2026-07 | 3.3% YoY",
+    "Unemployment 2026-07 | 4.1%",
+    "Fed Funds 2026-07 | 3.63%",
+    "Real GDP 2026-04-01 | 1.5% annualized",
+    "2-Year Treasury 2026-08-27 | 4.20%"
+  ],
+  "macro": [
+    "DXY  99.68 \u25b20.68%",
+    "Gold  $4,529.90 \u25bc2.39%",
+    "WTI  $83.40 \u25bc1.89%",
+    "Bitcoin  $77,674 \u25bc1.13%",
+    "EUR/USD  1.1587 \u25bc0.81%",
+    "USD/JPY  160.04 \u25b20.71%",
+    "VIX  14.43 \u25bc8.96%",
+    "Copper  $6.659 \u25b20.91%"
   ],
   "errors": {}
 }

@@ -793,6 +793,11 @@ function fmtVol(n){
   return n.toString();
 }
 function colorClass(n){ return n>0?'up':n<0?'dn':'neutral'; }
+function escapeTickerText(value){
+  return String(value == null ? '' : value)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
 function getDateRange(rangeKey){
   const dates=HIST.dates, last=new Date(dates[dates.length-1]);
   let cutoff;
@@ -2006,6 +2011,15 @@ function fetchLiveQuotes(){
     .then(function(r){ return r.json(); })
     .then(function(snapshot){
       applyLiveData(snapshot.quotes || {});
+      var liveStrips = {news:snapshot.news, econ:snapshot.economy, macro:snapshot.macro};
+      Object.keys(liveStrips).forEach(function(id){
+        var values = liveStrips[id];
+        var strip = TB_STRIPS.find(function(item){ return item.id === id; });
+        if(strip && Array.isArray(values) && values.length){
+          strip.items = values.map(escapeTickerText);
+        }
+      });
+      renderAllStrips();
       var asOfEl = document.getElementById('holdingsDate');
       if(asOfEl && snapshot.updatedAt){
         var refreshed = new Date(snapshot.updatedAt);
