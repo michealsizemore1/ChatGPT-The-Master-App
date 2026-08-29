@@ -26,6 +26,7 @@ SYMBOLS = {
     "ES=F": "ES=F",
     "YM=F": "YM=F",
     "NQ=F": "NQ=F",
+    "BTC=F": "BTC=F",
     "DX-Y.NYB": "DX-Y.NYB",
     "GC=F": "GC=F",
     "CL=F": "CL=F",
@@ -223,8 +224,8 @@ def main() -> None:
     snapshot = {
         "updatedAt": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "source": "Yahoo Finance public chart data",
-        "quotes": {key: value for key, value in quotes.items() if key not in {"ES=F", "YM=F", "NQ=F"}},
-        "futures": {key: quotes[key] for key in ("ES=F", "YM=F", "NQ=F") if key in quotes},
+        "quotes": {key: value for key, value in quotes.items() if key not in {"ES=F", "YM=F", "NQ=F", "BTC=F"}},
+        "futures": {key: quotes[key] for key in ("ES=F", "YM=F", "NQ=F", "BTC=F") if key in quotes},
         "gainers": gainers,
         "news": news,
         "economy": economy,

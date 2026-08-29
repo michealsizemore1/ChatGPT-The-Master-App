@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-29T13:23:39+00:00",
+  "updatedAt": "2026-08-29T13:53:17+00:00",
   "source": "Yahoo Finance public chart data",
   "quotes": {
     "SCHD": {
@@ -135,12 +135,12 @@
       "currency": "USD"
     },
     "BTC-USD": {
-      "price": 77681.66,
+      "price": 77701.82,
       "prev": 77838.39,
-      "change": -156.73,
-      "changesPercentage": -0.2014,
-      "volume": 30427854848,
-      "avgVolume": 35129509555,
+      "change": -136.57,
+      "changesPercentage": -0.1755,
+      "volume": 29798987776,
+      "avgVolume": 34972292787,
       "yearHigh": 126198.07,
       "yearLow": 57747.766,
       "marketState": "",
@@ -231,6 +231,18 @@
       "yearLow": 22961.5,
       "marketState": "",
       "currency": "USD"
+    },
+    "BTC=F": {
+      "price": 77815.0,
+      "prev": 77835.0,
+      "change": -20.0,
+      "changesPercentage": -0.0257,
+      "volume": 49,
+      "avgVolume": 8111,
+      "yearHigh": 127240.0,
+      "yearLow": 57850.0,
+      "marketState": "",
+      "currency": "USD"
     }
   },
   "gainers": [
@@ -287,7 +299,7 @@
     "DXY  99.68 \u25bc0.03%",
     "Gold  $4,529.90 \u25bc2.88%",
     "WTI  $83.40 \u25bc0.16%",
-    "Bitcoin  $77,682 \u25bc0.20%",
+    "Bitcoin  $77,702 \u25bc0.18%",
     "EUR/USD  1.1587 \u25bc0.62%",
     "USD/JPY  160.04 \u25b20.42%",
     "VIX  14.43 \u25bc0.55%",

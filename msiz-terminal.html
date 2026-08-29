@@ -467,13 +467,15 @@
     #marketStripScroll::-webkit-scrollbar { height:7px; }
     #marketStripScroll::-webkit-scrollbar-track { background:var(--bg-panel2); }
     #marketStripScroll::-webkit-scrollbar-thumb { background:var(--accent-dim); border-radius:8px; }
-    #indicesRow, #futuresRow { width:960px; min-width:960px !important; height:58px !important; }
+    #indicesRow, #futuresRow { width:1200px; min-width:1200px !important; height:58px !important; }
     #indicesRow > div, #futuresRow > div { min-width:230px !important; padding:0 12px !important; overflow:hidden; }
     #indicesRow > div > div:first-child,
     #futuresRow > div > div:first-child { font-size:10px !important; }
     #indicesRow [id$="-price"], #futuresRow [id$="-price"] { font-size:18px !important; }
     #indicesRow [id$="-chg"], #futuresRow [id$="-chg"] { font-size:14px !important; }
     #indicesRow [id$="-pt"] { font-size:12px !important; }
+    #centerHoldingsTable { min-width:540px !important; width:540px !important; table-layout:fixed; }
+    #centerHoldingsTable th, #centerHoldingsTable td { padding-left:4px !important; padding-right:4px !important; }
     .chart-tab, .range-tab { font-size:12px !important; padding:9px !important; white-space:nowrap; }
     .chart-tabs { display:flex; min-height:42px; }
     .chart-tabs > * { flex:0 0 auto; }
@@ -747,6 +749,14 @@
           <span id="idx-nq-pt" style="font-family:var(--font-mono);font-size:9px;color:var(--text-dim)">-448.08</span>
         </div>
       </div>
+      <div style="display:flex;flex-direction:column;justify-content:center;padding:0 14px;border-left:1px solid var(--border);gap:2px;flex:1;">
+        <div style="font-family:var(--font-mono);font-size:7.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);white-space:nowrap;">BITCOIN</div>
+        <div style="display:flex;align-items:baseline;gap:5px;">
+          <span id="idx-btc-price" style="font-family:var(--font-mono);font-size:12px;font-weight:600;color:var(--text-primary)">—</span>
+          <span id="idx-btc-chg" style="font-family:var(--font-mono);font-size:10px;">—</span>
+          <span id="idx-btc-pt" style="font-family:var(--font-mono);font-size:9px;color:var(--text-dim)">—</span>
+        </div>
+      </div>
       <div style="display:flex;align-items:center;justify-content:center;padding:0 12px;border-left:1px solid var(--border);">
         <span id="mktBadgeRow"></span>
       </div>
@@ -774,6 +784,13 @@
           <span id="fut-nq-chg" style="font-family:var(--font-mono);font-size:10px;white-space:nowrap;">—</span>
         </div>
       </div>
+      <div style="display:flex;flex-direction:column;justify-content:center;padding:0 14px;border-left:1px solid var(--border);gap:2px;flex:1;min-width:0;overflow:hidden;">
+        <div style="font-family:var(--font-mono);font-size:7.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);white-space:nowrap;">BITCOIN FUT</div>
+        <div style="display:flex;align-items:baseline;gap:5px;min-width:0;">
+          <span id="fut-btc-price" style="font-family:var(--font-mono);font-size:12px;font-weight:600;color:var(--text-primary);white-space:nowrap;">—</span>
+          <span id="fut-btc-chg" style="font-family:var(--font-mono);font-size:10px;white-space:nowrap;">—</span>
+        </div>
+      </div>
       <div style="display:flex;align-items:center;justify-content:center;padding:0 12px;border-left:1px solid var(--border);">
         <span id="futBadgeRow"></span>
       </div>
@@ -786,7 +803,8 @@
         <span class="ph-sub" id="centerHoldingsDate">CURRENT SNAPSHOT</span>
       </div>
       <div class="hscroll-wrap">
-        <table class="holdings-table" id="centerHoldingsTable" style="min-width:620px;width:620px">
+        <table class="holdings-table" id="centerHoldingsTable" style="min-width:540px;width:540px">
+          <colgroup><col style="width:58px"><col style="width:190px"><col style="width:100px"><col style="width:96px"><col style="width:96px"></colgroup>
           <thead><tr>
             <th>SYM</th><th style="text-align:left">NAME</th><th>PRICE</th><th>CHG</th><th>%CHG</th>
           </tr></thead>
@@ -2212,7 +2230,8 @@ function fetchFutures(){
   var map = {
     'ES=F': ['fut-es-price','fut-es-chg'],
     'YM=F': ['fut-ym-price','fut-ym-chg'],
-    'NQ=F': ['fut-nq-price','fut-nq-chg']
+    'NQ=F': ['fut-nq-price','fut-nq-chg'],
+    'BTC=F':['fut-btc-price','fut-btc-chg']
   };
   fetch(MARKET_DATA_URL + '?v=' + Date.now(), {cache:'no-store'})
     .then(function(r){ return r.json(); })
@@ -2249,7 +2268,8 @@ function applyLiveData(data){
   var idxMap = {
     '^GSPC': ['idx-sp-price','idx-sp-chg','idx-sp-pt'],
     '^DJI':  ['idx-dj-price','idx-dj-chg','idx-dj-pt'],
-    '^IXIC': ['idx-nq-price','idx-nq-chg','idx-nq-pt']
+    '^IXIC': ['idx-nq-price','idx-nq-chg','idx-nq-pt'],
+    'BTC-USD':['idx-btc-price','idx-btc-chg','idx-btc-pt']
   };
   Object.keys(idxMap).forEach(function(sym){
     var q = data[sym]; if(!q) return;
