@@ -1708,7 +1708,7 @@ function renderCorrelation(){
       if(v===null){h+=`<td style="color:var(--text-dim)">—</td>`;return;}
       const bg=corrColor(v);
       const tc=r===c?'var(--text-dim)':v>=0.7?'var(--red)':v<=0.1?'var(--accent)':'var(--text-primary)';
-      h+=`<td style="background:${bg};color:${tc}">${r===c?'—':fmt(v,2)}</td>`;
+      h+=`<td style="background:${r===c?'#000000':bg};color:${tc}">${r===c?'—':fmt(v,2)}</td>`;
     });
     h+=`</tr>`;
   });
