@@ -65,6 +65,7 @@ const { useState, useEffect, useRef, useMemo, useCallback } = React;
 /* ============================== CONSTANTS ============================== */
 
 const STORAGE_KEY = "meridian_money_data_v5";
+const SHARED_INVESTMENT_KEY = "mlma_investment_sync_v1";
 const ACTIVE_TAB_KEY = "meridian_money_active_tab";
 const VALID_TABS = ["dashboard", "budgets", "transactions", "checking", "subscriptions", "cashflow", "goals", "accounts", "review", "ai", "settings"];
 
@@ -856,8 +857,36 @@ function loadData() {
   data = ensureDiscoverRegister(data);
   data = ensureUserNamedSubscriptions(data);
   data = normalizeBudgetData(data);
+  data = applySharedInvestmentsToBudget(data);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   return data;
+}
+
+function readSharedInvestments() {
+  try { return JSON.parse(localStorage.getItem(SHARED_INVESTMENT_KEY) || "null"); } catch (e) { return null; }
+}
+
+function applySharedInvestmentsToBudget(data, suppliedShared) {
+  const shared = suppliedShared || readSharedInvestments();
+  if (!shared || !shared.balances || !shared.holdings) return data;
+  const investments = [...(data.investments || [])];
+  const upsertInvestment = (name, value, category, aliases = []) => {
+    const names = [name, ...aliases].map(v => v.toLowerCase());
+    const index = investments.findIndex(item => names.includes(String(item.name || "").toLowerCase()));
+    const next = { ...(index >= 0 ? investments[index] : {}), id: index >= 0 ? investments[index].id : uid(), name, category, value: Number(value) || 0 };
+    if (index >= 0) investments[index] = next; else investments.push(next);
+  };
+  upsertInvestment("Traditional TSP", shared.balances.traditionalTsp, "US Stocks");
+  upsertInvestment("Roth TSP", shared.balances.rothTsp, "US Stocks");
+  upsertInvestment("SCHD", shared.holdings.SCHD, "US Stocks", ["Schwab US Dividend ETF"]);
+  upsertInvestment("QQQM", shared.holdings.QQQM, "US Stocks", ["Invesco Nasdaq 100 ETF"]);
+  upsertInvestment("IBIT", shared.holdings.IBIT, "US Stocks", ["iShares Bitcoin Trust"]);
+  upsertInvestment("SGOV", shared.holdings.SGOV, "Bonds", ["iShares 0-3M T-Bond ETF"]);
+  const accounts = [...(data.accounts || [])];
+  const hysaIndex = accounts.findIndex(account => /\bhysa\b|high.?yield savings/i.test(String(account.name || "")));
+  const hysaAccount = { ...(hysaIndex >= 0 ? accounts[hysaIndex] : {}), id: hysaIndex >= 0 ? accounts[hysaIndex].id : "acc_shared_hysa", name: hysaIndex >= 0 ? accounts[hysaIndex].name : "Household HYSA", institution: hysaIndex >= 0 ? accounts[hysaIndex].institution : "ICCU", type: "savings", balance: Number(shared.balances.hysa) || 0 };
+  if (hysaIndex >= 0) accounts[hysaIndex] = hysaAccount; else accounts.push(hysaAccount);
+  return { ...data, accounts, investments };
 }
 
 function saveData(data) {
@@ -5553,6 +5582,15 @@ function App() {
   };
 
   useEffect(() => { saveData(data); }, [data]);
+  useEffect(() => {
+    const syncInvestments = event => {
+      if (event && event.key !== SHARED_INVESTMENT_KEY) return;
+      const shared = readSharedInvestments();
+      if (shared) rawSetData(current => applySharedInvestmentsToBudget(current, shared));
+    };
+    window.addEventListener("storage", syncInvestments);
+    return () => window.removeEventListener("storage", syncInvestments);
+  }, []);
   useEffect(() => { try { localStorage.setItem(ACTIVE_TAB_KEY, tab); } catch (e) {} }, [tab]);
 
   const viewer = (data.privacyPrefs || {}).viewer || "Household";

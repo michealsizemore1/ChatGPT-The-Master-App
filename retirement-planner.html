@@ -6430,6 +6430,7 @@ function renderLtcVaAidReadout() {
 
 // ---------- Persistence (localStorage) so values survive a page refresh ----------
 const STORAGE_KEY = 'retirementPlannerState_v1';
+const SHARED_INVESTMENT_KEY = 'mlma_investment_sync_v1';
 const ANTHROPIC_API_KEY_STORAGE_KEY = 'retirementPlannerAnthropicApiKey_v1';
 
 function saveAnthropicApiKeyLocal() {
@@ -7506,6 +7507,22 @@ function loadState() {
   let state;
   try { state = JSON.parse(raw); } catch (e) { return false; }
   return applyState(state);
+}
+
+function readSharedInvestmentsForPlanner() {
+  try { return JSON.parse(localStorage.getItem(SHARED_INVESTMENT_KEY) || 'null'); } catch (e) { return null; }
+}
+
+function applySharedInvestmentsToPlanner(shared) {
+  shared = shared || readSharedInvestmentsForPlanner();
+  if (!shared || !shared.balances) return false;
+  const setValue = (id, value) => { const el = els(id); if (el && value != null && Number.isFinite(Number(value))) el.value = Number(value); };
+  setValue('tradTSPBalance', shared.balances.traditionalTsp);
+  setValue('rothTSPBalance', shared.balances.rothTsp);
+  setValue('hysaBalance', shared.balances.hysa);
+  setValue('tradTSPPct', shared.rates && shared.rates.traditionalTspPct);
+  setValue('rothTSPPct', shared.rates && shared.rates.rothTspPct);
+  return true;
 }
 
 // ---------- Expenses (dynamic rows, monthly $ amounts) ----------
@@ -14294,6 +14311,7 @@ function render() {
 }
 
 const hadSavedState = loadState();
+applySharedInvestmentsToPlanner();
 // Restore an age-button selection before the first calculation even if the previous cloud attempt
 // ended during refresh. The pending marker is removed only after legacy online service confirms the saved plan.
 applyPendingRetirementAgeSelection();
@@ -14365,6 +14383,13 @@ renderDebtRows();
 renderFutureExpenseRows();
 renderWindfallRows();
 renderInsuranceRows();
+
+window.addEventListener('storage', function(event) {
+  if (event.key !== SHARED_INVESTMENT_KEY) return;
+  let shared = null;
+  try { shared = JSON.parse(event.newValue || 'null'); } catch (e) {}
+  if (applySharedInvestmentsToPlanner(shared)) render();
+});
 
 // Plain top-level fields (currentAge, preReturn, ltcStartAge, stdDeduction, etc.) were never wired to
 // an individual oninput/onchange handler the way checkboxes, row-item fields, and date pickers are —

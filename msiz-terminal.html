@@ -989,11 +989,11 @@
           </tbody>
         </table>
         <table class="contrib-matrix-table" style="margin-top:8px;min-width:620px;">
-          <thead><tr><th>TSP SOURCE</th><th>YOUR CONTRIBUTION</th><th>EMPLOYER MATCH</th><th>TOTAL</th></tr></thead>
+          <thead><tr><th>TSP SOURCE</th><th>CONTRIBUTION RATE</th><th>YOUR CONTRIBUTION</th><th>EMPLOYER MATCH</th><th>TOTAL</th></tr></thead>
           <tbody>
-            <tr><td>Traditional TSP</td><td>$1,348.00</td><td>$321.00</td><td>$1,669.00</td></tr>
-            <tr><td>Roth TSP</td><td>$1,348.00</td><td>$0.00</td><td>$1,348.00</td></tr>
-            <tr class="total-row"><td>Total TSP</td><td>$2,696.00</td><td>$321.00</td><td>$3,017.00</td></tr>
+            <tr><td>Traditional TSP</td><td>16%</td><td>$1,348.00</td><td>$321.00</td><td>$1,669.00</td></tr>
+            <tr><td>Roth TSP</td><td>16%</td><td>$1,348.00</td><td>$0.00</td><td>$1,348.00</td></tr>
+            <tr class="total-row"><td>Total TSP</td><td>32% employee</td><td>$2,696.00</td><td>$321.00</td><td>$3,017.00</td></tr>
           </tbody>
         </table>
       </div>
@@ -1475,19 +1475,20 @@ function balSave(input){
   var key=input.getAttribute('data-t');
   if(!isNaN(val)&&val>=0) b[key]=val; else delete b[key];
   saveBal(b);
+  syncSharedInvestmentsFromMsiz();
   renderBalances();
 }
 // Seed HYSA default
 // Hardcoded balances — always loaded as defaults
 var DEFAULT_BALANCES = {
-  'SCHD':    5141.59,
-  'QQQM':    3881.29,
-  'SGOV':    323.27,
-  'IBIT':    25.02,
-  'TSP C':   132438.22,
-  'TSP S':   41443.13,
-  'TSP I':   3719.93,
-  'ICCU_HYSA': 10193.00
+  'SCHD':    6331.00,
+  'QQQM':    4919.00,
+  'SGOV':    928.00,
+  'IBIT':    743.00,
+  'TSP C':   63331.29,
+  'TSP S':   63331.29,
+  'TSP I':   65250.42,
+  'ICCU_HYSA': 6000.00
 };
 function loadBal(){
   // Always start from defaults, then overlay any user edits from storage
@@ -2303,6 +2304,7 @@ document.addEventListener('DOMContentLoaded', function(){
   setInterval(fetchFutures, 60000);
   fetchBitcoinSpot();
   setInterval(fetchBitcoinSpot, 60 * 60 * 1000);
+  seedSharedInvestmentData();
 });
 // FUTURES FETCH — calls our own backend proxy /api/futures
 function fetchFutures(){
@@ -2671,13 +2673,13 @@ function smKV(k,v){
 // ── MONTHLY CONTRIBUTIONS ───────────────────────────────────────────────────
 var CONTRIB_KEY = 'msiz_contrib_v1';
 var DEFAULT_CONTRIB = {
-  'SCHD':  501.20,
-  'QQQM':  214.80,
-  'SGOV':  300.00,
-  'IBIT':  0,
-  'TSP C': 519.97,
-  'TSP S': 519.97,
-  'TSP I': 535.73
+  'SCHD':  50.00,
+  'QQQM':  45.00,
+  'SGOV':  25.00,
+  'IBIT':  5.00,
+  'TSP C': 995.61,
+  'TSP S': 995.61,
+  'TSP I': 1025.78
 };
 var CONTRIB_TICKERS = ['SCHD','QQQM','SGOV','IBIT','TSP C','TSP S','TSP I'];
 function contribGet(){
@@ -2701,8 +2703,51 @@ function contribSave(c){
   _memStore[CONTRIB_KEY] = JSON.stringify(c);
   try{ localStorage.setItem(CONTRIB_KEY, JSON.stringify(c)); } catch(e){}
 }
+var SHARED_INVESTMENT_KEY = 'mlma_investment_sync_v1';
+function knownSharedInvestmentData(){
+  return {
+    version:1,
+    source:'MSIZ Terminal',
+    updatedAt:new Date().toISOString(),
+    rates:{traditionalTspPct:16,rothTspPct:16},
+    balances:{traditionalTsp:106229,rothTsp:85684,hysa:6000},
+    holdings:{SCHD:6331,QQQM:4919,IBIT:743,SGOV:928},
+    tspFunds:{'TSP C':63331.29,'TSP S':63331.29,'TSP I':65250.42},
+    contributions:{SCHD:50,QQQM:45,IBIT:5,SGOV:25,'TSP C':995.61,'TSP S':995.61,'TSP I':1025.78},
+    allocations:{tspC:33,tspS:33,tspI:34,schd:50,qqqm:45,ibit:5}
+  };
+}
+function seedSharedInvestmentData(){
+  try{
+    if(!localStorage.getItem(SHARED_INVESTMENT_KEY)) localStorage.setItem(SHARED_INVESTMENT_KEY,JSON.stringify(knownSharedInvestmentData()));
+  }catch(e){}
+}
+function syncSharedInvestmentsFromMsiz(){
+  var b=loadBal(),c=contribGet(),previous=null;
+  try{previous=JSON.parse(localStorage.getItem(SHARED_INVESTMENT_KEY)||'null');}catch(e){}
+  if(!previous) previous=knownSharedInvestmentData();
+  var tspTotal=(+b['TSP C']||0)+(+b['TSP S']||0)+(+b['TSP I']||0);
+  var oldTrad=+(previous.balances&&previous.balances.traditionalTsp)||106229;
+  var oldRoth=+(previous.balances&&previous.balances.rothTsp)||85684;
+  var tradShare=(oldTrad+oldRoth)>0?oldTrad/(oldTrad+oldRoth):106229/191913;
+  var tspContrib=(+c['TSP C']||0)+(+c['TSP S']||0)+(+c['TSP I']||0);
+  var etfContrib=(+c.SCHD||0)+(+c.QQQM||0)+(+c.IBIT||0);
+  var payload={
+    version:1,source:'MSIZ Terminal',updatedAt:new Date().toISOString(),
+    rates:{traditionalTspPct:16,rothTspPct:16},
+    balances:{traditionalTsp:+(tspTotal*tradShare).toFixed(2),rothTsp:+(tspTotal*(1-tradShare)).toFixed(2),hysa:+b[BAL_HYSA]||0},
+    holdings:{SCHD:+b.SCHD||0,QQQM:+b.QQQM||0,IBIT:+b.IBIT||0,SGOV:+b.SGOV||0},
+    tspFunds:{'TSP C':+b['TSP C']||0,'TSP S':+b['TSP S']||0,'TSP I':+b['TSP I']||0},
+    contributions:{SCHD:+c.SCHD||0,QQQM:+c.QQQM||0,IBIT:+c.IBIT||0,SGOV:+c.SGOV||0,'TSP C':+c['TSP C']||0,'TSP S':+c['TSP S']||0,'TSP I':+c['TSP I']||0},
+    allocations:{
+      tspC:tspContrib?(+c['TSP C']||0)/tspContrib*100:0,tspS:tspContrib?(+c['TSP S']||0)/tspContrib*100:0,tspI:tspContrib?(+c['TSP I']||0)/tspContrib*100:0,
+      schd:etfContrib?(+c.SCHD||0)/etfContrib*100:0,qqqm:etfContrib?(+c.QQQM||0)/etfContrib*100:0,ibit:etfContrib?(+c.IBIT||0)/etfContrib*100:0
+    }
+  };
+  try{localStorage.setItem(SHARED_INVESTMENT_KEY,JSON.stringify(payload));}catch(e){}
+}
 function contribSaveField(sym,val){
-  var c=contribGet(); c[sym]=parseFloat(val)||0; contribSave(c); renderContrib();
+  var c=contribGet(); c[sym]=parseFloat(val)||0; contribSave(c); syncSharedInvestmentsFromMsiz(); renderContrib();
 }
 function contribBalSave(input){
   var b=loadBal();
@@ -2710,6 +2755,7 @@ function contribBalSave(input){
   var key=input.getAttribute('data-t');
   if(!isNaN(val)&&val>=0) b[key]=val; else delete b[key];
   saveBal(b);
+  syncSharedInvestmentsFromMsiz();
   renderContrib();
   renderBalances();
 }
