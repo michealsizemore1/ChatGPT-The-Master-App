@@ -5746,6 +5746,31 @@ function inferFoodMacroSources(item){
   return changed;
 }
 
+function runnerFoodQuality(item){
+  item=item||{};
+  var calories=Math.max(0,parseFloat(item.cal)||0),protein=Math.max(0,parseFloat(item.prot)||0),carbs=Math.max(0,parseFloat(item.carbs)||0),fat=Math.max(0,parseFloat(item.fat)||0);
+  var fiber=Math.max(0,parseFloat(item.fiber)||0),sugar=Math.max(0,parseFloat(item.sugar)||0),sodium=Math.max(0,parseFloat(item.sodium)||0);
+  var sports=item.meal==='sports',score=5,reasons=[];
+  function sourceScore(amount,source,supportPoints,limitPoints,supportReason,limitReason){
+    if(amount<=0)return;
+    if(source==='support'){score+=supportPoints;reasons.push(supportReason);}
+    else if(source==='limit'){score+=limitPoints;reasons.push(limitReason);}
+  }
+  sourceScore(protein,item.proteinSource,1,-1,'runner-supportive protein','processed or higher-fat protein');
+  sourceScore(carbs,item.carbSource,1,sports?0.5:-1,'complex carbohydrate source',sports?'quick training fuel':'mostly refined carbohydrate');
+  sourceScore(fat,item.fatSource,0.75,-1,'unsaturated fat source','mostly saturated or trans fat');
+  if(fiber>=5){score+=1;reasons.push('high fiber');}else if(fiber>=3){score+=0.6;reasons.push('useful fiber');}
+  if(calories>0&&protein/calories>=0.1){score+=1;reasons.push('high protein density');}else if(calories>0&&protein/calories>=0.05){score+=0.4;}
+  if(!sports&&sugar>=20&&fiber<3){score-=1;reasons.push('high sugar with little fiber');}else if(!sports&&sugar>=10&&fiber<2){score-=0.5;}
+  if(!sports&&sodium>=700){score-=0.5;reasons.push('high sodium');}
+  var text=[item.name,item.ingredientsText,item.categoriesText].filter(Boolean).join(' ').toLowerCase();
+  if(/\b(vegetable|fruit|berries|banana|apple|orange|oat|whole grain|whole wheat|bean|lentil|quinoa|brown rice|sweet potato|salmon|tuna)\b/.test(text)){score+=0.75;reasons.push('whole-food ingredients');}
+  if(/\b(candy|soda|donut|doughnut|pastry|fried|hydrogenated|corn syrup)\b/.test(text)&&!sports){score-=0.75;reasons.push('highly processed ingredients');}
+  score=Math.max(1,Math.min(10,Math.round(score)));
+  var label=score>=9?'Excellent':score>=7?'Good':score>=5?'Fair':score>=3?'Low':'Poor';
+  return {score:score,label:label,reason:reasons.slice(0,3).join(' · ')||'Add label details for a more precise rating'};
+}
+
 function renderFoodItems(){
   var log=window._foodLog||[];
   var autoClassChanged=false;
@@ -5812,6 +5837,22 @@ function renderFoodItems(){
         servingCalories.style.cssText='font-size:0.75rem;font-weight:700;color:#b45309;background:#fff7ed;border:1px solid #fed7aa;border-radius:6px;padding:4px 7px;margin:0 0 5px;';
         servingCalories.textContent='Actual serving: '+svgs+' × '+servingSize+' · '+Math.round(parseFloat(it.cal)||0)+' calories each';
         div.appendChild(servingCalories);
+
+        var quality=runnerFoodQuality(it);
+        var qualityBox=document.createElement('div');
+        qualityBox.style.cssText='background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;margin:0 0 6px;';
+        var qualityHeading=document.createElement('div');
+        qualityHeading.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:0.72rem;font-weight:800;color:#334155;margin-bottom:5px;';
+        qualityHeading.innerHTML='<span>Runner food quality</span><span>'+quality.score+'/10 · '+quality.label+'</span>';
+        var qualityTrack=document.createElement('div');
+        qualityTrack.style.cssText='height:10px;position:relative;border-radius:999px;background:linear-gradient(90deg,#dc2626 0%,#f97316 25%,#facc15 50%,#84cc16 75%,#16a34a 100%);box-shadow:inset 0 0 0 1px rgba(15,23,42,.12);';
+        var qualityMarker=document.createElement('span');
+        qualityMarker.style.cssText='position:absolute;top:50%;left:'+(((quality.score-1)/9)*100)+'%;width:15px;height:15px;border-radius:50%;background:#fff;border:3px solid #0f172a;box-sizing:border-box;transform:translate(-50%,-50%);box-shadow:0 1px 3px rgba(15,23,42,.35);';
+        qualityTrack.appendChild(qualityMarker);
+        var qualityReason=document.createElement('div');
+        qualityReason.style.cssText='font-size:0.62rem;color:#64748b;line-height:1.3;margin-top:4px;';
+        qualityReason.textContent=quality.reason;
+        qualityBox.appendChild(qualityHeading);qualityBox.appendChild(qualityTrack);qualityBox.appendChild(qualityReason);div.appendChild(qualityBox);
 
         // Row 2: macro grid using standalone _mkMacroCell
         var grid=document.createElement('div');
