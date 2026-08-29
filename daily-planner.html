@@ -2818,6 +2818,7 @@ body{
         <span id="topMicroQualityMarker" style="position:absolute;top:50%;left:0%;width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #0f172a;box-sizing:border-box;transform:translate(-50%,-50%);box-shadow:0 1px 3px rgba(15,23,42,.35);"></span>
       </div>
       <div id="topMicroQualityNote" style="font-size:.66rem;color:#64748b;line-height:1.35;margin-top:5px;">Iron, calcium, and vitamin D target coverage</div>
+      <div id="topMicroBreakdown" style="display:grid;gap:7px;margin-top:9px;padding-top:8px;border-top:1px dashed #dbe3ec;"></div>
     </div>
     <details style="margin-top:6px;padding-bottom:6px;">
       <summary style="cursor:pointer;font-size:.72rem;color:#64748b;font-weight:800;">Micronutrient Details</summary>
@@ -6315,7 +6316,7 @@ function updateMacroTotals(){
   MICRO_FIELDS.forEach(function(f){set(MICRO_META[f].elId,totals[f]||0);});
   // Combined adequacy score for the three priority micronutrients. Each nutrient
   // contributes equally and is capped at 100% so one high value cannot hide a shortfall.
-  var microQuality=document.getElementById('topMicroQuality'),microQualityLabel=document.getElementById('topMicroQualityLabel'),microQualityMarker=document.getElementById('topMicroQualityMarker'),microQualityTrack=document.getElementById('topMicroQualityTrack'),microQualityNote=document.getElementById('topMicroQualityNote');
+  var microQuality=document.getElementById('topMicroQuality'),microQualityLabel=document.getElementById('topMicroQualityLabel'),microQualityMarker=document.getElementById('topMicroQualityMarker'),microQualityTrack=document.getElementById('topMicroQualityTrack'),microQualityNote=document.getElementById('topMicroQualityNote'),microBreakdown=document.getElementById('topMicroBreakdown');
   if(microQuality){
     if(!hasData){microQuality.style.display='none';}
     else {
@@ -6333,6 +6334,13 @@ function updateMacroTotals(){
       if(microQualityMarker)microQualityMarker.style.left=Math.max(0,Math.min(100,(microScore-1)/9*100))+'%';
       if(microQualityTrack)microQualityTrack.setAttribute('aria-valuenow',microScore.toFixed(1));
       if(microQualityNote)microQualityNote.textContent='Targets: iron 8mg · calcium 1,000mg · vitamin D 15mcg · lowest today: '+weakest.name+' '+Math.round(weakest.value)+weakest.unit;
+      if(microBreakdown)microBreakdown.innerHTML=priorityMicros.map(function(n){
+        var pct=n.target?Math.max(0,n.value/n.target*100):0,capped=Math.min(100,pct),status=pct>=100?'Met':pct>=75?'Close':'Low';
+        var statusColor=status==='Met'?'#166534':status==='Close'?'#92400e':'#991b1b';
+        var barColor=status==='Met'?'#16a34a':status==='Close'?'#f59e0b':'#dc2626';
+        var shownValue=n.unit==='mg'&&n.value>=100?Math.round(n.value).toLocaleString():Math.round(n.value*10)/10;
+        return '<div><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.69rem;color:#475569;margin-bottom:3px;"><strong>'+n.name+'</strong><span>'+shownValue+n.unit+' / '+n.target.toLocaleString()+n.unit+' · '+Math.round(pct)+'% · <strong style="color:'+statusColor+'">'+status+'</strong></span></div><div role="progressbar" aria-label="'+n.name+' daily target completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+Math.round(pct)+'" style="height:8px;border-radius:999px;background:#e5e7eb;overflow:hidden;"><span style="display:block;width:'+capped+'%;height:100%;background:'+barColor+';border-radius:999px;"></span></div></div>';
+      }).join('');
     }
   }
   // Update hidden fields for backward compat save
