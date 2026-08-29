@@ -482,6 +482,22 @@
     .mini-charts { display:flex !important; gap:8px; }
     .mini-charts > * { flex:0 0 230px; min-width:230px; }
     .main-chart-wrap, .chart-area { min-width:0; }
+
+    /* One consistent, readable type size throughout the phone terminal. */
+    #topbar#topbar *,
+    #news-bar#news-bar *,
+    #ticker-tape#ticker-tape *,
+    #panel-center#panel-center * {
+      font-size:14px !important;
+    }
+    #news-bar,
+    #ticker-tape,
+    .tb-strip-scroll { min-height:30px; height:30px; }
+    .tb-strip-track,
+    .tape-track { min-height:30px; }
+    .section-divider,
+    .panel-header { min-height:36px; }
+    .chart-tabs { min-height:46px; }
   }
 </style>
 </head>
@@ -1706,7 +1722,7 @@ function renderSelectedInfoStrip(){
 }
 // CHARTS
 Chart.defaults.font.family="'IBM Plex Mono', monospace";
-Chart.defaults.font.size=9;
+Chart.defaults.font.size=14;
 Chart.defaults.color='#4a6a84';
 function getChartData(chartType, rangeKey){
   const filteredDates=getDateRange(rangeKey), allDates=HIST.dates;
@@ -1759,8 +1775,8 @@ function buildMainChart(){
   const isVol=activeChartType==='rollingvol', isPrice=activeChartType==='prices';
   const yLabel=isNorm?'Normalized (Base=100)':isCum?'Cumul Return %':isVol?'Rolling Vol % (ann)':'Price (USD)';
   const mobileChart = window.matchMedia('(max-width: 760px)').matches;
-  const axisFont = mobileChart ? 11 : 8;
-  const tooltipFont = mobileChart ? 12 : 9;
+  const axisFont = mobileChart ? 14 : 8;
+  const tooltipFont = mobileChart ? 14 : 9;
   const scales={
     x:{grid:{color:'rgba(26,40,64,0.5)',drawBorder:false},ticks:{maxTicksLimit:mobileChart?5:8,maxRotation:0,font:{size:axisFont},callback:(v,i)=>{const d=new Date(dates[i]);return`${d.toLocaleString('en',{month:'short'})} '${String(d.getFullYear()).slice(2)}`}}},
     y:{grid:{color:'rgba(26,40,64,0.6)',drawBorder:false},ticks:{font:{size:axisFont},maxTicksLimit:7},title:{display:true,text:yLabel,color:'#4a6a84',font:{size:axisFont}}},
@@ -1827,15 +1843,15 @@ function buildMiniCharts(){
       backgroundColor:bgColors,borderColor:bdColors,borderWidth:1,borderRadius:1}]},
     options:{responsive:false,maintainAspectRatio:false,plugins:{legend:{display:false},
       tooltip:{callbacks:{label:c=>c.raw.toFixed(1)+'% ann'}}},
-      scales:{x:{grid:{display:false},ticks:{font:{size:12,weight:'600'},color:'#c8dde8',maxRotation:0,minRotation:0}},y:{grid:{color:'rgba(26,40,64,0.6)'},ticks:{font:{size:12},color:'#c8dde8',maxTicksLimit:4}}}}
+      scales:{x:{grid:{display:false},ticks:{font:{size:14,weight:'600'},color:'#c8dde8',maxRotation:0,minRotation:0}},y:{grid:{color:'rgba(26,40,64,0.6)'},ticks:{font:{size:14},color:'#c8dde8',maxTicksLimit:4}}}}
   });
   new Chart(document.getElementById('miniDrawdown').getContext('2d'),{
     type:'bar',data:{labels:allT,datasets:[{data:allT.map(t=>HIST.maxDrawdown[t]),
       backgroundColor:allT.map(()=>'rgba(255,23,68,0.5)'),borderColor:allT.map(()=>'#ff1744'),borderWidth:1,borderRadius:1}]},
     options:{responsive:false,maintainAspectRatio:false,plugins:{legend:{display:false},
       tooltip:{callbacks:{label:c=>c.raw.toFixed(1)+'%'}}},
-      scales:{x:{grid:{display:false},ticks:{font:{size:12,weight:'600'},color:'#c8dde8',maxRotation:0,minRotation:0}},
-        y:{grid:{color:'rgba(26,40,64,0.6)'},ticks:{font:{size:12},color:'#c8dde8',maxTicksLimit:4},
+      scales:{x:{grid:{display:false},ticks:{font:{size:14,weight:'600'},color:'#c8dde8',maxRotation:0,minRotation:0}},
+        y:{grid:{color:'rgba(26,40,64,0.6)'},ticks:{font:{size:14},color:'#c8dde8',maxTicksLimit:4},
           min:Math.min(...allT.map(t=>HIST.maxDrawdown[t]))*1.1}}}
   });
   const corrLabels=allT.filter(t=>t!=='QQQM');
@@ -1846,8 +1862,8 @@ function buildMiniCharts(){
       borderWidth:1,borderRadius:1}]},
     options:{responsive:false,maintainAspectRatio:false,plugins:{legend:{display:false},
       tooltip:{callbacks:{label:c=>'r = '+c.raw.toFixed(3)}}},
-      scales:{x:{grid:{display:false},ticks:{font:{size:12,weight:'600'},color:'#c8dde8',maxRotation:0,minRotation:0}},
-        y:{grid:{color:'rgba(26,40,64,0.6)'},ticks:{font:{size:12},color:'#c8dde8',maxTicksLimit:4},min:0,max:1}}}
+      scales:{x:{grid:{display:false},ticks:{font:{size:14,weight:'600'},color:'#c8dde8',maxRotation:0,minRotation:0}},
+        y:{grid:{color:'rgba(26,40,64,0.6)'},ticks:{font:{size:14},color:'#c8dde8',maxTicksLimit:4},min:0,max:1}}}
   });
   new Chart(document.getElementById('miniBar').getContext('2d'),{
     type:'bar',data:{labels:allT,datasets:[
@@ -1855,10 +1871,10 @@ function buildMiniCharts(){
       {label:'1YR',data:allT.map(t=>HIST.oneYrReturn[t]),backgroundColor:allT.map(t=>COLORS[t]+'44'),borderColor:allT.map(t=>COLORS[t]+'88'),borderWidth:1,borderRadius:1},
     ]},
     options:{responsive:false,maintainAspectRatio:false,
-      plugins:{legend:{display:true,position:'top',labels:{boxWidth:10,font:{size:11},color:'#c8dde8',padding:5}},
+      plugins:{legend:{display:true,position:'top',labels:{boxWidth:10,font:{size:14},color:'#c8dde8',padding:5}},
         tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmtPct(c.raw,1)}}},
-      scales:{x:{grid:{display:false},ticks:{font:{size:12,weight:'600'},color:'#c8dde8',maxRotation:0,minRotation:0}},
-        y:{grid:{color:'rgba(26,40,64,0.6)'},ticks:{font:{size:12},color:'#c8dde8',maxTicksLimit:4},callback:v=>v+'%'}}}
+      scales:{x:{grid:{display:false},ticks:{font:{size:14,weight:'600'},color:'#c8dde8',maxRotation:0,minRotation:0}},
+        y:{grid:{color:'rgba(26,40,64,0.6)'},ticks:{font:{size:14},color:'#c8dde8',maxTicksLimit:4},callback:v=>v+'%'}}}
   });
 }
 // NEWS
