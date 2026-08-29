@@ -2414,7 +2414,7 @@ function prepareMobileScrollSections(){
 }
 
 function setupCollapsibleSections(){
-  var storageKey = 'msiz-terminal-collapsed-sections-v1';
+  var storageKey = 'msiz-terminal-collapsed-sections-v2';
   var saved = {};
   try { saved = JSON.parse(localStorage.getItem(storageKey) || '{}') || {}; } catch(e) { saved = {}; }
 
@@ -2448,7 +2448,8 @@ function setupCollapsibleSections(){
       icon.textContent = collapsed ? '+' : '\u2212';
       button.setAttribute('aria-label', (collapsed ? 'Expand ' : 'Collapse ') + title);
     }
-    apply(saved[key] === true);
+    var defaultCollapsed = key !== 'markets';
+    apply(Object.prototype.hasOwnProperty.call(saved,key) ? saved[key] === true : defaultCollapsed);
     button.addEventListener('click', function(){
       var collapsed = !body.hidden;
       saved[key] = collapsed;
