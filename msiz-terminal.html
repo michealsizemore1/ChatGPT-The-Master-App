@@ -387,6 +387,22 @@
     #holdingsWrap::-webkit-scrollbar-track { background:var(--bg-panel2); }
     #holdingsWrap::-webkit-scrollbar-thumb { background:var(--accent-dim); border-radius:8px; }
     #holdingsTable { min-width:760px !important; width:760px; }
+    #marketStripScroll {
+      display:block;
+      width:100%;
+      max-width:100vw;
+      overflow-x:auto;
+      overflow-y:hidden;
+      overscroll-behavior-x:contain;
+      -webkit-overflow-scrolling:touch;
+      touch-action:pan-x pan-y;
+      scrollbar-width:thin;
+      scrollbar-color:var(--accent-dim) var(--bg-panel2);
+    }
+    #marketStripScroll::-webkit-scrollbar { height:7px; }
+    #marketStripScroll::-webkit-scrollbar-track { background:var(--bg-panel2); }
+    #marketStripScroll::-webkit-scrollbar-thumb { background:var(--accent-dim); border-radius:8px; }
+    #indicesRow, #futuresRow { width:820px; min-width:820px !important; }
     .main-chart-wrap, .chart-area { min-width:0; }
   }
 </style>
@@ -543,8 +559,9 @@
   </div><!-- end panel-left -->
   <!-- CENTER PANEL -->
   <div class="panel" id="panel-center" style="border-right:1px solid var(--border);overflow-y:auto;">
+    <div id="marketStripScroll" aria-label="Market indexes and futures; swipe left or right">
     <!-- MARKET INDICES HEADER -->
-    <div style="display:flex;align-items:stretch;border-bottom:1px solid var(--border);background:var(--bg-base);height:38px;flex-shrink:0;">
+    <div id="indicesRow" style="display:flex;align-items:stretch;border-bottom:1px solid var(--border);background:var(--bg-base);height:38px;flex-shrink:0;">
       <div style="display:flex;flex-direction:column;justify-content:center;padding:0 14px;border-right:1px solid var(--border);gap:2px;flex:1;">
         <div style="font-family:var(--font-mono);font-size:7.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);color:var(--text-dim)">S&amp;P 500</div>
         <div style="display:flex;align-items:baseline;gap:5px;">
@@ -599,6 +616,7 @@
       <div style="display:flex;align-items:center;justify-content:center;padding:0 12px;border-left:1px solid var(--border);">
         <span id="futBadgeRow"></span>
       </div>
+    </div>
     </div>
     <div class="chart-tabs">
       <div class="chart-tab active" data-chart="normalized" onclick="switchChart('normalized',this)">NORMALIZED PERF</div>
