@@ -619,6 +619,68 @@
       margin-bottom:8px;
     }
   }
+
+  /* Compact horizontal rhythm at every screen size. Wide content remains scrollable. */
+  #panel-center .hscroll-wrap,
+  #panel-center .mobile-x-scroll { text-align:left; }
+  #centerHoldingsTable#centerHoldingsTable {
+    width:500px !important;
+    min-width:500px !important;
+  }
+  #centerHoldingsTable col:nth-child(1) { width:56px !important; }
+  #centerHoldingsTable col:nth-child(2) { width:170px !important; }
+  #centerHoldingsTable col:nth-child(3),
+  #centerHoldingsTable col:nth-child(4),
+  #centerHoldingsTable col:nth-child(5) { width:91px !important; }
+  #centerCorrelationSection .corr-table {
+    width:max-content !important;
+    min-width:600px !important;
+  }
+  #centerCorrelationSection .corr-table th,
+  #centerCorrelationSection .corr-table td { min-width:68px; }
+  #centerCorrelationSection .corr-table th:first-child,
+  #centerCorrelationSection .corr-table td:first-child { min-width:78px; }
+  .div-cal-table {
+    width:max-content !important;
+    min-width:780px !important;
+  }
+  .div-cal-table th, .div-cal-table td { padding-left:8px !important; padding-right:8px !important; }
+  .contrib-matrix-summary {
+    width:720px !important;
+    min-width:720px !important;
+    grid-template-columns:repeat(4,174px) !important;
+  }
+  .contrib-matrix-table {
+    width:720px !important;
+    min-width:720px !important;
+    table-layout:auto;
+  }
+  .contrib-matrix-table[style*="min-width:620px"] {
+    width:670px !important;
+    min-width:670px !important;
+  }
+  .contrib-matrix-table th,
+  .contrib-matrix-table td { padding-left:8px !important; padding-right:8px !important; }
+  .chart-tabs { justify-content:flex-start; }
+  .range-tabs { margin-left:8px !important; }
+  #chartLegend#chartLegend {
+    display:flex !important;
+    flex-wrap:wrap;
+    justify-content:flex-start;
+    align-items:center;
+    column-gap:16px;
+    row-gap:8px;
+  }
+  #chartLegend#chartLegend .legend-item { flex:0 0 auto; }
+  #selectedInfoStrip { gap:10px !important; overflow-x:auto; overflow-y:hidden; }
+  #indicesRow, #futuresRow {
+    width:1150px !important;
+    min-width:1150px !important;
+  }
+  #indicesRow > div, #futuresRow > div {
+    flex:0 0 230px !important;
+    width:230px !important;
+  }
 </style>
 </head>
 <body>
