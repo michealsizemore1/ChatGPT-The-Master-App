@@ -535,7 +535,8 @@
     #topbar#topbar *,
     #news-bar#news-bar *,
     #ticker-tape#ticker-tape *,
-    #panel-center#panel-center * {
+    #panel-center#panel-center *,
+    #stockModal#stockModal * {
       font-size:14px !important;
     }
     #news-bar,
@@ -2459,8 +2460,8 @@ function smRender(sym){
         plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return '$'+c.raw.toFixed(2);}},
           titleFont:{size:9,family:'IBM Plex Mono'},bodyFont:{size:9,family:'IBM Plex Mono'}}},
         scales:{
-          x:{grid:{color:'rgba(26,40,64,0.4)',drawBorder:false},ticks:{font:{size:9},color:'#5a8fa8',maxTicksLimit:10,maxRotation:0}},
-          y:{grid:{color:'rgba(26,40,64,0.5)',drawBorder:false},ticks:{font:{size:9},color:'#5a8fa8'},position:'right'}
+          x:{grid:{color:'rgba(26,40,64,0.4)',drawBorder:false},ticks:{font:{size:14},color:'#5a8fa8',maxTicksLimit:10,maxRotation:0}},
+          y:{grid:{color:'rgba(26,40,64,0.5)',drawBorder:false},ticks:{font:{size:14},color:'#5a8fa8'},position:'right'}
         }
       }
     });
