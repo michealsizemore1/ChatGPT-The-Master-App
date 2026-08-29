@@ -5770,6 +5770,11 @@ function runnerFoodQuality(item){
   var calories=Math.max(0,parseFloat(item.cal)||0),protein=Math.max(0,parseFloat(item.prot)||0),carbs=Math.max(0,parseFloat(item.carbs)||0),fat=Math.max(0,parseFloat(item.fat)||0);
   var fiber=Math.max(0,parseFloat(item.fiber)||0),sugar=Math.max(0,parseFloat(item.sugar)||0),sodium=Math.max(0,parseFloat(item.sodium)||0);
   var sports=item.meal==='sports',score=5,reasons=[];
+  var dateKey=dk(today),activityText='';
+  try{activityText=(getActivities()||[]).filter(function(a){return a&&a.date===dateKey;}).map(function(a){return [a.title,a.type,a.workout].filter(Boolean).join(' ');}).join(' ');}catch(ignoreActivity){}
+  try{activityText+=' '+(typeof journalTodayTrainingSummary==='function'?journalTodayTrainingSummary():'');}catch(ignoreSummary){}
+  var hardWorkout=typeof nutritionHardWorkoutForDate==='function'?nutritionHardWorkoutForDate(today):'';
+  var runDay=!!hardWorkout||/\b(run|race|interval|tempo|threshold|speed|track|recovery)\b/i.test(activityText);
   function sourceScore(amount,source,supportPoints,limitPoints,supportReason,limitReason){
     if(amount<=0)return;
     if(source==='support'){score+=supportPoints;reasons.push(supportReason);}
@@ -5785,9 +5790,18 @@ function runnerFoodQuality(item){
   var text=[item.name,item.ingredientsText,item.categoriesText].filter(Boolean).join(' ').toLowerCase();
   if(/\b(vegetable|fruit|berries|banana|apple|orange|oat|whole grain|whole wheat|bean|lentil|quinoa|brown rice|sweet potato|salmon|tuna)\b/.test(text)){score+=0.75;reasons.push('whole-food ingredients');}
   if(/\b(candy|soda|donut|doughnut|pastry|fried|hydrogenated|corn syrup)\b/.test(text)&&!sports){score-=0.75;reasons.push('highly processed ingredients');}
-  score=Math.max(1,Math.min(10,Math.round(score)));
+  // Morning-run context: quick carbohydrate in Sports Nutrition is purposeful fuel,
+  // while carbohydrate plus protein at breakfast supports post-run recovery.
+  if(runDay&&sports&&carbs>=15){score+=0.75;reasons.push((hardWorkout||'run')+' fuel');}
+  if(runDay&&item.meal==='breakfast'&&carbs>=25){score+=0.4;reasons.push('post-run carbohydrate');}
+  if(runDay&&item.meal==='breakfast'&&protein>=15){score+=0.4;reasons.push('post-run protein');}
+  score=Math.max(1,Math.min(10,Math.round(score*10)/10));
+  var completenessFields=['cal','prot','fat','carbs','fiber','sugar','sodium'],complete=0,totalChecks=completenessFields.length;
+  completenessFields.forEach(function(field){if(item[field]!==undefined&&item[field]!==null&&item[field]!=='')complete++;});
+  [{amount:protein,field:'proteinSource'},{amount:carbs,field:'carbSource'},{amount:fat,field:'fatSource'}].forEach(function(check){if(check.amount>0){totalChecks++;if(item[check.field]&&item[check.field]!=='unknown')complete++;}});
+  var confidencePct=totalChecks?Math.round(complete/totalChecks*100):0,confidence=confidencePct>=80?'High':confidencePct>=55?'Medium':'Low';
   var label=score>=9?'Excellent':score>=7?'Good':score>=5?'Fair':score>=3?'Low':'Poor';
-  return {score:score,label:label,reason:reasons.slice(0,3).join(' · ')||'Add label details for a more precise rating'};
+  return {score:score,label:label,reason:reasons.slice(0,3).join(' · ')||'Add label details for a more precise rating',confidence:confidence,confidencePct:confidencePct,workoutContext:runDay?(hardWorkout?hardWorkout+' workout':'run day'):'rest / recovery day'};
 }
 
 function renderFoodItems(){
@@ -5870,7 +5884,7 @@ function renderFoodItems(){
         qualityTrack.appendChild(qualityMarker);
         var qualityReason=document.createElement('div');
         qualityReason.style.cssText='font-size:0.62rem;color:#64748b;line-height:1.3;margin-top:4px;';
-        qualityReason.textContent=quality.reason;
+        qualityReason.textContent='Data confidence: '+quality.confidence+' ('+quality.confidencePct+'%) · '+quality.reason;
         qualityBox.appendChild(qualityHeading);qualityBox.appendChild(qualityTrack);qualityBox.appendChild(qualityReason);div.appendChild(qualityBox);
 
         // Row 2: macro grid using standalone _mkMacroCell
@@ -6289,10 +6303,11 @@ function updateMacroTotals(){
   if(qualityWrap){
     if(!log.length){qualityWrap.style.display='none';}
     else {
-      var qualityTotal=0,qualityWeight=0;
-      log.forEach(function(item){var quality=runnerFoodQuality(item),servings=Math.max(0.01,parseFloat(item.servings)||1),calories=Math.max(0,(parseFloat(item.cal)||0)*servings),weight=calories||servings;qualityTotal+=quality.score*weight;qualityWeight+=weight;});
+      var qualityTotal=0,qualityWeight=0,confidenceTotal=0,qualityContext='rest / recovery day';
+      log.forEach(function(item){var quality=runnerFoodQuality(item),servings=Math.max(0.01,parseFloat(item.servings)||1),calories=Math.max(0,(parseFloat(item.cal)||0)*servings),weight=calories||servings;qualityTotal+=quality.score*weight;confidenceTotal+=quality.confidencePct*weight;qualityWeight+=weight;if(quality.workoutContext!=='rest / recovery day')qualityContext=quality.workoutContext;});
       var dailyScore=qualityWeight?qualityTotal/qualityWeight:5,dailyLabel=dailyScore>=9?'Excellent':dailyScore>=7?'Good':dailyScore>=5?'Fair':dailyScore>=3?'Low':'Poor',markerLeft=Math.max(0,Math.min(100,(dailyScore-1)/9*100));
-      qualityWrap.style.display='block';if(qualityLabel)qualityLabel.textContent=dailyScore.toFixed(1)+'/10 · '+dailyLabel;if(qualityMarker)qualityMarker.style.left=markerLeft+'%';if(qualityTrack)qualityTrack.setAttribute('aria-valuenow',dailyScore.toFixed(1));if(qualityNote)qualityNote.textContent='Across '+log.length+' food item'+(log.length===1?'':'s')+' in all meals today · weighted by calories';
+      var dailyConfidence=qualityWeight?Math.round(confidenceTotal/qualityWeight):0,dailyConfidenceLabel=dailyConfidence>=80?'High':dailyConfidence>=55?'Medium':'Low';
+      qualityWrap.style.display='block';if(qualityLabel)qualityLabel.textContent=dailyScore.toFixed(1)+'/10 · '+dailyLabel;if(qualityMarker)qualityMarker.style.left=markerLeft+'%';if(qualityTrack)qualityTrack.setAttribute('aria-valuenow',dailyScore.toFixed(1));if(qualityNote)qualityNote.textContent='Across '+log.length+' food item'+(log.length===1?'':'s')+' · '+qualityContext+' · data confidence: '+dailyConfidenceLabel+' ('+dailyConfidence+'%)';
     }
   }
   // Macro ratios use caloric contribution: protein/carbohydrates = 4 kcal/g, fat = 9 kcal/g.
