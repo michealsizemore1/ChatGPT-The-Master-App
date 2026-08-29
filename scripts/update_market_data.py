@@ -18,7 +18,6 @@ SYMBOLS = {
     "SCHD": "SCHD",
     "QQQM": "QQQM",
     "SGOV": "SGOV",
-    "SMH": "SMH",
     "IBIT": "IBIT",
     "^GSPC": "^GSPC",
     "^DJI": "^DJI",
@@ -195,7 +194,7 @@ def main() -> None:
             errors[display] = str(exc)
         time.sleep(0.25)
 
-    etfs = ["SCHD", "QQQM", "SGOV", "SMH", "IBIT"]
+    etfs = ["SCHD", "QQQM", "SGOV", "IBIT"]
     gainers = sorted(
         (
             {
