@@ -479,8 +479,22 @@
     .chart-legend { white-space:nowrap; padding-bottom:5px; gap:9px; }
     .legend-item, .mini-chart-label { font-size:12px !important; }
     #selectedInfoStrip { white-space:nowrap; font-size:12px !important; min-height:38px !important; }
-    .mini-charts { display:flex !important; gap:8px; }
-    .mini-charts > * { flex:0 0 230px; min-width:230px; }
+    .mini-charts {
+      display:flex !important;
+      flex-direction:column;
+      gap:0;
+      height:auto;
+      overflow-x:hidden !important;
+    }
+    .mini-charts > * {
+      flex:0 0 160px;
+      width:100%;
+      min-width:0;
+      border-right:none;
+      border-top:1px solid var(--border);
+      padding:8px 10px;
+    }
+    .mini-chart-canvas { width:100% !important; height:125px !important; }
     .main-chart-wrap, .chart-area { min-width:0; }
 
     /* One consistent, readable type size throughout the phone terminal. */
