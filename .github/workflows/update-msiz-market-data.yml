@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out the app
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Refresh market snapshot
         run: python3 scripts/update_market_data.py
