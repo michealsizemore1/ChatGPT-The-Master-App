@@ -186,6 +186,18 @@
   .div-cal-table td:nth-child(2) { text-align: left; color: var(--text-secondary); font-size: 9px; }
   .div-cal-soon { color: var(--yellow); font-size: 8px; font-weight: 700; padding: 1px 4px; border-radius: 2px; border: 1px solid var(--yellow); margin-left: 4px; }
   .div-cal-paid { color: var(--text-dim); font-size: 8px; padding: 1px 4px; border-radius: 2px; border: 1px solid var(--border); margin-left: 4px; }
+  /* INVESTMENT CONTRIBUTION MATRIX */
+  .contrib-matrix-wrap { border-top:2px solid var(--accent); background:var(--bg-base); padding-bottom:8px; }
+  .contrib-matrix-summary { display:grid; grid-template-columns:repeat(4,minmax(120px,1fr)); gap:6px; min-width:620px; padding:8px; }
+  .contrib-matrix-card { border:1px solid var(--border-light); background:var(--bg-panel2); border-radius:3px; padding:7px; }
+  .contrib-matrix-card strong { display:block; color:var(--accent); font-family:var(--font-mono); }
+  .contrib-matrix-card span { display:block; color:var(--text-secondary); font-family:var(--font-mono); margin-top:3px; }
+  .contrib-matrix-table { width:100%; min-width:720px; border-collapse:collapse; font-family:var(--font-mono); }
+  .contrib-matrix-table th { background:var(--bg-panel2); color:var(--text-dim); text-align:right; padding:7px 8px; border:1px solid var(--border); white-space:nowrap; }
+  .contrib-matrix-table td { color:var(--text-primary); text-align:right; padding:7px 8px; border:1px solid var(--border); white-space:nowrap; }
+  .contrib-matrix-table th:first-child,.contrib-matrix-table th:nth-child(2),.contrib-matrix-table td:first-child,.contrib-matrix-table td:nth-child(2) { text-align:left; }
+  .contrib-matrix-table tr.total-row td { color:var(--accent); font-weight:700; border-top:2px solid var(--accent); }
+  .contrib-matrix-note { color:var(--text-dim); font-family:var(--font-mono); padding:7px 9px 0; line-height:1.45; }
   .div-cal-est { color: #00b8ff; font-size: 8px; font-weight: 700; padding: 1px 4px; border-radius: 2px; border: 1px solid #00b8ff; margin-left: 4px; }
   /* RIGHT PANEL */
   .selected-stats { padding: 5px 6px; font-family: var(--font-mono); }
@@ -919,6 +931,44 @@
         </div>
       </div>
     </div>
+    <!-- INVESTMENT CONTRIBUTION MATRIX -->
+    <section class="contrib-matrix-wrap" aria-labelledby="contributionMatrixTitle">
+      <div class="div-cal-header">
+        <span class="div-cal-title" id="contributionMatrixTitle">&#9670; INVESTMENT CONTRIBUTION MATRIX</span>
+        <span style="margin-left:auto;">MONTHLY CONTRIBUTIONS</span>
+      </div>
+      <div class="hscroll-wrap" aria-label="Portfolio contribution weights; swipe left or right">
+        <div class="contrib-matrix-summary">
+          <div class="contrib-matrix-card"><strong>TSP PIE</strong><span>$3,017.00 · 96.02%</span></div>
+          <div class="contrib-matrix-card"><strong>ETF PIE</strong><span>$100.00 · 3.18%</span></div>
+          <div class="contrib-matrix-card"><strong>SGOV PIE</strong><span>$25.00 · 0.80%</span></div>
+          <div class="contrib-matrix-card"><strong>HYSA</strong><span>$0.00 · 0.00%</span></div>
+        </div>
+        <table class="contrib-matrix-table">
+          <thead><tr><th>PORTFOLIO</th><th>INVESTMENT</th><th>MONTHLY</th><th>WEIGHT IN PIE</th><th>WEIGHT OF TOTAL</th></tr></thead>
+          <tbody>
+            <tr><td>TSP Pie</td><td style="color:#ff5252">TSP C</td><td>$995.61</td><td>33%</td><td>31.69%</td></tr>
+            <tr><td>TSP Pie</td><td style="color:#ff80ab">TSP S</td><td>$995.61</td><td>33%</td><td>31.69%</td></tr>
+            <tr><td>TSP Pie</td><td style="color:#40c4ff">TSP I</td><td>$1,025.78</td><td>34%</td><td>32.65%</td></tr>
+            <tr><td>ETF Pie</td><td style="color:#00e676">SCHD</td><td>$50.00</td><td>50%</td><td>1.59%</td></tr>
+            <tr><td>ETF Pie</td><td style="color:#00b8ff">QQQM</td><td>$45.00</td><td>45%</td><td>1.43%</td></tr>
+            <tr><td>ETF Pie</td><td style="color:#ff6d00">IBIT</td><td>$5.00</td><td>5%</td><td>0.16%</td></tr>
+            <tr><td>SGOV Pie</td><td style="color:#ffd740">SGOV</td><td>$25.00</td><td>100%</td><td>0.80%</td></tr>
+            <tr><td>HYSA</td><td>HYSA</td><td>$0.00</td><td>—</td><td>0.00%</td></tr>
+            <tr class="total-row"><td>TOTAL</td><td>ALL INVESTMENTS</td><td>$3,142.00</td><td>—</td><td>100.00%</td></tr>
+          </tbody>
+        </table>
+        <table class="contrib-matrix-table" style="margin-top:8px;min-width:620px;">
+          <thead><tr><th>TSP SOURCE</th><th>YOUR CONTRIBUTION</th><th>EMPLOYER MATCH</th><th>TOTAL</th></tr></thead>
+          <tbody>
+            <tr><td>Traditional TSP</td><td>$1,348.00</td><td>$321.00</td><td>$1,669.00</td></tr>
+            <tr><td>Roth TSP</td><td>$1,348.00</td><td>$0.00</td><td>$1,348.00</td></tr>
+            <tr class="total-row"><td>Total TSP</td><td>$2,696.00</td><td>$321.00</td><td>$3,017.00</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="contrib-matrix-note">Weights include the $321 monthly employer match. TSP C/S/I allocations apply across Traditional TSP, Roth TSP, and the employer match. HYSA is shown with no monthly contribution.</div>
+    </section>
   </div>
   <!-- RIGHT PANEL -->
   <div class="panel" id="panel-right" style="border-right:none;overflow:hidden;">
