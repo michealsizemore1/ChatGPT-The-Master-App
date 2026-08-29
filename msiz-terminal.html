@@ -598,6 +598,15 @@
     .chart-tabs { min-height:46px; }
   }
   @media (min-width: 900px) {
+    #mainChartArea#mainChartArea {
+      height:480px !important;
+      padding:16px !important;
+    }
+    #mainChartArea#mainChartArea canvas {
+      top:16px; left:16px; right:16px; bottom:16px;
+      width:calc(100% - 32px) !important;
+      height:calc(100% - 32px) !important;
+    }
     #miniChartsRow#miniChartsRow .mini-chart-cell {
       height:250px !important;
       padding:12px 16px !important;
@@ -1967,7 +1976,7 @@ function getChartData(chartType, rangeKey){
   const filteredDates=getDateRange(rangeKey), allDates=HIST.dates;
   const startIdx=allDates.indexOf(filteredDates[0]);
   const chartTickers=TICKERS_ANALYTICS.filter(t=>HIST.normalized&&HIST.normalized[t]);
-  const base={pointRadius:0,pointHoverRadius:3,borderWidth:1.5,tension:0.3,fill:false};
+  const base={pointRadius:0,pointHoverRadius:4,borderWidth:2.25,tension:0.3,fill:false};
   if(chartType==='normalized'){
     return{dates:filteredDates,datasets:chartTickers.map(t=>({
       ...base, label:t, data:HIST.normalized[t].slice(startIdx),
@@ -2013,17 +2022,17 @@ function buildMainChart(){
   const isNorm=activeChartType==='normalized', isCum=activeChartType==='cumreturn';
   const isVol=activeChartType==='rollingvol', isPrice=activeChartType==='prices';
   const yLabel=isNorm?'Normalized (Base=100)':isCum?'Cumul Return %':isVol?'Rolling Vol % (ann)':'Price (USD)';
-  const mobileChart = true;
-  const axisFont = mobileChart ? 14 : 8;
-  const tooltipFont = mobileChart ? 14 : 9;
+  const wideChart = window.matchMedia('(min-width: 900px)').matches;
+  const axisFont = wideChart ? 16 : 14;
+  const tooltipFont = wideChart ? 16 : 14;
   const scales={
-    x:{grid:{color:'rgba(26,40,64,0.5)',drawBorder:false},ticks:{maxTicksLimit:mobileChart?5:8,maxRotation:0,font:{size:axisFont},callback:(v,i)=>{const d=new Date(dates[i]);return`${d.toLocaleString('en',{month:'short'})} '${String(d.getFullYear()).slice(2)}`}}},
-    y:{grid:{color:'rgba(26,40,64,0.6)',drawBorder:false},ticks:{font:{size:axisFont},maxTicksLimit:7},title:{display:true,text:yLabel,color:'#4a6a84',font:{size:axisFont}}},
+    x:{grid:{color:'rgba(62,89,125,0.5)',drawBorder:false},ticks:{color:'#e0f4f4',padding:8,maxTicksLimit:wideChart?8:5,maxRotation:0,font:{size:axisFont,weight:'600'},callback:(v,i)=>{const d=new Date(dates[i]);return`${d.toLocaleString('en',{month:'short'})} '${String(d.getFullYear()).slice(2)}`}}},
+    y:{grid:{color:'rgba(62,89,125,0.55)',drawBorder:false},ticks:{color:'#e0f4f4',padding:8,font:{size:axisFont,weight:'600'},maxTicksLimit:7},title:{display:true,text:yLabel,color:'#8db3c7',font:{size:axisFont,weight:'600'}}},
   };
-  if(isPrice)scales['ySGOV']={position:'right',grid:{drawOnChartArea:false},ticks:{font:{size:axisFont},maxTicksLimit:5},title:{display:true,text:'SGOV',color:COLORS.SGOV,font:{size:axisFont}}};
+  if(isPrice)scales['ySGOV']={position:'right',grid:{drawOnChartArea:false},ticks:{color:'#e0f4f4',padding:8,font:{size:axisFont,weight:'600'},maxTicksLimit:5},title:{display:true,text:'SGOV',color:COLORS.SGOV,font:{size:axisFont,weight:'600'}}};
   mainChartInstance=new Chart(canvas,{
     type:'line', data:{labels:dates,datasets},
-    options:{responsive:false,maintainAspectRatio:false,animation:{duration:300},
+    options:{responsive:true,maintainAspectRatio:false,animation:{duration:300},layout:{padding:{top:8,right:12,bottom:8,left:8}},
       interaction:{mode:'index',intersect:false},
       plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(7,13,26,0.95)',borderColor:'#1a2840',borderWidth:1,
         titleFont:{size:tooltipFont,family:'IBM Plex Mono'},bodyFont:{size:tooltipFont,family:'IBM Plex Mono'},
