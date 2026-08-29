@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-29T05:05:20+00:00",
+  "updatedAt": "2026-08-29T05:06:57+00:00",
   "source": "Yahoo Finance public chart data",
   "quotes": {
     "SCHD": {
@@ -135,12 +135,12 @@
       "currency": "USD"
     },
     "BTC-USD": {
-      "price": 77674.01,
+      "price": 77668.42,
       "prev": 78564.98,
-      "change": -890.97,
-      "changesPercentage": -1.1341,
-      "volume": 33956818944,
-      "avgVolume": 36011750579,
+      "change": -896.56,
+      "changesPercentage": -1.1412,
+      "volume": 33905477632,
+      "avgVolume": 35998915251,
       "yearHigh": 126198.07,
       "yearLow": 57747.766,
       "marketState": "",
@@ -272,9 +272,9 @@
     "Investors, Fed watchers want one thing from Kevin Warsh in his Jackson Hole debut: Clarity - Yahoo Finance",
     "Markets Brace for Possible Rate Hike After Kevin Warsh\u2019s Hawkish Turn - WSJ",
     "If the Federal Reserve Hikes Interest Rates in 2026, History Has Good and Bad News for Investors - The Globe and Mail",
-    "US Stocks Open Mixed as Investors Weigh Rate Path and Earnings - CryptoRank",
     "Stock Market Today: S&P 500, Nasdaq 100 Futures Slip Ahead of Kevin Warsh's Jackson Hole Speech \u2014 MRVL, PYPL, IREN, GAP in Focus - TradingView",
     "\u3010US Pre-Market\u3011Market Focuses on Warsh Speech; Optical Communication and Storage Stocks Broadly Fall, PayPal Plunges Over 16%, Marvell Technology Drops Over 8% - TradingKey",
+    "Jackson Hole Focus: Why Nvidia Now Matters More Than the Fed for Markets - CryptoRank",
     "Investors heartened by Warsh inflation talk, still uncertain about Fed action - The Economic Times",
     "KOSPI retreats as investors turn cautious ahead of Fed chair's rate clues - The Korea Times",
     "US Stock Market: Warsh Jackson Hole speech puts Fed policy communication under scrutiny - The Economic Times"
@@ -291,11 +291,13 @@
     "DXY  99.68 \u25b20.68%",
     "Gold  $4,529.90 \u25bc2.39%",
     "WTI  $83.40 \u25bc1.89%",
-    "Bitcoin  $77,674 \u25bc1.13%",
+    "Bitcoin  $77,668 \u25bc1.14%",
     "EUR/USD  1.1587 \u25bc0.81%",
     "USD/JPY  160.04 \u25b20.71%",
     "VIX  14.43 \u25bc8.96%",
     "Copper  $6.659 \u25b20.91%"
   ],
-  "errors": {}
+  "errors": {
+    "economy": "The read operation timed out"
+  }
 }
