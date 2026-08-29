@@ -1894,7 +1894,6 @@ function buildMiniCharts(){
   const configs=[
     {id:'miniVol',label:'Ann Vol % (13W)'},
     {id:'miniDrawdown',label:'Max Drawdown %'},
-    {id:'miniCorr',label:'Correlation vs QQQM'},
     {id:'miniBar',label:'Return Comparison'},
   ];
   container.innerHTML=configs.map(c=>`<div class="mini-chart-cell">
@@ -1919,17 +1918,6 @@ function buildMiniCharts(){
       scales:{x:{grid:{display:false},ticks:{font:{size:14,weight:'600'},color:'#c8dde8',maxRotation:0,minRotation:0}},
         y:{grid:{color:'rgba(26,40,64,0.6)'},ticks:{font:{size:14},color:'#c8dde8',maxTicksLimit:4},
           min:Math.min(...allT.map(t=>HIST.maxDrawdown[t]))*1.1}}}
-  });
-  const corrLabels=allT.filter(t=>t!=='QQQM');
-  const corrVals=corrLabels.map(t=>HIST.correlation['QQQM'][t]||0);
-  new Chart(document.getElementById('miniCorr').getContext('2d'),{
-    type:'bar',data:{labels:corrLabels,datasets:[{label:'r vs QQQM',data:corrVals,
-      backgroundColor:corrLabels.map((_,i)=>corrVals[i]>0.8?'rgba(255,23,68,0.6)':corrVals[i]>0.4?'rgba(255,215,64,0.5)':'rgba(0,230,118,0.5)'),
-      borderWidth:1,borderRadius:1}]},
-    options:{responsive:false,maintainAspectRatio:false,plugins:{legend:{display:false},
-      tooltip:{callbacks:{label:c=>'r = '+c.raw.toFixed(3)}}},
-      scales:{x:{grid:{display:false},ticks:{font:{size:14,weight:'600'},color:'#c8dde8',maxRotation:0,minRotation:0}},
-        y:{grid:{color:'rgba(26,40,64,0.6)'},ticks:{font:{size:14},color:'#c8dde8',maxTicksLimit:4},min:0,max:1}}}
   });
   new Chart(document.getElementById('miniBar').getContext('2d'),{
     type:'bar',data:{labels:allT,datasets:[
