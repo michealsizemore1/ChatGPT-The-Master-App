@@ -342,6 +342,8 @@
   .contrib-bal-input::placeholder { color:var(--text-dim); }
   .master-home { display:grid; place-items:center; width:24px; height:24px; flex:0 0 24px; border:1px solid var(--border-light); border-radius:3px; color:var(--accent); text-decoration:none; font-size:15px; line-height:1; }
   .master-home:hover, .master-home:focus-visible { background:var(--accent-glow); border-color:var(--accent); outline:none; }
+  #app { grid-template-columns:minmax(0,1fr) 242px; }
+  #panel-left, #newsFeedHeader, #newsSection { display:none !important; }
   @media (max-width: 760px) {
     html, body { height:auto; min-height:100%; overflow-x:hidden; overflow-y:auto; font-size:14px; }
     #topbar, #news-bar, #app { min-width:0; width:100%; }
@@ -846,7 +848,7 @@
         </tbody>
       </table>
     </div>
-    <div class="section-divider" style="position:relative">
+    <div class="section-divider" id="newsFeedHeader" style="position:relative">
       <span>News Feed</span>
       <div class="news-filter-bar" style="margin-left:auto;border:none;background:none;height:auto;padding:0;gap:3px;">
         <span class="news-filter-chip active" data-filter="ALL" onclick="filterNews('ALL',this)">ALL</span>
