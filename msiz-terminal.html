@@ -359,7 +359,8 @@
   .master-home:hover, .master-home:focus-visible { background:var(--accent-glow); border-color:var(--accent); outline:none; }
   #app { grid-template-columns:minmax(0,1fr); }
   #panel-left, #panel-right, #newsFeedHeader, #newsSection { display:none !important; }
-  @media (max-width: 760px) {
+  /* Use the streamlined phone layout at every screen size. */
+  @media (min-width: 0px) {
     html, body { height:auto; min-height:100%; overflow-x:hidden; overflow-y:auto; font-size:14px; }
     #topbar, #news-bar, #app { min-width:0; width:100%; }
     #topbar { min-height:38px; height:auto; padding:5px 7px; }
@@ -481,7 +482,8 @@
     #marketStripScroll::-webkit-scrollbar { height:7px; }
     #marketStripScroll::-webkit-scrollbar-track { background:var(--bg-panel2); }
     #marketStripScroll::-webkit-scrollbar-thumb { background:var(--accent-dim); border-radius:8px; }
-    #indicesRow, #futuresRow { width:1200px; min-width:1200px !important; height:58px !important; }
+    #indicesRow { width:1200px; min-width:1200px !important; height:78px !important; }
+    #futuresRow { width:1200px; min-width:1200px !important; height:58px !important; }
     #indicesRow > div, #futuresRow > div { min-width:230px !important; padding:0 12px !important; overflow:hidden; }
     #indicesRow > div > div:first-child,
     #futuresRow > div > div:first-child { font-size:10px !important; }
@@ -759,12 +761,13 @@
         </div>
       </div>
       <div style="display:flex;flex-direction:column;justify-content:center;padding:0 14px;border-left:1px solid var(--border);gap:2px;flex:1;">
-        <div style="font-family:var(--font-mono);font-size:7.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);white-space:nowrap;">BITCOIN</div>
+        <div style="font-family:var(--font-mono);font-size:7.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);white-space:nowrap;">BITCOIN · HOURLY 24/7</div>
         <div style="display:flex;align-items:baseline;gap:5px;">
           <span id="idx-btc-price" style="font-family:var(--font-mono);font-size:12px;font-weight:600;color:var(--text-primary)">—</span>
           <span id="idx-btc-chg" style="font-family:var(--font-mono);font-size:10px;">—</span>
           <span id="idx-btc-pt" style="font-family:var(--font-mono);font-size:9px;color:var(--text-dim)">—</span>
         </div>
+        <div id="idx-btc-updated" style="font-family:var(--font-mono);font-size:8px;color:#4fc3f7;white-space:nowrap;">UPDATED —</div>
       </div>
       <div style="display:flex;align-items:center;justify-content:center;padding:0 12px;border-left:1px solid var(--border);">
         <span id="mktBadgeRow"></span>
@@ -1985,7 +1988,7 @@ function buildMainChart(){
   const isNorm=activeChartType==='normalized', isCum=activeChartType==='cumreturn';
   const isVol=activeChartType==='rollingvol', isPrice=activeChartType==='prices';
   const yLabel=isNorm?'Normalized (Base=100)':isCum?'Cumul Return %':isVol?'Rolling Vol % (ann)':'Price (USD)';
-  const mobileChart = window.matchMedia('(max-width: 760px)').matches;
+  const mobileChart = true;
   const axisFont = mobileChart ? 14 : 8;
   const tooltipFont = mobileChart ? 14 : 9;
   const scales={
@@ -2277,7 +2280,6 @@ function updateMarketBadges(){
 }
 
 function prepareMobileScrollSections(){
-  if(!window.matchMedia('(max-width: 760px)').matches) return;
   var existingScrollSelector = [
     '.hscroll-wrap', '.mobile-x-scroll', '.contrib-section', '.proj-section',
     '.div-cal-wrap', '.etf-cmp-table-wrap', '.corr-section', '.risk-section'
@@ -2356,12 +2358,18 @@ function showBitcoinSpot(q){
   var priceEl=document.getElementById('idx-btc-price');
   var chgEl=document.getElementById('idx-btc-chg');
   var ptEl=document.getElementById('idx-btc-pt');
+  var updatedEl=document.getElementById('idx-btc-updated');
   var up=q.changesPercentage>=0;
   var previous=q.price/(1+q.changesPercentage/100);
   var pointChange=q.price-previous;
   if(priceEl){priceEl.textContent=Math.round(q.price).toLocaleString();priceEl.title='Bitcoin spot price · hourly 24/7 update';}
   if(chgEl){chgEl.textContent=(up?'▲':'▼')+Math.abs(q.changesPercentage).toFixed(2)+'%';chgEl.className=up?'up':'dn';}
   if(ptEl){ptEl.textContent=(up?'+':'-')+Math.abs(pointChange).toFixed(0);ptEl.className=up?'up':'dn';}
+  if(updatedEl){
+    var updatedDate=new Date((q.lastUpdated||Math.floor(Date.now()/1000))*1000);
+    updatedEl.textContent='UPDATED '+updatedDate.toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZone:'America/Denver',timeZoneName:'short'}).toUpperCase()+' · '+String(q.source||'LIVE').toUpperCase();
+    updatedEl.title='Bitcoin refreshes immediately when opened and every hour while the terminal remains open.';
+  }
   applyBitcoinToMacroStrip();
   renderAllStrips();
 }
