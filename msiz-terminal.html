@@ -2301,6 +2301,8 @@ document.addEventListener('DOMContentLoaded', function(){
   setInterval(fetchLiveQuotes, 60000);
   fetchFutures();
   setInterval(fetchFutures, 60000);
+  fetchBitcoinSpot();
+  setInterval(fetchBitcoinSpot, 60 * 60 * 1000);
 });
 // FUTURES FETCH — calls our own backend proxy /api/futures
 function fetchFutures(){
@@ -2335,6 +2337,52 @@ function fetchFutures(){
 fetchFutures();
 setInterval(fetchFutures, 60000);
 // LIVE DATA — injected server-side into window.__LIVE__ at page load, no client fetch needed
+var LATEST_BITCOIN_SPOT = null;
+function applyBitcoinToMacroStrip(){
+  if(!LATEST_BITCOIN_SPOT) return;
+  var macro=TB_STRIPS.find(function(s){return s.id==='macro';});
+  if(!macro || !macro.items || !macro.items.length) return;
+  var q=LATEST_BITCOIN_SPOT;
+  var replacement='BTC: $'+Math.round(q.price).toLocaleString()+' '+(q.changesPercentage>=0?'▲':'▼')+Math.abs(q.changesPercentage).toFixed(2)+'%';
+  macro.items=macro.items.map(function(item){
+    return String(item).replace(/BTC:\s*\$[\d,]+(?:\.\d+)?(?:\s*[▲▼]?\s*[+-]?\d+(?:\.\d+)?%)?/,replacement);
+  });
+}
+function showBitcoinSpot(q){
+  if(!q || !q.price) return;
+  LATEST_BITCOIN_SPOT=q;
+  var priceEl=document.getElementById('idx-btc-price');
+  var chgEl=document.getElementById('idx-btc-chg');
+  var ptEl=document.getElementById('idx-btc-pt');
+  var up=q.changesPercentage>=0;
+  var previous=q.price/(1+q.changesPercentage/100);
+  var pointChange=q.price-previous;
+  if(priceEl){priceEl.textContent=Math.round(q.price).toLocaleString();priceEl.title='Bitcoin spot price · hourly 24/7 update';}
+  if(chgEl){chgEl.textContent=(up?'▲':'▼')+Math.abs(q.changesPercentage).toFixed(2)+'%';chgEl.className=up?'up':'dn';}
+  if(ptEl){ptEl.textContent=(up?'+':'-')+Math.abs(pointChange).toFixed(0);ptEl.className=up?'up':'dn';}
+  applyBitcoinToMacroStrip();
+  renderAllStrips();
+}
+function fetchBitcoinSpot(){
+  var coinGecko='https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true&include_last_updated_at=true';
+  fetch(coinGecko,{cache:'no-store',headers:{Accept:'application/json'}})
+    .then(function(r){if(!r.ok)throw new Error('CoinGecko '+r.status);return r.json();})
+    .then(function(data){
+      var b=data&&data.bitcoin;
+      if(!b||!b.usd)throw new Error('Bitcoin unavailable');
+      showBitcoinSpot({price:Number(b.usd),changesPercentage:Number(b.usd_24h_change)||0,lastUpdated:Number(b.last_updated_at)||Math.floor(Date.now()/1000),source:'CoinGecko'});
+    })
+    .catch(function(){
+      return fetch('https://api.exchange.coinbase.com/products/BTC-USD/stats',{cache:'no-store',headers:{Accept:'application/json'}})
+        .then(function(r){if(!r.ok)throw new Error('Coinbase '+r.status);return r.json();})
+        .then(function(data){
+          var price=Number(data.last),open=Number(data.open);
+          if(!price) return;
+          showBitcoinSpot({price:price,changesPercentage:open?(price-open)/open*100:0,lastUpdated:Math.floor(Date.now()/1000),source:'Coinbase'});
+        });
+    })
+    .catch(function(){});
+}
 function applyLiveData(data){
   if(!data) return;
   // Update ETF QUOTES
@@ -2349,7 +2397,7 @@ function applyLiveData(data){
     'BTC-USD':['idx-btc-price','idx-btc-chg','idx-btc-pt']
   };
   Object.keys(idxMap).forEach(function(sym){
-    var q = data[sym]; if(!q) return;
+    var q = sym==='BTC-USD' && LATEST_BITCOIN_SPOT ? LATEST_BITCOIN_SPOT : data[sym]; if(!q) return;
     var ids = idxMap[sym];
     var up  = q.changesPercentage >= 0;
     var arrow = up ? '\u25b2' : '\u25bc';
@@ -2389,6 +2437,7 @@ function fetchLiveQuotes(){
           strip.items = values.map(escapeTickerText);
         }
       });
+      applyBitcoinToMacroStrip();
       renderAllStrips();
       var asOfEl = document.getElementById('holdingsDate');
       if(asOfEl && snapshot.updatedAt){
