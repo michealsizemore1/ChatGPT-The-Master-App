@@ -751,6 +751,20 @@
         <span id="mktBadgeRow"></span>
       </div>
     </div>
+    <section id="centerHoldingsSection" aria-label="Holdings and watchlist">
+      <div class="panel-header">
+        <span class="ph-title">Holdings / Watchlist</span>
+        <span class="ph-sub" id="centerHoldingsDate">CURRENT SNAPSHOT</span>
+      </div>
+      <div class="hscroll-wrap">
+        <table class="holdings-table" id="centerHoldingsTable" style="min-width:620px;width:620px">
+          <thead><tr>
+            <th>SYM</th><th style="text-align:left">NAME</th><th>PRICE</th><th>CHG</th><th>%CHG</th>
+          </tr></thead>
+          <tbody id="centerHoldingsBody"></tbody>
+        </table>
+      </div>
+    </section>
     <!-- FUTURES ROW -->
     <div id="futuresRow" style="display:flex;align-items:stretch;border-bottom:1px solid var(--border);background:var(--bg-panel2);height:38px;flex-shrink:0;min-width:0;">
       <div style="display:flex;flex-direction:column;justify-content:center;padding:0 14px;border-right:1px solid var(--border);gap:2px;flex:1;min-width:0;overflow:hidden;">
@@ -1570,6 +1584,22 @@ function renderHoldings(){
     </tr>`;
   }).join('');
 }
+function renderCenterHoldings(){
+  const body=document.getElementById('centerHoldingsBody');
+  if(!body) return;
+  body.innerHTML=TICKERS_ETF.slice().sort().map(function(t){
+    const q=QUOTES[t], m=FUND_META[t];
+    const up=q.changesPercentage>=0;
+    const cls=up?'up':'dn', arrow=up?'▲':'▼';
+    return `<tr onclick="selectTicker('${t}')">
+      <td class="td-sym" style="color:${COLORS[t]} !important">${t}</td>
+      <td style="text-align:left;color:var(--text-secondary)">${m.name}</td>
+      <td class="neutral">$${fmt(q.price)}</td>
+      <td class="${cls}">${arrow}${fmt(Math.abs(q.change))}</td>
+      <td class="${cls}">${fmtPct(q.changesPercentage)}</td>
+    </tr>`;
+  }).join('');
+}
 function renderPerfTable(){
   const body=document.getElementById('perfBody');
   var sortedPerf = TICKERS_ETF.slice().sort(function(a,b){
@@ -2076,7 +2106,7 @@ window.addEventListener('resize',()=>{
   resizeTimeout=setTimeout(()=>{if(mainChartInstance)mainChartInstance.resize();},100);
 });
 function init(){
-  renderTickerTape(); renderTopBar(); renderHoldings(); renderPerfTable(); renderFundTable(); renderDivCal(); renderContrib(); renderEtfCompare();
+  renderTickerTape(); renderTopBar(); renderHoldings(); renderCenterHoldings(); renderPerfTable(); renderFundTable(); renderDivCal(); renderContrib(); renderEtfCompare();
   renderAllocSection(); renderCorrelation(); renderSelectedStats();
   renderSelectedInfoStrip(); renderRiskSection(); renderNews(); renderBalances();
   buildMainChart(); renderChartLegend(); buildMiniCharts();
@@ -2229,6 +2259,7 @@ function applyLiveData(data){
   var asOfEl = document.getElementById('holdingsDate');
   if(asOfEl) asOfEl.textContent = 'AS OF ' + months[now.getMonth()] + ' ' + String(now.getDate()).padStart(2,'0') + ' ' + now.getFullYear();
   renderHoldings();
+  renderCenterHoldings();
   renderPerfTable();
   // Refresh every visible area that reads QUOTES. Previously these retained
   // the embedded fallback values even after the current snapshot arrived.
@@ -2254,9 +2285,12 @@ function fetchLiveQuotes(){
       var asOfEl = document.getElementById('holdingsDate');
       if(asOfEl && snapshot.updatedAt){
         var refreshed = new Date(snapshot.updatedAt);
-        asOfEl.textContent = 'UPDATED ' + refreshed.toLocaleString([], {
+        var updatedLabel = 'UPDATED ' + refreshed.toLocaleString([], {
           month:'short', day:'numeric', hour:'numeric', minute:'2-digit', timeZoneName:'short'
         }).toUpperCase();
+        asOfEl.textContent = updatedLabel;
+        var centerAsOfEl = document.getElementById('centerHoldingsDate');
+        if(centerAsOfEl) centerAsOfEl.textContent = updatedLabel;
         asOfEl.title = 'Automatic market update from ' + (snapshot.source || 'the scheduled market feed');
       }
     })
