@@ -2810,6 +2810,15 @@ body{
       <span>&#x1F9B4; <strong id="totCalcium">0</strong>mg calcium</span>
       <span>&#x2600;&#xFE0F; <strong id="totVitD">0</strong>mcg vitamin D</span>
     </div>
+    <div id="topMicroQuality" style="display:none;margin-top:8px;padding:8px 9px;background:#fff;border:1px solid #dbe3ec;border-radius:8px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.76rem;font-weight:800;color:#334155;margin-bottom:6px;">
+        <span>Top 3 micronutrient quality</span><span id="topMicroQualityLabel">—</span>
+      </div>
+      <div id="topMicroQualityTrack" role="meter" aria-label="Combined daily iron, calcium, and vitamin D target completion" aria-valuemin="1" aria-valuemax="10" style="height:11px;position:relative;border-radius:999px;background:linear-gradient(90deg,#dc2626 0%,#f97316 25%,#facc15 50%,#84cc16 75%,#16a34a 100%);box-shadow:inset 0 0 0 1px rgba(15,23,42,.12);">
+        <span id="topMicroQualityMarker" style="position:absolute;top:50%;left:0%;width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #0f172a;box-sizing:border-box;transform:translate(-50%,-50%);box-shadow:0 1px 3px rgba(15,23,42,.35);"></span>
+      </div>
+      <div id="topMicroQualityNote" style="font-size:.66rem;color:#64748b;line-height:1.35;margin-top:5px;">Iron, calcium, and vitamin D target coverage</div>
+    </div>
     <details style="margin-top:6px;padding-bottom:6px;">
       <summary style="cursor:pointer;font-size:.72rem;color:#64748b;font-weight:800;">Micronutrient Details</summary>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:7px;font-size:0.74rem;color:#666;">
@@ -6304,6 +6313,28 @@ function updateMacroTotals(){
   showMacroSources('Carb',macroSourceRatios('carbs','carbSource'));
   showMacroSources('Fat',macroSourceRatios('fat','fatSource'));
   MICRO_FIELDS.forEach(function(f){set(MICRO_META[f].elId,totals[f]||0);});
+  // Combined adequacy score for the three priority micronutrients. Each nutrient
+  // contributes equally and is capped at 100% so one high value cannot hide a shortfall.
+  var microQuality=document.getElementById('topMicroQuality'),microQualityLabel=document.getElementById('topMicroQualityLabel'),microQualityMarker=document.getElementById('topMicroQualityMarker'),microQualityTrack=document.getElementById('topMicroQualityTrack'),microQualityNote=document.getElementById('topMicroQualityNote');
+  if(microQuality){
+    if(!hasData){microQuality.style.display='none';}
+    else {
+      var priorityMicros=[
+        {name:'Iron',value:totals.iron||0,target:8,unit:'mg'},
+        {name:'Calcium',value:totals.calcium||0,target:1000,unit:'mg'},
+        {name:'Vitamin D',value:totals.vitD||0,target:15,unit:'mcg'}
+      ];
+      var completion=priorityMicros.map(function(n){return Math.max(0,Math.min(1,n.value/n.target));});
+      var averageCompletion=completion.reduce(function(sum,n){return sum+n;},0)/completion.length;
+      var microScore=1+(averageCompletion*9),microLabel=microScore>=9?'Excellent':microScore>=7?'Good':microScore>=5?'Fair':microScore>=3?'Low':'Poor';
+      var weakestIndex=completion.indexOf(Math.min.apply(null,completion)),weakest=priorityMicros[weakestIndex];
+      microQuality.style.display='block';
+      if(microQualityLabel)microQualityLabel.textContent=microScore.toFixed(1)+'/10 · '+microLabel;
+      if(microQualityMarker)microQualityMarker.style.left=Math.max(0,Math.min(100,(microScore-1)/9*100))+'%';
+      if(microQualityTrack)microQualityTrack.setAttribute('aria-valuenow',microScore.toFixed(1));
+      if(microQualityNote)microQualityNote.textContent='Targets: iron 8mg · calcium 1,000mg · vitamin D 15mcg · lowest today: '+weakest.name+' '+Math.round(weakest.value)+weakest.unit;
+    }
+  }
   // Update hidden fields for backward compat save
   var setHid=function(id,v){var e=document.getElementById(id);if(e)e.value=hasData?Math.round(v):'';};
   setHid('nuCalVal',totals.cal);setHid('nuProtVal',totals.prot);setHid('nuFatVal',totals.fat);setHid('nuCarbsVal',totals.carbs);
