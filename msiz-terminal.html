@@ -188,6 +188,20 @@
   .div-cal-paid { color: var(--text-dim); font-size: 8px; padding: 1px 4px; border-radius: 2px; border: 1px solid var(--border); margin-left: 4px; }
   /* INVESTMENT CONTRIBUTION MATRIX */
   .contrib-matrix-wrap { border-top:2px solid var(--accent); background:var(--bg-base); padding-bottom:8px; }
+  .terminal-collapse-shell { flex:0 0 auto; min-width:0; border-bottom:1px solid var(--border); }
+  .terminal-collapse-toggle {
+    width:100%; min-height:44px; padding:9px 12px; border:0; border-bottom:1px solid var(--border);
+    background:var(--bg-panel2); color:var(--accent); display:flex; align-items:center;
+    justify-content:space-between; gap:12px; cursor:pointer; font-family:var(--font-mono);
+    font-size:14px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; text-align:left;
+  }
+  .terminal-collapse-toggle:hover, .terminal-collapse-toggle:focus-visible { background:rgba(0,212,200,.10); outline:none; }
+  .terminal-collapse-icon { flex:0 0 auto; width:28px; height:28px; border:1px solid var(--accent-dim); border-radius:4px; display:grid; place-items:center; font-size:18px; line-height:1; }
+  .terminal-collapse-body[hidden] { display:none !important; }
+  .terminal-collapse-body > #centerHoldingsSection > .panel-header,
+  .terminal-collapse-body > #centerCorrelationSection > .panel-header,
+  .terminal-collapse-body > .div-cal-wrap > .div-cal-header:first-child,
+  .terminal-collapse-body > .contrib-matrix-wrap > .div-cal-header:first-child { display:none; }
   .contrib-matrix-summary { display:grid; grid-template-columns:repeat(4,minmax(120px,1fr)); gap:6px; min-width:620px; padding:8px; }
   .contrib-matrix-card { border:1px solid var(--border-light); background:var(--bg-panel2); border-radius:3px; padding:7px; }
   .contrib-matrix-card strong { display:block; color:var(--accent); font-family:var(--font-mono); }
@@ -2295,9 +2309,70 @@ function prepareMobileScrollSections(){
   });
 }
 
+function setupCollapsibleSections(){
+  var storageKey = 'msiz-terminal-collapsed-sections-v1';
+  var saved = {};
+  try { saved = JSON.parse(localStorage.getItem(storageKey) || '{}') || {}; } catch(e) { saved = {}; }
+
+  function addGroup(key, title, nodes){
+    nodes = nodes.filter(Boolean);
+    if(!nodes.length || nodes[0].closest('.terminal-collapse-shell')) return;
+    var first = nodes[0], parent = first.parentNode;
+    var shell = document.createElement('section');
+    shell.className = 'terminal-collapse-shell';
+    shell.setAttribute('data-collapse-section', key);
+    var button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'terminal-collapse-toggle';
+    button.setAttribute('aria-controls', 'collapse-body-' + key);
+    var label = document.createElement('span');
+    label.textContent = title;
+    var icon = document.createElement('span');
+    icon.className = 'terminal-collapse-icon';
+    icon.setAttribute('aria-hidden', 'true');
+    var body = document.createElement('div');
+    body.className = 'terminal-collapse-body';
+    body.id = 'collapse-body-' + key;
+    parent.insertBefore(shell, first);
+    shell.appendChild(button); shell.appendChild(body);
+    button.appendChild(label); button.appendChild(icon);
+    nodes.forEach(function(node){ body.appendChild(node); });
+
+    function apply(collapsed){
+      body.hidden = collapsed;
+      button.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+      icon.textContent = collapsed ? '+' : '\u2212';
+      button.setAttribute('aria-label', (collapsed ? 'Expand ' : 'Collapse ') + title);
+    }
+    apply(saved[key] === true);
+    button.addEventListener('click', function(){
+      var collapsed = !body.hidden;
+      saved[key] = collapsed;
+      try { localStorage.setItem(storageKey, JSON.stringify(saved)); } catch(e) {}
+      apply(collapsed);
+      if(!collapsed && mainChartInstance && typeof mainChartInstance.resize === 'function') {
+        setTimeout(function(){ mainChartInstance.resize(); }, 0);
+      }
+    });
+  }
+
+  var panel = document.getElementById('panel-center');
+  addGroup('markets', 'Stock Indexes & Futures', [document.getElementById('marketStripScroll')]);
+  addGroup('holdings', 'Holdings / Watchlist', [document.getElementById('centerHoldingsSection')]);
+  addGroup('correlation', 'Correlation Matrix', [document.getElementById('centerCorrelationSection')]);
+  addGroup('performance', 'Performance & Risk Charts', [
+    panel && panel.querySelector(':scope > .chart-tabs'),
+    document.getElementById('selectedInfoStrip'), document.getElementById('mainChartArea'),
+    document.getElementById('chartLegend'), document.getElementById('miniChartsRow')
+  ]);
+  addGroup('dividends', 'Dividend Calendar', [panel && panel.querySelector(':scope > .div-cal-wrap')]);
+  addGroup('contributions', 'Investment Contribution Matrix', [panel && panel.querySelector(':scope > .contrib-matrix-wrap')]);
+}
+
 document.addEventListener('DOMContentLoaded', function(){
   prepareMobileScrollSections();
   init();
+  setupCollapsibleSections();
   updateMarketBadges(); updateTopBarStatus();
   setInterval(function(){ updateMarketBadges(); updateTopBarStatus(); }, 60000);
   fetchLiveQuotes();
