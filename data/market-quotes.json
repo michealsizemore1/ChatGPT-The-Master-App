@@ -1,0 +1,173 @@
+{
+  "updatedAt": "2026-08-29T04:50:26+00:00",
+  "source": "Yahoo Finance public chart data",
+  "quotes": {
+    "SCHD": {
+      "price": 34.9,
+      "prev": 35.11,
+      "change": -0.21,
+      "changesPercentage": -0.5981,
+      "volume": 20950162,
+      "avgVolume": 23829012,
+      "yearHigh": 35.31,
+      "yearLow": 26.32,
+      "marketState": "",
+      "currency": "USD"
+    },
+    "QQQM": {
+      "price": 295.0,
+      "prev": 293.76,
+      "change": 1.24,
+      "changesPercentage": 0.4221,
+      "volume": 2635688,
+      "avgVolume": 2848677,
+      "yearHigh": 308.21,
+      "yearLow": 228.75,
+      "marketState": "",
+      "currency": "USD"
+    },
+    "SGOV": {
+      "price": 100.69,
+      "prev": 100.63,
+      "change": 0.06,
+      "changesPercentage": 0.0596,
+      "volume": 24268084,
+      "avgVolume": 19297376,
+      "yearHigh": 100.73,
+      "yearLow": 100.27,
+      "marketState": "",
+      "currency": "USD"
+    },
+    "SMH": {
+      "price": 553.11,
+      "prev": 560.42,
+      "change": -7.31,
+      "changesPercentage": -1.3044,
+      "volume": 6301415,
+      "avgVolume": 6102223,
+      "yearHigh": 671.83,
+      "yearLow": 281.74,
+      "marketState": "",
+      "currency": "USD"
+    },
+    "IBIT": {
+      "price": 43.9,
+      "prev": 43.68,
+      "change": 0.22,
+      "changesPercentage": 0.5037,
+      "volume": 76502152,
+      "avgVolume": 68090030,
+      "yearHigh": 71.82,
+      "yearLow": 32.84,
+      "marketState": "",
+      "currency": "USD"
+    },
+    "^GSPC": {
+      "price": 7711.76,
+      "prev": 7674.37,
+      "change": 37.39,
+      "changesPercentage": 0.4872,
+      "volume": 2589484000,
+      "avgVolume": 3942672800,
+      "yearHigh": 7816.7,
+      "yearLow": 6316.91,
+      "marketState": "",
+      "currency": "USD"
+    },
+    "^DJI": {
+      "price": 53559.99,
+      "prev": 53277.01,
+      "change": 282.98,
+      "changesPercentage": 0.5311,
+      "volume": 507511504,
+      "avgVolume": 476678300,
+      "yearHigh": 54744.33,
+      "yearLow": 44948.16,
+      "marketState": "",
+      "currency": "USD"
+    },
+    "^IXIC": {
+      "price": 26402.424,
+      "prev": 26180.46,
+      "change": 221.964,
+      "changesPercentage": 0.8478,
+      "volume": 7526280000,
+      "avgVolume": 7368430000,
+      "yearHigh": 27190.21,
+      "yearLow": 20690.25,
+      "marketState": "",
+      "currency": "USD"
+    }
+  },
+  "futures": {
+    "ES=F": {
+      "price": 7722.0,
+      "prev": 7669.75,
+      "change": 52.25,
+      "changesPercentage": 0.6812,
+      "volume": 1456221,
+      "avgVolume": 1142861,
+      "yearHigh": 7838.5,
+      "yearLow": 6353.25,
+      "marketState": "",
+      "currency": "USD"
+    },
+    "YM=F": {
+      "price": 53584.0,
+      "prev": 53489.0,
+      "change": 95.0,
+      "changesPercentage": 0.1776,
+      "volume": 56319,
+      "avgVolume": 51622,
+      "yearHigh": 54884.0,
+      "yearLow": 45000.0,
+      "marketState": "",
+      "currency": "USD"
+    },
+    "NQ=F": {
+      "price": 29491.75,
+      "prev": 29105.75,
+      "change": 386.0,
+      "changesPercentage": 1.3262,
+      "volume": 572237,
+      "avgVolume": 501731,
+      "yearHigh": 30968.0,
+      "yearLow": 22961.5,
+      "marketState": "",
+      "currency": "USD"
+    }
+  },
+  "gainers": [
+    {
+      "sym": "IBIT",
+      "name": "IBIT",
+      "price": 43.9,
+      "chg": 0.5037
+    },
+    {
+      "sym": "QQQM",
+      "name": "QQQM",
+      "price": 295.0,
+      "chg": 0.4221
+    },
+    {
+      "sym": "SGOV",
+      "name": "SGOV",
+      "price": 100.69,
+      "chg": 0.0596
+    },
+    {
+      "sym": "SCHD",
+      "name": "SCHD",
+      "price": 34.9,
+      "chg": -0.5981
+    },
+    {
+      "sym": "SMH",
+      "name": "SMH",
+      "price": 553.11,
+      "chg": -1.3044
+    }
+  ],
+  "errors": {}
+}

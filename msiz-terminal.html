@@ -775,6 +775,7 @@ const COLORS = {
   SMH:'#ff9100', IBIT:'#f7931a',
   'TSP C':'#ff5252', 'TSP S':'#ff80ab', 'TSP I':'#40c4ff',
 };
+const MARKET_DATA_URL = 'data/market-quotes.json';
 let selectedTicker = 'QQQM';
 let activeChartType = 'normalized';
 let activeRange = '1Y';
@@ -810,9 +811,10 @@ function getDateRange(rangeKey){
 function renderTickerTape(){
   var track = document.getElementById('tapeTrack');
   if(!track) return;
-  fetch('http://localhost:8888/api/gainers')
+  fetch(MARKET_DATA_URL + '?v=' + Date.now(), {cache:'no-store'})
     .then(function(r){ return r.json(); })
-    .then(function(gainers){
+    .then(function(snapshot){
+      var gainers = snapshot.gainers || [];
       if(!gainers || !gainers.length) return;
       function itemHTML(g){
         var cls   = g.chg >= 0 ? 'up' : 'dn';
@@ -1941,9 +1943,10 @@ function fetchFutures(){
     'YM=F': ['fut-ym-price','fut-ym-chg'],
     'NQ=F': ['fut-nq-price','fut-nq-chg']
   };
-  fetch('http://localhost:8888/api/futures')
+  fetch(MARKET_DATA_URL + '?v=' + Date.now(), {cache:'no-store'})
     .then(function(r){ return r.json(); })
-    .then(function(data){
+    .then(function(snapshot){
+      var data = snapshot.futures || {};
       Object.keys(map).forEach(function(sym){
         var q = data[sym];
         if(!q || !q.price) return;
@@ -1999,9 +2002,9 @@ function applyLiveData(data){
   renderPerfTable();
 }
 function fetchLiveQuotes(){
-  fetch('http://localhost:8888/api/quotes')
+  fetch(MARKET_DATA_URL + '?v=' + Date.now(), {cache:'no-store'})
     .then(function(r){ return r.json(); })
-    .then(function(data){ applyLiveData(data); })
+    .then(function(snapshot){ applyLiveData(snapshot.quotes || {}); })
     .catch(function(){});
 }
 // ── STOCK SEARCH MODAL + MONTHLY CONTRIBUTIONS ─────────────────────────────
