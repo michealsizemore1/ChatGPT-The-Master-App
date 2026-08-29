@@ -186,6 +186,7 @@
   .div-cal-table td:nth-child(2) { text-align: left; color: var(--text-secondary); font-size: 9px; }
   .div-cal-soon { color: var(--yellow); font-size: 8px; font-weight: 700; padding: 1px 4px; border-radius: 2px; border: 1px solid var(--yellow); margin-left: 4px; }
   .div-cal-paid { color: var(--text-dim); font-size: 8px; padding: 1px 4px; border-radius: 2px; border: 1px solid var(--border); margin-left: 4px; }
+  .div-cal-est { color: #00b8ff; font-size: 8px; font-weight: 700; padding: 1px 4px; border-radius: 2px; border: 1px solid #00b8ff; margin-left: 4px; }
   /* RIGHT PANEL */
   .selected-stats { padding: 5px 6px; font-family: var(--font-mono); }
   .ss-header { display: flex; align-items: baseline; gap: 6px; margin-bottom: 5px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
@@ -991,8 +992,8 @@ const TICKERS_ETF = ['SCHD','QQQM','SGOV','SMH','IBIT'];
 const TICKERS_HELD = ['SCHD','QQQM','SGOV','IBIT'];
 const TICKERS_ALL = [...TICKERS_ETF, 'TSP C','TSP S','TSP I'];
 const COLORS = {
-  SCHD:'#00e676', QQQM:'#ff6d00', SGOV:'#ffd740',
-  SMH:'#ff9100', IBIT:'#f7931a',
+  SCHD:'#00e676', QQQM:'#00b8ff', SGOV:'#ffd740',
+  SMH:'#e040fb', IBIT:'#ff6d00',
   'TSP C':'#ff5252', 'TSP S':'#ff80ab', 'TSP I':'#40c4ff',
 };
 const MARKET_DATA_URL = 'data/market-quotes.json';
@@ -1384,42 +1385,40 @@ function loadBal(){
 }
 // DIVIDEND CALENDAR
 var DIV_DATA = [
-  // Sorted by ex-date ascending
-  // Status: 'upcoming' = future, 'soon' = within 7 days, 'paid' = already passed
+  // Future dates without a declared amount use the latest confirmed payout as an estimate.
   {
     sym:'SGOV', name:'iShares 0-3M Treasury', freq:'Monthly',
-    exDate:'2026-07-01', payDate:'2026-07-07', amount:0.35,
-    status:'upcoming'
+    exDate:'2026-09-01', payDate:'2026-09-08', amount:0.306812,
+    status:'upcoming', estimated:true
   },
   {
     sym:'SCHD', name:'Schwab Dividend Equity', freq:'Quarterly',
-    exDate:'2026-06-24', payDate:'2026-06-29', amount:0.26,
-    status:'soon'
+    exDate:'2026-09-23', payDate:'2026-09-28', amount:0.2525,
+    status:'upcoming', estimated:true
   },
   {
     sym:'QQQM', name:'Invesco Nasdaq 100', freq:'Quarterly',
-    exDate:'2026-06-22', payDate:'2026-06-26', amount:0.30,
-    status:'soon'
+    exDate:'2026-09-21', payDate:'2026-09-25', amount:0.35215,
+    status:'upcoming', estimated:true
   },
   {
     sym:'SMH', name:'VanEck Semiconductor', freq:'Annual',
-    exDate:'2026-12-21', payDate:'2026-12-23', amount:1.10,
-    status:'upcoming'
+    exDate:'2026-12-21', payDate:'2026-12-23', amount:1.1047,
+    status:'upcoming', estimated:true
   },
-  // Already paid this cycle — shown for reference
   {
     sym:'SGOV', name:'iShares 0-3M Treasury', freq:'Monthly',
-    exDate:'2026-06-01', payDate:'2026-06-04', amount:0.30,
+    exDate:'2026-08-03', payDate:'2026-08-06', amount:0.306812,
     status:'paid'
   },
   {
     sym:'SCHD', name:'Schwab Dividend Equity', freq:'Quarterly',
-    exDate:'2026-03-25', payDate:'2026-03-30', amount:0.26,
+    exDate:'2026-06-24', payDate:'2026-06-29', amount:0.2525,
     status:'paid'
   },
   {
     sym:'QQQM', name:'Invesco Nasdaq 100', freq:'Quarterly',
-    exDate:'2026-03-23', payDate:'2026-03-27', amount:0.33,
+    exDate:'2026-06-22', payDate:'2026-06-26', amount:0.35215,
     status:'paid'
   },
   {
@@ -1453,12 +1452,9 @@ function renderDivCal(){
     var badge = '';
     if(d.status === 'soon') badge = '<span class="div-cal-soon">SOON</span>';
     else if(d.status === 'paid') badge = '<span class="div-cal-paid">PAID</span>';
+    if(d.estimated) badge += '<span class="div-cal-est">EST</span>';
     var symColor = d.status === 'paid' ? 'var(--text-dim)' : 'var(--accent)';
-    if(d.sym === 'SCHD') symColor = 'var(--green)';
-    else if(d.sym === 'IBIT') symColor = '#f7931a';
-    else if(d.sym === 'QQQM') symColor = '#ff6d00';
-    else if(d.sym === 'SGOV') symColor = 'var(--yellow)';
-    else if(d.sym === 'SMH') symColor = '#ff9100';
+    if(COLORS[d.sym]) symColor = COLORS[d.sym];
     if(d.status === 'paid') symColor = 'var(--text-dim)';
     var rowOpacity = d.status === 'paid' ? 'opacity:0.45;' : '';
     html += '<tr style="' + rowOpacity + '">';
