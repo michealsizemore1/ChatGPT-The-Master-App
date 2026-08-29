@@ -2230,6 +2230,12 @@ function applyLiveData(data){
   if(asOfEl) asOfEl.textContent = 'AS OF ' + months[now.getMonth()] + ' ' + String(now.getDate()).padStart(2,'0') + ' ' + now.getFullYear();
   renderHoldings();
   renderPerfTable();
+  // Refresh every visible area that reads QUOTES. Previously these retained
+  // the embedded fallback values even after the current snapshot arrived.
+  renderSelectedStats();
+  renderSelectedInfoStrip();
+  renderChartLegend();
+  renderDivCal();
 }
 function fetchLiveQuotes(){
   fetch(MARKET_DATA_URL + '?v=' + Date.now(), {cache:'no-store'})
