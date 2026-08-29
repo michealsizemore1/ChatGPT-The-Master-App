@@ -198,6 +198,8 @@
   .contrib-matrix-table th:first-child,.contrib-matrix-table th:nth-child(2),.contrib-matrix-table td:first-child,.contrib-matrix-table td:nth-child(2) { text-align:left; }
   .contrib-matrix-table tr.total-row td { color:var(--accent); font-weight:700; border-top:2px solid var(--accent); }
   .contrib-matrix-note { color:var(--text-dim); font-family:var(--font-mono); padding:7px 9px 0; line-height:1.45; }
+  .contrib-hysa-banner { margin:8px; padding:9px; border:1px solid #4fc3f7; background:rgba(79,195,247,.08); color:var(--text-primary); font-family:var(--font-mono); line-height:1.45; }
+  .contrib-hysa-banner strong { color:#4fc3f7; }
   .div-cal-est { color: #00b8ff; font-size: 8px; font-weight: 700; padding: 1px 4px; border-radius: 2px; border: 1px solid #00b8ff; margin-left: 4px; }
   /* RIGHT PANEL */
   .selected-stats { padding: 5px 6px; font-family: var(--font-mono); }
@@ -941,6 +943,7 @@
         <span class="div-cal-title">CURRENT PORTFOLIO WEIGHTS</span>
         <span style="margin-left:auto;">$210,834 TOTAL</span>
       </div>
+      <div class="contrib-hysa-banner"><strong>HYSA IS INCLUDED:</strong> $204,834 investments + $6,000 HYSA = $210,834 total. The HYSA represents <strong>2.85%</strong> of the complete current portfolio.</div>
       <div class="hscroll-wrap" aria-label="Current portfolio balances and weights; swipe left or right">
         <div class="contrib-matrix-summary">
           <div class="contrib-matrix-card"><strong>TSP ACCOUNTS</strong><span>$191,913 · 91.03%</span></div>
@@ -958,12 +961,12 @@
             <tr><td>ETF Pie</td><td style="color:#ff6d00">IBIT</td><td>$743.00</td><td>0.35%</td></tr>
             <tr><td>SGOV Pie</td><td style="color:#ffd740">SGOV</td><td>$928.00</td><td>0.44%</td></tr>
             <tr><td>Cash Savings</td><td>HYSA</td><td>$6,000.00</td><td>2.85%</td></tr>
-            <tr class="total-row"><td>TOTAL</td><td>ALL ACCOUNTS</td><td>$210,834.00</td><td>100.00%</td></tr>
+            <tr class="total-row"><td>TOTAL</td><td>ALL INVESTMENTS + HYSA</td><td>$210,834.00</td><td>100.00%</td></tr>
           </tbody>
         </table>
       </div>
       <div class="div-cal-header">
-        <span class="div-cal-title">MONTHLY CONTRIBUTION WEIGHTS</span>
+        <span class="div-cal-title">MONTHLY CONTRIBUTION WEIGHTS — SEPARATE</span>
         <span style="margin-left:auto;">$3,142 / MONTH</span>
       </div>
       <div class="hscroll-wrap" aria-label="Portfolio contribution weights; swipe left or right">
@@ -971,7 +974,6 @@
           <div class="contrib-matrix-card"><strong>TSP PIE</strong><span>$3,017.00 · 96.02%</span></div>
           <div class="contrib-matrix-card"><strong>ETF PIE</strong><span>$100.00 · 3.18%</span></div>
           <div class="contrib-matrix-card"><strong>SGOV PIE</strong><span>$25.00 · 0.80%</span></div>
-          <div class="contrib-matrix-card"><strong>HYSA</strong><span>$6,000 balance · $0/mo</span></div>
         </div>
         <table class="contrib-matrix-table">
           <thead><tr><th>PORTFOLIO</th><th>INVESTMENT</th><th>MONTHLY</th><th>WEIGHT IN PIE</th><th>WEIGHT OF TOTAL</th></tr></thead>
@@ -983,8 +985,7 @@
             <tr><td>ETF Pie</td><td style="color:#00b8ff">QQQM</td><td>$45.00</td><td>45%</td><td>1.43%</td></tr>
             <tr><td>ETF Pie</td><td style="color:#ff6d00">IBIT</td><td>$5.00</td><td>5%</td><td>0.16%</td></tr>
             <tr><td>SGOV Pie</td><td style="color:#ffd740">SGOV</td><td>$25.00</td><td>100%</td><td>0.80%</td></tr>
-            <tr><td>HYSA</td><td>HYSA ($6,000 balance)</td><td>$0.00</td><td>—</td><td>0.00%</td></tr>
-            <tr class="total-row"><td>TOTAL</td><td>ALL INVESTMENTS</td><td>$3,142.00</td><td>—</td><td>100.00%</td></tr>
+            <tr class="total-row"><td>TOTAL</td><td>ALL MONTHLY CONTRIBUTIONS</td><td>$3,142.00</td><td>—</td><td>100.00%</td></tr>
           </tbody>
         </table>
         <table class="contrib-matrix-table" style="margin-top:8px;min-width:620px;">
@@ -996,7 +997,7 @@
           </tbody>
         </table>
       </div>
-      <div class="contrib-matrix-note">Weights include the $321 monthly employer match. TSP C/S/I allocations apply across Traditional TSP, Roth TSP, and the employer match. HYSA has a current balance of $6,000 and no monthly contribution, so it does not change the monthly contribution weights.</div>
+      <div class="contrib-matrix-note">The current portfolio weights above include the $6,000 HYSA at 2.85%. The separate monthly contribution table includes only accounts receiving monthly deposits. HYSA is omitted from that table because no new money is contributed to it each month.</div>
     </section>
   </div>
   <!-- RIGHT PANEL -->
