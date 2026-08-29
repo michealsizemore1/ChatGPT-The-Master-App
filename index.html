@@ -129,6 +129,7 @@
   .lang .icon{background:#fdeaea;color:#b0392c}
   .family .icon{background:#eef1f8;color:#1b2b52}
   .ebay .icon{background:#fff4d6;color:#9a6500}
+  .invest .icon{background:#071628;color:#00d4c8}
 
   .note{
     margin-top:30px;
@@ -228,6 +229,19 @@
       <div class="tags"><span>This device</span><span>Business plan included</span><span>Backup available</span></div>
       <div class="open">Open eBay Business Tracker &rarr;</div>
     </a>
+
+  </div>
+
+  <h2 class="section-title growth-title">Investments</h2>
+  <p class="section-intro">Monitor your portfolio, market performance, risk, income, and long-range projections.</p>
+  <div class="grid growth-grid">
+    <a class="card invest" href="msiz-terminal.html">
+      <div class="icon">&#128200;</div>
+      <h2>MSIZ Terminal</h2>
+      <p>Portfolio holdings, allocation, performance, dividends, risk, comparisons, projections, and market research.</p>
+      <div class="tags"><span>Portfolio analytics</span><span>Local storage</span></div>
+      <div class="open">Open MSIZ Terminal &rarr;</div>
+    </a>
   </div>
 
   <h2 class="section-title growth-title">Personal Growth</h2>
@@ -249,7 +263,7 @@
     </section>
     <section class="info-card backup">
       <h2>Back up the entire Master App</h2>
-      <p>Download one backup containing the information saved by all six tools in this browser. Keep the file somewhere safe because there is no automatic online copy.</p>
+      <p>Download one backup containing the information saved by all tools in this browser. Keep the file somewhere safe because there is no automatic online copy.</p>
       <div class="backup-actions">
         <button class="backup-btn" type="button" onclick="downloadMasterBackup()">Download Full Backup</button>
         <button class="backup-btn secondary" type="button" onclick="document.getElementById('masterBackupFile').click()">Restore Full Backup</button>
@@ -264,7 +278,7 @@
   </div>
 </main>
 
-<footer>My Life Master App &middot; a home for six connected tools</footer>
+<footer>My Life Master App &middot; your connected personal tools</footer>
 
 <script>
 function masterBackupStatus(message,isError){
@@ -324,4 +338,3 @@ function restoreMasterBackup(input){
 </script>
 </body>
 </html>
-
