@@ -799,8 +799,12 @@
       <div class="hscroll-wrap">
         <table class="holdings-table" id="centerHoldingsTable" style="min-width:540px;width:540px">
           <colgroup><col style="width:58px"><col style="width:190px"><col style="width:100px"><col style="width:96px"><col style="width:96px"></colgroup>
-          <thead><tr>
-            <th>SYM</th><th style="text-align:left">NAME</th><th>PRICE</th><th>CHG</th><th>%CHG</th>
+          <thead><tr id="centerHoldingsHdr">
+            <th class="sortable sort-asc" data-key="sym" onclick="sortHoldings('sym',this)">SYM</th>
+            <th class="sortable" data-key="name" style="text-align:left" onclick="sortHoldings('name',this)">NAME</th>
+            <th class="sortable" data-key="price" onclick="sortHoldings('price',this)">PRICE</th>
+            <th class="sortable" data-key="chg" onclick="sortHoldings('chg',this)">CHG</th>
+            <th class="sortable" data-key="pct" onclick="sortHoldings('pct',this)">%CHG</th>
           </tr></thead>
           <tbody id="centerHoldingsBody"></tbody>
         </table>
@@ -1500,12 +1504,15 @@ function sortHoldings(key, th){
   if(holdingsSortKey === key){ holdingsSortAsc = !holdingsSortAsc; }
   else { holdingsSortKey = key; holdingsSortAsc = key === 'sym'; }
   // Update header indicators
-  var hdrRow = document.getElementById('holdingsHdr');
-  if(hdrRow) hdrRow.querySelectorAll('th').forEach(function(t){
-    t.classList.remove('sort-asc','sort-desc');
-    if(t.dataset.key === holdingsSortKey) t.classList.add(holdingsSortAsc?'sort-asc':'sort-desc');
+  ['holdingsHdr','centerHoldingsHdr'].forEach(function(id){
+    var hdrRow = document.getElementById(id);
+    if(hdrRow) hdrRow.querySelectorAll('th').forEach(function(t){
+      t.classList.remove('sort-asc','sort-desc');
+      if(t.dataset.key === holdingsSortKey) t.classList.add(holdingsSortAsc?'sort-asc':'sort-desc');
+    });
   });
   renderHoldings();
+  renderCenterHoldings();
 }
 function sortPerf(key, th){
   if(perfSortKey === key){ perfSortAsc = !perfSortAsc; }
@@ -1594,25 +1601,23 @@ function renderHoldings(){
 function renderCenterHoldings(){
   const body=document.getElementById('centerHoldingsBody');
   if(!body) return;
-  body.innerHTML=TICKERS_ETF.slice().sort().map(function(t){
-    const q=QUOTES[t], m=FUND_META[t];
-    const up=q.changesPercentage>=0;
-    const cls=up?'up':'dn', arrow=up?'▲':'▼';
+  const sorted=TICKERS_ALL.slice().sort(function(a,b){
+    const va=getHoldingsVal(a,holdingsSortKey), vb=getHoldingsVal(b,holdingsSortKey);
+    if(typeof va==='string') return holdingsSortAsc?va.localeCompare(vb):vb.localeCompare(va);
+    return holdingsSortAsc?va-vb:vb-va;
+  });
+  body.innerHTML=sorted.map(function(t){
+    const m=FUND_META[t], isTSP=!!m.tsp, q=QUOTES[t]||{};
+    const price=isTSP?(TSP_NAV[t]||0):(q.price||0);
+    const prev=isTSP?(TSP_NAV_PREV[t]||price):((q.price||0)-(q.change||0));
+    const chg=isTSP?price-prev:(q.change||0);
+    const pct=isTSP?(prev?chg/prev*100:0):(q.changesPercentage||0);
+    const up=chg>=0;
     return `<tr onclick="selectTicker('${t}')">
-      <td class="td-sym" style="color:${COLORS[t]} !important">${t}</td>
+      <td class="${isTSP?'td-tsp':'td-sym'}" style="color:${COLORS[t]} !important">${t}</td>
       <td style="text-align:left;color:var(--text-secondary)">${m.name}</td>
-      <td class="neutral">$${fmt(q.price)}</td>
-      <td class="${cls}">${arrow}${fmt(Math.abs(q.change))}</td>
-      <td class="${cls}">${fmtPct(q.changesPercentage)}</td>
-    </tr>`;
-  }).join('')+['TSP C','TSP S','TSP I'].map(function(t){
-    const m=FUND_META[t], nav=TSP_NAV[t]||0, prev=TSP_NAV_PREV[t]||nav;
-    const chg=nav-prev, pct=prev?(chg/prev*100):0, up=chg>=0;
-    return `<tr onclick="selectTicker('${t}')">
-      <td class="td-tsp" style="color:${COLORS[t]} !important">${t}</td>
-      <td style="text-align:left;color:var(--text-secondary)">${m.name}</td>
-      <td class="neutral">$${nav.toFixed(4)}</td>
-      <td class="${up?'up':'dn'}">${up?'▲':'▼'}${Math.abs(chg).toFixed(4)}</td>
+      <td class="neutral">$${isTSP?price.toFixed(4):fmt(price)}</td>
+      <td class="${up?'up':'dn'}">${up?'▲':'▼'}${isTSP?Math.abs(chg).toFixed(4):fmt(Math.abs(chg))}</td>
       <td class="${up?'up':'dn'}">${fmtPct(pct)}</td>
     </tr>`;
   }).join('');
