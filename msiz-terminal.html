@@ -721,6 +721,31 @@
     flex:0 0 230px !important;
     width:230px !important;
   }
+  @media (min-width:900px) {
+    /* Center the desktop terminal consistently across every paired section. */
+    .terminal-collapse-toggle {
+      position:relative; justify-content:center !important; text-align:center !important;
+      padding-left:42px !important; padding-right:42px !important;
+    }
+    .terminal-collapse-toggle .terminal-collapse-icon { position:absolute; right:10px; top:50%; transform:translateY(-50%); }
+    .panel-header, .section-divider, .div-cal-header { justify-content:center !important; text-align:center !important; }
+    .panel-header .ph-sub, .div-cal-header > span:last-child { margin-left:10px !important; }
+    #indicesRow > div, #futuresRow > div { align-items:center !important; text-align:center !important; }
+    #indicesRow > div > div, #futuresRow > div > div { justify-content:center !important; text-align:center !important; }
+    #panel-center .hscroll-wrap, #panel-center .mobile-x-scroll { text-align:center !important; }
+    #panel-center table th, #panel-center table td,
+    #panel-center table th:first-child, #panel-center table td:first-child,
+    #panel-center table th:nth-child(2), #panel-center table td:nth-child(2) { text-align:center !important; }
+    #centerHoldingsTable th, #centerHoldingsTable td { text-align:center !important; }
+    .chart-tabs { justify-content:center !important; }
+    .range-tabs { margin-left:10px !important; }
+    #selectedInfoStrip { justify-content:center !important; text-align:center !important; }
+    #chartLegend#chartLegend { justify-content:center !important; text-align:center !important; }
+    #miniChartsRow .mini-chart-label { text-align:center !important; }
+    .contrib-matrix-summary { justify-content:center; text-align:center; }
+    .contrib-matrix-card, .contrib-matrix-note { text-align:center !important; }
+    .contrib-hysa-banner, .alloc-section, .risk-section, .corr-section { text-align:center !important; }
+  }
 </style>
 </head>
 <body>
