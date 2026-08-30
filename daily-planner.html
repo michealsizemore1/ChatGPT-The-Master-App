@@ -6237,7 +6237,7 @@ function setLibraryFoodThumbnail(library,idx,file){
     (window._foodLog||[]).forEach(function(item){if(String(item.name||'').toLowerCase()===name){item.imageData=data;item.imageUrl='';}});save();renderFoodItems();if(library==='healthy')renderHealthyFoodsList();else renderFavsList();
   });
 }
-function backfillSavedFoodBarcodeImages(){
+function backfillSavedFoodBarcodeImages(skipRender){
   var favorites=getFavorites(),healthy=getHealthyFoods(),targets=[],seen={};
   favorites.concat(healthy).concat(window._foodLog||[]).forEach(function(food){var code=String(food&&food.barcode||'').replace(/\D/g,'');if(code&&!food.imageUrl&&!food.imageData&&!seen[code]){seen[code]=true;targets.push(code);}});
   if(!targets.length)return Promise.resolve(0);
@@ -6249,8 +6249,16 @@ function backfillSavedFoodBarcodeImages(){
     var byName={};favorites.concat(healthy).concat(window._foodLog||[]).forEach(function(food){var src=food.imageData||food.imageUrl,name=String(food.name||'').toLowerCase();if(src&&name)byName[name]={imageData:food.imageData||'',imageUrl:food.imageUrl||''};});
     favorites.forEach(function(food){var src=byName[String(food.name||'').toLowerCase()];if(src&&!food.imageData&&!food.imageUrl){food.imageData=src.imageData;food.imageUrl=src.imageUrl;favChanged=true;}});
     healthy.forEach(function(food){var src=byName[String(food.name||'').toLowerCase()];if(src&&!food.imageData&&!food.imageUrl){food.imageData=src.imageData;food.imageUrl=src.imageUrl;healthyChanged=true;}});
-    if(favChanged)saveFavorites(favorites);if(healthyChanged)saveHealthyFoods(healthy);if(logChanged)save();if(favChanged||healthyChanged||logChanged){renderFoodItems();renderFavsList();renderHealthyFoodsList();}return Object.keys(found).length;
+    if(favChanged)saveFavorites(favorites);if(healthyChanged)saveHealthyFoods(healthy);if(logChanged)save();if(!skipRender&&(favChanged||healthyChanged||logChanged)){renderFoodItems();renderFavsList();renderHealthyFoodsList();}return Object.keys(found).length;
   });
+}
+function rescanHealthyFoodsAndImages(button){
+  if(button){button.disabled=true;button.textContent='⏳ Scanning saved foods and pictures…';button.style.opacity='.72';}
+  var status=document.getElementById('healthyRescanStatus');if(status){status.style.display='block';status.style.color='#475569';status.textContent='Checking every saved Nutrition day, Favorite, and available barcode picture…';}
+  window._healthyFoodsImported=false;importHealthyFoodsFromSavedNutrition(true);
+  backfillSavedFoodBarcodeImages(true).then(function(imagesFound){
+    renderHealthyFoodsList();var done=document.getElementById('healthyRescanStatus'),count=getHealthyFoods().length;if(done){done.style.display='block';done.style.color='#166534';done.textContent='✓ Rescan complete: '+count+' healthy food'+(count===1?'':'s')+' found · '+imagesFound+' barcode picture'+(imagesFound===1?'':'s')+' added.';}
+  }).catch(function(){renderHealthyFoodsList();var failed=document.getElementById('healthyRescanStatus');if(failed){failed.style.display='block';failed.style.color='#991b1b';failed.textContent='The food scan finished, but barcode pictures could not be checked. Try again when connected to the internet.';}});
 }
 
 function copyFoodItem(id){
@@ -6588,7 +6596,7 @@ function renderHealthyFoodsList(){
   var el=document.getElementById('healthyFoodsList');if(!el)return;
   importHealthyFoodsFromSavedNutrition();
   var all=getHealthyFoods();updateHealthyFoodsCount(all.length);var q=(document.getElementById('favSearch')||{value:''}).value.toLowerCase().trim(),foods=q?all.filter(function(food){return String(food.name||'').toLowerCase().includes(q);}):all;
-  var rescan='<div style="font-size:.68rem;color:#64748b;margin:0 0 6px;">Tap a 📷 thumbnail to add or change its picture.</div><button onclick="window._healthyFoodsImported=false;importHealthyFoodsFromSavedNutrition(true);backfillSavedFoodBarcodeImages();renderHealthyFoodsList()" style="width:100%;margin:0 0 7px;background:#ecfdf5;color:#166534;border:1px solid #86efac;border-radius:6px;padding:6px;font-size:.74rem;font-weight:800;cursor:pointer;">↻ Rescan foods & barcode pictures</button>';
+  var rescan='<div style="font-size:.68rem;color:#64748b;margin:0 0 6px;">Tap a 📷 thumbnail to add or change its picture.</div><button onclick="rescanHealthyFoodsAndImages(this)" style="width:100%;margin:0 0 5px;background:#ecfdf5;color:#166534;border:1px solid #86efac;border-radius:6px;padding:7px;font-size:.74rem;font-weight:800;cursor:pointer;">↻ Rescan foods & barcode pictures</button><div id="healthyRescanStatus" role="status" aria-live="polite" style="display:none;font-size:.7rem;font-weight:700;line-height:1.35;margin:0 2px 7px;"></div>';
   if(!foods.length){el.innerHTML=rescan+'<div style="font-size:.8rem;color:#64748b;text-align:center;padding:12px;line-height:1.4;">No saved foods currently score 7.0 or higher.</div>';return;}
   el.innerHTML=rescan+foods.map(function(food){var idx=all.indexOf(food);return '<div style="display:flex;align-items:center;gap:6px;padding:7px 0;border-bottom:1px solid #dcfce7;font-size:.82rem;">'
     +foodThumbnailHtml(food,'healthy',idx)+'<div style="flex:1;min-width:0;"><div style="font-weight:800;color:#166534;">'+escHtml(food.name)+'</div><div style="color:#64748b;font-size:.72rem;">'+Number(food.score||7).toFixed(1)+'/10 · '+escHtml(food.label||'Good')+' · '+escHtml(food.confidence||'')+' confidence</div></div>'
