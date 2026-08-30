@@ -5791,6 +5791,11 @@ function runnerFoodQuality(item){
   if(!sports&&sodium>=700){score-=0.5;reasons.push('high sodium');}
   var text=[item.name,item.ingredientsText,item.categoriesText].filter(Boolean).join(' ').toLowerCase();
   if(/\b(vegetable|fruit|berries|banana|apple|orange|oat|whole grain|whole wheat|bean|lentil|quinoa|brown rice|sweet potato|salmon|tuna)\b/.test(text)){score+=0.75;reasons.push('whole-food ingredients');}
+  // A plain baked potato is useful endurance fuel: carbohydrate-rich, naturally
+  // low in fat, and commonly a strong potassium source. Rich toppings are scored
+  // separately through the food's entered fat/source data.
+  if(/\b(baked|boiled|roasted)\s+(white\s+|russet\s+|red\s+)?potato(es)?\b/.test(text)&&fat<=5){score+=1.5;reasons.push('low-fat endurance carbohydrate');}
+  if((parseFloat(item.potassium)||0)>=600){score+=0.5;reasons.push('potassium-rich');}
   if(/\b(candy|soda|donut|doughnut|pastry|fried|hydrogenated|corn syrup)\b/.test(text)&&!sports){score-=0.75;reasons.push('highly processed ingredients');}
   // Morning-run context: quick carbohydrate in Sports Nutrition is purposeful fuel,
   // while carbohydrate plus protein at breakfast supports post-run recovery.
@@ -5810,6 +5815,7 @@ function renderFoodItems(){
   var log=window._foodLog||[];
   var autoClassChanged=false;
   log.forEach(function(item){if(inferFoodMacroSources(item))autoClassChanged=true;});
+  importHealthyFoodsFromSavedNutrition();
   captureHealthyFoods(log);
   var favNames=(getFavorites()||[]).map(function(f){return (f.name||'').toLowerCase();});
   MEALS.forEach(function(meal){
@@ -6491,6 +6497,17 @@ function renderFoodLibrarySearch(){if(window._activeFoodLibraryTab==='healthy')r
 
 function getHealthyFoods(){try{return JSON.parse(localStorage.getItem('healthy_foods_7plus')||'[]');}catch(ignore){return [];}}
 function saveHealthyFoods(items){localStorage.setItem('healthy_foods_7plus',JSON.stringify(items));}
+function importHealthyFoodsFromSavedNutrition(force){
+  if(window._healthyFoodsImported&&!force)return;
+  window._healthyFoodsImported=true;
+  var saved=[];
+  try{saved=saved.concat(getFavorites()||[]);}catch(ignore){}
+  for(var i=0;i<localStorage.length;i++){
+    var key=localStorage.key(i)||'';if(key.indexOf('planner_')!==0)continue;
+    try{var day=JSON.parse(localStorage.getItem(key)||'{}');if(Array.isArray(day.foodLog))saved=saved.concat(day.foodLog);}catch(ignore2){}
+  }
+  captureHealthyFoods(saved);
+}
 function captureHealthyFoods(log){
   var healthy=getHealthyFoods(),changed=false;
   (log||[]).forEach(function(item){
@@ -6505,9 +6522,11 @@ function captureHealthyFoods(log){
 }
 function renderHealthyFoodsList(){
   var el=document.getElementById('healthyFoodsList');if(!el)return;
+  importHealthyFoodsFromSavedNutrition();
   var all=getHealthyFoods(),q=(document.getElementById('favSearch')||{value:''}).value.toLowerCase().trim(),foods=q?all.filter(function(food){return String(food.name||'').toLowerCase().includes(q);}):all;
-  if(!foods.length){el.innerHTML='<div style="font-size:.8rem;color:#64748b;text-align:center;padding:12px;line-height:1.4;">Foods scoring 7.0 or higher will appear here automatically.</div>';return;}
-  el.innerHTML=foods.map(function(food){var idx=all.indexOf(food);return '<div style="display:flex;align-items:center;gap:6px;padding:7px 0;border-bottom:1px solid #dcfce7;font-size:.82rem;">'
+  var rescan='<button onclick="window._healthyFoodsImported=false;importHealthyFoodsFromSavedNutrition(true);renderHealthyFoodsList()" style="width:100%;margin:0 0 7px;background:#ecfdf5;color:#166534;border:1px solid #86efac;border-radius:6px;padding:6px;font-size:.74rem;font-weight:800;cursor:pointer;">↻ Rescan all saved Nutrition foods</button>';
+  if(!foods.length){el.innerHTML=rescan+'<div style="font-size:.8rem;color:#64748b;text-align:center;padding:12px;line-height:1.4;">No saved foods currently score 7.0 or higher.</div>';return;}
+  el.innerHTML=rescan+foods.map(function(food){var idx=all.indexOf(food);return '<div style="display:flex;align-items:center;gap:6px;padding:7px 0;border-bottom:1px solid #dcfce7;font-size:.82rem;">'
     +'<div style="flex:1;min-width:0;"><div style="font-weight:800;color:#166534;">'+escHtml(food.name)+'</div><div style="color:#64748b;font-size:.72rem;">'+Number(food.score||7).toFixed(1)+'/10 · '+escHtml(food.label||'Good')+' · '+escHtml(food.confidence||'')+' confidence</div></div>'
     +'<button onclick="loadHealthyFood('+idx+')" style="background:#16a34a;color:#fff;border:none;border-radius:5px;padding:5px 9px;font-size:.76rem;cursor:pointer;">+ Add</button>'
     +'<button onclick="deleteHealthyFood('+idx+')" title="Remove from this list" style="background:none;border:1px solid #fecaca;border-radius:4px;color:#dc2626;padding:3px 6px;cursor:pointer;">✕</button></div>';}).join('');
