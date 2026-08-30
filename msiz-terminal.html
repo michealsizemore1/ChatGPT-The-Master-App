@@ -805,6 +805,156 @@
     #centerCorrelationSection .corr-table td { border:none !important; border-radius:3px !important; }
     #collapse-body-contributions .contrib-matrix-table tbody td,
     .div-cal-table tbody td { background:rgba(10,18,32,.72) !important; }
+    #chartLegend#chartLegend {
+      display:flex !important; flex-wrap:nowrap !important;
+      justify-content:safe center !important; white-space:nowrap !important;
+      width:100% !important; max-width:100% !important;
+      overflow-x:auto !important; overflow-y:hidden !important;
+    }
+    #chartLegend#chartLegend .legend-item { flex:0 0 auto !important; }
+    #panel-center > .terminal-collapse-shell:has(#collapse-body-performance),
+    #panel-center > .terminal-collapse-shell:has(#collapse-body-dividends) { grid-column:1 / -1; }
+    #collapse-body-performance {
+      display:grid !important;
+      grid-template-columns:minmax(0,2fr) minmax(360px,1fr);
+      grid-template-rows:auto auto auto auto;
+      column-gap:12px;
+      align-items:start;
+    }
+    #collapse-body-performance > .chart-tabs { grid-column:1; grid-row:1; }
+    #collapse-body-performance > #selectedInfoStrip { grid-column:1; grid-row:2; }
+    #collapse-body-performance > #mainChartArea { grid-column:1; grid-row:3; }
+    #collapse-body-performance > #chartLegend { grid-column:1; grid-row:4; }
+    #collapse-body-performance > .chart-tabs,
+    #collapse-body-performance > #selectedInfoStrip,
+    #collapse-body-performance > #mainChartArea,
+    #collapse-body-performance > #chartLegend {
+      width:100% !important;
+      min-width:0 !important;
+      margin-left:0 !important;
+      margin-right:0 !important;
+      box-sizing:border-box;
+    }
+    #miniChartsRow#miniChartsRow {
+      grid-column:2; grid-row:1 / 5;
+      display:grid !important; grid-template-columns:minmax(0,1fr) !important;
+      width:100% !important; gap:8px !important; align-items:start;
+    }
+    #miniChartsRow#miniChartsRow .mini-chart-cell {
+      width:100% !important; min-width:0 !important; height:168px !important;
+      border-top:none !important; padding:8px 10px !important;
+    }
+    #miniChartsRow#miniChartsRow .mini-chart-canvas { height:128px !important; }
+    #indicesRow#indicesRow, #futuresRow#futuresRow {
+      display:grid !important;
+      grid-template-columns:230px 230px 230px 330px 130px !important;
+      width:1150px !important;
+      min-width:1150px !important;
+    }
+    #indicesRow#indicesRow > div, #futuresRow#futuresRow > div {
+      width:auto !important;
+      min-width:0 !important;
+      flex:none !important;
+      box-sizing:border-box;
+    }
+    #indicesRow#indicesRow > div:nth-child(4) {
+      width:auto !important;
+      min-width:0 !important;
+      flex:none !important;
+    }
+    #indicesRow#indicesRow > div:nth-child(5),
+    #futuresRow#futuresRow > div:nth-child(5) {
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+    }
+  }
+
+  /* Clear separation between major terminal sections without restoring table grids. */
+  #panel-center > .terminal-collapse-shell {
+    border:1px solid var(--border-light) !important;
+    border-top:2px solid var(--accent-dim) !important;
+    border-radius:3px;
+    box-shadow:0 3px 10px rgba(0,0,0,.22);
+  }
+  #panel-center > .terminal-collapse-shell > .terminal-collapse-toggle {
+    border-bottom:1px solid var(--border-light) !important;
+    background:linear-gradient(90deg,rgba(22,185,181,.08),var(--bg-panel2) 22%,var(--bg-panel2) 78%,rgba(22,185,181,.08));
+  }
+  #panel-center > .terminal-collapse-shell > .terminal-collapse-body[hidden] + * { border-top:none; }
+  #panel-center > .terminal-collapse-shell:has(> .terminal-collapse-body[hidden]) > .terminal-collapse-toggle {
+    border-bottom:none !important;
+  }
+  #miniChartsRow#miniChartsRow .mini-chart-cell {
+    border:1px solid var(--border-light) !important;
+    border-top:2px solid var(--accent-dim) !important;
+    border-radius:3px;
+    background:rgba(7,12,22,.72);
+    box-shadow:0 2px 8px rgba(0,0,0,.2);
+  }
+  #miniChartsRow#miniChartsRow .mini-chart-label {
+    padding-bottom:5px;
+    border-bottom:1px solid var(--border-light);
+  }
+  #collapse-body-contributions .contrib-matrix-wrap > :nth-child(2),
+  #collapse-body-contributions .contrib-matrix-wrap > :nth-child(4) {
+    width:auto !important;
+    min-width:0 !important;
+    box-sizing:border-box;
+    margin:6px 6px 0;
+    border:1px solid var(--border-light) !important;
+    border-top:2px solid var(--accent-dim) !important;
+    border-bottom:none !important;
+    border-radius:3px 3px 0 0;
+    background:rgba(22,185,181,.07) !important;
+  }
+  #collapse-body-contributions .contrib-matrix-wrap > :nth-child(3),
+  #collapse-body-contributions .contrib-matrix-wrap > :nth-child(5) {
+    width:auto !important;
+    min-width:0 !important;
+    box-sizing:border-box;
+    margin:0 6px 6px;
+    border:1px solid var(--border-light) !important;
+    border-top:none !important;
+    border-radius:0 0 3px 3px;
+    background:rgba(7,12,22,.6);
+    box-shadow:0 3px 9px rgba(0,0,0,.2);
+  }
+  @media (min-width:900px) {
+    #collapse-body-dividends .hscroll-wrap {
+      width:100% !important;
+      box-sizing:border-box;
+      padding:0 8px 8px;
+    }
+    #collapse-body-dividends .div-cal-table {
+      width:100% !important;
+      min-width:960px !important;
+      table-layout:fixed;
+      margin:0 !important;
+    }
+    #collapse-body-dividends .div-cal-table th:nth-child(1) { width:10%; }
+    #collapse-body-dividends .div-cal-table th:nth-child(2) { width:28%; }
+    #collapse-body-dividends .div-cal-table th:nth-child(3),
+    #collapse-body-dividends .div-cal-table th:nth-child(4) { width:14%; }
+    #collapse-body-dividends .div-cal-table th:nth-child(5) { width:10%; }
+    #collapse-body-dividends .div-cal-table th:nth-child(6),
+    #collapse-body-dividends .div-cal-table th:nth-child(7) { width:12%; }
+    #collapse-body-contributions .contrib-matrix-wrap {
+      align-items:stretch !important;
+    }
+    #collapse-body-contributions .contrib-matrix-wrap > :nth-child(3),
+    #collapse-body-contributions .contrib-matrix-wrap > :nth-child(5) {
+      align-self:stretch !important;
+      height:100% !important;
+    }
+    #panel-center > .terminal-collapse-shell:has(#collapse-body-holdings),
+    #panel-center > .terminal-collapse-shell:has(#collapse-body-correlation) {
+      align-self:stretch !important;
+      height:100% !important;
+    }
+  }
+  @media (max-width:899px) {
+    #panel-center > .terminal-collapse-shell { margin:0 0 8px; }
   }
 </style>
 </head>
@@ -1020,7 +1170,7 @@
       </div>
       <div style="display:flex;flex-direction:column;justify-content:center;padding:0 14px;border-left:1px solid var(--border);gap:2px;flex:1;min-width:0;overflow:hidden;">
         <div style="font-family:var(--font-mono);font-size:7.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);white-space:nowrap;">BITCOIN FUT</div>
-        <div style="display:flex;align-items:baseline;gap:5px;min-width:0;">
+        <div style="display:flex;align-items:center;justify-content:center;gap:8px;min-width:0;">
           <span id="fut-btc-price" style="font-family:var(--font-mono);font-size:12px;font-weight:600;color:var(--text-primary);white-space:nowrap;">—</span>
           <span id="fut-btc-chg" style="font-family:var(--font-mono);font-size:10px;white-space:nowrap;">—</span>
         </div>
@@ -2286,7 +2436,7 @@ function buildMiniCharts(){
       plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.raw.toFixed(1)+'%'}}},
       scales:{
         x:{grid:{display:false},ticks:{font:{size:15,weight:'600'},color:'#e0f4f4',maxRotation:0,minRotation:0,padding:6}},
-        y:{grid:{color:'rgba(26,40,64,0.6)'},ticks:{font:{size:15,weight:'600'},color:'#e0f4f4',maxTicksLimit:5,padding:6,callback:v=>v+'%'},min:Math.min(...allT.map(t=>HIST.maxDrawdown[t]))*1.1}
+        y:{grid:{color:'rgba(26,40,64,0.6)'},ticks:{font:{size:15,weight:'600'},color:'#e0f4f4',maxTicksLimit:5,padding:6,callback:v=>Math.round(Number(v))+'%'},min:Math.floor(Math.min(...allT.map(t=>HIST.maxDrawdown[t]))/10)*10}
       }
     }
   });
@@ -2620,25 +2770,35 @@ function fetchFutures(){
     'NQ=F': ['fut-nq-price','fut-nq-chg'],
     'BTC=F':['fut-btc-price','fut-btc-chg']
   };
+  var lastKnown = {
+    'ES=F': {price:7722.00, prev:7742.50},
+    'YM=F': {price:53584.00, prev:53621.00},
+    'NQ=F': {price:29491.75, prev:29695.75},
+    'BTC=F':{price:77815.00, prev:77835.00}
+  };
+  function render(data){
+    Object.keys(map).forEach(function(sym){
+      var q = data[sym];
+      if(!q || !q.price) return;
+      var price = Number(q.price);
+      var prev  = Number(q.prev || q.price);
+      var chg   = price - prev;
+      var pct   = prev ? (chg / prev) * 100 : 0;
+      var up    = chg >= 0;
+      var priceEl = document.getElementById(map[sym][0]);
+      var chgEl   = document.getElementById(map[sym][1]);
+      if(!priceEl || !chgEl) return;
+      priceEl.textContent = price.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+      chgEl.textContent   = (up ? '▲' : '▼') + Math.abs(pct).toFixed(2) + '%';
+      chgEl.style.color   = up ? 'var(--green)' : 'var(--red)';
+    });
+  }
+  render(lastKnown);
   fetch(MARKET_DATA_URL + '?v=' + Date.now(), {cache:'no-store'})
     .then(function(r){ return r.json(); })
     .then(function(snapshot){
       var data = snapshot.futures || {};
-      Object.keys(map).forEach(function(sym){
-        var q = data[sym];
-        if(!q || !q.price) return;
-        var price = q.price;
-        var prev  = q.prev;
-        var chg   = price - prev;
-        var pct   = prev ? (chg / prev) * 100 : 0;
-        var up    = chg >= 0;
-        var priceEl = document.getElementById(map[sym][0]);
-        var chgEl   = document.getElementById(map[sym][1]);
-        if(!priceEl || !chgEl) return;
-        priceEl.textContent = price.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-        chgEl.textContent   = (up ? '▲' : '▼') + Math.abs(pct).toFixed(2) + '%';
-        chgEl.style.color   = up ? 'var(--green)' : 'var(--red)';
-      });
+      render(Object.keys(data).length ? data : lastKnown);
     })
     .catch(function(){});
 }

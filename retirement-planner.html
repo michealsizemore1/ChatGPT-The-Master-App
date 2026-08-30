@@ -7522,6 +7522,25 @@ function applySharedInvestmentsToPlanner(shared) {
   setValue('hysaBalance', shared.balances.hysa);
   setValue('tradTSPPct', shared.rates && shared.rates.traditionalTspPct);
   setValue('rothTSPPct', shared.rates && shared.rates.rothTspPct);
+  const holdings = shared.holdings || {};
+  const contributions = shared.contributions || {};
+  const allThingsBalance = ['SCHD','QQQM','IBIT'].reduce((sum, symbol) => sum + (Number(holdings[symbol]) || 0), 0);
+  const allThingsContribution = ['SCHD','QQQM','IBIT'].reduce((sum, symbol) => sum + (Number(contributions[symbol]) || 0), 0);
+  const upsertPie = (matcher, defaults, balance, contribution) => {
+    let index = brokeragePies.findIndex(pie => matcher.test(String(pie.name || '').trim()));
+    const current = index >= 0 ? brokeragePies[index] : defaults;
+    const updated = { ...current, balance, contribution };
+    if (index >= 0) brokeragePies[index] = updated;
+    else brokeragePies.push(updated);
+  };
+  upsertPie(/^all things bucket$/i,
+    { name:'All Things Bucket', accountType:'roth_ira', riskType:'equity', cashRate:4.5, fee:0 },
+    allThingsBalance, allThingsContribution);
+  upsertPie(/^(sgov|sequence of returns risk)(?:\s*\([^)]*\))?$/i,
+    { name:'SGOV', accountType:'taxable', riskType:'cash', cashRate:4.5, fee:0 },
+    Number(holdings.SGOV) || 0, Number(contributions.SGOV) || 0);
+  if (els('brokeragePieRows')) renderBrokeragePieRows();
+  if (els('pieContributionRows')) renderPieContributionRows();
   return true;
 }
 
