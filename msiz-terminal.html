@@ -784,6 +784,27 @@
       width:100%; font-size:11px !important; text-align:center !important;
       overflow:visible !important; white-space:nowrap !important; letter-spacing:0 !important;
     }
+    #panel-center#panel-center { column-gap:14px; row-gap:10px; }
+    #panel-center > .terminal-collapse-shell {
+      border-right:none !important; border-bottom:none !important;
+      background:var(--bg-base);
+    }
+    #panel-center table {
+      border-collapse:separate !important; border-spacing:0 5px !important;
+      background:transparent !important;
+    }
+    #panel-center table th, #panel-center table td {
+      border:none !important; box-shadow:none !important;
+    }
+    #panel-center table thead th { background:transparent !important; border-bottom:none !important; }
+    #panel-center table tbody td { background:rgba(10,18,32,.72); }
+    #panel-center table tbody td:first-child { border-radius:4px 0 0 4px; }
+    #panel-center table tbody td:last-child { border-radius:0 4px 4px 0; }
+    #centerCorrelationSection .corr-table { border-spacing:3px !important; }
+    #centerCorrelationSection .corr-table th,
+    #centerCorrelationSection .corr-table td { border:none !important; border-radius:3px !important; }
+    #collapse-body-contributions .contrib-matrix-table tbody td,
+    .div-cal-table tbody td { background:rgba(10,18,32,.72) !important; }
   }
 </style>
 </head>
