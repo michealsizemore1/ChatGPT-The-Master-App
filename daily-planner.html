@@ -6252,13 +6252,14 @@ function backfillSavedFoodBarcodeImages(skipRender){
     if(favChanged)saveFavorites(favorites);if(healthyChanged)saveHealthyFoods(healthy);if(logChanged)save();if(!skipRender&&(favChanged||healthyChanged||logChanged)){renderFoodItems();renderFavsList();renderHealthyFoodsList();}return Object.keys(found).length;
   });
 }
-function rescanHealthyFoodsAndImages(button){
+function rescanHealthyFoodsAndImages(button,statusId){
+  statusId=statusId||'healthyRescanStatus';
   if(button){button.disabled=true;button.textContent='⏳ Scanning saved foods and pictures…';button.style.opacity='.72';}
-  var status=document.getElementById('healthyRescanStatus');if(status){status.style.display='block';status.style.color='#475569';status.textContent='Checking every saved Nutrition day, Favorite, and available barcode picture…';}
+  var status=document.getElementById(statusId);if(status){status.style.display='block';status.style.color='#475569';status.textContent='Checking every saved Nutrition day, Favorite, and available barcode picture…';}
   window._healthyFoodsImported=false;importHealthyFoodsFromSavedNutrition(true);
   backfillSavedFoodBarcodeImages(true).then(function(imagesFound){
-    renderHealthyFoodsList();var done=document.getElementById('healthyRescanStatus'),count=getHealthyFoods().length;if(done){done.style.display='block';done.style.color='#166534';done.textContent='✓ Rescan complete: '+count+' healthy food'+(count===1?'':'s')+' found · '+imagesFound+' barcode picture'+(imagesFound===1?'':'s')+' added.';}
-  }).catch(function(){renderHealthyFoodsList();var failed=document.getElementById('healthyRescanStatus');if(failed){failed.style.display='block';failed.style.color='#991b1b';failed.textContent='The food scan finished, but barcode pictures could not be checked. Try again when connected to the internet.';}});
+    renderHealthyFoodsList();renderFavsList();var done=document.getElementById(statusId),count=getHealthyFoods().length;if(done){done.style.display='block';done.style.color='#166534';done.textContent='✓ Rescan complete: '+count+' healthy food'+(count===1?'':'s')+' found · '+imagesFound+' barcode picture'+(imagesFound===1?'':'s')+' added.';}
+  }).catch(function(){renderHealthyFoodsList();renderFavsList();var failed=document.getElementById(statusId);if(failed){failed.style.display='block';failed.style.color='#991b1b';failed.textContent='The food scan finished, but barcode pictures could not be checked. Try again when connected to the internet.';}});
 }
 
 function copyFoodItem(id){
@@ -6616,9 +6617,9 @@ function renderFavsList(){
   updateFavoriteFoodsCount(favs.length);
   var q=(document.getElementById('favSearch')||{value:''}).value.toLowerCase().trim();
   var filtered=q?favs.filter(function(f){return f.name.toLowerCase().includes(q);}):favs;
-  if(!filtered.length){el.innerHTML='<div style="font-size:0.8rem;color:#bbb;text-align:center;padding:12px;">No favorites yet. Add items from your food log with ⭐</div>';return;}
+  var photoHelp='<div style="font-size:.68rem;color:#64748b;margin:0 0 6px;">Tap a 📷 thumbnail to add or change its picture.</div><button onclick="rescanHealthyFoodsAndImages(this,\'favoriteRescanStatus\')" style="width:100%;margin:0 0 5px;background:#fff7ed;color:#9a3412;border:1px solid #fdba74;border-radius:6px;padding:7px;font-size:.74rem;font-weight:800;cursor:pointer;">↻ Rescan foods & barcode pictures</button><div id="favoriteRescanStatus" role="status" aria-live="polite" style="display:none;font-size:.7rem;font-weight:700;line-height:1.35;margin:0 2px 7px;"></div>';
+  if(!filtered.length){el.innerHTML=photoHelp+'<div style="font-size:0.8rem;color:#bbb;text-align:center;padding:12px;">No favorites yet. Add items from your food log with ⭐</div>';return;}
   var target=(document.getElementById('favTargetMeal')||{value:'breakfast'}).value;
-  var photoHelp='<div style="font-size:.68rem;color:#64748b;margin:0 0 6px;">Tap a 📷 thumbnail to add or change its picture.</div>';
   el.innerHTML=photoHelp+filtered.map(function(f,i){
     var origIdx=favs.indexOf(f);
     return '<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid #f5f5f5;font-size:0.82rem;">'
