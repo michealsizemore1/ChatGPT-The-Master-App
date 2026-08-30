@@ -607,9 +607,13 @@
     #panel-center#panel-center {
       width:100%; max-width:1440px; margin:0 auto;
       display:grid !important; grid-template-columns:minmax(0,1fr) minmax(0,1fr);
-      align-items:start; align-content:start;
+      grid-auto-rows:min-content; align-items:start; align-content:start;
     }
-    #panel-center > .terminal-collapse-shell { min-width:0; width:100%; border-right:1px solid var(--border); }
+    #panel-center > .terminal-collapse-shell {
+      min-width:0; width:100%; height:auto !important; min-height:0 !important;
+      align-self:start !important; overflow:hidden; border-right:1px solid var(--border);
+    }
+    #panel-center > .terminal-collapse-shell:has(> .terminal-collapse-body[hidden]) { max-height:39px !important; }
     #panel-center > .terminal-collapse-shell:has(#collapse-body-markets),
     #panel-center > .terminal-collapse-shell:has(#collapse-body-contributions) { grid-column:1 / -1; }
     #panel-center > .terminal-collapse-shell:has(#collapse-body-correlation),
