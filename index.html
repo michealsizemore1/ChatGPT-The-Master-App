@@ -59,6 +59,10 @@
   .section-intro{margin:0 0 14px;font-size:13px;color:var(--muted)}
   .growth-title{margin-top:30px}
   .growth-grid{grid-template-columns:minmax(260px,360px)}
+  @media(min-width:1150px){
+    main{max-width:1320px}
+    .life-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+  }
   .card{
     display:flex;
     flex-direction:column;
@@ -183,7 +187,7 @@
 <main>
   <h2 class="section-title">Life Essentials</h2>
   <p class="section-intro">The tools that support your daily life, finances, future, and family protection.</p>
-  <div class="grid">
+  <div class="grid life-grid">
 
     <a class="card life" href="daily-planner.html">
       <div class="icon">&#129517;</div>
