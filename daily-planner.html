@@ -5805,7 +5805,7 @@ function runnerFoodQuality(item){
   // Raisins are concentrated whole fruit and useful portable carbohydrate for
   // runners. Their naturally occurring sugar should not be scored like candy;
   // sweetened or candy-coated products remain subject to the normal penalties.
-  if(/\b(raisin|raisins|unsweetened dried fruit)\b/.test(text)&&carbs>=15&&!/\b(candy|chocolate|yogurt covered|added sugar|corn syrup)\b/.test(text)){score+=1;reasons.push('portable runner carbohydrate');}
+  if(/\b(raisin|raisins|unsweetened dried fruit)\b/.test(text)&&!/\b(candy|chocolate|yogurt covered|added sugar|corn syrup)\b/.test(text)){score+=1;reasons.push('portable runner carbohydrate');}
   // A plain baked potato is useful endurance fuel: carbohydrate-rich, naturally
   // low in fat, and commonly a strong potassium source. Rich toppings are scored
   // separately through the food's entered fat/source data.
