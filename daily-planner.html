@@ -6227,11 +6227,11 @@ function foodThumbnailHtml(food,library,idx){
   var src=food&&(food.imageData||food.imageUrl),inside=src?'<img src="'+escHtml(src)+'" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;">':'<span style="font-size:1rem;">🖼️</span>';
   if(!library)return '<span style="width:34px;height:34px;border-radius:6px;background:#f8fafc;border:1px solid #dbe4ea;display:flex;align-items:center;justify-content:center;overflow:hidden;flex:0 0 auto;">'+inside+'</span>';
   var change="setLibraryFoodThumbnail('"+library+"',"+idx+",this.files&&this.files[0]);this.value=''";
-  return '<span style="width:70px;display:flex;flex-direction:column;align-items:center;gap:3px;flex:0 0 auto;">'
-    +'<span style="width:42px;height:42px;border-radius:7px;background:#f8fafc;border:1px solid #dbe4ea;display:flex;align-items:center;justify-content:center;overflow:hidden;">'+inside+'</span>'
-    +'<span style="width:100%;display:grid;grid-template-columns:1fr 1fr;gap:2px;">'
-      +'<label style="background:#ecfdf5;color:#166534;border:1px solid #86efac;border-radius:4px;padding:3px 1px;font-size:.52rem;font-weight:800;text-align:center;cursor:pointer;white-space:nowrap;">📷 Take<input type="file" accept="image/*" capture="environment" style="display:none" onchange="'+change+'"></label>'
-      +'<label style="background:#eff6ff;color:#1d4ed8;border:1px solid #93c5fd;border-radius:4px;padding:3px 1px;font-size:.52rem;font-weight:800;text-align:center;cursor:pointer;white-space:nowrap;">🖼 Choose<input type="file" accept="image/*" style="display:none" onchange="'+change+'"></label>'
+  return '<span style="width:94px;display:flex;flex-direction:column;align-items:center;gap:5px;flex:0 0 auto;">'
+    +'<span style="width:54px;height:54px;border-radius:9px;background:#f8fafc;border:1px solid #dbe4ea;display:flex;align-items:center;justify-content:center;overflow:hidden;">'+inside+'</span>'
+    +'<span style="width:100%;display:grid;grid-template-columns:1fr 1fr;gap:4px;">'
+      +'<label style="min-height:31px;box-sizing:border-box;background:#ecfdf5;color:#166534;border:1px solid #4ade80;border-radius:6px;padding:7px 3px;font-size:.65rem;font-weight:900;text-align:center;cursor:pointer;white-space:nowrap;display:flex;align-items:center;justify-content:center;">📷 Take<input type="file" accept="image/*" capture="environment" style="display:none" onchange="'+change+'"></label>'
+      +'<label style="min-height:31px;box-sizing:border-box;background:#eff6ff;color:#1d4ed8;border:1px solid #60a5fa;border-radius:6px;padding:7px 3px;font-size:.65rem;font-weight:900;text-align:center;cursor:pointer;white-space:nowrap;display:flex;align-items:center;justify-content:center;">🖼 Choose<input type="file" accept="image/*" style="display:none" onchange="'+change+'"></label>'
     +'</span></span>';
 }
 function setLibraryFoodThumbnail(library,idx,file){
