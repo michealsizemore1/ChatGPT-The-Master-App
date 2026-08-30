@@ -2883,7 +2883,7 @@ body{
   <div id="favMealPanel" style="display:block;background:#fffdf5;border:1px solid #f0c080;border-radius:10px;padding:10px 12px;margin-bottom:8px;">
     <div style="display:flex;gap:8px;margin-bottom:8px;">
       <button onclick="showFavTab('favs')" id="favTabBtn" style="flex:1;background:#f39c12;color:#fff;border:none;padding:5px;border-radius:6px;font-size:0.8rem;cursor:pointer;font-weight:700;">⭐ Favorites</button>
-      <button onclick="showFavTab('healthy')" id="healthyTabBtn" style="flex:1;background:#e9ecef;color:#555;border:none;padding:5px;border-radius:6px;font-size:0.8rem;cursor:pointer;font-weight:700;">✅ Healthy 7+</button>
+      <button onclick="showFavTab('healthy')" id="healthyTabBtn" style="flex:1;background:#e9ecef;color:#555;border:none;padding:5px;border-radius:6px;font-size:0.8rem;cursor:pointer;font-weight:700;">✅ Healthy 7+ (<span id="healthyFoodsCount">0</span>)</button>
       <button onclick="showFavTab('meals')" id="mealTabBtn" style="flex:1;background:#e9ecef;color:#555;border:none;padding:5px;border-radius:6px;font-size:0.8rem;cursor:pointer;">🍲 Saved Meals</button>
     </div>
     <div style="margin-bottom:6px;">
@@ -5817,6 +5817,7 @@ function renderFoodItems(){
   log.forEach(function(item){if(inferFoodMacroSources(item))autoClassChanged=true;});
   importHealthyFoodsFromSavedNutrition();
   captureHealthyFoods(log);
+  updateHealthyFoodsCount(getHealthyFoods().length);
   var favNames=(getFavorites()||[]).map(function(f){return (f.name||'').toLowerCase();});
   MEALS.forEach(function(meal){
     var listEl=document.getElementById('foodList-'+meal);
@@ -6496,7 +6497,8 @@ function showFavTab(tab){
 function renderFoodLibrarySearch(){if(window._activeFoodLibraryTab==='healthy')renderHealthyFoodsList();else if(window._activeFoodLibraryTab==='meals')renderMealsList();else renderFavsList();}
 
 function getHealthyFoods(){try{return JSON.parse(localStorage.getItem('healthy_foods_7plus')||'[]');}catch(ignore){return [];}}
-function saveHealthyFoods(items){localStorage.setItem('healthy_foods_7plus',JSON.stringify(items));}
+function updateHealthyFoodsCount(count){var el=document.getElementById('healthyFoodsCount');if(el)el.textContent=Number.isFinite(count)?count:getHealthyFoods().length;}
+function saveHealthyFoods(items){localStorage.setItem('healthy_foods_7plus',JSON.stringify(items));updateHealthyFoodsCount(items.length);}
 function importHealthyFoodsFromSavedNutrition(force){
   if(window._healthyFoodsImported&&!force)return;
   window._healthyFoodsImported=true;
@@ -6523,7 +6525,7 @@ function captureHealthyFoods(log){
 function renderHealthyFoodsList(){
   var el=document.getElementById('healthyFoodsList');if(!el)return;
   importHealthyFoodsFromSavedNutrition();
-  var all=getHealthyFoods(),q=(document.getElementById('favSearch')||{value:''}).value.toLowerCase().trim(),foods=q?all.filter(function(food){return String(food.name||'').toLowerCase().includes(q);}):all;
+  var all=getHealthyFoods();updateHealthyFoodsCount(all.length);var q=(document.getElementById('favSearch')||{value:''}).value.toLowerCase().trim(),foods=q?all.filter(function(food){return String(food.name||'').toLowerCase().includes(q);}):all;
   var rescan='<button onclick="window._healthyFoodsImported=false;importHealthyFoodsFromSavedNutrition(true);renderHealthyFoodsList()" style="width:100%;margin:0 0 7px;background:#ecfdf5;color:#166534;border:1px solid #86efac;border-radius:6px;padding:6px;font-size:.74rem;font-weight:800;cursor:pointer;">↻ Rescan all saved Nutrition foods</button>';
   if(!foods.length){el.innerHTML=rescan+'<div style="font-size:.8rem;color:#64748b;text-align:center;padding:12px;line-height:1.4;">No saved foods currently score 7.0 or higher.</div>';return;}
   el.innerHTML=rescan+foods.map(function(food){var idx=all.indexOf(food);return '<div style="display:flex;align-items:center;gap:6px;padding:7px 0;border-bottom:1px solid #dcfce7;font-size:.82rem;">'
