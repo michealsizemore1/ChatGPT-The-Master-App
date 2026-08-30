@@ -737,7 +737,7 @@
     #panel-center table th:first-child, #panel-center table td:first-child,
     #panel-center table th:nth-child(2), #panel-center table td:nth-child(2) { text-align:center !important; }
     #centerHoldingsTable th, #centerHoldingsTable td { text-align:center !important; }
-    .chart-tabs { justify-content:center !important; }
+    .chart-tabs { justify-content:safe center !important; }
     .range-tabs { margin-left:10px !important; }
     #selectedInfoStrip { justify-content:center !important; text-align:center !important; }
     #chartLegend#chartLegend { justify-content:center !important; text-align:center !important; }
@@ -763,6 +763,13 @@
       margin-left:auto !important; margin-right:auto !important;
     }
     #collapse-body-performance .chart-area canvas { left:50% !important; right:auto !important; transform:translateX(-50%); }
+    #collapse-body-performance > .chart-tabs {
+      margin-top:8px; padding-top:7px !important; padding-bottom:5px !important;
+      min-height:52px !important; height:auto !important; box-sizing:border-box;
+      scroll-padding-left:10px; scroll-padding-right:10px;
+    }
+    #collapse-body-performance > .chart-tabs > :first-child { margin-left:8px; }
+    #collapse-body-performance > .chart-tabs > :last-child { margin-right:8px; }
   }
 </style>
 </head>
