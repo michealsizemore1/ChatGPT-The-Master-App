@@ -2883,10 +2883,11 @@ body{
   <div id="favMealPanel" style="display:block;background:#fffdf5;border:1px solid #f0c080;border-radius:10px;padding:10px 12px;margin-bottom:8px;">
     <div style="display:flex;gap:8px;margin-bottom:8px;">
       <button onclick="showFavTab('favs')" id="favTabBtn" style="flex:1;background:#f39c12;color:#fff;border:none;padding:5px;border-radius:6px;font-size:0.8rem;cursor:pointer;font-weight:700;">⭐ Favorites</button>
+      <button onclick="showFavTab('healthy')" id="healthyTabBtn" style="flex:1;background:#e9ecef;color:#555;border:none;padding:5px;border-radius:6px;font-size:0.8rem;cursor:pointer;font-weight:700;">✅ Healthy 7+</button>
       <button onclick="showFavTab('meals')" id="mealTabBtn" style="flex:1;background:#e9ecef;color:#555;border:none;padding:5px;border-radius:6px;font-size:0.8rem;cursor:pointer;">🍲 Saved Meals</button>
     </div>
     <div style="margin-bottom:6px;">
-      <input type="text" id="favSearch" placeholder="🔍 Search favorites..." oninput="renderFavsList()" style="width:100%;border:1px solid #e9c87b;border-radius:6px;padding:5px 8px;font-size:0.8rem;box-sizing:border-box;margin-bottom:6px;">
+      <input type="text" id="favSearch" placeholder="🔍 Search saved foods..." oninput="renderFoodLibrarySearch()" style="width:100%;border:1px solid #e9c87b;border-radius:6px;padding:5px 8px;font-size:0.8rem;box-sizing:border-box;margin-bottom:6px;">
       <select id="favTargetMeal" style="width:100%;border:1px solid #e9c87b;border-radius:6px;padding:5px 8px;font-size:0.8rem;box-sizing:border-box;">
         <option value="breakfast">🌅 Add to Breakfast</option>
         <option value="lunch">🥗 Add to Lunch</option>
@@ -2897,6 +2898,7 @@ body{
       </select>
     </div>
     <div id="favsList" style="max-height:180px;overflow-y:auto;"></div>
+    <div id="healthyFoodsList" style="display:none;max-height:220px;overflow-y:auto;"></div>
     <div id="mealsList" style="display:none;max-height:200px;overflow-y:auto;"></div>
   </div>
   <!-- AI Food Search -->
@@ -5808,6 +5810,7 @@ function renderFoodItems(){
   var log=window._foodLog||[];
   var autoClassChanged=false;
   log.forEach(function(item){if(inferFoodMacroSources(item))autoClassChanged=true;});
+  captureHealthyFoods(log);
   var favNames=(getFavorites()||[]).map(function(f){return (f.name||'').toLowerCase();});
   MEALS.forEach(function(meal){
     var listEl=document.getElementById('foodList-'+meal);
@@ -6473,14 +6476,48 @@ function toggleFavMealPanel(){
 }
 
 function showFavTab(tab){
-  var fl=document.getElementById('favsList');var ml=document.getElementById('mealsList');
-  var fb=document.getElementById('favTabBtn');var mb2=document.getElementById('mealTabBtn');
+  window._activeFoodLibraryTab=tab;
+  var fl=document.getElementById('favsList');var hl=document.getElementById('healthyFoodsList');var ml=document.getElementById('mealsList');
+  var fb=document.getElementById('favTabBtn');var hb=document.getElementById('healthyTabBtn');var mb2=document.getElementById('mealTabBtn');
   if(fl)fl.style.display=tab==='favs'?'block':'none';
+  if(hl)hl.style.display=tab==='healthy'?'block':'none';
   if(ml)ml.style.display=tab==='meals'?'block':'none';
   if(fb){fb.style.background=tab==='favs'?'#f39c12':'#e9ecef';fb.style.color=tab==='favs'?'#fff':'#555';}
+  if(hb){hb.style.background=tab==='healthy'?'#16a34a':'#e9ecef';hb.style.color=tab==='healthy'?'#fff':'#555';}
   if(mb2){mb2.style.background=tab==='meals'?'#f39c12':'#e9ecef';mb2.style.color=tab==='meals'?'#fff':'#555';}
-  if(tab==='meals')renderMealsList();else renderFavsList();
+  if(tab==='meals')renderMealsList();else if(tab==='healthy')renderHealthyFoodsList();else renderFavsList();
 }
+function renderFoodLibrarySearch(){if(window._activeFoodLibraryTab==='healthy')renderHealthyFoodsList();else if(window._activeFoodLibraryTab==='meals')renderMealsList();else renderFavsList();}
+
+function getHealthyFoods(){try{return JSON.parse(localStorage.getItem('healthy_foods_7plus')||'[]');}catch(ignore){return [];}}
+function saveHealthyFoods(items){localStorage.setItem('healthy_foods_7plus',JSON.stringify(items));}
+function captureHealthyFoods(log){
+  var healthy=getHealthyFoods(),changed=false;
+  (log||[]).forEach(function(item){
+    if(!item||!String(item.name||'').trim())return;
+    var quality=runnerFoodQuality(item);if(quality.score<7)return;
+    var key=String(item.name).trim().toLowerCase(),copy={name:String(item.name).trim(),cal:item.cal,prot:item.prot,fat:item.fat,carbs:item.carbs,servingLabel:item.servingLabel||'1 serving',servings:parseFloat(item.servings)||1,proteinSource:item.proteinSource||'',carbSource:item.carbSource||'',fatSource:item.fatSource||'',score:quality.score,label:quality.label,confidence:quality.confidence,confidencePct:quality.confidencePct,updatedAt:new Date().toISOString()};
+    MICRO_FIELDS.forEach(function(field){copy[field]=item[field]!=null?item[field]:null;});
+    var idx=healthy.findIndex(function(food){return String(food.name||'').trim().toLowerCase()===key;});
+    if(idx<0)healthy.push(copy);else healthy[idx]=copy;changed=true;
+  });
+  if(changed)saveHealthyFoods(healthy.sort(function(a,b){return (b.score||0)-(a.score||0)||a.name.localeCompare(b.name);}));
+}
+function renderHealthyFoodsList(){
+  var el=document.getElementById('healthyFoodsList');if(!el)return;
+  var all=getHealthyFoods(),q=(document.getElementById('favSearch')||{value:''}).value.toLowerCase().trim(),foods=q?all.filter(function(food){return String(food.name||'').toLowerCase().includes(q);}):all;
+  if(!foods.length){el.innerHTML='<div style="font-size:.8rem;color:#64748b;text-align:center;padding:12px;line-height:1.4;">Foods scoring 7.0 or higher will appear here automatically.</div>';return;}
+  el.innerHTML=foods.map(function(food){var idx=all.indexOf(food);return '<div style="display:flex;align-items:center;gap:6px;padding:7px 0;border-bottom:1px solid #dcfce7;font-size:.82rem;">'
+    +'<div style="flex:1;min-width:0;"><div style="font-weight:800;color:#166534;">'+escHtml(food.name)+'</div><div style="color:#64748b;font-size:.72rem;">'+Number(food.score||7).toFixed(1)+'/10 · '+escHtml(food.label||'Good')+' · '+escHtml(food.confidence||'')+' confidence</div></div>'
+    +'<button onclick="loadHealthyFood('+idx+')" style="background:#16a34a;color:#fff;border:none;border-radius:5px;padding:5px 9px;font-size:.76rem;cursor:pointer;">+ Add</button>'
+    +'<button onclick="deleteHealthyFood('+idx+')" title="Remove from this list" style="background:none;border:1px solid #fecaca;border-radius:4px;color:#dc2626;padding:3px 6px;cursor:pointer;">✕</button></div>';}).join('');
+}
+function loadHealthyFood(idx){
+  var food=getHealthyFoods()[idx];if(!food)return;var target=(document.getElementById('favTargetMeal')||{value:'breakfast'}).value;
+  var item=Object.assign({},food,{id:'f'+Date.now(),meal:target});delete item.score;delete item.label;delete item.confidence;delete item.confidencePct;delete item.updatedAt;
+  if(!window._foodLog)window._foodLog=[];window._foodLog.push(item);_setMealOpen(target,true);renderFoodItems();save();
+}
+function deleteHealthyFood(idx){var foods=getHealthyFoods();foods.splice(idx,1);saveHealthyFoods(foods);renderHealthyFoodsList();}
 
 function renderFavsList(){
   var el=document.getElementById('favsList');if(!el)return;
