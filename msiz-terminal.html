@@ -604,26 +604,39 @@
     .chart-tabs { min-height:46px; }
   }
   @media (min-width: 900px) {
+    /* Desktop keeps the streamlined phone content, but uses a denser vertical
+       rhythm so wide monitors do not turn each section into a large empty box. */
+    #panel-center#panel-center { width:100%; max-width:1440px; margin:0 auto; }
     #mainChartArea#mainChartArea {
-      height:480px !important;
-      padding:16px !important;
+      height:330px !important;
+      padding:10px 12px !important;
     }
     #mainChartArea#mainChartArea canvas {
-      top:16px; left:16px; right:16px; bottom:16px;
-      width:calc(100% - 32px) !important;
-      height:calc(100% - 32px) !important;
+      top:10px; left:12px; right:12px; bottom:10px;
+      width:calc(100% - 24px) !important;
+      height:calc(100% - 20px) !important;
     }
     #miniChartsRow#miniChartsRow .mini-chart-cell {
-      height:250px !important;
-      padding:12px 16px !important;
+      height:178px !important;
+      padding:8px 12px !important;
     }
     #miniChartsRow#miniChartsRow .mini-chart-canvas {
-      height:205px !important;
+      height:138px !important;
     }
     #miniChartsRow#miniChartsRow .mini-chart-label {
-      font-size:15px !important;
-      margin-bottom:8px;
+      font-size:14px !important;
+      margin-bottom:4px;
     }
+    .terminal-collapse-toggle { min-height:38px; padding:6px 10px; }
+    .terminal-collapse-icon { width:25px; height:25px; font-size:16px; }
+    .panel-header, .section-divider { min-height:32px; padding-top:3px; padding-bottom:3px; }
+    .chart-tabs { min-height:39px; }
+    .chart-tab, .range-tab { padding:7px 8px !important; }
+    #selectedInfoStrip { min-height:32px !important; padding-top:3px !important; padding-bottom:3px !important; }
+    #chartLegend#chartLegend { padding:6px 10px; row-gap:5px; }
+    .div-cal-header { min-height:36px; padding:5px 10px; }
+    .panel table th, .panel table td { padding-top:4px !important; padding-bottom:4px !important; }
+    .contrib-matrix-summary, .contrib-hysa-banner, .contrib-matrix-note { margin-top:4px; margin-bottom:4px; }
   }
 
   /* Compact horizontal rhythm at every screen size. Wide content remains scrollable. */
