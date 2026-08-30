@@ -745,6 +745,24 @@
     .contrib-matrix-summary { justify-content:center; text-align:center; }
     .contrib-matrix-card, .contrib-matrix-note { text-align:center !important; }
     .contrib-hysa-banner, .alloc-section, .risk-section, .corr-section { text-align:center !important; }
+    /* Center the information blocks themselves, not only their text. */
+    #indicesRow, #futuresRow { margin-left:auto !important; margin-right:auto !important; }
+    #centerHoldingsSection .hscroll-wrap,
+    #centerCorrelationSection .hscroll-wrap,
+    .div-cal-wrap > .hscroll-wrap,
+    #collapse-body-contributions .hscroll-wrap { text-align:center !important; }
+    #centerHoldingsTable#centerHoldingsTable,
+    .div-cal-table,
+    .contrib-matrix-table { margin-left:auto !important; margin-right:auto !important; }
+    #centerCorrelationSection .corr-section {
+      width:max-content !important; max-width:none; margin-left:auto !important; margin-right:auto !important;
+    }
+    #centerCorrelationSection .corr-table { margin-left:auto !important; margin-right:auto !important; }
+    .contrib-matrix-summary { margin-left:auto !important; margin-right:auto !important; }
+    #mainChartArea, #miniChartsRow, #chartLegend, #selectedInfoStrip {
+      margin-left:auto !important; margin-right:auto !important;
+    }
+    #collapse-body-performance .chart-area canvas { left:50% !important; right:auto !important; transform:translateX(-50%); }
   }
 </style>
 </head>
