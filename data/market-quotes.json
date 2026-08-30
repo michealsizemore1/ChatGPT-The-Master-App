@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-29T14:05:48+00:00",
+  "updatedAt": "2026-08-30T06:43:38+00:00",
   "source": "Yahoo Finance public chart data",
   "quotes": {
     "SCHD": {
@@ -104,7 +104,7 @@
       "change": -134.1,
       "changesPercentage": -2.8752,
       "volume": 268759,
-      "avgVolume": 54476,
+      "avgVolume": 68922,
       "yearHigh": 5586.2,
       "yearLow": 3485.7,
       "marketState": "",
@@ -116,19 +116,19 @@
       "change": -0.13,
       "changesPercentage": -0.1556,
       "volume": 142318,
-      "avgVolume": 231197,
+      "avgVolume": 225189,
       "yearHigh": 119.48,
       "yearLow": 54.98,
       "marketState": "",
       "currency": "USD"
     },
     "BTC-USD": {
-      "price": 77703.88,
-      "prev": 77838.39,
-      "change": -134.51,
-      "changesPercentage": -0.1728,
-      "volume": 28585566208,
-      "avgVolume": 34668937395,
+      "price": 78243.36,
+      "prev": 78234.75,
+      "change": 8.61,
+      "changesPercentage": 0.011,
+      "volume": 13348307968,
+      "avgVolume": 29018323669,
       "yearHigh": 126198.07,
       "yearLow": 57747.766,
       "marketState": "",
@@ -176,7 +176,7 @@
       "change": -0.03,
       "changesPercentage": -0.4485,
       "volume": 37352,
-      "avgVolume": 8123,
+      "avgVolume": 15486,
       "yearHigh": 6.75,
       "yearLow": 4.472,
       "marketState": "",
@@ -190,7 +190,7 @@
       "change": -20.5,
       "changesPercentage": -0.2648,
       "volume": 1456221,
-      "avgVolume": 1142861,
+      "avgVolume": 1222610,
       "yearHigh": 7838.5,
       "yearLow": 6353.25,
       "marketState": "",
@@ -202,7 +202,7 @@
       "change": -37.0,
       "changesPercentage": -0.069,
       "volume": 56319,
-      "avgVolume": 51622,
+      "avgVolume": 52866,
       "yearHigh": 54884.0,
       "yearLow": 45000.0,
       "marketState": "",
@@ -214,7 +214,7 @@
       "change": -204.0,
       "changesPercentage": -0.687,
       "volume": 572237,
-      "avgVolume": 501731,
+      "avgVolume": 521756,
       "yearHigh": 30968.0,
       "yearLow": 22961.5,
       "marketState": "",
@@ -225,8 +225,8 @@
       "prev": 77835.0,
       "change": -20.0,
       "changesPercentage": -0.0257,
-      "volume": 49,
-      "avgVolume": 8111,
+      "volume": 121,
+      "avgVolume": 8363,
       "yearHigh": 127240.0,
       "yearLow": 57850.0,
       "marketState": "",
@@ -260,14 +260,18 @@
     }
   ],
   "news": [
-    "Investors bet on hike to interest rates as stocks dip - Northwest Arkansas Democrat-Gazette",
-    "What to Look Out for in Economic Data This Week (August 31-September 4) - Kiplinger",
-    "If the Federal Reserve Hikes Interest Rates in 2026, History Has Good and Bad News for Investors - The Motley Fool",
-    "Markets Brace for Possible Rate Hike After Kevin Warsh\u2019s Hawkish Turn - WSJ",
-    "Investors heartened by Warsh inflation talk, still uncertain about Fed action - The Economic Times",
-    "If the Federal Reserve Hikes Interest Rates in 2026, History Has Good and Bad News for Investors - The Globe and Mail",
-    "US Stocks Open Mixed as Investors Weigh Rate Path and Earnings - CryptoRank",
-    "US Stock Market Today: Dow Jones, NASDAQ & S&P 500 Major Indexes Trading Mix Amid Oil Prices Stemming from Regional Iran Conflict | Here\u2019s What Investors Should Watch - The Sunday Guardian"
+    "Stock Market Week Ahead: Chips, Cybersecurity And Jobs - Investor's Business Daily",
+    "The Fed Chair Says AI Is Moving Faster Than Even Its Believers Predicted - 24/7 Wall St.",
+    "American Century Short Duration Inflation Protection Bond Q2 2026 Commentary (APOIX) - Seeking Alpha",
+    "Investors bet on hike to interest rates as stocks dip - The Arkansas Democrat-Gazette",
+    "The Fed confronts a powerful new economic force - The Washington Post",
+    "European central bankers fear more U.S. policy turbulence, Reuters reports By Investing.com - Investing.com South Africa",
+    "Fed Rate Hike in September 2026 is Now More Likely Than Not - Norada Real Estate Investments",
+    "Wall Street week ahead: The market eyes the monthly jobs report - The Globe and Mail",
+    "Goldman draws 3 lessons from economic research on U.S. inflation expectations - Investing.com",
+    "Kevin Warsh: Almost Like Powell From 2022 (SP500) - Seeking Alpha",
+    "The New Fed Chair Just Rejected the Idea That Your Raise Causes Inflation - 24/7 Wall St.",
+    "What\u2019s in store for the week ahead By Investing.com - Investing.com South Africa"
   ],
   "economy": [
     "CPI 2026-07 | 3.5% YoY",
@@ -281,11 +285,13 @@
     "DXY  99.68 \u25bc0.03%",
     "Gold  $4,529.90 \u25bc2.88%",
     "WTI  $83.40 \u25bc0.16%",
-    "Bitcoin  $77,704 \u25bc0.17%",
+    "Bitcoin  $78,243 \u25b20.01%",
     "EUR/USD  1.1587 \u25bc0.62%",
     "USD/JPY  160.04 \u25b20.42%",
     "VIX  14.43 \u25bc0.55%",
     "Copper  $6.659 \u25bc0.45%"
   ],
-  "errors": {}
+  "errors": {
+    "economy": "The read operation timed out"
+  }
 }
