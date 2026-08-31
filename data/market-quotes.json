@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-29T14:05:48+00:00",
+  "updatedAt": "2026-08-31T07:04:15+00:00",
   "source": "Yahoo Finance public chart data",
   "quotes": {
     "SCHD": {
@@ -15,10 +15,10 @@
       "currency": "USD"
     },
     "QQQM": {
-      "price": 295.0,
+      "price": 294.976,
       "prev": 296.92,
-      "change": -1.92,
-      "changesPercentage": -0.6466,
+      "change": -1.944,
+      "changesPercentage": -0.6547,
       "volume": 2642700,
       "avgVolume": 2850080,
       "yearHigh": 308.21,
@@ -76,9 +76,9 @@
     },
     "^IXIC": {
       "price": 26402.424,
-      "prev": 26541.352,
-      "change": -138.928,
-      "changesPercentage": -0.5234,
+      "prev": 26541.4,
+      "change": -138.976,
+      "changesPercentage": -0.5236,
       "volume": 8457870000,
       "avgVolume": 7554748000,
       "yearHigh": 27190.21,
@@ -87,10 +87,10 @@
       "currency": "USD"
     },
     "DX-Y.NYB": {
-      "price": 99.677,
+      "price": 99.627,
       "prev": 99.702,
-      "change": -0.025,
-      "changesPercentage": -0.0251,
+      "change": -0.075,
+      "changesPercentage": -0.0752,
       "volume": 0,
       "avgVolume": 0,
       "yearHigh": 101.8,
@@ -99,46 +99,46 @@
       "currency": "USD"
     },
     "GC=F": {
-      "price": 4529.9,
-      "prev": 4664.0,
-      "change": -134.1,
-      "changesPercentage": -2.8752,
-      "volume": 268759,
-      "avgVolume": 54476,
+      "price": 4487.4,
+      "prev": 4529.9,
+      "change": -42.5,
+      "changesPercentage": -0.9382,
+      "volume": 59098,
+      "avgVolume": 17816,
       "yearHigh": 5586.2,
       "yearLow": 3485.7,
       "marketState": "",
       "currency": "USD"
     },
     "CL=F": {
-      "price": 83.4,
-      "prev": 83.53,
-      "change": -0.13,
-      "changesPercentage": -0.1556,
-      "volume": 142318,
-      "avgVolume": 231197,
+      "price": 85.49,
+      "prev": 83.4,
+      "change": 2.09,
+      "changesPercentage": 2.506,
+      "volume": 38660,
+      "avgVolume": 183701,
       "yearHigh": 119.48,
       "yearLow": 54.98,
       "marketState": "",
       "currency": "USD"
     },
     "BTC-USD": {
-      "price": 77703.88,
-      "prev": 77838.39,
-      "change": -134.51,
-      "changesPercentage": -0.1728,
-      "volume": 28585566208,
-      "avgVolume": 34668937395,
+      "price": 78035.15,
+      "prev": 77695.484,
+      "change": 339.666,
+      "changesPercentage": 0.4372,
+      "volume": 24215119872,
+      "avgVolume": 32537022527,
       "yearHigh": 126198.07,
       "yearLow": 57747.766,
       "marketState": "",
       "currency": "USD"
     },
     "EURUSD=X": {
-      "price": 1.1587,
-      "prev": 1.1659,
-      "change": -0.0072,
-      "changesPercentage": -0.6175,
+      "price": 1.159,
+      "prev": 1.1587,
+      "change": 0.0003,
+      "changesPercentage": 0.0259,
       "volume": 0,
       "avgVolume": 0,
       "yearHigh": 1.2024,
@@ -147,10 +147,10 @@
       "currency": "USD"
     },
     "JPY=X": {
-      "price": 160.038,
-      "prev": 159.371,
-      "change": 0.667,
-      "changesPercentage": 0.4185,
+      "price": 159.8,
+      "prev": 160.038,
+      "change": -0.238,
+      "changesPercentage": -0.1487,
       "volume": 0,
       "avgVolume": 0,
       "yearHigh": 163.979,
@@ -166,17 +166,17 @@
       "volume": 0,
       "avgVolume": 0,
       "yearHigh": 35.3,
-      "yearLow": 13.38,
+      "yearLow": 0.0,
       "marketState": "",
       "currency": "USD"
     },
     "HG=F": {
-      "price": 6.659,
-      "prev": 6.689,
-      "change": -0.03,
-      "changesPercentage": -0.4485,
-      "volume": 37352,
-      "avgVolume": 8123,
+      "price": 6.69,
+      "prev": 6.659,
+      "change": 0.031,
+      "changesPercentage": 0.4655,
+      "volume": 7152,
+      "avgVolume": 13645,
       "yearHigh": 6.75,
       "yearLow": 4.472,
       "marketState": "",
@@ -185,48 +185,48 @@
   },
   "futures": {
     "ES=F": {
-      "price": 7722.0,
-      "prev": 7742.5,
-      "change": -20.5,
-      "changesPercentage": -0.2648,
-      "volume": 1456221,
-      "avgVolume": 1142861,
+      "price": 7710.0,
+      "prev": 7722.0,
+      "change": -12.0,
+      "changesPercentage": -0.1554,
+      "volume": 94724,
+      "avgVolume": 968292,
       "yearHigh": 7838.5,
       "yearLow": 6353.25,
       "marketState": "",
       "currency": "USD"
     },
     "YM=F": {
-      "price": 53584.0,
-      "prev": 53621.0,
-      "change": -37.0,
-      "changesPercentage": -0.069,
-      "volume": 56319,
-      "avgVolume": 51622,
+      "price": 53516.0,
+      "prev": 53584.0,
+      "change": -68.0,
+      "changesPercentage": -0.1269,
+      "volume": 5792,
+      "avgVolume": 41202,
       "yearHigh": 54884.0,
       "yearLow": 45000.0,
       "marketState": "",
       "currency": "USD"
     },
     "NQ=F": {
-      "price": 29491.75,
-      "prev": 29695.75,
-      "change": -204.0,
-      "changesPercentage": -0.687,
-      "volume": 572237,
-      "avgVolume": 501731,
+      "price": 29510.25,
+      "prev": 29491.75,
+      "change": 18.5,
+      "changesPercentage": 0.0627,
+      "volume": 75854,
+      "avgVolume": 418611,
       "yearHigh": 30968.0,
       "yearLow": 22961.5,
       "marketState": "",
       "currency": "USD"
     },
     "BTC=F": {
-      "price": 77815.0,
+      "price": 78395.0,
       "prev": 77835.0,
-      "change": -20.0,
-      "changesPercentage": -0.0257,
-      "volume": 49,
-      "avgVolume": 8111,
+      "change": 560.0,
+      "changesPercentage": 0.7195,
+      "volume": 1697,
+      "avgVolume": 7573,
       "yearHigh": 127240.0,
       "yearLow": 57850.0,
       "marketState": "",
@@ -249,8 +249,8 @@
     {
       "sym": "QQQM",
       "name": "QQQM",
-      "price": 295.0,
-      "chg": -0.6466
+      "price": 294.976,
+      "chg": -0.6547
     },
     {
       "sym": "IBIT",
@@ -260,14 +260,18 @@
     }
   ],
   "news": [
-    "Investors bet on hike to interest rates as stocks dip - Northwest Arkansas Democrat-Gazette",
-    "What to Look Out for in Economic Data This Week (August 31-September 4) - Kiplinger",
-    "If the Federal Reserve Hikes Interest Rates in 2026, History Has Good and Bad News for Investors - The Motley Fool",
-    "Markets Brace for Possible Rate Hike After Kevin Warsh\u2019s Hawkish Turn - WSJ",
-    "Investors heartened by Warsh inflation talk, still uncertain about Fed action - The Economic Times",
-    "If the Federal Reserve Hikes Interest Rates in 2026, History Has Good and Bad News for Investors - The Globe and Mail",
-    "US Stocks Open Mixed as Investors Weigh Rate Path and Earnings - CryptoRank",
-    "US Stock Market Today: Dow Jones, NASDAQ & S&P 500 Major Indexes Trading Mix Amid Oil Prices Stemming from Regional Iran Conflict | Here\u2019s What Investors Should Watch - The Sunday Guardian"
+    "U.S. stock futures slip as chances of rate hike rise after Warsh\u2019s Jackson Hole comments - MarketWatch",
+    "Asia stocks slip on growing Fed hike bets, fresh Middle East tensions - Investing.com",
+    "China bond market diverges from US as Warsh strikes hawkish tone at Jackson Hole - South China Morning Post",
+    "Beating Inflation: How Investors Can Protect Long-Term Portfolio Returns Against Rising Costs - Kiplinger",
+    "\u2018There\u2019s a shroud over this market\u2019: Jim Cramer warns stocks face a tougher road \u2014 here\u2019s how to prepare - Yahoo Finance",
+    "S&P 500 Is Up 12% in 2026 But a 1907 Crash Signal Is Back - CryptoRank",
+    "Goldman Sachs sends blunt message on oil price, economy - thestreet.com",
+    "US Stock Market: Warsh signals Fed may need to raise rates if inflation remains elevated - inkl",
+    "Global Market: South Korean shares fall as hawkish Fed comments weigh on sentiment - The Economic Times",
+    "Nomura Strategic Income Fund Q2 2026 Commentary - Seeking Alpha",
+    "Hana Securities urges Korea to favor earnings growth over high-PER bets - CHOSUNBIZ - Chosunbiz",
+    "Stock Market Today: Gift Nifty To US-Iran War \u2014 Five Key Factors That May Drive Sensex, Nifty 50 on August 31 - NDTV Profit"
   ],
   "economy": [
     "CPI 2026-07 | 3.5% YoY",
@@ -278,15 +282,16 @@
     "2-Year Treasury 2026-08-27 | 4.20%"
   ],
   "macro": [
-    "DXY  99.68 \u25bc0.03%",
-    "Gold  $4,529.90 \u25bc2.88%",
-    "WTI  $83.40 \u25bc0.16%",
-    "Bitcoin  $77,704 \u25bc0.17%",
-    "EUR/USD  1.1587 \u25bc0.62%",
-    "USD/JPY  160.04 \u25b20.42%",
+    "DXY  99.63 \u25bc0.08%",
+    "Gold  $4,487.40 \u25bc0.94%",
+    "WTI  $85.49 \u25b22.51%",
+    "Bitcoin  $78,035 \u25b20.44%",
+    "EUR/USD  1.1590 \u25b20.03%",
+    "USD/JPY  159.80 \u25bc0.15%",
     "VIX  14.43 \u25bc0.55%",
-    "Copper  $6.659 \u25bc0.45%"
+    "Copper  $6.690 \u25b20.47%"
   ],
-  "errors": {}
+  "errors": {
+    "economy": "The read operation timed out"
+  }
 }
-
