@@ -126,8 +126,11 @@ function allExpenseCategories(data) {
 // like checking/savings where a transaction could be any of those.
 function allCategoriesFull(data) {
   const custom = (data && data.customCategories) || [];
+  const hidden = new Set((data && data.hiddenBudgetCategories) || []);
   const set = new Set([...Object.keys(CATEGORY_META), ...custom]);
-  return [...set].sort((a, b) => a.localeCompare(b));
+  return [...set]
+    .filter(cat => cat === "Income" || cat === "Transfer" || !hidden.has(cat))
+    .sort((a, b) => a.localeCompare(b));
 }
 
 const ACCOUNT_TYPE_META = {
@@ -1717,8 +1720,8 @@ function Budgets({ data, actions, derived }) {
     setEditCat(null);
   };
   const deleteBudget = (cat) => {
-    if (!window.confirm(`Delete the ${cat} budget? Historical transactions will keep their category.`)) return;
-    actions.deleteBudgetForMonth(selectedMonth, cat);
+    if (!window.confirm(`Delete ${cat} from the shared Budget list and all five accounts? Existing transactions in this category will be moved to Other.`)) return;
+    actions.deleteCategory(cat);
     if (trendCat === cat) setTrendCat(budgetCategories.find(c => c !== cat) || "Groceries");
   };
 
@@ -1727,7 +1730,7 @@ function Budgets({ data, actions, derived }) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-xl md:text-2xl font-bold text-slate-800">Budgets</h1>
-          <p className="text-slate-500 text-sm mt-1">Plan and review each month independently.</p>
+          <p className="text-slate-500 text-sm mt-1">One shared category list keeps every account consistent. Add or delete an item once to update all five accounts.</p>
         </div>
         <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
           <input type="month" className={inputClass + " max-w-[180px]"} value={selectedMonth} onChange={e => setSelectedMonth(e.target.value)} />
