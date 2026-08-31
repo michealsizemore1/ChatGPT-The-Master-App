@@ -34,3 +34,4 @@ jobs:
           git add data/market-quotes.json
           git commit -m "Update MSIZ market data"
           git push
+
