@@ -5762,7 +5762,7 @@ function inferFoodMacroSources(item){
   if(remembered){['proteinSource','carbSource','fatSource'].forEach(function(field){if(item[field]!==remembered[field]){item[field]=remembered[field]||'unknown';changed=true;}});item.sourceConfidence='High';item.sourceMethod='Remembered correction';return changed;}
   var proteinSupport=['chicken breast','chicken','turkey','fish','salmon','tuna','shrimp','lean beef','sirloin','egg white','egg','greek yogurt','yogurt','cottage cheese','milk protein','casein','milk','tofu','tempeh','bean','lentil','chickpea','pea protein','soy protein','protein isolate','protein concentrate','protein powder','whey','seitan'];
   var proteinLimit=['bacon','sausage','hot dog','pepperoni','salami','bologna','fried chicken','processed meat','mechanically separated','cured meat','pork rind','rib','cheese'];
-  var carbSupport=['oatmeal','oat','brown rice','wild rice','quinoa','whole grain','whole wheat','whole rye','barley','farro','bran','bean','lentil','chickpea','sweet potato','potato','fruit','dried fruit','raisin','apple','banana','berry','berries','orange','vegetable','broccoli','spinach'];
+  var carbSupport=['oatmeal','oat','brown rice','wild rice','quinoa','whole grain','whole wheat','whole rye','barley','farro','bran','bean','lentil','chickpea','sweet potato','potato','corn','sweet corn','fruit','dried fruit','raisin','apple','banana','berry','berries','orange','vegetable','broccoli','spinach'];
   var carbLimit=['candy','soda','soft drink','juice','sports drink','energy gel','gel','chew','sugar','cane sugar','corn syrup','high fructose corn syrup','honey','syrup','enriched wheat flour','refined flour','white flour','cookie','cake','pastry','donut','doughnut','white bread','white rice','sweetened cereal'];
   var fatSupport=['olive oil','canola oil','sunflower oil','safflower oil','soybean oil','sesame oil','avocado','almond','walnut','peanut','nut butter','seed','chia','flax','salmon','tuna'];
   var fatLimit=['butter','lard','shortening','coconut oil','palm oil','palm kernel oil','hydrogenated oil','partially hydrogenated oil','cream','cheese','bacon','sausage','pepperoni','fried'];
@@ -5797,7 +5797,7 @@ function runnerFoodQuality(item){
   if(!sports&&sugar>=20&&fiber<3){score-=1;reasons.push('high sugar with little fiber');}else if(!sports&&sugar>=10&&fiber<2){score-=0.5;}
   if(!sports&&sodium>=700){score-=0.5;reasons.push('high sodium');}
   var text=[item.name,item.ingredientsText,item.categoriesText].filter(Boolean).join(' ').toLowerCase();
-  if(/\b(vegetable|fruit|dried fruit|raisin|raisins|berries|banana|apple|orange|oat|oatmeal|whole grain|whole wheat|bean|lentil|quinoa|brown rice|sweet potato|salmon|tuna)\b/.test(text)){score+=0.75;reasons.push('whole-food ingredients');}
+  if(/\b(vegetable|fruit|dried fruit|raisin|raisins|berries|banana|apple|orange|oat|oatmeal|whole grain|whole wheat|bean|lentil|quinoa|brown rice|sweet potato|potato|potatoes|corn|salmon|tuna)\b/.test(text)){score+=0.75;reasons.push('whole-food ingredients');}
   // Oats provide a nutrient-dense carbohydrate base for endurance training. Give
   // plain or lightly sweetened oatmeal credit without extending the bonus to
   // dessert-style products with a large added-sugar load.
@@ -5806,10 +5806,15 @@ function runnerFoodQuality(item){
   // runners. Their naturally occurring sugar should not be scored like candy;
   // sweetened or candy-coated products remain subject to the normal penalties.
   if(/\b(raisin|raisins|unsweetened dried fruit)\b/.test(text)&&!/\b(candy|chocolate|yogurt covered|added sugar|corn syrup)\b/.test(text)){score+=1;reasons.push('portable runner carbohydrate');}
-  // A plain baked potato is useful endurance fuel: carbohydrate-rich, naturally
-  // low in fat, and commonly a strong potassium source. Rich toppings are scored
-  // separately through the food's entered fat/source data.
-  if(/\b(baked|boiled|roasted)\s+(white\s+|russet\s+|red\s+)?potato(es)?\b/.test(text)&&fat<=5){score+=1.5;reasons.push('low-fat endurance carbohydrate');}
+  // Plain potatoes are useful endurance fuel: carbohydrate-rich, naturally low
+  // in fat, and commonly a strong potassium source. Recognize product names such
+  // as "Idaho Potatoes" even when the cooking method is not included, but do not
+  // extend the bonus to fried, loaded, cheesy, or snack-food preparations.
+  if(/\b(potato|potatoes|russet|yukon gold)\b/.test(text)&&fat<=5&&!/\b(fries|french fry|chips?|hash browns?|tater tots?|loaded|cheesy|scalloped|au gratin|fried)\b/.test(text)){score+=1.5;reasons.push('low-fat endurance carbohydrate');}
+  // Corn is a starchy whole-food carbohydrate that can support training and
+  // glycogen replacement. Keep processed snack foods and rich preparations out
+  // of this bonus; their entered fat, sugar, and sodium still affect the score.
+  if(/\b(corn|sweet corn|corn kernels?)\b/.test(text)&&fat<=5&&!/\b(corn chips?|tortilla chips?|corn dog|creamed corn|caramel corn|popcorn|corn syrup|fried)\b/.test(text)){score+=1.25;reasons.push('starchy whole-food carbohydrate');}
   if((parseFloat(item.potassium)||0)>=600){score+=0.5;reasons.push('potassium-rich');}
   if(/\b(candy|soda|donut|doughnut|pastry|fried|hydrogenated|corn syrup)\b/.test(text)&&!sports){score-=0.75;reasons.push('highly processed ingredients');}
   // Morning-run context: quick carbohydrate in Sports Nutrition is purposeful fuel,
