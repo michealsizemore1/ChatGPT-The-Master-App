@@ -751,7 +751,7 @@ function generateSeedData() {
     { id: uid(), name: "Pay Off Credit Card", icon: "💳", target: 1284, current: 380, deadline: "2026-11-01", color: "#ec4899" },
   ];
 
-  return { accounts, transactions, budgets: { ...DEFAULT_BUDGETS }, subscriptions, goals, netWorthHistory, recurringBills, rules, investments, paidBills: {}, customCategories: [] };
+  return { accounts, transactions, budgets: { ...DEFAULT_BUDGETS }, subscriptions, goals, netWorthHistory, recurringBills, rules, investments, paidBills: {}, customCategories: [], trips: [] };
 }
 
 // A genuinely blank slate used only by the explicit "Clear All Data" action.
@@ -760,7 +760,7 @@ function emptyData() {
     accounts: [], transactions: [], budgets: {}, budgetPlans: {}, subscriptions: [],
     goals: [], netWorthHistory: [], recurringBills: [], rules: [], investments: [],
     investmentContributions: [], investmentStartingValue: 0, paycheckItems: [],
-    watchlists: [], paidBills: {}, customCategories: [], creditScores: [],
+    watchlists: [], paidBills: {}, customCategories: [], creditScores: [], trips: [],
   };
 }
 
@@ -846,6 +846,7 @@ function normalizeBudgetData(data) {
     notificationPrefs: data.notificationPrefs || { enabled: false },
     auditLog: data.auditLog || [],
     creditScores: data.creditScores || [],
+    trips: data.trips || [],
   };
 }
 
@@ -1877,8 +1878,8 @@ function Watchlists({ data, actions, selectedMonth }) {
 
 /* ============================== TRANSACTIONS ============================== */
 
-function TransactionModal({ open, onClose, onSave, initial, accounts, rules, defaultAccountId }) {
-  const blank = { date: todayISO(), accountId: defaultAccountId || accounts[0]?.id || "", merchant: "", category: defaultAccountId === CINDY_CC_ACCOUNT_ID ? "Personal Support" : "Other", amount: "", notes: "", tags: [], excludeFromBudget: false, needsReview: false, person: defaultAccountId === CINDY_CC_ACCOUNT_ID ? "Cynthia" : "Joint", receipt: null };
+function TransactionModal({ open, onClose, onSave, initial, accounts, rules, trips, defaultAccountId }) {
+  const blank = { date: todayISO(), accountId: defaultAccountId || accounts[0]?.id || "", merchant: "", category: defaultAccountId === CINDY_CC_ACCOUNT_ID ? "Personal Support" : "Other", amount: "", notes: "", tags: [], tripId: "", excludeFromBudget: false, needsReview: false, person: defaultAccountId === CINDY_CC_ACCOUNT_ID ? "Cynthia" : "Joint", receipt: null };
   const [form, setForm] = useState(initial || blank);
   const [receiptBusy, setReceiptBusy] = useState(false);
   useEffect(() => { setForm(initial || blank); }, [initial, open, defaultAccountId]);
@@ -2046,7 +2047,7 @@ function RegStat({ label, value, tone }) {
 }
 
 function CindyCreditCardRegister({ data, actions, cindyAccount }) {
-  const blankForm = { id: null, date: todayISO(), desc: "", amount: "", category: EXPENSE_CATEGORIES[0], regType: "expense", who: "Cynthia", receipt: null };
+  const blankForm = { id: null, date: todayISO(), desc: "", amount: "", category: EXPENSE_CATEGORIES[0], regType: "expense", who: "Cynthia", tripId: "", receipt: null };
   const [form, setForm] = useState(blankForm);
   const [search, setSearch] = useState("");
   const [catFilter, setCatFilter] = useState("All");
@@ -2127,7 +2128,7 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
     setSplitting({
       ...(existing || {}),
       id: existing?.id || uid(), date: form.date, merchant: form.desc.trim(), amount, category,
-      accountId: cindyAccount.id, person: form.who, receipt: form.receipt || null,
+      accountId: cindyAccount.id, person: form.who, tripId: form.tripId || "", receipt: form.receipt || null,
       cleared: existing ? existing.cleared : false, isDraftSplit: !existing,
     });
   };
@@ -2149,7 +2150,7 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
     setForm({
       id: t.id, date: t.date, desc: t.merchant, amount: String(Math.abs(t.amount)),
       category: t.category === "Transfer" ? EXPENSE_CATEGORIES[0] : t.category,
-      regType: cindyRegType(t), who: t.person || "Cynthia", receipt: t.receipt || null,
+      regType: cindyRegType(t), who: t.person || "Cynthia", tripId: t.tripId || "", receipt: t.receipt || null,
     });
     if (editFormRef.current && typeof editFormRef.current.scrollIntoView === "function") editFormRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
   };
@@ -2162,7 +2163,7 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
     const existing = form.id ? allTx.find(t => t.id === form.id) : null;
     const payload = {
       id: form.id || uid(), date: form.date, accountId: cindyAccount.id, merchant: form.desc.trim(),
-      category, amount, person: form.who, notes: existing ? (existing.notes || "") : "",
+      category, amount, person: form.who, tripId: form.tripId || "", notes: existing ? (existing.notes || "") : "",
       cleared: existing ? existing.cleared : false, checkedOff: existing ? !!existing.checkedOff : false, receipt: form.receipt || null,
     };
     if (form.id) {
@@ -2249,6 +2250,14 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
                 {form.receipt && <button type="button" className="text-xs text-indigo-600" onClick={() => setViewingReceipt(form.receipt)}>view</button>}
               </div>
             </div>
+          </div>
+
+          <div className="mt-3 max-w-sm">
+            <label className="block text-[10px] uppercase tracking-wide text-slate-400 mb-1">Trip</label>
+            <select className={inputClass} value={form.tripId || ""} onChange={e => setForm(f => ({ ...f, tripId: e.target.value }))}>
+              <option value="">Not part of a trip</option>
+              {(data.trips || []).map(trip => <option key={trip.id} value={trip.id}>{trip.name}</option>)}
+            </select>
           </div>
 
           <div className="flex flex-wrap items-center gap-3 mt-3">
@@ -2447,7 +2456,7 @@ function defaultPersonForAccount(accountId) {
 }
 
 function BankAccountRegister({ data, actions, account }) {
-  const blankForm = { id: null, date: todayISO(), desc: "", amount: "", category: "Other", direction: "withdrawal", receipt: null };
+  const blankForm = { id: null, date: todayISO(), desc: "", amount: "", category: "Other", direction: "withdrawal", tripId: "", receipt: null };
   const [form, setForm] = useState(blankForm);
   const [search, setSearch] = useState("");
   const [catFilter, setCatFilter] = useState("All");
@@ -2526,7 +2535,7 @@ function BankAccountRegister({ data, actions, account }) {
     setSplitting({
       ...(existing || {}),
       id: existing?.id || uid(), date: form.date, merchant: form.desc.trim(), amount,
-      category: form.category, accountId: account.id,
+      category: form.category, accountId: account.id, tripId: form.tripId || "",
       person: defaultPersonForAccount(account.id), receipt: form.receipt || null,
       cleared: existing ? existing.cleared : false, isDraftSplit: !existing,
     });
@@ -2548,7 +2557,7 @@ function BankAccountRegister({ data, actions, account }) {
   const startEdit = (t) => {
     setForm({
       id: t.id, date: t.date, desc: t.merchant, amount: String(Math.abs(t.amount)),
-      category: t.category, direction: t.amount > 0 ? "deposit" : "withdrawal", receipt: t.receipt || null,
+      category: t.category, direction: t.amount > 0 ? "deposit" : "withdrawal", tripId: t.tripId || "", receipt: t.receipt || null,
     });
     if (editFormRef.current && typeof editFormRef.current.scrollIntoView === "function") editFormRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
   };
@@ -2560,7 +2569,7 @@ function BankAccountRegister({ data, actions, account }) {
     const existing = form.id ? allTx.find(t => t.id === form.id) : null;
     const payload = {
       id: form.id || uid(), date: form.date, accountId: account.id, merchant: form.desc.trim(),
-      category: form.category, amount, person: existing ? (existing.person || defaultPersonForAccount(account.id)) : defaultPersonForAccount(account.id),
+      category: form.category, amount, tripId: form.tripId || "", person: existing ? (existing.person || defaultPersonForAccount(account.id)) : defaultPersonForAccount(account.id),
       notes: existing ? (existing.notes || "") : "", cleared: existing ? existing.cleared : false, checkedOff: existing ? !!existing.checkedOff : false, receipt: form.receipt || null,
     };
     if (form.id) {
@@ -2652,6 +2661,14 @@ function BankAccountRegister({ data, actions, account }) {
                 {form.receipt && <button type="button" className="text-xs text-indigo-600" onClick={() => setViewingReceipt(form.receipt)}>view</button>}
               </div>
             </div>
+          </div>
+
+          <div className="mt-3 max-w-sm">
+            <label className="block text-[10px] uppercase tracking-wide text-slate-400 mb-1">Trip</label>
+            <select className={inputClass} value={form.tripId || ""} onChange={e => setForm(f => ({ ...f, tripId: e.target.value }))}>
+              <option value="">Not part of a trip</option>
+              {(data.trips || []).map(trip => <option key={trip.id} value={trip.id}>{trip.name}</option>)}
+            </select>
           </div>
 
           <div className="flex flex-wrap items-center gap-3 mt-3">
@@ -2834,6 +2851,7 @@ function BankAccountRegister({ data, actions, account }) {
 
 function AccountsAndCards({ data, actions }) {
   const [activeTab, setActiveTab] = useState("cc");
+  const [tripName, setTripName] = useState("");
 
   const ccAccount = data.accounts.find(a => a.id === CINDY_CC_ACCOUNT_ID) || data.accounts.find(isIccuCreditAccount);
   const chkAccount = data.accounts.find(a => a.id === CHK_ACCOUNT_ID);
@@ -2908,6 +2926,32 @@ function AccountsAndCards({ data, actions }) {
               <div className="font-semibold text-rose-600">{fmtCurrency(iccuTotalOwed)}</div>
             </div>
           </div>
+        </div>
+      </Card>
+      <Card className="p-4 md:p-5 border-sky-200 bg-sky-50/40">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-4">
+          <div>
+            <div className="text-xs font-semibold uppercase tracking-wide text-sky-600">✈️ Trip spending</div>
+            <h3 className="text-lg font-bold text-slate-800 mt-1">Trips across all accounts</h3>
+            <p className="text-xs text-slate-500 mt-1">Assign transactions to a trip and spending is combined across all five accounts.</p>
+          </div>
+          <div className="flex gap-2 w-full sm:w-auto">
+            <input className={inputClass + " min-w-0 sm:w-[220px]"} placeholder="Trip name" value={tripName} onChange={e => setTripName(e.target.value)} />
+            <Button onClick={() => { const name = tripName.trim(); if (!name) return; actions.addTrip({ id: uid(), name, createdAt: todayISO() }); setTripName(""); }}>Add Trip</Button>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {(data.trips || []).map(trip => {
+            const purchases = data.transactions.filter(t => t.tripId === trip.id && Number(t.amount) < 0);
+            const total = purchases.reduce((sum, t) => sum + Math.abs(Number(t.amount) || 0), 0);
+            const accountCount = new Set(purchases.map(t => t.accountId)).size;
+            return <div key={trip.id} className="rounded-xl border border-sky-200 bg-white p-4">
+              <div className="flex justify-between gap-2"><strong className="text-slate-800">{trip.name}</strong><button className="text-xs text-rose-500" onClick={() => { if (window.confirm(`Delete the ${trip.name} trip? Transactions will remain but will no longer be assigned to it.`)) actions.deleteTrip(trip.id); }}>Delete</button></div>
+              <div className="text-2xl font-bold text-sky-700 mt-2">{fmtCurrency(total)}</div>
+              <div className="text-xs text-slate-400 mt-1">{purchases.length} purchase{purchases.length === 1 ? "" : "s"} · {accountCount} account{accountCount === 1 ? "" : "s"}</div>
+            </div>;
+          })}
+          {(data.trips || []).length === 0 && <div className="text-sm text-slate-400 py-3">Add a trip to begin tracking its spending.</div>}
         </div>
       </Card>
       <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
@@ -3583,7 +3627,7 @@ function Transactions({ data, actions }) {
           </div>
         )}
       </Card>
-      <TransactionModal open={modalOpen} onClose={() => setModalOpen(false)} onSave={save} initial={editing} accounts={data.accounts} rules={data.rules} defaultAccountId={presetAccountId} />
+      <TransactionModal open={modalOpen} onClose={() => setModalOpen(false)} onSave={save} initial={editing} accounts={data.accounts} rules={data.rules} trips={data.trips} defaultAccountId={presetAccountId} />
 
       <SubscriptionModal open={!!markingSub} onClose={closeMarkSubscription} onSave={saveMarkedSubscription} prefill={markSubPrefill} />
 
@@ -3794,6 +3838,12 @@ function SubscriptionModal({ open, onClose, onSave, onDelete, initial, prefill }
             <input type="checkbox" checked={form.active} onChange={e => setForm({ ...form, active: e.target.checked })} />
             Active
           </label>
+        </Field>
+        <Field label="Trip (optional)">
+          <select className={inputClass} value={form.tripId || ""} onChange={e => setForm({ ...form, tripId: e.target.value })}>
+            <option value="">Not part of a trip</option>
+            {(trips || []).map(trip => <option key={trip.id} value={trip.id}>{trip.name}</option>)}
+          </select>
         </Field>
         <Card className="p-4 bg-slate-50 mb-3">
           <div className="text-sm font-semibold text-slate-700 mb-3">Cancellation tracking</div>
@@ -5774,6 +5824,8 @@ function App() {
     updateGoal: (g) => setData(d => ({ ...d, goals: d.goals.map(x => x.id === g.id ? g : x) })),
     deleteGoal: (id) => setData(d => ({ ...d, goals: d.goals.filter(x => x.id !== id) })),
     contributeToGoal: (id, amt) => setData(d => ({ ...d, goals: d.goals.map(g => g.id === id ? { ...g, current: Math.max(0, g.current + amt) } : g) })),
+    addTrip: (trip) => setData(d => ({ ...d, trips: [...(d.trips || []), trip] }), "Trip added"),
+    deleteTrip: (id) => setData(d => ({ ...d, trips: (d.trips || []).filter(trip => trip.id !== id), transactions: d.transactions.map(t => t.tripId === id ? { ...t, tripId: "" } : t) }), "Trip deleted"),
 
     addAccount: (a) => setData(d => ({ ...d, accounts: [...d.accounts, a] })),
     updateAccount: (a) => setData(d => ({ ...d, accounts: d.accounts.map(x => x.id === a.id ? a : x) })),
