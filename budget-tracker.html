@@ -814,7 +814,9 @@ function ensureDiscoverRegister(data) { return data; }
 function ensureUserNamedSubscriptions(data) { return data; }
 
 function normalizeBudgetData(data) {
-  const normalizedSubscriptions = (data.subscriptions || []).map(subscription => {
+  data = data && typeof data === "object" ? data : {};
+  const asArray = value => Array.isArray(value) ? value.filter(Boolean) : [];
+  const normalizedSubscriptions = asArray(data.subscriptions).map(subscription => {
     if (/sirius\s*xm/i.test(String(subscription.merchant || ""))) {
       return {
         ...subscription,
@@ -835,34 +837,34 @@ function normalizeBudgetData(data) {
   });
   return {
     ...data,
-    accounts: data.accounts || [],
-    transactions: data.transactions || [],
+    accounts: asArray(data.accounts),
+    transactions: asArray(data.transactions),
     budgets: data.budgets || {},
     budgetPlans: data.budgetPlans || {},
     subscriptions: normalizedSubscriptions,
-    goals: data.goals || [],
-    recurringBills: data.recurringBills || [],
-    rules: data.rules || [],
-    investments: data.investments || [],
-    netWorthHistory: data.netWorthHistory || [],
-    investmentContributions: data.investmentContributions || [],
+    goals: asArray(data.goals),
+    recurringBills: asArray(data.recurringBills),
+    rules: asArray(data.rules),
+    investments: asArray(data.investments),
+    netWorthHistory: asArray(data.netWorthHistory),
+    investmentContributions: asArray(data.investmentContributions),
     investmentStartingValue: Number(data.investmentStartingValue) || 0,
     investmentCurrentValue: data.investmentCurrentValue == null || data.investmentCurrentValue === "" ? null : Number(data.investmentCurrentValue),
     investmentBaselineDate: data.investmentBaselineDate || todayISO(),
-    paycheckItems: data.paycheckItems || [],
-    watchlists: data.watchlists || [],
+    paycheckItems: asArray(data.paycheckItems),
+    watchlists: asArray(data.watchlists),
     paidBills: data.paidBills || {},
     autoPaidBills: data.autoPaidBills || {},
-    customCategories: data.customCategories || [],
-    hiddenBudgetCategories: data.hiddenBudgetCategories || [],
-    sinkingFunds: data.sinkingFunds || [],
+    customCategories: asArray(data.customCategories),
+    hiddenBudgetCategories: asArray(data.hiddenBudgetCategories),
+    sinkingFunds: asArray(data.sinkingFunds),
     subscriptionSinkingFundsInitialized: !!data.subscriptionSinkingFundsInitialized,
     reconciliations: data.reconciliations || {},
     privacyPrefs: data.privacyPrefs || { hideBalances: false, viewer: "Household" },
     notificationPrefs: data.notificationPrefs || { enabled: false },
-    auditLog: data.auditLog || [],
-    creditScores: data.creditScores || [],
-    trips: data.trips || [],
+    auditLog: asArray(data.auditLog),
+    creditScores: asArray(data.creditScores),
+    trips: asArray(data.trips),
     financialReviewPrefs: data.financialReviewPrefs || { earlyIncomeToNextMonth: true },
   };
 }
@@ -880,7 +882,9 @@ function loadData() {
   data = ensureUserNamedSubscriptions(data);
   data = normalizeBudgetData(data);
   data = applySharedInvestmentsToBudget(data);
-  data = syncPaidBillsFromClearedTransactions(data);
+  // Saved data can outlive several schema versions. Bill reconciliation must never
+  // prevent the application from opening when an older record is malformed.
+  try { data = syncPaidBillsFromClearedTransactions(data); } catch (e) {}
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   return data;
 }
@@ -1223,7 +1227,8 @@ function syncPaidBillsFromClearedTransactions(data) {
   const paidBills = Object.fromEntries(Object.entries(data.paidBills || {}).map(([month, values]) => [month, { ...(values || {}) }]));
   const autoPaidBills = Object.fromEntries(Object.entries(data.autoPaidBills || {}).map(([month, values]) => [month, { ...(values || {}) }]));
   const active = {};
-  (data.transactions || []).filter(transaction => transaction.cleared === true).forEach(transaction => {
+  const transactions = Array.isArray(data.transactions) ? data.transactions : [];
+  transactions.filter(transaction => transaction && transaction.cleared === true).forEach(transaction => {
     const month = monthKey(transaction.date || "");
     if (!month) return;
     matchingScheduledBillIds(transaction, data).forEach(id => {
@@ -1292,16 +1297,15 @@ function useDerived(data) {
       .map(x => ({ ...x, pct: (x.spent / x.budget) * 100, over: x.spent > x.budget }));
 
     // Safe to spend — checking balance minus bills/subscriptions still due this month
-    const todayDay = now.getDate();
     const paidForMonth = (data.paidBills && data.paidBills[curMonth]) || {};
     const recurringItems = [
       ...(data.recurringBills || []).map(b => ({ ...b, paid: !!paidForMonth[b.id] })),
       // Non-monthly subscriptions (Quarterly/Semi-Annual/Annual) only count toward this
       // month's bills/Safe-to-Spend when they're actually due this month — otherwise a
       // once-a-year charge would wrongly look like it's owed every single month.
-      ...data.subscriptions.filter(s => s.active && subDueInMonth(s, now.getFullYear(), now.getMonth() + 1)).map(s => ({ id: s.id, merchant: s.merchant, amount: s.amount, dayOfMonth: subscriptionDayForMonth(s, now.getFullYear(), now.getMonth() + 1), person: s.person, category: s.category, paid: !!paidForMonth[s.id] })),
+      ...(data.subscriptions || []).filter(s => s.active && subDueInMonth(s, now.getFullYear(), now.getMonth() + 1)).map(s => ({ id: s.id, merchant: s.merchant, amount: s.amount, dayOfMonth: subscriptionDayForMonth(s, now.getFullYear(), now.getMonth() + 1), person: s.person, category: s.category, paid: !!paidForMonth[s.id] })),
     ];
-    const upcomingBillsRemaining = recurringItems.filter(b => b.dayOfMonth > todayDay && !b.paid).reduce((s, b) => s + b.amount, 0);
+    const upcomingBillsRemaining = recurringItems.filter(b => !b.paid).reduce((s, b) => s + (Number(b.amount) || 0), 0);
     const checkingAccount = data.accounts.find(a => a.type === "checking");
     const safeToSpend = (checkingAccount ? checkingAccount.balance : 0) - upcomingBillsRemaining;
 
@@ -4377,7 +4381,7 @@ function CashFlow({ data, derived, actions }) {
 
   // "Still due this month" and Safe to Spend always reflect the real current month,
   // regardless of which month the calendar above is browsing.
-  const upcoming = derived.recurringItems.filter(b => b.dayOfMonth > CASHFLOW_REAL_TODAY.day).sort((a, b) => a.dayOfMonth - b.dayOfMonth);
+  const upcoming = derived.recurringItems.slice().sort((a, b) => a.dayOfMonth - b.dayOfMonth);
 
   // Recomputed live from `items` on every render (not a frozen snapshot), so the paid
   // checkbox in the modal stays in sync immediately after toggling.
@@ -4410,10 +4414,10 @@ function CashFlow({ data, derived, actions }) {
           <div className={"text-3xl font-bold mt-2 " + (derived.safeToSpend >= 0 ? "text-slate-800" : "text-rose-600")}>{fmtCurrency(derived.safeToSpend, { decimals: false })}</div>
           <div className="mt-4 space-y-2 text-sm border-t border-slate-100 pt-4">
             <div className="flex justify-between"><span className="text-slate-500">Checking balance</span><span className="font-medium text-slate-700">{fmtCurrency((derived.checkingAccount && derived.checkingAccount.balance) || 0, { decimals: false })}</span></div>
-            <div className="flex justify-between"><span className="text-slate-500">Upcoming bills (rest of month)</span><span className="font-medium text-rose-600">-{fmtCurrency(derived.upcomingBillsRemaining, { decimals: false })}</span></div>
+            <div className="flex justify-between"><span className="text-slate-500">Unpaid bills this month</span><span className="font-medium text-rose-600">-{fmtCurrency(derived.upcomingBillsRemaining, { decimals: false })}</span></div>
           </div>
           <div className="mt-4 pt-4 border-t border-slate-100">
-            <div className="text-xs text-slate-400 uppercase tracking-wide mb-2">Still due this month</div>
+            <div className="text-xs text-slate-400 uppercase tracking-wide mb-2">Bills this month</div>
             <div className="space-y-2 max-h-56 overflow-y-auto no-scrollbar">
               {upcoming.length === 0 && <div className="text-sm text-slate-400">Nothing left — you're all paid up! 🎉</div>}
               {upcoming.map((b, i) => (
