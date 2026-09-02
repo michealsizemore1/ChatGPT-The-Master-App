@@ -895,7 +895,7 @@ body.v26-compact .journal-col textarea{height:70px;}
 .journal-schedule-actions{display:flex;gap:3px;justify-content:flex-end;}.journal-schedule-remove{border:1px solid #fecaca;border-radius:6px;background:#fff;color:#b42318;padding:3px 5px;font-size:.62rem;font-weight:800;text-align:center;cursor:pointer;user-select:none;}.journal-schedule-remove:hover{background:#fff1f2;}
 .journal-schedule-copy{border:1px solid #bfdbfe;border-radius:6px;background:#fff;color:#1d4ed8;padding:3px 5px;font-size:.62rem;font-weight:800;text-align:center;cursor:pointer;user-select:none}.journal-schedule-copy:hover{background:#eff6ff}
 .journal-growth-pool{margin:0 12px 12px;padding-top:10px;border-top:2px dashed #c4b5fd;}.journal-growth-pool-title{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:7px;color:#6d28d9;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;}.journal-growth-pool-card{display:grid;grid-template-columns:24px 19px minmax(120px,1fr) minmax(80px,auto) auto;gap:7px;align-items:center;background:#faf5ff;border:1px solid #ddd6fe;border-radius:9px;padding:8px;color:#4c1d95;margin-top:6px;}.journal-growth-pool-card strong{font-size:.76rem!important;line-height:1.3}.journal-growth-pool-card input{width:100%;border:1px solid #c4b5fd;border-radius:6px;padding:5px;background:#fff;}.journal-growth-drag{display:flex;align-items:center;justify-content:center;font-size:1.1rem;cursor:grab;color:#7c3aed;user-select:none;touch-action:none;padding:5px 2px;border-radius:5px;}.journal-growth-drag.dragging{cursor:grabbing;background:#ede9fe;}.journal-growth-add{border:1px solid #c4b5fd;border-radius:6px;background:#fff;color:#6d28d9;padding:4px 7px;font-size:.62rem;font-weight:800;cursor:pointer;}.journal-growth-status{font-size:.66rem;line-height:1.3;color:#7c6f98;text-align:right;}
-.journal-schedule-time{font-size:.68rem;font-weight:800;color:#667085;}.journal-schedule-check{width:16px;height:16px;border:2px solid #b8c0cc;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;background:#fff;}.journal-schedule-item.done .journal-schedule-check{border-color:#22a06b;background:#22a06b;color:#fff;}.journal-schedule-item.fixed .journal-schedule-check{border-color:#94a3b8;background:#eef2f7;color:#475569;font-size:9px;}
+.journal-schedule-time{font-size:.68rem;font-weight:800;color:#667085;}.journal-schedule-check{width:16px;height:16px;border:2px solid #b8c0cc;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;background:#fff;}.journal-schedule-item.done .journal-schedule-check{border-color:#22a06b;background:#22a06b;color:#fff;}.journal-schedule-item.partial .journal-schedule-check{border-color:#9333ea;background:#9333ea;color:#fff;}.journal-schedule-item.fixed .journal-schedule-check{border-color:#94a3b8;background:#eef2f7;color:#475569;font-size:9px;}
 @media(max-width:620px){
   .journal-schedule-status{font-size:.86rem;line-height:1.35;flex-wrap:wrap}
   .journal-schedule-status strong{font-size:.96rem}
@@ -1246,21 +1246,6 @@ body{
 .h2-month-toggle{width:100%;display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding:6px 8px;border:1px solid #dbe2ea;border-radius:8px;background:rgba(255,255,255,.72);color:#475569;font-size:.67rem;font-weight:800;cursor:pointer}.h2-month-toggle span:last-child{font-weight:650;color:#64748b}.h2-month-panel{margin-top:6px;padding:9px;background:rgba(255,255,255,.74);border:1px solid #dbe2ea;border-radius:8px}.h2-month-grid{display:grid;grid-template-columns:repeat(15,minmax(8px,1fr));gap:4px}.h2-month-day{height:12px;border-radius:3px;background:#e2e8f0;border:1px solid rgba(15,23,42,.06)}.h2-month-day.done{background:#16a34a}.h2-month-day.partial{background:#9333ea}.h2-month-day.skip{background:#475569}.h2-month-day.not-due{background:#fff;border-color:#e2e8f0}.h2-month-summary{margin-top:7px;font-size:.65rem;color:#64748b}.h2-month-summary strong{color:#334155}@media(max-width:620px){.h2-month-grid{grid-template-columns:repeat(10,minmax(8px,1fr))}}
 .h2-card summary{cursor:pointer;color:var(--h2-navy);font-size:.84rem;font-weight:850}.h2-insight-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:16px;margin-top:12px}.h2-insight-grid h3{margin:0 0 8px;font-size:.72rem;text-transform:uppercase;color:#64748b}.h2-heatmap{display:grid;grid-template-columns:repeat(12,1fr);grid-template-rows:repeat(7,12px);grid-auto-flow:column;gap:3px}.h2-heatmap i{border-radius:3px;background:#e2e8f0}.h2-heatmap i.l1{background:#bfdbd1}.h2-heatmap i.l2{background:#72b49d}.h2-heatmap i.l3{background:#16835d}.h2-heat-legend{display:flex;align-items:center;justify-content:flex-end;gap:3px;margin-top:6px;color:#94a3b8;font-size:.6rem}.h2-heat-legend i{width:10px;height:10px;border-radius:2px;background:#e2e8f0}.h2-heat-legend i:nth-of-type(2){background:#bfdbd1}.h2-heat-legend i:nth-of-type(3){background:#72b49d}.h2-heat-legend i:nth-of-type(4){background:#16835d}.h2-performance-legend{display:flex;gap:8px;flex-wrap:wrap;margin:-3px 0 9px;font-size:.58rem;color:#64748b}.h2-performance-legend span{display:flex;align-items:center;gap:4px}.h2-performance-legend i{width:8px;height:8px;border-radius:50%}.h2-performance-row{margin-bottom:8px}.h2-performance-label{display:flex;justify-content:space-between;font-size:.68rem;color:#475569;margin-bottom:3px}.h2-performance-bar{height:7px;background:#e2e8f0;border-radius:5px;overflow:hidden}.h2-performance-bar i{display:block;height:100%;border-radius:5px}.h2-coach-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:12px 0}.h2-coach-grid div{background:#f8fafc;border-radius:9px;padding:9px}.h2-coach-grid strong,.h2-coach-grid span{display:block}.h2-coach-grid strong{font-size:.72rem;color:var(--h2-navy)}.h2-coach-grid span{font-size:.67rem;color:#64748b;line-height:1.4;margin-top:2px}
 @media(max-width:700px){.h2-header{display:block}.h2-header-actions{justify-content:flex-start;margin-top:10px}.h2-summary-grid{grid-template-columns:repeat(2,1fr)}.h2-form-grid,.h2-insight-grid,.h2-coach-grid{grid-template-columns:1fr}.h2-wide{grid-column:auto}.h2-progress-row{grid-template-columns:1fr}.h2-habit-top,.h2-suggestion{grid-template-columns:1fr}.h2-habit-actions,.h2-suggestion-actions{justify-content:flex-end}.h2-today-control{flex-wrap:wrap}.h2-today-control button{flex:1;min-width:72px}.h2-date-btn{min-width:100px}}
-</style>
-<style id="healthy-library-mobile-fix">
-.healthy-library-row{display:grid;grid-template-columns:120px minmax(0,1fr) auto auto;column-gap:8px;row-gap:3px;align-items:start}
-.healthy-library-row>span:first-child{grid-column:1;grid-row:1 / span 2;width:120px!important}
-.healthy-library-copy{grid-column:2;grid-row:1;min-width:0}
-.healthy-library-add{grid-column:3;grid-row:1}
-.healthy-library-delete{grid-column:4;grid-row:1}
-.healthy-library-quality{grid-column:2 / 5;grid-row:2;min-width:0;padding-left:0;line-height:1.3;overflow-wrap:anywhere}
-.favorite-library-row{display:grid;grid-template-columns:120px minmax(0,1fr) auto auto;column-gap:8px;row-gap:3px;align-items:start}
-.favorite-library-row>span:first-child{grid-column:1;grid-row:1 / span 2;width:120px!important}
-.favorite-library-copy{grid-column:2;grid-row:1;min-width:0}
-.favorite-library-add{grid-column:3;grid-row:1}
-.favorite-library-delete{grid-column:4;grid-row:1}
-.favorite-library-macros{grid-column:2 / 5;grid-row:2;min-width:0;padding-left:0;line-height:1.3;overflow-wrap:anywhere}
-@media(max-width:600px){.healthy-library-row,.favorite-library-row{column-gap:7px}.healthy-library-quality,.favorite-library-macros{font-size:.68rem!important}}
 </style>
 </head>
 <body><a id="homeButton" href="index.html" title="Home" aria-label="Return to My Life Master App home" style="position:fixed;left:10px;bottom:10px;z-index:2147483000;display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;background:#14161a;color:#fff;text-decoration:none;font:700 18px/1 -apple-system,Segoe UI,Roboto,Arial,sans-serif;padding:0;border-radius:50%;box-shadow:0 4px 12px rgba(0,0,0,.24);opacity:.68;border:1px solid rgba(255,255,255,.18)" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.68">⌂</a>
@@ -3104,11 +3089,13 @@ function parseSkillTimeMins(value){
 }
 function fmtDuration(s){
   if(!s)return '';
-  if(typeof s==='number'){var h=Math.floor(s/60),m=s%60;return h?h+'h '+(m?m+'m':''):m+'m';}
+  if(typeof s==='number'){var totalSeconds=Math.round(s*60),numericHours=Math.floor(totalSeconds/3600),numericMinutes=Math.floor((totalSeconds%3600)/60),numericSeconds=totalSeconds%60;return((numericHours?numericHours+'h ':'')+(numericMinutes?numericMinutes+'m ':'')+(numericSeconds?numericSeconds+'s':'')).trim();}
   var str=String(s).trim();
   var parts=str.split(':').map(Number);
-  if(parts.length===3){var h=parts[0],m=parts[1];return h?h+'h '+(m?m+'m':''):m+'m';}
-  if(parts.length===2){return parts[0]+'h '+(parts[1]?parts[1]+'m':'');}
+  var total=0;
+  if(parts.length===3)total=(parts[0]*3600)+(parts[1]*60)+parts[2];
+  if(parts.length===2)total=(parts[0]*60)+parts[1];
+  if(total>0){var h=Math.floor(total/3600),m=Math.floor((total%3600)/60),sec=Math.round(total%60);return((h?h+'h ':'')+(m?m+'m ':'')+(sec?sec+'s':'')).trim();}
   return str;
 }
 function parsePace(s){if(!s)return 0;s=s.trim().replace('--','');if(!s)return 0;const m=s.match(/(\d+):(\d{1,2})/);if(m)return parseInt(m[1])*60+parseInt(m[2]);const n=parseFloat(s);return(isNaN(n)||n<=0)?0:Math.round(n*60);}
@@ -6642,11 +6629,10 @@ function renderHealthyFoodsList(){
   var all=getHealthyFoods();updateHealthyFoodsCount(all.length);var q=(document.getElementById('favSearch')||{value:''}).value.toLowerCase().trim(),foods=q?all.filter(function(food){return String(food.name||'').toLowerCase().includes(q);}):all;
   var rescan='<div style="font-size:.68rem;color:#64748b;margin:0 0 6px;">Use 📷 Take for the camera or 🖼 Choose for a picture already on your phone.</div><button onclick="rescanHealthyFoodsAndImages(this)" style="width:100%;margin:0 0 5px;background:#ecfdf5;color:#166534;border:1px solid #86efac;border-radius:6px;padding:7px;font-size:.74rem;font-weight:800;cursor:pointer;">↻ Rescan foods & barcode pictures</button><div id="healthyRescanStatus" role="status" aria-live="polite" style="display:none;font-size:.7rem;font-weight:700;line-height:1.35;margin:0 2px 7px;"></div>';
   if(!foods.length){el.innerHTML=rescan+'<div style="font-size:.8rem;color:#64748b;text-align:center;padding:12px;line-height:1.4;">No saved foods currently score 7.0 or higher.</div>';return;}
-  el.innerHTML=rescan+foods.map(function(food){var idx=all.indexOf(food);return '<div class="healthy-library-row" style="padding:7px 0;border-bottom:1px solid #dcfce7;font-size:.82rem;">'
-    +foodThumbnailHtml(food,'healthy',idx)+'<div class="healthy-library-copy"><div style="font-weight:800;color:#166534;">'+escHtml(food.name)+'</div></div>'
-    +'<button class="healthy-library-add" onclick="loadHealthyFood('+idx+')" style="background:#16a34a;color:#fff;border:none;border-radius:5px;padding:5px 9px;font-size:.76rem;cursor:pointer;">+ Add</button>'
-    +'<button class="healthy-library-delete" onclick="deleteHealthyFood('+idx+')" title="Remove from this list" style="background:none;border:1px solid #fecaca;border-radius:4px;color:#dc2626;padding:3px 6px;cursor:pointer;">✕</button>'
-    +'<div class="healthy-library-quality" style="color:#64748b;font-size:.72rem;">'+Number(food.score||7).toFixed(1)+'/10 · '+escHtml(food.label||'Good')+' · '+escHtml(food.confidence||'')+' confidence</div></div>';}).join('');
+  el.innerHTML=rescan+foods.map(function(food){var idx=all.indexOf(food);return '<div style="display:flex;align-items:center;gap:6px;padding:7px 0;border-bottom:1px solid #dcfce7;font-size:.82rem;">'
+    +foodThumbnailHtml(food,'healthy',idx)+'<div style="flex:1;min-width:0;"><div style="font-weight:800;color:#166534;">'+escHtml(food.name)+'</div><div style="color:#64748b;font-size:.72rem;">'+Number(food.score||7).toFixed(1)+'/10 · '+escHtml(food.label||'Good')+' · '+escHtml(food.confidence||'')+' confidence</div></div>'
+    +'<button onclick="loadHealthyFood('+idx+')" style="background:#16a34a;color:#fff;border:none;border-radius:5px;padding:5px 9px;font-size:.76rem;cursor:pointer;">+ Add</button>'
+    +'<button onclick="deleteHealthyFood('+idx+')" title="Remove from this list" style="background:none;border:1px solid #fecaca;border-radius:4px;color:#dc2626;padding:3px 6px;cursor:pointer;">✕</button></div>';}).join('');
 }
 function loadHealthyFood(idx){
   var food=getHealthyFoods()[idx];if(!food)return;var target=(document.getElementById('favTargetMeal')||{value:'breakfast'}).value;
@@ -6666,11 +6652,13 @@ function renderFavsList(){
   var target=(document.getElementById('favTargetMeal')||{value:'breakfast'}).value;
   el.innerHTML=photoHelp+filtered.map(function(f,i){
     var origIdx=favs.indexOf(f);
-    return '<div class="favorite-library-row" style="padding:5px 0;border-bottom:1px solid #f5f5f5;font-size:0.82rem;">'
-      +foodThumbnailHtml(f,'favorite',origIdx)+'<div class="favorite-library-copy"><div style="font-weight:600;">'+escHtml(f.name)+'</div></div>'
-      +'<button class="favorite-library-add" onclick="loadFavoriteItem('+origIdx+')" style="background:#e67e22;color:#fff;border:none;border-radius:5px;padding:4px 9px;font-size:0.78rem;cursor:pointer;">+ Add</button>'
-      +'<button class="favorite-library-delete" onclick="deleteFavorite('+origIdx+')" style="background:none;border:1px solid #f5c6cb;border-radius:4px;cursor:pointer;font-size:0.72rem;padding:2px 5px;color:#e74c3c;">✕</button>'
-      +'<div class="favorite-library-macros" style="color:#888;font-size:0.75rem;">'+(f.cal?'🔥'+f.cal+' ':'')+''+(f.prot?'🥩'+f.prot+'g ':'')+''+(f.carbs?'🍞'+f.carbs+'g':'')+'</div>'
+    return '<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid #f5f5f5;font-size:0.82rem;">'
+      +foodThumbnailHtml(f,'favorite',origIdx)+'<div style="flex:1;min-width:0;">'
+        +'<div style="font-weight:600;">'+escHtml(f.name)+'</div>'
+        +'<div style="color:#888;font-size:0.75rem;">'+(f.cal?'🔥'+f.cal+' ':'')+''+(f.prot?'🥩'+f.prot+'g ':'')+''+(f.carbs?'🍞'+f.carbs+'g':'')+'</div>'
+      +'</div>'
+      +'<button onclick="loadFavoriteItem('+origIdx+')" style="background:#e67e22;color:#fff;border:none;border-radius:5px;padding:4px 9px;font-size:0.78rem;cursor:pointer;">+ Add</button>'
+      +'<button onclick="deleteFavorite('+origIdx+')" style="background:none;border:1px solid #f5c6cb;border-radius:4px;cursor:pointer;font-size:0.72rem;padding:2px 5px;color:#e74c3c;">✕</button>'
       +'</div>';
   }).join('');
 }
@@ -13586,8 +13574,8 @@ function renderJournalSchedule(){
   var items=[
     {time:'6:30 AM',mins:390,label:'Review priorities, goals, calendar, email and schedule',detail:'Check complete after your morning review',done:!!d.reviewCheck,tab:'daily',checkId:'reviewCheck'},
     {time:'6:30 AM',mins:390,label:'Meditation',detail:'Begin the day with meditation and stillness',done:d.spMeditation==='green',tab:'meditate'},
-    {time:'6:30 AM',mins:390,label:'Wellness check and water',detail:wellnessRecorded+' of 4 wellness items complete',done:wellnessRecorded===4,tab:'wellness',detailKind:'wellness'},
-    {time:'6:45 AM',mins:405,label:'Bible reading and prayer',detail:faithDone+' of 3 faith practices complete',done:faithDone===3,tab:'bible',detailKind:'faith'},
+    {time:'6:30 AM',mins:390,label:'Wellness check and water',detail:wellnessRecorded+' of 4 wellness items complete',done:wellnessRecorded===4,partial:wellnessRecorded>0&&wellnessRecorded<4,tab:'wellness',detailKind:'wellness'},
+    {time:'6:45 AM',mins:405,label:'Bible reading and prayer',detail:faithDone+' of 3 faith practices complete',done:faithDone===3,partial:faithDone>0&&faithDone<3,tab:'bible',detailKind:'faith'},
     {time:journalMinsToClock(trainingStartMins),mins:trainingStartMins,label:restDay?'Rest day — no training scheduled':'Today’s training',detail:restDay?'Automatically complete because no workout is scheduled':training,done:activityDone,tab:'activities'},
     {time:journalMinsToClock(breakfastMins),mins:breakfastMins,label:'Breakfast',detail:'Recovery meal and hydration after training',done:mealComplete('breakfast',breakfastMins),tab:'nutrition'},
     {time:'9:30 AM',mins:570,label:'Work',detail:'9:30 AM – 6:00 PM',done:true,tab:'daily',skip:!(today.getDay()>=1&&today.getDay()<=5),fixed:true},
@@ -13597,7 +13585,7 @@ function renderJournalSchedule(){
     {time:'6:00 PM',mins:1080,label:'Water checkpoint: 64 oz',detail:'Cumulative total: reach 64 ounces by 6:00 PM',done:water>=64,tab:'nutrition'},
     {time:'8:15 PM',mins:1215,label:'Journal accomplishments and gratitude',detail:'Capture the day while it is fresh',done:reflected,tab:'daily'},
     {time:'8:30 PM',mins:1230,label:'Prepare priorities for tomorrow',detail:'Close the day intentionally',done:localStorage.getItem('schedule_eveningPlanning_'+dateKey)==='1'||!!d.prepJournalCheck,tab:'daily',manual:'eveningPlanning'},
-    {time:'11:30 PM',mins:1410,label:'Begin sleep routine',detail:sleepRoutine.count+' of 6 routine steps completed',done:sleepRoutine.count>=4,tab:'wellness',sleepRoutineChecklist:true}
+    {time:'11:30 PM',mins:1410,label:'Begin sleep routine',detail:sleepRoutine.count+' of 6 routine steps completed',done:sleepRoutine.count>=4,partial:sleepRoutine.count>0&&sleepRoutine.count<4,tab:'wellness',sleepRoutineChecklist:true}
   ].filter(function(item){return !item.skip;});
   // Growth habits are placed directly onto My Schedule on the days selected in Habits. A manually
   // scheduled activity is also retained even when it is not a normal habit day. Defaults are staggered
@@ -13621,9 +13609,7 @@ function renderJournalSchedule(){
   var scheduleMoves=journalScheduleMoves();
   items=items.filter(function(item){return !scheduleMoves.some(function(move){return move.sourceDate===dateKey&&move.originalId===item.id;});});
   scheduleMoves.filter(function(move){return move.targetDate===dateKey;}).forEach(function(move){var moved=Object.assign({},move.item||{});moved.id=move.id;moved._moveId=move.id;moved.time=move.time;moved.mins=move.mins;moved.done=false;items.push(moved);});
-  var scheduleSlots=items.map(function(item){return{time:item.time,mins:item.mins};});
   items=journalScheduleApplyOrder(items,dateKey);
-  items.forEach(function(item,index){item.time=scheduleSlots[index].time;item.mins=scheduleSlots[index].mins;});
   var scheduleOverrides={};try{scheduleOverrides=JSON.parse(localStorage.getItem(journalScheduleOverridesKey(dateKey))||'{}');}catch(ignore){}
   items.forEach(function(item){var override=item._moveId?scheduleMoves.find(function(move){return move.id===item._moveId;}):scheduleOverrides[item.id];if(override){if(override.time){item.time=override.time;item.mins=Number(override.mins);}if(!item.detailKind&&!item.sleepRoutineChecklist&&typeof override.label==='string'&&override.label.trim())item.label=override.label;if(!item.detailKind&&!item.sleepRoutineChecklist&&typeof override.detail==='string')item.detail=override.detail;if(typeof override.link==='string')item.link=override.link;if(typeof override.resource==='string')item.resource=override.resource;if(typeof override.notes==='string')item.notes=override.notes;}});
   // Sleep-routine completion is always live. A saved time/label edit from an
@@ -13662,7 +13648,7 @@ function renderJournalSchedule(){
     growthCards.sort(function(a,b){var aScheduled=localStorage.getItem(journalScheduleGrowthKey(a.dataset.growthKind,dateKey))==='1',bScheduled=localStorage.getItem(journalScheduleGrowthKey(b.dataset.growthKind,dateKey))==='1';return Number(bScheduled)-Number(aScheduled);});
     growthCards.forEach(function(card){card.classList.toggle('completed',!!growthComplete[card.dataset.growthKind]);growthPool.insertBefore(card,growthHelp);});
   }
-  var scheduleStatuses=journalScheduleStatuses(dateKey);items.forEach(function(item){var hasManual=Object.prototype.hasOwnProperty.call(scheduleStatuses,item.id),manual=hasManual?scheduleStatuses[item.id]:'';item.scheduleStatus=(item.detailKind||item.sleepRoutineChecklist||item.linkedCheckKey)?(item.done?'green':journalCheckState(d,item.linkedCheckKey)==='red'?'red':''):hasManual?(manual==='blank'?'':manual):(item.done?'green':'');item.done=item.scheduleStatus==='green';});
+  var scheduleStatuses=journalScheduleStatuses(dateKey);items.forEach(function(item){var hasManual=Object.prototype.hasOwnProperty.call(scheduleStatuses,item.id),manual=hasManual?scheduleStatuses[item.id]:'';item.scheduleStatus=(item.detailKind||item.sleepRoutineChecklist||item.linkedCheckKey)?(item.done?'green':item.partial?'purple':journalCheckState(d,item.linkedCheckKey)==='red'?'red':''):hasManual?(manual==='blank'?'':manual):(item.done?'green':'');item.done=item.scheduleStatus==='green';item.partial=item.scheduleStatus==='purple';});
   var trackable=items.filter(function(item){return !item.fixed;});
   var complete=trackable.filter(function(item){return item.done;}).length,next=-1;
   if(isSelectedToday){for(var i=0;i<items.length;i++){if(!items[i].fixed&&!items[i].done&&items[i].mins>=currentMinutes){next=i;break;}}if(next<0)next=items.findIndex(function(item){return !item.fixed&&!item.done;});}
@@ -13678,6 +13664,7 @@ function renderJournalSchedule(){
   // This also covers Financial Videos and Audiobook, which previously opened
   // different sections instead of the Growth Activities pop-up.
   body.querySelectorAll('.journal-schedule-item').forEach(function(card){var growthItem=_journalScheduleItemsById[card.dataset.scheduleId];if(growthItem&&growthItem.growthKind)card.onclick=function(){journalOpenGrowthLog(growthItem.growthKind);};});
+  body.querySelectorAll('.journal-schedule-item').forEach(function(card){var partialItem=_journalScheduleItemsById[card.dataset.scheduleId],partialCheck=card.querySelector('.journal-schedule-check');if(partialItem&&partialItem.partial&&!partialItem.done&&!partialItem.fixed){card.classList.add('partial');if(partialCheck)partialCheck.innerHTML='&#x2713;';}});
   body.querySelectorAll('.journal-schedule-item').forEach(function(card){var item=_journalScheduleItemsById[card.dataset.scheduleId],check=card.querySelector('.journal-schedule-check');if(item&&check&&!item.fixed){check.removeAttribute('onclick');check.title='Tap: green complete, red not completed, then clear';check.onclick=function(event){journalScheduleCycleStatus(event,item.id);};if(item.scheduleStatus==='red'){card.classList.add('red');check.innerHTML='&#x2713;';}}if(!item||item.manualCreated||item.growthKind)return;var actions=card.querySelector('.journal-schedule-actions');if(actions)actions.insertAdjacentHTML('beforeend','<span class="journal-schedule-remove" role="button" tabindex="0" onclick="journalDeleteScheduleItem(event,\''+escHtml(item.id)+'\')">Delete</span>');});
 }
 function renderJournalHome(){
