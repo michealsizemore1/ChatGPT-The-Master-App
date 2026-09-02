@@ -1254,7 +1254,13 @@ body{
 .healthy-library-add{grid-column:3;grid-row:1}
 .healthy-library-delete{grid-column:4;grid-row:1}
 .healthy-library-quality{grid-column:2 / 5;grid-row:2;min-width:0;line-height:1.3;overflow-wrap:anywhere}
-@media(max-width:600px){.healthy-library-row{column-gap:7px}.healthy-library-quality{font-size:.68rem!important}}
+.favorite-library-row{display:grid;grid-template-columns:94px minmax(0,1fr) auto auto;column-gap:8px;row-gap:3px;align-items:start}
+.favorite-library-row>span:first-child{grid-column:1;grid-row:1 / span 2}
+.favorite-library-copy{grid-column:2;grid-row:1;min-width:0}
+.favorite-library-add{grid-column:3;grid-row:1}
+.favorite-library-delete{grid-column:4;grid-row:1}
+.favorite-library-macros{grid-column:2 / 5;grid-row:2;min-width:0;line-height:1.3;overflow-wrap:anywhere}
+@media(max-width:600px){.healthy-library-row,.favorite-library-row{column-gap:7px}.healthy-library-quality,.favorite-library-macros{font-size:.68rem!important}}
 </style>
 </head>
 <body><a id="homeButton" href="index.html" title="Home" aria-label="Return to My Life Master App home" style="position:fixed;left:10px;bottom:10px;z-index:2147483000;display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;background:#14161a;color:#fff;text-decoration:none;font:700 18px/1 -apple-system,Segoe UI,Roboto,Arial,sans-serif;padding:0;border-radius:50%;box-shadow:0 4px 12px rgba(0,0,0,.24);opacity:.68;border:1px solid rgba(255,255,255,.18)" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.68">⌂</a>
@@ -6660,13 +6666,11 @@ function renderFavsList(){
   var target=(document.getElementById('favTargetMeal')||{value:'breakfast'}).value;
   el.innerHTML=photoHelp+filtered.map(function(f,i){
     var origIdx=favs.indexOf(f);
-    return '<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid #f5f5f5;font-size:0.82rem;">'
-      +foodThumbnailHtml(f,'favorite',origIdx)+'<div style="flex:1;min-width:0;">'
-        +'<div style="font-weight:600;">'+escHtml(f.name)+'</div>'
-        +'<div style="color:#888;font-size:0.75rem;">'+(f.cal?'🔥'+f.cal+' ':'')+''+(f.prot?'🥩'+f.prot+'g ':'')+''+(f.carbs?'🍞'+f.carbs+'g':'')+'</div>'
-      +'</div>'
-      +'<button onclick="loadFavoriteItem('+origIdx+')" style="background:#e67e22;color:#fff;border:none;border-radius:5px;padding:4px 9px;font-size:0.78rem;cursor:pointer;">+ Add</button>'
-      +'<button onclick="deleteFavorite('+origIdx+')" style="background:none;border:1px solid #f5c6cb;border-radius:4px;cursor:pointer;font-size:0.72rem;padding:2px 5px;color:#e74c3c;">✕</button>'
+    return '<div class="favorite-library-row" style="padding:5px 0;border-bottom:1px solid #f5f5f5;font-size:0.82rem;">'
+      +foodThumbnailHtml(f,'favorite',origIdx)+'<div class="favorite-library-copy"><div style="font-weight:600;">'+escHtml(f.name)+'</div></div>'
+      +'<button class="favorite-library-add" onclick="loadFavoriteItem('+origIdx+')" style="background:#e67e22;color:#fff;border:none;border-radius:5px;padding:4px 9px;font-size:0.78rem;cursor:pointer;">+ Add</button>'
+      +'<button class="favorite-library-delete" onclick="deleteFavorite('+origIdx+')" style="background:none;border:1px solid #f5c6cb;border-radius:4px;cursor:pointer;font-size:0.72rem;padding:2px 5px;color:#e74c3c;">✕</button>'
+      +'<div class="favorite-library-macros" style="color:#888;font-size:0.75rem;">'+(f.cal?'🔥'+f.cal+' ':'')+''+(f.prot?'🥩'+f.prot+'g ':'')+''+(f.carbs?'🍞'+f.carbs+'g':'')+'</div>'
       +'</div>';
   }).join('');
 }
