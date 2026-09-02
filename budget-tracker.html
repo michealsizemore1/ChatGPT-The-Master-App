@@ -2441,7 +2441,7 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
                     <td className="px-3 py-3 font-medium text-slate-700">
                       <div className="flex items-center gap-2">
                         <MerchantAvatar merchant={t.merchant} category={t.category} size={24} />
-                        <div>
+                        <div className="min-w-0 flex-1">
                           <div>{t.merchant}</div>
                           {(t.tags || []).length > 0 && <div className="text-[10px] text-indigo-500 font-medium">{t.tags.map(tag => "#" + tag).join(" ")}</div>}
                           <div className={"text-xs font-semibold " + (debtAmount > 0 ? "text-rose-600" : "text-emerald-600")}>
@@ -2449,7 +2449,7 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
                           </div>
                         </div>
                         {t.receipt && (
-                          <button type="button" title="View receipt" className="text-slate-400 hover:text-indigo-600" onClick={() => setViewingReceipt(t.receipt)}>📎</button>
+                          <button type="button" title="View receipt" className="w-8 shrink-0 text-center text-slate-400 hover:text-indigo-600" onClick={() => setViewingReceipt(t.receipt)}>📎</button>
                         )}
                       </div>
                     </td>
@@ -2844,7 +2844,7 @@ function BankAccountRegister({ data, actions, account }) {
                     <td className="px-3 py-3 font-medium text-slate-700">
                       <div className="flex items-center gap-2">
                         <MerchantAvatar merchant={t.merchant} category={t.category} size={24} />
-                        <div>
+                        <div className="min-w-0 flex-1">
                           <div>{t.merchant}</div>
                           {(t.tags || []).length > 0 && <div className="text-[10px] text-indigo-500 font-medium">{t.tags.map(tag => "#" + tag).join(" ")}</div>}
                           <div className={"text-xs font-semibold " + (isDeposit ? "text-emerald-600" : "text-rose-600")}>
@@ -2852,7 +2852,7 @@ function BankAccountRegister({ data, actions, account }) {
                           </div>
                         </div>
                         {t.receipt && (
-                          <button type="button" title="View receipt" className="text-slate-400 hover:text-indigo-600" onClick={() => setViewingReceipt(t.receipt)}>📎</button>
+                          <button type="button" title="View receipt" className="w-8 shrink-0 text-center text-slate-400 hover:text-indigo-600" onClick={() => setViewingReceipt(t.receipt)}>📎</button>
                         )}
                       </div>
                     </td>
