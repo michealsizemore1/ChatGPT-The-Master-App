@@ -189,7 +189,7 @@ function financialReviewMonth(transaction, data) {
   const prefs = (data && data.financialReviewPrefs) || {};
   const day = Number(String(transaction.date || "").slice(8, 10));
   const isIncome = Number(transaction.amount) > 0 && transaction.category === "Income";
-  return prefs.earlyIncomeToNextMonth && isIncome && day >= 25 ? nextMonthKey(actualMonth) : actualMonth;
+  return prefs.earlyIncomeToNextMonth && isIncome && day >= 27 ? nextMonthKey(actualMonth) : actualMonth;
 }
 
 function pad(n) { return n < 10 ? "0" + n : "" + n; }
@@ -4999,7 +4999,7 @@ function FinancialReview({ data, derived, actions }) {
       <Card className="p-4 border-indigo-200 bg-indigo-50/50">
         <label className="flex items-start gap-3 cursor-pointer">
           <input type="checkbox" className="mt-1" checked={!!data.financialReviewPrefs?.earlyIncomeToNextMonth} onChange={e => actions.setFinancialReviewPrefs({ earlyIncomeToNextMonth: e.target.checked })} />
-          <span><span className="block text-sm font-semibold text-slate-700">Count early month-end income in the following month</span><span className="block text-xs text-slate-500 mt-1">Income dated on or after the 25th is shown in the next month’s Financial Review. The real bank transaction date and account balance stay unchanged.</span></span>
+          <span><span className="block text-sm font-semibold text-slate-700">Count early month-end income in the following month</span><span className="block text-xs text-slate-500 mt-1">Income dated on or after the 27th is shown in the next month’s Financial Review. The real bank transaction date and account balance stay unchanged.</span></span>
         </label>
       </Card>
 
