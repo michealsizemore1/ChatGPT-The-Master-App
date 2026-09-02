@@ -1197,14 +1197,21 @@ function matchingScheduledBillIds(transaction, data) {
   if (!account || String(account.type || "").toLowerCase() !== "checking") return [];
   const transactionName = normalizeMerchantName(transaction.merchant || "");
   if (!transactionName) return [];
+  const transactionAmount = Math.abs(Number(transaction.amount) || 0);
+  const transactionCategories = new Set(expenseCategoryAllocations(transaction).map(part => part.category).filter(Boolean));
   const isNameMatch = merchant => {
     const billName = normalizeMerchantName(merchant || "");
     return billName && (billName === transactionName || (billName.length >= 5 && transactionName.includes(billName)) || (transactionName.length >= 5 && billName.includes(transactionName)));
   };
-  const ids = (data.recurringBills || []).filter(item => isNameMatch(item.merchant)).map(item => item.id);
+  const isAmountCategoryMatch = item => {
+    const billAmount = Math.abs(Number(item.amount) || 0);
+    if (!transactionAmount || !billAmount || Math.abs(transactionAmount - billAmount) > 0.02) return false;
+    return !item.category || transactionCategories.size === 0 || transactionCategories.has(item.category);
+  };
+  const ids = (data.recurringBills || []).filter(item => isNameMatch(item.merchant) || isAmountCategoryMatch(item)).map(item => item.id);
   const date = new Date(String(transaction.date || "") + "T00:00:00");
   if (Number.isFinite(date.getTime())) {
-    (data.subscriptions || []).filter(item => item.active && subDueInMonth(item, date.getFullYear(), date.getMonth() + 1) && isNameMatch(item.merchant)).forEach(item => ids.push(item.id));
+    (data.subscriptions || []).filter(item => item.active && subDueInMonth(item, date.getFullYear(), date.getMonth() + 1) && (isNameMatch(item.merchant) || isAmountCategoryMatch(item))).forEach(item => ids.push(item.id));
   }
   return [...new Set(ids.filter(Boolean))];
 }
