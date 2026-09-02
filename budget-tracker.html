@@ -2082,7 +2082,7 @@ function RegStat({ label, value, tone }) {
 }
 
 function CindyCreditCardRegister({ data, actions, cindyAccount }) {
-  const blankForm = { id: null, date: todayISO(), desc: "", amount: "", category: EXPENSE_CATEGORIES[0], regType: "expense", who: "Cynthia", tripId: "", receipt: null };
+  const blankForm = { id: null, date: todayISO(), desc: "", amount: "", category: EXPENSE_CATEGORIES[0], regType: "expense", who: "Cynthia", tripId: "", tags: "", receipt: null };
   const [form, setForm] = useState(blankForm);
   const [search, setSearch] = useState("");
   const [catFilter, setCatFilter] = useState("All");
@@ -2163,7 +2163,7 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
     setSplitting({
       ...(existing || {}),
       id: existing?.id || uid(), date: form.date, merchant: form.desc.trim(), amount, category,
-      accountId: cindyAccount.id, person: form.who, tripId: form.tripId || "", receipt: form.receipt || null,
+      accountId: cindyAccount.id, person: form.who, tripId: form.tripId || "", tags: form.tags.split(",").map(tag => tag.trim()).filter(Boolean), receipt: form.receipt || null,
       cleared: existing ? existing.cleared : false, isDraftSplit: !existing,
     });
   };
@@ -2185,7 +2185,7 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
     setForm({
       id: t.id, date: t.date, desc: t.merchant, amount: String(Math.abs(t.amount)),
       category: t.category === "Transfer" ? EXPENSE_CATEGORIES[0] : t.category,
-      regType: cindyRegType(t), who: t.person || "Cynthia", tripId: t.tripId || "", receipt: t.receipt || null,
+      regType: cindyRegType(t), who: t.person || "Cynthia", tripId: t.tripId || "", tags: (t.tags || []).join(", "), receipt: t.receipt || null,
     });
     if (editFormRef.current && typeof editFormRef.current.scrollIntoView === "function") editFormRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
   };
@@ -2198,7 +2198,7 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
     const existing = form.id ? allTx.find(t => t.id === form.id) : null;
     const payload = {
       id: form.id || uid(), date: form.date, accountId: cindyAccount.id, merchant: form.desc.trim(),
-      category, amount, person: form.who, tripId: form.tripId || "", notes: existing ? (existing.notes || "") : "",
+      category, amount, person: form.who, tripId: form.tripId || "", tags: form.tags.split(",").map(tag => tag.trim()).filter(Boolean), notes: existing ? (existing.notes || "") : "",
       cleared: existing ? existing.cleared : false, checkedOff: existing ? !!existing.checkedOff : false, receipt: form.receipt || null,
     };
     if (form.id) {
@@ -2287,12 +2287,9 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
             </div>
           </div>
 
-          <div className="mt-3 max-w-sm">
-            <label className="block text-[10px] uppercase tracking-wide text-slate-400 mb-1">Trip</label>
-            <select className={inputClass} value={form.tripId || ""} onChange={e => setForm(f => ({ ...f, tripId: e.target.value }))}>
-              <option value="">Not part of a trip</option>
-              {(data.trips || []).map(trip => <option key={trip.id} value={trip.id}>{trip.name}</option>)}
-            </select>
+          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div><label className="block text-[10px] uppercase tracking-wide text-slate-400 mb-1">Trip</label><select className={inputClass} value={form.tripId || ""} onChange={e => setForm(f => ({ ...f, tripId: e.target.value }))}><option value="">Not part of a trip</option>{(data.trips || []).map(trip => <option key={trip.id} value={trip.id}>{trip.name}</option>)}</select></div>
+            <div><label className="block text-[10px] uppercase tracking-wide text-slate-400 mb-1">Tags</label><input className={inputClass} placeholder="Vacation, Tax, Reimbursable" value={form.tags} onChange={e => setForm(f => ({ ...f, tags: e.target.value }))} /></div>
           </div>
 
           <div className="flex flex-wrap items-center gap-3 mt-3">
@@ -2441,6 +2438,7 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
                         <MerchantAvatar merchant={t.merchant} category={t.category} size={24} />
                         <div>
                           <div>{t.merchant}</div>
+                          {(t.tags || []).length > 0 && <div className="text-[10px] text-indigo-500 font-medium">{t.tags.map(tag => "#" + tag).join(" ")}</div>}
                           <div className={"text-xs font-semibold " + (debtAmount > 0 ? "text-rose-600" : "text-emerald-600")}>
                             {debtAmount > 0 ? "+" : "-"}{fmtCurrency(Math.abs(debtAmount))}
                           </div>
@@ -2491,7 +2489,7 @@ function defaultPersonForAccount(accountId) {
 }
 
 function BankAccountRegister({ data, actions, account }) {
-  const blankForm = { id: null, date: todayISO(), desc: "", amount: "", category: "Other", direction: "withdrawal", tripId: "", receipt: null };
+  const blankForm = { id: null, date: todayISO(), desc: "", amount: "", category: "Other", direction: "withdrawal", tripId: "", tags: "", receipt: null };
   const [form, setForm] = useState(blankForm);
   const [search, setSearch] = useState("");
   const [catFilter, setCatFilter] = useState("All");
@@ -2531,7 +2529,7 @@ function BankAccountRegister({ data, actions, account }) {
 
   const filtered = useMemo(() => {
     return allTx.filter(t => {
-      if (search && !t.merchant.toLowerCase().includes(search.toLowerCase())) return false;
+      if (search && ![t.merchant, t.notes, ...(t.tags || [])].join(" ").toLowerCase().includes(search.toLowerCase())) return false;
       if (catFilter !== "All" && !transactionHasCategory(t, catFilter)) return false;
       if (dirFilter !== "All" && (t.amount > 0 ? "deposit" : "withdrawal") !== dirFilter) return false;
       if (fromDate && t.date < fromDate) return false;
@@ -2570,7 +2568,7 @@ function BankAccountRegister({ data, actions, account }) {
     setSplitting({
       ...(existing || {}),
       id: existing?.id || uid(), date: form.date, merchant: form.desc.trim(), amount,
-      category: form.category, accountId: account.id, tripId: form.tripId || "",
+      category: form.category, accountId: account.id, tripId: form.tripId || "", tags: form.tags.split(",").map(tag => tag.trim()).filter(Boolean),
       person: defaultPersonForAccount(account.id), receipt: form.receipt || null,
       cleared: existing ? existing.cleared : false, isDraftSplit: !existing,
     });
@@ -2592,7 +2590,7 @@ function BankAccountRegister({ data, actions, account }) {
   const startEdit = (t) => {
     setForm({
       id: t.id, date: t.date, desc: t.merchant, amount: String(Math.abs(t.amount)),
-      category: t.category, direction: t.amount > 0 ? "deposit" : "withdrawal", tripId: t.tripId || "", receipt: t.receipt || null,
+      category: t.category, direction: t.amount > 0 ? "deposit" : "withdrawal", tripId: t.tripId || "", tags: (t.tags || []).join(", "), receipt: t.receipt || null,
     });
     if (editFormRef.current && typeof editFormRef.current.scrollIntoView === "function") editFormRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
   };
@@ -2604,7 +2602,7 @@ function BankAccountRegister({ data, actions, account }) {
     const existing = form.id ? allTx.find(t => t.id === form.id) : null;
     const payload = {
       id: form.id || uid(), date: form.date, accountId: account.id, merchant: form.desc.trim(),
-      category: form.category, amount, tripId: form.tripId || "", person: existing ? (existing.person || defaultPersonForAccount(account.id)) : defaultPersonForAccount(account.id),
+      category: form.category, amount, tripId: form.tripId || "", tags: form.tags.split(",").map(tag => tag.trim()).filter(Boolean), person: existing ? (existing.person || defaultPersonForAccount(account.id)) : defaultPersonForAccount(account.id),
       notes: existing ? (existing.notes || "") : "", cleared: existing ? existing.cleared : false, checkedOff: existing ? !!existing.checkedOff : false, receipt: form.receipt || null,
     };
     if (form.id) {
@@ -2698,12 +2696,9 @@ function BankAccountRegister({ data, actions, account }) {
             </div>
           </div>
 
-          <div className="mt-3 max-w-sm">
-            <label className="block text-[10px] uppercase tracking-wide text-slate-400 mb-1">Trip</label>
-            <select className={inputClass} value={form.tripId || ""} onChange={e => setForm(f => ({ ...f, tripId: e.target.value }))}>
-              <option value="">Not part of a trip</option>
-              {(data.trips || []).map(trip => <option key={trip.id} value={trip.id}>{trip.name}</option>)}
-            </select>
+          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div><label className="block text-[10px] uppercase tracking-wide text-slate-400 mb-1">Trip</label><select className={inputClass} value={form.tripId || ""} onChange={e => setForm(f => ({ ...f, tripId: e.target.value }))}><option value="">Not part of a trip</option>{(data.trips || []).map(trip => <option key={trip.id} value={trip.id}>{trip.name}</option>)}</select></div>
+            <div><label className="block text-[10px] uppercase tracking-wide text-slate-400 mb-1">Tags</label><input className={inputClass} placeholder="Vacation, Tax, Reimbursable" value={form.tags} onChange={e => setForm(f => ({ ...f, tags: e.target.value }))} /></div>
           </div>
 
           <div className="flex flex-wrap items-center gap-3 mt-3">
@@ -2841,6 +2836,7 @@ function BankAccountRegister({ data, actions, account }) {
                         <MerchantAvatar merchant={t.merchant} category={t.category} size={24} />
                         <div>
                           <div>{t.merchant}</div>
+                          {(t.tags || []).length > 0 && <div className="text-[10px] text-indigo-500 font-medium">{t.tags.map(tag => "#" + tag).join(" ")}</div>}
                           <div className={"text-xs font-semibold " + (isDeposit ? "text-emerald-600" : "text-rose-600")}>
                             {isDeposit ? "+" : "-"}{fmtCurrency(Math.abs(t.amount))}
                           </div>
