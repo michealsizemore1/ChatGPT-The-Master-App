@@ -2291,6 +2291,11 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
             <div><label className="block text-[10px] uppercase tracking-wide text-slate-400 mb-1">Trip</label><select className={inputClass} value={form.tripId || ""} onChange={e => setForm(f => ({ ...f, tripId: e.target.value }))}><option value="">Not part of a trip</option>{(data.trips || []).map(trip => <option key={trip.id} value={trip.id}>{trip.name}</option>)}</select></div>
             <div><label className="block text-[10px] uppercase tracking-wide text-slate-400 mb-1">Tags</label><input className={inputClass} placeholder="Vacation, Tax, Reimbursable" value={form.tags} onChange={e => setForm(f => ({ ...f, tags: e.target.value }))} /></div>
           </div>
+          <div className="sm:hidden mt-3 flex flex-wrap items-center gap-2">
+            <label className="px-3 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium cursor-pointer">📷 Take Receipt Photo<input type="file" accept="image/*" capture="environment" className="hidden" onChange={e => attachReceipt(e.target.files[0])} /></label>
+            <label className="px-3 py-2 rounded-lg bg-slate-100 text-slate-700 text-sm font-medium cursor-pointer">🖼 Choose Photo<input type="file" accept="image/*" className="hidden" onChange={e => attachReceipt(e.target.files[0])} /></label>
+            {form.receipt && <button type="button" className="text-xs text-indigo-600 font-medium" onClick={() => setViewingReceipt(form.receipt)}>View receipt</button>}
+          </div>
 
           <div className="flex flex-wrap items-center gap-3 mt-3">
             <div className="flex w-full sm:w-auto rounded-lg border border-slate-200 overflow-hidden text-xs font-semibold">
@@ -2699,6 +2704,11 @@ function BankAccountRegister({ data, actions, account }) {
           <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div><label className="block text-[10px] uppercase tracking-wide text-slate-400 mb-1">Trip</label><select className={inputClass} value={form.tripId || ""} onChange={e => setForm(f => ({ ...f, tripId: e.target.value }))}><option value="">Not part of a trip</option>{(data.trips || []).map(trip => <option key={trip.id} value={trip.id}>{trip.name}</option>)}</select></div>
             <div><label className="block text-[10px] uppercase tracking-wide text-slate-400 mb-1">Tags</label><input className={inputClass} placeholder="Vacation, Tax, Reimbursable" value={form.tags} onChange={e => setForm(f => ({ ...f, tags: e.target.value }))} /></div>
+          </div>
+          <div className="sm:hidden mt-3 flex flex-wrap items-center gap-2">
+            <label className="px-3 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium cursor-pointer">📷 Take Receipt Photo<input type="file" accept="image/*" capture="environment" className="hidden" onChange={e => attachReceipt(e.target.files[0])} /></label>
+            <label className="px-3 py-2 rounded-lg bg-slate-100 text-slate-700 text-sm font-medium cursor-pointer">🖼 Choose Photo<input type="file" accept="image/*" className="hidden" onChange={e => attachReceipt(e.target.files[0])} /></label>
+            {form.receipt && <button type="button" className="text-xs text-indigo-600 font-medium" onClick={() => setViewingReceipt(form.receipt)}>View receipt</button>}
           </div>
 
           <div className="flex flex-wrap items-center gap-3 mt-3">
