@@ -1207,13 +1207,13 @@ function useDerived(data) {
     const curMonth = todayISO().slice(0, 7);
 
     const monthTx = data.transactions.filter(t => monthKey(t.date) === curMonth && !t.excludeFromBudget);
+    const reviewMonthIncome = data.transactions.filter(t => financialReviewMonth(t, data) === curMonth && !t.excludeFromBudget && t.category !== "Transfer" && Number(t.amount) > 0);
     const spendByCategory = {};
     const spendByPerson = { Joint: 0, Michael: 0, Cynthia: 0 };
-    let monthIncome = 0, monthExpense = 0;
+    let monthIncome = reviewMonthIncome.reduce((sum, t) => sum + Number(t.amount || 0), 0), monthExpense = 0;
     monthTx.forEach(t => {
       if (t.category === "Transfer") return;
-      if (t.amount > 0) monthIncome += t.amount;
-      else {
+      if (t.amount < 0) {
         monthExpense += -t.amount;
         expenseCategoryAllocations(t).forEach(part => {
           spendByCategory[part.category] = (spendByCategory[part.category] || 0) + part.amount;
@@ -4259,11 +4259,13 @@ function PaycheckPlanner({ data, actions }) {
 }
 
 function MonthlyClosingReport({ data }) {
-  const months = [...new Set(data.transactions.map(t => monthKey(t.date)))].sort().reverse();
+  const months = [...new Set(data.transactions.flatMap(t => [monthKey(t.date), financialReviewMonth(t, data)]).filter(Boolean))].sort().reverse();
   const [selected, setSelected] = useState(months[0] || new Date().toISOString().slice(0, 7));
-  const tx = data.transactions.filter(t => monthKey(t.date) === selected && !t.excludeFromBudget && t.category !== "Transfer");
-  const income = tx.filter(t => t.amount > 0).reduce((s, t) => s + t.amount, 0);
-  const spending = tx.filter(t => t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0);
+  const incomeTx = data.transactions.filter(t => financialReviewMonth(t, data) === selected && !t.excludeFromBudget && t.category !== "Transfer" && Number(t.amount) > 0);
+  const expenseTx = data.transactions.filter(t => monthKey(t.date) === selected && !t.excludeFromBudget && t.category !== "Transfer" && Number(t.amount) < 0);
+  const tx = [...incomeTx, ...expenseTx];
+  const income = incomeTx.reduce((s, t) => s + Number(t.amount || 0), 0);
+  const spending = expenseTx.reduce((s, t) => s + Math.abs(Number(t.amount || 0)), 0);
   const byCategory = {};
   const byMerchant = {};
   tx.filter(t => t.amount < 0).forEach(t => {
@@ -5345,7 +5347,13 @@ function RolloverAndSinkingFunds({ data, actions }) {
   const rollovers = data.budgetRollovers || {};
   const funds = data.sinkingFunds || [];
   const nonMonthlySubscriptions = (data.subscriptions || []).filter(subscription => subscription.active && ["Semi-Annual", "Annual"].includes(subCadence(subscription)));
-  const previousMonth = "2026-06";
+  const currentMonth = todayISO().slice(0, 7);
+  const currentDate = new Date(currentMonth + "-01T00:00:00");
+  const previousDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+  const previousMonth = previousDate.toISOString().slice(0, 7);
+  const previousLabel = previousDate.toLocaleDateString("en-US", { month: "long" });
+  const currentLabel = currentDate.toLocaleDateString("en-US", { month: "long" });
+  const previousPlan = (data.budgetPlans && data.budgetPlans[previousMonth]) || data.budgets || {};
 
   useEffect(() => { actions.syncSubscriptionSinkingFunds(false); }, []);
 
@@ -5371,10 +5379,10 @@ function RolloverAndSinkingFunds({ data, actions }) {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
       <Card className="p-5">
         <h3 className="font-semibold text-slate-700">Rollover Budgets</h3>
-        <p className="text-sm text-slate-500 mt-1 mb-4">Carry unused June budget into July for categories that vary month to month.</p>
+        <p className="text-sm text-slate-500 mt-1 mb-4">Carry unused {previousLabel} budget into {currentLabel} for categories that vary month to month.</p>
         <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
           {EXPENSE_CATEGORIES.map(cat => {
-            const carry = Math.max(0, (data.budgets[cat] || 0) - (priorSpend[cat] || 0));
+            const carry = Math.max(0, (previousPlan[cat] || 0) - (priorSpend[cat] || 0));
             return (
               <label key={cat} className="flex items-center justify-between gap-3 rounded-lg border border-slate-100 px-3 py-2">
                 <span className="text-sm text-slate-600">{cat}</span>
