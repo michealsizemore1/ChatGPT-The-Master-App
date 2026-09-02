@@ -855,6 +855,7 @@ function normalizeBudgetData(data) {
     customCategories: data.customCategories || [],
     hiddenBudgetCategories: data.hiddenBudgetCategories || [],
     sinkingFunds: data.sinkingFunds || [],
+    subscriptionSinkingFundsInitialized: !!data.subscriptionSinkingFundsInitialized,
     reconciliations: data.reconciliations || {},
     privacyPrefs: data.privacyPrefs || { hideBalances: false, viewer: "Household" },
     notificationPrefs: data.notificationPrefs || { enabled: false },
@@ -5337,7 +5338,10 @@ function RolloverAndSinkingFunds({ data, actions }) {
   const [monthly, setMonthly] = useState("");
   const rollovers = data.budgetRollovers || {};
   const funds = data.sinkingFunds || [];
+  const nonMonthlySubscriptions = (data.subscriptions || []).filter(subscription => subscription.active && ["Semi-Annual", "Annual"].includes(subCadence(subscription)));
   const previousMonth = "2026-06";
+
+  useEffect(() => { actions.syncSubscriptionSinkingFunds(false); }, []);
 
   const priorSpend = useMemo(() => {
     const totals = {};
@@ -5381,6 +5385,11 @@ function RolloverAndSinkingFunds({ data, actions }) {
       <Card className="p-5">
         <h3 className="font-semibold text-slate-700">Sinking Funds</h3>
         <p className="text-sm text-slate-500 mt-1 mb-4">Save gradually for irregular expenses without distorting the monthly budget.</p>
+        {nonMonthlySubscriptions.length > 0 && <div className="rounded-xl border border-indigo-100 bg-indigo-50/60 p-3 mb-4">
+          <div className="text-sm font-semibold text-slate-700">Yearly and twice-yearly subscriptions</div>
+          <div className="text-xs text-slate-500 mt-1">These subscription amounts are used as targets, with the cost divided into 12 or 6 monthly contributions.</div>
+          <Button variant="secondary" className="mt-2" onClick={() => actions.syncSubscriptionSinkingFunds(true)}>Refresh from Subscriptions</Button>
+        </div>}
         <div className="space-y-3 mb-4">
           {funds.length === 0 && <p className="text-sm text-slate-400">No sinking funds yet.</p>}
           {funds.map(f => (
@@ -5391,7 +5400,7 @@ function RolloverAndSinkingFunds({ data, actions }) {
               </div>
               <ProgressBar pct={(f.current / f.target) * 100} color="#0ea5e9" />
               <div className="flex items-center justify-between mt-2">
-                <span className="text-xs text-slate-400">{fmtCurrency(f.monthly)} planned monthly</span>
+                <span className="text-xs text-slate-400">{fmtCurrency(f.monthly)} planned monthly{f.nextChargeDate ? " · due " + fmtDate(f.nextChargeDate) : ""}</span>
                 <span className="flex gap-2">
                   <button className="text-xs text-indigo-600 font-medium" onClick={() => actions.contributeSinkingFund(f.id, f.monthly || 25)}>Add monthly</button>
                   <button className="text-xs text-rose-500 font-medium" onClick={() => actions.deleteSinkingFund(f.id)}>Delete</button>
@@ -5855,6 +5864,22 @@ function App() {
       };
     }, "Budget category deleted"),
     toggleBudgetRollover: (cat) => setData(d => ({ ...d, budgetRollovers: { ...(d.budgetRollovers || {}), [cat]: !(d.budgetRollovers || {})[cat] } }), "Rollover setting changed"),
+    syncSubscriptionSinkingFunds: (force) => setData(d => {
+      if (d.subscriptionSinkingFundsInitialized && !force) return d;
+      const funds = [...(d.sinkingFunds || [])];
+      (d.subscriptions || []).filter(subscription => subscription.active && ["Semi-Annual", "Annual"].includes(subCadence(subscription))).forEach(subscription => {
+        const target = Math.abs(Number(subscription.amount) || 0);
+        if (!target) return;
+        const interval = subCadence(subscription) === "Semi-Annual" ? 6 : 12;
+        const nextDate = subscriptionNextChargeDate(subscription);
+        const nextChargeDate = Number.isFinite(nextDate.getTime()) ? nextDate.toISOString().slice(0, 10) : "";
+        const existingIndex = funds.findIndex(fund => fund.sourceSubscriptionId === subscription.id || String(fund.name || "").toLowerCase() === String(subscription.merchant || "").toLowerCase());
+        const values = { name: subscription.merchant, target, monthly: target / interval, sourceSubscriptionId: subscription.id, nextChargeDate };
+        if (existingIndex >= 0) funds[existingIndex] = { ...funds[existingIndex], ...values };
+        else funds.push({ id: uid(), current: 0, ...values });
+      });
+      return { ...d, sinkingFunds: funds, subscriptionSinkingFundsInitialized: true };
+    }, "Subscription sinking funds updated"),
     addSinkingFund: (fund) => setData(d => ({ ...d, sinkingFunds: [...(d.sinkingFunds || []), fund] }), "Sinking fund added"),
     contributeSinkingFund: (id, amount) => setData(d => ({ ...d, sinkingFunds: (d.sinkingFunds || []).map(f => f.id === id ? { ...f, current: Math.min(f.target, f.current + amount) } : f) }), "Sinking fund contribution"),
     deleteSinkingFund: (id) => setData(d => ({ ...d, sinkingFunds: (d.sinkingFunds || []).filter(f => f.id !== id) }), "Sinking fund deleted"),
