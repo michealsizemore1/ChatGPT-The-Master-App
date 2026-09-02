@@ -880,6 +880,7 @@ function loadData() {
   data = ensureUserNamedSubscriptions(data);
   data = normalizeBudgetData(data);
   data = applySharedInvestmentsToBudget(data);
+  data = syncPaidBillsFromClearedTransactions(data);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   return data;
 }
