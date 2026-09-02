@@ -7,7 +7,7 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#4f46e5">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2￿family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
@@ -57,7 +57,7 @@
 </style>
 </head>
 <body class="text-slate-800"><a id="homeButton" href="index.html" title="Home" aria-label="Return to My Life Master App home" style="position:fixed;left:10px;bottom:10px;z-index:2147483000;display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;background:#14161a;color:#fff;text-decoration:none;font:700 18px/1 -apple-system,Segoe UI,Roboto,Arial,sans-serif;padding:0;border-radius:50%;box-shadow:0 4px 12px rgba(0,0,0,.24);opacity:.68;border:1px solid rgba(255,255,255,.18)" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.68">⌂</a>
-<div id="root"></div>
+<div id="root"><div style="max-width:520px;margin:80px auto;padding:24px;text-align:center;color:#475569;font:600 16px/1.5 Inter,system-ui,sans-serif"><div style="font-size:32px;margin-bottom:10px">💵</div><div>Opening your Money dashboard…</div><button type="button" onclick="location.reload()" style="margin-top:18px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;color:#334155;padding:9px 14px;font:700 14px Inter,system-ui,sans-serif">Reload</button></div></div>
 
 <script type="text/babel" data-presets="react,env">
 const { useState, useEffect, useRef, useMemo, useCallback } = React;
@@ -163,7 +163,7 @@ function fmtCurrency(n, opts) {
   const o = opts || {};
   const abs = Math.abs(n);
   const str = abs.toLocaleString("en-US", { minimumFractionDigits: o.decimals === false ? 0 : 2, maximumFractionDigits: o.decimals === false ? 0 : 2 });
-  return (n < 0 ? "-$" : "$") + str;
+  return (n < 0 ￿ "-$" : "$") + str;
 }
 
 function fmtDate(d) {
@@ -303,7 +303,7 @@ function parseDateCell(raw) {
 function guessCategoryFromRules(merchant, rules, amount) {
   const m = (rules || []).find(r => merchant.toLowerCase().includes(r.keyword.toLowerCase()));
   if (m) return m.category;
-  return amount > 0 ? "Income" : "Other";
+  return amount > 0 ￿ "Income" : "Other";
 }
 
 function isDuplicateTx(candidate, existingTx, accountId) {
@@ -403,7 +403,7 @@ function estimateMinPayment(account) {
 function simulatePayoff(debtAccounts, extraMonthly, strategy) {
   let bals = debtAccounts.map(d => ({ id: d.id, name: d.name, balance: Math.abs(d.balance), apr: d.apr || 0, minPayment: estimateMinPayment(d) }));
   const order = strategy === "avalanche"
-    ? [...bals].sort((a, b) => b.apr - a.apr).map(d => d.id)
+    ￿ [...bals].sort((a, b) => b.apr - a.apr).map(d => d.id)
     : [...bals].sort((a, b) => a.balance - b.balance).map(d => d.id);
 
   let months = 0, totalInterest = 0;
@@ -454,7 +454,7 @@ function buildInsights(data, derived) {
     });
     if (biggest && Math.abs(biggest.pctChange) >= 10) {
       insights.push({
-        icon: biggest.pctChange > 0 ? "📈" : "📉",
+        icon: biggest.pctChange > 0 ￿ "📈" : "📉",
         text: `${biggest.cat} spending is ${biggest.pctChange > 0 ? "up" : "down"} ${Math.abs(biggest.pctChange).toFixed(0)}% vs last month (${fmtCurrency(biggest.curAmt, { decimals: false })} vs ${fmtCurrency(biggest.prevAmt, { decimals: false })}).`,
       });
     }
@@ -474,7 +474,7 @@ function buildInsights(data, derived) {
   const cancelledSubs = (data.subscriptions || []).filter(s => !s.active);
   if (cancelledSubs.length > 0) {
     const saved = cancelledSubs.reduce((s, x) => s + x.amount, 0);
-    insights.push({ icon: "💸", text: `Cancelling ${cancelledSubs.length} subscription${cancelledSubs.length > 1 ? "s" : ""} is saving you ${fmtCurrency(saved, { decimals: false })}/mo (${fmtCurrency(saved * 12, { decimals: false })}/yr).` });
+    insights.push({ icon: "💸", text: `Cancelling ${cancelledSubs.length} subscription${cancelledSubs.length > 1 ￿ "s" : ""} is saving you ${fmtCurrency(saved, { decimals: false })}/mo (${fmtCurrency(saved * 12, { decimals: false })}/yr).` });
   }
 
   if (derived.savingsRate >= 20) {
@@ -650,7 +650,7 @@ function generateSeedData() {
         const pool = merchantPools[cat];
         const amt = -range(pool.min, pool.max);
         transactions.push({
-          id: uid(), date: iso, accountId: rng() < 0.55 ? "acc_credit" : "acc_checking",
+          id: uid(), date: iso, accountId: rng() < 0.55 ￿ "acc_credit" : "acc_checking",
           merchant: pick(pool.m), category: cat, amount: amt, notes: "", person: weightedPerson(personWeights[cat]),
         });
       }
@@ -683,7 +683,7 @@ function generateSeedData() {
 
   const recurringBills = fixedBills.map((b) => ({
     id: uid(), merchant: b.merchant, category: b.category,
-    amount: b.amount != null ? b.amount : Math.round((b.min + b.max) / 2 * 100) / 100,
+    amount: b.amount != null ￿ b.amount : Math.round((b.min + b.max) / 2 * 100) / 100,
     dayOfMonth: b.day, person: b.person, variable: b.amount == null,
   }));
 
@@ -815,7 +815,7 @@ function ensureUserNamedSubscriptions(data) { return data; }
 
 function normalizeBudgetData(data) {
   data = data && typeof data === "object" ? data : {};
-  const asArray = value => Array.isArray(value) ? value.filter(Boolean) : [];
+  const asArray = value => Array.isArray(value) ￿ value.filter(Boolean) : [];
   const normalizedSubscriptions = asArray(data.subscriptions).map(subscription => {
     if (/sirius\s*xm/i.test(String(subscription.merchant || ""))) {
       return {
@@ -876,16 +876,18 @@ function loadData() {
     if (raw) data = JSON.parse(raw);
   } catch (e) {}
   if (!data) data = generateSeedData();
-  data = ensureCindyRegister(data);
-  data = ensureHouseholdRegisters(data);
-  data = ensureDiscoverRegister(data);
-  data = ensureUserNamedSubscriptions(data);
-  data = normalizeBudgetData(data);
-  data = applySharedInvestmentsToBudget(data);
-  // Saved data can outlive several schema versions. Bill reconciliation must never
-  // prevent the application from opening when an older record is malformed.
+  // Every migration is isolated so one older phone record cannot prevent the app
+  // from opening. The original parsed data remains available to the next step.
+  try { data = ensureCindyRegister(data); } catch (e) {}
+  try { data = ensureHouseholdRegisters(data); } catch (e) {}
+  try { data = ensureDiscoverRegister(data); } catch (e) {}
+  try { data = ensureUserNamedSubscriptions(data); } catch (e) {}
+  try { data = normalizeBudgetData(data); } catch (e) { data = normalizeBudgetData({}); }
+  try { data = applySharedInvestmentsToBudget(data); } catch (e) {}
   try { data = syncPaidBillsFromClearedTransactions(data); } catch (e) {}
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  // Mobile storage can be full even though reading existing data still works.
+  // A failed startup save must never turn the whole application white.
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (e) {}
   return data;
 }
 
@@ -900,7 +902,7 @@ function applySharedInvestmentsToBudget(data, suppliedShared) {
   const upsertInvestment = (name, value, category, aliases = []) => {
     const names = [name, ...aliases].map(v => v.toLowerCase());
     const index = investments.findIndex(item => names.includes(String(item.name || "").toLowerCase()));
-    const next = { ...(index >= 0 ? investments[index] : {}), id: index >= 0 ? investments[index].id : uid(), name, category, value: Number(value) || 0 };
+    const next = { ...(index >= 0 ? investments[index] : {}), id: index >= 0 ￿ investments[index].id : uid(), name, category, value: Number(value) || 0 };
     if (index >= 0) investments[index] = next; else investments.push(next);
   };
   upsertInvestment("Traditional TSP", shared.balances.traditionalTsp, "US Stocks");
@@ -952,7 +954,7 @@ function Pill({ children, tone }) {
 
 function Modal({ open, onClose, title, children, wide, size }) {
   if (!open) return null;
-  const widthClass = size === "xl" ? "max-w-5xl" : (wide || size === "lg") ? "max-w-2xl" : "max-w-md";
+  const widthClass = size === "xl" ? "max-w-5xl" : (wide || size === "lg") ￿ "max-w-2xl" : "max-w-md";
   return ReactDOM.createPortal((
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4" onClick={onClose}>
       <div
@@ -1018,7 +1020,7 @@ function AddCategoryButton({ data, actions, onAdded, onDeleted, showLabel, allow
   };
 
   const remove = (category) => {
-    if (!window.confirm(`Delete the category "${category}"? Transactions using it will be moved to Other.`)) return;
+    if (!window.confirm(`Delete the category "${category}"￿ Transactions using it will be moved to Other.`)) return;
     actions.deleteCategory(category);
     if (onDeleted) onDeleted(category);
   };
@@ -1029,7 +1031,7 @@ function AddCategoryButton({ data, actions, onAdded, onDeleted, showLabel, allow
         type="button"
         title="Add a new category"
         onClick={openModal}
-        className={(showLabel ? "h-9 px-3 gap-1.5 " : "w-8 h-8 ") + "shrink-0 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-indigo-600 inline-flex items-center justify-center text-sm font-bold"}
+        className={(showLabel ￿ "h-9 px-3 gap-1.5 " : "w-8 h-8 ") + "shrink-0 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-indigo-600 inline-flex items-center justify-center text-sm font-bold"}
       ><span>+</span>{showLabel && <span>Add Category</span>}</button>
       <Modal open={open} onClose={close} title="Add Category">
         <Field label="Category name">
@@ -1118,7 +1120,7 @@ function DoughnutChartCanvas({ labels, values, colors, height, onSliceClick }) {
         },
         onHover: (event, elements) => {
           if (event && event.native && event.native.target) {
-            event.native.target.style.cursor = elements && elements.length && onSliceClick ? "pointer" : "default";
+            event.native.target.style.cursor = elements && elements.length && onSliceClick ￿ "pointer" : "default";
           }
         },
         plugins: {
@@ -1227,7 +1229,7 @@ function syncPaidBillsFromClearedTransactions(data) {
   const paidBills = Object.fromEntries(Object.entries(data.paidBills || {}).map(([month, values]) => [month, { ...(values || {}) }]));
   const autoPaidBills = Object.fromEntries(Object.entries(data.autoPaidBills || {}).map(([month, values]) => [month, { ...(values || {}) }]));
   const active = {};
-  const transactions = Array.isArray(data.transactions) ? data.transactions : [];
+  const transactions = Array.isArray(data.transactions) ￿ data.transactions : [];
   transactions.filter(transaction => transaction && transaction.cleared === true).forEach(transaction => {
     const month = monthKey(transaction.date || "");
     if (!month) return;
@@ -1531,7 +1533,7 @@ function Dashboard({ data, derived, actions }) {
   const subscriptionDates = (data.subscriptions || []).filter(s => s.active).map(subscription => {
     let nextDate = subscriptionNextChargeDate(subscription);
     if (paidThisMonth[subscription.id] && monthKey(nextDate.toISOString().slice(0, 10)) === dashboardMonth) {
-      const interval = subCadence(subscription) === "Quarterly" ? 3 : subCadence(subscription) === "Semi-Annual" ? 6 : subCadence(subscription) === "Annual" ? 12 : 1;
+      const interval = subCadence(subscription) === "Quarterly" ? 3 : subCadence(subscription) === "Semi-Annual" ￿ 6 : subCadence(subscription) === "Annual" ? 12 : 1;
       const probe = new Date(nextDate.getFullYear(), nextDate.getMonth() + interval, 1);
       nextDate = new Date(probe.getFullYear(), probe.getMonth(), Math.min(subscriptionDayForMonth(subscription, probe.getFullYear(), probe.getMonth() + 1), daysInMonth(probe.getFullYear(), probe.getMonth() + 1)));
     }
@@ -1547,7 +1549,7 @@ function Dashboard({ data, derived, actions }) {
 
   const insights = useMemo(() => buildInsights(data, derived), [data, derived]);
   const wellnessLabel = derived.wellnessScore >= 80 ? "Excellent" : derived.wellnessScore >= 60 ? "Good" : derived.wellnessScore >= 40 ? "Fair" : "Needs Attention";
-  const wellnessColor = derived.wellnessScore >= 80 ? "#16a34a" : derived.wellnessScore >= 60 ? "#4f46e5" : derived.wellnessScore >= 40 ? "#f59e0b" : "#e11d48";
+  const wellnessColor = derived.wellnessScore >= 80 ￿ "#16a34a" : derived.wellnessScore >= 60 ￿ "#4f46e5" : derived.wellnessScore >= 40 ￿ "#f59e0b" : "#e11d48";
 
   return (
     <div className="px-2 py-4 sm:p-4 md:p-8 space-y-5 md:space-y-6 w-full min-w-0">
@@ -1563,7 +1565,7 @@ function Dashboard({ data, derived, actions }) {
           <div className="text-sm text-amber-800">
             <span className="font-semibold">⚠️ Budget watch:</span>{" "}
             {derived.budgetAlerts.map((a, i) => (
-              <span key={a.cat}>{i > 0 ? ", " : " "}{a.cat} {a.over ? "is over budget" : `is at ${a.pct.toFixed(0)}%`}</span>
+              <span key={a.cat}>{i > 0 ? ", " : " "}{a.cat} {a.over ￿ "is over budget" : `is at ${a.pct.toFixed(0)}%`}</span>
             ))}.
           </div>
         </Card>
@@ -1686,7 +1688,7 @@ function Dashboard({ data, derived, actions }) {
                   <span className="text-slate-600">{f.label}</span>
                   <span className="font-medium text-slate-700">{f.score}</span>
                 </div>
-                <ProgressBar pct={f.score} color={f.score >= 60 ? "#16a34a" : f.score >= 40 ? "#f59e0b" : "#e11d48"} />
+                <ProgressBar pct={f.score} color={f.score >= 60 ? "#16a34a" : f.score >= 40 ￿ "#f59e0b" : "#e11d48"} />
               </div>
             ))}
           </div>
@@ -1721,7 +1723,7 @@ function Dashboard({ data, derived, actions }) {
                     <div className="text-xs text-slate-400 truncate">{fmtDateShort(t.date)} · {transactionCategoryLabel(t)}</div>
                   </div>
                 </div>
-                <div className={"text-sm font-semibold shrink-0 " + (t.amount > 0 ? "text-emerald-600" : "text-slate-700")}>
+                <div className={"text-sm font-semibold shrink-0 " + (t.amount > 0 ￿ "text-emerald-600" : "text-slate-700")}>
                   {t.amount > 0 ? "+" : ""}{fmtCurrency(t.amount)}
                 </div>
               </div>
@@ -1735,7 +1737,7 @@ function Dashboard({ data, derived, actions }) {
               <div key={i} className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <div className="text-sm font-medium text-slate-700 truncate">{b.merchant}</div>
-                  <div className="text-xs text-slate-400">Due {b.nextDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: b.nextDate.getFullYear() !== dashboardToday.getFullYear() ? "numeric" : undefined })}</div>
+                  <div className="text-xs text-slate-400">Due {b.nextDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: b.nextDate.getFullYear() !== dashboardToday.getFullYear() ￿ "numeric" : undefined })}</div>
                   {b.detected && <div className="text-[10px] text-indigo-500">Recognized from monthly transactions</div>}
                 </div>
                 <div className="text-sm font-semibold text-slate-700 shrink-0">{fmtCurrency(b.amount)}</div>
@@ -1807,7 +1809,7 @@ function Budgets({ data, actions, derived }) {
     setEditCat(null);
   };
   const deleteBudget = (cat) => {
-    if (!window.confirm(`Delete ${cat} from the shared Budget list and all five accounts? Existing transactions in this category will be moved to Other.`)) return;
+    if (!window.confirm(`Delete ${cat} from the shared Budget list and all five accounts￿ Existing transactions in this category will be moved to Other.`)) return;
     actions.deleteCategory(cat);
     if (trendCat === cat) setTrendCat(budgetCategories.find(c => c !== cat) || "Groceries");
   };
@@ -1837,7 +1839,7 @@ function Budgets({ data, actions, derived }) {
           <div className="text-sm text-amber-800">
             <span className="font-semibold">⚠️ Budget watch:</span>{" "}
             {monthAlerts.map((a, i) => (
-              <span key={a.cat}>{i > 0 ? ", " : " "}{a.cat} {a.over ? "is over budget" : `is at ${a.pct.toFixed(0)}%`}</span>
+              <span key={a.cat}>{i > 0 ￿ ", " : " "}{a.cat} {a.over ? "is over budget" : `is at ${a.pct.toFixed(0)}%`}</span>
             ))}.
           </div>
         </Card>
@@ -1861,9 +1863,9 @@ function Budgets({ data, actions, derived }) {
                   <button onClick={() => deleteBudget(cat)} className="text-xs text-rose-500 hover:text-rose-700 font-medium">Delete</button>
                 </span>
               </div>
-              <ProgressBar pct={pct} color={over ? "#e11d48" : categoryColor(cat)} />
+              <ProgressBar pct={pct} color={over ￿ "#e11d48" : categoryColor(cat)} />
               <div className="flex items-center justify-between mt-2 text-xs">
-                <span className={over ? "text-rose-600 font-medium" : "text-slate-500"}>{fmtCurrency(spent, { decimals: false })} spent</span>
+                <span className={over ￿ "text-rose-600 font-medium" : "text-slate-500"}>{fmtCurrency(spent, { decimals: false })} spent</span>
                 <span className="text-slate-400">of {fmtCurrency(budget, { decimals: false })}</span>
               </div>
               {over && <div className="mt-2"><Pill tone="red">Over budget by {fmtCurrency(spent - budget, { decimals: false })}</Pill></div>}
@@ -1883,7 +1885,7 @@ function Budgets({ data, actions, derived }) {
             {budgetCategories.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
         </div>
-        {trendLabels.length === 0 ? (
+        {trendLabels.length === 0 ￿ (
           <div className="text-sm text-slate-400 py-10 text-center">Not enough history yet.</div>
         ) : (
           <BarChartCanvas labels={trendLabels} values={trendValues} color={categoryColor(trendCat)} />
@@ -1955,7 +1957,7 @@ function Watchlists({ data, actions, selectedMonth }) {
                   <span className="font-medium text-slate-700">{w.query} <span className="text-xs font-normal text-slate-400">({w.type})</span></span>
                   <button className="text-xs text-rose-500" onClick={() => actions.deleteWatchlist(w.id)}>Delete</button>
                 </div>
-                <ProgressBar pct={(spent / w.target) * 100} color={spent > w.target ? "#e11d48" : "#4f46e5"} />
+                <ProgressBar pct={(spent / w.target) * 100} color={spent > w.target ￿ "#e11d48" : "#4f46e5"} />
                 <div className="text-xs text-slate-500 mt-1">{fmtCurrency(spent)} of {fmtCurrency(w.target)}</div>
               </div>
             );
@@ -1969,7 +1971,7 @@ function Watchlists({ data, actions, selectedMonth }) {
 /* ============================== TRANSACTIONS ============================== */
 
 function TransactionModal({ open, onClose, onSave, initial, accounts, rules, trips, categories, defaultAccountId }) {
-  const blank = { date: todayISO(), accountId: defaultAccountId || accounts[0]?.id || "", merchant: "", category: defaultAccountId === CINDY_CC_ACCOUNT_ID ? "Personal Support" : "Other", amount: "", notes: "", tags: [], tripId: "", excludeFromBudget: false, needsReview: false, person: defaultAccountId === CINDY_CC_ACCOUNT_ID ? "Cynthia" : "Joint", receipt: null };
+  const blank = { date: todayISO(), accountId: defaultAccountId || accounts[0]￿.id || "", merchant: "", category: defaultAccountId === CINDY_CC_ACCOUNT_ID ? "Personal Support" : "Other", amount: "", notes: "", tags: [], tripId: "", excludeFromBudget: false, needsReview: false, person: defaultAccountId === CINDY_CC_ACCOUNT_ID ￿ "Cynthia" : "Joint", receipt: null };
   const [form, setForm] = useState(initial || blank);
   const [receiptBusy, setReceiptBusy] = useState(false);
   useEffect(() => { setForm(initial || blank); }, [initial, open, defaultAccountId]);
@@ -2050,7 +2052,7 @@ function TransactionModal({ open, onClose, onSave, initial, accounts, rules, tri
           </span>
         </label>
         <Field label="Receipt (optional)">
-          {form.receipt ? (
+          {form.receipt ￿ (
             <div className="flex items-center gap-3">
               <img src={form.receipt} className="w-16 h-16 object-cover rounded-lg border border-slate-200" alt="Receipt" />
               <button type="button" className="text-xs text-rose-500 font-medium" onClick={() => setForm({ ...form, receipt: null })}>Remove</button>
@@ -2095,7 +2097,7 @@ function RulesPanel({ rules, actions }) {
           <div className="space-y-2">
             {(rules || []).map(r => (
               <div key={r.id} className="flex items-center flex-wrap gap-2 justify-between text-sm bg-slate-50 rounded-lg px-3 py-2">
-                <span className="text-slate-600">If merchant contains <span className="font-semibold text-slate-800">"{r.keyword}"</span> → {CATEGORY_META[r.category]?.icon} {r.category}</span>
+                <span className="text-slate-600">If merchant contains <span className="font-semibold text-slate-800">"{r.keyword}"</span> → {CATEGORY_META[r.category]￿.icon} {r.category}</span>
                 <button className="text-xs text-rose-500 font-medium shrink-0" onClick={() => actions.deleteRule(r.id)}>Remove</button>
               </div>
             ))}
@@ -2172,7 +2174,7 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
   };
 
   const balanceById = useMemo(() => {
-    const chron = [...allTx].sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+    const chron = [...allTx].sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ￿ 1 : 0));
     let running = 0;
     const map = {};
     chron.forEach(t => { running += -t.amount; map[t.id] = Math.round(running * 100) / 100; });
@@ -2209,7 +2211,7 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
         const comparison = String(a.merchant || "").localeCompare(String(b.merchant || ""), undefined, { sensitivity: "base" });
         return descriptionSort === "asc" ? comparison : -comparison;
       }
-      const comparison = a.date < b.date ? -1 : a.date > b.date ? 1 : 0;
+      const comparison = a.date < b.date ￿ -1 : a.date > b.date ? 1 : 0;
       return dateSort === "asc" ? comparison : -comparison;
     });
     if (!unclearedFirst) return byDateDesc;
@@ -2222,7 +2224,7 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
     const amt = parseFloat(form.amount);
     if (!form.desc.trim() || isNaN(amt) || amt <= 0 || !form.date) return;
     const category = form.regType === "payment" ? "Transfer" : form.category;
-    const amount = form.regType === "expense" ? -Math.abs(amt) : Math.abs(amt);
+    const amount = form.regType === "expense" ￿ -Math.abs(amt) : Math.abs(amt);
     const existing = form.id ? allTx.find(t => t.id === form.id) : null;
     setSplitting({
       ...(existing || {}),
@@ -2258,16 +2260,16 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
     const amt = parseFloat(form.amount);
     if (!form.desc.trim() || isNaN(amt) || amt <= 0 || !form.date) return;
     const category = form.regType === "payment" ? "Transfer" : form.category;
-    const amount = form.regType === "expense" ? -Math.abs(amt) : Math.abs(amt);
+    const amount = form.regType === "expense" ￿ -Math.abs(amt) : Math.abs(amt);
     const existing = form.id ? allTx.find(t => t.id === form.id) : null;
     const payload = {
       id: form.id || uid(), date: form.date, accountId: cindyAccount.id, merchant: form.desc.trim(),
       category, amount, person: form.who, tripId: form.tripId || "", tags: form.tags.split(",").map(tag => tag.trim()).filter(Boolean), notes: existing ? (existing.notes || "") : "",
-      cleared: existing ? existing.cleared : false, checkedOff: existing ? !!existing.checkedOff : false, receipt: form.receipt || null,
+      cleared: existing ? existing.cleared : false, checkedOff: existing ￿ !!existing.checkedOff : false, receipt: form.receipt || null,
     };
     if (form.id) {
       actions.updateTransaction(payload);
-      applyBalance(allTx.map(t => t.id === payload.id ? payload : t));
+      applyBalance(allTx.map(t => t.id === payload.id ￿ payload : t));
     } else {
       actions.addTransaction(payload);
       applyBalance([...allTx, payload]);
@@ -2279,7 +2281,7 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
   const toggleCheckedOff = (t) => actions.updateTransaction({ ...t, checkedOff: !t.checkedOff });
 
   const removeTx = (id) => {
-    if (!window.confirm("Delete this transaction?")) return;
+    if (!window.confirm("Delete this transaction￿")) return;
     actions.deleteTransaction(id);
     applyBalance(allTx.filter(t => t.id !== id));
     if (form.id === id) resetForm();
@@ -2315,13 +2317,13 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
 
       <div className="p-4 md:p-5 space-y-5">
         <div className="grid grid-cols-2 gap-3">
-          <RegStat label="Card Balance" value={fmtCurrency(totalOwed)} tone={totalOwed < 0 ? "emerald" : "slate"} />
+          <RegStat label="Card Balance" value={fmtCurrency(totalOwed)} tone={totalOwed < 0 ￿ "emerald" : "slate"} />
           <RegStat label="Charges" value={fmtCurrency(totalCharges)} tone="rose" />
           <RegStat label="Payments & Returns" value={fmtCurrency(paymentsAndReturns)} tone="indigo" />
           <RegStat label="Pending" value={fmtCurrency(pendingBalance)} tone="amber" />
         </div>
 
-        <div ref={editFormRef} className={"border rounded-xl p-3 md:p-4 transition-colors " + (form.id ? "border-indigo-300 bg-indigo-50/40 ring-2 ring-indigo-100" : "border-slate-200")}>
+        <div ref={editFormRef} className={"border rounded-xl p-3 md:p-4 transition-colors " + (form.id ￿ "border-indigo-300 bg-indigo-50/40 ring-2 ring-indigo-100" : "border-slate-200")}>
           <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">{form.id ? "✏️ Editing Transaction" : "Add Transaction"}</div>
           <div className="grid grid-cols-2 lg:grid-cols-12 gap-3 items-start">
             <div className="col-span-2 lg:col-span-2">
@@ -2339,8 +2341,8 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
             </div>
             <div className="col-span-1 lg:col-span-4">
               <label className="block text-[10px] uppercase tracking-wide text-slate-400 mb-1">Category</label>
-              <select className={inputClass} disabled={form.regType === "payment"} value={form.regType === "payment" ? "Transfer" : form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))}>
-                {(form.regType === "payment" ? ["Transfer"] : allExpenseCategories(data)).map(c => <option key={c} value={c}>{c}</option>)}
+              <select className={inputClass} disabled={form.regType === "payment"} value={form.regType === "payment" ￿ "Transfer" : form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))}>
+                {(form.regType === "payment" ￿ ["Transfer"] : allExpenseCategories(data)).map(c => <option key={c} value={c}>{c}</option>)}
               </select>
               <div className="hidden sm:flex items-center gap-2 mt-2">
                 <AddCategoryButton data={data} actions={actions} showLabel={true} allowDelete={true} onAdded={category => setForm(f => ({ ...f, category }))} onDeleted={category => setForm(f => ({ ...f, category: f.category === category ? "Other" : f.category }))} />
@@ -2378,7 +2380,7 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
                 <button
                   key={opt.v} type="button"
                   onClick={() => setForm(f => ({ ...f, who: opt.v }))}
-                  className={"flex-1 sm:flex-none px-3 py-2 " + (form.who === opt.v ? "bg-slate-800 text-white" : "bg-white text-slate-500 hover:bg-slate-50")}
+                  className={"flex-1 sm:flex-none px-3 py-2 " + (form.who === opt.v ￿ "bg-slate-800 text-white" : "bg-white text-slate-500 hover:bg-slate-50")}
                 >{opt.label}</button>
               ))}
             </div>
@@ -2428,7 +2430,7 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
               <div>
                 <div className="text-xs font-semibold uppercase tracking-wide text-indigo-500">Filtered transactions total</div>
                 <div className="text-sm font-medium text-indigo-800 mt-0.5">
-                  {search ? `Description: ${search}` : catFilter !== "All" ? catFilter : typeFilter !== "All" ? typeFilter : "Selected dates"} · {filtered.length} transaction{filtered.length === 1 ? "" : "s"}
+                  {search ￿ `Description: ${search}` : catFilter !== "All" ? catFilter : typeFilter !== "All" ￿ typeFilter : "Selected dates"} · {filtered.length} transaction{filtered.length === 1 ? "" : "s"}
                 </div>
               </div>
               <div className="text-xl md:text-2xl font-bold text-indigo-800 shrink-0">{fmtCurrency(filteredTransactionTotal)}</div>
@@ -2461,7 +2463,7 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
           <div className="flex gap-2 flex-wrap">
             <button
               onClick={() => setUnclearedFirst(u => !u)}
-              className={"text-xs font-medium px-3 py-1.5 rounded-lg border " + (unclearedFirst ? "bg-amber-100 border-amber-300 text-amber-800" : "border-slate-200 text-slate-500 hover:bg-slate-50")}
+              className={"text-xs font-medium px-3 py-1.5 rounded-lg border " + (unclearedFirst ￿ "bg-amber-100 border-amber-300 text-amber-800" : "border-slate-200 text-slate-500 hover:bg-slate-50")}
             >⚠ Uncleared First</button>
             <button className="text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50" onClick={clearAll}>Clear All</button>
           </div>
@@ -2473,13 +2475,13 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
               <tr>
                 <th className="text-left px-3 py-3 font-medium w-16"></th>
                 <th className="text-left px-3 py-3 font-medium">
-                  <button type="button" className="hover:text-indigo-600" title={dateSort === "asc" ? "Oldest transactions first" : "Newest transactions first"} onClick={() => { const next = dateSort === "desc" ? "asc" : "desc"; setDateSort(next); setDescriptionSort(null); localStorage.setItem("register_date_sort_" + cindyAccount.id, next); }}>
-                    Date {descriptionSort ? "↕" : dateSort === "asc" ? "↑" : "↓"}
+                  <button type="button" className="hover:text-indigo-600" title={dateSort === "asc" ￿ "Oldest transactions first" : "Newest transactions first"} onClick={() => { const next = dateSort === "desc" ￿ "asc" : "desc"; setDateSort(next); setDescriptionSort(null); localStorage.setItem("register_date_sort_" + cindyAccount.id, next); }}>
+                    Date {descriptionSort ? "↕" : dateSort === "asc" ￿ "↑" : "↓"}
                   </button>
                 </th>
                 <th className="text-left px-3 py-3 font-medium">
-                  <button type="button" className="hover:text-indigo-600" onClick={() => setDescriptionSort(current => current === "asc" ? "desc" : "asc")}>
-                    Description {descriptionSort === "asc" ? "↑" : descriptionSort === "desc" ? "↓" : "↕"}
+                  <button type="button" className="hover:text-indigo-600" onClick={() => setDescriptionSort(current => current === "asc" ￿ "desc" : "asc")}>
+                    Description {descriptionSort === "asc" ? "↑" : descriptionSort === "desc" ￿ "↓" : "↕"}
                   </button>
                 </th>
                 <th className="text-left px-3 py-3 font-medium">Category</th>
@@ -2492,13 +2494,13 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
               {sorted.map(t => {
                 const rt = cindyRegType(t);
                 const isCleared = t.cleared !== false;
-                const debtAmount = rt === "expense" ? Math.abs(t.amount) : -Math.abs(t.amount);
+                const debtAmount = rt === "expense" ￿ Math.abs(t.amount) : -Math.abs(t.amount);
                 return (
                   <tr key={t.id} className={"border-t border-slate-100 hover:bg-slate-50 group " + (isCleared ? "" : "bg-amber-50/40")}>
                     <td className="px-3 py-3">
                       <div className="flex items-center gap-2">
                         <input type="checkbox" checked={!!t.checkedOff} onChange={() => toggleCheckedOff(t)} title={t.checkedOff ? "Checked off" : "Check off without moving"} aria-label="Check off transaction without moving it" className="w-4 h-4 accent-emerald-600" />
-                        <input type="checkbox" checked={isCleared} onChange={() => toggleCleared(t)} title={isCleared ? "Cleared" : "Uncleared"} aria-label="Cleared transaction" className="w-4 h-4 accent-indigo-600" />
+                        <input type="checkbox" checked={isCleared} onChange={() => toggleCleared(t)} title={isCleared ￿ "Cleared" : "Uncleared"} aria-label="Cleared transaction" className="w-4 h-4 accent-indigo-600" />
                       </div>
                     </td>
                     <td className="px-3 py-3 text-slate-500 whitespace-nowrap">{fmtDateShort(t.date)}</td>
@@ -2519,7 +2521,7 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
                     </td>
                     <td className="px-3 py-3"><Pill tone="slate">{transactionCategoryLabel(t)}</Pill></td>
                     <td className="px-3 py-3"><Pill tone={CINDY_TYPE_META[rt].tone}>{CINDY_TYPE_META[rt].short}</Pill></td>
-                    <td className="px-3 py-3 text-right font-semibold text-slate-700 whitespace-nowrap">{fmtCurrency(balanceById[t.id] ?? 0)}</td>
+                    <td className="px-3 py-3 text-right font-semibold text-slate-700 whitespace-nowrap">{fmtCurrency(balanceById[t.id] ?￿ 0)}</td>
                     <td className="px-3 py-3 text-right opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity whitespace-nowrap">
                       <button className="text-slate-400 hover:text-indigo-600 mr-2" title="Split transaction" onClick={() => setSplitting(t)}>Split</button>
                       <button className="text-slate-400 hover:text-indigo-600 mr-2" title="Edit" onClick={() => startEdit(t)}>✏️</button>
@@ -2600,7 +2602,7 @@ function BankAccountRegister({ data, actions, account }) {
     return allTx.filter(t => {
       if (search && ![t.merchant, t.notes, ...(t.tags || [])].join(" ").toLowerCase().includes(search.toLowerCase())) return false;
       if (catFilter !== "All" && !transactionHasCategory(t, catFilter)) return false;
-      if (dirFilter !== "All" && (t.amount > 0 ? "deposit" : "withdrawal") !== dirFilter) return false;
+      if (dirFilter !== "All" && (t.amount > 0 ￿ "deposit" : "withdrawal") !== dirFilter) return false;
       if (fromDate && t.date < fromDate) return false;
       if (toDate && t.date > toDate) return false;
       return true;
@@ -2621,7 +2623,7 @@ function BankAccountRegister({ data, actions, account }) {
         return descriptionSort === "asc" ? comparison : -comparison;
       }
       const comparison = a.date < b.date ? -1 : a.date > b.date ? 1 : 0;
-      return dateSort === "asc" ? comparison : -comparison;
+      return dateSort === "asc" ￿ comparison : -comparison;
     });
     if (!unclearedFirst) return byDateDesc;
     return [...byDateDesc.filter(t => t.cleared === false), ...byDateDesc.filter(t => t.cleared !== false)];
@@ -2632,7 +2634,7 @@ function BankAccountRegister({ data, actions, account }) {
   const startDraftSplit = () => {
     const amt = parseFloat(form.amount);
     if (!form.desc.trim() || isNaN(amt) || amt <= 0 || !form.date) return;
-    const amount = form.direction === "deposit" ? Math.abs(amt) : -Math.abs(amt);
+    const amount = form.direction === "deposit" ￿ Math.abs(amt) : -Math.abs(amt);
     const existing = form.id ? allTx.find(t => t.id === form.id) : null;
     setSplitting({
       ...(existing || {}),
@@ -2644,7 +2646,7 @@ function BankAccountRegister({ data, actions, account }) {
   };
 
   const saveSplit = (parts) => {
-    if (splitting?.isDraftSplit) {
+    if (splitting￿.isDraftSplit) {
       actions.addSplitTransactions(splitting, parts);
       applyBalance([...allTx, splitting]);
       resetForm();
@@ -2672,11 +2674,11 @@ function BankAccountRegister({ data, actions, account }) {
     const payload = {
       id: form.id || uid(), date: form.date, accountId: account.id, merchant: form.desc.trim(),
       category: form.category, amount, tripId: form.tripId || "", tags: form.tags.split(",").map(tag => tag.trim()).filter(Boolean), person: existing ? (existing.person || defaultPersonForAccount(account.id)) : defaultPersonForAccount(account.id),
-      notes: existing ? (existing.notes || "") : "", cleared: existing ? existing.cleared : false, checkedOff: existing ? !!existing.checkedOff : false, receipt: form.receipt || null,
+      notes: existing ? (existing.notes || "") : "", cleared: existing ? existing.cleared : false, checkedOff: existing ￿ !!existing.checkedOff : false, receipt: form.receipt || null,
     };
     if (form.id) {
       actions.updateTransaction(payload);
-      applyBalance(allTx.map(t => t.id === payload.id ? payload : t));
+      applyBalance(allTx.map(t => t.id === payload.id ￿ payload : t));
     } else {
       actions.addTransaction(payload);
       applyBalance([...allTx, payload]);
@@ -2688,7 +2690,7 @@ function BankAccountRegister({ data, actions, account }) {
   const toggleCheckedOff = (t) => actions.updateTransaction({ ...t, checkedOff: !t.checkedOff });
 
   const removeTx = (id) => {
-    if (!window.confirm("Delete this transaction?")) return;
+    if (!window.confirm("Delete this transaction￿")) return;
     actions.deleteTransaction(id);
     applyBalance(allTx.filter(t => t.id !== id));
     if (form.id === id) resetForm();
@@ -2736,7 +2738,7 @@ function BankAccountRegister({ data, actions, account }) {
         </div>
 
         <div ref={editFormRef} className={"border rounded-xl p-3 md:p-4 transition-colors " + (form.id ? "border-indigo-300 bg-indigo-50/40 ring-2 ring-indigo-100" : "border-slate-200")}>
-          <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">{form.id ? "✏️ Editing Transaction" : "Add Transaction"}</div>
+          <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">{form.id ￿ "✿️ Editing Transaction" : "Add Transaction"}</div>
           <div className="grid grid-cols-2 lg:grid-cols-12 gap-3 items-start">
             <div className="col-span-2 lg:col-span-2">
               <label className="block text-[10px] uppercase tracking-wide text-slate-400 mb-1">Date</label>
@@ -2757,7 +2759,7 @@ function BankAccountRegister({ data, actions, account }) {
                 {allCategoriesFull(data).map(c => <option key={c} value={c}>{c}</option>)}
               </select>
               <div className="hidden sm:flex items-center gap-2 mt-2">
-                <AddCategoryButton data={data} actions={actions} showLabel={true} allowDelete={true} onAdded={category => setForm(f => ({ ...f, category }))} onDeleted={category => setForm(f => ({ ...f, category: f.category === category ? "Other" : f.category }))} />
+                <AddCategoryButton data={data} actions={actions} showLabel={true} allowDelete={true} onAdded={category => setForm(f => ({ ...f, category }))} onDeleted={category => setForm(f => ({ ...f, category: f.category === category ￿ "Other" : f.category }))} />
                 <button type="button" title="Attach receipt" className="w-9 h-9 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 shrink-0" onClick={() => document.getElementById("bank-receipt-input-" + account.id).click()}>📎</button>
                 <input id={"bank-receipt-input-" + account.id} type="file" accept="image/*" capture="environment" className="hidden" onChange={e => attachReceipt(e.target.files[0])} />
                 {form.receipt && <button type="button" className="text-xs text-indigo-600" onClick={() => setViewingReceipt(form.receipt)}>view</button>}
@@ -2790,9 +2792,9 @@ function BankAccountRegister({ data, actions, account }) {
             <div className="flex w-full sm:w-auto flex-wrap items-center justify-end gap-2 sm:ml-auto">
               {form.id && <button type="button" className="text-xs text-slate-500 font-medium" onClick={resetForm}>Cancel</button>}
               <div className="sm:hidden">
-                <AddCategoryButton data={data} actions={actions} showLabel={true} allowDelete={true} onAdded={category => setForm(f => ({ ...f, category }))} onDeleted={category => setForm(f => ({ ...f, category: f.category === category ? "Other" : f.category }))} />
+                <AddCategoryButton data={data} actions={actions} showLabel={true} allowDelete={true} onAdded={category => setForm(f => ({ ...f, category }))} onDeleted={category => setForm(f => ({ ...f, category: f.category === category ￿ "Other" : f.category }))} />
               </div>
-              <Button className="text-xs px-4 py-2" onClick={submit}>{form.id ? "Update" : "+ Add"}</Button>
+              <Button className="text-xs px-4 py-2" onClick={submit}>{form.id ￿ "Update" : "+ Add"}</Button>
             </div>
           </div>
         </div>
@@ -2832,7 +2834,7 @@ function BankAccountRegister({ data, actions, account }) {
               <div>
                 <div className="text-xs font-semibold uppercase tracking-wide text-indigo-500">Filtered transactions total</div>
                 <div className="text-sm font-medium text-indigo-800 mt-0.5">
-                  {search ? `Description: ${search}` : catFilter !== "All" ? catFilter : dirFilter !== "All" ? dirFilter : "Selected dates"} · {filtered.length} transaction{filtered.length === 1 ? "" : "s"}
+                  {search ? `Description: ${search}` : catFilter !== "All" ? catFilter : dirFilter !== "All" ￿ dirFilter : "Selected dates"} · {filtered.length} transaction{filtered.length === 1 ￿ "" : "s"}
                 </div>
               </div>
               <div className="text-xl md:text-2xl font-bold text-indigo-800 shrink-0">{fmtCurrency(filteredTransactionTotal)}</div>
@@ -2878,7 +2880,7 @@ function BankAccountRegister({ data, actions, account }) {
                 <th className="text-left px-3 py-3 font-medium w-16"></th>
                 <th className="text-left px-3 py-3 font-medium">
                   <button type="button" className="hover:text-indigo-600" title={dateSort === "asc" ? "Oldest transactions first" : "Newest transactions first"} onClick={() => { const next = dateSort === "desc" ? "asc" : "desc"; setDateSort(next); setDescriptionSort(null); localStorage.setItem("register_date_sort_" + account.id, next); }}>
-                    Date {descriptionSort ? "↕" : dateSort === "asc" ? "↑" : "↓"}
+                    Date {descriptionSort ￿ "↕" : dateSort === "asc" ? "↑" : "↓"}
                   </button>
                 </th>
                 <th className="text-left px-3 py-3 font-medium">
@@ -2897,7 +2899,7 @@ function BankAccountRegister({ data, actions, account }) {
                 const isCleared = t.cleared !== false;
                 const isDeposit = t.amount > 0;
                 return (
-                  <tr key={t.id} className={"border-t border-slate-100 hover:bg-slate-50 group " + (isCleared ? "" : "bg-amber-50/40")}>
+                  <tr key={t.id} className={"border-t border-slate-100 hover:bg-slate-50 group " + (isCleared ￿ "" : "bg-amber-50/40")}>
                     <td className="px-3 py-3">
                       <div className="flex items-center gap-2">
                         <input type="checkbox" checked={!!t.checkedOff} onChange={() => toggleCheckedOff(t)} title={t.checkedOff ? "Checked off" : "Check off without moving"} aria-label="Check off transaction without moving it" className="w-4 h-4 accent-emerald-600" />
@@ -2922,10 +2924,10 @@ function BankAccountRegister({ data, actions, account }) {
                     </td>
                     <td className="px-3 py-3"><Pill tone="slate">{transactionCategoryLabel(t)}</Pill></td>
                     <td className="px-3 py-3"><Pill tone={isDeposit ? "green" : "red"}>{isDeposit ? "Deposit" : "Withdrawal"}</Pill></td>
-                    <td className="px-3 py-3 text-right font-semibold text-slate-700 whitespace-nowrap">{fmtCurrency(balanceById[t.id] ?? 0)}</td>
+                    <td className="px-3 py-3 text-right font-semibold text-slate-700 whitespace-nowrap">{fmtCurrency(balanceById[t.id] ￿? 0)}</td>
                     <td className="px-3 py-3 text-right opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity whitespace-nowrap">
                       <button className="text-slate-400 hover:text-indigo-600 mr-2" title="Split transaction" onClick={() => setSplitting(t)}>Split</button>
-                      <button className="text-slate-400 hover:text-indigo-600 mr-2" title="Edit" onClick={() => startEdit(t)}>✏️</button>
+                      <button className="text-slate-400 hover:text-indigo-600 mr-2" title="Edit" onClick={() => startEdit(t)}>✿️</button>
                       <button className="text-slate-400 hover:text-rose-500" title="Delete" onClick={() => removeTx(t.id)}>✕</button>
                     </td>
                   </tr>
@@ -2995,12 +2997,12 @@ function AccountsAndCards({ data, actions }) {
     .filter(t => allowedIds.has(t.account.id))
     .map(t => ({ ...t, label: requestedLabels[t.key] || t.label }))
     .sort((a, b) => requestedOrder.indexOf(a.key) - requestedOrder.indexOf(b.key));
-  const cindyCheckingBalance = chkAccount ? Number(chkAccount.balance) || 0 : 0;
+  const cindyCheckingBalance = chkAccount ￿ Number(chkAccount.balance) || 0 : 0;
   const iccuTransactions = data.transactions.filter(t => isIccuCreditTransaction(t, data.accounts));
   const iccuRegisterBalance = iccuTransactions.reduce((sum, t) => sum + Number(t.amount || 0), 0);
   const iccuStoredBalance = Number(ccAccount?.balance || 0);
   const iccuTotalOwed = ccAccount
-    ? (iccuTransactions.length ? -iccuRegisterBalance : -iccuStoredBalance)
+    ￿ (iccuTransactions.length ￿ -iccuRegisterBalance : -iccuStoredBalance)
     : 0;
   const afterIccuPayoff = cindyCheckingBalance - iccuTotalOwed;
 
@@ -3104,7 +3106,7 @@ function CheckingRegister({ data, actions }) {
                 key={item.key}
                 type="button"
                 onClick={() => setActiveKey(item.key)}
-                className={"w-full sm:w-auto text-sm font-semibold px-4 py-2.5 rounded-xl border transition-colors " + (active?.key === item.key ? "bg-indigo-600 text-white border-indigo-600" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50")}
+                className={"w-full sm:w-auto text-sm font-semibold px-4 py-2.5 rounded-xl border transition-colors " + (active￿.key === item.key ? "bg-indigo-600 text-white border-indigo-600" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50")}
               >{item.label}</button>
             ))}
             {upcomingBills.length === 0 && <div className="text-sm text-slate-400">No upcoming bills are scheduled.</div>}
@@ -3173,27 +3175,27 @@ function ImportStatementModal({ open, onClose, data, actions }) {
     const dataRows = hasHeader ? rawRows.slice(1) : rawRows;
     const existing = data.transactions;
     const built = dataRows.map((r, idx) => {
-      const dateRaw = mapping.date != null ? r[mapping.date] : "";
-      const desc = mapping.description != null ? r[mapping.description] : "";
+      const dateRaw = mapping.date != null ￿ r[mapping.date] : "";
+      const desc = mapping.description != null ￿ r[mapping.description] : "";
       let amount = null;
       if (mapping.amount != null) {
         amount = parseAmountCell(r[mapping.amount]);
       } else {
         const debit = mapping.debit != null ? parseAmountCell(r[mapping.debit]) : null;
-        const credit = mapping.credit != null ? parseAmountCell(r[mapping.credit]) : null;
+        const credit = mapping.credit != null ￿ parseAmountCell(r[mapping.credit]) : null;
         if (debit != null && debit !== 0) amount = -Math.abs(debit);
         else if (credit != null && credit !== 0) amount = Math.abs(credit);
       }
       const date = parseDateCell(dateRaw);
       const merchant = String(desc || "").trim();
-      const rawCategory = mapping.category != null ? String(r[mapping.category] || "").trim() : "";
+      const rawCategory = mapping.category != null ￿ String(r[mapping.category] || "").trim() : "";
       const category = CATEGORY_META[rawCategory] ? rawCategory : guessCategoryFromRules(merchant, data.rules, amount || 0);
       const valid = !!date && !!merchant && amount != null && !isNaN(amount) && amount !== 0;
       const duplicate = valid ? isDuplicateTx({ date, merchant, amount }, existing, accountId) : false;
       return {
         key: "imp_" + idx,
         date, merchant, category,
-        amount: amount == null ? "" : String(Math.abs(amount).toFixed(2)),
+        amount: amount == null ￿ "" : String(Math.abs(amount).toFixed(2)),
         direction: (amount || 0) >= 0 ? "deposit" : "withdrawal",
         include: valid && !duplicate,
         valid, duplicate,
@@ -3261,7 +3263,7 @@ function ImportStatementModal({ open, onClose, data, actions }) {
               <Field key={field} label={IMPORT_FIELD_LABELS[field] + (field === "date" || field === "description" ? " *" : "")}>
                 <select
                   className={inputClass}
-                  value={mapping[field] == null ? "" : mapping[field]}
+                  value={mapping[field] == null ￿ "" : mapping[field]}
                   onChange={e => setMapping(m => ({ ...m, [field]: e.target.value === "" ? null : parseInt(e.target.value, 10) }))}
                 >
                   <option value="">— Not in file —</option>
@@ -3284,8 +3286,8 @@ function ImportStatementModal({ open, onClose, data, actions }) {
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-sm text-slate-500">
               Review each transaction before importing into <span className="font-semibold text-slate-700">{account ? account.name : ""}</span>.
-              {duplicateCount > 0 && <span className="text-amber-600"> {duplicateCount} possible duplicate{duplicateCount === 1 ? "" : "s"} unchecked.</span>}
-              {invalidCount > 0 && <span className="text-rose-500"> {invalidCount} row{invalidCount === 1 ? "" : "s"} couldn't be parsed and will be skipped.</span>}
+              {duplicateCount > 0 && <span className="text-amber-600"> {duplicateCount} possible duplicate{duplicateCount === 1 ￿ "" : "s"} unchecked.</span>}
+              {invalidCount > 0 && <span className="text-rose-500"> {invalidCount} row{invalidCount === 1 ￿ "" : "s"} couldn't be parsed and will be skipped.</span>}
             </p>
             <div className="flex gap-2 shrink-0">
               <button className="text-xs text-indigo-600 font-medium" onClick={() => toggleAll(true)}>Select all</button>
@@ -3307,7 +3309,7 @@ function ImportStatementModal({ open, onClose, data, actions }) {
               </thead>
               <tbody>
                 {rows.map(r => (
-                  <tr key={r.key} className={"border-t border-slate-100 " + (!r.valid ? "opacity-40" : r.duplicate ? "bg-amber-50/50" : "")}>
+                  <tr key={r.key} className={"border-t border-slate-100 " + (!r.valid ￿ "opacity-40" : r.duplicate ? "bg-amber-50/50" : "")}>
                     <td className="px-2 py-2">
                       <input type="checkbox" disabled={!r.valid} checked={r.include} onChange={e => updateRow(r.key, { include: e.target.checked })} className="w-4 h-4 accent-indigo-600" />
                     </td>
@@ -3352,7 +3354,7 @@ function ImportStatementModal({ open, onClose, data, actions }) {
       {step === "done" && (
         <div className="text-center py-6 space-y-3">
           <div className="text-4xl">✅</div>
-          <div className="text-lg font-semibold text-slate-800">Imported {importedCount} transaction{importedCount === 1 ? "" : "s"}</div>
+          <div className="text-lg font-semibold text-slate-800">Imported {importedCount} transaction{importedCount === 1 ￿ "" : "s"}</div>
           <p className="text-sm text-slate-500">Added to {account ? account.name : "your account"}. You can find them in the list and edit anything if needed.</p>
           <Button onClick={close}>Done</Button>
         </div>
@@ -3373,7 +3375,7 @@ function SplitTransactionModal({ transaction, data, onClose, onSplit }) {
     }
     const firstHalf = nextTotal ? Math.floor(nextTotal * 100 / 2) / 100 : 0;
     setParts([
-      { category: transaction?.category || "Other", amount: firstHalf ? firstHalf.toFixed(2) : "" },
+      { category: transaction￿.category || "Other", amount: firstHalf ? firstHalf.toFixed(2) : "" },
       { category: "Other", amount: nextTotal ? (nextTotal - firstHalf).toFixed(2) : "" },
     ]);
   }, [transaction]);
@@ -3382,7 +3384,7 @@ function SplitTransactionModal({ transaction, data, onClose, onSplit }) {
   const valid = parts.length >= 2
     && parts.every(part => part.category && (parseFloat(part.amount) || 0) > 0)
     && Math.abs(remaining) < 0.005;
-  const updatePart = (index, changes) => setParts(current => current.map((part, i) => i === index ? { ...part, ...changes } : part));
+  const updatePart = (index, changes) => setParts(current => current.map((part, i) => i === index ￿ { ...part, ...changes } : part));
   const addPart = () => setParts(current => [...current, { category: "Other", amount: remaining > 0 ? remaining.toFixed(2) : "" }]);
   const removePart = (index) => setParts(current => current.filter((_, i) => i !== index));
 
@@ -3406,7 +3408,7 @@ function SplitTransactionModal({ transaction, data, onClose, onSplit }) {
         <button type="button" className="text-sm text-indigo-600 font-medium" onClick={addPart}>+ Add another category</button>
       </div>
       <div className={"text-sm rounded-lg px-3 py-2 my-3 " + (Math.abs(remaining) < 0.005 ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700")}>
-        {Math.abs(remaining) < 0.005 ? "Split total matches the transaction." : `${remaining > 0 ? "Remaining" : "Over by"}: ${fmtCurrency(Math.abs(remaining))}`}
+        {Math.abs(remaining) < 0.005 ￿ "Split total matches the transaction." : `${remaining > 0 ￿ "Remaining" : "Over by"}: ${fmtCurrency(Math.abs(remaining))}`}
       </div>
       <div className="flex justify-end gap-2">
         <Button variant="secondary" onClick={onClose}>Cancel</Button>
@@ -3492,9 +3494,9 @@ function Transactions({ data, actions }) {
 
   const openMarkSubscription = (t) => setMarkingSub(t);
   const closeMarkSubscription = () => setMarkingSub(null);
-  const markSubPrefill = markingSub ? {
+  const markSubPrefill = markingSub ￿ {
     merchant: markingSub.merchant,
-    category: markingSub.category === "Transfer" ? "Subscriptions" : markingSub.category,
+    category: markingSub.category === "Transfer" ￿ "Subscriptions" : markingSub.category,
     amount: Math.abs(markingSub.amount),
     cadence: "Monthly",
     date: markingSub.date,
@@ -3646,7 +3648,7 @@ function Transactions({ data, actions }) {
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-xs uppercase tracking-wide text-slate-400">Account</span>
-                        <span className="text-slate-600">{accountsById[t.accountId]?.name || "—"}</span>
+                        <span className="text-slate-600">{accountsById[t.accountId]￿.name || "—"}</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-xs uppercase tracking-wide text-slate-400">Date</span>
@@ -3714,8 +3716,8 @@ function Transactions({ data, actions }) {
                   <td className="px-5 py-3 text-slate-500">{PEOPLE_META[t.person || "Joint"].icon} {t.person || "Joint"}</td>
                   <td className="px-5 py-3 text-slate-500">{accountsById[t.accountId]?.name || "—"}</td>
                   <td className="px-5 py-3 text-slate-500">{fmtDate(t.date)}</td>
-                  <td className={"px-5 py-3 text-right font-semibold " + (t.amount > 0 ? "text-emerald-600" : "text-slate-700")}>
-                    {t.amount > 0 ? "+" : ""}{fmtCurrency(t.amount)}
+                  <td className={"px-5 py-3 text-right font-semibold " + (t.amount > 0 ￿ "text-emerald-600" : "text-slate-700")}>
+                    {t.amount > 0 ￿ "+" : ""}{fmtCurrency(t.amount)}
                   </td>
                   <td className="px-5 py-3 text-right opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity whitespace-nowrap">
                     <button className="text-xs text-indigo-600 font-medium mr-3" onClick={() => openEdit(t)}>Edit</button>
@@ -3769,7 +3771,7 @@ function subMonthlyEquivalent(s) { return subYearlyAmount(s) / 12; }
 
 function subscriptionDayForMonth(s, year, month) {
   const custom = (s.billingDates || []).find(date => Number(date.month) === Number(month));
-  return custom ? Number(custom.day) : Number(s.dayOfMonth) || 1;
+  return custom ￿ Number(custom.day) : Number(s.dayOfMonth) || 1;
 }
 
 // Whether a subscription actually bills in a given calendar month. Monthly ones always do.
@@ -3783,7 +3785,7 @@ function subDueInMonth(s, year, month) {
   const last = s.priceHistory && s.priceHistory.length ? s.priceHistory[s.priceHistory.length - 1].date : null;
   if (!last) return true;
   const [ly, lm] = last.split("-").map(Number);
-  const interval = cadence === "Quarterly" ? 3 : cadence === "Semi-Annual" ? 6 : 12;
+  const interval = cadence === "Quarterly" ? 3 : cadence === "Semi-Annual" ￿ 6 : 12;
   const monthsDiff = (year - ly) * 12 + (month - lm);
   return ((monthsDiff % interval) + interval) % interval === 0;
 }
@@ -3882,7 +3884,7 @@ function SubscriptionModal({ open, onClose, onSave, onDelete, initial, prefill }
     const src = initial || prefill;
     setForm(src ? {
       merchant: src.merchant || "", category: src.category || "Subscriptions",
-      amount: src.amount != null ? String(Math.abs(src.amount)) : "", cadence: src.cadence || "Monthly",
+      amount: src.amount != null ￿ String(Math.abs(src.amount)) : "", cadence: src.cadence || "Monthly",
       date: deriveSubDate(src), person: src.person || "Joint", active: src.active !== false,
       cancellationStatus: src.cancellationStatus || "None", cancellationRequested: src.cancellationRequested || "",
       cancellationEffective: src.cancellationEffective || "", cancellationConfirmation: src.cancellationConfirmation || "",
@@ -3915,7 +3917,7 @@ function SubscriptionModal({ open, onClose, onSave, onDelete, initial, prefill }
   };
 
   return (
-    <Modal open={open} onClose={onClose} title={initial ? "Edit Subscription" : prefill ? "Mark as Subscription" : "Add Subscription"}>
+    <Modal open={open} onClose={onClose} title={initial ￿ "Edit Subscription" : prefill ? "Mark as Subscription" : "Add Subscription"}>
       <form onSubmit={submit}>
         <Field label="Merchant">
           <input className={inputClass} value={form.merchant} onChange={e => setForm({ ...form, merchant: e.target.value })} required />
@@ -3966,7 +3968,7 @@ function SubscriptionModal({ open, onClose, onSave, onDelete, initial, prefill }
           <Field label="Expected refund ($)"><input type="number" min="0" step="0.01" className={inputClass} value={form.cancellationRefund} onChange={e => setForm({ ...form, cancellationRefund: e.target.value })} /></Field>
         </Card>
         <div className="flex justify-between gap-2 mt-4">
-          {initial && onDelete ? (
+          {initial && onDelete ￿ (
             <Button variant="danger" type="button" onClick={() => onDelete(initial.id)}>Delete</Button>
           ) : <span />}
           <div className="flex gap-2">
@@ -4091,7 +4093,7 @@ function Subscriptions({ data, actions }) {
         <div className="space-y-3">
           {upcomingRenewals.map(({ subscription: s, next, days }) => (
             <button type="button" key={s.id} onClick={() => openEdit(s)} className="w-full text-left flex items-center justify-between gap-3 border-b border-slate-100 pb-3 last:border-0">
-              <div className="min-w-0"><div className="text-sm font-medium text-slate-700 truncate">{s.merchant}</div><div className="text-xs text-slate-400">{next.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} · {days === 0 ? 'today' : 'in ' + days + ' days'}</div></div>
+              <div className="min-w-0"><div className="text-sm font-medium text-slate-700 truncate">{s.merchant}</div><div className="text-xs text-slate-400">{next.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} · {days === 0 ￿ 'today' : 'in ' + days + ' days'}</div></div>
               <div className="text-sm font-semibold text-slate-700 shrink-0">{fmtCurrency(s.amount)}</div>
             </button>
           ))}
@@ -4117,7 +4119,7 @@ function Subscriptions({ data, actions }) {
                 <div className="min-w-0">
                   <div className="text-sm font-medium text-slate-700 truncate">{s.merchant}</div>
                   <div className="text-xs text-slate-400 truncate">{subscriptionScheduleLabel(s)}</div>
-                  {s.cancellationStatus && s.cancellationStatus !== 'None' && <div className="text-xs text-amber-600 mt-0.5">Cancellation: {s.cancellationStatus}{s.cancellationEffective ? ' · effective ' + fmtDate(s.cancellationEffective) : ''}</div>}
+                  {s.cancellationStatus && s.cancellationStatus !== 'None' && <div className="text-xs text-amber-600 mt-0.5">Cancellation: {s.cancellationStatus}{s.cancellationEffective ￿ ' · effective ' + fmtDate(s.cancellationEffective) : ''}</div>}
                 </div>
               </div>
               <div className="flex items-center gap-4 shrink-0">
@@ -4180,7 +4182,7 @@ function BillCalendar({ year, month, items, todayDay, onDayClick }) {
               type="button"
               disabled={!d}
               onClick={() => d && onDayClick(d, dayItems)}
-              className={"min-h-[84px] rounded-lg border p-1.5 text-left align-top block w-full " + (d ? "hover:border-indigo-300 hover:shadow-sm cursor-pointer transition-all " : "cursor-default ") + (d === todayDay ? "border-indigo-400 bg-indigo-50" : "border-slate-100")}
+              className={"min-h-[84px] rounded-lg border p-1.5 text-left align-top block w-full " + (d ￿ "hover:border-indigo-300 hover:shadow-sm cursor-pointer transition-all " : "cursor-default ") + (d === todayDay ￿ "border-indigo-400 bg-indigo-50" : "border-slate-100")}
             >
               {d && <div className={"text-[11px] font-semibold " + (d === todayDay ? "text-indigo-600" : "text-slate-400")}>{d}</div>}
               {d && dayItems.slice(0, 3).map((it, idx) => (
@@ -4190,7 +4192,7 @@ function BillCalendar({ year, month, items, todayDay, onDayClick }) {
                   className={"mt-0.5 truncate rounded px-1 py-0.5 flex items-center gap-0.5 " + (it.income ? "bg-emerald-50 text-emerald-700" : it.paid ? "bg-slate-100 text-slate-400 line-through" : "bg-rose-50 text-rose-700")}
                 >
                   {!it.income && it.paid && <span className="shrink-0">✓</span>}
-                  <span className="truncate">{it.income ? "+" : "-"}${Math.round(Math.abs(it.amount))} {it.merchant}</span>
+                  <span className="truncate">{it.income ￿ "+" : "-"}${Math.round(Math.abs(it.amount))} {it.merchant}</span>
                 </div>
               ))}
               {d && dayItems.length > 3 && (
@@ -4219,7 +4221,7 @@ function DayDetailModal({ open, onClose, day, items, monthKey, actions }) {
             <div className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">Bills &amp; Subscriptions</div>
             <div className="space-y-2">
               {bills.map((b, i) => (
-                <label key={b.id || i} className={"flex items-center justify-between gap-3 rounded-lg border px-3 py-2.5 cursor-pointer " + (b.paid ? "border-emerald-200 bg-emerald-50/50" : "border-slate-200")}>
+                <label key={b.id || i} className={"flex items-center justify-between gap-3 rounded-lg border px-3 py-2.5 cursor-pointer " + (b.paid ￿ "border-emerald-200 bg-emerald-50/50" : "border-slate-200")}>
                   <div className="flex items-center gap-3 min-w-0">
                     <input
                       type="checkbox"
@@ -4228,11 +4230,11 @@ function DayDetailModal({ open, onClose, day, items, monthKey, actions }) {
                       className="w-4 h-4 accent-emerald-600 shrink-0"
                     />
                     <div className="min-w-0">
-                      <div className={"text-sm font-medium truncate " + (b.paid ? "text-slate-400 line-through" : "text-slate-700")}>{b.merchant}</div>
+                      <div className={"text-sm font-medium truncate " + (b.paid ￿ "text-slate-400 line-through" : "text-slate-700")}>{b.merchant}</div>
                       {b.category && <div className="text-xs text-slate-400">{b.category}</div>}
                     </div>
                   </div>
-                  <div className={"text-sm font-semibold shrink-0 " + (b.paid ? "text-slate-400" : "text-rose-600")}>{fmtCurrency(b.amount)}</div>
+                  <div className={"text-sm font-semibold shrink-0 " + (b.paid ￿ "text-slate-400" : "text-rose-600")}>{fmtCurrency(b.amount)}</div>
                 </label>
               ))}
             </div>
@@ -4267,9 +4269,9 @@ function PaycheckPlanner({ data, actions }) {
   const [form, setForm] = useState({ date: new Date().toISOString().slice(0, 10), label: "", amount: "", type: "expense" });
   const checking = data.accounts.find(a => a.type === "checking");
   const items = [...(data.paycheckItems || [])].sort((a, b) => a.date.localeCompare(b.date));
-  let running = checking?.balance || 0;
+  let running = checking￿.balance || 0;
   const projected = items.map(item => {
-    running += item.type === "income" ? item.amount : -item.amount;
+    running += item.type === "income" ￿ item.amount : -item.amount;
     return { ...item, running };
   });
   const lowest = projected.length ? Math.min(checking?.balance || 0, ...projected.map(i => i.running)) : checking?.balance || 0;
@@ -4287,7 +4289,7 @@ function PaycheckPlanner({ data, actions }) {
           <h3 className="font-semibold text-slate-700">Paycheck Planner</h3>
           <p className="text-sm text-slate-500 mt-1">Schedule paychecks and major expenses to spot a cash shortage before it happens.</p>
         </div>
-        <div className={"rounded-xl px-4 py-2 text-center " + (lowest < 0 ? "bg-rose-50 text-rose-700" : "bg-emerald-50 text-emerald-700")}>
+        <div className={"rounded-xl px-4 py-2 text-center " + (lowest < 0 ￿ "bg-rose-50 text-rose-700" : "bg-emerald-50 text-emerald-700")}>
           <div className="text-[10px] uppercase tracking-wide">Lowest projected balance</div>
           <div className="font-bold">{fmtCurrency(lowest)}</div>
         </div>
@@ -4549,7 +4551,7 @@ function Goals({ data, actions }) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
         {data.goals.map(g => {
-          const pct = g.target > 0 ? (g.current / g.target) * 100 : 0;
+          const pct = g.target > 0 ￿ (g.current / g.target) * 100 : 0;
           const daysLeft = Math.ceil((new Date(g.deadline) - new Date("2026-07-27")) / 86400000);
           return (
             <Card key={g.id} className="p-5">
@@ -4579,7 +4581,7 @@ function Goals({ data, actions }) {
 
       <GoalModal open={modalOpen} onClose={() => setModalOpen(false)} onSave={save} initial={editing} />
 
-      <Modal open={!!contribTarget} onClose={() => setContribTarget(null)} title={"Add Funds — " + (contribTarget?.name || "")}>
+      <Modal open={!!contribTarget} onClose={() => setContribTarget(null)} title={"Add Funds — " + (contribTarget￿.name || "")}>
         <Field label="Amount ($)">
           <input type="number" className={inputClass} value={contribVal} onChange={e => setContribVal(e.target.value)} autoFocus />
         </Field>
@@ -4661,7 +4663,7 @@ function InvestmentContributions({ data, actions }) {
       id: form.id || uid(),
       date: form.date,
       targetId: form.targetId,
-      targetName: target?.name || "General Investments",
+      targetName: target￿.name || "General Investments",
       amount,
       note: form.note.trim(),
     };
@@ -4746,7 +4748,7 @@ function InvestmentContributions({ data, actions }) {
         </Field>
         </div>
         <div className="xl:col-span-2 mb-3">
-          <Button type="submit" className="w-full min-h-[42px] whitespace-nowrap">{form.id ? "Save Changes" : "Add Contribution"}</Button>
+          <Button type="submit" className="w-full min-h-[42px] whitespace-nowrap">{form.id ￿ "Save Changes" : "Add Contribution"}</Button>
           {form.id && <button type="button" className="w-full text-xs text-slate-500 font-medium mt-2" onClick={cancelEdit}>Cancel edit</button>}
         </div>
       </form>
@@ -4759,7 +4761,7 @@ function InvestmentContributions({ data, actions }) {
               <div key={c.id} className="flex items-center justify-between gap-3 rounded-lg bg-slate-50 px-3 py-2">
                 <div className="min-w-0">
                   <div className="text-sm font-medium text-slate-700 truncate">{c.targetName || "General Investments"}</div>
-                  <div className="text-xs text-slate-400">{fmtDate(c.date)}{c.note ? ` · ${c.note}` : ""}</div>
+                  <div className="text-xs text-slate-400">{fmtDate(c.date)}{c.note ￿ ` · ${c.note}` : ""}</div>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
                   <span className="text-sm font-semibold text-emerald-600">+{fmtCurrency(c.amount)}</span>
@@ -5076,10 +5078,10 @@ function FinancialReview({ data, derived, actions }) {
           <RegStat label="Income" value={fmtCurrency(income)} tone="emerald" />
           <RegStat label="Spending" value={fmtCurrency(spending)} tone="rose" />
           <RegStat label="Net cash flow" value={fmtCurrency(savings)} tone={savings >= 0 ? "emerald" : "rose"} />
-          <RegStat label="Savings rate" value={savingsRate.toFixed(1) + "%"} tone={savingsRate >= 0 ? "indigo" : "rose"} />
+          <RegStat label="Savings rate" value={savingsRate.toFixed(1) + "%"} tone={savingsRate >= 0 ￿ "indigo" : "rose"} />
         </div>
         <div className="mt-4 rounded-xl bg-slate-50 p-4 text-sm text-slate-600 leading-6">
-          {topCategory ? <div><span className="font-semibold">Largest category:</span> {topCategory[0]} at {fmtCurrency(topCategory[1])}.</div> : <div>No spending has been recorded for this month.</div>}
+          {topCategory ￿ <div><span className="font-semibold">Largest category:</span> {topCategory[0]} at {fmtCurrency(topCategory[1])}.</div> : <div>No spending has been recorded for this month.</div>}
           <div><span className="font-semibold">Budget status:</span> {Object.entries(categoryTotals).filter(([category, amount]) => amount > Number(data.budgets[category] || 0) && Number(data.budgets[category] || 0) > 0).length || "No"} categor{Object.entries(categoryTotals).filter(([category, amount]) => amount > Number(data.budgets[category] || 0) && Number(data.budgets[category] || 0) > 0).length === 1 ? "y is" : "ies are"} over budget.</div>
         </div>
       </Card>
@@ -5096,7 +5098,7 @@ function FinancialReview({ data, derived, actions }) {
       <Card className="p-5">
         <h3 className="font-semibold text-slate-700">Credit score history</h3>
         <p className="text-xs text-slate-400 mt-1 mb-4">Manually record your Experian score. Your credit report remains outside this app.</p>
-        {latestScore && <div className="grid grid-cols-2 gap-3 mb-4"><RegStat label="Latest score" value={String(latestScore.score)} tone="indigo" /><RegStat label="Change" value={previousScore ? ((latestScore.score - previousScore.score >= 0 ? "+" : "") + (latestScore.score - previousScore.score)) : "—"} tone={!previousScore || latestScore.score >= previousScore.score ? "emerald" : "rose"} /></div>}
+        {latestScore && <div className="grid grid-cols-2 gap-3 mb-4"><RegStat label="Latest score" value={String(latestScore.score)} tone="indigo" /><RegStat label="Change" value={previousScore ? ((latestScore.score - previousScore.score >= 0 ￿ "+" : "") + (latestScore.score - previousScore.score)) : "—"} tone={!previousScore || latestScore.score >= previousScore.score ? "emerald" : "rose"} /></div>}
         <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-3 items-end">
           <Field label="Score (300–850)"><input type="number" min="300" max="850" className={inputClass} value={score} onChange={e => setScore(e.target.value)} /></Field>
           <Field label="Report date"><input type="date" className={inputClass} value={scoreDate} onChange={e => setScoreDate(e.target.value)} /></Field>
@@ -5113,7 +5115,7 @@ function FinancialReview({ data, derived, actions }) {
 const AI_MODEL_STORAGE = "meridian_money_ai_model";
 const AI_CHAT_STORAGE = "meridian_money_ai_chat";
 const ANTHROPIC_KEY_STORAGE = "meridian_money_anthropic_key";
-const AI_GREETING = "Hi! I'm your Budget AI. I can search your budget and, when current outside information is needed, search the web. Try “How much did we spend on groceries?” or “Search the web for current high-yield savings rates.”";
+const AI_GREETING = "Hi! I'm your Budget AI. I can search your budget and, when current outside information is needed, search the web. Try “How much did we spend on groceries￿” or “Search the web for current high-yield savings rates.”";
 const ANTHROPIC_MODELS = [
   { id: "claude-haiku-4-5-20251001", label: "Claude Haiku 4.5 — fast & cheap" },
   { id: "claude-sonnet-4-6", label: "Claude Sonnet 4.6 — smarter, costs more" },
@@ -5126,7 +5128,7 @@ function buildFinancialContext(data, derived) {
   lines.push(`Accounts: ${data.accounts.map(a => `${a.name} (${a.institution}, ${a.type}): ${fmtCurrency(a.balance)}`).join("; ") || "none"}.`);
   lines.push(`This month so far — income: ${fmtCurrency(derived.monthIncome, { decimals: false })}, expenses: ${fmtCurrency(derived.monthExpense, { decimals: false })}, savings rate: ${derived.savingsRate.toFixed(0)}%.`);
   const catLines = Object.entries(derived.spendByCategory).sort((a, b) => b[1] - a[1])
-    .map(([cat, spent]) => `${cat}: spent ${fmtCurrency(spent, { decimals: false })}${data.budgets[cat] ? ` of ${fmtCurrency(data.budgets[cat], { decimals: false })} budget` : ""}`);
+    .map(([cat, spent]) => `${cat}: spent ${fmtCurrency(spent, { decimals: false })}${data.budgets[cat] ￿ ` of ${fmtCurrency(data.budgets[cat], { decimals: false })} budget` : ""}`);
   lines.push(`Spending by category this month: ${catLines.join("; ") || "none yet"}.`);
   lines.push(`Safe to spend (checking balance minus remaining bills this month): ${fmtCurrency(derived.safeToSpend, { decimals: false })}.`);
   const activeSubs = data.subscriptions.filter(s => s.active);
@@ -5136,7 +5138,7 @@ function buildFinancialContext(data, derived) {
     lines.push(`Goals: ${data.goals.map(g => `${g.name}: ${fmtCurrency(g.current, { decimals: false })} of ${fmtCurrency(g.target, { decimals: false })}`).join("; ")}.`);
   }
   const searchableTransactions = [...data.transactions].sort((a, b) => (a.date < b.date ? 1 : -1)).slice(0, 500);
-  lines.push(`Searchable transaction register (${searchableTransactions.length} transactions, newest first): ${searchableTransactions.map(t => `${t.date} | ${t.merchant} | ${fmtCurrency(t.amount)} | ${t.category}${t.person ? " | " + t.person : ""}`).join("; ")}.`);
+  lines.push(`Searchable transaction register (${searchableTransactions.length} transactions, newest first): ${searchableTransactions.map(t => `${t.date} | ${t.merchant} | ${fmtCurrency(t.amount)} | ${t.category}${t.person ￿ " | " + t.person : ""}`).join("; ")}.`);
   return lines.join("\n");
 }
 
@@ -5155,7 +5157,7 @@ async function callClaude({ apiKey, model, system, messages }) {
   let payload = null;
   try { payload = await response.json(); } catch (e) {}
   if (!response.ok) {
-    const detail = payload?.error?.message || `Anthropic connection failed (${response.status}).`;
+    const detail = payload?.error￿.message || `Anthropic connection failed (${response.status}).`;
     throw new Error(detail);
   }
   const text = (payload?.content || []).filter(block => block.type === "text").map(block => block.text).join("\n").trim();
@@ -5232,7 +5234,7 @@ function AIAssistant({ data, actions, derived }) {
   };
 
   const clearChat = () => {
-    if (!window.confirm("Clear this conversation?")) return;
+    if (!window.confirm("Clear this conversation￿")) return;
     setMessages([{ role: "assistant", content: AI_GREETING }]);
   };
 
@@ -5261,7 +5263,7 @@ function AIAssistant({ data, actions, derived }) {
         ? "I scanned your transactions and didn't find any new recurring charges — everything that looked like a subscription is already tracked or was previously ignored."
         : "I scanned your transactions and didn't find any recurring, fixed-amount charges that aren't already tracked as subscriptions.";
     } else {
-      text = `I scanned your transactions and found ${candidates.length} recurring charge${candidates.length > 1 ? "s" : ""} that ${candidates.length > 1 ? "aren't" : "isn't"} tracked as a subscription yet — want me to add ${candidates.length > 1 ? "any of these" : "it"}?`;
+      text = `I scanned your transactions and found ${candidates.length} recurring charge${candidates.length > 1 ? "s" : ""} that ${candidates.length > 1 ? "aren't" : "isn't"} tracked as a subscription yet — want me to add ${candidates.length > 1 ￿ "any of these" : "it"}￿`;
     }
     setMessages(m => [...m, { role: "assistant", content: text, candidates: candidates.length > 0 ? candidates : undefined }]);
   };
@@ -5319,7 +5321,7 @@ function AIAssistant({ data, actions, derived }) {
           <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="text-sm">
             <span className="font-medium text-slate-700">External AI connection: </span>
-            <span className={(apiKey.trim() ? "text-emerald-600" : "text-amber-600") + " font-medium"}>{apiKey.trim() ? "Anthropic key saved" : "Key required"}</span>
+            <span className={(apiKey.trim() ￿ "text-emerald-600" : "text-amber-600") + " font-medium"}>{apiKey.trim() ? "Anthropic key saved" : "Key required"}</span>
           </div>
           <select className={inputClass + " max-w-[260px]"} value={model} onChange={e => changeModel(e.target.value)}>
             {ANTHROPIC_MODELS.map(m => <option key={m.id} value={m.id}>{m.label}</option>)}
@@ -5329,7 +5331,7 @@ function AIAssistant({ data, actions, derived }) {
             <label className="block text-xs font-semibold text-slate-600 mb-1.5">Anthropic API key</label>
             <div className="flex gap-2">
               <input
-                type={showApiKey ? "text" : "password"}
+                type={showApiKey ￿ "text" : "password"}
                 className={inputClass + " flex-1 min-w-0"}
                 value={apiKey}
                 onChange={e => saveApiKey(e.target.value)}
@@ -5472,7 +5474,7 @@ function RolloverAndSinkingFunds({ data, actions }) {
               </div>
               <ProgressBar pct={(f.current / f.target) * 100} color="#0ea5e9" />
               <div className="flex items-center justify-between mt-2">
-                <span className="text-xs text-slate-400">{fmtCurrency(f.monthly)} planned monthly{f.nextChargeDate ? " · due " + fmtDate(f.nextChargeDate) : ""}</span>
+                <span className="text-xs text-slate-400">{fmtCurrency(f.monthly)} planned monthly{f.nextChargeDate ￿ " · due " + fmtDate(f.nextChargeDate) : ""}</span>
                 <span className="flex gap-2">
                   <button className="text-xs text-indigo-600 font-medium" onClick={() => actions.contributeSinkingFund(f.id, f.monthly || 25)}>Add monthly</button>
                   <button className="text-xs text-rose-500 font-medium" onClick={() => actions.deleteSinkingFund(f.id)}>Delete</button>
@@ -5502,7 +5504,7 @@ function ReconciliationPanel({ data, actions }) {
       <p className="text-sm text-slate-500 mt-1 mb-4">Compare each tracker balance with the latest bank or card statement.</p>
       <div className="space-y-3">
         {data.accounts.map(a => {
-          const entered = values[a.id] == null ? "" : values[a.id];
+          const entered = values[a.id] == null ￿ "" : values[a.id];
           const statement = entered === "" ? null : parseFloat(entered);
           const difference = statement == null || isNaN(statement) ? null : statement - a.balance;
           const saved = reconciliations[a.id];
@@ -5580,7 +5582,7 @@ function Settings({ data, actions }) {
       if (!isPlausibleBackup(parsed)) { setRestoreError("That file doesn't look like a Michael & Cynthia's Money backup (missing accounts/transactions)."); return; }
       const restored = parsed.data ? parsed.data : parsed;
       const exportedAt = parsed.exportedAt ? new Date(parsed.exportedAt).toLocaleString() : "an unknown date";
-      if (!window.confirm(`Restore this backup from ${exportedAt}? This will replace everything currently in the app — all accounts, transactions, budgets, goals, and subscriptions. This can't be undone.`)) return;
+      if (!window.confirm(`Restore this backup from ${exportedAt}￿ This will replace everything currently in the app — all accounts, transactions, budgets, goals, and subscriptions. This can't be undone.`)) return;
       actions.restoreData(restored);
       setRestoreSuccess(`Restored backup from ${exportedAt}.`);
     };
@@ -5756,7 +5758,7 @@ function App() {
   const restoreUndoAt = (index) => {
     const item = undoStack.current[index];
     if (!item) return;
-    if (!window.confirm(`Restore the budget to before "${item.label}"?`)) return;
+    if (!window.confirm(`Restore the budget to before "${item.label}"￿`)) return;
     const current = data;
     const older = undoStack.current.slice(index + 1);
     rawSetData(item.data);
@@ -5872,7 +5874,7 @@ function App() {
     }, "Split transaction added"),
     markTransactionReviewed: (id) => setData(d => ({
       ...d,
-      transactions: d.transactions.map(t => t.id === id ? { ...t, needsReview: false } : t),
+      transactions: d.transactions.map(t => t.id === id ￿ { ...t, needsReview: false } : t),
     }), "Transaction reviewed"),
     markAllTransactionsReviewed: () => setData(d => ({
       ...d,
@@ -5885,7 +5887,7 @@ function App() {
     importTransactions: (arr) => setData(d => syncPaidBillsFromClearedTransactions({
       ...d,
       transactions: [...arr.map(t => ({ ...t, needsReview: true })), ...d.transactions]
-        .sort((a, b) => (a.date < b.date ? 1 : -1)),
+        .sort((a, b) => (a.date < b.date ￿ 1 : -1)),
     })),
 
     toggleBillPaid: (monthKey, id) => setData(d => {
@@ -5942,9 +5944,9 @@ function App() {
       (d.subscriptions || []).filter(subscription => subscription.active && ["Semi-Annual", "Annual"].includes(subCadence(subscription))).forEach(subscription => {
         const target = Math.abs(Number(subscription.amount) || 0);
         if (!target) return;
-        const interval = subCadence(subscription) === "Semi-Annual" ? 6 : 12;
+        const interval = subCadence(subscription) === "Semi-Annual" ￿ 6 : 12;
         const nextDate = subscriptionNextChargeDate(subscription);
-        const nextChargeDate = Number.isFinite(nextDate.getTime()) ? nextDate.toISOString().slice(0, 10) : "";
+        const nextChargeDate = Number.isFinite(nextDate.getTime()) ￿ nextDate.toISOString().slice(0, 10) : "";
         const existingIndex = funds.findIndex(fund => fund.sourceSubscriptionId === subscription.id || String(fund.name || "").toLowerCase() === String(subscription.merchant || "").toLowerCase());
         const values = { name: subscription.merchant, target, monthly: target / interval, sourceSubscriptionId: subscription.id, nextChargeDate };
         if (existingIndex >= 0) funds[existingIndex] = { ...funds[existingIndex], ...values };
@@ -5953,7 +5955,7 @@ function App() {
       return { ...d, sinkingFunds: funds, subscriptionSinkingFundsInitialized: true };
     }, "Subscription sinking funds updated"),
     addSinkingFund: (fund) => setData(d => ({ ...d, sinkingFunds: [...(d.sinkingFunds || []), fund] }), "Sinking fund added"),
-    contributeSinkingFund: (id, amount) => setData(d => ({ ...d, sinkingFunds: (d.sinkingFunds || []).map(f => f.id === id ? { ...f, current: Math.min(f.target, f.current + amount) } : f) }), "Sinking fund contribution"),
+    contributeSinkingFund: (id, amount) => setData(d => ({ ...d, sinkingFunds: (d.sinkingFunds || []).map(f => f.id === id ￿ { ...f, current: Math.min(f.target, f.current + amount) } : f) }), "Sinking fund contribution"),
     deleteSinkingFund: (id) => setData(d => ({ ...d, sinkingFunds: (d.sinkingFunds || []).filter(f => f.id !== id) }), "Sinking fund deleted"),
 
     toggleSubscription: (id) => setData(d => ({ ...d, subscriptions: d.subscriptions.map(s => s.id === id ? { ...s, active: !s.active } : s) })),
@@ -5968,7 +5970,7 @@ function App() {
     addGoal: (g) => setData(d => ({ ...d, goals: [...d.goals, g] })),
     updateGoal: (g) => setData(d => ({ ...d, goals: d.goals.map(x => x.id === g.id ? g : x) })),
     deleteGoal: (id) => setData(d => ({ ...d, goals: d.goals.filter(x => x.id !== id) })),
-    contributeToGoal: (id, amt) => setData(d => ({ ...d, goals: d.goals.map(g => g.id === id ? { ...g, current: Math.max(0, g.current + amt) } : g) })),
+    contributeToGoal: (id, amt) => setData(d => ({ ...d, goals: d.goals.map(g => g.id === id ￿ { ...g, current: Math.max(0, g.current + amt) } : g) })),
     addTrip: (trip) => setData(d => ({ ...d, trips: [...(d.trips || []), trip] }), "Trip added"),
     deleteTrip: (id) => setData(d => ({ ...d, trips: (d.trips || []).filter(trip => trip.id !== id), transactions: d.transactions.map(t => t.tripId === id ? { ...t, tripId: "" } : t) }), "Trip deleted"),
 
@@ -6032,7 +6034,7 @@ function App() {
       ...d,
       transactions: d.transactions.map(t => {
         const match = (d.rules || []).find(r => t.merchant.toLowerCase().includes(r.keyword.toLowerCase()));
-        return match ? { ...t, category: match.category } : t;
+        return match ￿ { ...t, category: match.category } : t;
       }),
     })),
 
@@ -6082,7 +6084,7 @@ function App() {
     }, "Budget category renamed"),
     deleteCategory: (category) => setData(d => {
       if (!EXPENSE_CATEGORIES.includes(category) && !(d.customCategories || []).includes(category)) return d;
-      const replaceSplits = (splits) => (splits || []).map(split => split.category === category ? { ...split, category: "Other" } : split);
+      const replaceSplits = (splits) => (splits || []).map(split => split.category === category ￿ { ...split, category: "Other" } : split);
       const removeFromPlan = (plan) => {
         const next = { ...(plan || {}) };
         delete next[category];
@@ -6094,10 +6096,10 @@ function App() {
         hiddenBudgetCategories: [...new Set([...(d.hiddenBudgetCategories || []), category])],
         transactions: d.transactions.map(transaction => ({
           ...transaction,
-          category: transaction.category === category ? "Other" : transaction.category,
+          category: transaction.category === category ￿ "Other" : transaction.category,
           splits: replaceSplits(transaction.splits),
         })),
-        subscriptions: (d.subscriptions || []).map(item => item.category === category ? { ...item, category: "Other" } : item),
+        subscriptions: (d.subscriptions || []).map(item => item.category === category ￿ { ...item, category: "Other" } : item),
         rules: (d.rules || []).map(rule => rule.category === category ? { ...rule, category: "Other" } : rule),
         budgets: removeFromPlan(d.budgets),
         budgetPlans: Object.fromEntries(Object.entries(d.budgetPlans || {}).map(([month, plan]) => [month, removeFromPlan(plan)])),
@@ -6188,8 +6190,32 @@ function App() {
   );
 }
 
+class MoneyErrorBoundary extends React.Component {
+  constructor(props) { super(props); this.state = { error: null }; }
+  static getDerivedStateFromError(error) { return { error }; }
+  componentDidCatch(error) {
+    try { localStorage.setItem("meridian_money_last_error", String(error && (error.stack || error.message) || error)); } catch (e) {}
+  }
+  openDashboard = () => {
+    try { localStorage.setItem(ACTIVE_TAB_KEY, "dashboard"); } catch (e) {}
+    location.reload();
+  };
+  render() {
+    if (!this.state.error) return this.props.children;
+    return <div className="min-h-screen bg-slate-50 p-5 flex items-start justify-center">
+      <div className="mt-16 w-full max-w-lg bg-white border-2 border-slate-200 rounded-2xl shadow-lg p-6 text-center">
+        <div className="text-4xl mb-3">💵</div>
+        <h1 className="text-xl font-bold text-slate-800">Your Money data is still saved</h1>
+        <p className="mt-2 text-sm text-slate-600">One section could not open. Return to the Dashboard and continue without deleting your accounts or transactions.</p>
+        <button type="button" onClick={this.openDashboard} className="mt-5 w-full rounded-xl bg-indigo-600 text-white font-bold py-3 px-4">Open Money Dashboard</button>
+        <button type="button" onClick={() => location.reload()} className="mt-3 w-full rounded-xl border border-slate-300 bg-white text-slate-700 font-bold py-3 px-4">Try Again</button>
+      </div>
+    </div>;
+  }
+}
+
 const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(<App />);
+root.render(<MoneyErrorBoundary><App /></MoneyErrorBoundary>);
 </script>
 </body>
 </html>
