@@ -3887,12 +3887,6 @@ function SubscriptionModal({ open, onClose, onSave, onDelete, initial, prefill }
             Active
           </label>
         </Field>
-        <Field label="Trip (optional)">
-          <select className={inputClass} value={form.tripId || ""} onChange={e => setForm({ ...form, tripId: e.target.value })}>
-            <option value="">Not part of a trip</option>
-            {(trips || []).map(trip => <option key={trip.id} value={trip.id}>{trip.name}</option>)}
-          </select>
-        </Field>
         <Card className="p-4 bg-slate-50 mb-3">
           <div className="text-sm font-semibold text-slate-700 mb-3">Cancellation tracking</div>
           <Field label="Cancellation status">
