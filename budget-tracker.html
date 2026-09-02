@@ -177,6 +177,20 @@ function fmtDateShort(d) {
 }
 
 function monthKey(d) { return d.slice(0, 7); }
+function nextMonthKey(month) {
+  const [year, monthNumber] = String(month || "").split("-").map(Number);
+  if (!year || !monthNumber) return month;
+  const next = new Date(Date.UTC(year, monthNumber, 1));
+  return next.toISOString().slice(0, 7);
+}
+function financialReviewMonth(transaction, data) {
+  if (transaction.reviewMonth) return transaction.reviewMonth;
+  const actualMonth = monthKey(transaction.date || "");
+  const prefs = (data && data.financialReviewPrefs) || {};
+  const day = Number(String(transaction.date || "").slice(8, 10));
+  const isIncome = Number(transaction.amount) > 0 && transaction.category === "Income";
+  return prefs.earlyIncomeToNextMonth && isIncome && day >= 25 ? nextMonthKey(actualMonth) : actualMonth;
+}
 
 function pad(n) { return n < 10 ? "0" + n : "" + n; }
 
@@ -847,6 +861,7 @@ function normalizeBudgetData(data) {
     auditLog: data.auditLog || [],
     creditScores: data.creditScores || [],
     trips: data.trips || [],
+    financialReviewPrefs: data.financialReviewPrefs || { earlyIncomeToNextMonth: true },
   };
 }
 
@@ -1693,7 +1708,9 @@ function Dashboard({ data, derived, actions }) {
 
 function Budgets({ data, actions, derived }) {
   const [editCat, setEditCat] = useState(null);
+  const [editName, setEditName] = useState("");
   const [editVal, setEditVal] = useState("");
+  const [editError, setEditError] = useState("");
   const [trendCat, setTrendCat] = useState("Groceries");
   const [selectedMonth, setSelectedMonth] = useState(derived.curMonth);
   const budgetCategories = allExpenseCategories(data);
@@ -1714,10 +1731,14 @@ function Budgets({ data, actions, derived }) {
   const trendLabels = derived.trendMonths.map(m => new Date(m + "-01T00:00:00").toLocaleDateString("en-US", { month: "short" }));
   const trendValues = derived.trendMonths.map(m => (derived.monthlyCategoryTotals[m] && derived.monthlyCategoryTotals[m][trendCat]) || 0);
 
-  const openEdit = (cat) => { setEditCat(cat); setEditVal(String(monthBudget[cat] || 0)); };
+  const openEdit = (cat) => { setEditCat(cat); setEditName(cat); setEditVal(String(monthBudget[cat] || 0)); setEditError(""); };
   const saveEdit = () => {
+    const renamed = editName.trim();
     const v = parseFloat(editVal);
-    if (!isNaN(v) && v >= 0) actions.setBudgetForMonth(selectedMonth, editCat, v);
+    if (!renamed) { setEditError("Enter a category name."); return; }
+    if (renamed.toLowerCase() !== editCat.toLowerCase() && budgetCategories.some(cat => cat.toLowerCase() === renamed.toLowerCase())) { setEditError("That category already exists."); return; }
+    if (renamed !== editCat) actions.renameCategory(editCat, renamed);
+    if (!isNaN(v) && v >= 0) actions.setBudgetForMonth(selectedMonth, renamed, v);
     setEditCat(null);
   };
   const deleteBudget = (cat) => {
@@ -1805,9 +1826,13 @@ function Budgets({ data, actions, derived }) {
       </Card>
 
       <Modal open={!!editCat} onClose={() => setEditCat(null)} title={"Edit Budget — " + editCat}>
-        <Field label="Monthly limit ($)">
-          <input type="number" className={inputClass} value={editVal} onChange={e => setEditVal(e.target.value)} autoFocus />
+        <Field label="Category name">
+          <input className={inputClass} value={editName} onChange={e => setEditName(e.target.value)} autoFocus />
         </Field>
+        <Field label="Monthly limit ($)">
+          <input type="number" className={inputClass} value={editVal} onChange={e => setEditVal(e.target.value)} />
+        </Field>
+        {editError && <p className="text-sm text-rose-600 mb-3">{editError}</p>}
         <div className="flex justify-end gap-2 mt-4">
           <Button variant="secondary" onClick={() => setEditCat(null)}>Cancel</Button>
           <Button onClick={saveEdit}>Save</Button>
@@ -1878,7 +1903,7 @@ function Watchlists({ data, actions, selectedMonth }) {
 
 /* ============================== TRANSACTIONS ============================== */
 
-function TransactionModal({ open, onClose, onSave, initial, accounts, rules, trips, defaultAccountId }) {
+function TransactionModal({ open, onClose, onSave, initial, accounts, rules, trips, categories, defaultAccountId }) {
   const blank = { date: todayISO(), accountId: defaultAccountId || accounts[0]?.id || "", merchant: "", category: defaultAccountId === CINDY_CC_ACCOUNT_ID ? "Personal Support" : "Other", amount: "", notes: "", tags: [], tripId: "", excludeFromBudget: false, needsReview: false, person: defaultAccountId === CINDY_CC_ACCOUNT_ID ? "Cynthia" : "Joint", receipt: null };
   const [form, setForm] = useState(initial || blank);
   const [receiptBusy, setReceiptBusy] = useState(false);
@@ -1926,7 +1951,7 @@ function TransactionModal({ open, onClose, onSave, initial, accounts, rules, tri
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Field label="Category">
             <select className={inputClass} value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
-              {Object.keys(CATEGORY_META).map(c => <option key={c} value={c}>{c}</option>)}
+              {(categories || Object.keys(CATEGORY_META)).map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </Field>
           <Field label="Account">
@@ -1938,6 +1963,12 @@ function TransactionModal({ open, onClose, onSave, initial, accounts, rules, tri
         <Field label="Person">
           <select className={inputClass} value={form.person || "Joint"} onChange={e => setForm({ ...form, person: e.target.value })}>
             {PEOPLE.map(p => <option key={p} value={p}>{PEOPLE_META[p].icon} {p}</option>)}
+          </select>
+        </Field>
+        <Field label="Trip">
+          <select className={inputClass} value={form.tripId || ""} onChange={e => setForm({ ...form, tripId: e.target.value })}>
+            <option value="">Not part of a trip</option>
+            {(trips || []).map(trip => <option key={trip.id} value={trip.id}>{trip.name}</option>)}
           </select>
         </Field>
         <Field label="Notes (optional)">
@@ -1960,7 +1991,10 @@ function TransactionModal({ open, onClose, onSave, initial, accounts, rules, tri
               <button type="button" className="text-xs text-rose-500 font-medium" onClick={() => setForm({ ...form, receipt: null })}>Remove</button>
             </div>
           ) : (
-            <input type="file" accept="image/*" className="text-sm" onChange={e => onReceiptChange(e.target.files[0])} />
+            <div className="flex flex-wrap gap-2">
+              <label className="px-3 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium cursor-pointer">📷 Take Photo<input type="file" accept="image/*" capture="environment" className="hidden" onChange={e => onReceiptChange(e.target.files[0])} /></label>
+              <label className="px-3 py-2 rounded-lg bg-slate-100 text-slate-700 text-sm font-medium cursor-pointer">🖼 Choose Photo<input type="file" accept="image/*" className="hidden" onChange={e => onReceiptChange(e.target.files[0])} /></label>
+            </div>
           )}
           {receiptBusy && <div className="text-xs text-slate-400 mt-1">Processing image…</div>}
         </Field>
@@ -2246,7 +2280,7 @@ function CindyCreditCardRegister({ data, actions, cindyAccount }) {
               <div className="hidden sm:flex items-center gap-2 mt-2">
                 <AddCategoryButton data={data} actions={actions} showLabel={true} allowDelete={true} onAdded={category => setForm(f => ({ ...f, category }))} onDeleted={category => setForm(f => ({ ...f, category: f.category === category ? "Other" : f.category }))} />
                 <button type="button" title="Attach receipt" className="w-9 h-9 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 shrink-0" onClick={() => document.getElementById("cindy-receipt-input").click()}>📎</button>
-                <input id="cindy-receipt-input" type="file" accept="image/*" className="hidden" onChange={e => attachReceipt(e.target.files[0])} />
+                <input id="cindy-receipt-input" type="file" accept="image/*" capture="environment" className="hidden" onChange={e => attachReceipt(e.target.files[0])} />
                 {form.receipt && <button type="button" className="text-xs text-indigo-600" onClick={() => setViewingReceipt(form.receipt)}>view</button>}
               </div>
             </div>
@@ -2657,7 +2691,7 @@ function BankAccountRegister({ data, actions, account }) {
               <div className="hidden sm:flex items-center gap-2 mt-2">
                 <AddCategoryButton data={data} actions={actions} showLabel={true} allowDelete={true} onAdded={category => setForm(f => ({ ...f, category }))} onDeleted={category => setForm(f => ({ ...f, category: f.category === category ? "Other" : f.category }))} />
                 <button type="button" title="Attach receipt" className="w-9 h-9 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 shrink-0" onClick={() => document.getElementById("bank-receipt-input-" + account.id).click()}>📎</button>
-                <input id={"bank-receipt-input-" + account.id} type="file" accept="image/*" className="hidden" onChange={e => attachReceipt(e.target.files[0])} />
+                <input id={"bank-receipt-input-" + account.id} type="file" accept="image/*" capture="environment" className="hidden" onChange={e => attachReceipt(e.target.files[0])} />
                 {form.receipt && <button type="button" className="text-xs text-indigo-600" onClick={() => setViewingReceipt(form.receipt)}>view</button>}
               </div>
             </div>
@@ -2945,10 +2979,17 @@ function AccountsAndCards({ data, actions }) {
             const purchases = data.transactions.filter(t => t.tripId === trip.id && Number(t.amount) < 0);
             const total = purchases.reduce((sum, t) => sum + Math.abs(Number(t.amount) || 0), 0);
             const accountCount = new Set(purchases.map(t => t.accountId)).size;
+            const categoryTotals = purchases.reduce((totals, transaction) => {
+              expenseCategoryAllocations(transaction).forEach(part => { totals[part.category] = (totals[part.category] || 0) + part.amount; });
+              return totals;
+            }, {});
             return <div key={trip.id} className="rounded-xl border border-sky-200 bg-white p-4">
               <div className="flex justify-between gap-2"><strong className="text-slate-800">{trip.name}</strong><button className="text-xs text-rose-500" onClick={() => { if (window.confirm(`Delete the ${trip.name} trip? Transactions will remain but will no longer be assigned to it.`)) actions.deleteTrip(trip.id); }}>Delete</button></div>
               <div className="text-2xl font-bold text-sky-700 mt-2">{fmtCurrency(total)}</div>
               <div className="text-xs text-slate-400 mt-1">{purchases.length} purchase{purchases.length === 1 ? "" : "s"} · {accountCount} account{accountCount === 1 ? "" : "s"}</div>
+              {Object.keys(categoryTotals).length > 0 && <div className="mt-3 pt-3 border-t border-sky-100 space-y-1">
+                {Object.entries(categoryTotals).sort((a, b) => b[1] - a[1]).map(([category, amount]) => <div key={category} className="flex items-center justify-between gap-3 text-xs"><span className="text-slate-600">{categoryIconOf(category)} {category}</span><strong className="text-slate-700">{fmtCurrency(amount)}</strong></div>)}
+              </div>}
             </div>;
           })}
           {(data.trips || []).length === 0 && <div className="text-sm text-slate-400 py-3">Add a trip to begin tracking its spending.</div>}
@@ -3627,7 +3668,7 @@ function Transactions({ data, actions }) {
           </div>
         )}
       </Card>
-      <TransactionModal open={modalOpen} onClose={() => setModalOpen(false)} onSave={save} initial={editing} accounts={data.accounts} rules={data.rules} trips={data.trips} defaultAccountId={presetAccountId} />
+      <TransactionModal open={modalOpen} onClose={() => setModalOpen(false)} onSave={save} initial={editing} accounts={data.accounts} rules={data.rules} trips={data.trips} categories={allCategoriesFull(data)} defaultAccountId={presetAccountId} />
 
       <SubscriptionModal open={!!markingSub} onClose={closeMarkSubscription} onSave={saveMarkedSubscription} prefill={markSubPrefill} />
 
@@ -4907,16 +4948,16 @@ function median(values) {
 
 function FinancialReview({ data, derived, actions }) {
   const months = useMemo(() => {
-    const result = [...new Set(data.transactions.map(t => monthKey(t.date)).filter(Boolean))].sort().reverse();
+    const result = [...new Set(data.transactions.map(t => financialReviewMonth(t, data)).filter(Boolean))].sort().reverse();
     const current = todayISO().slice(0, 7);
     if (!result.includes(current)) result.unshift(current);
     return result;
-  }, [data.transactions]);
+  }, [data.transactions, data.financialReviewPrefs]);
   const [selectedMonth, setSelectedMonth] = useState(months[0] || todayISO().slice(0, 7));
   const [score, setScore] = useState("");
   const [scoreDate, setScoreDate] = useState(todayISO());
 
-  const monthTransactions = data.transactions.filter(t => monthKey(t.date) === selectedMonth && !t.excludeFromBudget && t.category !== "Transfer");
+  const monthTransactions = data.transactions.filter(t => financialReviewMonth(t, data) === selectedMonth && !t.excludeFromBudget && t.category !== "Transfer");
   const income = monthTransactions.filter(t => t.amount > 0).reduce((sum, t) => sum + Number(t.amount || 0), 0);
   const spending = monthTransactions.filter(t => t.amount < 0).reduce((sum, t) => sum + Math.abs(Number(t.amount || 0)), 0);
   const savings = income - spending;
@@ -4954,6 +4995,13 @@ function FinancialReview({ data, derived, actions }) {
         </select>
       </div>
       <SectionNotes section="review" data={data} actions={actions} />
+
+      <Card className="p-4 border-indigo-200 bg-indigo-50/50">
+        <label className="flex items-start gap-3 cursor-pointer">
+          <input type="checkbox" className="mt-1" checked={!!data.financialReviewPrefs?.earlyIncomeToNextMonth} onChange={e => actions.setFinancialReviewPrefs({ earlyIncomeToNextMonth: e.target.checked })} />
+          <span><span className="block text-sm font-semibold text-slate-700">Count early month-end income in the following month</span><span className="block text-xs text-slate-500 mt-1">Income dated on or after the 25th is shown in the next month’s Financial Review. The real bank transaction date and account balance stay unchanged.</span></span>
+        </label>
+      </Card>
 
       <Card className="p-5">
         <h3 className="font-semibold text-slate-700 mb-4">Monthly report</h3>
@@ -5879,6 +5927,7 @@ function App() {
     }), "Watchlist deleted"),
     addCreditScore: (entry) => setData(d => ({ ...d, creditScores: [...(d.creditScores || []), entry].sort((a, b) => a.date.localeCompare(b.date)) }), "Credit score added"),
     deleteCreditScore: (id) => setData(d => ({ ...d, creditScores: (d.creditScores || []).filter(entry => entry.id !== id) }), "Credit score deleted"),
+    setFinancialReviewPrefs: (prefs) => setData(d => ({ ...d, financialReviewPrefs: { ...(d.financialReviewPrefs || {}), ...prefs } }), "Financial Review setting updated"),
 
     addRule: (r) => setData(d => ({ ...d, rules: [...(d.rules || []), r] })),
     deleteRule: (id) => setData(d => ({ ...d, rules: (d.rules || []).filter(r => r.id !== id) })),
@@ -5912,6 +5961,28 @@ function App() {
       if (existing.has(trimmed.toLowerCase())) return d;
       return { ...d, customCategories: [...(d.customCategories || []), trimmed] };
     }),
+    renameCategory: (category, nextName) => setData(d => {
+      const renamed = String(nextName || "").trim();
+      if (!renamed || renamed === category) return d;
+      const replacePlan = (plan) => {
+        const next = { ...(plan || {}) };
+        if (Object.prototype.hasOwnProperty.call(next, category)) { next[renamed] = next[category]; delete next[category]; }
+        return next;
+      };
+      const replaceSplits = (splits) => (splits || []).map(split => split.category === category ? { ...split, category: renamed } : split);
+      return {
+        ...d,
+        customCategories: [...new Set([...(d.customCategories || []).filter(item => item !== category), renamed])],
+        hiddenBudgetCategories: [...new Set([...(d.hiddenBudgetCategories || []).filter(item => item !== renamed), category])],
+        transactions: d.transactions.map(transaction => ({ ...transaction, category: transaction.category === category ? renamed : transaction.category, splits: replaceSplits(transaction.splits) })),
+        subscriptions: (d.subscriptions || []).map(item => item.category === category ? { ...item, category: renamed } : item),
+        rules: (d.rules || []).map(rule => rule.category === category ? { ...rule, category: renamed } : rule),
+        watchlists: (d.watchlists || []).map(item => item.type === "category" && item.query === category ? { ...item, query: renamed } : item),
+        budgetRollovers: replacePlan(d.budgetRollovers),
+        budgets: replacePlan(d.budgets),
+        budgetPlans: Object.fromEntries(Object.entries(d.budgetPlans || {}).map(([month, plan]) => [month, replacePlan(plan)])),
+      };
+    }, "Budget category renamed"),
     deleteCategory: (category) => setData(d => {
       if (!EXPENSE_CATEGORIES.includes(category) && !(d.customCategories || []).includes(category)) return d;
       const replaceSplits = (splits) => (splits || []).map(split => split.category === category ? { ...split, category: "Other" } : split);
