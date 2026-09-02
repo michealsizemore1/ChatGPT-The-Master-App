@@ -188,7 +188,7 @@ function financialReviewMonth(transaction, data) {
   const actualMonth = monthKey(transaction.date || "");
   const prefs = (data && data.financialReviewPrefs) || {};
   const day = Number(String(transaction.date || "").slice(8, 10));
-  const isIncome = Number(transaction.amount) > 0 && transaction.category === "Income";
+  const isIncome = Number(transaction.amount) > 0 && transaction.category !== "Transfer";
   return prefs.earlyIncomeToNextMonth && isIncome && day >= 27 ? nextMonthKey(actualMonth) : actualMonth;
 }
 
