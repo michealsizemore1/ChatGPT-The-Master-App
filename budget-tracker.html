@@ -852,6 +852,7 @@ function normalizeBudgetData(data) {
     paycheckItems: data.paycheckItems || [],
     watchlists: data.watchlists || [],
     paidBills: data.paidBills || {},
+    autoPaidBills: data.autoPaidBills || {},
     customCategories: data.customCategories || [],
     hiddenBudgetCategories: data.hiddenBudgetCategories || [],
     sinkingFunds: data.sinkingFunds || [],
@@ -1187,6 +1188,57 @@ function transactionCategoryAmount(t, category) {
 function transactionCategoryLabel(t) {
   const splits = transactionSplits(t);
   return splits.length ? `Split: ${splits.map(part => part.category).join(" + ")}` : t.category;
+}
+
+function matchingScheduledBillIds(transaction, data) {
+  if (!transaction || Number(transaction.amount) >= 0 || transaction.category === "Transfer") return [];
+  const account = (data.accounts || []).find(item => item.id === transaction.accountId);
+  if (!account || String(account.type || "").toLowerCase() !== "checking") return [];
+  const transactionName = normalizeMerchantName(transaction.merchant || "");
+  if (!transactionName) return [];
+  const isNameMatch = merchant => {
+    const billName = normalizeMerchantName(merchant || "");
+    return billName && (billName === transactionName || (billName.length >= 5 && transactionName.includes(billName)) || (transactionName.length >= 5 && billName.includes(transactionName)));
+  };
+  const ids = (data.recurringBills || []).filter(item => isNameMatch(item.merchant)).map(item => item.id);
+  const date = new Date(String(transaction.date || "") + "T00:00:00");
+  if (Number.isFinite(date.getTime())) {
+    (data.subscriptions || []).filter(item => item.active && subDueInMonth(item, date.getFullYear(), date.getMonth() + 1) && isNameMatch(item.merchant)).forEach(item => ids.push(item.id));
+  }
+  return [...new Set(ids.filter(Boolean))];
+}
+
+// Keep the register, Safe to Spend, and Bill Calendar on one shared paid status.
+// Only explicit cleared=true transactions create an automatic checkmark; manual
+// calendar checkmarks remain untouched unless they were originally created here.
+function syncPaidBillsFromClearedTransactions(data) {
+  const paidBills = Object.fromEntries(Object.entries(data.paidBills || {}).map(([month, values]) => [month, { ...(values || {}) }]));
+  const autoPaidBills = Object.fromEntries(Object.entries(data.autoPaidBills || {}).map(([month, values]) => [month, { ...(values || {}) }]));
+  const active = {};
+  (data.transactions || []).filter(transaction => transaction.cleared === true).forEach(transaction => {
+    const month = monthKey(transaction.date || "");
+    if (!month) return;
+    matchingScheduledBillIds(transaction, data).forEach(id => {
+      active[month] = active[month] || {};
+      active[month][id] = true;
+    });
+  });
+  const months = new Set([...Object.keys(autoPaidBills), ...Object.keys(active)]);
+  months.forEach(month => {
+    paidBills[month] = { ...(paidBills[month] || {}) };
+    autoPaidBills[month] = { ...(autoPaidBills[month] || {}) };
+    const ids = new Set([...Object.keys(autoPaidBills[month]), ...Object.keys(active[month] || {})]);
+    ids.forEach(id => {
+      if (active[month] && active[month][id]) {
+        paidBills[month][id] = true;
+        autoPaidBills[month][id] = true;
+      } else if (autoPaidBills[month][id]) {
+        paidBills[month][id] = false;
+        delete autoPaidBills[month][id];
+      }
+    });
+  });
+  return { ...data, paidBills, autoPaidBills };
 }
 
 function useDerived(data) {
@@ -5779,9 +5831,9 @@ function App() {
   }, [data.notificationPrefs && data.notificationPrefs.enabled, JSON.stringify(derived.budgetAlerts), JSON.stringify(derived.recurringItems)]);
 
   const actions = {
-    addTransaction: (t) => setData(d => ({ ...d, transactions: [{ ...t, needsReview: false }, ...d.transactions].sort((a, b) => (a.date < b.date ? 1 : -1)) }), "Transaction added"),
-    updateTransaction: (t) => setData(d => ({ ...d, transactions: d.transactions.map(x => x.id === t.id ? t : x) }), "Transaction updated"),
-    deleteTransaction: (id) => setData(d => ({ ...d, transactions: d.transactions.filter(x => x.id !== id) }), "Transaction deleted"),
+    addTransaction: (t) => setData(d => syncPaidBillsFromClearedTransactions({ ...d, transactions: [{ ...t, needsReview: false }, ...d.transactions].sort((a, b) => (a.date < b.date ? 1 : -1)) }), "Transaction added"),
+    updateTransaction: (t) => setData(d => syncPaidBillsFromClearedTransactions({ ...d, transactions: d.transactions.map(x => x.id === t.id ? t : x) }), "Transaction updated"),
+    deleteTransaction: (id) => setData(d => syncPaidBillsFromClearedTransactions({ ...d, transactions: d.transactions.filter(x => x.id !== id) }), "Transaction deleted"),
     splitTransaction: (original, parts) => setData(d => {
       const splits = parts.map(part => ({ category: part.category, amount: Number(part.amount) }));
       return {
@@ -5818,7 +5870,7 @@ function App() {
       const idSet = new Set(ids);
       return { ...d, transactions: d.transactions.map(t => idSet.has(t.id) ? { ...t, accountId } : t) };
     }),
-    importTransactions: (arr) => setData(d => ({
+    importTransactions: (arr) => setData(d => syncPaidBillsFromClearedTransactions({
       ...d,
       transactions: [...arr.map(t => ({ ...t, needsReview: true })), ...d.transactions]
         .sort((a, b) => (a.date < b.date ? 1 : -1)),
