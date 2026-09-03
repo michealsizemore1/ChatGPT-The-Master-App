@@ -6511,9 +6511,424 @@ function dailyCalorieTargetData(){
   var activities=getActivities().filter(function(a){return a.date===dateKey;}),active=0,estimatedCount=0,activityDetails=[];
   activities.forEach(function(a){var c=calorieAdvisorActivityCalories(a,weight);active+=c.calories;if(c.estimated&&c.calories)estimatedCount++;activityDetails.push(calorieAdvisorActivityDescription(a,c));});
   active=Math.round(active);var refuel=Math.max(0,Math.min(100,parseInt(settings.refuel||100,10)))/100,performance=nutritionPerformancePreset(dateKey),goalAdjust=performance?0:(settings.goal==='loss'?-300:(settings.goal==='gain'?250:0));
-  var activityBased=Math.max(1200,Math.round((ba
-... 36290 bytes omitted ...
-, and fat (unsaturated versus saturated/trans). Respond with ONLY a single JSON object — no markdown, no code fences, no explanation, nothing else before or after. The JSON must have these exact keys:\n- "name": the product or food name visible anywhere on the label/package (use "Scanned Food" if not visible)\n- "ingredientsText": the complete ingredient list exactly as visible (use an empty string if it is not visible; do not guess)\n- "proteinSource": use "support" for lean/plant, "limit" for higher-fat/processed, or "unknown" when not supported by visible evidence\n- "carbSource": use "support" for complex/fiber-rich, "limit" for simple/refined, or "unknown" when not supported by visible evidence\n- "fatSource": use "support" for unsaturated, "limit" for saturated/trans, or "unknown" when not supported by visible evidence\n- "cal": Calories per serving as a plain number\n- "prot": Protein grams per serving as a plain number\n- "fat": Total Fat grams per serving as a plain number\n- "carbs": Total Carbohydrate grams per serving as a plain number\n- "fiber": Dietary Fiber grams per serving as a plain number\n- "sugar": Total Sugars grams per serving as a plain number\n- "sodium": Sodium milligrams per serving as a plain number\n- "vitA": Vitamin A in mcg per serving as a plain number\n- "vitC": Vitamin C in mg per serving as a plain number\n- "vitD": Vitamin D in mcg per serving as a plain number\n- "calcium": Calcium in mg per serving as a plain number\n- "iron": Iron in mg per serving as a plain number\n- "potassium": Potassium in mg per serving as a plain number\nAll numeric values must be numbers, not strings. Use 0 if a numeric value cannot be read from the label. Never invent missing ingredients or classifications. Output the JSON object only.'}
+  var activityBased=Math.max(1200,Math.round((base+active*refuel+goalAdjust)/25)*25),target=performance?Math.max(performance.calories,activityBased):activityBased,range=Math.max(100,Math.round(target*.05/25)*25);
+  return{dateKey:dateKey,settings:settings,weight:weight,manualBase:manualBase,base:base,activities:activities,active:active,estimatedCount:estimatedCount,activityDetails:activityDetails,refuel:refuel,goalAdjust:goalAdjust,target:target,range:range,performancePreset:performance,activityBased:activityBased};
+}
+function refreshNutritionTargets(showMessage){
+  updateMacroTotals();
+  if(showMessage&&typeof v26Toast==='function')v26Toast('Calorie and macro targets recalculated together');
+}
+function calculateDailyCalorieTarget(showMessage){
+  var result=document.getElementById('calorieAdvisorResult');if(!result)return;
+  var calc=dailyCalorieTargetData(),dateKey=calc.dateKey,settings=calc.settings,baseInput=document.getElementById('calorieBaseTarget'),goalInput=document.getElementById('calorieGoal'),refuelInput=document.getElementById('calorieRefuelPct');
+  if(baseInput&&document.activeElement!==baseInput)baseInput.value=settings.base||'';
+  if(goalInput)goalInput.value=settings.goal||'maintain';if(refuelInput)refuelInput.value=String(settings.refuel||100);
+  var dateLabel=document.getElementById('calorieAdvisorDate');if(dateLabel)dateLabel.textContent=today.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  var weight=calorieAdvisorLatestWeight(dateKey),manualBase=parseFloat(settings.base)||0,base=manualBase||(weight?Math.round(weight*12.5/50)*50:2200);
+  var activities=getActivities().filter(function(a){return a.date===dateKey;}),active=0,estimatedCount=0;
+  var activityDetails=[];
+  activities.forEach(function(a){var c=calorieAdvisorActivityCalories(a,weight);active+=c.calories;if(c.estimated&&c.calories)estimatedCount++;activityDetails.push(calorieAdvisorActivityDescription(a,c));});
+  active=Math.round(active);var refuel=Math.max(0,Math.min(100,parseInt(settings.refuel||100,10)))/100,goalAdjust=settings.goal==='loss'?-300:(settings.goal==='gain'?250:0);
+  var target=calc.target,range=calc.range;weight=calc.weight;manualBase=calc.manualBase;base=calc.base;activities=calc.activities;active=calc.active;estimatedCount=calc.estimatedCount;activityDetails=calc.activityDetails;refuel=calc.refuel;goalAdjust=calc.goalAdjust;
+  var logged=Math.round((window._foodLog||[]).reduce(function(sum,x){return sum+(parseFloat(x.cal)||0)*(parseFloat(x.servings)||1);},0)),remaining=Math.max(0,target-logged),over=Math.max(0,logged-target);
+  var workoutText=activities.length?activities.length+' workout'+(activities.length===1?'':'s')+' • '+active.toLocaleString()+' active kcal':'No workout logged • 0 active kcal';
+  result.innerHTML='<div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;"><strong style="font-size:1.45rem;color:#166534;">'+target.toLocaleString()+' kcal</strong><span style="color:#4d7c0f;font-weight:700;">suggested intake</span></div>'
+    +(calc.performancePreset?'<div style="margin:6px 0;padding:7px 9px;border-radius:9px;background:#eff6ff;color:#1e3a8a;"><strong>'+escHtml(calc.performancePreset.label)+'</strong><br><span style="font-size:.72rem;">Hard-workout fueling is active. The gradual-loss deduction is paused for this day.</span></div>':'')
+    +'<div style="margin-top:4px;"><strong>Practical range:</strong> '+Math.max(1200,target-range).toLocaleString()+'–'+(target+range).toLocaleString()+' kcal</div>'
+    +'<div><strong>Calculation:</strong> '+(calc.performancePreset?'Higher of '+calc.performancePreset.calories.toLocaleString()+' performance target or ':'')+base.toLocaleString()+' rest-day target + '+Math.round(active*refuel).toLocaleString()+' workout replacement'+(goalAdjust?' '+(goalAdjust>0?'+ ':'− ')+Math.abs(goalAdjust)+' goal adjustment':'')+'</div>'
+    +'<div><strong>Activities:</strong> '+workoutText+(estimatedCount?' ('+estimatedCount+' estimated)':'')+'</div>'
+    +(activityDetails.length?'<div style="margin-top:3px;font-size:.72rem;color:#3f6212;"><strong>Used from Activities:</strong> '+activityDetails.map(escHtml).join('; ')+'</div>':'<div style="margin-top:3px;font-size:.72rem;color:#78716c;">No saved Activities were found for this date.</div>')
+    +'<div><strong>Logged so far:</strong> '+logged.toLocaleString()+' kcal • '+(over?'<strong style="color:#b91c1c;">Over target: '+over.toLocaleString()+' kcal</strong>':'<strong>Remaining:</strong> '+remaining.toLocaleString()+' kcal')+'</div>'
+    +(weight&&!manualBase?'<div style="font-size:.7rem;color:#78716c;margin-top:4px;">Automatic rest-day target uses your most recent weight of '+weight.toFixed(1)+' lb. Enter your own rest-day target above if you know it.</div>':'');
+  if(showMessage&&typeof v26Toast==='function')v26Toast('Daily calorie target recalculated');
+}
+
+// ── Favorites ────────────────────────────────────────
+function getFavorites(){var r=localStorage.getItem('favorites_data');return r?JSON.parse(r):[];}
+function updateFavoriteFoodsCount(count){var el=document.getElementById('favoriteFoodsCount');if(el)el.textContent=Number.isFinite(count)?count:getFavorites().length;}
+function saveFavorites(favs){localStorage.setItem('favorites_data',JSON.stringify(favs));updateFavoriteFoodsCount(favs.length);}
+
+function saveFoodAsFavorite(itemId){
+  var item=(window._foodLog||[]).find(function(x){return x.id===itemId;});
+  if(!item){alert('Item not found.');return;}
+  var favs=getFavorites();
+  var exists=favs.some(function(f){return f.name.toLowerCase()===item.name.toLowerCase();});
+  if(exists){if(!confirm('"'+item.name+'" is already in favorites. Add again?'))return;}
+  var fav={name:item.name,cal:item.cal,prot:item.prot,fat:item.fat,carbs:item.carbs,servingLabel:item.servingLabel||'1 serving',servings:parseFloat(item.servings)||1,proteinSource:item.proteinSource||'',carbSource:item.carbSource||'',fatSource:item.fatSource||'',barcode:item.barcode||'',imageUrl:item.imageUrl||'',imageData:item.imageData||''};
+  MICRO_FIELDS.forEach(function(f){fav[f]=item[f]!=null?item[f]:null;});
+  favs.push(fav);saveFavorites(favs);
+  alert('⭐ "'+item.name+'" saved to favorites!');
+  renderFavsList();
+}
+
+function addFavorite(){
+  var name=prompt('Favorite food name:','');if(!name||!name.trim())return;
+  var cal=prompt('Calories:','');var prot=prompt('Protein g:','');
+  var fat=prompt('Fat g:','');var carbs=prompt('Carbs g:','');
+  var favs=getFavorites();
+  favs.push({name:name.trim(),cal:cal.trim()?parseFloat(cal)||null:null,prot:prot.trim()?parseFloat(prot)||null:null,fat:fat.trim()?parseFloat(fat)||null:null,carbs:carbs.trim()?parseFloat(carbs)||null:null});
+  saveFavorites(favs);renderFavsList();
+}
+
+function toggleFavMealPanel(){
+  // Panel is always visible; just ensure favs tab is active and rendered
+  showFavTab('favs');renderFavsList();
+}
+
+function showFavTab(tab){
+  window._activeFoodLibraryTab=tab;
+  var fl=document.getElementById('favsList');var hl=document.getElementById('healthyFoodsList');var ml=document.getElementById('mealsList');
+  var fb=document.getElementById('favTabBtn');var hb=document.getElementById('healthyTabBtn');var mb2=document.getElementById('mealTabBtn');
+  if(fl)fl.style.display=tab==='favs'?'block':'none';
+  if(hl)hl.style.display=tab==='healthy'?'block':'none';
+  if(ml)ml.style.display=tab==='meals'?'block':'none';
+  if(fb){fb.style.background=tab==='favs'?'#f39c12':'#e9ecef';fb.style.color=tab==='favs'?'#fff':'#555';}
+  if(hb){hb.style.background=tab==='healthy'?'#16a34a':'#e9ecef';hb.style.color=tab==='healthy'?'#fff':'#555';}
+  if(mb2){mb2.style.background=tab==='meals'?'#f39c12':'#e9ecef';mb2.style.color=tab==='meals'?'#fff':'#555';}
+  if(tab==='meals')renderMealsList();else if(tab==='healthy')renderHealthyFoodsList();else renderFavsList();
+}
+function renderFoodLibrarySearch(){if(window._activeFoodLibraryTab==='healthy')renderHealthyFoodsList();else if(window._activeFoodLibraryTab==='meals')renderMealsList();else renderFavsList();}
+
+function getHealthyFoods(){try{return JSON.parse(localStorage.getItem('healthy_foods_7plus')||'[]');}catch(ignore){return [];}}
+function updateHealthyFoodsCount(count){var el=document.getElementById('healthyFoodsCount');if(el)el.textContent=Number.isFinite(count)?count:getHealthyFoods().length;}
+function saveHealthyFoods(items){localStorage.setItem('healthy_foods_7plus',JSON.stringify(items));updateHealthyFoodsCount(items.length);}
+function importHealthyFoodsFromSavedNutrition(force){
+  if(window._healthyFoodsImported&&!force)return;
+  window._healthyFoodsImported=true;
+  var saved=[],plannerKeys=[];
+  try{saved=saved.concat(getFavorites()||[]);}catch(ignore){}
+  for(var i=0;i<localStorage.length;i++){
+    var key=localStorage.key(i)||'';if(key.indexOf('planner_')===0)plannerKeys.push(key);
+  }
+  plannerKeys.sort().forEach(function(key){try{var day=JSON.parse(localStorage.getItem(key)||'{}');if(Array.isArray(day.foodLog))saved=saved.concat(day.foodLog);}catch(ignore2){}});
+  saved=saved.concat(window._foodLog||[]);
+  var latestByName={};
+  saved.forEach(function(item){var key=String(item&&item.name||'').trim().toLowerCase();if(key)latestByName[key]=item;});
+  var rebuilt=[];
+  Object.keys(latestByName).forEach(function(key){
+    var item=latestByName[key];inferFoodMacroSources(item);var quality=runnerFoodQuality(item);if(quality.score<7)return;
+    var copy={name:String(item.name).trim(),cal:item.cal,prot:item.prot,fat:item.fat,carbs:item.carbs,fiber:item.fiber,sugar:item.sugar,sodium:item.sodium,servingLabel:item.servingLabel||'1 serving',servings:parseFloat(item.servings)||1,proteinSource:item.proteinSource||'',carbSource:item.carbSource||'',fatSource:item.fatSource||'',barcode:item.barcode||'',imageUrl:item.imageUrl||'',imageData:item.imageData||'',score:quality.score,label:quality.label,confidence:quality.confidence,confidencePct:quality.confidencePct,updatedAt:new Date().toISOString()};
+    MICRO_FIELDS.forEach(function(field){copy[field]=item[field]!=null?item[field]:null;});rebuilt.push(copy);
+  });
+  saveHealthyFoods(rebuilt.sort(function(a,b){return (b.score||0)-(a.score||0)||a.name.localeCompare(b.name);}));
+}
+function captureHealthyFoods(log){
+  var healthy=getHealthyFoods(),changed=false;
+  (log||[]).forEach(function(item){
+    if(!item||!String(item.name||'').trim())return;
+    var quality=runnerFoodQuality(item),key=String(item.name).trim().toLowerCase(),idx=healthy.findIndex(function(food){return String(food.name||'').trim().toLowerCase()===key;});
+    if(quality.score<7){if(idx>=0){healthy.splice(idx,1);changed=true;}return;}
+    var copy={name:String(item.name).trim(),cal:item.cal,prot:item.prot,fat:item.fat,carbs:item.carbs,fiber:item.fiber,sugar:item.sugar,sodium:item.sodium,servingLabel:item.servingLabel||'1 serving',servings:parseFloat(item.servings)||1,proteinSource:item.proteinSource||'',carbSource:item.carbSource||'',fatSource:item.fatSource||'',barcode:item.barcode||'',imageUrl:item.imageUrl||'',imageData:item.imageData||'',score:quality.score,label:quality.label,confidence:quality.confidence,confidencePct:quality.confidencePct,updatedAt:new Date().toISOString()};
+    MICRO_FIELDS.forEach(function(field){copy[field]=item[field]!=null?item[field]:null;});
+    if(idx<0)healthy.push(copy);else healthy[idx]=copy;changed=true;
+  });
+  if(changed)saveHealthyFoods(healthy.sort(function(a,b){return (b.score||0)-(a.score||0)||a.name.localeCompare(b.name);}));
+}
+function renderHealthyFoodsList(){
+  var el=document.getElementById('healthyFoodsList');if(!el)return;
+  importHealthyFoodsFromSavedNutrition();
+  var all=getHealthyFoods();updateHealthyFoodsCount(all.length);var q=(document.getElementById('favSearch')||{value:''}).value.toLowerCase().trim(),foods=q?all.filter(function(food){return String(food.name||'').toLowerCase().includes(q);}):all;
+  var rescan='<div style="font-size:.68rem;color:#64748b;margin:0 0 6px;">Use 📷 Take for the camera or 🖼 Choose for a picture already on your phone.</div><button onclick="rescanHealthyFoodsAndImages(this)" style="width:100%;margin:0 0 5px;background:#ecfdf5;color:#166534;border:1px solid #86efac;border-radius:6px;padding:7px;font-size:.74rem;font-weight:800;cursor:pointer;">↻ Rescan foods & barcode pictures</button><div id="healthyRescanStatus" role="status" aria-live="polite" style="display:none;font-size:.7rem;font-weight:700;line-height:1.35;margin:0 2px 7px;"></div>';
+  if(!foods.length){el.innerHTML=rescan+'<div style="font-size:.8rem;color:#64748b;text-align:center;padding:12px;line-height:1.4;">No saved foods currently score 7.0 or higher.</div>';return;}
+  el.innerHTML=rescan+foods.map(function(food){var idx=all.indexOf(food);return '<div style="display:flex;align-items:center;gap:6px;padding:7px 0;border-bottom:1px solid #dcfce7;font-size:.82rem;">'
+    +foodThumbnailHtml(food,'healthy',idx)+'<div style="flex:1;min-width:0;"><div style="font-weight:800;color:#166534;">'+escHtml(food.name)+'</div><div style="color:#64748b;font-size:.72rem;">'+Number(food.score||7).toFixed(1)+'/10 · '+escHtml(food.label||'Good')+' · '+escHtml(food.confidence||'')+' confidence</div></div>'
+    +'<button onclick="loadHealthyFood('+idx+')" style="background:#16a34a;color:#fff;border:none;border-radius:5px;padding:5px 9px;font-size:.76rem;cursor:pointer;">+ Add</button>'
+    +'<button onclick="deleteHealthyFood('+idx+')" title="Remove from this list" style="background:none;border:1px solid #fecaca;border-radius:4px;color:#dc2626;padding:3px 6px;cursor:pointer;">✕</button></div>';}).join('');
+}
+function loadHealthyFood(idx){
+  var food=getHealthyFoods()[idx];if(!food)return;var target=(document.getElementById('favTargetMeal')||{value:'breakfast'}).value;
+  var item=Object.assign({},food,{id:'f'+Date.now(),meal:target});delete item.score;delete item.label;delete item.confidence;delete item.confidencePct;delete item.updatedAt;
+  if(!window._foodLog)window._foodLog=[];window._foodLog.push(item);_setMealOpen(target,true);renderFoodItems();save();
+}
+function deleteHealthyFood(idx){var foods=getHealthyFoods();foods.splice(idx,1);saveHealthyFoods(foods);renderHealthyFoodsList();}
+
+function renderFavsList(){
+  var el=document.getElementById('favsList');if(!el)return;
+  var favs=getFavorites();
+  updateFavoriteFoodsCount(favs.length);
+  var q=(document.getElementById('favSearch')||{value:''}).value.toLowerCase().trim();
+  var filtered=q?favs.filter(function(f){return f.name.toLowerCase().includes(q);}):favs;
+  var photoHelp='<div style="font-size:.68rem;color:#64748b;margin:0 0 6px;">Use 📷 Take for the camera or 🖼 Choose for a picture already on your phone.</div><button onclick="rescanHealthyFoodsAndImages(this,\'favoriteRescanStatus\')" style="width:100%;margin:0 0 5px;background:#fff7ed;color:#9a3412;border:1px solid #fdba74;border-radius:6px;padding:7px;font-size:.74rem;font-weight:800;cursor:pointer;">↻ Rescan foods & barcode pictures</button><div id="favoriteRescanStatus" role="status" aria-live="polite" style="display:none;font-size:.7rem;font-weight:700;line-height:1.35;margin:0 2px 7px;"></div>';
+  if(!filtered.length){el.innerHTML=photoHelp+'<div style="font-size:0.8rem;color:#bbb;text-align:center;padding:12px;">No favorites yet. Add items from your food log with ⭐</div>';return;}
+  var target=(document.getElementById('favTargetMeal')||{value:'breakfast'}).value;
+  el.innerHTML=photoHelp+filtered.map(function(f,i){
+    var origIdx=favs.indexOf(f);
+    return '<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid #f5f5f5;font-size:0.82rem;">'
+      +foodThumbnailHtml(f,'favorite',origIdx)+'<div style="flex:1;min-width:0;">'
+        +'<div style="font-weight:600;">'+escHtml(f.name)+'</div>'
+        +'<div style="color:#888;font-size:0.75rem;">'+(f.cal?'🔥'+f.cal+' ':'')+''+(f.prot?'🥩'+f.prot+'g ':'')+''+(f.carbs?'🍞'+f.carbs+'g':'')+'</div>'
+      +'</div>'
+      +'<button onclick="loadFavoriteItem('+origIdx+')" style="background:#e67e22;color:#fff;border:none;border-radius:5px;padding:4px 9px;font-size:0.78rem;cursor:pointer;">+ Add</button>'
+      +'<button onclick="deleteFavorite('+origIdx+')" style="background:none;border:1px solid #f5c6cb;border-radius:4px;cursor:pointer;font-size:0.72rem;padding:2px 5px;color:#e74c3c;">✕</button>'
+      +'</div>';
+  }).join('');
+}
+
+function loadFavoriteItem(idx){
+  var favs=getFavorites();var f=favs[idx];if(!f)return;
+  var target=(document.getElementById('favTargetMeal')||{value:'breakfast'}).value;
+  if(!window._foodLog)window._foodLog=[];
+  var favItem={id:'f'+Date.now(),meal:target,name:f.name,cal:f.cal,prot:f.prot,fat:f.fat,carbs:f.carbs,servingLabel:f.servingLabel||'1 serving',servings:parseFloat(f.servings)||1,proteinSource:f.proteinSource||'',carbSource:f.carbSource||'',fatSource:f.fatSource||'',imageUrl:f.imageUrl||'',imageData:f.imageData||''};
+  MICRO_FIELDS.forEach(function(fld){favItem[fld]=f[fld]!=null?f[fld]:null;});
+  window._foodLog.push(favItem);
+  _setMealOpen(target,true);
+  renderFoodItems();save();
+}
+
+function deleteFavorite(idx){
+  var favs=getFavorites();favs.splice(idx,1);saveFavorites(favs);renderFavsList();
+}
+
+// ── Saved Meals ──────────────────────────────────────
+function getSavedMeals(){var r=localStorage.getItem('saved_meals');return r?JSON.parse(r):[];}
+function saveSavedMeals(m){localStorage.setItem('saved_meals',JSON.stringify(m));}
+
+function saveMeal(){
+  var log=window._foodLog||[];
+  if(!log.length){alert('Add some food items first.');return;}
+  document.getElementById('saveMealName').value='';
+  document.getElementById('saveMealModal').style.display='flex';
+  setTimeout(function(){document.getElementById('saveMealName').focus();},80);
+}
+function confirmSaveMeal(){
+  var name=(document.getElementById('saveMealName').value||'').trim();
+  if(!name){document.getElementById('saveMealName').focus();return;}
+  var category=document.getElementById('saveMealTarget').value;
+  var log=window._saveMealItems||window._foodLog||[];
+  window._saveMealItems=null;
+  var meals=getSavedMeals();
+  meals.push({name:name,category:category,items:log.map(function(x){
+    var it={name:x.name,cal:x.cal,prot:x.prot,fat:x.fat,carbs:x.carbs,servingLabel:x.servingLabel||'1 serving',servings:parseFloat(x.servings)||1,proteinSource:x.proteinSource||'',carbSource:x.carbSource||'',fatSource:x.fatSource||'',imageUrl:x.imageUrl||'',imageData:x.imageData||''};
+    MICRO_FIELDS.forEach(function(f){it[f]=x[f]!=null?x[f]:null;});
+    return it;
+  })});
+  saveSavedMeals(meals);
+  document.getElementById('saveMealModal').style.display='none';
+}
+function saveMealFromSection(mealType){
+  var log=(window._foodLog||[]).filter(function(x){return x.meal===mealType;});
+  if(!log.length){alert('No items in this section to save.');return;}
+  document.getElementById('saveMealName').value='';
+  document.getElementById('saveMealTarget').value=mealType;
+  // Store section items for confirmSaveMeal to use
+  window._saveMealItems=log;
+  document.getElementById('saveMealModal').style.display='flex';
+  setTimeout(function(){document.getElementById('saveMealName').focus();},80);
+}
+
+function renderMealsList(){
+  var el=document.getElementById('mealsList');if(!el)return;
+  var meals=getSavedMeals();
+  if(!meals.length){el.innerHTML='<div style="font-size:0.8rem;color:#bbb;text-align:center;padding:12px;">No saved meals yet. Log a full day of food then tap "Save Meal".</div>';return;}
+  el.innerHTML=meals.map(function(m,i){
+    var cal=m.items.reduce(function(a,x){return a+(parseFloat(x.cal)||0);},0);
+    var macros={prot:0,carbs:0,fat:0},micros={};
+    MICRO_FIELDS.forEach(function(field){micros[field]=0;});
+    m.items.forEach(function(item){
+      macros.prot+=parseFloat(item.prot)||0;
+      macros.carbs+=parseFloat(item.carbs)||0;
+      macros.fat+=parseFloat(item.fat)||0;
+      MICRO_FIELDS.forEach(function(field){micros[field]+=parseFloat(item[field])||0;});
+    });
+    var macroHtml='<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;margin:5px 0;">'
+      +[['Calories',Math.round(cal),'cal'],['Protein',Math.round(macros.prot*10)/10,'g'],['Carbs',Math.round(macros.carbs*10)/10,'g'],['Fat',Math.round(macros.fat*10)/10,'g']].map(function(n){return '<div style="background:#fff7e8;border-radius:5px;padding:4px 2px;text-align:center;"><strong style="display:block;font-size:0.76rem;color:#7a4b00;">'+n[1]+' '+n[2]+'</strong><span style="font-size:0.64rem;color:#777;">'+n[0]+'</span></div>';}).join('')
+      +'</div>';
+    var microHtml='<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;margin:0 0 6px;">'
+      +MICRO_FIELDS.map(function(field){var meta=MICRO_META[field],value=Math.round(micros[field]*10)/10;return '<div style="background:#f7faf7;border-radius:4px;padding:3px 4px;font-size:0.65rem;color:#526052;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><span>'+meta.label+'</span> <strong>'+(value||'—')+(value?' '+meta.unit:'')+'</strong></div>';}).join('')
+      +'</div>';
+    return '<div style="padding:6px 0;border-bottom:1px solid #f5f5f5;">'
+      +'<div style="display:flex;align-items:center;gap:6px;">'
+        +'<div style="flex:1;font-weight:600;font-size:0.85rem;">'+escHtml(m.name)+'</div>'
+        +'<button onclick="deleteMeal('+i+')" style="background:none;border:1px solid #f5c6cb;border-radius:4px;cursor:pointer;font-size:0.72rem;padding:2px 5px;color:#e74c3c;">✕</button>'
+      +'</div>'
+      +'<div style="font-size:0.75rem;color:#888;margin-bottom:4px;">'+m.items.length+' items'+(cal?' · ~'+Math.round(cal)+' cal':'')+'</div>'
+      +macroHtml+microHtml
+      +'<div style="display:flex;gap:4px;align-items:center;">'
+        +'<select id="mealTarget_'+i+'" style="flex:1;border:1px solid #e9c87b;border-radius:5px;padding:3px 5px;font-size:0.75rem;">'
+          +'<option value="breakfast"'+(m.category==='breakfast'?' selected':'')+'>🌅 Breakfast</option>'
+          +'<option value="lunch"'+(m.category==='lunch'?' selected':'')+'>🥗 Lunch</option>'
+          +'<option value="dinner"'+(m.category==='dinner'?' selected':'')+'>🍽️ Dinner</option>'
+          +'<option value="snack"'+(m.category==='snack'?' selected':'')+'>🍎 Snacks</option>'
+          +'<option value="liquids"'+(m.category==='liquids'?' selected':'')+'>💧 Liquids</option>'
+          +'<option value="sports"'+(m.category==='sports'?' selected':'')+'>💪 Sports Nutrition</option>'
+        +'</select>'
+        +'<button onclick="loadMeal('+i+')" style="background:#2980b9;color:#fff;border:none;border-radius:5px;padding:4px 9px;font-size:0.78rem;cursor:pointer;">Load</button>'
+      +'</div>'
+    +'</div>';
+  }).join('');
+}
+
+function loadMeal(idx){
+  var meals=getSavedMeals();var m=meals[idx];if(!m)return;
+  var perSel=document.getElementById('mealTarget_'+idx);
+  var target=perSel?perSel.value:(m.category||(document.getElementById('favTargetMeal')||{value:'breakfast'}).value);
+  if(!window._foodLog)window._foodLog=[];
+  m.items.forEach(function(it){
+    var loadedItem={id:'f'+Date.now()+'_'+Math.random().toString(36).slice(2,5),meal:target,name:it.name,cal:it.cal,prot:it.prot,fat:it.fat,carbs:it.carbs,servingLabel:it.servingLabel||'1 serving',servings:parseFloat(it.servings)||1,proteinSource:it.proteinSource||'',carbSource:it.carbSource||'',fatSource:it.fatSource||'',imageUrl:it.imageUrl||'',imageData:it.imageData||''};
+    MICRO_FIELDS.forEach(function(f){loadedItem[f]=it[f]!=null?it[f]:null;});
+    window._foodLog.push(loadedItem);
+  });
+  _setMealOpen(target,true);
+  renderFoodItems();save();
+  // favMealPanel stays open
+}
+
+function deleteMeal(idx){
+  var meals=getSavedMeals();meals.splice(idx,1);saveSavedMeals(meals);renderMealsList();
+}
+
+// ── Copy Day Modal ───────────────────────────────────
+function openCopyDayModal(){
+  var modal=document.getElementById('copyDayModal');if(!modal)return;
+  modal.style.display='flex';
+  var title=document.getElementById('copyDayModalTitle');if(title)title.innerHTML='&#x1F4C5; Copy Food Between Days';
+  var from=document.getElementById('copyDayFrom');
+  var to=document.getElementById('copyDayTo');
+  if(from)from.value=dk(today);
+  if(to)to.value=dk(today);
+  updateCopyDayFoodList();
+}
+function openCopyMealToDate(mealType){
+  var modal=document.getElementById('copyDayModal');if(!modal)return;
+  var label=(MEAL_LABELS[mealType]||mealType).replace(/^[^\w]+/,'');
+  var title=document.getElementById('copyDayModalTitle');
+  if(title)title.textContent='Copy '+label+' to Date';
+  var from=document.getElementById('copyDayFrom');
+  var to=document.getElementById('copyDayTo');
+  var meal=document.getElementById('copyDayMeal');
+  var nextDay=new Date(today);nextDay.setDate(nextDay.getDate()+1);
+  if(from)from.value=dk(today);
+  if(to)to.value=dk(nextDay);
+  if(meal)meal.value=mealType;
+  modal.style.display='flex';
+  updateCopyDayFoodList();
+}
+
+function updateCopyDayFoodList(){
+  var from=(document.getElementById('copyDayFrom')||{value:''}).value;
+  var mealSel=document.getElementById('copyDayMeal');
+  var meal=mealSel?mealSel.value:'all';
+  var row=document.getElementById('copyDayFoodRow');
+  var sel=document.getElementById('copyDayFood');
+  if(!from||!sel){if(row)row.style.display='none';return;}
+  var r=localStorage.getItem('planner_'+from);
+  var items=[];
+  if(r){
+    try{
+      var dd=JSON.parse(r);
+      var log=Array.isArray(dd.foodLog)?dd.foodLog:[];
+      items=meal==='all'?log:log.filter(function(x){return x.meal===meal;});
+    }catch(e){}
+  }
+  if(!items.length){if(row)row.style.display='none';return;}
+  if(row)row.style.display='block';
+  sel.innerHTML='<option value="all">All food items ('+items.length+')</option>'
+    +items.map(function(x,i){return '<option value="'+i+'">'+escHtml(x.name||'Item '+(i+1))+'</option>';}).join('');
+}
+
+function confirmCopyDay(){
+  var from=(document.getElementById('copyDayFrom')||{value:''}).value;
+  var to=(document.getElementById('copyDayTo')||{value:''}).value;
+  var mealSel=document.getElementById('copyDayMeal');
+  var meal=mealSel?mealSel.value:'all';
+  var foodSel=document.getElementById('copyDayFood');
+  var foodIdx=foodSel?foodSel.value:'all';
+  var replace=document.getElementById('copyDayReplace');
+  var doReplace=replace&&replace.checked;
+  if(!from||!to){alert('Please select both From and To dates.');return;}
+  var r=localStorage.getItem('planner_'+from);
+  if(!r){alert('No data found for '+from+'.');return;}
+  var src=JSON.parse(r);
+  var srcLog=Array.isArray(src.foodLog)?src.foodLog:[];
+  var filtered=meal==='all'?srcLog:srcLog.filter(function(x){return x.meal===meal;});
+  if(foodIdx!=='all'){var idx=parseInt(foodIdx)||0;filtered=[filtered[idx]].filter(Boolean);}
+  if(!filtered.length){alert('No food items to copy.');return;}
+  // Load destination
+  var destKey='planner_'+to;
+  var destRaw=localStorage.getItem(destKey);
+  var dest=destRaw?JSON.parse(destRaw):{};
+  var destLog=Array.isArray(dest.foodLog)?dest.foodLog:[];
+  if(doReplace){
+    // Remove existing items for the meal(s) being copied
+    var mealsToReplace=meal==='all'?MEALS:[meal];
+    destLog=destLog.filter(function(x){return mealsToReplace.indexOf(x.meal)<0;});
+  }
+  filtered.forEach(function(x){
+    destLog.push(Object.assign({},x,{id:'f'+Date.now()+'_'+Math.random().toString(36).slice(2,5)}));
+  });
+  dest.foodLog=destLog;
+  localStorage.setItem(destKey,JSON.stringify(dest));
+  // A complete-day copy includes an independent snapshot of that day's Macro
+  // Ratio. Editing the destination later can never alter the source date.
+  if(meal==='all'&&foodIdx==='all'){
+    var sourceRatio=localStorage.getItem(macroRatioStorageKey(from));
+    if(sourceRatio)localStorage.setItem(macroRatioStorageKey(to),sourceRatio);
+    else localStorage.removeItem(macroRatioStorageKey(to));
+  }
+  document.getElementById('copyDayModal').style.display='none';
+  // If destination is today, reload
+  if(to===dk(today)){window._foodLog=destLog;renderFoodItems();save();}
+  alert('Copied '+filtered.length+' item'+(filtered.length>1?'s':'')+' to '+to+'.');
+}
+
+// ── Food Label Scanner ───────────────────────────────
+var _barcodeStream=null,_barcodeScanActive=false,_barcodeDetector=null;
+function barcodeStatus(message,isError){var el=document.getElementById('barcodeStatus');if(el){el.textContent=message;el.style.color=isError?'#991b1b':'#475569';el.style.background=isError?'#fff7f7':'#f0fdfa';el.style.borderColor=isError?'#fecaca':'#ccfbf1';}}
+function stopBarcodeCamera(){_barcodeScanActive=false;if(_barcodeStream){_barcodeStream.getTracks().forEach(function(track){track.stop();});_barcodeStream=null;}var video=document.getElementById('barcodeVideo');if(video){video.pause();video.srcObject=null;video.style.display='none';}}
+function closeBarcodeScanner(){stopBarcodeCamera();var modal=document.getElementById('barcodeScannerModal');if(modal)modal.style.display='none';}
+function openBarcodeScanner(){
+  var modal=document.getElementById('barcodeScannerModal'),input=document.getElementById('barcodeManualInput');if(!modal)return;
+  modal.style.display='flex';if(input)input.value='';barcodeStatus('Starting the rear camera…',false);
+  if(!('BarcodeDetector' in window)||!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){barcodeStatus('Automatic camera scanning is not supported by this browser. Enter the barcode number below.',false);if(input)input.focus();return;}
+  try{_barcodeDetector=new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e']});}catch(e){barcodeStatus('Camera barcode detection is unavailable. Enter the barcode number below.',false);if(input)input.focus();return;}
+  navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:false}).then(function(stream){
+    _barcodeStream=stream;_barcodeScanActive=true;var video=document.getElementById('barcodeVideo');if(!video)return;video.srcObject=stream;video.style.display='block';return video.play().then(function(){barcodeStatus('Point the camera at the barcode and hold steady.',false);scanBarcodeFrame();});
+  }).catch(function(){barcodeStatus('The camera could not be opened. Allow camera access or enter the barcode number below.',true);if(input)input.focus();});
+}
+function scanBarcodeFrame(){
+  if(!_barcodeScanActive||!_barcodeDetector)return;var video=document.getElementById('barcodeVideo');
+  _barcodeDetector.detect(video).then(function(results){if(!_barcodeScanActive)return;if(results&&results[0]&&results[0].rawValue){var code=String(results[0].rawValue).replace(/\D/g,'');stopBarcodeCamera();var input=document.getElementById('barcodeManualInput');if(input)input.value=code;lookupFoodBarcode(code);return;}setTimeout(scanBarcodeFrame,220);}).catch(function(){if(_barcodeScanActive)setTimeout(scanBarcodeFrame,350);});
+}
+function barcodeNutrient(nutrients,key){var serving=nutrients[key+'_serving'],per100=nutrients[key+'_100g'];var value=serving!==undefined&&serving!==null?serving:per100;return value!==undefined&&value!==null&&value!==''?Math.round((parseFloat(value)||0)*10)/10:null;}
+function showPendingFood(food,title){
+  window._pendingScanFood=food;var nameEl=document.getElementById('scanResultName'),macroEl=document.getElementById('scanResultMacros'),modal=document.getElementById('scanConfirmModal'),heading=document.getElementById('scanConfirmTitle');
+  renderPendingFoodPhoto(food);
+  if(heading)heading.textContent=title||'Food Scanned';if(nameEl)nameEl.textContent=food.name||'Scanned Food';
+  if(macroEl){var microSummary=MICRO_FIELDS.filter(function(f){return food[f];}).map(function(f){return MICRO_META[f].icon+' '+food[f]+MICRO_META[f].unit+' '+MICRO_META[f].label;}).join(' | ');macroEl.innerHTML='<strong style="color:#b45309;">'+(food.cal||0)+' calories '+escHtml(food.servingLabel||'per serving')+'</strong><br>'+(food.prot||0)+'g protein &nbsp;|&nbsp; '+(food.fat||0)+'g fat &nbsp;|&nbsp; '+(food.carbs||0)+'g carbs'+(microSummary?'<div style="margin-top:6px;font-size:0.76rem;color:#0f766e;">'+microSummary+'</div>':'')+(food.barcode?'<div style="margin-top:5px;font-size:.68rem;color:#64748b;">Barcode '+escHtml(food.barcode)+' · '+escHtml(food.sourceConfidence||'Low')+' source confidence</div>':'');}
+  if(modal)modal.style.display='flex';
+}
+function lookupFoodBarcode(scannedCode){
+  var input=document.getElementById('barcodeManualInput'),code=String(scannedCode||(input&&input.value)||'').replace(/\D/g,'');
+  if(code.length<8||code.length>14){barcodeStatus('Enter a valid 8–14 digit UPC or EAN barcode.',true);return;}
+  stopBarcodeCamera();barcodeStatus('Looking up product '+code+'…',false);
+  var fields='code,product_name,brands,serving_size,nutriments,ingredients_text,categories,image_front_small_url,image_front_url,image_url';
+  fetch('https://world.openfoodfacts.org/api/v2/product/'+encodeURIComponent(code)+'.json?fields='+encodeURIComponent(fields)).then(function(response){if(!response.ok)throw new Error('Product lookup failed');return response.json();}).then(function(data){
+    if(!data||data.status!==1||!data.product)throw new Error('This barcode was not found');var product=data.product,n=product.nutriments||{},hasServing=['energy-kcal','proteins','fat','carbohydrates'].some(function(key){return n[key+'_serving']!==undefined;});
+    var food={name:[product.product_name,product.brands].filter(Boolean).join(' — ')||'Barcode '+code,barcode:code,servingLabel:hasServing&&product.serving_size?'per '+product.serving_size:'per 100 g',cal:barcodeNutrient(n,'energy-kcal'),prot:barcodeNutrient(n,'proteins'),fat:barcodeNutrient(n,'fat'),carbs:barcodeNutrient(n,'carbohydrates'),fiber:barcodeNutrient(n,'fiber'),sugar:barcodeNutrient(n,'sugars'),sodium:(function(){var value=barcodeNutrient(n,'sodium');return value===null?null:Math.round(value*1000);})(),ingredientsText:product.ingredients_text||'',categoriesText:product.categories||'',imageUrl:product.image_front_small_url||product.image_front_url||product.image_url||'',source:'barcode'};
+    inferFoodMacroSources(food);if(!food.sourceConfidence){food.sourceConfidence='Low';food.sourceMethod='Needs review';}
+    closeBarcodeScanner();showPendingFood(food,'Barcode Product Found');
+  }).catch(function(error){barcodeStatus(error.message+'. You can scan the nutrition label instead or enter the food manually.',true);});
+}
+
+function scanFoodLabel(ev){
+  var file=ev.target.files[0];if(!file)return;
+  var key=journalAIKey();if(!key){alert('Add your Anthropic API key in Settings first.');ev.target.value='';return;}
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var b64=e.target.result.split(',')[1];
+    var mtype=file.type||'image/jpeg';
+    var status=document.createElement('div');
+    status.style.cssText='position:fixed;bottom:20px;right:20px;background:#333;color:#fff;padding:10px 16px;border-radius:8px;z-index:9999;font-size:0.85rem;';
+    status.textContent='🔍 Scanning label…';document.body.appendChild(status);
+    fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-6',
+        max_tokens:400,
+        messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:mtype,data:b64}},
+          {type:'text',text:'Read this food package image carefully. Extract the per-serving Nutrition Facts, any visible product name, and the complete visible ingredient list. Use the ingredients to classify the dominant source of ALL THREE macros for a runner: protein (lean/plant versus higher-fat/processed), carbohydrates (complex/fiber-rich versus simple/refined), and fat (unsaturated versus saturated/trans). Respond with ONLY a single JSON object — no markdown, no code fences, no explanation, nothing else before or after. The JSON must have these exact keys:\n- "name": the product or food name visible anywhere on the label/package (use "Scanned Food" if not visible)\n- "ingredientsText": the complete ingredient list exactly as visible (use an empty string if it is not visible; do not guess)\n- "proteinSource": use "support" for lean/plant, "limit" for higher-fat/processed, or "unknown" when not supported by visible evidence\n- "carbSource": use "support" for complex/fiber-rich, "limit" for simple/refined, or "unknown" when not supported by visible evidence\n- "fatSource": use "support" for unsaturated, "limit" for saturated/trans, or "unknown" when not supported by visible evidence\n- "cal": Calories per serving as a plain number\n- "prot": Protein grams per serving as a plain number\n- "fat": Total Fat grams per serving as a plain number\n- "carbs": Total Carbohydrate grams per serving as a plain number\n- "fiber": Dietary Fiber grams per serving as a plain number\n- "sugar": Total Sugars grams per serving as a plain number\n- "sodium": Sodium milligrams per serving as a plain number\n- "vitA": Vitamin A in mcg per serving as a plain number\n- "vitC": Vitamin C in mg per serving as a plain number\n- "vitD": Vitamin D in mcg per serving as a plain number\n- "calcium": Calcium in mg per serving as a plain number\n- "iron": Iron in mg per serving as a plain number\n- "potassium": Potassium in mg per serving as a plain number\nAll numeric values must be numbers, not strings. Use 0 if a numeric value cannot be read from the label. Never invent missing ingredients or classifications. Output the JSON object only.'}
           ,{type:'text',text:'Also include a string key named "servingLabel" containing the exact serving size printed on the label, including its unit (for example, "1 cup (240 mL)" or "30 g"). Use "1 serving" only when the serving size cannot be read.'}
         ]}]
       })
@@ -14083,4 +14498,3 @@ window.addEventListener('DOMContentLoaded',function(){
 <div id="v26Toast" class="v26-toast" role="status" aria-live="polite"></div>
 </body>
 </html>
-
