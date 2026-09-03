@@ -223,12 +223,12 @@ html{font-size:14px}
 </main>
 
 <script>
-const APP_VERSION='2026-09-03-6';
+const APP_VERSION='2026-09-03-7';
 // GitHub Pages caches this file, so a phone can sit on an old copy. Reload once if a newer build is live.
 (async function(){try{const res=await fetch(location.pathname+'?_cv='+Date.now(),{cache:'no-store'});
 const live=(await res.text()).match(/APP_VERSION='([^']+)'/);
 if(live&&live[1]!==APP_VERSION&&!sessionStorage.getItem('tf-v-'+live[1])){
-sessionStorage.setItem('tf-v-'+live[1],'1');location.replace(location.pathname+'?v='+live[1])}}catch(e){}})();
+sessionStorage.setItem('tf-v-'+live[1],'1');location.replace(location.pathname+'?v='+live[1]+location.hash)}}catch(e){}})();
 
 // [name, country, ranking score, 2026 season best]  "rd" marks a road time used where there is no track mark.
 const TRACK_EVENTS=['100m','200m','400m','800m','1500m','5000m','10,000m'];
@@ -404,6 +404,7 @@ function renderBoard(section,data,keys,notes){
     : athleteRow(rank-1,row[0],row[1],row[3],row[2],true)
   ).join('')||'<div class="event-note">No data for this selection.</div>';
   $$('#'+section+'Chips button').forEach(b=>b.onclick=()=>{s.key=b.dataset.key;renderBoard(section,data,keys,notes)});
+  saveView();
 }
 function renderEntries(){
   const s=state.entries, list=(ENTRIES[s.gender]||{})[s.key]||[];
@@ -416,11 +417,60 @@ function renderEntries(){
     `<article class="athlete"><span class="rank">&nbsp;</span><div><div class="name">${esc(name)}</div><div class="country">${esc(country)}</div></div><div class="figure">${sb?`<b>${esc(sb)}</b>`:'<b class="none">&mdash;</b>'}<small>${pb?'PB '+esc(pb):'no PB listed'}${rank?' \u00b7 WR '+esc(rank):''}</small></div></article>`
   ).join('')||'<div class="event-note">No entry list for this event.</div>';
   $$('#entriesChips button').forEach(b=>b.onclick=()=>{s.key=b.dataset.key;renderEntries()});
+  saveView();
   $('#pendingList').innerHTML=ENTRIES_PENDING.map(([name,when,note])=>
     `<div class="done" style="grid-template-columns:minmax(0,1fr)"><div><div class="m" style="font-size:15px;color:var(--ink)">${esc(name)}</div><div class="d" style="margin-top:4px">${esc(when)}</div><div style="font:12px/1.5 Arial,Helvetica,sans-serif;color:var(--muted);margin-top:5px">${esc(note)}</div></div></div>`
   ).join('');
 }
 const ttState={day:0,scope:'finals'};
+// --- Remembering where you were -------------------------------------------
+// A refresh should land back on the same tab and the same selection, so the view
+// is mirrored into the URL hash (shareable) and localStorage (survives a bare URL).
+const TABS=['track','road','ultra','entries','calendar'];
+const SECTION_KEYS={track:TRACK_EVENTS,road:ROAD_GROUPS,ultra:ULTRA_DISTANCES,entries:ENTRY_EVENTS};
+let activeTab='track';
+function saveView(){
+  try{localStorage.setItem('tf-view',JSON.stringify({tab:activeTab,state:state,tt:ttState}))}catch(e){}
+  const s=state[activeTab];
+  const hash='#'+activeTab+(s?'/'+s.gender+'/'+encodeURIComponent(s.key)+'/'+s.sort:'');
+  if(location.hash!==hash){try{history.replaceState(null,'',location.pathname+location.search+hash)}catch(e){}}
+}
+// Anything stored can be stale — an event that no longer exists, a hand-edited hash —
+// so every piece is checked against the live data before it is used.
+function applyView(tab,sel){
+  if(TABS.indexOf(tab)>-1)activeTab=tab;
+  const s=state[activeTab];
+  if(!s||!sel)return;
+  if(sel.gender==='men'||sel.gender==='women')s.gender=sel.gender;
+  if(SECTION_KEYS[activeTab].indexOf(sel.key)>-1)s.key=sel.key;
+  if(sel.sort==='points'||(sel.sort==='time'&&activeTab!=='ultra'))s.sort=sel.sort;
+}
+function restoreView(){
+  let saved=null;
+  try{saved=JSON.parse(localStorage.getItem('tf-view')||'null')}catch(e){}
+  if(saved){
+    if(saved.tt){if(saved.tt.day===0||saved.tt.day===1)ttState.day=saved.tt.day;
+      if(saved.tt.scope==='all'||saved.tt.scope==='finals')ttState.scope=saved.tt.scope}
+    TABS.forEach(t=>{if(saved.state&&saved.state[t])applyView(t,saved.state[t])});
+    if(TABS.indexOf(saved.tab)>-1)activeTab=saved.tab;
+  }
+  // The hash wins, so a link to a particular board opens on it.
+  const parts=decodeURIComponent(location.hash.slice(1)).split('/');
+  if(parts[0])applyView(parts[0],{gender:parts[1],key:parts[2],sort:parts[3]});
+  showTab(activeTab);
+  // The gender and sort buttons are static markup, so bring them in line with the restored state.
+  TABS.forEach(t=>{const s=state[t];if(!s)return;
+    $$('#'+t+'View .controls .seg:not(.sortseg) button').forEach(b=>{const on=b.dataset.gender===s.gender;b.classList.toggle('active',on);b.setAttribute('aria-selected',on)});
+    $$('#'+t+'View .controls .sortseg button').forEach(b=>b.classList.toggle('active',b.dataset.sort===s.sort&&!b.disabled));
+  });
+  $$('#ttScope button').forEach(b=>b.classList.toggle('active',b.dataset.scope===ttState.scope));
+}
+function showTab(name){
+  activeTab=name;
+  $$('.tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
+  TABS.forEach(x=>$('#'+x+'View').classList.toggle('hide',x!==name));
+  saveView();
+}
 function renderTimetable(){
   const day=TIMETABLE[ttState.day];
   $('#ttDays').innerHTML=TIMETABLE.map((d,i)=>`<button role="tab" aria-selected="${i===ttState.day}" class="${i===ttState.day?'active':''}" data-day="${i}">${esc(d.short)}</button>`).join('');
@@ -430,6 +480,7 @@ function renderTimetable(){
   ).join('');
   $$('#ttDays button').forEach(b=>b.onclick=()=>{ttState.day=+b.dataset.day;renderTimetable()});
   $$('#ttScope button').forEach(b=>b.onclick=()=>{ttState.scope=b.dataset.scope;$$('#ttScope button').forEach(x=>x.classList.toggle('active',x===b));renderTimetable()});
+  saveView();
   // Tapping a race jumps the start list above to that event.
   $$('#ttList .tt-link').forEach(b=>b.onclick=()=>{
     const g=b.dataset.entry.split('/')[0],ev=b.dataset.entry.split('/')[1];
@@ -453,10 +504,7 @@ function renderCalendar(){
     `<div class="done"><span class="d">${esc(d)}</span><span class="m">${esc(city)}, ${esc(country)}</span><span class="f">${i===DL_SEASON.length-1?'Final':''}</span></div>`
   ).join('');
 }
-$$('.tabs button').forEach(btn=>btn.onclick=()=>{
-  $$('.tabs button').forEach(b=>b.classList.toggle('active',b===btn));
-  ['track','road','ultra','entries','calendar'].forEach(x=>$(`#${x}View`).classList.toggle('hide',x!==btn.dataset.tab));
-});
+$$('.tabs button').forEach(btn=>btn.onclick=()=>showTab(btn.dataset.tab));
 ['track','road','ultra','entries'].forEach(section=>{
   $$('#'+section+'View .controls .seg:not(.sortseg) button').forEach(btn=>btn.onclick=()=>{
     state[section].gender=btn.dataset.gender;
@@ -470,7 +518,7 @@ $$('.tabs button').forEach(btn=>btn.onclick=()=>{
     renderAll();
   });
 });
-renderAll();renderCalendar();renderTimetable();
+restoreView();renderAll();renderCalendar();renderTimetable();
 </script>
 </body>
 </html>
