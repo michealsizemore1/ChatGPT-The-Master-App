@@ -321,27 +321,64 @@ function masterBackupStatus(message,isError){
   el.textContent=message;
   el.style.color=isError?'#b42318':'#2457bf';
 }
-function downloadMasterBackup(){
+function masterBackupIdbOpen(dbName,storeName){
+  return new Promise(function(resolve,reject){
+    var req=indexedDB.open(dbName);
+    req.onupgradeneeded=function(){var db=req.result;if(!db.objectStoreNames.contains(storeName))db.createObjectStore(storeName);};
+    req.onsuccess=function(){resolve(req.result);};
+    req.onerror=function(){reject(req.error);};
+  });
+}
+function masterBackupIdbGetAll(dbName,storeName){
+  return masterBackupIdbOpen(dbName,storeName).then(function(db){
+    return new Promise(function(resolve,reject){
+      if(!db.objectStoreNames.contains(storeName)){resolve({});return;}
+      var tx=db.transaction(storeName,'readonly'),store=tx.objectStore(storeName),out={};
+      var req=store.openCursor();
+      req.onsuccess=function(){var cursor=req.result;if(cursor){out[cursor.key]=cursor.value;cursor.continue();}else{resolve(out);}};
+      req.onerror=function(){reject(req.error);};
+    });
+  })['catch'](function(){return{};});
+}
+function masterBackupIdbSetAll(dbName,storeName,obj){
+  if(!obj||!Object.keys(obj).length)return Promise.resolve(true);
+  return masterBackupIdbOpen(dbName,storeName).then(function(db){
+    return new Promise(function(resolve,reject){
+      var tx=db.transaction(storeName,'readwrite'),store=tx.objectStore(storeName);
+      Object.keys(obj).forEach(function(key){store.put(obj[key],key);});
+      tx.oncomplete=function(){resolve(true);};
+      tx.onerror=function(){reject(tx.error);};
+    });
+  })['catch'](function(){return false;});
+}
+async function downloadMasterBackup(){
   try{
     var saved={};
     for(var i=0;i<localStorage.length;i++){
       var key=localStorage.key(i);
       saved[key]=localStorage.getItem(key);
     }
+    var journalStore=await masterBackupIdbGetAll('my_life_command_center_large_storage','journal');
+    var receiptStore=await masterBackupIdbGetAll('meridian_money_receipts','receipts');
     var backup={
       format:'my-life-master-app-backup',
-      version:1,
+      version:2,
       createdAt:new Date().toISOString(),
       origin:location.origin,
       itemCount:Object.keys(saved).length,
-      localStorage:saved
+      localStorage:saved,
+      indexedDB:{
+        my_life_command_center_large_storage:{journal:journalStore},
+        meridian_money_receipts:{receipts:receiptStore}
+      }
     };
     var stamp=new Date().toISOString().slice(0,10);
     var blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
     var url=URL.createObjectURL(blob),link=document.createElement('a');
     link.href=url;link.download='my-life-master-app-backup-'+stamp+'.json';
     document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);
-    masterBackupStatus('Full backup downloaded: '+backup.itemCount+' saved items.');
+    var extra=Object.keys(journalStore).length+Object.keys(receiptStore).length;
+    masterBackupStatus('Full backup downloaded: '+backup.itemCount+' saved items'+(extra?' plus '+extra+' large file'+(extra===1?'':'s')+' (journal entries, receipt photos).':'.'));
   }catch(error){
     masterBackupStatus('The backup could not be created. Please try again.',true);
   }
@@ -350,16 +387,23 @@ function restoreMasterBackup(input){
   var file=input.files&&input.files[0];
   if(!file)return;
   var reader=new FileReader();
-  reader.onload=function(){
+  reader.onload=async function(){
     try{
       var backup=JSON.parse(reader.result);
       if(!backup||backup.format!=='my-life-master-app-backup'||!backup.localStorage||typeof backup.localStorage!=='object')throw new Error('Invalid backup');
-      var count=Object.keys(backup.localStorage).length;
+      var idb=backup.indexedDB||{};
+      var journalData=idb.my_life_command_center_large_storage&&idb.my_life_command_center_large_storage.journal||{};
+      var receiptData=idb.meridian_money_receipts&&idb.meridian_money_receipts.receipts||{};
+      var journalCount=Object.keys(journalData).length;
+      var receiptCount=Object.keys(receiptData).length;
+      var count=Object.keys(backup.localStorage).length+journalCount+receiptCount;
       if(!confirm('Restore '+count+' saved items from this Master App backup?\n\nThis will replace matching information currently saved in this browser.')){input.value='';return;}
       Object.keys(backup.localStorage).forEach(function(key){
         var value=backup.localStorage[key];
         if(typeof value==='string')localStorage.setItem(key,value);
       });
+      if(journalCount)await masterBackupIdbSetAll('my_life_command_center_large_storage','journal',journalData);
+      if(receiptCount)await masterBackupIdbSetAll('meridian_money_receipts','receipts',receiptData);
       masterBackupStatus('Full backup restored. Open an app or refresh it to see the restored information.');
     }catch(error){
       masterBackupStatus('That file is not a valid My Life Master App backup.',true);
