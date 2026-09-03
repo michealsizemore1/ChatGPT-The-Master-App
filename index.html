@@ -58,7 +58,11 @@
   .section-title{margin:0 0 5px;font-size:18px;letter-spacing:-.01em}
   .section-intro{margin:0 0 14px;font-size:13px;color:var(--muted)}
   .growth-title{margin-top:30px}
-  .growth-grid{grid-template-columns:minmax(260px,360px)}
+  .growth-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media(min-width:1150px){
+    main{max-width:1320px}
+    .life-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+  }
   .card{
     display:flex;
     flex-direction:column;
@@ -129,6 +133,7 @@
   .lang .icon{background:#fdeaea;color:#b0392c}
   .family .icon{background:#eef1f8;color:#1b2b52}
   .ebay .icon{background:#fff4d6;color:#9a6500}
+  .invest .icon{background:#071628;color:#00d4c8}
 
   .note{
     margin-top:30px;
@@ -182,7 +187,7 @@
 <main>
   <h2 class="section-title">Life Essentials</h2>
   <p class="section-intro">The tools that support your daily life, finances, future, and family protection.</p>
-  <div class="grid">
+  <div class="grid life-grid">
 
     <a class="card life" href="daily-planner.html">
       <div class="icon">&#129517;</div>
@@ -216,10 +221,45 @@
       <div class="open">Open Family Benefits Hub &rarr;</div>
     </a>
 
+    <a class="card invest" href="msiz-terminal.html">
+      <div class="icon">&#128200;</div>
+      <h2>MSIZ Terminal</h2>
+      <p>Portfolio holdings, allocation, performance, dividends, risk, comparisons, projections, and market research.</p>
+      <div class="tags"><span>Portfolio analytics</span><span>Local storage</span></div>
+      <div class="open">Open MSIZ Terminal &rarr;</div>
+    </a>
+
+  </div>
+
+  <h2 class="section-title growth-title">Sports</h2>
+  <p class="section-intro">League schedules, scores, standings, and postseason tracking.</p>
+  <div class="grid growth-grid">
+    <a class="card football" href="https://saturday-top-25.michealsizemore1.chatgpt.site">
+      <div class="icon">&#127944;</div>
+      <h2>Saturday Top 25</h2>
+      <p>College football rankings, live scores, team schedules, completed-game statistics, and verified scoring details.</p>
+      <div class="tags"><span>Live scores</span><span>CFBStats backup</span><span>Private app</span></div>
+      <div class="open">Open Saturday Top 25 &rarr;</div>
+    </a>
+
+    <a class="card football" href="https://nfl-gameday.michealsizemore1.chatgpt.site">
+      <div class="icon">&#127944;</div>
+      <h2>NFL Gameday</h2>
+      <p>All 32 teams, weekly scores, Mountain Time kickoffs, streaming networks, team logos, standings, statistics, highlights, and playoff tracking.</p>
+      <div class="tags"><span>Live scores</span><span>Mountain Time</span><span>Private app</span></div>
+      <div class="open">Open NFL Gameday &rarr;</div>
+    </a>
+    <a class="card life" href="the-w.html">
+      <div class="icon">W</div>
+      <h2>The W</h2>
+      <p>All 15 WNBA teams with league rankings, schedules, daily scores, standings, and playoff coverage.</p>
+      <div class="tags"><span>WNBA</span><span>2026 season</span><span>Live updates</span></div>
+      <div class="open">Open The W &rarr;</div>
+    </a>
   </div>
 
   <h2 class="section-title growth-title">Business</h2>
-  <p class="section-intro">Operate and grow MCS Second Hand Treasures from one dedicated workspace.</p>
+  <p class="section-intro">Operate and grow MCS Second Hand Treasures from its dedicated workspace.</p>
   <div class="grid growth-grid">
     <a class="card ebay" href="ebay-tracker.html">
       <div class="icon">&#128230;</div>
@@ -230,8 +270,8 @@
     </a>
   </div>
 
-  <h2 class="section-title growth-title">Personal Growth</h2>
-  <p class="section-intro">Optional learning tools that support interests and long-term development.</p>
+  <h2 class="section-title growth-title">Personal Growth &amp; Learning</h2>
+  <p class="section-intro">Learning tools that support personal development and long-term goals.</p>
   <div class="grid growth-grid">
     <a class="card lang" href="spanish-learning.html">
       <div class="icon">&#128483;</div>
@@ -249,7 +289,7 @@
     </section>
     <section class="info-card backup">
       <h2>Back up the entire Master App</h2>
-      <p>Download one backup containing the information saved by all six tools in this browser. Keep the file somewhere safe because there is no automatic online copy.</p>
+      <p>Download one backup containing the information saved by all tools in this browser. Keep the file somewhere safe because there is no automatic online copy.</p>
       <div class="backup-actions">
         <button class="backup-btn" type="button" onclick="downloadMasterBackup()">Download Full Backup</button>
         <button class="backup-btn secondary" type="button" onclick="document.getElementById('masterBackupFile').click()">Restore Full Backup</button>
@@ -264,7 +304,7 @@
   </div>
 </main>
 
-<footer>My Life Master App &middot; a home for six connected tools</footer>
+<footer>My Life Master App &middot; your connected personal tools</footer>
 
 <script>
 function masterBackupStatus(message,isError){

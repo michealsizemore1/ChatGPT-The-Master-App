@@ -455,6 +455,23 @@
   .stat .value{font-size:28px; font-weight:700; color:var(--navy);}
   .stat.warn .value{color:var(--danger);}
   .stat.ok .value{color:var(--good);}
+  .msiz-snapshot{border-top:4px solid var(--teal);}
+  .msiz-snapshot-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:14px;}
+  .msiz-snapshot-head h3{cursor:default;margin:0 0 4px;}
+  .msiz-snapshot-head h3::after{display:none;}
+  .msiz-snapshot-head p{margin:0;color:var(--muted);font-size:14.5px;line-height:1.45;}
+  .msiz-open-btn{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:9px 14px;border-radius:8px;background:var(--teal);color:#fff;text-decoration:none;font-size:14px;font-weight:800;}
+  .msiz-snapshot-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;}
+  .msiz-snapshot-item{background:var(--teal-light);border:1px solid #c7e2df;border-radius:8px;padding:10px;text-align:center;}
+  .msiz-snapshot-item span{display:block;color:var(--muted);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
+  .msiz-snapshot-item strong{display:block;margin-top:4px;color:var(--navy);font-size:18px;}
+  .msiz-snapshot-updated{margin-top:10px;color:var(--muted);font-size:12.5px;text-align:right;}
+  @media(max-width:760px){
+    .msiz-snapshot-head{display:block;}
+    .msiz-open-btn{width:100%;margin-top:11px;}
+    .msiz-snapshot-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+    .msiz-snapshot-item:first-child{grid-column:1 / -1;}
+  }
   .wellness-summary{background:linear-gradient(135deg,var(--navy),#244f57);color:#fff;border:0;}
   .wellness-summary h3{color:#fff;cursor:default;}
   .wellness-summary h3::after{display:none;}
@@ -1662,6 +1679,24 @@
       <div class="mini-chart-card chart-horizontal"><div class="mini-label" style="margin-bottom:8px;">Brokerage balance by portfolio</div><canvas id="chart_investments_pies"></canvas></div>
 
       <div class="stat" style="margin-bottom:16px;"><div class="label">Total current assets (TSP + brokerage + cash)</div><div class="value" id="totalAssetsTile">$0</div></div>
+
+      <div class="card msiz-snapshot" id="msizInvestmentSnapshot">
+        <div class="msiz-snapshot-head">
+          <div>
+            <h3>MSIZ Investment Snapshot</h3>
+            <p>A concise view of the balances synchronized from MSIZ Terminal.</p>
+          </div>
+          <a class="msiz-open-btn" href="msiz-terminal.html">Open MSIZ Terminal &rarr;</a>
+        </div>
+        <div class="msiz-snapshot-grid">
+          <div class="msiz-snapshot-item"><span>Total Portfolio</span><strong id="msizSnapTotal">&mdash;</strong></div>
+          <div class="msiz-snapshot-item"><span>TSP</span><strong id="msizSnapTsp">&mdash;</strong></div>
+          <div class="msiz-snapshot-item"><span>All Things</span><strong id="msizSnapAllThings">&mdash;</strong></div>
+          <div class="msiz-snapshot-item"><span>SGOV</span><strong id="msizSnapSgov">&mdash;</strong></div>
+          <div class="msiz-snapshot-item"><span>HYSA</span><strong id="msizSnapHysa">&mdash;</strong></div>
+        </div>
+        <div class="msiz-snapshot-updated" id="msizSnapUpdated">Waiting for synchronized MSIZ data</div>
+      </div>
 
       <div class="card">
         <h3 onclick="toggleCard(this)">TSP — Thrift Savings Plan<span class="sub-label">Agency match always deposits into Traditional TSP</span></h3>
@@ -6430,6 +6465,7 @@ function renderLtcVaAidReadout() {
 
 // ---------- Persistence (localStorage) so values survive a page refresh ----------
 const STORAGE_KEY = 'retirementPlannerState_v1';
+const SHARED_INVESTMENT_KEY = 'mlma_investment_sync_v1';
 const ANTHROPIC_API_KEY_STORAGE_KEY = 'retirementPlannerAnthropicApiKey_v1';
 
 function saveAnthropicApiKeyLocal() {
@@ -7506,6 +7542,66 @@ function loadState() {
   let state;
   try { state = JSON.parse(raw); } catch (e) { return false; }
   return applyState(state);
+}
+
+function readSharedInvestmentsForPlanner() {
+  try { return JSON.parse(localStorage.getItem(SHARED_INVESTMENT_KEY) || 'null'); } catch (e) { return null; }
+}
+
+function renderMsizInvestmentSnapshot(shared) {
+  if (!shared) return;
+  const balances = shared.balances || {};
+  const holdings = shared.holdings || {};
+  const tsp = (Number(balances.traditionalTsp) || 0) + (Number(balances.rothTsp) || 0);
+  const allThings = ['SCHD','QQQM','IBIT'].reduce((sum, symbol) => sum + (Number(holdings[symbol]) || 0), 0);
+  const sgov = Number(holdings.SGOV) || 0;
+  const hysa = Number(balances.hysa) || 0;
+  const total = tsp + allThings + sgov + hysa;
+  const put = (id, value) => { const el = els(id); if (el) el.textContent = fmtMoney(value); };
+  put('msizSnapTotal', total);
+  put('msizSnapTsp', tsp);
+  put('msizSnapAllThings', allThings);
+  put('msizSnapSgov', sgov);
+  put('msizSnapHysa', hysa);
+  const updated = els('msizSnapUpdated');
+  if (updated) {
+    const stamp = shared.updatedAt ? new Date(shared.updatedAt) : null;
+    updated.textContent = stamp && !Number.isNaN(stamp.getTime())
+      ? 'Last synchronized ' + stamp.toLocaleString()
+      : 'Synchronized from MSIZ Terminal';
+  }
+}
+
+function applySharedInvestmentsToPlanner(shared) {
+  shared = shared || readSharedInvestmentsForPlanner();
+  if (!shared || !shared.balances) return false;
+  const setValue = (id, value) => { const el = els(id); if (el && value != null && Number.isFinite(Number(value))) el.value = Number(value); };
+  setValue('tradTSPBalance', shared.balances.traditionalTsp);
+  setValue('rothTSPBalance', shared.balances.rothTsp);
+  setValue('hysaBalance', shared.balances.hysa);
+  setValue('tradTSPPct', shared.rates && shared.rates.traditionalTspPct);
+  setValue('rothTSPPct', shared.rates && shared.rates.rothTspPct);
+  const holdings = shared.holdings || {};
+  const contributions = shared.contributions || {};
+  const allThingsBalance = ['SCHD','QQQM','IBIT'].reduce((sum, symbol) => sum + (Number(holdings[symbol]) || 0), 0);
+  const allThingsContribution = ['SCHD','QQQM','IBIT'].reduce((sum, symbol) => sum + (Number(contributions[symbol]) || 0), 0);
+  const upsertPie = (matcher, defaults, balance, contribution) => {
+    let index = brokeragePies.findIndex(pie => matcher.test(String(pie.name || '').trim()));
+    const current = index >= 0 ? brokeragePies[index] : defaults;
+    const updated = { ...current, balance, contribution };
+    if (index >= 0) brokeragePies[index] = updated;
+    else brokeragePies.push(updated);
+  };
+  upsertPie(/^all things bucket$/i,
+    { name:'All Things Bucket', accountType:'roth_ira', riskType:'equity', cashRate:4.5, fee:0 },
+    allThingsBalance, allThingsContribution);
+  upsertPie(/^(sgov|sequence of returns risk)(?:\s*\([^)]*\))?$/i,
+    { name:'SGOV', accountType:'taxable', riskType:'cash', cashRate:4.5, fee:0 },
+    Number(holdings.SGOV) || 0, Number(contributions.SGOV) || 0);
+  if (els('brokeragePieRows')) renderBrokeragePieRows();
+  if (els('pieContributionRows')) renderPieContributionRows();
+  renderMsizInvestmentSnapshot(shared);
+  return true;
 }
 
 // ---------- Expenses (dynamic rows, monthly $ amounts) ----------
@@ -14294,6 +14390,7 @@ function render() {
 }
 
 const hadSavedState = loadState();
+applySharedInvestmentsToPlanner();
 // Restore an age-button selection before the first calculation even if the previous cloud attempt
 // ended during refresh. The pending marker is removed only after legacy online service confirms the saved plan.
 applyPendingRetirementAgeSelection();
@@ -14365,6 +14462,13 @@ renderDebtRows();
 renderFutureExpenseRows();
 renderWindfallRows();
 renderInsuranceRows();
+
+window.addEventListener('storage', function(event) {
+  if (event.key !== SHARED_INVESTMENT_KEY) return;
+  let shared = null;
+  try { shared = JSON.parse(event.newValue || 'null'); } catch (e) {}
+  if (applySharedInvestmentsToPlanner(shared)) render();
+});
 
 // Plain top-level fields (currentAge, preReturn, ltcStartAge, stdDeduction, etc.) were never wired to
 // an individual oninput/onchange handler the way checkboxes, row-item fields, and date pickers are —
