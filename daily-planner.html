@@ -3339,7 +3339,16 @@ function save(){
   PTIDS.forEach(id=>{const row=document.getElementById(id);if(row){const tx=row.querySelector('input[type=text]');if(tx)d[id+'t']=tx.value;}});
   d.waterOz=waterOz;d.score=scoreVal;
   d.foodLog=window._foodLog||[];
-  localStorage.setItem('planner_'+dk(today),JSON.stringify(d));
+  try{
+    localStorage.setItem('planner_'+dk(today),JSON.stringify(d));
+  }catch(saveErr){
+    var isQuota=saveErr&&(saveErr.name==='QuotaExceededError'||saveErr.code===22||saveErr.code===1014||/quota/i.test(saveErr.message||''));
+    if(!window._saveQuotaWarned){
+      window._saveQuotaWarned=true;
+      alert((isQuota?'Your device storage is full, so this change could NOT be saved — it will disappear if you refresh or leave this page.\n\nFree up space (for example, delete old entries in the AI Prayer Archive or Bible Reading Archive, or remove old receipt photos in the Budget Tracker), then make this change again.':'This change could NOT be saved to device storage.\n\n'+(saveErr&&saveErr.message?saveErr.message:''))+'\n\nThis warning will not repeat again this session, but the problem will keep happening until storage is freed up.');
+    }
+    return;
+  }
   renderStreaks();
   updateIssuesCount();
   renderJournalHome();
@@ -10354,10 +10363,23 @@ function readMeditArchive(){
   }catch(e){return[];}
 }
 function writeMeditArchive(entries){
-  var value=JSON.stringify(Array.isArray(entries)?entries:[]);
-  localStorage.setItem('meditation_archive',value);
+  var arr=(Array.isArray(entries)?entries:[]).slice();
+  var trimmed=false;
+  while(true){
+    var value=JSON.stringify(arr);
+    try{
+      localStorage.setItem('meditation_archive',value);
+      break;
+    }catch(writeErr){
+      var isQuota=writeErr&&(writeErr.name==='QuotaExceededError'||writeErr.code===22||writeErr.code===1014||/quota/i.test(writeErr.message||''));
+      if(!isQuota||!arr.length)throw writeErr;
+      arr.pop();
+      trimmed=true;
+    }
+  }
   var check=readMeditArchive();
   if(!check.length&&entries&&entries.length)throw new Error('The prayer could not be verified in device storage.');
+  writeMeditArchive._trimmed=trimmed;
   return check;
 }
 function saveToMeditArchive(btn){
@@ -10369,7 +10391,7 @@ function saveToMeditArchive(btn){
   try{
     var arch=readMeditArchive(),stamp=new Date().toISOString();
     arch.unshift({label:p.label||'Guided Prayer',text:prayer,type:p.type||'prayer',date:p.date||new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),ts:stamp});
-    while(arch.length>200)arch.pop();
+    while(arch.length>60)arch.pop();
     var saved=writeMeditArchive(arch);
     if(!saved.some(function(e){return e&&e.ts===stamp;}))throw new Error('The saved prayer could not be found after writing it.');
     var panel=document.getElementById('meditArchivePanel'),arrow=document.getElementById('meditArchiveArrow');
@@ -10377,7 +10399,7 @@ function saveToMeditArchive(btn){
     if(arrow)arrow.innerHTML='&#x25BC;';
     renderMeditArchive();
     if(btn){btn.textContent='✓ Saved to AI Prayer Archive';btn.disabled=true;btn.style.background='#16a34a';}
-    if(typeof v26Toast==='function')v26Toast('Prayer saved to AI Prayer Archive');
+    if(typeof v26Toast==='function')v26Toast(writeMeditArchive._trimmed?'Saved — removed some older entries to free up storage space':'Prayer saved to AI Prayer Archive');
   }catch(e){
     if(btn){btn.textContent='Save failed — try again';btn.disabled=false;btn.style.background='#b91c1c';}
     alert('The prayer could not be saved. Press Sync, then try again.\n\n'+(e&&e.message?e.message:''));
