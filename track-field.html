@@ -31,7 +31,7 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:Georgia,'Time
 .source a{color:var(--track)}
 .panel{background:var(--card);border:1px solid var(--line);border-top:0}
 .controls{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:13px}
-.seg{display:flex;gap:6px}
+.ctl-row{display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap}.seg{display:flex;gap:6px}.sortseg{margin-left:auto}.sortseg button.active{background:var(--track);border-color:var(--track);color:#fff}.sortseg button[disabled]{opacity:.4;cursor:not-allowed}.sortlabel{font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#a29a91;align-self:center;margin-right:-4px}
 .seg button{border:1px solid var(--line);background:#fff;color:var(--muted);font:800 11px Arial,Helvetica,sans-serif;letter-spacing:.09em;text-transform:uppercase;padding:9px 18px;cursor:pointer}
 .seg button.active{background:var(--dark);color:#fff;border-color:var(--dark)}
 .chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
@@ -71,6 +71,7 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:Georgia,'Time
 .hide{display:none!important}
 @media(max-width:680px){
 html{font-size:14px}
+.ctl-row{gap:8px}.sortseg{margin-left:0}.seg button{padding:9px 13px}
 .nav{height:106px;display:grid;grid-template-columns:42px 1fr;padding:10px 14px 0;gap:7px 11px}
 .home{height:46px}.brand strong{font-size:19px}
 .tabs{grid-column:1/-1;height:44px;justify-content:flex-start;overflow-x:auto;-webkit-overflow-scrolling:touch}
@@ -109,7 +110,7 @@ html{font-size:14px}
     </div>
     <div class="panel">
       <div class="controls">
-        <div class="seg" role="tablist" aria-label="Category"><button class="active" data-gender="men" role="tab" aria-selected="true">Men</button><button data-gender="women" role="tab" aria-selected="false">Women</button></div>
+        <div class="ctl-row"><div class="seg" role="tablist" aria-label="Category"><button class="active" data-gender="men" role="tab" aria-selected="true">Men</button><button data-gender="women" role="tab" aria-selected="false">Women</button></div><span class="sortlabel">Sort</span><div class="seg sortseg" role="group" aria-label="Sort by"><button class="active" data-sort="points">Points</button><button data-sort="time">Time</button></div></div>
         <div class="chips" id="trackChips" role="tablist" aria-label="Event"></div>
       </div>
       <div class="event-note" id="trackNote"></div>
@@ -126,7 +127,7 @@ html{font-size:14px}
     </div>
     <div class="panel">
       <div class="controls">
-        <div class="seg" role="tablist" aria-label="Category"><button class="active" data-gender="men" role="tab" aria-selected="true">Men</button><button data-gender="women" role="tab" aria-selected="false">Women</button></div>
+        <div class="ctl-row"><div class="seg" role="tablist" aria-label="Category"><button class="active" data-gender="men" role="tab" aria-selected="true">Men</button><button data-gender="women" role="tab" aria-selected="false">Women</button></div><span class="sortlabel">Sort</span><div class="seg sortseg" role="group" aria-label="Sort by"><button class="active" data-sort="points">Points</button><button data-sort="time">Time</button></div></div>
         <div class="chips" id="roadChips" role="tablist" aria-label="Group"></div>
       </div>
       <div class="event-note" id="roadNote"></div>
@@ -143,7 +144,7 @@ html{font-size:14px}
     </div>
     <div class="panel">
       <div class="controls">
-        <div class="seg" role="tablist" aria-label="Category"><button class="active" data-gender="men" role="tab" aria-selected="true">Men</button><button data-gender="women" role="tab" aria-selected="false">Women</button></div>
+        <div class="ctl-row"><div class="seg" role="tablist" aria-label="Category"><button class="active" data-gender="men" role="tab" aria-selected="true">Men</button><button data-gender="women" role="tab" aria-selected="false">Women</button></div><span class="sortlabel">Sort</span><div class="seg sortseg" role="group" aria-label="Sort by"><button class="active" data-sort="points">Points</button><button data-sort="time" disabled title="ITRA publishes a performance index, not times">Time</button></div></div>
         <div class="chips" id="ultraChips" role="tablist" aria-label="Distance"></div>
       </div>
       <div class="event-note" id="ultraNote"></div>
@@ -160,7 +161,7 @@ html{font-size:14px}
     </div>
     <div class="panel">
       <div class="controls">
-        <div class="seg" role="tablist" aria-label="Category"><button class="active" data-gender="men" role="tab" aria-selected="true">Men</button><button data-gender="women" role="tab" aria-selected="false">Women</button></div>
+        <div class="ctl-row"><div class="seg" role="tablist" aria-label="Category"><button class="active" data-gender="men" role="tab" aria-selected="true">Men</button><button data-gender="women" role="tab" aria-selected="false">Women</button></div><span class="sortlabel">Sort</span><div class="seg sortseg" role="group" aria-label="Sort by"><button class="active" data-sort="points">Points</button><button data-sort="time">Time</button></div></div>
         <div class="chips" id="entriesChips" role="tablist" aria-label="Event"></div>
       </div>
       <div class="event-note" id="entriesNote"></div>
@@ -197,7 +198,7 @@ html{font-size:14px}
 </main>
 
 <script>
-const APP_VERSION='2026-09-03-4';
+const APP_VERSION='2026-09-03-5';
 // GitHub Pages caches this file, so a phone can sit on an old copy. Reload once if a newer build is live.
 (async function(){try{const res=await fetch(location.pathname+'?_cv='+Date.now(),{cache:'no-store'});
 const live=(await res.text()).match(/APP_VERSION='([^']+)'/);
@@ -322,7 +323,9 @@ const DL_SEASON=[
 
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-const state={track:{gender:'men',key:'100m'},road:{gender:'men',key:'10km – Half marathon'},ultra:{gender:'men',key:'50K'},entries:{gender:'men',key:'100m'}};
+const state={track:{gender:'men',key:'100m',sort:'points'},road:{gender:'men',key:'10km – Half marathon',sort:'points'},ultra:{gender:'men',key:'50K',sort:'points'},entries:{gender:'men',key:'100m',sort:'points'}};
+// Times come in several shapes: 9.82, 1:41.76, 12:47.62, 1:59:30, and road marks like '26:55 rd'.
+function timeSeconds(v){if(!v)return Infinity;const m=String(v).match(/[0-9]+(?::[0-9]+)*(?:\.[0-9]+)?/);if(!m)return Infinity;const parts=m[0].split(':').map(Number);if(parts.some(n=>!Number.isFinite(n)))return Infinity;return parts.reduce((a,b)=>a*60+b,0)}
 
 function athleteRow(i,name,country,figure,sub,subIsScore){
   const shown=figure?`<b>${esc(figure)}</b>`:'<b class="none">&mdash;</b>';
@@ -331,18 +334,25 @@ function athleteRow(i,name,country,figure,sub,subIsScore){
 function renderBoard(section,data,keys,notes){
   const s=state[section], list=(data[s.gender]||{})[s.key]||[];
   $('#'+section+'Chips').innerHTML=keys.map(k=>`<button role="tab" aria-selected="${k===s.key}" class="${k===s.key?'active':''}" data-key="${esc(k)}">${esc(k)}</button>`).join('');
-  $('#'+section+'Note').textContent=typeof notes==='string'?notes:(notes[s.key]||'');
-  $('#'+section+'List').innerHTML=list.map((row,i)=>section==='ultra'
-    ? athleteRow(i,row[0],row[1],row[2],row[3],false)
-    : athleteRow(i,row[0],row[1],row[3],row[2],true)
+  const baseNote=typeof notes==='string'?notes:(notes[s.key]||'');
+  $('#'+section+'Note').textContent=s.sort==='time'?baseNote+' Sorted by time; the rank column still shows the world ranking position.':baseNote;
+  // Keep each athlete's ranking position so it survives a re-sort.
+  const items=list.map((row,i)=>({row,rank:i+1}));
+  if(s.sort==='time'&&section!=='ultra')items.sort((a,b)=>timeSeconds(a.row[3])-timeSeconds(b.row[3]));
+  $('#'+section+'List').innerHTML=items.map(({row,rank})=>section==='ultra'
+    ? athleteRow(rank-1,row[0],row[1],row[2],row[3],false)
+    : athleteRow(rank-1,row[0],row[1],row[3],row[2],true)
   ).join('')||'<div class="event-note">No data for this selection.</div>';
   $$('#'+section+'Chips button').forEach(b=>b.onclick=()=>{s.key=b.dataset.key;renderBoard(section,data,keys,notes)});
 }
 function renderEntries(){
   const s=state.entries, list=(ENTRIES[s.gender]||{})[s.key]||[];
   $('#entriesChips').innerHTML=ENTRY_EVENTS.map(k=>`<button role="tab" aria-selected="${k===s.key}" class="${k===s.key?'active':''}" data-key="${esc(k)}">${esc(k)}</button>`).join('');
-  $('#entriesNote').textContent=`${list.length} entered \u00b7 ${(ENTRY_WHEN[s.gender]||{})[s.key]||''}`;
-  $('#entriesList').innerHTML=list.map(([name,country,sb,pb,rank])=>
+  $('#entriesNote').textContent=`${list.length} entered \u00b7 ${(ENTRY_WHEN[s.gender]||{})[s.key]||''} \u00b7 sorted by ${s.sort==='time'?'season best':'world ranking'}`;
+  const ordered=list.slice().sort((a,b)=>s.sort==='time'
+    ? timeSeconds(a[2])-timeSeconds(b[2])
+    : (Number(a[4]||9999)-Number(b[4]||9999)));
+  $('#entriesList').innerHTML=ordered.map(([name,country,sb,pb,rank])=>
     `<article class="athlete"><span class="rank">&nbsp;</span><div><div class="name">${esc(name)}</div><div class="country">${esc(country)}</div></div><div class="figure">${sb?`<b>${esc(sb)}</b>`:'<b class="none">&mdash;</b>'}<small>${pb?'PB '+esc(pb):'no PB listed'}${rank?' \u00b7 WR '+esc(rank):''}</small></div></article>`
   ).join('')||'<div class="event-note">No entry list for this event.</div>';
   $$('#entriesChips button').forEach(b=>b.onclick=()=>{s.key=b.dataset.key;renderEntries()});
@@ -369,9 +379,15 @@ $$('.tabs button').forEach(btn=>btn.onclick=()=>{
   ['track','road','ultra','entries','calendar'].forEach(x=>$(`#${x}View`).classList.toggle('hide',x!==btn.dataset.tab));
 });
 ['track','road','ultra','entries'].forEach(section=>{
-  $$('#'+section+'View .seg button').forEach(btn=>btn.onclick=()=>{
+  $$('#'+section+'View .seg:not(.sortseg) button').forEach(btn=>btn.onclick=()=>{
     state[section].gender=btn.dataset.gender;
-    $$('#'+section+'View .seg button').forEach(b=>{b.classList.toggle('active',b===btn);b.setAttribute('aria-selected',b===btn)});
+    $$('#'+section+'View .seg:not(.sortseg) button').forEach(b=>{b.classList.toggle('active',b===btn);b.setAttribute('aria-selected',b===btn)});
+    renderAll();
+  });
+  $$('#'+section+'View .sortseg button').forEach(btn=>btn.onclick=()=>{
+    if(btn.disabled)return;
+    state[section].sort=btn.dataset.sort;
+    $$('#'+section+'View .sortseg button').forEach(b=>b.classList.toggle('active',b===btn));
     renderAll();
   });
 });
