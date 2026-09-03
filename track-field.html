@@ -59,7 +59,7 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:Georgia,'Time
 .meet-date small{display:block;color:#a29a91;font-weight:700}
 .meet h3{margin:0 0 4px;font-size:19px;font-weight:500;line-height:1.2}
 .meet .where{font:12px Arial,Helvetica,sans-serif;color:#5f574f}
-.meet .detail{font:12px/1.55 Arial,Helvetica,sans-serif;color:var(--muted);margin-top:6px}
+.meet .detail{font:12px/1.55 Arial,Helvetica,sans-serif;color:var(--muted);margin-top:6px}.meet .watch{font:12px/1.5 Arial,Helvetica,sans-serif;color:#3f3933;margin-top:8px;padding:8px 10px;background:#fbf5f2;border-left:3px solid var(--track)}.meet .watch b{font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--track);display:block;margin-bottom:3px}
 .tag{display:inline-block;margin-top:8px;font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.12em;text-transform:uppercase;padding:4px 8px;border:1px solid var(--line);color:#6d655d;background:#fbf8f3}
 .tag.major{border-color:var(--track);color:var(--track)}
 .tag.champs{border-color:#2f6d4f;color:#2f6d4f}
@@ -136,9 +136,9 @@ html{font-size:14px}
 
   <section id="ultraView" class="hide">
     <div class="hero">
-      <div class="eyebrow">2026 world best times</div>
-      <div class="hero-row"><h1>Ultra</h1><div class="stamp">SEASON TO <b>3 SEP 2026</b></div></div>
-      <p class="source">World Athletics publishes no ultra rankings &mdash; its road groups stop at the marathon. These are the fastest 2026 performances at each distance from the DUV ultramarathon statistics archive, the reference database used by the IAU. Ranked by time, not by ranking points. <a href="https://statistik.d-u-v.org/" target="_blank" rel="noopener">statistik.d-u-v.org</a></p>
+      <div class="eyebrow">ITRA world rankings</div>
+      <div class="hero-row"><h1>Ultra</h1><div class="stamp">ITRA INDEX <b>CURRENT</b></div></div>
+      <p class="source">World Athletics publishes no ultra rankings &mdash; its road groups stop at the marathon. These are the ITRA Performance Index world rankings, the sport&rsquo;s established global rating for ultra and trail running: a 0&ndash;1000 index built from each runner&rsquo;s best five results over the previous 36 months. <a href="https://itra.run/Runners/Ranking" target="_blank" rel="noopener">itra.run</a></p>
     </div>
     <div class="panel">
       <div class="controls">
@@ -146,7 +146,7 @@ html{font-size:14px}
         <div class="chips" id="ultraChips" role="tablist" aria-label="Distance"></div>
       </div>
       <div class="event-note" id="ultraNote"></div>
-      <div class="list-head"><span>Rank</span><span>Athlete</span><span>Time / race</span></div>
+      <div class="list-head"><span>Rank</span><span>Athlete</span><span>Index / age</span></div>
       <div id="ultraList"></div>
     </div>
   </section>
@@ -155,7 +155,7 @@ html{font-size:14px}
     <div class="section-card">
       <div class="eyebrow">What&rsquo;s next</div>
       <h2>Upcoming meets</h2>
-      <p class="note">Diamond League final, global championships and the remaining World Marathon Majors.</p>
+      <p class="note">Diamond League final, global championships and the remaining World Marathon Majors, with broadcast details in Mountain Time.</p>
       <div id="upcomingList"></div>
     </div>
     <div class="section-card">
@@ -173,7 +173,7 @@ html{font-size:14px}
 </main>
 
 <script>
-const APP_VERSION='2026-09-03-2';
+const APP_VERSION='2026-09-03-3';
 // GitHub Pages caches this file, so a phone can sit on an old copy. Reload once if a newer build is live.
 (async function(){try{const res=await fetch(location.pathname+'?_cv='+Date.now(),{cache:'no-store'});
 const live=(await res.text()).match(/APP_VERSION='([^']+)'/);
@@ -228,30 +228,33 @@ const ROAD={
  }
 };
 
-const ULTRA_DISTANCES=['50km','100km','100 miles'];
-const ULTRA_NOTE='Fastest 2026 performances worldwide at this distance. Ranked by time, so this is a season best list rather than a points ranking.';
-// [name, country, time, race]
+const ULTRA_DISTANCES=['50K','100K','100M'];
+const ULTRA_NOTES={
+ '50K':'ITRA Performance Index for the 50km category. The index is a rolling rating built from a runner\u2019s best five results over the previous 36 months, so it is a standing rather than a single-season list.',
+ '100K':'ITRA Performance Index for the 100km category, weighted towards recent results.',
+ '100M':'ITRA Performance Index for the 100 mile category \u2014 the closest thing the sport has to a world ranking at the classic ultra distance.'
+};
+// [name, country, ITRA index, age group]
 const ULTRA={
  men:{
-  '50km':[['Alexander Milne','GBR','2:46:08','New Delhi (IND) · 14 Mar'],['Charlie Davis','GBR','2:47:12','New Delhi (IND) · 14 Mar'],['Logan Smith','GBR','2:47:28','New Delhi (IND) · 14 Mar'],['Sean Michael Hogan','GBR','2:47:58','New Delhi (IND) · 14 Mar'],['Henry Hart','GBR','2:48:30','New Delhi (IND) · 14 Mar'],['Kevin Campbell','GBR','2:48:51','New Delhi (IND) · 14 Mar'],['Remigijus Kancys','LTU','2:49:53','New Delhi (IND) · 14 Mar'],['Haruki Okayama','JPN','2:50:40','New Delhi (IND) · 14 Mar'],['Guillaume Ruel','FRA','2:51:38','Castel Bolognese (ITA) · 25 Apr'],['Marcel Bräutigam','GER','2:52:08','Bremen (GER) · 15 Mar']],
-  '100km':[['Taketoshi Ooe','JPN','6:10:22','Yubetsu (JPN) · 28 Jun'],['Masato Tanaka','JPN','6:12:16','Yubetsu (JPN) · 28 Jun'],['Tatsuya Itagaki','JPN','6:16:01','Yubetsu (JPN) · 28 Jun'],['Pascal Rüeger','SUI','6:18:27','Porto Recanati (ITA) · 21 Feb'],['Toru Somiya','JPN','6:19:45','Yubetsu (JPN) · 28 Jun'],['Tamas Bodis','HUN','6:20:01','Pabianice (POL) · 30 May'],['Kobun Nakamura','JPN','6:22:02','Yubetsu (JPN) · 28 Jun'],['Jason Pointeau','FRA','6:23:41','Steenwerck (FRA) · 13 May'],['Justin Dourlens','FRA','6:24:41','Steenwerck (FRA) · 13 May'],['Arnar Petursson','ISL','6:24:53','Koper (SLO) · 28 Mar']],
-  '100 miles':[['Rajpaul Pannu','USA','11:38:56','Henderson, NV (USA) · 14 Feb'],['Andrii Tkachuk','UKR','11:38:58','Sittard (NED) · 10 May'],['Anton Kadiev','BUL','12:40:18','Ruse (BUL) · 28 Mar'],['Matti Jonkka','FIN','13:08:23','Espoo (FIN) · 22 Feb'],['Tadas Scegauskas','LTU','13:20:05','Pabianice (POL) · 29 May'],['Jelle Tielemans','BEL','13:32:13','Amersfoort (NED) · 25 Jan'],['Scott Munson','USA','13:37:03','Henderson, NV (USA) · 14 Feb'],['Edher Ramirez','MEX','13:44:38','Henderson, NV (USA) · 14 Feb'],['Bartosz Fudali','POL','13:48:59','Cinisello Balsamo (ITA) · 29 Mar'],['Niko Toroskainen','FIN','13:52:18','Espoo (FIN) · 22 Feb']]
+  '50K':[['Frederic Tranchand','FRA',944,'35-39'],['Daniel Pattis','ITA',940,'23-34'],['Cristian Minoggio','ITA',933,'40-44'],['Andrzej Witek','POL',932,'23-34'],['Francesco Puppi','ITA',930,'35-39'],['Nashon Kiplimo','KEN',925,'23-34'],['William Boffelli','ITA',923,'23-34'],['Tao Luo','CHN',920,'23-34'],['Bartosz Gorczyca','POL',917,'23-34'],['Jim Walmsley','USA',917,'35-39']],
+  '100K':[['Cristian Minoggio','ITA',945,'40-44'],['Ben Dhiman','USA',941,'35-39'],['Louison Coiffet','FRA',937,'23-34'],['Jim Walmsley','USA',934,'35-39'],['Francesco Puppi','ITA',930,'35-39'],['Jonathan Albon','GBR',929,'35-39'],['Hannes Namberger','GER',926,'35-39'],['Jianjian Yang','CHN',923,'35-39'],['Andreas Reiterer','ITA',922,'23-34'],['Miguel Arsenio','POR',922,'35-39']],
+  '100M':[['Ben Dhiman','USA',962,'35-39'],['Caleb Olson','USA',945,'23-34'],['Baptiste Chassagne','FRA',937,'23-34'],['Vincent Bouillard','FRA',933,'23-34'],['Thomas Evans','GBR',932,'35-39'],['Jim Walmsley','USA',927,'35-39'],['Francesco Puppi','ITA',927,'35-39'],['Virgile Moriset','FRA',925,'23-34'],['Ryan Montgomery','USA',924,'23-34'],['Ludovic Pommeret','FRA',923,'50-54']]
  },
  women:{
-  '50km':[['Satu Lipiäinen','FIN','3:13:02','Bremen (GER) · 15 Mar'],['Naomi Robinson','GBR','3:13:37','New Delhi (IND) · 14 Mar'],['Katrina Ballantyne','GBR','3:17:20','New Delhi (IND) · 14 Mar'],['Nera Jareb','AUS','3:18:24','Perth (AUS) · 20 Jun'],['Monika Brzozowska','POL','3:18:59','New Delhi (IND) · 14 Mar'],['Magdalena Patas','POL','3:20:20','New Delhi (IND) · 14 Mar'],['Nomin-Erdene Bayartogtokh','MGL','3:20:31','New Delhi (IND) · 14 Mar'],['Dominika Magdalena Stelmach','POL','3:20:36','Castel Bolognese (ITA) · 25 Apr'],['Becky Briggs','GBR','3:22:31','New Delhi (IND) · 14 Mar'],['Virginia Lo','JPN','3:22:50','Yubetsu (JPN) · 28 Jun']],
-  '100km':[['Sarah Webster','GBR','7:03:48','Porto Recanati (ITA) · 21 Feb'],['Sarah Morrison','USA','7:17:01','Madison, WI (USA) · 11 Apr'],['Camille Chaigneau','FRA','7:19:50','Steenwerck (FRA) · 13 May'],['Gemma Arenas Alcazar','ESP','7:20:57','Malaga (ESP) · 21 Mar'],['Akiko Maruichi','JPN','7:22:22','Yubetsu (JPN) · 28 Jun'],['Maria Romero Ledo','ESP','7:23:31','Malaga (ESP) · 21 Mar'],['Nikolina Sustic Stankovic','CRO','7:25:25','Slavonski Brod (CRO) · 7 Mar'],['Noora Katarina Honkala','FIN','7:27:02','Porto Recanati (ITA) · 21 Feb'],['Selina Leroy','FRA','7:28:05','Steenwerck (FRA) · 13 May'],['Malory Leroy','FRA','7:28:05','Steenwerck (FRA) · 13 May']],
-  '100 miles':[['Ashley Paulson','USA','12:19:34','Henderson, NV (USA) · 14 Feb'],['Patrycja Bereznowska','POL','14:39:03','Pabianice (POL) · 29 May'],['Kaylee Frederick','USA','14:49:08','Henderson, NV (USA) · 14 Feb'],['Michelle White','GBR','14:53:44','Burjassot (ESP) · 29 Mar'],['Jenny Arnzen','USA','15:01:20','Henderson, NV (USA) · 14 Feb'],['Sandra Lundqvist','SWE','15:14:16','Växjö (SWE) · 25 Apr'],['Mascha Rondhuis','NED','15:16:39','Amersfoort (NED) · 25 Jan'],['Jian Springer','USA','15:41:02','Henderson, NV (USA) · 14 Feb'],['Edyta Lewandowska-Pyza','POL','15:49:14','Cinisello Balsamo (ITA) · 29 Mar'],['Mara Alexandra Guler-Cionca','ROU','15:51:03','Serres (GRE) · 21 Mar']]
+  '50K':[['Miao Yao','CHN',823,'23-34'],['Tove Alexandersson','SWE',818,'23-34'],['Judith Wyder','SUI',817,'35-39'],['Ikram Rharsalla Laktab','ESP',811,'23-34'],['Maude Mathys','SUI',804,'35-39'],['Nuria Gil Clapera','ESP',796,'23-34'],['Ida Amelie Robsahm','NOR',796,'23-34'],['Yngvild Kaspersen','NOR',795,'23-34'],['Sara Alonso','ESP',794,'23-34'],['Mar\u00eda Teresa La Chica Lho\u00ebst','ESP',790,'23-34']],
+  '100K':[['Jennifer Lichter','USA',823,'23-34'],['Anne Flower','USA',821,'35-39'],['Katie Schide','USA',818,'23-34'],['Miao Yao','CHN',812,'23-34'],['Sunmaya Budha','NEP',810,'23-34'],['Antonina Iushina','RUS',805,'23-34'],['Eszter Csillag','HUN',804,'40-44'],['Yngvild Kaspersen','NOR',803,'23-34'],['Lucy Bartholomew','AUS',801,'23-34'],['Toni McCann','RSA',799,'23-34']],
+  '100M':[['Courtney Dauwalter','USA',833,'40-44'],['Katie Schide','USA',830,'23-34'],['Jennifer Lichter','USA',830,'23-34'],['Riley Brady','USA',817,'23-34'],['Antonina Iushina','RUS',816,'23-34'],['Tara Dower','USA',814,'23-34'],['Marianne Hogan','CAN',809,'35-39'],['Fuzhao Xiang','CHN',806,'35-39'],['Caitlin Fielder','NZL',805,'23-34'],["Blandine L'Hirondel",'FRA',804,'35-39']]
  }
 };
-
 const UPCOMING=[
- {d:'Sep 4-5',y:'2026',name:'Wanda Diamond League Final',where:'Brussels, Belgium',detail:'The season finale runs over two days for the first time, with Diamond Trophies decided in every discipline.',tag:'Diamond League',cls:'major'},
- {d:'Sep 11-13',y:'2026',name:'World Athletics Ultimate Championship',where:'Budapest, Hungary',detail:'Inaugural edition. Sixteen athletes per track event, eight per field event, and a US$10 million purse. Entry comes from Olympic and world titles, Diamond League final wins, and the world rankings.',tag:'Championship',cls:'champs'},
- {d:'Sep 19-20',y:'2026',name:'World Athletics Road Running Championships',where:'Copenhagen, Denmark',detail:'Half marathon, 5km and the mile, with mass-participation races at 5km and the mile.',tag:'Championship',cls:'champs'},
- {d:'Sep 27',y:'2026',name:'Berlin Marathon',where:'Berlin, Germany',detail:'The fastest of the majors and the usual home of world record attempts.',tag:'Marathon major',cls:'major'},
- {d:'Oct 11',y:'2026',name:'Chicago Marathon',where:'Chicago, USA',detail:'Flat, fast, and the second of the autumn majors.',tag:'Marathon major',cls:'major'},
- {d:'Nov 1',y:'2026',name:'New York City Marathon',where:'New York, USA',detail:'Five boroughs and the largest field in the sport.',tag:'Marathon major',cls:'major'},
- {d:'Dec 6',y:'2026',name:'Shanghai Marathon',where:'Shanghai, China',detail:'A candidate race under assessment to join the majors in 2027.',tag:'Candidate major',cls:''}
+ {d:'Sep 4-5',y:'2026',name:'Wanda Diamond League Final',where:'Brussels, Belgium',detail:'The season finale runs over two days for the first time, with Diamond Trophies decided in every discipline.',watch:'FloTrack &middot; Fri from 10:30 AM MDT, Sat from 10:10 AM MDT',tag:'Diamond League',cls:'major'},
+ {d:'Sep 11-13',y:'2026',name:'World Athletics Ultimate Championship',where:'Budapest, Hungary',detail:'Inaugural edition. Sixteen athletes per track event, eight per field event, and a US$10 million purse. Entry comes from Olympic and world titles, Diamond League final wins, and the world rankings.',watch:'US broadcaster not yet announced &middot; first session 9:00 AM MDT',tag:'Championship',cls:'champs'},
+ {d:'Sep 19-20',y:'2026',name:'World Athletics Road Running Championships',where:'Copenhagen, Denmark',detail:'Half marathon, 5km and the mile, with mass-participation races at 5km and the mile.',watch:'Broadcaster not yet announced &middot; World Athletics streams selected territories',tag:'Championship',cls:'champs'},
+ {d:'Sep 27',y:'2026',name:'Berlin Marathon',where:'Berlin, Germany',detail:'The fastest of the majors and the usual home of world record attempts.',watch:'FloSports &middot; 1:00 AM MDT',tag:'Marathon major',cls:'major'},
+ {d:'Oct 11',y:'2026',name:'Chicago Marathon',where:'Chicago, USA',detail:'Flat, fast, and the second of the autumn majors.',watch:'Peacock and NBC Chicago &middot; 6:00 AM MDT',tag:'Marathon major',cls:'major'},
+ {d:'Nov 1',y:'2026',name:'New York City Marathon',where:'New York, USA',detail:'Five boroughs and the largest field in the sport. Clocks go back the same morning, so the start lands at 6:00 AM once Mountain Time returns to standard.',watch:'ESPN2 and ABC &middot; 6:00 AM MST',tag:'Marathon major',cls:'major'},
+ {d:'Dec 6',y:'2026',name:'Shanghai Marathon',where:'Shanghai, China',detail:'A candidate race under assessment to join the majors in 2027.',watch:'No US broadcast confirmed',tag:'Candidate major',cls:''}
 ];
 const DL_SEASON=[
  ['May 16','Keqiao / Shanghai','China'],['May 23','Xiamen','China'],['May 31','Rabat','Morocco'],
@@ -282,11 +285,11 @@ function renderBoard(section,data,keys,notes){
 function renderAll(){
   renderBoard('track',TRACK,TRACK_EVENTS,TRACK_NOTES);
   renderBoard('road',ROAD,ROAD_GROUPS,ROAD_NOTES);
-  renderBoard('ultra',ULTRA,ULTRA_DISTANCES,ULTRA_NOTE);
+  renderBoard('ultra',ULTRA,ULTRA_DISTANCES,ULTRA_NOTES);
 }
 function renderCalendar(){
   $('#upcomingList').innerHTML=UPCOMING.map(m=>
-    `<article class="meet"><div class="meet-date">${esc(m.d)}<small>${esc(m.y)}</small></div><div><h3>${esc(m.name)}</h3><div class="where">${esc(m.where)}</div><div class="detail">${esc(m.detail)}</div><span class="tag ${esc(m.cls)}">${esc(m.tag)}</span></div></article>`
+    `<article class="meet"><div class="meet-date">${esc(m.d)}<small>${esc(m.y)}</small></div><div><h3>${esc(m.name)}</h3><div class="where">${esc(m.where)}</div><div class="detail">${esc(m.detail)}</div><div class="watch"><b>Watch</b> ${m.watch}</div><span class="tag ${esc(m.cls)}">${esc(m.tag)}</span></div></article>`
   ).join('');
   $('#dlList').innerHTML=DL_SEASON.map(([d,city,country],i)=>
     `<div class="done"><span class="d">${esc(d)}</span><span class="m">${esc(city)}, ${esc(country)}</span><span class="f">${i===DL_SEASON.length-1?'Final':''}</span></div>`
