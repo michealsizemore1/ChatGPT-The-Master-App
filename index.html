@@ -145,7 +145,7 @@
     color:var(--muted);
   }
   .note b{color:var(--ink)}
-  .info-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:18px}
+  .info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:18px}
   .info-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:17px 19px;font-size:13px;color:var(--muted)}
   .info-card h2{margin:0 0 7px;font-size:15px;color:var(--ink)}
   .info-card p{margin:0}
@@ -297,6 +297,14 @@
       </div>
       <div class="backup-status" id="masterBackupStatus" role="status" aria-live="polite"></div>
     </section>
+    <section class="info-card storage">
+      <h2>Storage usage</h2>
+      <p>Every tool on this site shares one storage limit on this device. See what's using it up before anything runs out unexpectedly.</p>
+      <div class="backup-actions">
+        <button class="backup-btn secondary" type="button" onclick="checkStorageUsage()">Refresh</button>
+      </div>
+      <div id="storageUsageResult" style="margin-top:10px;"></div>
+    </section>
   </div>
 
   <div class="note">
@@ -361,6 +369,80 @@ function restoreMasterBackup(input){
   reader.onerror=function(){masterBackupStatus('The backup file could not be read.',true);input.value='';};
   reader.readAsText(file);
 }
+
+/* ---- Storage usage diagnostic ---- */
+var STORAGE_LABEL_RULES=[
+  {test:function(k){return k==='meridian_money_data_v5';},label:'Budget & Net Worth Tracker'},
+  {test:function(k){return k.indexOf('planner_')===0;},label:'My Life Command Center — daily entries'},
+  {test:function(k){return k==='meditation_archive';},label:'AI Prayer Archive (My Life Command Center)'},
+  {test:function(k){return k==='bible_reading_archive';},label:'Bible Reading Archive — local copy (My Life Command Center)'},
+  {test:function(k){return k==='current_training_plan';},label:'Training Plan (My Life Command Center)'},
+  {test:function(k){return k==='activities_data';},label:'Activities — local copy (My Life Command Center)'},
+  {test:function(k){return k.indexOf('retirementPlanner')===0;},label:'Retirement & Credit Planner'},
+  {test:function(k){return k==='mcsAIKey';},label:'eBay Business Tracker — AI key'},
+  {test:function(k){return k==='autoHideMenu'||k==='lastSection'||k.indexOf('navGroup_')===0;},label:'Family Benefits Hub — preferences'},
+  {test:function(k){return k==='journal_cloud_dirty';},label:'My Life Command Center — sync flag'}
+];
+function storageFriendlyLabel(key){
+  for(var i=0;i<STORAGE_LABEL_RULES.length;i++){if(STORAGE_LABEL_RULES[i].test(key))return STORAGE_LABEL_RULES[i].label;}
+  return key;
+}
+function storageEscHtml(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];});}
+function storageFmtBytes(n){
+  if(n>=1024*1024)return (n/(1024*1024)).toFixed(2)+' MB';
+  if(n>=1024)return (n/1024).toFixed(1)+' KB';
+  return n+' B';
+}
+async function checkStorageUsage(){
+  var out=document.getElementById('storageUsageResult');
+  if(!out)return;
+  out.innerHTML='<div style="color:#666;">Checking…</div>';
+  var groups={},totalLS=0;
+  for(var i=0;i<localStorage.length;i++){
+    var key=localStorage.key(i);
+    var value=localStorage.getItem(key)||'';
+    var size=0;
+    try{size=new Blob([key+value]).size;}catch(e){size=(key.length+value.length)*2;}
+    totalLS+=size;
+    var label=storageFriendlyLabel(key);
+    if(!groups[label])groups[label]={bytes:0,count:0};
+    groups[label].bytes+=size;
+    groups[label].count+=1;
+  }
+  var rows=Object.keys(groups).map(function(label){return {label:label,bytes:groups[label].bytes,count:groups[label].count};});
+  rows.sort(function(a,b){return b.bytes-a.bytes;});
+
+  var quotaLine='';
+  try{
+    if(navigator.storage&&navigator.storage.estimate){
+      var est=await navigator.storage.estimate();
+      if(est&&typeof est.usage==='number'){
+        var pct=est.quota?Math.round(est.usage/est.quota*100):null;
+        quotaLine='<div style="margin-bottom:10px;padding:10px 12px;background:#eef2ff;border-radius:8px;">'
+          +'<b>Everything this site stores on this device:</b> '+storageFmtBytes(est.usage)+(est.quota?' of about '+storageFmtBytes(est.quota)+' available'+(pct!==null?' ('+pct+'%)':''):'')
+          +'<div style="font-size:11px;color:#666;margin-top:4px;">Includes the localStorage breakdown below, plus the Bible Reading Archive and a few other items stored separately (IndexedDB) that aren’t broken out here.</div>'
+          +'</div>';
+      }
+    }
+  }catch(estErr){}
+
+  var tableRows=rows.map(function(r){
+    var pctOfLS=totalLS?Math.round(r.bytes/totalLS*100):0;
+    return '<tr>'
+      +'<td style="padding:5px 8px;border-bottom:1px solid #eee;">'+storageEscHtml(r.label)+(r.count>1?' <span style="color:#999;">('+r.count+' items)</span>':'')+'</td>'
+      +'<td style="padding:5px 8px;border-bottom:1px solid #eee;text-align:right;white-space:nowrap;">'+storageFmtBytes(r.bytes)+'</td>'
+      +'<td style="padding:5px 8px;border-bottom:1px solid #eee;text-align:right;color:#999;white-space:nowrap;">'+pctOfLS+'%</td>'
+      +'</tr>';
+  }).join('');
+
+  out.innerHTML=quotaLine
+    +'<div style="font-size:12px;color:#666;margin-bottom:6px;">localStorage total: <b>'+storageFmtBytes(totalLS)+'</b> across '+localStorage.length+' item'+(localStorage.length===1?'':'s')+'</div>'
+    +'<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12.5px;">'
+    +'<thead><tr><th style="text-align:left;padding:5px 8px;border-bottom:2px solid #ddd;">Where it is</th><th style="text-align:right;padding:5px 8px;border-bottom:2px solid #ddd;">Size</th><th style="text-align:right;padding:5px 8px;border-bottom:2px solid #ddd;">%</th></tr></thead>'
+    +'<tbody>'+tableRows+'</tbody></table></div>'
+    +'<div style="font-size:11px;color:#999;margin-top:8px;">Checked on this device/browser only — your phone and computer each have their own separate storage.</div>';
+}
+checkStorageUsage();
 </script>
 </body>
 </html>
