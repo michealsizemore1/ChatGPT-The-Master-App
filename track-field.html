@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#241f1c">
+<title>Track &amp; Field — World Rankings</title>
+<style>
+:root{--ink:#221f1d;--dark:#241f1c;--track:#c0472b;--gold:#e8b64c;--paper:#f5f1ea;--card:#fffdf9;--line:#e2dbd0;--muted:#7b736a}
+*{box-sizing:border-box}html{font-size:15px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:Georgia,'Times New Roman',serif}
+.sans,.nav,.eyebrow,.meta,.chip,button,input,.tag{font-family:Arial,Helvetica,sans-serif}
+.top{position:sticky;top:0;z-index:20;background:var(--dark);color:#fff;border-bottom:1px solid #3d3531}
+.nav{height:100px;max-width:980px;margin:auto;display:flex;align-items:center;gap:22px;padding:0 24px}
+.home{width:43px;height:52px;border:1px solid #574c46;border-radius:6px;color:#fff;display:grid;place-items:center;text-decoration:none;font-size:20px}
+.brand{margin-right:auto}
+.brand strong{display:block;font-size:23px;letter-spacing:.08em}
+.brand span{display:block;color:var(--gold);font-size:9px;letter-spacing:.22em;text-transform:uppercase;margin-top:4px}
+.tabs{display:flex;align-self:stretch}
+.tabs button{position:relative;border:0;background:transparent;color:#b2a79f;font-weight:800;font-size:14px;padding:0 18px;cursor:pointer}
+.tabs button.active{color:#fff}
+.tabs button.active:after{content:"";height:4px;background:var(--track);position:absolute;left:16px;right:16px;bottom:0}
+.page{max-width:920px;margin:0 auto;padding:30px 24px 70px}
+.hero{background:var(--card);border:1px solid var(--line);padding:27px 29px 22px}
+.eyebrow{font-size:10px;letter-spacing:.22em;font-weight:800;color:#6d655d;text-transform:uppercase}
+.hero h1{font-size:39px;font-weight:500;margin:12px 0 4px}
+.hero-row{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.stamp{font:700 11px Arial,Helvetica,sans-serif;color:#5f574f}
+.stamp b{color:var(--track)}
+.source{font:11px/1.6 Arial,Helvetica,sans-serif;color:var(--muted);margin:10px 0 0}
+.source a{color:var(--track)}
+.panel{background:var(--card);border:1px solid var(--line);border-top:0}
+.controls{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:13px}
+.seg{display:flex;gap:6px}
+.seg button{border:1px solid var(--line);background:#fff;color:var(--muted);font:800 11px Arial,Helvetica,sans-serif;letter-spacing:.09em;text-transform:uppercase;padding:9px 18px;cursor:pointer}
+.seg button.active{background:var(--dark);color:#fff;border-color:var(--dark)}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.chips button{flex:0 0 auto;border:1px solid var(--line);background:#fff;color:#4d463f;font:800 12px Arial,Helvetica,sans-serif;padding:9px 15px;cursor:pointer;border-radius:2px}
+.chips button.active{background:var(--track);color:#fff;border-color:var(--track)}
+.list-head{display:grid;grid-template-columns:44px minmax(0,1fr) 62px;gap:10px;padding:12px 18px;background:#ebe5db;color:#77706a;font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.16em;text-transform:uppercase}
+.list-head span:last-child{text-align:right}
+.athlete{display:grid;grid-template-columns:44px minmax(0,1fr) 62px;gap:10px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line)}
+.athlete:nth-child(odd){background:#fbf8f3}
+.rank{font-size:23px;color:#b9b1a7}
+.athlete.podium .rank{color:var(--track)}
+.name{font-size:19px;line-height:1.15}
+.country{font:10px Arial,Helvetica,sans-serif;letter-spacing:.16em;color:#8b847c;margin-top:5px}
+.score{font:800 17px Arial,Helvetica,sans-serif;text-align:right;font-variant-numeric:tabular-nums}
+.event-note{padding:14px 18px;font:12px/1.6 Arial,Helvetica,sans-serif;color:var(--muted);border-bottom:1px solid var(--line);background:#fbf8f3}
+.section-card{background:var(--card);border:1px solid var(--line);padding:22px;margin-bottom:18px}
+.section-card h2{font-size:28px;font-weight:500;margin:0 0 6px}
+.section-card p.note{font:13px/1.6 Arial,Helvetica,sans-serif;color:var(--muted);margin:0 0 16px}
+.meet{display:grid;grid-template-columns:74px minmax(0,1fr);gap:14px;padding:15px 0;border-top:1px solid var(--line)}
+.meet:first-of-type{border-top:0}
+.meet-date{font:800 11px Arial,Helvetica,sans-serif;letter-spacing:.06em;color:var(--track);line-height:1.45;text-transform:uppercase}
+.meet-date small{display:block;color:#a29a91;font-weight:700}
+.meet h3{margin:0 0 4px;font-size:19px;font-weight:500;line-height:1.2}
+.meet .where{font:12px Arial,Helvetica,sans-serif;color:#5f574f}
+.meet .detail{font:12px/1.55 Arial,Helvetica,sans-serif;color:var(--muted);margin-top:6px}
+.tag{display:inline-block;margin-top:8px;font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.12em;text-transform:uppercase;padding:4px 8px;border:1px solid var(--line);color:#6d655d;background:#fbf8f3}
+.tag.major{border-color:var(--track);color:var(--track)}
+.tag.champs{border-color:#2f6d4f;color:#2f6d4f}
+.done{display:grid;grid-template-columns:74px minmax(0,1fr) auto;gap:12px;align-items:baseline;padding:11px 0;border-top:1px solid var(--line);font-family:Arial,Helvetica,sans-serif}
+.done:first-of-type{border-top:0}
+.done .d{font:800 11px Arial,Helvetica,sans-serif;color:#a29a91;letter-spacing:.06em;text-transform:uppercase}
+.done .m{font-size:14px;color:#3f3933}
+.done .f{font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--track)}
+.hide{display:none!important}
+@media(max-width:680px){
+html{font-size:14px}
+.nav{height:106px;display:grid;grid-template-columns:42px 1fr;padding:10px 14px 0;gap:7px 11px}
+.home{height:46px}.brand strong{font-size:19px}
+.tabs{grid-column:1/-1;height:44px;justify-content:flex-start}
+.tabs button{padding:0 16px;font-size:13px}
+.page{padding:12px 14px 60px}
+.hero{padding:19px 16px}.hero h1{font-size:32px}
+.list-head,.athlete{grid-template-columns:34px minmax(0,1fr) 56px;padding-left:12px;padding-right:12px}
+.rank{font-size:20px}.name{font-size:17px}
+.meet{grid-template-columns:64px minmax(0,1fr);gap:11px}
+.done{grid-template-columns:60px minmax(0,1fr)}
+.done .f{grid-column:2}
+}
+</style>
+</head>
+<body>
+<header class="top"><div class="nav">
+  <a class="home" href="index.html" aria-label="Home">&#8962;</a>
+  <div class="brand"><strong>TRACK &amp; FIELD</strong><span>World Athletics command center</span></div>
+  <nav class="tabs" aria-label="Sections">
+    <button class="active" data-tab="rankings">Rankings</button>
+    <button data-tab="calendar">Calendar</button>
+  </nav>
+</div></header>
+
+<main class="page">
+  <section id="rankingsView">
+    <div class="hero">
+      <div class="eyebrow">World rankings &middot; 100m to 10,000m</div>
+      <div class="hero-row">
+        <h1>World Rankings</h1>
+        <div class="stamp">AS OF <b id="rankDate"></b></div>
+      </div>
+      <p class="source">Top 10 per event from the official World Athletics world rankings. Scores are ranking points, not times. <a href="https://worldathletics.org/world-rankings" target="_blank" rel="noopener">worldathletics.org</a></p>
+    </div>
+    <div class="panel">
+      <div class="controls">
+        <div class="seg" role="tablist" aria-label="Category">
+          <button class="active" data-gender="men" role="tab" aria-selected="true">Men</button>
+          <button data-gender="women" role="tab" aria-selected="false">Women</button>
+        </div>
+        <div class="chips" id="eventChips" role="tablist" aria-label="Event"></div>
+      </div>
+      <div class="event-note" id="eventNote"></div>
+      <div class="list-head"><span>Rank</span><span>Athlete</span><span>Score</span></div>
+      <div id="rankList"></div>
+    </div>
+  </section>
+
+  <section id="calendarView" class="hide">
+    <div class="section-card">
+      <div class="eyebrow">What&rsquo;s next</div>
+      <h2>Upcoming meets</h2>
+      <p class="note">Diamond League final, global championships and the remaining World Marathon Majors.</p>
+      <div id="upcomingList"></div>
+    </div>
+    <div class="section-card">
+      <div class="eyebrow">2026 season</div>
+      <h2>Diamond League season</h2>
+      <p class="note">All 15 meetings of the 2026 Wanda Diamond League, finishing with the two-day final in Brussels.</p>
+      <div id="dlList"></div>
+    </div>
+    <div class="section-card">
+      <div class="eyebrow">Also worth knowing</div>
+      <h2>Season notes</h2>
+      <p class="note" style="margin:0">The World Athletics Continental Tour Gold series ran from March to July 2026 and has finished for the year, so the autumn calendar is championship and marathon territory. The Ultimate Championship in Budapest is new for 2026: sixteen athletes per track event, eight per field event, and a US$10 million purse.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+const APP_VERSION='2026-09-03-1';
+// GitHub Pages caches this file, so a phone can sit on an old copy. Reload once if a newer build is live.
+(async function(){try{const res=await fetch(location.pathname+'?_cv='+Date.now(),{cache:'no-store'});
+const live=(await res.text()).match(/APP_VERSION='([^']+)'/);
+if(live&&live[1]!==APP_VERSION&&!sessionStorage.getItem('tf-v-'+live[1])){
+sessionStorage.setItem('tf-v-'+live[1],'1');location.replace(location.pathname+'?v='+live[1])}}catch(e){}})();
+
+const RANK_DATE='1 September 2026';
+const EVENTS=['100m','200m','400m','800m','1500m','5000m','10,000m'];
+const NOTES={
+ '100m':'World Athletics scores this group together with the indoor 50m, 55m and 60m.',
+ '200m':'A standalone ranking group.',
+ '400m':'Scored together with the 300m and 500m.',
+ '800m':'Scored together with the 600m and 1000m.',
+ '1500m':'Scored together with the mile, 2000m and road mile.',
+ '5000m':'Scored together with the 3000m, two miles and road 5km.',
+ '10,000m':'Scored together with the road 10km.'
+};
+const RANKINGS={
+ men:{
+  '100m':[['Oblique Seville','JAM',1414],['Noah Lyles','USA',1376],['Kenneth Bednarek','USA',1373],['Kayinsola Ajayi','NGR',1365],['Kishane Thompson','JAM',1345],['Gift Leotlela','RSA',1342],['Jordan Anthony','USA',1339],['Trayvon Bromell','USA',1337],['Emmanuel Eseme','CMR',1332],['Ferdinand Omanyala','KEN',1316]],
+  '200m':[['Kenneth Bednarek','USA',1413],['Letsile Tebogo','BOT',1387],['Sinesipho Dambile','RSA',1359],['Bryan Levell','JAM',1338],['Noah Lyles','USA',1330],['Makanakaishe Charamba','ZIM',1326],['Zharnel Hughes','GBR',1318],['Alexander Ogando','DOM',1307],['Andre De Grasse','CAN',1305],['Tate Taylor','USA',1295]],
+  '400m':[['Busang Collen Kebinatshipi','BOT',1442],['Zakithi Nene','RSA',1358],['Jacory Patterson','USA',1357],['Rai Benjamin','USA',1356],['Jereem Richards','TTO',1355],['Matthew Hudson-Smith','GBR',1349],['Khaleb McRae','USA',1330],['Muzala Samukonga','ZAM',1326],['Bayapo Ndori','BOT',1325],['Chris Bailey','USA',1322]],
+  '800m':[['Emmanuel Wanyonyi','KEN',1434],['Djamel Sedjati','ALG',1382],['Marco Arop','CAN',1382],['Cooper Lutkenhaus','USA',1366],['Mohamed Attaoui','ESP',1348],['Brandon Miller','USA',1344],['Max Burgin','GBR',1337],['Mark English','IRL',1328],['Eliott Crestan','BEL',1319],['Navasky Anderson','JAM',1317]],
+  '1500m':[['Cameron Myers','AUS',1372],['Yared Nuguse','USA',1367],['Isaac Nader','POR',1342],['Timothy Cheruiyot','KEN',1337],['Azeddine Habz','FRA',1326],['Jake Wightman','GBR',1317],['Hobbs Kessler','USA',1316],['Ethan Strand','USA',1309],['Robert Farken','GER',1306],['Vincent Ciattei','USA',1306]],
+  '5000m':[['Addisu Yihune','ETH',1338],['Birhanu Balew','BRN',1337],['Parker Wolfe','USA',1336],['Andreas Almgren','SWE',1332],['Cole Hocker','USA',1329],['Graham Blanks','USA',1329],['Grant Fisher','USA',1326],['Ky Robinson','AUS',1323],['Biniam Mehary','ETH',1323],['Jimmy Gressier','FRA',1313]],
+  '10,000m':[['Ishmael Rokitto Kipkurui','KEN',1280],['Biniam Mehary','ETH',1271],['Andreas Almgren','SWE',1259],['Ky Robinson','AUS',1235],['Selemon Barega','ETH',1234],['Nicholas Kipkorir','KEN',1233],['Edwin Kurgat','KEN',1232],['Mohamed Abdilaahi','GER',1232],['Habtom Samuel','ERI',1231],['Adriaan Wildschutt','RSA',1226]]
+ },
+ women:{
+  '100m':[['Melissa Jefferson-Wooden','USA',1417],['Julien Alfred','LCA',1383],['Tina Clayton','JAM',1355],["Sha'Carri Richardson",'USA',1342],['Shericka Jackson','JAM',1311],['Amy Hunt','GBR',1304],['Jonielle Smith','JAM',1300],['Brianna Lyston','JAM',1297],['Zaynab Dosso','ITA',1293],['Adaejah Hodge','IVB',1293]],
+  '200m':[['Gabrielle Thomas','USA',1363],['Melissa Jefferson-Wooden','USA',1352],['Amy Hunt','GBR',1348],['Shericka Jackson','JAM',1346],['Anavia Battle','USA',1332],['Kayla White','USA',1332],['Shaunae Miller-Uibo','BAH',1323],['Adaejah Hodge','IVB',1321],['Favour Ofili','NGR',1309],['Dina Asher-Smith','GBR',1308]],
+  '400m':[['Marileidy Paulino','DOM',1421],['Henriette Jæger','NOR',1363],['Natalia Bukowiecka','POL',1342],['Nickisha Pryce','JAM',1340],['Salwa Eid Naser','BRN',1338],['Lurdes Gloria Manuel','CZE',1338],['Aaliyah Butler','USA',1324],['Roxana Gómez','CUB',1319],['Amber Anning','GBR',1317],['Stacey Ann Williams','JAM',1317]],
+  '800m':[['Keely Hodgkinson','GBR',1409],['Audrey Werro','SUI',1405],['Lilian Odira','KEN',1358],['Femke Broeders-Bol','NED',1358],['Georgia Hunter Bell','GBR',1343],['Tsige Duguma','ETH',1311],['Sage Hurta-Klecker','USA',1304],['Addison Wiley','USA',1299],['Anaïs Bourgoin','FRA',1295],['Prudence Sekgodiso','RSA',1289]],
+  '1500m':[['Jessica Hull','AUS',1368],['Dorcus Ewoi','KEN',1358],['Georgia Hunter Bell','GBR',1344],['Birke Haylom','ETH',1340],['Nikki Hiltz','USA',1332],['Klaudia Kazimierska','POL',1331],['Freweyni Hailu','ETH',1328],['Faith Kipyegon','KEN',1323],['Agathe Guillemot','FRA',1323],['Abbey Caldwell','AUS',1316]],
+  '5000m':[['Likina Amebaw','ETH',1325],['Faith Kipyegon','KEN',1324],['Freweyni Hailu','ETH',1313],['Nadia Battocletti','ITA',1311],['Senayet Getachew','ETH',1305],['Aleshign Baweke','ETH',1302],['Medina Eisa','ETH',1292],['Rose Davies','AUS',1280],['Fantaye Belayneh','ETH',1274],['Shelby Houlihan','USA',1272]],
+  '10,000m':[['Agnes Jebet Ngetich','KEN',1339],['Beatrice Chebet','KEN',1318],['Nadia Battocletti','ITA',1313],['Ririka Hironaka','JPN',1282],['Joy Cheptoyek','UGA',1258],['Chaltu Dida','ETH',1257],['Miriam Chebet','KEN',1253],['Asayech Ayichew','ETH',1243],['Jana Van Lent','BEL',1240],['Senayet Getachew','ETH',1237]]
+ }
+};
+const UPCOMING=[
+ {d:'Sep 4-5',y:'2026',name:'Wanda Diamond League Final',where:'Brussels, Belgium',detail:'The season finale runs over two days for the first time, with Diamond Trophies decided in every discipline.',tag:'Diamond League',cls:'major'},
+ {d:'Sep 11-13',y:'2026',name:'World Athletics Ultimate Championship',where:'Budapest, Hungary',detail:'Inaugural edition. Sixteen athletes per track event, eight per field event, and a US$10 million purse. Entry comes from Olympic and world titles, Diamond League final wins, and the world rankings.',tag:'Championship',cls:'champs'},
+ {d:'Sep 19-20',y:'2026',name:'World Athletics Road Running Championships',where:'Copenhagen, Denmark',detail:'Half marathon, 5km and the mile, with mass-participation races at 5km and the mile.',tag:'Championship',cls:'champs'},
+ {d:'Sep 27',y:'2026',name:'Berlin Marathon',where:'Berlin, Germany',detail:'The fastest of the majors and the usual home of world record attempts.',tag:'Marathon major',cls:'major'},
+ {d:'Oct 11',y:'2026',name:'Chicago Marathon',where:'Chicago, USA',detail:'Flat, fast, and the second of the autumn majors.',tag:'Marathon major',cls:'major'},
+ {d:'Nov 1',y:'2026',name:'New York City Marathon',where:'New York, USA',detail:'Five boroughs and the largest field in the sport.',tag:'Marathon major',cls:'major'},
+ {d:'Dec 6',y:'2026',name:'Shanghai Marathon',where:'Shanghai, China',detail:'A candidate race under assessment to join the majors in 2027.',tag:'Candidate major',cls:''}
+];
+const DL_SEASON=[
+ ['May 16','Keqiao / Shanghai','China'],['May 23','Xiamen','China'],['May 31','Rabat','Morocco'],
+ ['Jun 4','Rome','Italy'],['Jun 7','Stockholm','Sweden'],['Jun 10','Oslo','Norway'],
+ ['Jun 19','Doha','Qatar'],['Jun 28','Paris','France'],['Jul 4','Eugene','USA'],
+ ['Jul 10','Monaco','Monaco'],['Jul 18','London','Great Britain'],['Aug 21','Lausanne','Switzerland'],
+ ['Aug 23','Silesia','Poland'],['Aug 27','Zurich','Switzerland'],['Sep 4-5','Brussels','Belgium']
+];
+
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+let gender='men', currentEvent='100m';
+
+function renderRankings(){
+  $('#rankDate').textContent=RANK_DATE;
+  $('#eventChips').innerHTML=EVENTS.map(e=>`<button role="tab" aria-selected="${e===currentEvent}" class="${e===currentEvent?'active':''}" data-event="${esc(e)}">${esc(e)}</button>`).join('');
+  $('#eventNote').textContent=NOTES[currentEvent]||'';
+  const list=(RANKINGS[gender]||{})[currentEvent]||[];
+  $('#rankList').innerHTML=list.map(([name,country,score],i)=>
+    `<article class="athlete${i<3?' podium':''}"><span class="rank">${i+1}</span><div><div class="name">${esc(name)}</div><div class="country">${esc(country)}</div></div><span class="score">${esc(score)}</span></article>`
+  ).join('')||'<div class="event-note">No ranking data for this event.</div>';
+  $$('#eventChips button').forEach(b=>b.onclick=()=>{currentEvent=b.dataset.event;renderRankings()});
+}
+function renderCalendar(){
+  $('#upcomingList').innerHTML=UPCOMING.map(m=>
+    `<article class="meet"><div class="meet-date">${esc(m.d)}<small>${esc(m.y)}</small></div><div><h3>${esc(m.name)}</h3><div class="where">${esc(m.where)}</div><div class="detail">${esc(m.detail)}</div><span class="tag ${esc(m.cls)}">${esc(m.tag)}</span></div></article>`
+  ).join('');
+  $('#dlList').innerHTML=DL_SEASON.map(([d,city,country],i)=>
+    `<div class="done"><span class="d">${esc(d)}</span><span class="m">${esc(city)}, ${esc(country)}</span><span class="f">${i===DL_SEASON.length-1?'Final':''}</span></div>`
+  ).join('');
+}
+$$('.tabs button').forEach(btn=>btn.onclick=()=>{
+  $$('.tabs button').forEach(b=>b.classList.toggle('active',b===btn));
+  ['rankings','calendar'].forEach(x=>$(`#${x}View`).classList.toggle('hide',x!==btn.dataset.tab));
+});
+$$('.seg button').forEach(btn=>btn.onclick=()=>{
+  gender=btn.dataset.gender;
+  $$('.seg button').forEach(b=>{b.classList.toggle('active',b===btn);b.setAttribute('aria-selected',b===btn)});
+  renderRankings();
+});
+renderRankings();renderCalendar();
+</script>
+</body>
+</html>
