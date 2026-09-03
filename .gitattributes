@@ -1,0 +1,8 @@
+# Normalize line endings to LF for all text files, regardless of OS.
+# This prevents Windows git (autocrlf) from rewriting these files to
+# CRLF on checkout, which previously showed up as false "modified"/
+# "conflict" diffs even when content hadn't actually changed.
+* text=auto eol=lf
+
+# Binary files: never touch line endings, never diff as text.
+*.png binary
