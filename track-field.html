@@ -9,7 +9,7 @@
 :root{--ink:#221f1d;--dark:#241f1c;--track:#c0472b;--gold:#e8b64c;--paper:#f5f1ea;--card:#fffdf9;--line:#e2dbd0;--muted:#7b736a}
 *{box-sizing:border-box}html{font-size:15px}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:Georgia,'Times New Roman',serif}
-.sans,.nav,.eyebrow,.meta,.chip,button,input,.tag{font-family:Arial,Helvetica,sans-serif}
+.sans,.nav,.eyebrow,.chip,button,input,.tag{font-family:Arial,Helvetica,sans-serif}
 .top{position:sticky;top:0;z-index:20;background:var(--dark);color:#fff;border-bottom:1px solid #3d3531}
 .nav{height:100px;max-width:980px;margin:auto;display:flex;align-items:center;gap:22px;padding:0 24px}
 .home{width:43px;height:52px;border:1px solid #574c46;border-radius:6px;color:#fff;display:grid;place-items:center;text-decoration:none;font-size:20px}
@@ -17,9 +17,9 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:Georgia,'Time
 .brand strong{display:block;font-size:23px;letter-spacing:.08em}
 .brand span{display:block;color:var(--gold);font-size:9px;letter-spacing:.22em;text-transform:uppercase;margin-top:4px}
 .tabs{display:flex;align-self:stretch}
-.tabs button{position:relative;border:0;background:transparent;color:#b2a79f;font-weight:800;font-size:14px;padding:0 18px;cursor:pointer}
+.tabs button{position:relative;border:0;background:transparent;color:#b2a79f;font-weight:800;font-size:14px;padding:0 15px;cursor:pointer}
 .tabs button.active{color:#fff}
-.tabs button.active:after{content:"";height:4px;background:var(--track);position:absolute;left:16px;right:16px;bottom:0}
+.tabs button.active:after{content:"";height:4px;background:var(--track);position:absolute;left:13px;right:13px;bottom:0}
 .page{max-width:920px;margin:0 auto;padding:30px 24px 70px}
 .hero{background:var(--card);border:1px solid var(--line);padding:27px 29px 22px}
 .eyebrow{font-size:10px;letter-spacing:.22em;font-weight:800;color:#6d655d;text-transform:uppercase}
@@ -37,15 +37,18 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:Georgia,'Time
 .chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
 .chips button{flex:0 0 auto;border:1px solid var(--line);background:#fff;color:#4d463f;font:800 12px Arial,Helvetica,sans-serif;padding:9px 15px;cursor:pointer;border-radius:2px}
 .chips button.active{background:var(--track);color:#fff;border-color:var(--track)}
-.list-head{display:grid;grid-template-columns:44px minmax(0,1fr) 62px;gap:10px;padding:12px 18px;background:#ebe5db;color:#77706a;font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.16em;text-transform:uppercase}
+.list-head{display:grid;grid-template-columns:44px minmax(0,1fr) 96px;gap:10px;padding:12px 18px;background:#ebe5db;color:#77706a;font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.16em;text-transform:uppercase}
 .list-head span:last-child{text-align:right}
-.athlete{display:grid;grid-template-columns:44px minmax(0,1fr) 62px;gap:10px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line)}
+.athlete{display:grid;grid-template-columns:44px minmax(0,1fr) 96px;gap:10px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line)}
 .athlete:nth-child(odd){background:#fbf8f3}
 .rank{font-size:23px;color:#b9b1a7}
 .athlete.podium .rank{color:var(--track)}
 .name{font-size:19px;line-height:1.15}
 .country{font:10px Arial,Helvetica,sans-serif;letter-spacing:.16em;color:#8b847c;margin-top:5px}
-.score{font:800 17px Arial,Helvetica,sans-serif;text-align:right;font-variant-numeric:tabular-nums}
+.figure{text-align:right}
+.figure b{display:block;font:800 17px Arial,Helvetica,sans-serif;font-variant-numeric:tabular-nums}
+.figure b.none{color:#b9b1a7;font-weight:400}
+.figure small{display:block;font:10px Arial,Helvetica,sans-serif;color:#8b847c;margin-top:4px;letter-spacing:.04em}
 .event-note{padding:14px 18px;font:12px/1.6 Arial,Helvetica,sans-serif;color:var(--muted);border-bottom:1px solid var(--line);background:#fbf8f3}
 .section-card{background:var(--card);border:1px solid var(--line);padding:22px;margin-bottom:18px}
 .section-card h2{font-size:28px;font-weight:500;margin:0 0 6px}
@@ -70,12 +73,14 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:Georgia,'Time
 html{font-size:14px}
 .nav{height:106px;display:grid;grid-template-columns:42px 1fr;padding:10px 14px 0;gap:7px 11px}
 .home{height:46px}.brand strong{font-size:19px}
-.tabs{grid-column:1/-1;height:44px;justify-content:flex-start}
-.tabs button{padding:0 16px;font-size:13px}
+.tabs{grid-column:1/-1;height:44px;justify-content:space-between}
+.tabs button{padding:0 9px;font-size:13px}
+.tabs button.active:after{left:7px;right:7px}
 .page{padding:12px 14px 60px}
 .hero{padding:19px 16px}.hero h1{font-size:32px}
-.list-head,.athlete{grid-template-columns:34px minmax(0,1fr) 56px;padding-left:12px;padding-right:12px}
+.list-head,.athlete{grid-template-columns:32px minmax(0,1fr) 84px;padding-left:12px;padding-right:12px;gap:8px}
 .rank{font-size:20px}.name{font-size:17px}
+.figure b{font-size:16px}
 .meet{grid-template-columns:64px minmax(0,1fr);gap:11px}
 .done{grid-template-columns:60px minmax(0,1fr)}
 .done .f{grid-column:2}
@@ -87,32 +92,62 @@ html{font-size:14px}
   <a class="home" href="index.html" aria-label="Home">&#8962;</a>
   <div class="brand"><strong>TRACK &amp; FIELD</strong><span>World Athletics command center</span></div>
   <nav class="tabs" aria-label="Sections">
-    <button class="active" data-tab="rankings">Rankings</button>
+    <button class="active" data-tab="track">Track</button>
+    <button data-tab="road">Road</button>
+    <button data-tab="ultra">Ultra</button>
     <button data-tab="calendar">Calendar</button>
   </nav>
 </div></header>
 
 <main class="page">
-  <section id="rankingsView">
+  <section id="trackView">
     <div class="hero">
       <div class="eyebrow">World rankings &middot; 100m to 10,000m</div>
-      <div class="hero-row">
-        <h1>World Rankings</h1>
-        <div class="stamp">AS OF <b id="rankDate"></b></div>
-      </div>
-      <p class="source">Top 10 per event from the official World Athletics world rankings. Scores are ranking points, not times. <a href="https://worldathletics.org/world-rankings" target="_blank" rel="noopener">worldathletics.org</a></p>
+      <div class="hero-row"><h1>Track</h1><div class="stamp">AS OF <b>1 SEP 2026</b></div></div>
+      <p class="source">Top 10 per event from the official World Athletics world rankings, with each athlete&rsquo;s 2026 season best alongside. The ranking score reflects results and the quality of the fields raced, so it does not simply follow the times. <a href="https://worldathletics.org/world-rankings" target="_blank" rel="noopener">worldathletics.org</a></p>
     </div>
     <div class="panel">
       <div class="controls">
-        <div class="seg" role="tablist" aria-label="Category">
-          <button class="active" data-gender="men" role="tab" aria-selected="true">Men</button>
-          <button data-gender="women" role="tab" aria-selected="false">Women</button>
-        </div>
-        <div class="chips" id="eventChips" role="tablist" aria-label="Event"></div>
+        <div class="seg" role="tablist" aria-label="Category"><button class="active" data-gender="men" role="tab" aria-selected="true">Men</button><button data-gender="women" role="tab" aria-selected="false">Women</button></div>
+        <div class="chips" id="trackChips" role="tablist" aria-label="Event"></div>
       </div>
-      <div class="event-note" id="eventNote"></div>
-      <div class="list-head"><span>Rank</span><span>Athlete</span><span>Score</span></div>
-      <div id="rankList"></div>
+      <div class="event-note" id="trackNote"></div>
+      <div class="list-head"><span>Rank</span><span>Athlete</span><span>Best / score</span></div>
+      <div id="trackList"></div>
+    </div>
+  </section>
+
+  <section id="roadView" class="hide">
+    <div class="hero">
+      <div class="eyebrow">World rankings &middot; road running</div>
+      <div class="hero-row"><h1>Road</h1><div class="stamp">AS OF <b>1 SEP 2026</b></div></div>
+      <p class="source">World Athletics ranks the roads in two groups only. The 5km and 10km are not ranked separately &mdash; they feed the 5000m and 10,000m rankings on the Track tab. Times shown are 2026 season bests at the group&rsquo;s headline distance. <a href="https://worldathletics.org/world-rankings" target="_blank" rel="noopener">worldathletics.org</a></p>
+    </div>
+    <div class="panel">
+      <div class="controls">
+        <div class="seg" role="tablist" aria-label="Category"><button class="active" data-gender="men" role="tab" aria-selected="true">Men</button><button data-gender="women" role="tab" aria-selected="false">Women</button></div>
+        <div class="chips" id="roadChips" role="tablist" aria-label="Group"></div>
+      </div>
+      <div class="event-note" id="roadNote"></div>
+      <div class="list-head"><span>Rank</span><span>Athlete</span><span>Best / score</span></div>
+      <div id="roadList"></div>
+    </div>
+  </section>
+
+  <section id="ultraView" class="hide">
+    <div class="hero">
+      <div class="eyebrow">2026 world best times</div>
+      <div class="hero-row"><h1>Ultra</h1><div class="stamp">SEASON TO <b>3 SEP 2026</b></div></div>
+      <p class="source">World Athletics publishes no ultra rankings &mdash; its road groups stop at the marathon. These are the fastest 2026 performances at each distance from the DUV ultramarathon statistics archive, the reference database used by the IAU. Ranked by time, not by ranking points. <a href="https://statistik.d-u-v.org/" target="_blank" rel="noopener">statistik.d-u-v.org</a></p>
+    </div>
+    <div class="panel">
+      <div class="controls">
+        <div class="seg" role="tablist" aria-label="Category"><button class="active" data-gender="men" role="tab" aria-selected="true">Men</button><button data-gender="women" role="tab" aria-selected="false">Women</button></div>
+        <div class="chips" id="ultraChips" role="tablist" aria-label="Distance"></div>
+      </div>
+      <div class="event-note" id="ultraNote"></div>
+      <div class="list-head"><span>Rank</span><span>Athlete</span><span>Time / race</span></div>
+      <div id="ultraList"></div>
     </div>
   </section>
 
@@ -138,44 +173,77 @@ html{font-size:14px}
 </main>
 
 <script>
-const APP_VERSION='2026-09-03-1';
+const APP_VERSION='2026-09-03-2';
 // GitHub Pages caches this file, so a phone can sit on an old copy. Reload once if a newer build is live.
 (async function(){try{const res=await fetch(location.pathname+'?_cv='+Date.now(),{cache:'no-store'});
 const live=(await res.text()).match(/APP_VERSION='([^']+)'/);
 if(live&&live[1]!==APP_VERSION&&!sessionStorage.getItem('tf-v-'+live[1])){
 sessionStorage.setItem('tf-v-'+live[1],'1');location.replace(location.pathname+'?v='+live[1])}}catch(e){}})();
 
-const RANK_DATE='1 September 2026';
-const EVENTS=['100m','200m','400m','800m','1500m','5000m','10,000m'];
-const NOTES={
- '100m':'World Athletics scores this group together with the indoor 50m, 55m and 60m.',
- '200m':'A standalone ranking group.',
- '400m':'Scored together with the 300m and 500m.',
- '800m':'Scored together with the 600m and 1000m.',
- '1500m':'Scored together with the mile, 2000m and road mile.',
- '5000m':'Scored together with the 3000m, two miles and road 5km.',
- '10,000m':'Scored together with the road 10km.'
+// [name, country, ranking score, 2026 season best]  "rd" marks a road time used where there is no track mark.
+const TRACK_EVENTS=['100m','200m','400m','800m','1500m','5000m','10,000m'];
+const TRACK_NOTES={
+ '100m':'Ranked together with the indoor 50m, 55m and 60m. Times are 2026 outdoor season bests.',
+ '200m':'A standalone ranking group. Times are 2026 outdoor season bests.',
+ '400m':'Ranked together with the 300m and 500m.',
+ '800m':'Ranked together with the 600m and 1000m.',
+ '1500m':'Ranked together with the mile, 2000m and road mile.',
+ '5000m':'Ranked together with the 3000m, two miles and road 5km.',
+ '10,000m':'Ranked together with the road 10km, so several of these athletes score from the roads. Times marked "rd" are road 10km bests.'
 };
-const RANKINGS={
+const TRACK={
  men:{
-  '100m':[['Oblique Seville','JAM',1414],['Noah Lyles','USA',1376],['Kenneth Bednarek','USA',1373],['Kayinsola Ajayi','NGR',1365],['Kishane Thompson','JAM',1345],['Gift Leotlela','RSA',1342],['Jordan Anthony','USA',1339],['Trayvon Bromell','USA',1337],['Emmanuel Eseme','CMR',1332],['Ferdinand Omanyala','KEN',1316]],
-  '200m':[['Kenneth Bednarek','USA',1413],['Letsile Tebogo','BOT',1387],['Sinesipho Dambile','RSA',1359],['Bryan Levell','JAM',1338],['Noah Lyles','USA',1330],['Makanakaishe Charamba','ZIM',1326],['Zharnel Hughes','GBR',1318],['Alexander Ogando','DOM',1307],['Andre De Grasse','CAN',1305],['Tate Taylor','USA',1295]],
-  '400m':[['Busang Collen Kebinatshipi','BOT',1442],['Zakithi Nene','RSA',1358],['Jacory Patterson','USA',1357],['Rai Benjamin','USA',1356],['Jereem Richards','TTO',1355],['Matthew Hudson-Smith','GBR',1349],['Khaleb McRae','USA',1330],['Muzala Samukonga','ZAM',1326],['Bayapo Ndori','BOT',1325],['Chris Bailey','USA',1322]],
-  '800m':[['Emmanuel Wanyonyi','KEN',1434],['Djamel Sedjati','ALG',1382],['Marco Arop','CAN',1382],['Cooper Lutkenhaus','USA',1366],['Mohamed Attaoui','ESP',1348],['Brandon Miller','USA',1344],['Max Burgin','GBR',1337],['Mark English','IRL',1328],['Eliott Crestan','BEL',1319],['Navasky Anderson','JAM',1317]],
-  '1500m':[['Cameron Myers','AUS',1372],['Yared Nuguse','USA',1367],['Isaac Nader','POR',1342],['Timothy Cheruiyot','KEN',1337],['Azeddine Habz','FRA',1326],['Jake Wightman','GBR',1317],['Hobbs Kessler','USA',1316],['Ethan Strand','USA',1309],['Robert Farken','GER',1306],['Vincent Ciattei','USA',1306]],
-  '5000m':[['Addisu Yihune','ETH',1338],['Birhanu Balew','BRN',1337],['Parker Wolfe','USA',1336],['Andreas Almgren','SWE',1332],['Cole Hocker','USA',1329],['Graham Blanks','USA',1329],['Grant Fisher','USA',1326],['Ky Robinson','AUS',1323],['Biniam Mehary','ETH',1323],['Jimmy Gressier','FRA',1313]],
-  '10,000m':[['Ishmael Rokitto Kipkurui','KEN',1280],['Biniam Mehary','ETH',1271],['Andreas Almgren','SWE',1259],['Ky Robinson','AUS',1235],['Selemon Barega','ETH',1234],['Nicholas Kipkorir','KEN',1233],['Edwin Kurgat','KEN',1232],['Mohamed Abdilaahi','GER',1232],['Habtom Samuel','ERI',1231],['Adriaan Wildschutt','RSA',1226]]
+  '100m':[['Oblique Seville','JAM',1414,'9.82'],['Noah Lyles','USA',1376,'9.79'],['Kenneth Bednarek','USA',1373,'9.87'],['Kayinsola Ajayi','NGR',1365,'9.84'],['Kishane Thompson','JAM',1345,''],['Gift Leotlela','RSA',1342,'9.91'],['Jordan Anthony','USA',1339,'9.91'],['Trayvon Bromell','USA',1337,'9.91'],['Emmanuel Eseme','CMR',1332,'9.83'],['Ferdinand Omanyala','KEN',1316,'9.94']],
+  '200m':[['Kenneth Bednarek','USA',1413,'19.62'],['Letsile Tebogo','BOT',1387,'19.84'],['Sinesipho Dambile','RSA',1359,'19.74'],['Bryan Levell','JAM',1338,'19.93'],['Noah Lyles','USA',1330,'19.91'],['Makanakaishe Charamba','ZIM',1326,'19.88'],['Zharnel Hughes','GBR',1318,'20.04'],['Alexander Ogando','DOM',1307,'19.96'],['Andre De Grasse','CAN',1305,'19.84'],['Tate Taylor','USA',1295,'19.75']],
+  '400m':[['Busang Collen Kebinatshipi','BOT',1442,'43.44'],['Zakithi Nene','RSA',1358,'43.89'],['Jacory Patterson','USA',1357,'43.96'],['Rai Benjamin','USA',1356,'43.83'],['Jereem Richards','TTO',1355,'44.44'],['Matthew Hudson-Smith','GBR',1349,'44.09'],['Khaleb McRae','USA',1330,'44.40'],['Muzala Samukonga','ZAM',1326,'44.02'],['Bayapo Ndori','BOT',1325,'44.62'],['Chris Bailey','USA',1322,'44.06']],
+  '800m':[['Emmanuel Wanyonyi','KEN',1434,'1:41.76'],['Djamel Sedjati','ALG',1382,'1:41.83'],['Marco Arop','CAN',1382,'1:41.84'],['Cooper Lutkenhaus','USA',1366,'1:42.08'],['Mohamed Attaoui','ESP',1348,'1:43.82'],['Brandon Miller','USA',1344,'1:42.19'],['Max Burgin','GBR',1337,'1:42.98'],['Mark English','IRL',1328,'1:42.97'],['Eliott Crestan','BEL',1319,'1:43.83'],['Navasky Anderson','JAM',1317,'1:43.62']],
+  '1500m':[['Cameron Myers','AUS',1372,'3:28.00'],['Yared Nuguse','USA',1367,'3:29.36'],['Isaac Nader','POR',1342,'3:30.43'],['Timothy Cheruiyot','KEN',1337,'3:30.67'],['Azeddine Habz','FRA',1326,'3:29.80'],['Jake Wightman','GBR',1317,'3:29.95'],['Hobbs Kessler','USA',1316,'3:31.76'],['Ethan Strand','USA',1309,'3:30.77'],['Robert Farken','GER',1306,'3:30.09'],['Vincent Ciattei','USA',1306,'3:30.90']],
+  '5000m':[['Addisu Yihune','ETH',1338,'12:47.62'],['Birhanu Balew','BRN',1337,'12:47.73'],['Parker Wolfe','USA',1336,'12:49.45'],['Andreas Almgren','SWE',1332,'12:48.61'],['Cole Hocker','USA',1329,''],['Graham Blanks','USA',1329,'12:49.99'],['Grant Fisher','USA',1326,'12:49.61'],['Ky Robinson','AUS',1323,'12:50.82'],['Biniam Mehary','ETH',1323,'12:54.35'],['Jimmy Gressier','FRA',1313,'12:57.79']],
+  '10,000m':[['Ishmael Rokitto Kipkurui','KEN',1280,''],['Biniam Mehary','ETH',1271,'26:55 rd'],['Andreas Almgren','SWE',1259,'27:23.44'],['Ky Robinson','AUS',1235,'26:57.07'],['Selemon Barega','ETH',1234,'27:37 rd'],['Nicholas Kipkorir','KEN',1233,''],['Edwin Kurgat','KEN',1232,'27:50.98'],['Mohamed Abdilaahi','GER',1232,'26:56.58'],['Habtom Samuel','ERI',1231,'27:30.51'],['Adriaan Wildschutt','RSA',1226,'27:47 rd']]
  },
  women:{
-  '100m':[['Melissa Jefferson-Wooden','USA',1417],['Julien Alfred','LCA',1383],['Tina Clayton','JAM',1355],["Sha'Carri Richardson",'USA',1342],['Shericka Jackson','JAM',1311],['Amy Hunt','GBR',1304],['Jonielle Smith','JAM',1300],['Brianna Lyston','JAM',1297],['Zaynab Dosso','ITA',1293],['Adaejah Hodge','IVB',1293]],
-  '200m':[['Gabrielle Thomas','USA',1363],['Melissa Jefferson-Wooden','USA',1352],['Amy Hunt','GBR',1348],['Shericka Jackson','JAM',1346],['Anavia Battle','USA',1332],['Kayla White','USA',1332],['Shaunae Miller-Uibo','BAH',1323],['Adaejah Hodge','IVB',1321],['Favour Ofili','NGR',1309],['Dina Asher-Smith','GBR',1308]],
-  '400m':[['Marileidy Paulino','DOM',1421],['Henriette Jæger','NOR',1363],['Natalia Bukowiecka','POL',1342],['Nickisha Pryce','JAM',1340],['Salwa Eid Naser','BRN',1338],['Lurdes Gloria Manuel','CZE',1338],['Aaliyah Butler','USA',1324],['Roxana Gómez','CUB',1319],['Amber Anning','GBR',1317],['Stacey Ann Williams','JAM',1317]],
-  '800m':[['Keely Hodgkinson','GBR',1409],['Audrey Werro','SUI',1405],['Lilian Odira','KEN',1358],['Femke Broeders-Bol','NED',1358],['Georgia Hunter Bell','GBR',1343],['Tsige Duguma','ETH',1311],['Sage Hurta-Klecker','USA',1304],['Addison Wiley','USA',1299],['Anaïs Bourgoin','FRA',1295],['Prudence Sekgodiso','RSA',1289]],
-  '1500m':[['Jessica Hull','AUS',1368],['Dorcus Ewoi','KEN',1358],['Georgia Hunter Bell','GBR',1344],['Birke Haylom','ETH',1340],['Nikki Hiltz','USA',1332],['Klaudia Kazimierska','POL',1331],['Freweyni Hailu','ETH',1328],['Faith Kipyegon','KEN',1323],['Agathe Guillemot','FRA',1323],['Abbey Caldwell','AUS',1316]],
-  '5000m':[['Likina Amebaw','ETH',1325],['Faith Kipyegon','KEN',1324],['Freweyni Hailu','ETH',1313],['Nadia Battocletti','ITA',1311],['Senayet Getachew','ETH',1305],['Aleshign Baweke','ETH',1302],['Medina Eisa','ETH',1292],['Rose Davies','AUS',1280],['Fantaye Belayneh','ETH',1274],['Shelby Houlihan','USA',1272]],
-  '10,000m':[['Agnes Jebet Ngetich','KEN',1339],['Beatrice Chebet','KEN',1318],['Nadia Battocletti','ITA',1313],['Ririka Hironaka','JPN',1282],['Joy Cheptoyek','UGA',1258],['Chaltu Dida','ETH',1257],['Miriam Chebet','KEN',1253],['Asayech Ayichew','ETH',1243],['Jana Van Lent','BEL',1240],['Senayet Getachew','ETH',1237]]
+  '100m':[['Melissa Jefferson-Wooden','USA',1417,'10.70'],['Julien Alfred','LCA',1383,'10.70'],['Tina Clayton','JAM',1355,'10.85'],["Sha'Carri Richardson",'USA',1342,'10.77'],['Shericka Jackson','JAM',1311,'10.81'],['Amy Hunt','GBR',1304,'10.97'],['Jonielle Smith','JAM',1300,'10.89'],['Brianna Lyston','JAM',1297,'10.94'],['Zaynab Dosso','ITA',1293,'11.07'],['Adaejah Hodge','IVB',1293,'10.63']],
+  '200m':[['Gabrielle Thomas','USA',1363,'21.70'],['Melissa Jefferson-Wooden','USA',1352,'21.69'],['Amy Hunt','GBR',1348,'22.19'],['Shericka Jackson','JAM',1346,'21.87'],['Anavia Battle','USA',1332,'22.21'],['Kayla White','USA',1332,'21.92'],['Shaunae Miller-Uibo','BAH',1323,'22.04'],['Adaejah Hodge','IVB',1321,'21.68'],['Favour Ofili','NGR',1309,'22.03'],['Dina Asher-Smith','GBR',1308,'22.28']],
+  '400m':[['Marileidy Paulino','DOM',1421,'48.48'],['Henriette Jæger','NOR',1363,'49.04'],['Natalia Bukowiecka','POL',1342,'49.57'],['Nickisha Pryce','JAM',1340,'49.27'],['Salwa Eid Naser','BRN',1338,'49.27'],['Lurdes Gloria Manuel','CZE',1338,'49.37'],['Aaliyah Butler','USA',1324,'48.84'],['Roxana Gómez','CUB',1319,'49.99'],['Amber Anning','GBR',1317,'49.96'],['Stacey Ann Williams','JAM',1317,'49.48']],
+  '800m':[['Keely Hodgkinson','GBR',1409,'1:54.33'],['Audrey Werro','SUI',1405,'1:53.80'],['Lilian Odira','KEN',1358,'1:56.19'],['Femke Broeders-Bol','NED',1358,'1:55.60'],['Georgia Hunter Bell','GBR',1343,'1:55.93'],['Tsige Duguma','ETH',1311,'1:56.92'],['Sage Hurta-Klecker','USA',1304,'1:58.18'],['Addison Wiley','USA',1299,'1:57.70'],['Anaïs Bourgoin','FRA',1295,'1:55.65'],['Prudence Sekgodiso','RSA',1289,'1:56.83']],
+  '1500m':[['Jessica Hull','AUS',1368,'3:55.20'],['Dorcus Ewoi','KEN',1358,'3:55.58'],['Georgia Hunter Bell','GBR',1344,'3:55.63'],['Birke Haylom','ETH',1340,'3:55.56'],['Nikki Hiltz','USA',1332,'3:59.26'],['Klaudia Kazimierska','POL',1331,'3:55.59'],['Freweyni Hailu','ETH',1328,'3:55.92'],['Faith Kipyegon','KEN',1323,'4:01.92'],['Agathe Guillemot','FRA',1323,'3:56.24'],['Abbey Caldwell','AUS',1316,'3:56.12']],
+  '5000m':[['Likina Amebaw','ETH',1325,'14:18.41'],['Faith Kipyegon','KEN',1324,'14:24.14'],['Freweyni Hailu','ETH',1313,'14:18.94'],['Nadia Battocletti','ITA',1311,'14:40.05'],['Senayet Getachew','ETH',1305,'14:22.37'],['Aleshign Baweke','ETH',1302,'14:18.54'],['Medina Eisa','ETH',1292,'14:22.51'],['Rose Davies','AUS',1280,'14:44.53'],['Fantaye Belayneh','ETH',1274,'14:23.44'],['Shelby Houlihan','USA',1272,'14:57.88']],
+  '10,000m':[['Agnes Jebet Ngetich','KEN',1339,'28:58 rd'],['Beatrice Chebet','KEN',1318,''],['Nadia Battocletti','ITA',1313,'31:41.17'],['Ririka Hironaka','JPN',1282,''],['Joy Cheptoyek','UGA',1258,'32:01.92'],['Chaltu Dida','ETH',1257,'29:50 rd'],['Miriam Chebet','KEN',1253,'32:09.42'],['Asayech Ayichew','ETH',1243,'30:01 rd'],['Jana Van Lent','BEL',1240,'30:51.18'],['Senayet Getachew','ETH',1237,'']]
  }
 };
+
+const ROAD_GROUPS=['10km – Half marathon','Marathon'];
+const ROAD_NOTES={
+ '10km – Half marathon':'World Athletics ranks this group as 10km through the half marathon, including 15km, 10 miles and 20km. Times are 2026 half marathon season bests, or a road 10km best where marked "10k".',
+ 'Marathon':'Ranked together with the half marathon, 25km and 30km. Times are 2026 marathon season bests.'
+};
+const ROAD={
+ men:{
+  '10km – Half marathon':[['Yomif Kejelcha','ETH',1307,'56:51'],['Nicholas Kipkorir','KEN',1268,'58:08'],['Rodrigue Kwizera','BDI',1265,'58:16'],['Alex Nzioka Matata','KEN',1259,'59:11'],['Isaia Kipkoech Lasoi','KEN',1257,'58:26'],['Andreas Almgren','SWE',1256,''],['Khairi Bejiga','ETH',1249,''],['Jemal Mekonen','ETH',1243,'58:55'],['Gemechu Dida','ETH',1234,''],['Yann Schrub','FRA',1234,'']],
+  'Marathon':[['Sabastian Kimaru Sawe','KEN',1441,'1:59:30'],['Jacob Kiplimo','UGA',1400,'2:00:28'],['John Korir','KEN',1387,''],['Yomif Kejelcha','ETH',1375,'1:59:41'],['Tadese Takele','ETH',1371,'2:03:37'],['Geofry Toroitich Kipchumba','KEN',1355,'2:03:37'],['Amos Kipruto','KEN',1344,'2:01:39'],['Haftu Teklu','ETH',1341,'2:04:22'],['Alphonce Felix Simbu','TAN',1334,''],['Alexander Munyao','KEN',1321,'2:03:38']]
+ },
+ women:{
+  '10km – Half marathon':[['Agnes Jebet Ngetich','KEN',1320,'28:58 10k'],['Likina Amebaw','ETH',1270,'1:05:07'],['Fotyen Tesfay','ETH',1268,'1:03:57'],['Tsigie Gebreselama','ETH',1264,'1:04:48'],['Brenda Jepchirchir','KEN',1257,''],['Miriam Chebet','KEN',1250,'1:06:27'],['Loice Chemnung','KEN',1249,'1:04:01'],['Caroline Makandi Gitonga','KEN',1247,'1:06:16'],['Chaltu Dida','ETH',1240,'29:50 10k'],['Wede Kefale','ETH',1239,'1:07:12']],
+  'Marathon':[['Tigst Assefa','ETH',1413,'2:15:41'],['Brigid Kosgei','KEN',1375,'2:14:29'],['Joyciline Jepkosgei','KEN',1361,'2:15:55'],['Peres Jepchirchir','KEN',1360,''],['Hawi Feysa','ETH',1352,'2:17:39'],['Hellen Obiri','KEN',1338,'2:15:53'],['Sutume Asefa Kebede','ETH',1335,'2:17:39'],['Sharon Lokedi','KEN',1331,''],['Bertukan Welde','ETH',1328,'2:16:36'],['Sheila Chepkirui','KEN',1320,'2:21:54']]
+ }
+};
+
+const ULTRA_DISTANCES=['50km','100km','100 miles'];
+const ULTRA_NOTE='Fastest 2026 performances worldwide at this distance. Ranked by time, so this is a season best list rather than a points ranking.';
+// [name, country, time, race]
+const ULTRA={
+ men:{
+  '50km':[['Alexander Milne','GBR','2:46:08','New Delhi (IND) · 14 Mar'],['Charlie Davis','GBR','2:47:12','New Delhi (IND) · 14 Mar'],['Logan Smith','GBR','2:47:28','New Delhi (IND) · 14 Mar'],['Sean Michael Hogan','GBR','2:47:58','New Delhi (IND) · 14 Mar'],['Henry Hart','GBR','2:48:30','New Delhi (IND) · 14 Mar'],['Kevin Campbell','GBR','2:48:51','New Delhi (IND) · 14 Mar'],['Remigijus Kancys','LTU','2:49:53','New Delhi (IND) · 14 Mar'],['Haruki Okayama','JPN','2:50:40','New Delhi (IND) · 14 Mar'],['Guillaume Ruel','FRA','2:51:38','Castel Bolognese (ITA) · 25 Apr'],['Marcel Bräutigam','GER','2:52:08','Bremen (GER) · 15 Mar']],
+  '100km':[['Taketoshi Ooe','JPN','6:10:22','Yubetsu (JPN) · 28 Jun'],['Masato Tanaka','JPN','6:12:16','Yubetsu (JPN) · 28 Jun'],['Tatsuya Itagaki','JPN','6:16:01','Yubetsu (JPN) · 28 Jun'],['Pascal Rüeger','SUI','6:18:27','Porto Recanati (ITA) · 21 Feb'],['Toru Somiya','JPN','6:19:45','Yubetsu (JPN) · 28 Jun'],['Tamas Bodis','HUN','6:20:01','Pabianice (POL) · 30 May'],['Kobun Nakamura','JPN','6:22:02','Yubetsu (JPN) · 28 Jun'],['Jason Pointeau','FRA','6:23:41','Steenwerck (FRA) · 13 May'],['Justin Dourlens','FRA','6:24:41','Steenwerck (FRA) · 13 May'],['Arnar Petursson','ISL','6:24:53','Koper (SLO) · 28 Mar']],
+  '100 miles':[['Rajpaul Pannu','USA','11:38:56','Henderson, NV (USA) · 14 Feb'],['Andrii Tkachuk','UKR','11:38:58','Sittard (NED) · 10 May'],['Anton Kadiev','BUL','12:40:18','Ruse (BUL) · 28 Mar'],['Matti Jonkka','FIN','13:08:23','Espoo (FIN) · 22 Feb'],['Tadas Scegauskas','LTU','13:20:05','Pabianice (POL) · 29 May'],['Jelle Tielemans','BEL','13:32:13','Amersfoort (NED) · 25 Jan'],['Scott Munson','USA','13:37:03','Henderson, NV (USA) · 14 Feb'],['Edher Ramirez','MEX','13:44:38','Henderson, NV (USA) · 14 Feb'],['Bartosz Fudali','POL','13:48:59','Cinisello Balsamo (ITA) · 29 Mar'],['Niko Toroskainen','FIN','13:52:18','Espoo (FIN) · 22 Feb']]
+ },
+ women:{
+  '50km':[['Satu Lipiäinen','FIN','3:13:02','Bremen (GER) · 15 Mar'],['Naomi Robinson','GBR','3:13:37','New Delhi (IND) · 14 Mar'],['Katrina Ballantyne','GBR','3:17:20','New Delhi (IND) · 14 Mar'],['Nera Jareb','AUS','3:18:24','Perth (AUS) · 20 Jun'],['Monika Brzozowska','POL','3:18:59','New Delhi (IND) · 14 Mar'],['Magdalena Patas','POL','3:20:20','New Delhi (IND) · 14 Mar'],['Nomin-Erdene Bayartogtokh','MGL','3:20:31','New Delhi (IND) · 14 Mar'],['Dominika Magdalena Stelmach','POL','3:20:36','Castel Bolognese (ITA) · 25 Apr'],['Becky Briggs','GBR','3:22:31','New Delhi (IND) · 14 Mar'],['Virginia Lo','JPN','3:22:50','Yubetsu (JPN) · 28 Jun']],
+  '100km':[['Sarah Webster','GBR','7:03:48','Porto Recanati (ITA) · 21 Feb'],['Sarah Morrison','USA','7:17:01','Madison, WI (USA) · 11 Apr'],['Camille Chaigneau','FRA','7:19:50','Steenwerck (FRA) · 13 May'],['Gemma Arenas Alcazar','ESP','7:20:57','Malaga (ESP) · 21 Mar'],['Akiko Maruichi','JPN','7:22:22','Yubetsu (JPN) · 28 Jun'],['Maria Romero Ledo','ESP','7:23:31','Malaga (ESP) · 21 Mar'],['Nikolina Sustic Stankovic','CRO','7:25:25','Slavonski Brod (CRO) · 7 Mar'],['Noora Katarina Honkala','FIN','7:27:02','Porto Recanati (ITA) · 21 Feb'],['Selina Leroy','FRA','7:28:05','Steenwerck (FRA) · 13 May'],['Malory Leroy','FRA','7:28:05','Steenwerck (FRA) · 13 May']],
+  '100 miles':[['Ashley Paulson','USA','12:19:34','Henderson, NV (USA) · 14 Feb'],['Patrycja Bereznowska','POL','14:39:03','Pabianice (POL) · 29 May'],['Kaylee Frederick','USA','14:49:08','Henderson, NV (USA) · 14 Feb'],['Michelle White','GBR','14:53:44','Burjassot (ESP) · 29 Mar'],['Jenny Arnzen','USA','15:01:20','Henderson, NV (USA) · 14 Feb'],['Sandra Lundqvist','SWE','15:14:16','Växjö (SWE) · 25 Apr'],['Mascha Rondhuis','NED','15:16:39','Amersfoort (NED) · 25 Jan'],['Jian Springer','USA','15:41:02','Henderson, NV (USA) · 14 Feb'],['Edyta Lewandowska-Pyza','POL','15:49:14','Cinisello Balsamo (ITA) · 29 Mar'],['Mara Alexandra Guler-Cionca','ROU','15:51:03','Serres (GRE) · 21 Mar']]
+ }
+};
+
 const UPCOMING=[
  {d:'Sep 4-5',y:'2026',name:'Wanda Diamond League Final',where:'Brussels, Belgium',detail:'The season finale runs over two days for the first time, with Diamond Trophies decided in every discipline.',tag:'Diamond League',cls:'major'},
  {d:'Sep 11-13',y:'2026',name:'World Athletics Ultimate Championship',where:'Budapest, Hungary',detail:'Inaugural edition. Sixteen athletes per track event, eight per field event, and a US$10 million purse. Entry comes from Olympic and world titles, Diamond League final wins, and the world rankings.',tag:'Championship',cls:'champs'},
@@ -195,17 +263,26 @@ const DL_SEASON=[
 
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-let gender='men', currentEvent='100m';
+const state={track:{gender:'men',key:'100m'},road:{gender:'men',key:'10km – Half marathon'},ultra:{gender:'men',key:'50km'}};
 
-function renderRankings(){
-  $('#rankDate').textContent=RANK_DATE;
-  $('#eventChips').innerHTML=EVENTS.map(e=>`<button role="tab" aria-selected="${e===currentEvent}" class="${e===currentEvent?'active':''}" data-event="${esc(e)}">${esc(e)}</button>`).join('');
-  $('#eventNote').textContent=NOTES[currentEvent]||'';
-  const list=(RANKINGS[gender]||{})[currentEvent]||[];
-  $('#rankList').innerHTML=list.map(([name,country,score],i)=>
-    `<article class="athlete${i<3?' podium':''}"><span class="rank">${i+1}</span><div><div class="name">${esc(name)}</div><div class="country">${esc(country)}</div></div><span class="score">${esc(score)}</span></article>`
-  ).join('')||'<div class="event-note">No ranking data for this event.</div>';
-  $$('#eventChips button').forEach(b=>b.onclick=()=>{currentEvent=b.dataset.event;renderRankings()});
+function athleteRow(i,name,country,figure,sub,subIsScore){
+  const shown=figure?`<b>${esc(figure)}</b>`:'<b class="none">&mdash;</b>';
+  return `<article class="athlete${i<3?' podium':''}"><span class="rank">${i+1}</span><div><div class="name">${esc(name)}</div><div class="country">${esc(country)}</div></div><div class="figure">${shown}<small>${esc(sub)}${subIsScore?' pts':''}</small></div></article>`;
+}
+function renderBoard(section,data,keys,notes){
+  const s=state[section], list=(data[s.gender]||{})[s.key]||[];
+  $('#'+section+'Chips').innerHTML=keys.map(k=>`<button role="tab" aria-selected="${k===s.key}" class="${k===s.key?'active':''}" data-key="${esc(k)}">${esc(k)}</button>`).join('');
+  $('#'+section+'Note').textContent=typeof notes==='string'?notes:(notes[s.key]||'');
+  $('#'+section+'List').innerHTML=list.map((row,i)=>section==='ultra'
+    ? athleteRow(i,row[0],row[1],row[2],row[3],false)
+    : athleteRow(i,row[0],row[1],row[3],row[2],true)
+  ).join('')||'<div class="event-note">No data for this selection.</div>';
+  $$('#'+section+'Chips button').forEach(b=>b.onclick=()=>{s.key=b.dataset.key;renderBoard(section,data,keys,notes)});
+}
+function renderAll(){
+  renderBoard('track',TRACK,TRACK_EVENTS,TRACK_NOTES);
+  renderBoard('road',ROAD,ROAD_GROUPS,ROAD_NOTES);
+  renderBoard('ultra',ULTRA,ULTRA_DISTANCES,ULTRA_NOTE);
 }
 function renderCalendar(){
   $('#upcomingList').innerHTML=UPCOMING.map(m=>
@@ -217,14 +294,16 @@ function renderCalendar(){
 }
 $$('.tabs button').forEach(btn=>btn.onclick=()=>{
   $$('.tabs button').forEach(b=>b.classList.toggle('active',b===btn));
-  ['rankings','calendar'].forEach(x=>$(`#${x}View`).classList.toggle('hide',x!==btn.dataset.tab));
+  ['track','road','ultra','calendar'].forEach(x=>$(`#${x}View`).classList.toggle('hide',x!==btn.dataset.tab));
 });
-$$('.seg button').forEach(btn=>btn.onclick=()=>{
-  gender=btn.dataset.gender;
-  $$('.seg button').forEach(b=>{b.classList.toggle('active',b===btn);b.setAttribute('aria-selected',b===btn)});
-  renderRankings();
+['track','road','ultra'].forEach(section=>{
+  $$('#'+section+'View .seg button').forEach(btn=>btn.onclick=()=>{
+    state[section].gender=btn.dataset.gender;
+    $$('#'+section+'View .seg button').forEach(b=>{b.classList.toggle('active',b===btn);b.setAttribute('aria-selected',b===btn)});
+    renderAll();
+  });
 });
-renderRankings();renderCalendar();
+renderAll();renderCalendar();
 </script>
 </body>
 </html>
