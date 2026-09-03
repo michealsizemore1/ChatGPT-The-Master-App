@@ -68,6 +68,15 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:Georgia,'Time
 .done .d{font:800 11px Arial,Helvetica,sans-serif;color:#a29a91;letter-spacing:.06em;text-transform:uppercase}
 .done .m{font-size:14px;color:#3f3933}
 .done .f{font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--track)}
+.tt-row{display:grid;grid-template-columns:104px minmax(0,1fr) auto;gap:12px;align-items:baseline;padding:10px 0;border-top:1px solid var(--line)}
+.tt-row:first-of-type{border-top:0}
+.tt-row .t{font:800 13px Arial,Helvetica,sans-serif;color:var(--track);font-variant-numeric:tabular-nums}
+.tt-row .t small{display:block;font:700 10px Arial,Helvetica,sans-serif;color:#a29a91;margin-top:3px;letter-spacing:.02em}
+.tt-row .e{font:14px Arial,Helvetica,sans-serif;color:#3f3933}
+.tt-row.support .t{color:#b9b1a7}.tt-row.support .e{color:#8b847c}
+.tt-link{border:1px solid var(--line);background:#fbf5f2;color:var(--track);font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.12em;text-transform:uppercase;padding:5px 9px;cursor:pointer}
+.tt-link:hover{background:var(--track);color:#fff;border-color:var(--track)}
+.tt-head{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:15px}
 .hide{display:none!important}
 @media(max-width:680px){
 html{font-size:14px}
@@ -85,6 +94,8 @@ html{font-size:14px}
 .meet{grid-template-columns:64px minmax(0,1fr);gap:11px}
 .done{grid-template-columns:60px minmax(0,1fr)}
 .done .f{grid-column:2}
+.tt-row{grid-template-columns:84px minmax(0,1fr);gap:9px}
+.tt-link{grid-column:2;justify-self:start;margin-top:2px}
 }
 </style>
 </head>
@@ -157,7 +168,7 @@ html{font-size:14px}
     <div class="hero">
       <div class="eyebrow">Diamond League Final &middot; Brussels</div>
       <div class="hero-row"><h1>Entries</h1><div class="stamp">PUBLISHED <b>2 SEP 2026</b></div></div>
-      <p class="source">Confirmed start lists for the flat running events at the Allianz Memorial Van Damme, with each entrant&rsquo;s season best, personal best and world ranking. Day one race times are Mountain; day two times had not been published when this was built. <a href="https://brussels.diamondleague.com/en/programme-results/" target="_blank" rel="noopener">brussels.diamondleague.com</a></p>
+      <p class="source">Confirmed start lists for the flat running events at the Allianz Memorial Van Damme, with each entrant&rsquo;s season best, personal best and world ranking. Race times are Mountain, and the full two-day timetable is below the lists. <a href="https://brussels.diamondleague.com/en/programme-results/" target="_blank" rel="noopener">brussels.diamondleague.com</a></p>
     </div>
     <div class="panel">
       <div class="controls">
@@ -169,6 +180,20 @@ html{font-size:14px}
       <div id="entriesList"></div>
     </div>
     <div class="section-card" style="margin-top:18px">
+      <div class="eyebrow">King Baudouin Stadium &middot; Sep 4&ndash;5</div>
+      <h2>Meet timetable</h2>
+      <p class="note">Every event of the two-day final. Mountain Time first, Brussels local time underneath. Coverage starts 10:00 AM MDT both evenings on FloTrack.</p>
+      <div class="tt-head">
+        <div class="seg" id="ttDays" role="tablist" aria-label="Day"></div>
+        <span class="sortlabel">Show</span>
+        <div class="seg sortseg" id="ttScope" role="group" aria-label="Which events">
+          <button class="active" data-scope="finals">Diamond finals</button>
+          <button data-scope="all">Full programme</button>
+        </div>
+      </div>
+      <div id="ttList"></div>
+    </div>
+    <div class="section-card">
       <div class="eyebrow">Not yet published</div>
       <h2>Still to come</h2>
       <p class="note">Start lists for the rest of the calendar, and when each is normally released.</p>
@@ -198,7 +223,7 @@ html{font-size:14px}
 </main>
 
 <script>
-const APP_VERSION='2026-09-03-5';
+const APP_VERSION='2026-09-03-6';
 // GitHub Pages caches this file, so a phone can sit on an old copy. Reload once if a newer build is live.
 (async function(){try{const res=await fetch(location.pathname+'?_cv='+Date.now(),{cache:'no-store'});
 const live=(await res.text()).match(/APP_VERSION='([^']+)'/);
@@ -275,10 +300,45 @@ const ULTRA={
 // Brussels Diamond League Final entry lists, published 2 September 2026.
 // [name, country, season best, personal best, world rank ('' when unranked)]
 const ENTRY_EVENTS=['100m','200m','400m','800m','1500m','5000m'];
-const ENTRY_WHEN={
- men:{'100m':'Friday 4 Sep · 12:14 PM MDT','200m':'Saturday 5 Sep','400m':'Friday 4 Sep · 1:52 PM MDT','800m':'Friday 4 Sep · 12:42 PM MDT','1500m':'Friday 4 Sep · 1:26 PM MDT','5000m':'Saturday 5 Sep'},
- women:{'100m':'Saturday 5 Sep','200m':'Friday 4 Sep · 1:41 PM MDT','400m':'Saturday 5 Sep','800m':'Saturday 5 Sep','1500m':'Saturday 5 Sep','5000m':'Friday 4 Sep · 1:03 PM MDT'}
-};
+// Official two-day programme, times as published in Brussels local time (CEST).
+// A third element links the row to the start list it belongs to.
+const TIMETABLE=[
+ {label:'Friday 4 September',short:'Fri 4 Sep',rows:[
+  ['18:05','Girls’ Youth 100m'],['18:10','Girls’ Youth High Jump'],['18:13','Boys’ Youth 100m'],
+  ['18:21','Girls’ Youth 1000m'],['18:30','Women’s Shot Put'],['18:32','Boys’ Youth 1000m'],
+  ['18:38','Men’s Long Jump'],['18:45','Girls’ Youth 4x100m'],['18:49','Women’s Discus'],
+  ['18:55','Boys’ Youth 4x100m'],['19:05','Mixed Club 100m'],['19:13','Men’s T63 Blades 100m'],
+  ['19:22','Women’s Invitational 400m'],['19:31','Men’s Invitational 400m'],['19:59','Men’s Pole Vault'],
+  ['20:04','Women’s 400m Hurdles'],['20:09','Men’s High Jump'],['20:14','Men’s 100m','men/100m'],
+  ['20:23','Women’s 3000m Steeplechase'],['20:37','Men’s Discus'],['20:42','Men’s 800m','men/800m'],
+  ['20:48','Women’s Triple Jump'],['20:55','Men’s 110m Hurdles'],['21:03','Women’s 5000m','women/5000m'],
+  ['21:26','Men’s 1500m','men/1500m'],['21:41','Women’s 200m','women/200m'],['21:52','Men’s 400m','men/400m']
+ ]},
+ {label:'Saturday 5 September',short:'Sat 5 Sep',rows:[
+  ['17:10','Mixed Club Challenge 4x400m – Group G'],['17:25','Boys’ Youth High Jump'],
+  ['17:40','Mixed Club Challenge 4x400m – Group F'],['17:50','Mixed Club Challenge 4x400m – Group E'],
+  ['17:58','Mixed Allianz Eagles 1500m'],['18:05','Women’s Javelin'],
+  ['18:10','Mixed Club Challenge 4x400m – Group D'],['18:20','Mixed Club Challenge 4x400m – Group C'],
+  ['18:28','Men’s Shot Put'],['18:30','Mixed Club Challenge 4x400m – Group B'],
+  ['18:40','Mixed Club Challenge 4x400m – Group A'],['18:54','Mixed Equal Rights Run 100m'],
+  ['19:02','Mixed Frame Running 100m'],['19:21','Men’s Triple Jump'],['19:31','Mixed Turbo Relay 4x100m'],
+  ['19:39','Women’s T54 Wheelchair 400m'],['19:44','Women’s Invitational 100m'],['19:54','Men’s Invitational 100m'],
+  ['19:58','Women’s Pole Vault'],['20:06','Women’s 400m','women/400m'],['20:16','Women’s High Jump'],
+  ['20:24','Women’s 100m','women/100m'],['20:32','Men’s 5000m','men/5000m'],['20:40','Men’s Javelin'],
+  ['20:49','Men’s 200m','men/200m'],['20:58','Women’s Long Jump'],['21:05','Women’s 1500m','women/1500m'],
+  ['21:10','Women’s 100m Hurdles'],['21:20','Men’s 3000m Steeplechase'],['21:30','Women’s 800m','women/800m'],
+  ['21:52','Men’s 400m Hurdles']
+ ]}
+];
+// Brussels sits on CEST and Denver on MDT for both dates, so the gap is a flat eight hours.
+function toMountain(hhmm){const p=hhmm.split(':'),H=(+p[0]+24-8)%24;return `${H%12||12}:${p[1]} ${H>=12?'PM':'AM'}`}
+// The 32 Diamond finals are the men's and women's events; youth, club, invitational and para races support them.
+function isFinalEvent(n){return /^(Men|Women)/.test(n)&&!/Invitational|T63|T54/.test(n)}
+// Each start list takes its time straight from the timetable, so the two can never disagree.
+const ENTRY_WHEN=(()=>{const out={men:{},women:{}};
+ TIMETABLE.forEach(d=>d.rows.forEach(([t,n,key])=>{if(!key)return;const g=key.split('/')[0],ev=key.split('/')[1];
+  out[g][ev]=`${d.short} · ${toMountain(t)} MDT`}));
+ return out})();
 const ENTRIES={
  men:{
   '100m':[['Kayinsola Ajayi','NGR','9.84','9.84','4'],['Trayvon Bromell','USA','9.91','9.76','8'],['Christian Coleman','USA','9.90','9.76','11'],['Emmanuel Eseme','CMR','9.89','9.83','9'],['Lachlan Kennedy','AUS','9.85','9.85','17'],['Gift Leotlela','RSA','9.91','9.87','6'],['Oblique Seville','JAM','9.82','9.77','1'],['Akani Simbine','RSA','9.93','9.82','10'],['Simon Verherstraeten','BEL','10.12','10.06','51']],
@@ -360,6 +420,25 @@ function renderEntries(){
     `<div class="done" style="grid-template-columns:minmax(0,1fr)"><div><div class="m" style="font-size:15px;color:var(--ink)">${esc(name)}</div><div class="d" style="margin-top:4px">${esc(when)}</div><div style="font:12px/1.5 Arial,Helvetica,sans-serif;color:var(--muted);margin-top:5px">${esc(note)}</div></div></div>`
   ).join('');
 }
+const ttState={day:0,scope:'finals'};
+function renderTimetable(){
+  const day=TIMETABLE[ttState.day];
+  $('#ttDays').innerHTML=TIMETABLE.map((d,i)=>`<button role="tab" aria-selected="${i===ttState.day}" class="${i===ttState.day?'active':''}" data-day="${i}">${esc(d.short)}</button>`).join('');
+  const rows=day.rows.filter(r=>ttState.scope==='all'||isFinalEvent(r[1]));
+  $('#ttList').innerHTML=rows.map(([t,n,key])=>
+    `<div class="tt-row${isFinalEvent(n)?'':' support'}"><div class="t">${esc(toMountain(t))}<small>${esc(t)} Brussels</small></div><div class="e">${esc(n)}</div>${key?`<button class="tt-link" data-entry="${esc(key)}">Start list</button>`:'<span></span>'}</div>`
+  ).join('');
+  $$('#ttDays button').forEach(b=>b.onclick=()=>{ttState.day=+b.dataset.day;renderTimetable()});
+  $$('#ttScope button').forEach(b=>b.onclick=()=>{ttState.scope=b.dataset.scope;$$('#ttScope button').forEach(x=>x.classList.toggle('active',x===b));renderTimetable()});
+  // Tapping a race jumps the start list above to that event.
+  $$('#ttList .tt-link').forEach(b=>b.onclick=()=>{
+    const g=b.dataset.entry.split('/')[0],ev=b.dataset.entry.split('/')[1];
+    state.entries.gender=g;state.entries.key=ev;
+    $$('#entriesView .controls .seg:not(.sortseg) button').forEach(x=>{const on=x.dataset.gender===g;x.classList.toggle('active',on);x.setAttribute('aria-selected',on)});
+    renderEntries();
+    $('#entriesView .panel').scrollIntoView({behavior:'smooth',block:'start'});
+  });
+}
 function renderAll(){
   renderBoard('track',TRACK,TRACK_EVENTS,TRACK_NOTES);
   renderBoard('road',ROAD,ROAD_GROUPS,ROAD_NOTES);
@@ -379,19 +458,19 @@ $$('.tabs button').forEach(btn=>btn.onclick=()=>{
   ['track','road','ultra','entries','calendar'].forEach(x=>$(`#${x}View`).classList.toggle('hide',x!==btn.dataset.tab));
 });
 ['track','road','ultra','entries'].forEach(section=>{
-  $$('#'+section+'View .seg:not(.sortseg) button').forEach(btn=>btn.onclick=()=>{
+  $$('#'+section+'View .controls .seg:not(.sortseg) button').forEach(btn=>btn.onclick=()=>{
     state[section].gender=btn.dataset.gender;
-    $$('#'+section+'View .seg:not(.sortseg) button').forEach(b=>{b.classList.toggle('active',b===btn);b.setAttribute('aria-selected',b===btn)});
+    $$('#'+section+'View .controls .seg:not(.sortseg) button').forEach(b=>{b.classList.toggle('active',b===btn);b.setAttribute('aria-selected',b===btn)});
     renderAll();
   });
-  $$('#'+section+'View .sortseg button').forEach(btn=>btn.onclick=()=>{
+  $$('#'+section+'View .controls .sortseg button').forEach(btn=>btn.onclick=()=>{
     if(btn.disabled)return;
     state[section].sort=btn.dataset.sort;
-    $$('#'+section+'View .sortseg button').forEach(b=>b.classList.toggle('active',b===btn));
+    $$('#'+section+'View .controls .sortseg button').forEach(b=>b.classList.toggle('active',b===btn));
     renderAll();
   });
 });
-renderAll();renderCalendar();
+renderAll();renderCalendar();renderTimetable();
 </script>
 </body>
 </html>
