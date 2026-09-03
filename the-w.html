@@ -27,6 +27,10 @@
 </main>
 <script>
 const SEASON=2026, API='https://site.api.espn.com/apis/site/v2/sports/basketball/wnba';
+const APP_VERSION='2026-09-03-5';
+// GitHub Pages caches this file for ten minutes, so a phone can sit on an old copy.
+// Compare against what is actually deployed and reload once if they differ.
+(async function(){try{const res=await fetch(location.pathname+'?_cv='+Date.now(),{cache:'no-store'});const live=(await res.text()).match(/APP_VERSION='([^']+)'/);if(live&&live[1]!==APP_VERSION&&!sessionStorage.getItem('thew-v-'+live[1])){sessionStorage.setItem('thew-v-'+live[1],'1');location.replace(location.pathname+'?v='+live[1])}}catch(e){}})();
 const REAL_IDS={ATL:'20',CHI:'19',CON:'18',DAL:'3',GS:'129689',IND:'5',LV:'17',LA:'6',MIN:'8',NY:'9',PHX:'11',POR:'132052',SEA:'14',TOR:'131935',WSH:'16'};
 const FALLBACK=[['ATL','Atlanta Dream'],['CHI','Chicago Sky'],['CON','Connecticut Sun'],['DAL','Dallas Wings'],['GS','Golden State Valkyries'],['IND','Indiana Fever'],['LV','Las Vegas Aces'],['LA','Los Angeles Sparks'],['MIN','Minnesota Lynx'],['NY','New York Liberty'],['PHX','Phoenix Mercury'],['POR','Portland Fire'],['SEA','Seattle Storm'],['TOR','Toronto Tempo'],['WSH','Washington Mystics']]
 .map((x,i)=>({id:REAL_IDS[x[0]]||String(i+1),abbreviation:x[0],displayName:x[1],shortDisplayName:x[1].replace(/^[^ ]+ /,''),slug:x[1].toLowerCase().replace(/[^a-z0-9]+/g,'-'),logo:`https://a.espncdn.com/i/teamlogos/wnba/500/${x[0].toLowerCase()}.png`,record:'—'}));

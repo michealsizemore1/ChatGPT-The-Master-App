@@ -60,6 +60,16 @@
 
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script src="./budget-app.js?v=20260903-4"></script>
+<script>
+// GitHub Pages caches this page for ten minutes; reload once if a newer build is deployed.
+(function(){try{var tag=document.querySelector('script[src*="budget-app.js"]');
+var mine=tag&&(tag.getAttribute('src').match(/[?&]v=([^&"]+)/)||[])[1];if(!mine)return;
+fetch(location.pathname+'?_cv='+Date.now(),{cache:'no-store'}).then(function(r){return r.text();}).then(function(t){
+var m=t.match(/budget-app\.js\?v=([^"']+)/);var live=m&&m[1];
+if(live&&live!==mine&&!sessionStorage.getItem('bt-reload-'+live)){sessionStorage.setItem('bt-reload-'+live,'1');
+location.replace(location.pathname+'?v='+live);}}).catch(function(){});}catch(e){}})();
+</script>
+
 <script src="./receipt-scanner.js?v=20260903-4"></script>
 </body>
 </html>
