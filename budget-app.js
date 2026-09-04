@@ -208,9 +208,20 @@ function buildForecast(data, prefs, overrides) {
   var streams = forecastIncomeStreams(data, today);
   var events = forecastScheduledEvents(data, today, end)
     .concat(forecastIncomeEvents(streams, today, end, prefs.mutedIncome));
-  (overrides && overrides.events ? overrides.events : []).forEach(function (event) { events.push(event); });
   var dailySpend = prefs.includeSpending ? forecastDailySpend(data, today) : 0;
-  if (overrides && Number.isFinite(overrides.dailySpendDelta)) dailySpend = Math.max(0, dailySpend + overrides.dailySpendDelta);
+  // A scenario is replayed through the same engine rather than calculated separately.
+  var scenarioList = Array.isArray(overrides) ? overrides.filter(function (item) { return item && item.enabled; }) : [];
+  scenarioList.forEach(function (scenario) {
+    var applied = applyScenario(scenario, events, dailySpend, today, end);
+    events = applied.events;
+    dailySpend = applied.dailySpend;
+  });
+  if (overrides && !Array.isArray(overrides) && overrides.events) {
+    overrides.events.forEach(function (event) { events.push(event); });
+  }
+  if (overrides && !Array.isArray(overrides) && Number.isFinite(overrides.dailySpendDelta)) {
+    dailySpend = Math.max(0, dailySpend + overrides.dailySpendDelta);
+  }
 
   var byDate = {};
   events.forEach(function (event) {
@@ -219,7 +230,7 @@ function buildForecast(data, prefs, overrides) {
   });
 
   var days = [];
-  var balance = opening + ((overrides && Number(overrides.openingDelta)) || 0);
+  var balance = opening + ((overrides && !Array.isArray(overrides) && Number(overrides.openingDelta)) || 0);
   var cursor = new Date(today.getTime());
   var lowest = { date: forecastISO(cursor), balance: balance };
   var breach = null;
@@ -256,8 +267,159 @@ function buildForecast(data, prefs, overrides) {
   };
 }
 
+/* ---------------------------------------------------------------------------
+   What-if scenarios. Each one is a set of adjustments replayed through the same
+   forecast engine, so the answer is the balance curve you already trust rather
+   than a separate calculator.
+   --------------------------------------------------------------------------- */
+var SCENARIO_KEY = "meridian_forecast_scenarios";
+
+var SCENARIO_KINDS = [
+  { id: "income", label: "Income change" },
+  { id: "recurring", label: "Bill added or changed" },
+  { id: "oneoff", label: "One-off purchase or windfall" },
+  { id: "savings", label: "Move money to savings" },
+  { id: "payoff", label: "Extra debt payment" },
+  { id: "inflation", label: "Prices rise or fall" }
+];
+
+function loadScenarios() {
+  try {
+    var raw = localStorage.getItem(SCENARIO_KEY);
+    var list = raw ? JSON.parse(raw) : [];
+    return Array.isArray(list) ? list : [];
+  } catch (err) {
+    return [];
+  }
+}
+
+function saveScenarios(list) {
+  try { localStorage.setItem(SCENARIO_KEY, JSON.stringify(list)); } catch (err) {}
+}
+
+function scenarioBlank(kind) {
+  var base = { id: uid(), kind: kind, enabled: true, name: "", startDate: todayISO() };
+  if (kind === "income") return _objectSpread(_objectSpread({}, base), { target: "all", mode: "percent", value: 5 });
+  if (kind === "recurring") return _objectSpread(_objectSpread({}, base), { label: "New bill", amount: 100, dayOfMonth: 1, direction: "out" });
+  if (kind === "oneoff") return _objectSpread(_objectSpread({}, base), { label: "One-off", amount: 500, direction: "out", date: todayISO() });
+  if (kind === "savings") return _objectSpread(_objectSpread({}, base), { amount: 200, dayOfMonth: 15 });
+  if (kind === "payoff") return _objectSpread(_objectSpread({}, base), { amount: 150, strategy: "avalanche" });
+  return _objectSpread(_objectSpread({}, base), { percent: 3 });
+}
+
+function scenarioSummary(scenario) {
+  if (scenario.kind === "income") {
+    var who = scenario.target === "all" ? "all income" : scenario.target;
+    var change = scenario.mode === "percent" ? scenario.value + "%" : fmtCurrency(Math.abs(scenario.value));
+    return (Number(scenario.value) < 0 ? "Cut " : "Raise ") + who + " by " + change + " from " + scenario.startDate;
+  }
+  if (scenario.kind === "recurring") {
+    return (scenario.direction === "in" ? "Add " : "Add a ") + fmtCurrency(Math.abs(scenario.amount)) +
+      (scenario.direction === "in" ? " coming in" : " bill") + " on day " + scenario.dayOfMonth + " from " + scenario.startDate;
+  }
+  if (scenario.kind === "oneoff") {
+    return (scenario.direction === "in" ? "Receive " : "Spend ") + fmtCurrency(Math.abs(scenario.amount)) + " on " + scenario.date;
+  }
+  if (scenario.kind === "savings") {
+    return "Move " + fmtCurrency(Math.abs(scenario.amount)) + " to savings on day " + scenario.dayOfMonth;
+  }
+  if (scenario.kind === "payoff") {
+    return "Put " + fmtCurrency(Math.abs(scenario.amount)) + " a month extra at debt (" + scenario.strategy + ")";
+  }
+  return (Number(scenario.percent) < 0 ? "Prices fall " : "Prices rise ") + Math.abs(Number(scenario.percent)) + "% from " + scenario.startDate;
+}
+
+function scenarioMonthlyEvents(label, amount, dayOfMonth, startISO, today, end, kind) {
+  var events = [];
+  var start = new Date(String(startISO || todayISO()) + "T00:00:00");
+  if (isNaN(start.getTime())) start = new Date(today.getTime());
+  var cursor = new Date(today.getFullYear(), today.getMonth(), 1);
+  for (var i = 0; i <= 25; i++) {
+    var year = cursor.getFullYear();
+    var month = cursor.getMonth() + 1;
+    var when = new Date(year, month - 1, Math.min(Number(dayOfMonth) || 1, daysInMonth(year, month)));
+    if (when > end) break;
+    if (when >= today && when >= start) {
+      events.push({ date: forecastISO(when), label: label, amount: amount, kind: kind || "scenario" });
+    }
+    cursor.setMonth(cursor.getMonth() + 1);
+  }
+  return events;
+}
+
+/* Rewrites the event list for one scenario. Returns the new list plus any change
+   to the daily spending assumption. */
+function applyScenario(scenario, events, dailySpend, today, end) {
+  var startISO = String(scenario.startDate || todayISO());
+  var next = events;
+  var spend = dailySpend;
+
+  if (scenario.kind === "income") {
+    next = events.map(function (event) {
+      if (event.kind !== "income" || event.date < startISO) return event;
+      if (scenario.target !== "all" && forecastKey(event.label) !== scenario.target) return event;
+      var amount = scenario.mode === "percent"
+        ? event.amount * (1 + Number(scenario.value) / 100)
+        : event.amount + Number(scenario.value);
+      return _objectSpread(_objectSpread({}, event), { amount: Math.max(0, amount), scenario: true });
+    });
+  } else if (scenario.kind === "inflation") {
+    var factor = 1 + Number(scenario.percent) / 100;
+    next = events.map(function (event) {
+      if (event.amount >= 0 || event.date < startISO) return event;
+      return _objectSpread(_objectSpread({}, event), { amount: event.amount * factor, scenario: true });
+    });
+    spend = dailySpend * factor;
+  } else if (scenario.kind === "recurring") {
+    var flow = scenario.direction === "in" ? Math.abs(Number(scenario.amount)) : -Math.abs(Number(scenario.amount));
+    next = events.concat(scenarioMonthlyEvents(scenario.label || "Scenario bill", flow, scenario.dayOfMonth, startISO, today, end, "scenario"));
+  } else if (scenario.kind === "savings") {
+    next = events.concat(scenarioMonthlyEvents(scenario.name || "To savings", -Math.abs(Number(scenario.amount)), scenario.dayOfMonth, startISO, today, end, "scenario"));
+  } else if (scenario.kind === "payoff") {
+    next = events.concat(scenarioMonthlyEvents(scenario.name || "Extra debt payment", -Math.abs(Number(scenario.amount)), 1, startISO, today, end, "scenario"));
+  } else if (scenario.kind === "oneoff") {
+    var when = String(scenario.date || todayISO());
+    if (when >= forecastISO(today) && when <= forecastISO(end)) {
+      next = events.concat([{
+        date: when,
+        label: scenario.label || scenario.name || "One-off",
+        amount: scenario.direction === "in" ? Math.abs(Number(scenario.amount)) : -Math.abs(Number(scenario.amount)),
+        kind: "scenario"
+      }]);
+    }
+  }
+  return { events: next, dailySpend: spend };
+}
+
+/* What the extra payment does to the debt itself, not just to the balance curve. */
+function scenarioDebtEffect(data, scenarios) {
+  var extra = 0;
+  var strategy = "avalanche";
+  scenarios.forEach(function (scenario) {
+    if (scenario.enabled && scenario.kind === "payoff") {
+      extra += Math.abs(Number(scenario.amount) || 0);
+      strategy = scenario.strategy || strategy;
+    }
+  });
+  if (!extra) return null;
+  var debts = (data.accounts || []).filter(function (account) {
+    return (account.type === "credit" || account.type === "loan" || account.balance < 0) && account.apr != null;
+  });
+  if (!debts.length) return null;
+  var base = simulatePayoff(debts, 0, strategy);
+  var withExtra = simulatePayoff(debts, extra, strategy);
+  return {
+    extra: extra,
+    strategy: strategy,
+    monthsSaved: base.months - withExtra.months,
+    interestSaved: base.totalInterest - withExtra.totalInterest,
+    months: withExtra.months
+  };
+}
+
 function ForecastChart(_forecastChartProps) {
   var days = _forecastChartProps.days;
+  var baselineDays = _forecastChartProps.baselineDays;
   var buffer = _forecastChartProps.buffer;
   var ref = useRef(null);
   var chartRef = useRef(null);
@@ -268,43 +430,52 @@ function ForecastChart(_forecastChartProps) {
       var parts = day.date.split("-");
       return Number(parts[1]) + "/" + Number(parts[2]);
     });
-    var values = days.map(function (day) { return Math.round(day.balance * 100) / 100; });
+    var datasets = [{
+      label: "Projected",
+      data: days.map(function (day) { return Math.round(day.balance * 100) / 100; }),
+      borderColor: "#4f46e5",
+      backgroundColor: "rgba(79,70,229,0.08)",
+      borderWidth: 2.5,
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: 0.25,
+      fill: true
+    }];
+    if (baselineDays) {
+      datasets.push({
+        label: "Without scenarios",
+        data: baselineDays.map(function (day) { return Math.round(day.balance * 100) / 100; }),
+        borderColor: "#94a3b8",
+        borderWidth: 1.5,
+        borderDash: [4, 4],
+        pointRadius: 0,
+        fill: false
+      });
+    }
+    datasets.push({
+      label: "Buffer",
+      data: days.map(function () { return buffer; }),
+      borderColor: "#f59e0b",
+      borderWidth: 1.5,
+      borderDash: [6, 5],
+      pointRadius: 0,
+      fill: false
+    });
     chartRef.current = new Chart(ref.current, {
       type: "line",
-      data: {
-        labels: labels,
-        datasets: [
-          {
-            data: values,
-            borderColor: "#4f46e5",
-            backgroundColor: "rgba(79,70,229,0.08)",
-            borderWidth: 2.5,
-            pointRadius: 0,
-            pointHoverRadius: 4,
-            tension: 0.25,
-            fill: true
-          },
-          {
-            data: days.map(function () { return buffer; }),
-            borderColor: "#f59e0b",
-            borderWidth: 1.5,
-            borderDash: [6, 5],
-            pointRadius: 0,
-            fill: false
-          }
-        ]
-      },
+      data: { labels: labels, datasets: datasets },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         interaction: { mode: "index", intersect: false },
         plugins: {
-          legend: { display: false },
+          legend: { display: !!baselineDays, labels: { boxWidth: 12, font: { size: 11 } } },
           tooltip: {
             callbacks: {
               title: function title(items) { return days[items[0].dataIndex].date; },
               label: function label(ctx) {
-                if (ctx.datasetIndex === 1) return "Buffer " + fmtCurrency(buffer);
+                if (ctx.dataset.label === "Buffer") return "Buffer " + fmtCurrency(buffer);
+                if (ctx.dataset.label === "Without scenarios") return "Without scenarios " + fmtCurrency(ctx.parsed.y);
                 var day = days[ctx.dataIndex];
                 var lines = ["Balance " + fmtCurrency(day.balance)];
                 day.events.forEach(function (event) {
@@ -322,8 +493,119 @@ function ForecastChart(_forecastChartProps) {
       }
     });
     return function () { if (chartRef.current) { chartRef.current.destroy(); chartRef.current = null; } };
-  }, [days, buffer]);
+  }, [days, baselineDays, buffer]);
   return React.createElement("div", { style: { height: 260 } }, React.createElement("canvas", { ref: ref }));
+}
+
+function ScenarioFields(_scenarioFieldProps) {
+  var scenario = _scenarioFieldProps.scenario;
+  var streams = _scenarioFieldProps.streams;
+  var onChange = _scenarioFieldProps.onChange;
+  var small = "border border-slate-200 rounded-lg px-2 py-1 text-sm w-full";
+  var set = function set(patch) { onChange(_objectSpread(_objectSpread({}, scenario), patch)); };
+  var labelled = function labelled(text, control) {
+    return React.createElement(
+      "label",
+      { className: "block" },
+      React.createElement("span", { className: "block text-[10px] uppercase tracking-wide text-slate-400 font-semibold mb-1" }, text),
+      control
+    );
+  };
+  var number = function number(value, onSet, step) {
+    return React.createElement("input", {
+      type: "number", step: step || "1", className: small, value: value,
+      onChange: function onChange2(event) { onSet(Number(event.target.value)); }
+    });
+  };
+  var dateInput = function dateInput(value, onSet) {
+    return React.createElement("input", {
+      type: "date", className: small, value: value || todayISO(),
+      onChange: function onChange3(event) { onSet(event.target.value); }
+    });
+  };
+
+  if (scenario.kind === "income") {
+    return React.createElement(
+      "div",
+      { className: "grid grid-cols-2 md:grid-cols-4 gap-2" },
+      labelled("Which income", React.createElement(
+        "select",
+        { className: small, value: scenario.target, onChange: function (e) { set({ target: e.target.value }); } },
+        React.createElement("option", { value: "all" }, "All income"),
+        streams.map(function (stream) {
+          return React.createElement("option", { key: stream.key, value: stream.key }, stream.label);
+        })
+      )),
+      labelled("Change by", React.createElement(
+        "select",
+        { className: small, value: scenario.mode, onChange: function (e) { set({ mode: e.target.value }); } },
+        React.createElement("option", { value: "percent" }, "Percent"),
+        React.createElement("option", { value: "amount" }, "Dollars per paycheck")
+      )),
+      labelled(scenario.mode === "percent" ? "Percent" : "Dollars", number(scenario.value, function (v) { set({ value: v }); }, "0.01")),
+      labelled("Starting", dateInput(scenario.startDate, function (v) { set({ startDate: v }); }))
+    );
+  }
+  if (scenario.kind === "recurring") {
+    return React.createElement(
+      "div",
+      { className: "grid grid-cols-2 md:grid-cols-4 gap-2" },
+      labelled("Name", React.createElement("input", { className: small, value: scenario.label, onChange: function (e) { set({ label: e.target.value }); } })),
+      labelled("Amount", number(scenario.amount, function (v) { set({ amount: v }); }, "0.01")),
+      labelled("Direction", React.createElement(
+        "select",
+        { className: small, value: scenario.direction, onChange: function (e) { set({ direction: e.target.value }); } },
+        React.createElement("option", { value: "out" }, "Money out"),
+        React.createElement("option", { value: "in" }, "Money in")
+      )),
+      labelled("Day of month", number(scenario.dayOfMonth, function (v) { set({ dayOfMonth: Math.max(1, Math.min(31, v)) }); })),
+      labelled("Starting", dateInput(scenario.startDate, function (v) { set({ startDate: v }); }))
+    );
+  }
+  if (scenario.kind === "oneoff") {
+    return React.createElement(
+      "div",
+      { className: "grid grid-cols-2 md:grid-cols-4 gap-2" },
+      labelled("Name", React.createElement("input", { className: small, value: scenario.label, onChange: function (e) { set({ label: e.target.value }); } })),
+      labelled("Amount", number(scenario.amount, function (v) { set({ amount: v }); }, "0.01")),
+      labelled("Direction", React.createElement(
+        "select",
+        { className: small, value: scenario.direction, onChange: function (e) { set({ direction: e.target.value }); } },
+        React.createElement("option", { value: "out" }, "Money out"),
+        React.createElement("option", { value: "in" }, "Money in")
+      )),
+      labelled("On", dateInput(scenario.date, function (v) { set({ date: v }); }))
+    );
+  }
+  if (scenario.kind === "savings") {
+    return React.createElement(
+      "div",
+      { className: "grid grid-cols-2 md:grid-cols-4 gap-2" },
+      labelled("Amount a month", number(scenario.amount, function (v) { set({ amount: v }); }, "0.01")),
+      labelled("Day of month", number(scenario.dayOfMonth, function (v) { set({ dayOfMonth: Math.max(1, Math.min(31, v)) }); })),
+      labelled("Starting", dateInput(scenario.startDate, function (v) { set({ startDate: v }); }))
+    );
+  }
+  if (scenario.kind === "payoff") {
+    return React.createElement(
+      "div",
+      { className: "grid grid-cols-2 md:grid-cols-4 gap-2" },
+      labelled("Extra a month", number(scenario.amount, function (v) { set({ amount: v }); }, "0.01")),
+      labelled("Order", React.createElement(
+        "select",
+        { className: small, value: scenario.strategy, onChange: function (e) { set({ strategy: e.target.value }); } },
+        React.createElement("option", { value: "avalanche" }, "Highest rate first"),
+        React.createElement("option", { value: "snowball" }, "Smallest balance first")
+      )),
+      labelled("Starting", dateInput(scenario.startDate, function (v) { set({ startDate: v }); }))
+    );
+  }
+  return React.createElement(
+    "div",
+    { className: "grid grid-cols-2 md:grid-cols-4 gap-2" },
+    labelled("Percent change", number(scenario.percent, function (v) { set({ percent: v }); }, "0.1")),
+    labelled("Starting", dateInput(scenario.startDate, function (v) { set({ startDate: v }); }))
+  );
 }
 
 function Forecast(_forecastProps) {
@@ -331,6 +613,13 @@ function Forecast(_forecastProps) {
   var _forecastState = useState(loadForecastPrefs());
   var prefs = _forecastState[0];
   var setPrefs = _forecastState[1];
+  var _scenarioState = useState(loadScenarios());
+  var scenarios = _scenarioState[0];
+  var setScenarios = _scenarioState[1];
+  var _editState = useState(null);
+  var editingId = _editState[0];
+  var setEditingId = _editState[1];
+
   var update = function update(patch) {
     setPrefs(function (current) {
       var next = _objectSpread(_objectSpread({}, current), patch);
@@ -338,21 +627,46 @@ function Forecast(_forecastProps) {
       return next;
     });
   };
-  var forecast = useMemo(function () { return buildForecast(data, prefs, null); }, [data, prefs]);
+  var writeScenarios = function writeScenarios(list) {
+    saveScenarios(list);
+    setScenarios(list);
+  };
+  var patchScenario = function patchScenario(next) {
+    writeScenarios(scenarios.map(function (item) { return item.id === next.id ? next : item; }));
+  };
+
+  var enabled = scenarios.filter(function (scenario) { return scenario.enabled; });
+  var baseline = useMemo(function () { return buildForecast(data, prefs, null); }, [data, prefs]);
+  var projected = useMemo(function () {
+    return enabled.length ? buildForecast(data, prefs, enabled) : baseline;
+  }, [data, prefs, scenarios, baseline]);
+  var debtEffect = useMemo(function () { return scenarioDebtEffect(data, scenarios); }, [data, scenarios]);
+  var active = enabled.length > 0;
   var horizons = [30, 60, 90, 180];
 
-  var statCard = function statCard(label, value, tone, note) {
+  var delta = function delta(now, before) {
+    var diff = now - before;
+    if (!active || Math.abs(diff) < 0.005) return null;
+    return React.createElement(
+      "div",
+      { className: "text-xs font-semibold mt-1 " + (diff >= 0 ? "text-emerald-600" : "text-rose-600") },
+      (diff >= 0 ? "+" : "−") + fmtCurrency(Math.abs(diff)) + " vs today's plan"
+    );
+  };
+
+  var statCard = function statCard(label, value, tone, note, deltaNode) {
     return React.createElement(
       "div",
       { className: "budget-card rounded-2xl border border-slate-200 p-4" },
       React.createElement("div", { className: "text-[11px] uppercase tracking-wide text-slate-400 font-semibold" }, label),
       React.createElement("div", { className: "text-xl md:text-2xl font-bold mt-1 " + (tone || "text-slate-800") }, value),
-      note ? React.createElement("div", { className: "text-xs text-slate-500 mt-1" }, note) : null
+      note ? React.createElement("div", { className: "text-xs text-slate-500 mt-1" }, note) : null,
+      deltaNode || null
     );
   };
 
-  var lowTone = forecast.lowest.balance < 0 ? "text-rose-600" : forecast.lowest.balance < prefs.buffer ? "text-amber-600" : "text-emerald-600";
-  var upcoming = forecast.events.slice(0, 60);
+  var lowTone = projected.lowest.balance < 0 ? "text-rose-600" : projected.lowest.balance < prefs.buffer ? "text-amber-600" : "text-emerald-600";
+  var upcoming = projected.events.slice(0, 60);
 
   return React.createElement(
     "div",
@@ -368,24 +682,25 @@ function Forecast(_forecastProps) {
       )
     ),
 
-    forecast.breach
+    projected.breach
       ? React.createElement(
           "div",
           {
-            className: "rounded-2xl border-2 p-4 " + (forecast.lowest.balance < 0 ? "border-rose-200 bg-rose-50" : "border-amber-200 bg-amber-50"),
+            className: "rounded-2xl border-2 p-4 " + (projected.lowest.balance < 0 ? "border-rose-200 bg-rose-50" : "border-amber-200 bg-amber-50"),
             "data-testid": "forecast-warning"
           },
           React.createElement(
             "div",
-            { className: "font-semibold " + (forecast.lowest.balance < 0 ? "text-rose-700" : "text-amber-700") },
-            forecast.lowest.balance < 0
-              ? "Projected to go negative on " + forecast.breach.date
-              : "Projected to dip under your " + fmtCurrency(prefs.buffer) + " buffer on " + forecast.breach.date
+            { className: "font-semibold " + (projected.lowest.balance < 0 ? "text-rose-700" : "text-amber-700") },
+            projected.lowest.balance < 0
+              ? "Projected to go negative on " + projected.breach.date
+              : "Projected to dip under your " + fmtCurrency(prefs.buffer) + " buffer on " + projected.breach.date
           ),
           React.createElement(
             "div",
-            { className: "text-sm mt-1 " + (forecast.lowest.balance < 0 ? "text-rose-600" : "text-amber-700") },
-            "Low point is " + fmtCurrency(forecast.lowest.balance) + " on " + forecast.lowest.date + "."
+            { className: "text-sm mt-1 " + (projected.lowest.balance < 0 ? "text-rose-600" : "text-amber-700") },
+            "Low point is " + fmtCurrency(projected.lowest.balance) + " on " + projected.lowest.date + "." +
+              (active ? " With " + enabled.length + " scenario" + (enabled.length === 1 ? "" : "s") + " applied." : "")
           )
         )
       : React.createElement(
@@ -395,17 +710,19 @@ function Forecast(_forecastProps) {
           React.createElement(
             "div",
             { className: "text-sm text-emerald-700 mt-1" },
-            "Low point is " + fmtCurrency(forecast.lowest.balance) + " on " + forecast.lowest.date + ", above your " + fmtCurrency(prefs.buffer) + " buffer."
+            "Low point is " + fmtCurrency(projected.lowest.balance) + " on " + projected.lowest.date + ", above your " + fmtCurrency(prefs.buffer) + " buffer." +
+              (active ? " With " + enabled.length + " scenario" + (enabled.length === 1 ? "" : "s") + " applied." : "")
           )
         ),
 
     React.createElement(
       "div",
       { className: "grid grid-cols-2 lg:grid-cols-4 gap-3" },
-      statCard("Today", fmtCurrency(forecast.opening), "text-slate-800", forecast.accounts.length + " account" + (forecast.accounts.length === 1 ? "" : "s")),
-      statCard("Low point", fmtCurrency(forecast.lowest.balance), lowTone, forecast.lowest.date),
-      statCard("In / out", fmtCurrency(forecast.totalIn) + " / " + fmtCurrency(forecast.totalOut), "text-slate-800", "next " + prefs.horizon + " days"),
-      statCard("End of window", fmtCurrency(forecast.ending), forecast.ending >= forecast.opening ? "text-emerald-600" : "text-slate-800", forecast.days.length ? forecast.days[forecast.days.length - 1].date : "")
+      statCard("Today", fmtCurrency(projected.opening), "text-slate-800", projected.accounts.length + " account" + (projected.accounts.length === 1 ? "" : "s")),
+      statCard("Low point", fmtCurrency(projected.lowest.balance), lowTone, projected.lowest.date, delta(projected.lowest.balance, baseline.lowest.balance)),
+      statCard("In / out", fmtCurrency(projected.totalIn) + " / " + fmtCurrency(projected.totalOut), "text-slate-800", "next " + prefs.horizon + " days"),
+      statCard("End of window", fmtCurrency(projected.ending), projected.ending >= projected.opening ? "text-emerald-600" : "text-slate-800",
+        projected.days.length ? projected.days[projected.days.length - 1].date : "", delta(projected.ending, baseline.ending))
     ),
 
     React.createElement(
@@ -451,7 +768,7 @@ function Forecast(_forecastProps) {
             "data-testid": "forecast-spending",
             onChange: function onChange(event) { update({ includeSpending: event.target.checked }); }
           }),
-          "Include everyday spending (" + fmtCurrency(forecast.dailySpend) + "/day)"
+          "Include everyday spending (" + fmtCurrency(projected.dailySpend) + "/day)"
         ),
         React.createElement(
           "label",
@@ -465,7 +782,119 @@ function Forecast(_forecastProps) {
           "Count savings too"
         )
       ),
-      React.createElement(ForecastChart, { days: forecast.days, buffer: prefs.buffer })
+      React.createElement(ForecastChart, { days: projected.days, baselineDays: active ? baseline.days : null, buffer: prefs.buffer })
+    ),
+
+    React.createElement(
+      "div",
+      { className: "budget-card rounded-2xl border border-slate-200 p-4", "data-testid": "scenarios" },
+      React.createElement(
+        "div",
+        { className: "flex flex-wrap items-center justify-between gap-3" },
+        React.createElement(
+          "div",
+          null,
+          React.createElement("h2", { className: "font-bold text-slate-800" }, "What if"),
+          React.createElement("p", { className: "text-xs text-slate-500 mt-1" }, "Tick a scenario to replay the forecast with it applied. The dashed line is your plan as it stands.")
+        ),
+        React.createElement(
+          "div",
+          { className: "flex items-center gap-2" },
+          React.createElement(
+            "select",
+            {
+              className: "border border-slate-200 rounded-lg px-2 py-1.5 text-sm",
+              "data-testid": "scenario-kind",
+              value: "",
+              onChange: function onChange(event) {
+                if (!event.target.value) return;
+                var fresh = scenarioBlank(event.target.value);
+                writeScenarios(scenarios.concat([fresh]));
+                setEditingId(fresh.id);
+                event.target.value = "";
+              }
+            },
+            React.createElement("option", { value: "" }, "+ Add scenario"),
+            SCENARIO_KINDS.map(function (kind) {
+              return React.createElement("option", { key: kind.id, value: kind.id }, kind.label);
+            })
+          )
+        )
+      ),
+
+      scenarios.length
+        ? React.createElement(
+            "div",
+            { className: "mt-4 divide-y divide-slate-100", "data-testid": "scenario-list" },
+            scenarios.map(function (scenario) {
+              var open = editingId === scenario.id;
+              return React.createElement(
+                "div",
+                { key: scenario.id, className: "py-3", "data-scenario-kind": scenario.kind },
+                React.createElement(
+                  "div",
+                  { className: "flex items-center gap-3" },
+                  React.createElement("input", {
+                    type: "checkbox",
+                    checked: !!scenario.enabled,
+                    "data-testid": "scenario-toggle",
+                    onChange: function onChange() { patchScenario(_objectSpread(_objectSpread({}, scenario), { enabled: !scenario.enabled })); }
+                  }),
+                  React.createElement(
+                    "div",
+                    { className: "min-w-0 flex-1" },
+                    React.createElement("div", { className: "text-sm font-medium text-slate-700 truncate" }, scenario.name || SCENARIO_KINDS.filter(function (k) { return k.id === scenario.kind; }).map(function (k) { return k.label; })[0]),
+                    React.createElement("div", { className: "text-[11px] text-slate-400" }, scenarioSummary(scenario))
+                  ),
+                  React.createElement(
+                    "button",
+                    {
+                      className: "text-xs text-indigo-600 font-medium shrink-0",
+                      onClick: function onClick() { setEditingId(open ? null : scenario.id); }
+                    },
+                    open ? "Done" : "Edit"
+                  ),
+                  React.createElement(
+                    "button",
+                    {
+                      className: "text-xs text-rose-500 font-medium shrink-0",
+                      onClick: function onClick() {
+                        writeScenarios(scenarios.filter(function (item) { return item.id !== scenario.id; }));
+                      }
+                    },
+                    "Delete"
+                  )
+                ),
+                open
+                  ? React.createElement(
+                      "div",
+                      { className: "mt-3 space-y-2" },
+                      React.createElement("input", {
+                        className: "border border-slate-200 rounded-lg px-2 py-1 text-sm w-full",
+                        placeholder: "Name this scenario",
+                        value: scenario.name || "",
+                        onChange: function onChange(event) { patchScenario(_objectSpread(_objectSpread({}, scenario), { name: event.target.value })); }
+                      }),
+                      React.createElement(ScenarioFields, {
+                        scenario: scenario,
+                        streams: baseline.streams,
+                        onChange: patchScenario
+                      })
+                    )
+                  : null
+              );
+            })
+          )
+        : React.createElement("div", { className: "text-sm text-slate-500 mt-3" }, "No scenarios yet. Add one to test a raise, a new bill, a big purchase, extra debt payments or a price rise."),
+
+      debtEffect
+        ? React.createElement(
+            "div",
+            { className: "mt-4 rounded-xl bg-indigo-50 border border-indigo-100 p-3 text-sm text-indigo-800", "data-testid": "scenario-debt" },
+            fmtCurrency(debtEffect.extra) + " a month extra clears the debt " + debtEffect.monthsSaved + " month" +
+              (debtEffect.monthsSaved === 1 ? "" : "s") + " sooner and saves " + fmtCurrency(debtEffect.interestSaved) + " in interest."
+          )
+        : null
     ),
 
     React.createElement(
@@ -509,11 +938,11 @@ function Forecast(_forecastProps) {
           { className: "text-xs text-slate-500 mt-1 mb-3" },
           "Income is read from your deposit history. Untick anything that is not really recurring."
         ),
-        forecast.streams.length
+        baseline.streams.length
           ? React.createElement(
               "div",
               { className: "space-y-2", "data-testid": "forecast-streams" },
-              forecast.streams.map(function (stream) {
+              baseline.streams.map(function (stream) {
                 var muted = (prefs.mutedIncome || []).indexOf(stream.key) > -1;
                 return React.createElement(
                   "label",
@@ -550,7 +979,7 @@ function Forecast(_forecastProps) {
         React.createElement(
           "div",
           { className: "mt-4 pt-3 border-t border-slate-100 text-xs text-slate-500 space-y-1" },
-          React.createElement("div", null, "Everyday spending: " + fmtCurrency(forecast.dailySpend) + " a day, averaged over the last 90 days, bills and subscriptions excluded."),
+          React.createElement("div", null, "Everyday spending: " + fmtCurrency(projected.dailySpend) + " a day, averaged over the last 90 days, bills and subscriptions excluded."),
           React.createElement("div", null, "Bills already ticked off for the month are left out.")
         )
       )
