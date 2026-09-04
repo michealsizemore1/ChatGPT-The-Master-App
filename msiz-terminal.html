@@ -2707,6 +2707,10 @@ function init(){
   renderTickerTape(); renderTopBar(); renderHoldings(); renderCenterHoldings(); renderPerfTable(); renderFundTable(); renderDivCal(); renderContrib(); renderEtfCompare();
   renderAllocSection(); renderCorrelation(); renderSelectedStats();
   renderSelectedInfoStrip(); renderRiskSection(); renderNews(); renderBalances();
+  // Keep the shared payload (Money app, Retirement Planner) current just from opening this
+  // page — previously it only refreshed when a balance was actively edited here, so other
+  // apps could show a stale Traditional/Roth TSP split after a defaults change.
+  syncSharedInvestmentsFromMsiz();
   renderContribMatrix(); matrixBindReset();
   buildMainChart(); renderChartLegend(); buildMiniCharts();
   // Populate SGOV balance in Cash & Liquidity panel from DEFAULT_BALANCES
