@@ -77,6 +77,8 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:Georgia,'Time
 .tt-row.support .t{color:#b9b1a7}.tt-row.support .e{color:#8b847c}
 .tt-link{border:1px solid var(--line);background:#fbf5f2;color:var(--track);font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.12em;text-transform:uppercase;padding:5px 9px;cursor:pointer}
 .tt-link:hover{background:var(--track);color:#fff;border-color:var(--track)}
+.rec-flag{display:block;font:700 9px Arial,Helvetica,sans-serif;letter-spacing:.09em;text-transform:uppercase;color:#a2812c;margin-top:4px}
+.rec-new .rec-ev{color:var(--track)}
 .rec{display:grid;grid-template-columns:110px minmax(0,1fr) auto;gap:12px;align-items:baseline;padding:12px 0;border-top:1px solid var(--line)}
 .rec:first-of-type{border-top:0}
 .rec-ev{font:800 12px Arial,Helvetica,sans-serif;letter-spacing:.05em;text-transform:uppercase;color:var(--ink)}
@@ -290,7 +292,7 @@ html{font-size:14px}
 </main>
 
 <script>
-const APP_VERSION='2026-09-04-2';
+const APP_VERSION='2026-09-04-3';
 // GitHub Pages caches this file, so a phone can sit on an old copy. Reload once if a newer build is live.
 (async function(){try{const res=await fetch(location.pathname+'?_cv='+Date.now(),{cache:'no-store'});
 const live=(await res.text()).match(/APP_VERSION='([^']+)'/);
@@ -492,9 +494,9 @@ const RECORDS={
    ['200m','19.19','Usain Bolt','JAM','Berlin','20 Aug 2009',''],
    ['400m','43.03','Wayde van Niekerk','RSA','Rio de Janeiro','14 Aug 2016',''],
    ['800m','1:40.91','David Rudisha','KEN','London','9 Aug 2012',''],
-   ['1000m','2:11.96','Noah Ngeny','KEN','Rieti','5 Sep 1999','2:11.83 by Emmanuel Wanyonyi in Monaco, 10 Jul 2026, awaits ratification'],
+   ['1000m','2:11.83','Emmanuel Wanyonyi','KEN','Monaco','10 Jul 2026','previous record Noah Ngeny 2:11.96, Rieti, 5 Sep 1999','pending'],
    ['1500m','3:26.00','Hicham El Guerrouj','MAR','Rome','14 Jul 1998',''],
-   ['Mile','3:43.13','Hicham El Guerrouj','MAR','Rome','7 Jul 1999','3:42.66 by Josh Kerr in London, 18 Jul 2026, awaits ratification'],
+   ['Mile','3:42.66','Josh Kerr','GBR','London','18 Jul 2026','previous record Hicham El Guerrouj 3:43.13, Rome, 7 Jul 1999','pending'],
    ['2000m','4:43.13','Jakob Ingebrigtsen','NOR','Brussels','8 Sep 2023',''],
    ['3000m','7:17.55','Jakob Ingebrigtsen','NOR','Chorzow','25 Aug 2024',''],
    ['2 miles','7:54.10','Jakob Ingebrigtsen','NOR','Paris','9 Jun 2023','world best, not a ratified record'],
@@ -520,7 +522,7 @@ const RECORDS={
   men:[
    ['5km','12:49','Berihu Aregawi','ETH','Barcelona','31 Dec 2021',''],
    ['10km','26:31','Yomif Kejelcha','ETH','Castellon','16 Feb 2025',''],
-   ['Half marathon','57:30','Yomif Kejelcha','ETH','Valencia','27 Oct 2024','56:51 by Kejelcha in Buenos Aires, 23 Aug 2026, awaits ratification'],
+   ['Half marathon','56:51','Yomif Kejelcha','ETH','Buenos Aires','23 Aug 2026','previous record Kejelcha 57:30, Valencia, 27 Oct 2024','pending'],
    ['Marathon','1:59:30','Sabastian Sawe','KEN','London','26 Apr 2026','']
   ],
   women:[
@@ -702,9 +704,10 @@ function renderRecords(section){
   const note=$('#'+section+'RecordsNote');
   if(note)note.innerHTML=(gender==='men'?'Men':'Women')+'&rsquo;s world records, from <a href="'+esc(src[1])+'" target="_blank" rel="noopener">'+esc(src[0])+'</a>. Switch to '+(gender==='men'?'women':'men')+' above to see theirs. Read '+esc(d.d)+' '+esc(d.y)+'.';
   box.innerHTML=list.map(function(r){
-    return '<div class="rec"><div class="rec-ev">'+esc(r[0])+(r[6]?'<small>'+esc(r[6])+'</small>':'')+'</div>'
+    var pending=r[7]==='pending';
+    return '<div class="rec'+(pending?' rec-new':'')+'"><div class="rec-ev">'+esc(r[0])+(r[6]?'<small>'+esc(r[6])+'</small>':'')+'</div>'
       +'<div class="rec-who"><b>'+esc(r[2])+'</b><small>'+esc(r[3])+' &middot; '+esc(r[4])+' &middot; '+esc(r[5])+'</small></div>'
-      +'<div class="rec-mark">'+esc(r[1])+'</div></div>';
+      +'<div class="rec-mark">'+esc(r[1])+(pending?'<span class="rec-flag">Awaiting ratification</span>':'')+'</div></div>';
   }).join('')||'<div class="event-note" style="border:0;background:none;padding-left:0">No records listed.</div>';
 }
 function renderAll(){
