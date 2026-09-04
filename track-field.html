@@ -148,7 +148,7 @@ html{font-size:14px}
       <div id="trackList"></div>
     </div>
     <div class="section-card" style="margin-top:18px">
-      <div class="eyebrow">100m to 10,000m</div>
+      <div class="eyebrow">100m to 10,000m, standard and rarely-run</div>
       <h2>World records</h2>
       <p class="note" id="trackRecordsNote"></p>
       <div id="trackRecords"></div>
@@ -290,7 +290,7 @@ html{font-size:14px}
 </main>
 
 <script>
-const APP_VERSION='2026-09-04-1';
+const APP_VERSION='2026-09-04-2';
 // GitHub Pages caches this file, so a phone can sit on an old copy. Reload once if a newer build is live.
 (async function(){try{const res=await fetch(location.pathname+'?_cv='+Date.now(),{cache:'no-store'});
 const live=(await res.text()).match(/APP_VERSION='([^']+)'/);
@@ -492,7 +492,12 @@ const RECORDS={
    ['200m','19.19','Usain Bolt','JAM','Berlin','20 Aug 2009',''],
    ['400m','43.03','Wayde van Niekerk','RSA','Rio de Janeiro','14 Aug 2016',''],
    ['800m','1:40.91','David Rudisha','KEN','London','9 Aug 2012',''],
+   ['1000m','2:11.96','Noah Ngeny','KEN','Rieti','5 Sep 1999','2:11.83 by Emmanuel Wanyonyi in Monaco, 10 Jul 2026, awaits ratification'],
    ['1500m','3:26.00','Hicham El Guerrouj','MAR','Rome','14 Jul 1998',''],
+   ['Mile','3:43.13','Hicham El Guerrouj','MAR','Rome','7 Jul 1999','3:42.66 by Josh Kerr in London, 18 Jul 2026, awaits ratification'],
+   ['2000m','4:43.13','Jakob Ingebrigtsen','NOR','Brussels','8 Sep 2023',''],
+   ['3000m','7:17.55','Jakob Ingebrigtsen','NOR','Chorzow','25 Aug 2024',''],
+   ['2 miles','7:54.10','Jakob Ingebrigtsen','NOR','Paris','9 Jun 2023','world best, not a ratified record'],
    ['5000m','12:35.36','Joshua Cheptegei','UGA','Monaco','14 Aug 2020',''],
    ['10,000m','26:11.00','Joshua Cheptegei','UGA','Valencia','7 Oct 2020','']
   ],
@@ -501,7 +506,12 @@ const RECORDS={
    ['200m','21.34','Florence Griffith Joyner','USA','Seoul','29 Sep 1988',''],
    ['400m','47.60','Marita Koch','GDR','Canberra','6 Oct 1985',''],
    ['800m','1:53.28','Jarmila Kratochvilova','TCH','Munich','26 Jul 1983',''],
+   ['1000m','2:28.98','Svetlana Masterkova','RUS','Brussels','23 Aug 1996',''],
    ['1500m','3:48.68','Faith Kipyegon','KEN','Eugene','5 Jul 2025',''],
+   ['Mile','4:07.64','Faith Kipyegon','KEN','Monaco','21 Jul 2023',''],
+   ['2000m','5:19.70','Jessica Hull','AUS','Monaco','12 Jul 2024',''],
+   ['3000m','8:06.11','Wang Junxia','CHN','Beijing','13 Sep 1993',''],
+   ['2 miles','8:58.58','Meseret Defar','ETH','Brussels','14 Sep 2007','world best, not a ratified record'],
    ['5000m','13:58.06','Beatrice Chebet','KEN','Eugene','5 Jul 2025',''],
    ['10,000m','28:54.14','Beatrice Chebet','KEN','Eugene','25 May 2024','']
   ]
