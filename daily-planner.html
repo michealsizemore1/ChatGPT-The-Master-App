@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-09-04-1">
+<meta name="app-build" content="2026-09-04-2">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#667eea">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,7 +16,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
 (function(){
-  var build='2026-09-04-1',checking=false;
+  var build='2026-09-04-2',checking=false;
   function checkForAppUpdate(){
     if(checking||location.protocol==='file:')return;checking=true;
     fetch(location.pathname+'?update-check='+Date.now(),{cache:'no-store'}).then(function(response){return response.text();}).then(function(html){var match=html.match(/name=["']app-build["']\s+content=["']([^"']+)/i);if(match&&match[1]!==build){location.replace(location.pathname+'?v='+encodeURIComponent(match[1]));}}).catch(function(){}).finally(function(){checking=false;});
@@ -6250,14 +6250,18 @@ function renderPendingFoodPhoto(food){
 }
 function foodThumbnailHtml(food,library,idx){
   var src=food&&(food.imageData||food.imageUrl),inside=src?'<img src="'+escHtml(src)+'" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;">':'<span style="font-size:1rem;">🖼️</span>';
-  if(!library)return '<span style="width:34px;height:34px;border-radius:6px;background:#f8fafc;border:1px solid #dbe4ea;display:flex;align-items:center;justify-content:center;overflow:hidden;flex:0 0 auto;">'+inside+'</span>';
+  var size=library?'54px':'34px';
+  return '<span style="width:'+size+';height:'+size+';border-radius:'+(library?'9px':'6px')+';background:#f8fafc;border:1px solid #dbe4ea;display:flex;align-items:center;justify-content:center;overflow:hidden;flex:0 0 auto;">'+inside+'</span>';
+}
+// The Take/Choose photo buttons for a library row (Healthy 7+, Favorites). Rendered as a
+// full-width block BELOW the name/score row -- not squeezed into a narrow column beside it --
+// so a long, wrapping food name can never crowd or visually overlap these buttons.
+function foodThumbnailButtonsHtml(library,idx){
   var change="setLibraryFoodThumbnail('"+library+"',"+idx+",this.files&&this.files[0]);this.value=''";
-  return '<span style="width:94px;display:flex;flex-direction:column;align-items:center;gap:5px;flex:0 0 auto;">'
-    +'<span style="width:54px;height:54px;border-radius:9px;background:#f8fafc;border:1px solid #dbe4ea;display:flex;align-items:center;justify-content:center;overflow:hidden;">'+inside+'</span>'
-    +'<span style="width:100%;display:grid;grid-template-columns:1fr 1fr;gap:4px;">'
-      +'<label style="min-height:31px;box-sizing:border-box;background:#ecfdf5;color:#166534;border:1px solid #4ade80;border-radius:6px;padding:7px 3px;font-size:.65rem;font-weight:900;text-align:center;cursor:pointer;white-space:nowrap;display:flex;align-items:center;justify-content:center;">📷 Take<input type="file" accept="image/*" capture="environment" style="display:none" onchange="'+change+'"></label>'
-      +'<label style="min-height:31px;box-sizing:border-box;background:#eff6ff;color:#1d4ed8;border:1px solid #60a5fa;border-radius:6px;padding:7px 3px;font-size:.65rem;font-weight:900;text-align:center;cursor:pointer;white-space:nowrap;display:flex;align-items:center;justify-content:center;">🖼 Choose<input type="file" accept="image/*" style="display:none" onchange="'+change+'"></label>'
-    +'</span></span>';
+  return '<div style="width:100%;display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;">'
+    +'<label style="min-height:31px;box-sizing:border-box;background:#ecfdf5;color:#166534;border:1px solid #4ade80;border-radius:6px;padding:7px 3px;font-size:.65rem;font-weight:900;text-align:center;cursor:pointer;white-space:nowrap;display:flex;align-items:center;justify-content:center;">📷 Take<input type="file" accept="image/*" capture="environment" style="display:none" onchange="'+change+'"></label>'
+    +'<label style="min-height:31px;box-sizing:border-box;background:#eff6ff;color:#1d4ed8;border:1px solid #60a5fa;border-radius:6px;padding:7px 3px;font-size:.65rem;font-weight:900;text-align:center;cursor:pointer;white-space:nowrap;display:flex;align-items:center;justify-content:center;">🖼 Choose<input type="file" accept="image/*" style="display:none" onchange="'+change+'"></label>'
+    +'</div>';
 }
 function setLibraryFoodThumbnail(library,idx,file){
   if(!file||!/^image\//.test(file.type||''))return;
@@ -6639,10 +6643,14 @@ function renderHealthyFoodsList(){
   var all=getHealthyFoods();updateHealthyFoodsCount(all.length);var q=(document.getElementById('favSearch')||{value:''}).value.toLowerCase().trim(),foods=q?all.filter(function(food){return String(food.name||'').toLowerCase().includes(q);}):all;
   var rescan='<div style="font-size:.68rem;color:#64748b;margin:0 0 6px;">Use 📷 Take for the camera or 🖼 Choose for a picture already on your phone.</div><button onclick="rescanHealthyFoodsAndImages(this)" style="width:100%;margin:0 0 5px;background:#ecfdf5;color:#166534;border:1px solid #86efac;border-radius:6px;padding:7px;font-size:.74rem;font-weight:800;cursor:pointer;">↻ Rescan foods & barcode pictures</button><div id="healthyRescanStatus" role="status" aria-live="polite" style="display:none;font-size:.7rem;font-weight:700;line-height:1.35;margin:0 2px 7px;"></div>';
   if(!foods.length){el.innerHTML=rescan+'<div style="font-size:.8rem;color:#64748b;text-align:center;padding:12px;line-height:1.4;">No saved foods currently score 7.0 or higher.</div>';return;}
-  el.innerHTML=rescan+foods.map(function(food){var idx=all.indexOf(food);return '<div style="display:flex;align-items:flex-start;gap:6px;padding:7px 0;border-bottom:1px solid #dcfce7;font-size:.82rem;">'
-    +foodThumbnailHtml(food,'healthy',idx)+'<div style="flex:1;min-width:0;"><div style="font-weight:800;color:#166534;">'+escHtml(food.name)+'</div><div style="color:#64748b;font-size:.72rem;">'+Number(food.score||7).toFixed(1)+'/10 · '+escHtml(food.label||'Good')+' · '+escHtml(food.confidence||'')+' confidence</div></div>'
-    +'<button onclick="loadHealthyFood('+idx+')" style="background:#16a34a;color:#fff;border:none;border-radius:5px;padding:5px 9px;font-size:.76rem;cursor:pointer;">+ Add</button>'
-    +'<button onclick="deleteHealthyFood('+idx+')" title="Remove from this list" style="background:none;border:1px solid #fecaca;border-radius:4px;color:#dc2626;padding:3px 6px;cursor:pointer;">✕</button></div>';}).join('');
+  el.innerHTML=rescan+foods.map(function(food){var idx=all.indexOf(food);return '<div style="padding:7px 0;border-bottom:1px solid #dcfce7;font-size:.82rem;">'
+    +'<div style="display:flex;align-items:center;gap:6px;">'
+      +foodThumbnailHtml(food,'healthy',idx)+'<div style="flex:1;min-width:0;"><div style="font-weight:800;color:#166534;">'+escHtml(food.name)+'</div><div style="color:#64748b;font-size:.72rem;">'+Number(food.score||7).toFixed(1)+'/10 · '+escHtml(food.label||'Good')+' · '+escHtml(food.confidence||'')+' confidence</div></div>'
+      +'<button onclick="loadHealthyFood('+idx+')" style="background:#16a34a;color:#fff;border:none;border-radius:5px;padding:5px 9px;font-size:.76rem;cursor:pointer;">+ Add</button>'
+      +'<button onclick="deleteHealthyFood('+idx+')" title="Remove from this list" style="background:none;border:1px solid #fecaca;border-radius:4px;color:#dc2626;padding:3px 6px;cursor:pointer;">✕</button>'
+    +'</div>'
+    +foodThumbnailButtonsHtml('healthy',idx)
+    +'</div>';}).join('');
 }
 function loadHealthyFood(idx){
   var food=getHealthyFoods()[idx];if(!food)return;var target=(document.getElementById('favTargetMeal')||{value:'breakfast'}).value;
@@ -6662,13 +6670,16 @@ function renderFavsList(){
   var target=(document.getElementById('favTargetMeal')||{value:'breakfast'}).value;
   el.innerHTML=photoHelp+filtered.map(function(f,i){
     var origIdx=favs.indexOf(f);
-    return '<div style="display:flex;align-items:flex-start;gap:6px;padding:5px 0;border-bottom:1px solid #f5f5f5;font-size:0.82rem;">'
-      +foodThumbnailHtml(f,'favorite',origIdx)+'<div style="flex:1;min-width:0;">'
-        +'<div style="font-weight:600;">'+escHtml(f.name)+'</div>'
-        +'<div style="color:#888;font-size:0.75rem;">'+(f.cal?'🔥'+f.cal+' ':'')+''+(f.prot?'🥩'+f.prot+'g ':'')+''+(f.carbs?'🍞'+f.carbs+'g':'')+'</div>'
+    return '<div style="padding:5px 0;border-bottom:1px solid #f5f5f5;font-size:0.82rem;">'
+      +'<div style="display:flex;align-items:center;gap:6px;">'
+        +foodThumbnailHtml(f,'favorite',origIdx)+'<div style="flex:1;min-width:0;">'
+          +'<div style="font-weight:600;">'+escHtml(f.name)+'</div>'
+          +'<div style="color:#888;font-size:0.75rem;">'+(f.cal?'🔥'+f.cal+' ':'')+''+(f.prot?'🥩'+f.prot+'g ':'')+''+(f.carbs?'🍞'+f.carbs+'g':'')+'</div>'
+        +'</div>'
+        +'<button onclick="loadFavoriteItem('+origIdx+')" style="background:#e67e22;color:#fff;border:none;border-radius:5px;padding:4px 9px;font-size:0.78rem;cursor:pointer;">+ Add</button>'
+        +'<button onclick="deleteFavorite('+origIdx+')" style="background:none;border:1px solid #f5c6cb;border-radius:4px;cursor:pointer;font-size:0.72rem;padding:2px 5px;color:#e74c3c;">✕</button>'
       +'</div>'
-      +'<button onclick="loadFavoriteItem('+origIdx+')" style="background:#e67e22;color:#fff;border:none;border-radius:5px;padding:4px 9px;font-size:0.78rem;cursor:pointer;">+ Add</button>'
-      +'<button onclick="deleteFavorite('+origIdx+')" style="background:none;border:1px solid #f5c6cb;border-radius:4px;cursor:pointer;font-size:0.72rem;padding:2px 5px;color:#e74c3c;">✕</button>'
+      +foodThumbnailButtonsHtml('favorite',origIdx)
       +'</div>';
   }).join('');
 }
