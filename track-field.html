@@ -77,6 +77,16 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:Georgia,'Time
 .tt-row.support .t{color:#b9b1a7}.tt-row.support .e{color:#8b847c}
 .tt-link{border:1px solid var(--line);background:#fbf5f2;color:var(--track);font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.12em;text-transform:uppercase;padding:5px 9px;cursor:pointer}
 .tt-link:hover{background:var(--track);color:#fff;border-color:var(--track)}
+.rec{display:grid;grid-template-columns:110px minmax(0,1fr) auto;gap:12px;align-items:baseline;padding:12px 0;border-top:1px solid var(--line)}
+.rec:first-of-type{border-top:0}
+.rec-ev{font:800 12px Arial,Helvetica,sans-serif;letter-spacing:.05em;text-transform:uppercase;color:var(--ink)}
+.rec-ev small{display:block;font:700 9px Arial,Helvetica,sans-serif;letter-spacing:.08em;color:#a29a91;text-transform:uppercase;margin-top:4px}
+.rec-who b{font:500 17px Georgia,'Times New Roman',serif;display:block}
+.rec-who small{display:block;font:10px Arial,Helvetica,sans-serif;letter-spacing:.05em;color:#8b847c;margin-top:4px}
+.rec-mark{font:800 17px Arial,Helvetica,sans-serif;font-variant-numeric:tabular-nums;color:var(--track);text-align:right}
+.meet-links{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.meet-links a{font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.11em;text-transform:uppercase;color:var(--track);border:1px solid var(--line);background:#fbf8f3;padding:5px 9px;text-decoration:none}
+.meet-links a:hover{background:var(--track);border-color:var(--track);color:#fff}
 .tt-head{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:15px}
 .story h3 a{color:inherit;text-decoration:none;box-shadow:inset 0 -1px 0 rgba(192,71,43,.35)}
 .story h3 a:hover{color:var(--track)}
@@ -85,6 +95,9 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:Georgia,'Time
 .hide{display:none!important}
 @media(max-width:680px){
 .story{grid-template-columns:64px minmax(0,1fr);gap:11px}
+.rec{grid-template-columns:minmax(0,1fr) auto;gap:10px}
+.rec-ev{grid-column:1/-1}
+.rec-who b{font-size:16px}
 html{font-size:14px}
 .ctl-row{gap:8px}.sortseg{margin-left:0}.seg button{padding:9px 13px}
 .nav{height:106px;display:grid;grid-template-columns:42px 1fr;padding:10px 14px 0;gap:7px 11px}
@@ -135,6 +148,12 @@ html{font-size:14px}
       <div id="trackList"></div>
     </div>
     <div class="section-card" style="margin-top:18px">
+      <div class="eyebrow">100m to 10,000m</div>
+      <h2>World records</h2>
+      <p class="note" id="trackRecordsNote"></p>
+      <div id="trackRecords"></div>
+    </div>
+    <div class="section-card" style="margin-top:18px">
       <div class="eyebrow">Track &amp; field</div>
       <h2>Latest news</h2>
       <p class="note" id="trackNewsNote"></p>
@@ -158,6 +177,12 @@ html{font-size:14px}
       <div id="roadList"></div>
     </div>
     <div class="section-card" style="margin-top:18px">
+      <div class="eyebrow">5km to the marathon</div>
+      <h2>World records</h2>
+      <p class="note" id="roadRecordsNote"></p>
+      <div id="roadRecords"></div>
+    </div>
+    <div class="section-card" style="margin-top:18px">
       <div class="eyebrow">Road racing</div>
       <h2>Latest news</h2>
       <p class="note" id="roadNewsNote"></p>
@@ -179,6 +204,12 @@ html{font-size:14px}
       <div class="event-note" id="ultraNote"></div>
       <div class="list-head"><span>Rank</span><span>Athlete</span><span>Index / age</span></div>
       <div id="ultraList"></div>
+    </div>
+    <div class="section-card" style="margin-top:18px">
+      <div class="eyebrow">50km to 48 hours</div>
+      <h2>World records</h2>
+      <p class="note" id="ultraRecordsNote"></p>
+      <div id="ultraRecords"></div>
     </div>
     <div class="section-card" style="margin-top:18px">
       <div class="eyebrow">Ultra &amp; trail</div>
@@ -259,7 +290,7 @@ html{font-size:14px}
 </main>
 
 <script>
-const APP_VERSION='2026-09-03-8';
+const APP_VERSION='2026-09-04-1';
 // GitHub Pages caches this file, so a phone can sit on an old copy. Reload once if a newer build is live.
 (async function(){try{const res=await fetch(location.pathname+'?_cv='+Date.now(),{cache:'no-store'});
 const live=(await res.text()).match(/APP_VERSION='([^']+)'/);
@@ -401,13 +432,13 @@ const ENTRIES_PENDING=[
  ['New York City Marathon','Nov 1','Elite field announced closer to race day.']
 ];
 const UPCOMING=[
- {d:'Sep 4-5',y:'2026',name:'Wanda Diamond League Final',where:'Brussels, Belgium',detail:'The season finale runs over two days for the first time, with Diamond Trophies decided in every discipline.',watch:'FloTrack &middot; Fri from 10:30 AM MDT, Sat from 10:10 AM MDT',tag:'Diamond League',cls:'major'},
- {d:'Sep 11-13',y:'2026',name:'World Athletics Ultimate Championship',where:'Budapest, Hungary',detail:'Inaugural edition. Sixteen athletes per track event, eight per field event, and a US$10 million purse. Entry comes from Olympic and world titles, Diamond League final wins, and the world rankings.',watch:'US broadcaster not yet announced &middot; first session 9:00 AM MDT',tag:'Championship',cls:'champs'},
- {d:'Sep 19-20',y:'2026',name:'World Athletics Road Running Championships',where:'Copenhagen, Denmark',detail:'Half marathon, 5km and the mile, with mass-participation races at 5km and the mile.',watch:'Broadcaster not yet announced &middot; World Athletics streams selected territories',tag:'Championship',cls:'champs'},
- {d:'Sep 27',y:'2026',name:'Berlin Marathon',where:'Berlin, Germany',detail:'The fastest of the majors and the usual home of world record attempts.',watch:'FloSports &middot; 1:00 AM MDT',tag:'Marathon major',cls:'major'},
- {d:'Oct 11',y:'2026',name:'Chicago Marathon',where:'Chicago, USA',detail:'Flat, fast, and the second of the autumn majors.',watch:'Peacock and NBC Chicago &middot; 6:00 AM MDT',tag:'Marathon major',cls:'major'},
- {d:'Nov 1',y:'2026',name:'New York City Marathon',where:'New York, USA',detail:'Five boroughs and the largest field in the sport. Clocks go back the same morning, so the start lands at 6:00 AM once Mountain Time returns to standard.',watch:'ESPN2 and ABC &middot; 6:00 AM MST',tag:'Marathon major',cls:'major'},
- {d:'Dec 6',y:'2026',name:'Shanghai Marathon',where:'Shanghai, China',detail:'A candidate race under assessment to join the majors in 2027.',watch:'No US broadcast confirmed',tag:'Candidate major',cls:''}
+ {d:'Sep 4-5',y:'2026',name:'Wanda Diamond League Final',where:'Brussels, Belgium',detail:'The season finale runs over two days for the first time, with Diamond Trophies decided in every discipline.',watch:'FloTrack &middot; Fri from 10:30 AM MDT, Sat from 10:10 AM MDT',tag:'Diamond League',cls:'major',links:[['Official programme','https://brussels.diamondleague.com/en/programme-results/'],['Ones to watch','https://www.diamondleague.com/wdl-final-2026-in-brussels-ones-to-watch-on-day-one/'],['Entry lists','https://www.diamondleague.com/wdl-final-in-brussels-entry-lists-published/']]},
+ {d:'Sep 11-13',y:'2026',name:'World Athletics Ultimate Championship',where:'Budapest, Hungary',detail:'Inaugural edition. Sixteen athletes per track event, eight per field event, and a US$10 million purse. Entry comes from Olympic and world titles, Diamond League final wins, and the world rankings.',watch:'US broadcaster not yet announced &middot; first session 9:00 AM MDT',tag:'Championship',cls:'champs',links:[['Official site','https://worldathletics.org/competitions/world-athletics-ultimate-championship/2026'],['Exceptional invitations','https://worldathletics.org/competitions/world-athletics-ultimate-championship/2026/news/press-releases/exceptional-invitations-ultimate-championship'],['Kerr vs Ingebrigtsen','https://www.letsrun.com/news/2026/08/kerr-vs-jakob-is-on-world-athletics-bends-rules-to-grant-budapest-invitations/']]},
+ {d:'Sep 19-20',y:'2026',name:'World Athletics Road Running Championships',where:'Copenhagen, Denmark',detail:'Half marathon, 5km and the mile, with mass-participation races at 5km and the mile.',watch:'Broadcaster not yet announced &middot; World Athletics streams selected territories',tag:'Championship',cls:'champs',links:[['Official site','https://worldathletics.org/competitions/world-athletics-road-running-championships/copenhagen26/main-page'],['Kenyan team','https://worldathletics.org/competitions/world-athletics-road-running-championships/copenhagen26/news/news/wrrc-copenhagen-26-kenya-team'],['USATF roster','https://www.usatf.org/news/2026/usatf-announces-roster-for-world-road-running-cham']]},
+ {d:'Sep 27',y:'2026',name:'Berlin Marathon',where:'Berlin, Germany',detail:'The fastest of the majors and the usual home of world record attempts.',watch:'FloSports &middot; 1:00 AM MDT',tag:'Marathon major',cls:'major',links:[['Official site','https://www.bmw-berlin-marathon.com/en/'],['Elite field','https://www.bmw-berlin-marathon.com/en/news-media/news/detail/top-stars-complete-the-bmw-berlin-marathon-field-for-thrilling-races']]},
+ {d:'Oct 11',y:'2026',name:'Chicago Marathon',where:'Chicago, USA',detail:'Flat, fast, and the second of the autumn majors.',watch:'Peacock and NBC Chicago &middot; 6:00 AM MDT',tag:'Marathon major',cls:'major',links:[['Official site','https://www.chicagomarathon.com/']]},
+ {d:'Nov 1',y:'2026',name:'New York City Marathon',where:'New York, USA',detail:'Five boroughs and the largest field in the sport. Clocks go back the same morning, so the start lands at 6:00 AM once Mountain Time returns to standard.',watch:'ESPN2 and ABC &middot; 6:00 AM MST',tag:'Marathon major',cls:'major',links:[['Official site','https://www.nyrr.org/tcsnycmarathon']]},
+ {d:'Dec 6',y:'2026',name:'Shanghai Marathon',where:'Shanghai, China',detail:'A candidate race under assessment to join the majors in 2027.',watch:'No US broadcast confirmed',tag:'Candidate major',cls:'',links:[]}
 ];
 const DL_SEASON=[
  ['May 16','Keqiao / Shanghai','China'],['May 23','Xiamen','China'],['May 31','Rabat','Morocco'],
@@ -450,6 +481,78 @@ const NEWS={
  ]
 };
 
+// World records. [event, mark, athlete, country, venue, date, note]
+// Track and road from the World Athletics world-record tables; ultra from the IAU record lists.
+// Both read 3 September 2026.
+const RECORDS_CHECKED='2026-09-03';
+const RECORDS={
+ track:{
+  men:[
+   ['100m','9.58','Usain Bolt','JAM','Berlin','16 Aug 2009',''],
+   ['200m','19.19','Usain Bolt','JAM','Berlin','20 Aug 2009',''],
+   ['400m','43.03','Wayde van Niekerk','RSA','Rio de Janeiro','14 Aug 2016',''],
+   ['800m','1:40.91','David Rudisha','KEN','London','9 Aug 2012',''],
+   ['1500m','3:26.00','Hicham El Guerrouj','MAR','Rome','14 Jul 1998',''],
+   ['5000m','12:35.36','Joshua Cheptegei','UGA','Monaco','14 Aug 2020',''],
+   ['10,000m','26:11.00','Joshua Cheptegei','UGA','Valencia','7 Oct 2020','']
+  ],
+  women:[
+   ['100m','10.49','Florence Griffith Joyner','USA','Indianapolis','16 Jul 1988',''],
+   ['200m','21.34','Florence Griffith Joyner','USA','Seoul','29 Sep 1988',''],
+   ['400m','47.60','Marita Koch','GDR','Canberra','6 Oct 1985',''],
+   ['800m','1:53.28','Jarmila Kratochvilova','TCH','Munich','26 Jul 1983',''],
+   ['1500m','3:48.68','Faith Kipyegon','KEN','Eugene','5 Jul 2025',''],
+   ['5000m','13:58.06','Beatrice Chebet','KEN','Eugene','5 Jul 2025',''],
+   ['10,000m','28:54.14','Beatrice Chebet','KEN','Eugene','25 May 2024','']
+  ]
+ },
+ road:{
+  men:[
+   ['5km','12:49','Berihu Aregawi','ETH','Barcelona','31 Dec 2021',''],
+   ['10km','26:31','Yomif Kejelcha','ETH','Castellon','16 Feb 2025',''],
+   ['Half marathon','57:30','Yomif Kejelcha','ETH','Valencia','27 Oct 2024','56:51 by Kejelcha in Buenos Aires, 23 Aug 2026, awaits ratification'],
+   ['Marathon','1:59:30','Sabastian Sawe','KEN','London','26 Apr 2026','']
+  ],
+  women:[
+   ['5km','13:54','Beatrice Chebet','KEN','Barcelona','31 Dec 2024','mixed race'],
+   ['5km','14:13','Beatrice Chebet','KEN','Barcelona','31 Dec 2023','women-only race'],
+   ['10km','28:46','Agnes Ngetich','KEN','Valencia','14 Jan 2024','mixed race'],
+   ['10km','29:27','Agnes Ngetich','KEN','Herzogenaurach','26 Apr 2025','women-only race'],
+   ['Half marathon','1:02:52','Letesenbet Gidey','ETH','Valencia','24 Oct 2021','mixed race'],
+   ['Half marathon','1:05:16','Peres Jepchirchir','KEN','Gdynia','17 Oct 2020','women-only race'],
+   ['Marathon','2:09:56','Ruth Chepngetich','KEN','Chicago','13 Oct 2024','mixed race'],
+   ['Marathon','2:15:41','Tigst Assefa','ETH','London','26 Apr 2026','women-only race']
+  ]
+ },
+ ultra:{
+  men:[
+   ['50km','2:38:43','CJ Albertson','USA','San Francisco','8 Oct 2022','road'],
+   ['50 miles','4:48:21','Charlie Lawrence','USA','Vienna, IL','11 Nov 2023',''],
+   ['100km','6:05:35','Aleksandr Sorokin','LTU','Vilnius','14 May 2023','road'],
+   ['100 miles','10:51:39','Aleksandr Sorokin','LTU','Tel Aviv','7 Jan 2022',''],
+   ['6 hours','98.496 km','Aleksandr Sorokin','LTU','Bedford','23 Apr 2022',''],
+   ['12 hours','177.410 km','Aleksandr Sorokin','LTU','Tel Aviv','7 Jan 2022',''],
+   ['24 hours','319.614 km','Aleksandr Sorokin','LTU','Verona','17 Sep 2022',''],
+   ['48 hours','485.099 km','Matthieu Bonne','BEL','Pabianice','30 May 2025','']
+  ],
+  women:[
+   ['50km','2:59:54','Des Linden','USA','Dorena','13 Apr 2021','road'],
+   ['50 miles','5:18:57','Anne Flower','USA','Vienna, IL','9 Nov 2025',''],
+   ['100km','6:33:11','Tomoe Abe','JPN','Lake Saroma','25 Jun 2000','road'],
+   ['100 miles','12:42:40','Camille Herron','USA','Vienna, IL','11 Nov 2017',''],
+   ['6 hours','85.490 km','Nele Alder-Baerens','GER','Munster','11 Mar 2017',''],
+   ['12 hours','153.600 km','Satu Lipiainen','FIN','Kokkola','20 May 2023',''],
+   ['24 hours','278.621 km','Sarah Webster','GBR','Albi','18 Oct 2025',''],
+   ['48 hours','436.371 km','Patrycja Bereznowska','POL','Pabianice','30 May 2025','']
+  ]
+ }
+};
+const RECORD_SOURCE={
+ track:['World Athletics world records','https://worldathletics.org/records/by-category/world-records'],
+ road:['World Athletics world records','https://worldathletics.org/records/by-category/world-records'],
+ ultra:['IAU world records','https://iau-ultramarathon.org/iau-records.html']
+};
+
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 const state={track:{gender:'men',key:'100m',sort:'points'},road:{gender:'men',key:'10km – Half marathon',sort:'points'},ultra:{gender:'men',key:'50K',sort:'points'},entries:{gender:'men',key:'100m',sort:'points'}};
@@ -473,6 +576,7 @@ function renderBoard(section,data,keys,notes){
     : athleteRow(rank-1,row[0],row[1],row[3],row[2],true)
   ).join('')||'<div class="event-note">No data for this selection.</div>';
   $$('#'+section+'Chips button').forEach(b=>b.onclick=()=>{s.key=b.dataset.key;renderBoard(section,data,keys,notes)});
+  renderRecords(section);
   saveView();
 }
 function renderEntries(){
@@ -578,15 +682,37 @@ function renderNews(){
     }).join('')||'<div class="event-note" style="border:0;background:none;padding-left:0">No stories yet.</div>';
   });
 }
+function renderRecords(section){
+  const box=$('#'+section+'Records');
+  if(!box)return;
+  const gender=state[section].gender;
+  const list=((RECORDS[section]||{})[gender])||[];
+  const src=RECORD_SOURCE[section]||['',''];
+  const d=newsDate(RECORDS_CHECKED);
+  const note=$('#'+section+'RecordsNote');
+  if(note)note.innerHTML=(gender==='men'?'Men':'Women')+'&rsquo;s world records, from <a href="'+esc(src[1])+'" target="_blank" rel="noopener">'+esc(src[0])+'</a>. Switch to '+(gender==='men'?'women':'men')+' above to see theirs. Read '+esc(d.d)+' '+esc(d.y)+'.';
+  box.innerHTML=list.map(function(r){
+    return '<div class="rec"><div class="rec-ev">'+esc(r[0])+(r[6]?'<small>'+esc(r[6])+'</small>':'')+'</div>'
+      +'<div class="rec-who"><b>'+esc(r[2])+'</b><small>'+esc(r[3])+' &middot; '+esc(r[4])+' &middot; '+esc(r[5])+'</small></div>'
+      +'<div class="rec-mark">'+esc(r[1])+'</div></div>';
+  }).join('')||'<div class="event-note" style="border:0;background:none;padding-left:0">No records listed.</div>';
+}
 function renderAll(){
   renderBoard('track',TRACK,TRACK_EVENTS,TRACK_NOTES);
   renderBoard('road',ROAD,ROAD_GROUPS,ROAD_NOTES);
   renderBoard('ultra',ULTRA,ULTRA_DISTANCES,ULTRA_NOTES);
   renderEntries();
 }
+// Official page and background reading for each meet; nothing renders when there is no link yet.
+function meetLinks(links){
+  if(!links||!links.length)return '';
+  return '<div class="meet-links">'+links.map(function(l){
+    return '<a href="'+esc(l[1])+'" target="_blank" rel="noopener">'+esc(l[0])+'</a>';
+  }).join('')+'</div>';
+}
 function renderCalendar(){
   $('#upcomingList').innerHTML=UPCOMING.map(m=>
-    `<article class="meet"><div class="meet-date">${esc(m.d)}<small>${esc(m.y)}</small></div><div><h3>${esc(m.name)}</h3><div class="where">${esc(m.where)}</div><div class="detail">${esc(m.detail)}</div><div class="watch"><b>Watch</b> ${m.watch}</div><span class="tag ${esc(m.cls)}">${esc(m.tag)}</span></div></article>`
+    `<article class="meet"><div class="meet-date">${esc(m.d)}<small>${esc(m.y)}</small></div><div><h3>${esc(m.name)}</h3><div class="where">${esc(m.where)}</div><div class="detail">${esc(m.detail)}</div><div class="watch"><b>Watch</b> ${m.watch}</div>${meetLinks(m.links)}<span class="tag ${esc(m.cls)}">${esc(m.tag)}</span></div></article>`
   ).join('');
   $('#dlList').innerHTML=DL_SEASON.map(([d,city,country],i)=>
     `<div class="done"><span class="d">${esc(d)}</span><span class="m">${esc(city)}, ${esc(country)}</span><span class="f">${i===DL_SEASON.length-1?'Final':''}</span></div>`
