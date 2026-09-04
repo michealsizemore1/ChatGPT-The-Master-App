@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-04T21:27:16+00:00",
+  "updatedAt": "2026-09-04T23:09:58+00:00",
   "source": "Yahoo Finance public chart data",
   "quotes": {
     "SCHD": {
@@ -79,8 +79,8 @@
       "prev": 26584.06,
       "change": -77.07,
       "changesPercentage": -0.2899,
-      "volume": 5603170000,
-      "avgVolume": 7015250000,
+      "volume": 5604391000,
+      "avgVolume": 7015494200,
       "yearHigh": 27190.21,
       "yearLow": 20690.25,
       "marketState": "",
@@ -123,12 +123,12 @@
       "currency": "USD"
     },
     "BTC-USD": {
-      "price": 79792.63,
+      "price": 79664.01,
       "prev": 81271.92,
-      "change": -1479.29,
-      "changesPercentage": -1.8202,
-      "volume": 39783120896,
-      "avgVolume": 33605960091,
+      "change": -1607.91,
+      "changesPercentage": -1.9784,
+      "volume": 38021726208,
+      "avgVolume": 33253681154,
       "yearHigh": 126198.07,
       "yearLow": 57747.766,
       "marketState": "",
@@ -221,12 +221,12 @@
       "currency": "USD"
     },
     "BTC=F": {
-      "price": 79945.0,
+      "price": 79860.0,
       "prev": 80055.0,
-      "change": -110.0,
-      "changesPercentage": -0.1374,
-      "volume": 10183,
-      "avgVolume": 7672,
+      "change": -195.0,
+      "changesPercentage": -0.2436,
+      "volume": 6,
+      "avgVolume": 5636,
       "yearHigh": 127240.0,
       "yearLow": 57850.0,
       "marketState": "",
@@ -261,17 +261,17 @@
   ],
   "news": [
     "Toto, I Don\u2019t Think It\u2019s the Fed Anymore - J.P. Morgan",
-    "Trump says he will cease trading with top partners unless Fed lowers rates - CNN",
+    "Stock Market Today: Short-Term Treasury Yields Climb as Dow and S&P 500 Fall, Oil price Hit $95 - Eurasia Business News",
     "The U.S. Added a Blowout 162,000 Jobs in August. Here's What That Means for the Fed - Kiplinger",
+    "European Shares Post Weekly Loss on Inflation; Volkswagen Surges - Global Banking & Finance Review",
     "The jobs report just put Fed chair Kevin Warsh's new playbook to work: One Big Investment Idea - Yahoo Finance",
+    "Trump says he will cease trading with top partners unless Fed lowers rates - CNN",
     "Trump Issues Ultimatum to Fed: Cut Rates or Face Trade War With the World - 24/7 Wall St.",
     "US Dollar: Oil Shock and Stagflation Fears Signal Upside Risks - Investing.com",
-    "Yields Rise, Stocks Ease After Strong U.S. Jobs Report | Finance News - Global Banking & Finance Review",
     "US Economy Added 162,000 Jobs in August, Raising Fed Rate Hike Fears - \u041c\u0435\u0436\u0430. \u041d\u043e\u0432\u0438\u043d\u0438 \u0423\u043a\u0440\u0430\u0457\u043d\u0438.",
     "U.S. futures mixed ahead of August jobs report many expect to show a rebound in hiring - The Tribune-Democrat",
-    "Wall Street ends sharply higher as Waller remarks ease rate hike fears - Reuters",
-    "Evercore sees strong jobs data not altering Fed September call By Investing.com - Investing.com South Africa",
-    "3 Utility Dividend Stocks Built to Keep Paying in Any Economy - 24/7 Wall St."
+    "3 Utility Dividend Stocks Built to Keep Paying in Any Economy - 24/7 Wall St.",
+    "U.S. Nonfarm Payrolls Surge Past Expectations, Indicating Economic Strength - Investing.com"
   ],
   "economy": [
     "CPI 2026-07 | 3.5% YoY",
@@ -285,7 +285,7 @@
     "DXY  99.16 \u25b20.25%",
     "Gold  $4,477.20 \u25bc1.38%",
     "WTI  $91.22 \u25bc0.09%",
-    "Bitcoin  $79,793 \u25bc1.82%",
+    "Bitcoin  $79,664 \u25bc1.98%",
     "EUR/USD  1.1621 \u25bc0.09%",
     "USD/JPY  156.22 \u25b20.24%",
     "VIX  14.53 \u25b21.47%",
