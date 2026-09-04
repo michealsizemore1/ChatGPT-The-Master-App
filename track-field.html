@@ -53,13 +53,13 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:Georgia,'Time
 .section-card{background:var(--card);border:1px solid var(--line);padding:22px;margin-bottom:18px}
 .section-card h2{font-size:28px;font-weight:500;margin:0 0 6px}
 .section-card p.note{font:13px/1.6 Arial,Helvetica,sans-serif;color:var(--muted);margin:0 0 16px}
-.meet{display:grid;grid-template-columns:74px minmax(0,1fr);gap:14px;padding:15px 0;border-top:1px solid var(--line)}
-.meet:first-of-type{border-top:0}
+.meet,.story{display:grid;grid-template-columns:74px minmax(0,1fr);gap:14px;padding:15px 0;border-top:1px solid var(--line)}
+.meet:first-of-type,.story:first-of-type{border-top:0}
 .meet-date{font:800 11px Arial,Helvetica,sans-serif;letter-spacing:.06em;color:var(--track);line-height:1.45;text-transform:uppercase}
 .meet-date small{display:block;color:#a29a91;font-weight:700}
-.meet h3{margin:0 0 4px;font-size:19px;font-weight:500;line-height:1.2}
-.meet .where{font:12px Arial,Helvetica,sans-serif;color:#5f574f}
-.meet .detail{font:12px/1.55 Arial,Helvetica,sans-serif;color:var(--muted);margin-top:6px}.meet .watch{font:12px/1.5 Arial,Helvetica,sans-serif;color:#3f3933;margin-top:8px;padding:8px 10px;background:#fbf5f2;border-left:3px solid var(--track)}.meet .watch b{font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--track);display:block;margin-bottom:3px}
+.meet h3,.story h3{margin:0 0 4px;font-size:19px;font-weight:500;line-height:1.2}
+.meet .where,.story .where{font:12px Arial,Helvetica,sans-serif;color:#5f574f}
+.meet .detail,.story .detail{font:12px/1.55 Arial,Helvetica,sans-serif;color:var(--muted);margin-top:6px}.meet .watch{font:12px/1.5 Arial,Helvetica,sans-serif;color:#3f3933;margin-top:8px;padding:8px 10px;background:#fbf5f2;border-left:3px solid var(--track)}.meet .watch b{font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--track);display:block;margin-bottom:3px}
 .tag{display:inline-block;margin-top:8px;font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.12em;text-transform:uppercase;padding:4px 8px;border:1px solid var(--line);color:#6d655d;background:#fbf8f3}
 .tag.major{border-color:var(--track);color:var(--track)}
 .tag.champs{border-color:#2f6d4f;color:#2f6d4f}
@@ -71,14 +71,20 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:Georgia,'Time
 .tt-row{display:grid;grid-template-columns:104px minmax(0,1fr) auto;gap:12px;align-items:baseline;padding:10px 0;border-top:1px solid var(--line)}
 .tt-row:first-of-type{border-top:0}
 .tt-row .t{font:800 13px Arial,Helvetica,sans-serif;color:var(--track);font-variant-numeric:tabular-nums}
+.tt-row .t .tz{font:700 9px Arial,Helvetica,sans-serif;letter-spacing:.1em;color:#b9b1a7;margin-left:5px}
 .tt-row .t small{display:block;font:700 10px Arial,Helvetica,sans-serif;color:#a29a91;margin-top:3px;letter-spacing:.02em}
 .tt-row .e{font:14px Arial,Helvetica,sans-serif;color:#3f3933}
 .tt-row.support .t{color:#b9b1a7}.tt-row.support .e{color:#8b847c}
 .tt-link{border:1px solid var(--line);background:#fbf5f2;color:var(--track);font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.12em;text-transform:uppercase;padding:5px 9px;cursor:pointer}
 .tt-link:hover{background:var(--track);color:#fff;border-color:var(--track)}
 .tt-head{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:15px}
+.story h3 a{color:inherit;text-decoration:none;box-shadow:inset 0 -1px 0 rgba(192,71,43,.35)}
+.story h3 a:hover{color:var(--track)}
+.newsdate{font:800 11px Arial,Helvetica,sans-serif;letter-spacing:.06em;color:var(--track);line-height:1.45;text-transform:uppercase}
+.newsdate small{display:block;color:#a29a91;font-weight:700}
 .hide{display:none!important}
 @media(max-width:680px){
+.story{grid-template-columns:64px minmax(0,1fr);gap:11px}
 html{font-size:14px}
 .ctl-row{gap:8px}.sortseg{margin-left:0}.seg button{padding:9px 13px}
 .nav{height:106px;display:grid;grid-template-columns:42px 1fr;padding:10px 14px 0;gap:7px 11px}
@@ -128,6 +134,12 @@ html{font-size:14px}
       <div class="list-head"><span>Rank</span><span>Athlete</span><span>Best / score</span></div>
       <div id="trackList"></div>
     </div>
+    <div class="section-card" style="margin-top:18px">
+      <div class="eyebrow">Track &amp; field</div>
+      <h2>Latest news</h2>
+      <p class="note" id="trackNewsNote"></p>
+      <div id="trackNews"></div>
+    </div>
   </section>
 
   <section id="roadView" class="hide">
@@ -145,6 +157,12 @@ html{font-size:14px}
       <div class="list-head"><span>Rank</span><span>Athlete</span><span>Best / score</span></div>
       <div id="roadList"></div>
     </div>
+    <div class="section-card" style="margin-top:18px">
+      <div class="eyebrow">Road racing</div>
+      <h2>Latest news</h2>
+      <p class="note" id="roadNewsNote"></p>
+      <div id="roadNews"></div>
+    </div>
   </section>
 
   <section id="ultraView" class="hide">
@@ -161,6 +179,12 @@ html{font-size:14px}
       <div class="event-note" id="ultraNote"></div>
       <div class="list-head"><span>Rank</span><span>Athlete</span><span>Index / age</span></div>
       <div id="ultraList"></div>
+    </div>
+    <div class="section-card" style="margin-top:18px">
+      <div class="eyebrow">Ultra &amp; trail</div>
+      <h2>Latest news</h2>
+      <p class="note" id="ultraNewsNote"></p>
+      <div id="ultraNews"></div>
     </div>
   </section>
 
@@ -199,6 +223,12 @@ html{font-size:14px}
       <p class="note">Start lists for the rest of the calendar, and when each is normally released.</p>
       <div id="pendingList"></div>
     </div>
+    <div class="section-card" style="margin-top:18px">
+      <div class="eyebrow">Meet news</div>
+      <h2>Latest news</h2>
+      <p class="note" id="entriesNewsNote"></p>
+      <div id="entriesNews"></div>
+    </div>
   </section>
 
   <section id="calendarView" class="hide">
@@ -219,11 +249,17 @@ html{font-size:14px}
       <h2>Season notes</h2>
       <p class="note" style="margin:0">The World Athletics Continental Tour Gold series ran from March to July 2026 and has finished for the year, so the autumn calendar is championship and marathon territory. The Ultimate Championship in Budapest is new for 2026: sixteen athletes per track event, eight per field event, and a US$10 million purse.</p>
     </div>
+    <div class="section-card" style="margin-top:18px">
+      <div class="eyebrow">Championships &amp; majors</div>
+      <h2>Latest news</h2>
+      <p class="note" id="calendarNewsNote"></p>
+      <div id="calendarNews"></div>
+    </div>
   </section>
 </main>
 
 <script>
-const APP_VERSION='2026-09-03-7';
+const APP_VERSION='2026-09-03-8';
 // GitHub Pages caches this file, so a phone can sit on an old copy. Reload once if a newer build is live.
 (async function(){try{const res=await fetch(location.pathname+'?_cv='+Date.now(),{cache:'no-store'});
 const live=(await res.text()).match(/APP_VERSION='([^']+)'/);
@@ -381,6 +417,39 @@ const DL_SEASON=[
  ['Aug 23','Silesia','Poland'],['Aug 27','Zurich','Switzerland'],['Sep 4-5','Brussels','Belgium']
 ];
 
+// Section news. [ISO date, headline, publisher, url, one-line summary]
+// Checked 3 September 2026; the twice-weekly refresh replaces these.
+const NEWS_CHECKED='2026-09-03';
+const NEWS={
+ track:[
+  ['2026-09-02','Diamond League reaches climax with Ultimate places up for grabs','World Athletics','https://worldathletics.org/news/news/diamond-league-final-brussels-2026-day-one','Brussels closes the season with automatic Budapest places on the line alongside the Diamond Trophies.'],
+  ['2026-08-29','Explainer: wild cards in the Diamond League Final','Wanda Diamond League','https://www.diamondleague.com/explainer-wild-cards-in-the-wdl-final/','How national and global wild cards get athletes into the final without finishing top of the standings.'],
+  ['2026-08-27','Dos Santos and Russell break world records in Zurich','Wanda Diamond League','https://www.diamondleague.com/dos-santos-and-russell-break-world-records-in-zurich/','Alison dos Santos ran 45.80 in the 400m hurdles, 0.14 inside Warholm’s mark; Masai Russell followed with 12.09 in the 100m hurdles less than 40 minutes later.']
+ ],
+ road:[
+  ['2026-08-29','Gobena breaks course record while Jepchirchir dominates in Sydney','World Athletics','https://worldathletics.org/competitions/world-athletics-label-road-races/news/sydney-marathon-2026-gobena-jepchirchir','Addisu Gobena won in 2:04:42, three seconds clear and inside the course record; Peres Jepchirchir took the women’s race in 2:18:31.'],
+  ['2026-08-11','Top stars complete the BMW Berlin Marathon field','BMW Berlin Marathon','https://www.bmw-berlin-marathon.com/en/news-media/news/detail/top-stars-complete-the-bmw-berlin-marathon-field-for-thrilling-races','Gabriel Geay and Guye Adola join the men’s field for 27 September, with Dubai winner Bedatu Hirpa added to the women’s.'],
+  ['2026-05-26','USATF announces its roster for the World Road Running Championships','USATF','https://www.usatf.org/news/2026/usatf-announces-roster-for-world-road-running-cham','Nineteen athletes named for Copenhagen, among them half marathon American record holders Weini Kelati and Conner Mantz.']
+ ],
+ ultra:[
+  ['2026-09-01','Nick Fowler sets the overall and self-supported Pacific Crest Trail FKT','iRunFar','https://www.irunfar.com/nick-fowler-pacific-crest-trail-fkt-2026','Averaged 56.7 miles a day for more than 45 days on the 2,650-mile trail.'],
+  ['2026-08-29','2026 UTMB results: Ben Dhiman and Blandine L’Hirondel win','iRunFar','https://www.irunfar.com/2026-utmb-results','The sport’s biggest weekend closes with a first UTMB title for Dhiman and a Mont-Blanc win for L’Hirondel.'],
+  ['2026-08-28','2026 CCC results: Yngvild Kaspersen and Cristian Minoggio triumph','iRunFar','https://www.irunfar.com/2026-ccc-results','The 100km race from Courmayeur goes to Norway and Italy.'],
+  ['2026-08-27','2026 OCC results: Frédéric Tranchand and Lauren Gregory win dramatic races','iRunFar','https://www.irunfar.com/2026-occ-results','France and the United States take the opening title of UTMB week.']
+ ],
+ entries:[
+  ['2026-09-03','Ones to watch on day two','Wanda Diamond League','https://www.diamondleague.com/wdl-final-in-brussels-ones-to-watch-on-day-two/','Five names for Saturday, with an all-time Diamond League record within reach.'],
+  ['2026-09-03','Press conference on the eve of the final','Wanda Diamond League','https://www.diamondleague.com/wdl-final-in-brussels-2026-press-conference/','Duplantis, Bol and Russell among those facing the media before the two-day final.'],
+  ['2026-09-02','Ones to watch on day one','Wanda Diamond League','https://www.diamondleague.com/wdl-final-2026-in-brussels-ones-to-watch-on-day-one/','Friday’s picks, including the men’s 100m and 1500m.'],
+  ['2026-09-02','Entry lists published','Wanda Diamond League','https://www.diamondleague.com/wdl-final-in-brussels-entry-lists-published/','The full rosters behind the start lists on this page.']
+ ],
+ calendar:[
+  ['2026-08-24','Exceptional invitations announced for the Ultimate Championship','World Athletics','https://worldathletics.org/competitions/world-athletics-ultimate-championship/2026/news/press-releases/exceptional-invitations-ultimate-championship','Josh Kerr, Jakob Ingebrigtsen and Gianmarco Tamberi handed places in Budapest; the men’s 1500m field expands to 13.'],
+  ['2026-08-24','Kerr vs Ingebrigtsen is on for Budapest','LetsRun','https://www.letsrun.com/news/2026/08/kerr-vs-jakob-is-on-world-athletics-bends-rules-to-grant-budapest-invitations/','Neither man qualified on ranking; it will be their first meeting in more than two years.'],
+  ['2026-08-21','Ngetich and Ebenyo lead the Kenyan team for Copenhagen','World Athletics','https://worldathletics.org/competitions/world-athletics-road-running-championships/copenhagen26/news/news/wrrc-copenhagen-26-kenya-team','World 10km record holder Agnes Ngetich and half marathon silver medallist Daniel Ebenyo head a 16-strong squad.']
+ ]
+};
+
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 const state={track:{gender:'men',key:'100m',sort:'points'},road:{gender:'men',key:'10km – Half marathon',sort:'points'},ultra:{gender:'men',key:'50K',sort:'points'},entries:{gender:'men',key:'100m',sort:'points'}};
@@ -476,7 +545,7 @@ function renderTimetable(){
   $('#ttDays').innerHTML=TIMETABLE.map((d,i)=>`<button role="tab" aria-selected="${i===ttState.day}" class="${i===ttState.day?'active':''}" data-day="${i}">${esc(d.short)}</button>`).join('');
   const rows=day.rows.filter(r=>ttState.scope==='all'||isFinalEvent(r[1]));
   $('#ttList').innerHTML=rows.map(([t,n,key])=>
-    `<div class="tt-row${isFinalEvent(n)?'':' support'}"><div class="t">${esc(toMountain(t))}<small>${esc(t)} Brussels</small></div><div class="e">${esc(n)}</div>${key?`<button class="tt-link" data-entry="${esc(key)}">Start list</button>`:'<span></span>'}</div>`
+    `<div class="tt-row${isFinalEvent(n)?'':' support'}"><div class="t">${esc(toMountain(t))}<span class="tz">MDT</span><small>${esc(t)} Brussels</small></div><div class="e">${esc(n)}</div>${key?`<button class="tt-link" data-entry="${esc(key)}">Start list</button>`:'<span></span>'}</div>`
   ).join('');
   $$('#ttDays button').forEach(b=>b.onclick=()=>{ttState.day=+b.dataset.day;renderTimetable()});
   $$('#ttScope button').forEach(b=>b.onclick=()=>{ttState.scope=b.dataset.scope;$$('#ttScope button').forEach(x=>x.classList.toggle('active',x===b));renderTimetable()});
@@ -488,6 +557,25 @@ function renderTimetable(){
     $$('#entriesView .controls .seg:not(.sortseg) button').forEach(x=>{const on=x.dataset.gender===g;x.classList.toggle('active',on);x.setAttribute('aria-selected',on)});
     renderEntries();
     $('#entriesView .panel').scrollIntoView({behavior:'smooth',block:'start'});
+  });
+}
+const NEWS_MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function newsDate(iso){const p=String(iso).split('-');return {d:(+p[2])+' '+NEWS_MONTHS[+p[1]-1],y:p[0]}}
+function renderNews(){
+  const checked=newsDate(NEWS_CHECKED);
+  Object.keys(NEWS).forEach(sec=>{
+    const list=NEWS[sec]||[];
+    const note=$('#'+sec+'NewsNote'), box=$('#'+sec+'News');
+    if(!box)return;
+    if(note)note.textContent=list.length
+      ? 'Checked '+checked.d+' '+checked.y+'. Headlines refresh twice a week; tap one to read it at the source.'
+      : 'Nothing new since this section was last checked.';
+    box.innerHTML=list.map(function(row){const dt=newsDate(row[0]);
+      return '<article class="story"><div class="newsdate">'+esc(dt.d)+'<small>'+esc(dt.y)+'</small></div><div>'
+        +'<h3><a href="'+esc(row[3])+'" target="_blank" rel="noopener">'+esc(row[1])+'</a></h3>'
+        +'<div class="where">'+esc(row[2])+'</div>'
+        +'<div class="detail">'+esc(row[4])+'</div></div></article>';
+    }).join('')||'<div class="event-note" style="border:0;background:none;padding-left:0">No stories yet.</div>';
   });
 }
 function renderAll(){
@@ -518,7 +606,7 @@ $$('.tabs button').forEach(btn=>btn.onclick=()=>showTab(btn.dataset.tab));
     renderAll();
   });
 });
-restoreView();renderAll();renderCalendar();renderTimetable();
+restoreView();renderAll();renderCalendar();renderTimetable();renderNews();
 </script>
 </body>
 </html>
