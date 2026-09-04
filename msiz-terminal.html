@@ -261,6 +261,11 @@
   .exposure-table td:last-child { text-align: right; }
   .tsp-note { padding: 3px 6px; font-family: var(--font-mono); font-size: 8px; color: #ffab40; background: rgba(255,171,64,0.05); border-left: 2px solid #ffab40; margin: 4px 6px; line-height: 1.4; }
   .watch-note { padding: 3px 6px; font-family: var(--font-mono); font-size: 8px; color: #ff9100; background: rgba(255,145,0,0.05); border-left: 2px solid #ff9100; margin: 4px 6px; line-height: 1.4; }
+  .matrix-input { background:transparent; border:none; border-bottom:1px dashed var(--border-light); color:var(--green); font-family:var(--font-mono); font-size:11px; text-align:right; width:104px; padding:1px 2px; outline:none; cursor:pointer; }
+  .matrix-input:hover { border-bottom-color:var(--accent); }
+  .matrix-input:focus { border-bottom-style:solid; border-bottom-color:var(--accent); color:var(--accent); }
+  .matrix-reset { background:transparent; border:1px solid var(--border-light); color:var(--text-dim); font-family:var(--font-mono); font-size:8px; letter-spacing:1px; padding:2px 6px; margin-left:8px; cursor:pointer; }
+  .matrix-reset:hover { color:var(--accent); border-color:var(--accent); }
   .bal-input { background:transparent; border:none; border-bottom:1px solid var(--border-light); color:var(--green); font-family:var(--font-mono); font-size:10px; text-align:right; width:68px; padding:0 2px; outline:none; cursor:pointer; }
   .bal-input:focus { border-bottom-color:var(--accent); color:var(--accent); }
   .bal-input::placeholder { color:var(--text-dim); }
@@ -1315,27 +1320,14 @@
       </div>
       <div class="div-cal-header">
         <span class="div-cal-title">CURRENT PORTFOLIO WEIGHTS</span>
-        <span style="margin-left:auto;">$210,834 TOTAL</span>
+        <button type="button" id="matrixReset" class="matrix-reset" title="Put every balance back to the built-in figures">RESET</button>
+        <span style="margin-left:auto;" id="matrixTotalHeader">$210,834 TOTAL</span>
       </div>
       <div class="hscroll-wrap" aria-label="Current portfolio balances and weights; swipe left or right">
-        <div class="contrib-matrix-summary">
-          <div class="contrib-matrix-card"><strong>TSP ACCOUNTS</strong><span>$191,913 · 91.03%</span></div>
-          <div class="contrib-matrix-card"><strong>ETF PIE</strong><span>$11,993 · 5.69%</span></div>
-          <div class="contrib-matrix-card"><strong>SGOV PIE</strong><span>$928 · 0.44%</span></div>
-          <div class="contrib-matrix-card"><strong>HYSA</strong><span>$6,000 · 2.85%</span></div>
-        </div>
+        <div class="contrib-matrix-summary" id="matrixSummary"></div>
         <table class="contrib-matrix-table">
           <thead><tr><th>PORTFOLIO</th><th>ACCOUNT / INVESTMENT</th><th>CURRENT BALANCE</th><th>WEIGHT OF TOTAL</th></tr></thead>
-          <tbody>
-            <tr><td>TSP Accounts</td><td>Traditional TSP</td><td>$106,229.00</td><td>50.39%</td></tr>
-            <tr><td>TSP Accounts</td><td>Roth TSP</td><td>$85,684.00</td><td>40.64%</td></tr>
-            <tr><td>ETF Pie</td><td style="color:#00e676">SCHD</td><td>$6,331.00</td><td>3.00%</td></tr>
-            <tr><td>ETF Pie</td><td style="color:#00b8ff">QQQM</td><td>$4,919.00</td><td>2.33%</td></tr>
-            <tr><td>ETF Pie</td><td style="color:#ff6d00">IBIT</td><td>$743.00</td><td>0.35%</td></tr>
-            <tr><td>SGOV Pie</td><td style="color:#ffd740">SGOV</td><td>$928.00</td><td>0.44%</td></tr>
-            <tr><td>Cash Savings</td><td>HYSA</td><td>$6,000.00</td><td>2.85%</td></tr>
-            <tr class="total-row"><td>TOTAL</td><td>ALL INVESTMENTS + HYSA</td><td>$210,834.00</td><td>100.00%</td></tr>
-          </tbody>
+          <tbody id="matrixBody"></tbody>
         </table>
       </div>
       <div class="div-cal-header">
@@ -1370,7 +1362,8 @@
           </tbody>
         </table>
       </div>
-      <div class="contrib-matrix-note">The current portfolio weights above include the $6,000 HYSA at 2.85%. The separate monthly contribution table includes only accounts receiving monthly deposits. HYSA is omitted from that table because no new money is contributed to it each month.</div>
+      <div class="contrib-matrix-note" id="matrixReconcile" style="display:none"></div>
+      <div class="contrib-matrix-note">Balances in the table above are yours to edit — tap a figure, type the new one and press enter. They are stored on this device and feed the weights, the dividend estimates and the projections. The current portfolio weights include the HYSA. The separate monthly contribution table includes only accounts receiving monthly deposits. HYSA is omitted from that table because no new money is contributed to it each month.</div>
     </section>
   </div>
   <!-- RIGHT PANEL -->
@@ -1791,6 +1784,106 @@ function fmtMoney(n){
   if(abs>=1e3) return (n<0?'-':'')+'$'+(abs/1e3).toFixed(1)+'K';
   return pre+abs.toFixed(2);
 }
+
+// ---- INVESTMENT CONTRIBUTION MATRIX: editable balances --------------------
+// One store behind every balance on the page, so the matrix, the portfolio
+// table and the projections can never disagree.
+var MATRIX_ROWS = [
+  { key:'TSP TRAD',  group:'TSP Accounts',  label:'Traditional TSP', color:'' },
+  { key:'TSP ROTH',  group:'TSP Accounts',  label:'Roth TSP',        color:'' },
+  { key:'SCHD',      group:'ETF Pie',       label:'SCHD',            color:'#00e676' },
+  { key:'QQQM',      group:'ETF Pie',       label:'QQQM',            color:'#00b8ff' },
+  { key:'IBIT',      group:'ETF Pie',       label:'IBIT',            color:'#ff6d00' },
+  { key:'SGOV',      group:'SGOV Pie',      label:'SGOV',            color:'#ffd740' },
+  { key:'ICCU_HYSA', group:'Cash Savings',  label:'HYSA',            color:'#4fc3f7' }
+];
+function matrixMoney(n){
+  return '$' + (Number(n)||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function matrixShort(n){
+  return '$' + Math.round(Number(n)||0).toLocaleString('en-US');
+}
+function renderContribMatrix(){
+  var body = document.getElementById('matrixBody');
+  if(!body) return;
+  var b = loadBal();
+  var value = function(key){ return parseFloat(b[key])||0; };
+  var tsp = value('TSP TRAD') + value('TSP ROTH');
+  var etf = value('SCHD') + value('QQQM') + value('IBIT');
+  var sgov = value('SGOV');
+  var hysa = value('ICCU_HYSA');
+  var total = tsp + etf + sgov + hysa;
+  var pct = function(v){ return total > 0 ? ((v/total)*100).toFixed(2)+'%' : '0.00%'; };
+
+  var rows = '';
+  MATRIX_ROWS.forEach(function(row){
+    var v = value(row.key);
+    rows += '<tr data-matrix-row="'+row.key+'">'
+      + '<td>'+row.group+'</td>'
+      + '<td'+(row.color?' style="color:'+row.color+'"':'')+'>'+row.label+'</td>'
+      + '<td><input class="matrix-input" type="text" value="'+matrixMoney(v)+'" data-t="'+row.key+'" '
+        + 'aria-label="'+row.label+' balance" onfocus="this.select()" onblur="matrixSave(this)" '
+        + 'onkeydown="if(event.key===String.fromCharCode(13))this.blur()"></td>'
+      + '<td>'+pct(v)+'</td></tr>';
+  });
+  rows += '<tr class="total-row"><td>TOTAL</td><td>ALL INVESTMENTS + HYSA</td>'
+    + '<td id="matrixTotalCell">'+matrixMoney(total)+'</td><td>'+(total>0?'100.00%':'0.00%')+'</td></tr>';
+  body.innerHTML = rows;
+
+  var summary = document.getElementById('matrixSummary');
+  if(summary){
+    summary.innerHTML =
+      '<div class="contrib-matrix-card"><strong>TSP ACCOUNTS</strong><span>'+matrixShort(tsp)+' \u00b7 '+pct(tsp)+'</span></div>'
+    + '<div class="contrib-matrix-card"><strong>ETF PIE</strong><span>'+matrixShort(etf)+' \u00b7 '+pct(etf)+'</span></div>'
+    + '<div class="contrib-matrix-card"><strong>SGOV PIE</strong><span>'+matrixShort(sgov)+' \u00b7 '+pct(sgov)+'</span></div>'
+    + '<div class="contrib-matrix-card"><strong>HYSA</strong><span>'+matrixShort(hysa)+' \u00b7 '+pct(hysa)+'</span></div>';
+  }
+  var header = document.getElementById('matrixTotalHeader');
+  if(header) header.textContent = matrixShort(total) + ' TOTAL';
+
+  // The TSP is entered twice over: by tax treatment here, by fund below. Say so when they drift.
+  var funds = value('TSP C') + value('TSP S') + value('TSP I');
+  var note = document.getElementById('matrixReconcile');
+  if(note){
+    var gap = tsp - funds;
+    if(Math.abs(gap) >= 1){
+      note.style.display = '';
+      note.style.color = '#ff9100';
+      note.textContent = 'Traditional + Roth is ' + matrixMoney(tsp) + ', but TSP C/S/I adds up to ' + matrixMoney(funds)
+        + ' \u2014 a ' + matrixMoney(Math.abs(gap)) + ' difference. Both describe the same money, so update the fund balances too.';
+    } else {
+      note.style.display = 'none';
+    }
+  }
+}
+function matrixSave(input){
+  var b = loadBal();
+  var key = input.getAttribute('data-t');
+  var val = parseFloat((input.value||'').replace(/[$,]/g,''));
+  if(!isNaN(val) && val >= 0) b[key] = val; else delete b[key];
+  saveBal(b);
+  syncSharedInvestmentsFromMsiz();
+  renderContribMatrix();
+  if(typeof renderBalances === 'function') renderBalances();
+  if(typeof renderDivCal === 'function') renderDivCal();
+  if(typeof renderContrib === 'function') renderContrib();
+}
+function matrixBindReset(){
+  var btn = document.getElementById('matrixReset');
+  if(btn && !btn._bound){ btn._bound = true; btn.addEventListener('click', matrixResetBalances); }
+}
+function matrixResetBalances(){
+  var b = loadBal();
+  MATRIX_ROWS.forEach(function(row){ delete b[row.key]; });
+  // saveBal writes the overlay; deleting the keys drops back to the built-in figures.
+  var saved = {};
+  try { saved = JSON.parse(lsGet(BAL_KEY)||'{}'); } catch(e){}
+  MATRIX_ROWS.forEach(function(row){ delete saved[row.key]; });
+  lsSet(BAL_KEY, JSON.stringify(saved));
+  syncSharedInvestmentsFromMsiz();
+  renderContribMatrix();
+  if(typeof renderBalances === 'function') renderBalances();
+}
 function renderBalances(){
   var body=document.getElementById('balBody');
   if(!body) return;
@@ -1850,10 +1943,13 @@ function balSave(input){
   saveBal(b);
   syncSharedInvestmentsFromMsiz();
   renderBalances();
+  if(typeof renderContribMatrix==='function') renderContribMatrix();
 }
 // Seed HYSA default
 // Hardcoded balances — always loaded as defaults
 var DEFAULT_BALANCES = {
+  'TSP TRAD':  106229.00,
+  'TSP ROTH':   85684.00,
   'SCHD':    6331.00,
   'QQQM':    4919.00,
   'SGOV':    928.00,
@@ -2611,6 +2707,7 @@ function init(){
   renderTickerTape(); renderTopBar(); renderHoldings(); renderCenterHoldings(); renderPerfTable(); renderFundTable(); renderDivCal(); renderContrib(); renderEtfCompare();
   renderAllocSection(); renderCorrelation(); renderSelectedStats();
   renderSelectedInfoStrip(); renderRiskSection(); renderNews(); renderBalances();
+  renderContribMatrix(); matrixBindReset();
   buildMainChart(); renderChartLegend(); buildMiniCharts();
   // Populate SGOV balance in Cash & Liquidity panel from DEFAULT_BALANCES
   var sgovBal = parseFloat(DEFAULT_BALANCES['SGOV']) || 0;
@@ -3210,6 +3307,9 @@ function syncSharedInvestmentsFromMsiz(){
   var oldTrad=+(previous.balances&&previous.balances.traditionalTsp)||106229;
   var oldRoth=+(previous.balances&&previous.balances.rothTsp)||85684;
   var tradShare=(oldTrad+oldRoth)>0?oldTrad/(oldTrad+oldRoth):106229/191913;
+  // An explicit Traditional/Roth split from the matrix beats the inherited ratio.
+  var typedTrad=+b['TSP TRAD']||0, typedRoth=+b['TSP ROTH']||0;
+  if(typedTrad+typedRoth>0) tradShare=typedTrad/(typedTrad+typedRoth);
   var tspContrib=(+c['TSP C']||0)+(+c['TSP S']||0)+(+c['TSP I']||0);
   var etfContrib=(+c.SCHD||0)+(+c.QQQM||0)+(+c.IBIT||0);
   var payload={
@@ -3238,6 +3338,7 @@ function contribBalSave(input){
   syncSharedInvestmentsFromMsiz();
   renderContrib();
   renderBalances();
+  if(typeof renderContribMatrix === 'function') renderContribMatrix();
 }
 // Historical average annual returns for projection (approximate)
 var HIST_RETURNS = {
