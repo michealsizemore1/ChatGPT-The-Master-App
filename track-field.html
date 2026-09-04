@@ -77,6 +77,23 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:Georgia,'Time
 .tt-row.support .t{color:#b9b1a7}.tt-row.support .e{color:#8b847c}
 .tt-link{border:1px solid var(--line);background:#fbf5f2;color:var(--track);font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.12em;text-transform:uppercase;padding:5px 9px;cursor:pointer}
 .tt-link:hover{background:var(--track);color:#fff;border-color:var(--track)}
+.tt-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.tt-result-link{border:1px solid var(--track);background:#fff;color:var(--track);font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.12em;text-transform:uppercase;padding:5px 9px;cursor:pointer;text-decoration:none;display:inline-block}
+.tt-result-link:hover{background:var(--track);color:#fff}
+.tt-badge{display:inline-block;margin-left:7px;font:800 8px Arial,Helvetica,sans-serif;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;vertical-align:middle;border-radius:2px}
+.tt-badge.live{background:var(--track);color:#fff}
+.tt-badge.final{background:#efe8de;color:#8b847c}
+.tt-row.is-live{background:#fff6f2}
+.tt-row.is-live .e{color:var(--track);font-weight:700}
+.tt-row.is-live .t{color:var(--track)}
+.tt-live-banner{display:flex;align-items:center;gap:9px;padding:11px 13px;margin-bottom:15px;background:#fff6f2;border:1px solid var(--track);font:13px Arial,Helvetica,sans-serif;color:var(--ink)}
+.tt-live-banner.off{background:#fbf8f3;border-color:var(--line);color:var(--muted)}
+.tt-live-banner .dot{width:8px;height:8px;border-radius:50%;background:var(--track);flex-shrink:0;animation:tt-pulse 1.6s ease-in-out infinite}
+.tt-live-banner b{font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.13em;text-transform:uppercase;color:var(--track);margin-right:7px}
+.tt-live-banner.off b{color:var(--muted)}
+.tt-live-banner a{color:var(--track);font-weight:700}
+.tt-live-time{color:#8b847c;margin-left:6px;font-size:12px}
+@keyframes tt-pulse{0%,100%{opacity:1}50%{opacity:.35}}
 .rec-flag{display:block;font:700 9px Arial,Helvetica,sans-serif;letter-spacing:.09em;text-transform:uppercase;color:#a2812c;margin-top:4px}
 .rec-new .rec-ev{color:var(--track)}
 .rec{display:grid;grid-template-columns:110px minmax(0,1fr) auto;gap:12px;align-items:baseline;padding:12px 0;border-top:1px solid var(--line)}
@@ -116,7 +133,7 @@ html{font-size:14px}
 .done{grid-template-columns:60px minmax(0,1fr)}
 .done .f{grid-column:2}
 .tt-row{grid-template-columns:84px minmax(0,1fr);gap:9px}
-.tt-link{grid-column:2;justify-self:start;margin-top:2px}
+.tt-actions{grid-column:2;justify-self:start;margin-top:2px;justify-content:flex-start}
 }
 </style>
 </head>
@@ -248,6 +265,7 @@ html{font-size:14px}
           <button data-scope="all">Full programme</button>
         </div>
       </div>
+      <div id="ttLiveBanner"></div>
       <div id="ttList"></div>
     </div>
     <div class="section-card">
@@ -292,7 +310,7 @@ html{font-size:14px}
 </main>
 
 <script>
-const APP_VERSION='2026-09-04-3';
+const APP_VERSION='2026-09-04-4';
 // GitHub Pages caches this file, so a phone can sit on an old copy. Reload once if a newer build is live.
 (async function(){try{const res=await fetch(location.pathname+'?_cv='+Date.now(),{cache:'no-store'});
 const live=(await res.text()).match(/APP_VERSION='([^']+)'/);
@@ -403,6 +421,61 @@ const TIMETABLE=[
 function toMountain(hhmm){const p=hhmm.split(':'),H=(+p[0]+24-8)%24;return `${H%12||12}:${p[1]} ${H>=12?'PM':'AM'}`}
 // The 32 Diamond finals are the men's and women's events; youth, club, invitational and para races support them.
 function isFinalEvent(n){return /^(Men|Women)/.test(n)&&!/Invitational|T63|T54/.test(n)}
+// ---- Live status for the timetable ----------------------------------------
+// No results feed exists for this meet (worldathletics.org blocks scripted access, and Diamond
+// League publishes no public API), so "live" here means an honest, purely time-driven read of the
+// schedule: which event is on right now, and which have already finished, computed straight from
+// each device's own clock against the published start times — never a guessed or fabricated result.
+// Brussels runs CEST (UTC+2) for both days of this meet, so a row's real UTC instant is its local
+// time minus two hours, dated against the day the TIMETABLE entry belongs to.
+function ttRowDateUTC(dayIndex,hhmm){
+ const day=TIMETABLE[dayIndex],dom=+(day.label.match(/(\d+)/)||[])[1]||(4+dayIndex);
+ const p=hhmm.split(':').map(Number);
+ return new Date(Date.UTC(2026,8,dom,p[0]-2,p[1]));
+}
+// The last row at-or-before `now`, scoped to that day's OWN window (its first row's start through
+// its last row plus a results buffer) — never keyed off the next day's start, so a long overnight
+// gap between sessions can't make a day look like it's still "live".
+function ttDayWindow(dayIndex){
+ const rows=TIMETABLE[dayIndex].rows;
+ return {start:ttRowDateUTC(dayIndex,rows[0][0]).getTime(), end:ttRowDateUTC(dayIndex,rows[rows.length-1][0]).getTime()+40*60000};
+}
+function ttRowStatuses(dayIndex){
+ const rows=TIMETABLE[dayIndex].rows,now=Date.now(),win=ttDayWindow(dayIndex);
+ let liveIdx=-1;
+ if(now>=win.end)liveIdx=rows.length;
+ else if(now>=win.start){for(let i=0;i<rows.length;i++){if(ttRowDateUTC(dayIndex,rows[i][0]).getTime()<=now)liveIdx=i;else break}}
+ return rows.map((r,i)=>i<liveIdx?'final':i===liveIdx?'live':'upcoming');
+}
+function ttLiveIndexInDay(rows,dayIndex,now){let idx=-1;for(let i=0;i<rows.length;i++){if(ttRowDateUTC(dayIndex,rows[i][0]).getTime()<=now)idx=i;else break}return idx}
+// One phase for the whole meet, used by the banner and to pick which day opens by default.
+function ttMeetPhase(){
+ const now=Date.now(),w0=ttDayWindow(0),w1=ttDayWindow(1);
+ if(now<w0.start)return{kind:'before',ms:w0.start-now};
+ if(now>=w1.end)return{kind:'after'};
+ if(now>=w0.start&&now<w0.end){
+  const idx=ttLiveIndexInDay(TIMETABLE[0].rows,0,now);
+  if(idx>-1)return{kind:'live',day:0,idx};
+ }
+ if(now>=w1.start&&now<w1.end){
+  const idx=ttLiveIndexInDay(TIMETABLE[1].rows,1,now);
+  if(idx>-1)return{kind:'live',day:1,idx};
+ }
+ if(now<w1.start)return{kind:'gap',ms:w1.start-now,label:'Day two starts in'};
+ return{kind:'gap',ms:0,label:'Day two is underway'};
+}
+function ttDefaultDay(){return Date.now()>=ttDayWindow(0).end?1:0}
+function ttFmtCountdown(ms){if(ms<=0)return'any moment';const mins=Math.round(ms/60000),h=Math.floor(mins/60),m=mins%60;return h>0?`${h}h ${m}m`:`${m}m`}
+function ttBadge(status){return status==='live'?'<span class="tt-badge live">Live</span>':status==='final'?'<span class="tt-badge final">Final</span>':''}
+function renderTtBanner(){
+ const el=$('#ttLiveBanner');if(!el)return;
+ const phase=ttMeetPhase();
+ if(phase.kind==='before'){el.innerHTML=`<div class="tt-live-banner off"><b>Starts soon</b> Day one begins in ${esc(ttFmtCountdown(phase.ms))}</div>`;return}
+ if(phase.kind==='after'){el.innerHTML=`<div class="tt-live-banner off"><b>Final complete</b> Full results at <a href="https://brussels.diamondleague.com/en/programme-results/" target="_blank" rel="noopener">brussels.diamondleague.com</a></div>`;return}
+ if(phase.kind==='gap'){el.innerHTML=`<div class="tt-live-banner off"><b>Between sessions</b> ${esc(phase.label)}${phase.ms?' &middot; '+esc(ttFmtCountdown(phase.ms)):''}</div>`;return}
+ const row=TIMETABLE[phase.day].rows[phase.idx];
+ el.innerHTML=`<div class="tt-live-banner"><span class="dot"></span><b>Live now</b> ${esc(row[1])}<span class="tt-live-time">${esc(toMountain(row[0]))} MDT</span></div>`;
+}
 // Each start list takes its time straight from the timetable, so the two can never disagree.
 const ENTRY_WHEN=(()=>{const out={men:{},women:{}};
  TIMETABLE.forEach(d=>d.rows.forEach(([t,n,key])=>{if(!key)return;const g=key.split('/')[0],ev=key.split('/')[1];
@@ -607,7 +680,7 @@ function renderEntries(){
     `<div class="done" style="grid-template-columns:minmax(0,1fr)"><div><div class="m" style="font-size:15px;color:var(--ink)">${esc(name)}</div><div class="d" style="margin-top:4px">${esc(when)}</div><div style="font:12px/1.5 Arial,Helvetica,sans-serif;color:var(--muted);margin-top:5px">${esc(note)}</div></div></div>`
   ).join('');
 }
-const ttState={day:0,scope:'finals'};
+const ttState={day:ttDefaultDay(),scope:'finals'};
 // --- Remembering where you were -------------------------------------------
 // A refresh should land back on the same tab and the same selection, so the view
 // is mirrored into the URL hash (shareable) and localStorage (survives a bare URL).
@@ -659,10 +732,16 @@ function showTab(name){
 function renderTimetable(){
   const day=TIMETABLE[ttState.day];
   $('#ttDays').innerHTML=TIMETABLE.map((d,i)=>`<button role="tab" aria-selected="${i===ttState.day}" class="${i===ttState.day?'active':''}" data-day="${i}">${esc(d.short)}</button>`).join('');
+  renderTtBanner();
+  const statuses=ttRowStatuses(ttState.day);
   const rows=day.rows.filter(r=>ttState.scope==='all'||isFinalEvent(r[1]));
-  $('#ttList').innerHTML=rows.map(([t,n,key])=>
-    `<div class="tt-row${isFinalEvent(n)?'':' support'}"><div class="t">${esc(toMountain(t))}<span class="tz">MDT</span><small>${esc(t)} Brussels</small></div><div class="e">${esc(n)}</div>${key?`<button class="tt-link" data-entry="${esc(key)}">Start list</button>`:'<span></span>'}</div>`
-  ).join('');
+  $('#ttList').innerHTML=rows.map(r=>{
+    const[t,n,key]=r,status=statuses[day.rows.indexOf(r)],badge=ttBadge(status);
+    const actions=[];
+    if(key)actions.push(`<button class="tt-link" data-entry="${esc(key)}">Start list</button>`);
+    if(status==='final')actions.push(`<a class="tt-result-link" href="https://brussels.diamondleague.com/en/programme-results/" target="_blank" rel="noopener">Result &#8599;</a>`);
+    return`<div class="tt-row${isFinalEvent(n)?'':' support'}${status==='live'?' is-live':''}"><div class="t">${esc(toMountain(t))}<span class="tz">MDT</span><small>${esc(t)} Brussels</small></div><div class="e">${esc(n)}${badge}</div><div class="tt-actions">${actions.join('')}</div></div>`;
+  }).join('');
   $$('#ttDays button').forEach(b=>b.onclick=()=>{ttState.day=+b.dataset.day;renderTimetable()});
   $$('#ttScope button').forEach(b=>b.onclick=()=>{ttState.scope=b.dataset.scope;$$('#ttScope button').forEach(x=>x.classList.toggle('active',x===b));renderTimetable()});
   saveView();
@@ -746,6 +825,8 @@ $$('.tabs button').forEach(btn=>btn.onclick=()=>showTab(btn.dataset.tab));
   });
 });
 restoreView();renderAll();renderCalendar();renderTimetable();renderNews();
+// Keeps the Brussels timetable's live badges and banner current while the tab sits open.
+setInterval(renderTimetable,30000);
 </script>
 </body>
 </html>
