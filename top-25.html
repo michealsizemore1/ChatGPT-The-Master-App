@@ -54,8 +54,8 @@ img{max-width:100%;display:block;vertical-align:middle}
 .team-name{min-width:0}
 .team-name>span:last-child{min-width:0}
 .team-name strong{overflow-wrap:break-word}
-.drive-tracker{margin:0 0 14px;padding:14px;background:#10231d;border:1px solid #ffffff1f;border-radius:2px}
-.drive-tracker-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;color:#d9f044;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.drive-tracker{margin:0 0 14px;padding:16px 14px 14px;background:#000;border:1px solid #ffffff1a;border-radius:8px}
+.drive-tracker-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;color:#d9f044;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
 .drive-tracker-head small{color:#ffffff99;font-weight:400;text-transform:none;letter-spacing:0;font-size:10px}
 .field-bar{display:flex;align-items:stretch;height:44px;margin-bottom:10px;border-radius:3px;overflow:hidden}
 .field-endzone{flex:0 0 26px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:8px;font-weight:800;letter-spacing:.03em;overflow:hidden}
@@ -88,37 +88,34 @@ img{max-width:100%;display:block;vertical-align:middle}
 .drive-progress{position:absolute;top:50%;height:5px;transform:translateY(-50%);background:#ffffff4d;border-radius:3px}
 .drive-progress-arrow{position:absolute;top:50%;right:-1px;transform:translate(50%,-50%);width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:7px solid #ffffff80}
 .drive-progress-arrow.reversed{right:auto;left:-1px;transform:translate(-50%,-50%) rotate(180deg)}
-.dt-scorebar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
-.dt-team{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
-.dt-team.home{flex-direction:row-reverse;text-align:right}
-.dt-team-logo{width:32px;height:32px;object-fit:contain;flex:0 0 32px}
-.dt-team-meta{display:flex;flex-direction:column;gap:3px;min-width:0}
-.dt-team.home .dt-team-meta{align-items:flex-end}
-.dt-team-score-row{display:flex;align-items:center;gap:4px}
-.dt-team.home .dt-team-score-row{flex-direction:row-reverse}
-.dt-team-score{color:#fff;font:700 24px Georgia,serif;line-height:1}
-.dt-team-sub{color:#9fb0aa;font-size:9px;letter-spacing:.04em;font-weight:700}
-.dt-timeouts{display:flex;gap:3px}
-.dt-team.home .dt-timeouts{flex-direction:row-reverse}
-.dt-timeout-dot{width:6px;height:6px;border-radius:50%;background:#ffd54a}
-.dt-timeout-dot.used{background:#3a463f}
-.dt-center{flex:0 0 auto;text-align:center;padding:0 6px;white-space:nowrap}
-.dt-clock{color:#fff;font:700 14px Georgia,serif}
-.dt-downdistance{color:#d9f044;font-size:11px;font-weight:700;margin-top:2px}
-.dt-yardline{color:#9fb0aa;font-size:9px;margin-top:1px;text-transform:uppercase;letter-spacing:.04em}
+.dt-scorebar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px}
+.dt-team{display:flex;align-items:center;gap:10px;flex:0 1 auto;min-width:0}
+.dt-team.home{flex-direction:row-reverse}
+.dt-team-logo-col{display:flex;flex-direction:column;align-items:center;gap:5px;flex:0 0 auto}
+.dt-team-logo{width:56px;height:56px;object-fit:contain}
+.dt-team-logo-fallback{width:56px;height:56px;border-radius:50%;background:#26302b;color:#fff;display:flex;align-items:center;justify-content:center;font:800 20px Georgia,serif}
+.dt-team-score{color:#fff;font:800 48px Georgia,serif;line-height:1}
+.dt-team-sub{color:#ffffffaa;font-size:10px;letter-spacing:.04em;font-weight:700;white-space:nowrap}
+.dt-timeouts{display:flex;gap:4px}
+.dt-timeout-dot{width:7px;height:7px;border-radius:50%;background:#ffd54a}
+.dt-timeout-dot.used{background:#33362f}
+.dt-center{flex:0 0 auto;text-align:center;padding:0 10px;white-space:nowrap}
+.dt-clock{color:#fff;font:700 19px Georgia,serif}
+.dt-downdistance{color:#fff;font-size:15px;font-weight:700;margin-top:5px}
+.dt-yardline{color:#ffffff88;font-size:11px;margin-top:2px;text-transform:uppercase;letter-spacing:.04em}
 .highlights{padding:0 22px 18px}
 .legacy-game-panel .highlights{padding:0 0 4px}
 .highlights-grid{display:grid;grid-template-columns:1fr;gap:10px}
 .highlight-clip{margin:0;background:#10231d;border-radius:4px;overflow:hidden;border:1px solid #ffffff1f}
 .highlight-clip video{width:100%;display:block;max-height:220px;background:#000}
 .highlight-clip figcaption{padding:8px 10px;color:#ffffffcc;font-size:11px;line-height:1.4}
-@media(max-width:760px){.dt-team-score{font-size:26px}.dt-clock{font-size:15px}.dt-downdistance{font-size:12px}.dt-team-logo{width:36px;height:36px;flex-basis:36px}.highlight-clip figcaption{font-size:13px}}
+@media(max-width:760px){.dt-team-score{font-size:32px}.dt-clock{font-size:16px}.dt-downdistance{font-size:13px}.dt-team-logo,.dt-team-logo-fallback{width:40px;height:40px}.dt-team-logo-fallback{font-size:16px}.highlight-clip figcaption{font-size:13px}}
 </style>
 </head>
 <body>
 <main id="app"></main>
 <script>
-const APP_VERSION='2026-09-05-10';
+const APP_VERSION='2026-09-05-11';
 (async function(){try{const res=await fetch(location.pathname+'?_cv='+Date.now(),{cache:'no-store'});
 const live=(await res.text()).match(/APP_VERSION='([^']+)'/);
 if(live&&live[1]!==APP_VERSION&&!sessionStorage.getItem('top25-v-'+live[1])){
@@ -491,7 +488,8 @@ function renderDriveTracker(d,game){
  const timeoutDots=(count)=>count==null?'':`<div class="dt-timeouts">${[0,1,2].map(i=>`<span class="dt-timeout-dot${i<count?'':' used'}"></span>`).join('')}</div>`;
  const teamBlock=(team,timeouts,align)=>{
   const meta=metaFor(team);
-  return `<div class="dt-team ${align}">${meta?.logo?`<img class="espn-logo dt-team-logo" src="${esc(meta.logo)}" alt="">`:''}<div class="dt-team-meta"><div class="dt-team-score-row">${team&&team.id===sit.offenseTeamId?'<span class="poss-icon" title="Has the ball">&#127944;</span>':''}<span class="dt-team-score">${esc(team?.score??'—')}</span></div><span class="dt-team-sub">${meta?.rank?`#${meta.rank} `:''}${esc(meta?.record??'')}</span>${timeoutDots(timeouts)}</div></div>`;
+  const hasBall=!!(team&&team.id===sit.offenseTeamId);
+  return `<div class="dt-team ${align}"><div class="dt-team-logo-col">${meta?.logo?`<img class="espn-logo dt-team-logo" src="${esc(meta.logo)}" alt="">`:`<span class="dt-team-logo-fallback">${esc((team?.abbr||'?')[0])}</span>`}${timeoutDots(timeouts)}<span class="dt-team-sub">${meta?.rank?`#${meta.rank} `:''}${esc(meta?.record??'')}</span></div>${hasBall?'<span class="poss-icon" title="Has the ball">&#127944;</span>':''}<span class="dt-team-score">${esc(team?.score??'—')}</span></div>`;
  };
  const arrowLeft=Math.min(startPct,ballPct);
  const arrowWidth=Math.max(1,Math.abs(ballPct-startPct));
