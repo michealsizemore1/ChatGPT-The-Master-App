@@ -35,9 +35,9 @@ img{max-width:100%;display:block;vertical-align:middle}
 .team-name i{overflow:hidden}.team-name i img{width:29px;height:29px;object-fit:contain}
 @media(min-width:621px){body{font-size:16px}.team-name strong{font-size:18px}.team-name small{font-size:10px}.table-head{font-size:10px}.team-row>span,.team-row>strong{font-size:14px}.schedule-game{font-size:13px}.team-stat-list>div,.team-leaders>div{font-size:12px}}
 @media(max-width:620px){body{font-size:16px}.topbar nav button{font-size:14px}.score-card b{font-size:14px}.score-card strong{font-size:19px}.team-name strong{font-size:18px}.team-name small{font-size:10px}.team-name i{width:40px;height:40px;min-width:40px;flex-basis:40px}.team-name i img{width:34px;height:34px}.team-row{min-height:78px}.table-head{font-size:10px}.team-row>span,.team-row>strong{font-size:14px}.schedule-cta{font-size:12px!important}.metric-item h3{font-size:19px}.metric-item p{font-size:14px}.metric-feed{font-size:11px}}
-.weekly-score{color:#1f3b33!important;font-size:11px!important;font-weight:400;line-height:1.2;letter-spacing:0;margin-top:4px;display:block;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;text-transform:none}
-@media(max-width:760px){.weekly-score{font-size:10px!important;line-height:1.15}}
-@media(max-width:620px){.team-row{position:relative;padding-bottom:20px}.weekly-score{position:absolute;left:10px;right:10px;bottom:7px;max-width:none}}
+.weekly-score{color:#1f3b33!important;font-size:11px!important;font-weight:400;line-height:1.3;letter-spacing:0;margin-top:4px;display:block;max-width:100%;white-space:normal;overflow:visible;text-overflow:clip;text-transform:none}
+@media(max-width:760px){.weekly-score{font-size:10px!important;line-height:1.3}}
+@media(max-width:620px){.team-row{padding:10px 10px}}
 @media(max-width:760px){.schedule-head{font-size:12px}.schedule-head small{font-size:10px}.schedule-game{font-size:14px;min-height:52px}.schedule-game small{font-size:12px}.archive-label{font-size:12px;padding:16px 12px}.team-archive>header{padding:18px}.team-archive>header small{font-size:10px}.team-archive>header b{font-size:21px}.team-archive>header strong{font-size:38px}.team-stat-list{padding:8px 14px}.team-stat-list>div,.team-leaders>div{min-height:42px;font-size:14px}.team-leaders{padding:10px 14px 14px}.team-leaders>p{font-size:11px}.team-leaders span small{font-size:9px}.legacy-game-panel .last-play{font-size:13px}}
 .archive-label{margin:0;padding:12px;color:#d9f044;font-size:9px;letter-spacing:.12em;font-weight:700}
 .schedule-game-wrap{border-bottom:1px solid #ffffff14}.schedule-game-wrap .schedule-game{border-bottom:0}.schedule-game{width:100%;background:transparent;color:inherit;text-align:left;border:0;cursor:pointer}.schedule-game:hover{background:#ffffff0a}.legacy-game-panel{padding:0 12px 14px;background:#0b1b16}.team-archive-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.team-archive{border:1px solid #ffffff1f;background:#10231d}.team-archive>header{display:flex;justify-content:space-between;align-items:center;padding:14px;border-bottom:1px solid #ffffff1f}.team-archive>header span{display:flex;flex-direction:column;gap:4px}.team-archive>header small{color:#d9f044;font:700 8px Arial,sans-serif;letter-spacing:.12em}.team-archive>header b{font:700 15px Georgia,serif}.team-archive>header strong{font:700 28px Georgia,serif}.team-stat-list{padding:6px 12px}.team-stat-list>div,.team-leaders>div{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;min-height:31px;border-bottom:1px solid #ffffff14;font-size:10px}.team-stat-list b,.team-leaders b{text-align:right;color:#fff}.team-leaders{padding:8px 12px 12px}.team-leaders>p{margin:4px 0 8px;color:#d9f044;font-size:9px;letter-spacing:.12em;font-weight:700}.team-leaders span{display:flex;flex-direction:column;gap:2px}.team-leaders span small{color:#9fb0aa;font-size:8px;text-transform:uppercase}.leaders-pending{display:block;color:#9fb0aa;padding:8px 0}.legacy-game-panel .last-play{margin:10px 0 0;background:#ffffff0d;border:0;color:#fff;padding:10px;font-size:11px}.legacy-game-panel .schedule-message{padding:15px 12px}@media(max-width:760px){.team-archive-grid{grid-template-columns:1fr}}
@@ -50,7 +50,10 @@ img{max-width:100%;display:block;vertical-align:middle}
 .schedule-cta{font-size:12px!important}
 .team-row>b:first-child{font-size:23px}
 @media(max-width:760px){.weekly-score{font-size:13px!important}}
-@media(max-width:620px){.weekly-score{font-size:13px!important;bottom:6px}.schedule-cta{font-size:14px!important}.team-row{min-height:88px;padding-bottom:26px}}
+@media(max-width:620px){.weekly-score{font-size:13px!important}.schedule-cta{font-size:14px!important}}
+.team-name{min-width:0}
+.team-name>span:last-child{min-width:0}
+.team-name strong{overflow-wrap:break-word}
 </style>
 </head>
 <body>
