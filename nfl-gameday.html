@@ -45,6 +45,14 @@ img{max-width:100%;display:block;vertical-align:middle}
 .field-track{position:relative;flex:1;background:repeating-linear-gradient(90deg,#16281f,#16281f 9.9%,#1c3226 9.9%,#1c3226 10%)}
 .first-down-marker{position:absolute;top:0;bottom:0;width:2px;background:#ffd54a;transform:translateX(-50%)}
 .ball-marker{position:absolute;top:50%;left:0;transform:translate(-50%,-50%);font-size:15px;filter:drop-shadow(0 0 2px #000)}
+.linescore{margin:2px 0 14px;border:1px solid #ffffff1c;border-radius:4px;overflow:hidden}
+.linescore-row{display:grid;align-items:center;padding:6px 10px;color:#fff;font-size:13px}
+.linescore-row+.linescore-row{border-top:1px solid #ffffff14}
+.linescore-row span{text-align:center}
+.linescore-team{text-align:left!important;font-weight:700}
+.linescore-total{font-weight:700;color:var(--lime)}
+.linescore-head{background:#ffffff0d;padding:5px 10px}
+.linescore-head span{color:#ffffff88;font-size:9px;letter-spacing:.09em}
 .down-distance{margin:0 0 6px;color:#fff;font:700 17px Georgia,serif}
 .last-play-detail{margin:0 0 10px;color:#ffffffcc;font-size:12px;line-height:1.5}
 .play-participants{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
@@ -57,7 +65,7 @@ img{max-width:100%;display:block;vertical-align:middle}
 .win-prob-bar{display:flex;height:8px;border-radius:4px;overflow:hidden;background:#ffffff14}
 .win-prob-labels{display:flex;justify-content:space-between;margin-top:6px;color:#ffffffaa;font-size:9px;letter-spacing:.06em;font-weight:700}
 .win-prob-labels span:nth-child(2){color:#66756c;font-weight:400;text-transform:uppercase}
-@media(max-width:760px){.down-distance{font-size:20px}.last-play-detail{font-size:15px}.play-participant b{font-size:14px}.play-participant small{font-size:11px}.win-prob-labels{font-size:11px}.field-bar{height:52px}.field-endzone{font-size:10px;flex-basis:30px}}
+@media(max-width:760px){.down-distance{font-size:20px}.last-play-detail{font-size:15px}.play-participant b{font-size:14px}.play-participant small{font-size:11px}.win-prob-labels{font-size:11px}.field-bar{height:52px}.field-endzone{font-size:10px;flex-basis:30px}.linescore-row{font-size:15px;padding:8px 10px}.linescore-head span{font-size:10px}}
 .field-endzone span{writing-mode:vertical-rl;text-orientation:upright}
 .yard-label{position:absolute;top:50%;transform:translate(-50%,-50%);color:#ffffff59;font-size:9px;font-weight:700;pointer-events:none}
 .drive-progress{position:absolute;top:50%;height:5px;transform:translateY(-50%);background:#ffffff4d;border-radius:3px}
@@ -104,7 +112,7 @@ img{max-width:100%;display:block;vertical-align:middle}
 <body>
 <main id="app"></main>
 <script>
-const APP_VERSION='2026-09-05-7';
+const APP_VERSION='2026-09-05-8';
 (async function(){try{const res=await fetch(location.pathname+'?_cv='+Date.now(),{cache:'no-store'});
 const live=(await res.text()).match(/APP_VERSION='([^']+)'/);
 if(live&&live[1]!==APP_VERSION&&!sessionStorage.getItem('nflgd-v-'+live[1])){
@@ -370,6 +378,18 @@ function renderGameDetailPanel(g){
  }
  return `<div class="legacy-game-panel">${renderArchive(d,g)}</div>`;
 }
+function renderLinescore(awayTeam,homeTeam){
+ const extract=(team)=>(team?.linescores??[]).map(l=>String(l?.displayValue??l?.value??l??'-'));
+ const awayScores=extract(awayTeam);
+ const homeScores=extract(homeTeam);
+ const periods=Math.max(awayScores.length,homeScores.length);
+ if(!periods)return '';
+ const periodLabel=(i)=>i<4?['1ST','2ND','3RD','4TH'][i]:(periods-4>1?`OT${i-3}`:'OT');
+ const cols=`56px repeat(${periods},1fr) 46px`;
+ const row=(team,scores)=>`<div class="linescore-row" style="grid-template-columns:${cols}"><span class="linescore-team">${esc(team?.team?.abbreviation||'')}</span>${Array.from({length:periods},(_,i)=>`<span>${esc(scores[i]??'-')}</span>`).join('')}<span class="linescore-total">${esc(team?.score??'-')}</span></div>`;
+ const head=`<div class="linescore-row linescore-head" style="grid-template-columns:${cols}"><span></span>${Array.from({length:periods},(_,i)=>`<span>${periodLabel(i)}</span>`).join('')}<span>T</span></div>`;
+ return `<div class="linescore">${head}${row(awayTeam,awayScores)}${row(homeTeam,homeScores)}</div>`;
+}
 function renderDriveTracker(d,g){
  if(!d.drive||!d.drive.situation)return '';
  const sit=d.drive.situation;
@@ -407,6 +427,7 @@ function renderDriveTracker(d,g){
    ${teamBlock(homeTeam,d.drive.homeTimeouts,'home')}
   </div>
   <div class="field-bar"><div class="field-endzone" style="background:#${offenseTeam?.team?.color||'333'}"><span>${esc(offenseTeam?.team?.abbreviation||'')}</span></div><div class="field-track">${yardMarks}<div class="drive-progress" style="left:${arrowLeft}%;width:${arrowWidth}%"><span class="drive-progress-arrow ${arrowReversed?'reversed':''}"></span></div><div class="first-down-marker" style="left:${firstDownPct}%"></div><div class="ball-marker" style="left:${ballPct}%">&#127944;</div></div><div class="field-endzone" style="background:#${defenseTeam?.team?.color||'333'}"><span>${esc(defenseTeam?.team?.abbreviation||'')}</span></div></div>
+  ${renderLinescore(awayTeam,homeTeam)}
   ${sit.downDistanceText?`<p class="down-distance">${esc(sit.downDistanceText)}</p>`:''}
   ${sit.text?`<p class="last-play-detail">${esc(sit.text)}</p>`:''}
   ${participantsHtml?`<div class="play-participants">${participantsHtml}</div>`:''}
