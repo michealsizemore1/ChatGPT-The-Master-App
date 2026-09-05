@@ -110,7 +110,7 @@ img{max-width:100%;display:block;vertical-align:middle}
 <body>
 <main id="app"></main>
 <script>
-const APP_VERSION='2026-09-05-4';
+const APP_VERSION='2026-09-05-5';
 (async function(){try{const res=await fetch(location.pathname+'?_cv='+Date.now(),{cache:'no-store'});
 const live=(await res.text()).match(/APP_VERSION='([^']+)'/);
 if(live&&live[1]!==APP_VERSION&&!sessionStorage.getItem('top25-v-'+live[1])){
@@ -259,7 +259,12 @@ async function loadGameDetails(){
   const response=await fetch(`https://site.api.espn.com/apis/site/v2/sports/football/college-football/summary?event=${encodeURIComponent(state.selectedGameId)}`,{cache:'no-store'});
   if(!response.ok)throw new Error('Details unavailable');
   const data=await response.json();
-  const normalizedTeams=normalizeGame(data.header).teams;
+  const rawTeams=normalizeGame(data.header).teams;
+  const liveMeta=state.liveGames.find(entry=>entry.id===state.selectedGameId);
+  const normalizedTeams=rawTeams.map(team=>{
+   const meta=liveMeta?.teams?.find(m=>m.id===team.id);
+   return meta?{...team,logo:team.logo??meta.logo,rank:team.rank??meta.rank,record:team.record??meta.record}:team;
+  });
   const rows=new Map();
   (data.boxscore?.teams??[]).forEach(teamBlock=>{
    const index=normalizedTeams.findIndex(team=>team.id===teamBlock.team?.id);
@@ -273,7 +278,17 @@ async function loadGameDetails(){
   const lastDrivePlay=drivePlays[drivePlays.length-1];
   const possessionTeamId=lastDrivePlay?String(lastDrivePlay.teamParticipants?.find(p=>p.type==='offense')?.id??lastDrivePlay.end?.team?.id??lastDrivePlay.team?.id??'')||null:null;
   const highlights=(data.videos??[]).slice(0,3).map(video=>({headline:String(video.headline??video.title??'Official game highlights'),thumbnail:String(video.thumbnail??''),src:String(video.links?.source?.HD?.href??video.links?.source?.full?.href??'')})).filter(video=>video.src);
-  state.gameDetails={headline:data.header?.competitions?.[0]?.status?.type?.detail??'',teams:normalizedTeams,stats:[...rows.values()].slice(0,10),lastPlay:data.plays?.at?.(-1)?.text,leaders,possessionTeamId,highlights};
+  let drive=null;
+  if(liveMeta?.state==='in'&&lastDrivePlay){
+   const offenseTeamId=String(lastDrivePlay.teamParticipants?.find(p=>p.type==='offense')?.id??lastDrivePlay.end?.team?.id??lastDrivePlay.team?.id??'');
+   const situation={downDistanceText:lastDrivePlay.end?.downDistanceText??lastDrivePlay.end?.shortDownDistanceText??'',shortDownDistanceText:lastDrivePlay.end?.shortDownDistanceText??'',possessionText:lastDrivePlay.end?.possessionText??'',yardsToEndzone:lastDrivePlay.end?.yardsToEndzone,startYardsToEndzone:drivePlays[0]?.start?.yardsToEndzone??lastDrivePlay.end?.yardsToEndzone,distance:lastDrivePlay.end?.distance??10,offenseTeamId,text:lastDrivePlay.text??'',participants:(lastDrivePlay.participants??[]).slice(0,2).map(p=>({name:p.athlete?.displayName??p.athlete?.shortName??'',position:p.athlete?.position?.abbreviation??'',jersey:p.athlete?.jersey??'',headshot:p.athlete?.headshot?.href??''}))};
+   const wpEntries=data.winprobability??[];
+   const lastWp=wpEntries[wpEntries.length-1];
+   const winProb=lastWp?{home:lastWp.homeWinPercentage,tie:lastWp.tiePercentage??0}:null;
+   const gameSituation=liveMeta?.situation??null;
+   drive={situation,description:data.drives?.current?.description??'',winProb,homeTimeouts:gameSituation?.homeTimeouts??null,awayTimeouts:gameSituation?.awayTimeouts??null,clockText:liveMeta?.status??'',metaTeams:liveMeta?.teams??[]};
+  }
+  state.gameDetails={headline:data.header?.competitions?.[0]?.status?.type?.detail??'',teams:normalizedTeams,stats:[...rows.values()].slice(0,10),lastPlay:data.plays?.at?.(-1)?.text,leaders,possessionTeamId,highlights,drive};
  }catch{state.gameDetails=null}
  state.detailsLoading=false;render();
 }
@@ -402,7 +417,7 @@ function renderLiveCenter(){
   const body=items.length?items.map(l=>`<div class="live-leader-row"><span><small>${esc(l.category)}</small>${esc(l.name)}</span><b>${esc(l.value)}</b></div>`).join(''):'<p class="live-leaders-empty">Player leaders have not been posted by the provider.</p>';
   return `<div><p class="live-leaders-head">${esc(team.abbr)} LEADERS</p>${body}</div>`;
  };
- return `<section class="live-center" aria-live="polite"><div class="live-center-head"><div><p class="eyebrow">LIVE GAME CENTER</p><h2>${state.detailsLoading?'Loading game statistics…':esc(d?.headline||'Game details unavailable')}</h2></div><button data-close-live>Close &times;</button></div>${d?`<div class="live-matchup">${d.teams.map(team=>`<div><span style="background:${team.color}">${team.logo?`<img class="espn-logo" src="${esc(team.logo)}" alt="">`:esc((team.abbr||'?')[0])}</span><b>${team.rank?`#${team.rank} `:''}${esc(team.name)}${team.id===d.possessionTeamId?' <span class="poss-icon" title="Has the ball">&#127944;</span>':''}</b><strong>${esc(team.score)}</strong></div>`).join('')}</div>${d.lastPlay?`<p class="last-play"><b>LATEST:</b> ${esc(d.lastPlay)}</p>`:''}<div class="boxscore"><div class="boxscore-head"><span>TEAM STAT</span><b>${esc(d.teams[0]?.abbr)}</b><b>${esc(d.teams[1]?.abbr)}</b></div>${d.stats.length?d.stats.map(stat=>`<div><span>${esc(stat.name)}</span><b>${esc(stat.away)}</b><b>${esc(stat.home)}</b></div>`).join(''):'<p>Detailed team statistics will populate after the game begins.</p>'}</div><div class="live-leaders"><div class="live-leaders-grid">${d.teams.map(leadersColumn).join('')}</div></div>${renderHighlights(d.highlights)}`:''}</section>`;
+ return `<section class="live-center" aria-live="polite"><div class="live-center-head"><div><p class="eyebrow">LIVE GAME CENTER</p><h2>${state.detailsLoading?'Loading game statistics…':esc(d?.headline||'Game details unavailable')}</h2></div><button data-close-live>Close &times;</button></div>${d?`${d.drive?renderDriveTracker(d,{status:d.headline}):`<div class="live-matchup">${d.teams.map(team=>`<div><span style="background:${team.color}">${team.logo?`<img class="espn-logo" src="${esc(team.logo)}" alt="">`:esc((team.abbr||'?')[0])}</span><b>${team.rank?`#${team.rank} `:''}${esc(team.name)}${team.id===d.possessionTeamId?' <span class="poss-icon" title="Has the ball">&#127944;</span>':''}</b><strong>${esc(team.score)}</strong></div>`).join('')}</div>`}${d.lastPlay?`<p class="last-play"><b>LATEST:</b> ${esc(d.lastPlay)}</p>`:''}<div class="boxscore"><div class="boxscore-head"><span>TEAM STAT</span><b>${esc(d.teams[0]?.abbr)}</b><b>${esc(d.teams[1]?.abbr)}</b></div>${d.stats.length?d.stats.map(stat=>`<div><span>${esc(stat.name)}</span><b>${esc(stat.away)}</b><b>${esc(stat.home)}</b></div>`).join(''):'<p>Detailed team statistics will populate after the game begins.</p>'}</div><div class="live-leaders"><div class="live-leaders-grid">${d.teams.map(leadersColumn).join('')}</div></div>${renderHighlights(d.highlights)}`:''}</section>`;
 }
 function renderDriveTracker(d,game){
  if(!d.drive||!d.drive.situation)return '';

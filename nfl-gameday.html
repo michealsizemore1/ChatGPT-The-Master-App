@@ -104,7 +104,7 @@ img{max-width:100%;display:block;vertical-align:middle}
 <body>
 <main id="app"></main>
 <script>
-const APP_VERSION='2026-09-05-4';
+const APP_VERSION='2026-09-05-5';
 (async function(){try{const res=await fetch(location.pathname+'?_cv='+Date.now(),{cache:'no-store'});
 const live=(await res.text()).match(/APP_VERSION='([^']+)'/);
 if(live&&live[1]!==APP_VERSION&&!sessionStorage.getItem('nflgd-v-'+live[1])){
@@ -238,7 +238,21 @@ async function loadGameDetails(){
   const lastDrivePlay=drivePlays[drivePlays.length-1];
   const possessionTeamId=lastDrivePlay?String(lastDrivePlay.teamParticipants?.find(p=>p.type==='offense')?.id??lastDrivePlay.end?.team?.id??lastDrivePlay.team?.id??'')||null:null;
   const highlights=(d.videos||[]).slice(0,3).map(v=>({headline:v.headline||v.title||'Game highlights',thumbnail:v.thumbnail||'',src:v.links?.source?.HD?.href||v.links?.source?.full?.href||''})).filter(v=>v.src);
-  state.gameDetails={headline:d.header?.competitions?.[0]?.status?.type?.detail||'',teams:comp,stats:[...rows.values()].filter(s=>/yard|passing|comp|rushing|first down|turnover|penalt|possession|sack/i.test(s.name)).slice(0,10),leaders,possessionTeamId,lastPlay:d.plays?.at?.(-1)?.text,highlights};
+  const liveMeta=state.games.find(entry=>String(entry.id)===String(state.selectedGameId));
+  let drive=null;
+  if(liveMeta?.status?.type?.state==='in'&&lastDrivePlay){
+   const offenseTeamId=String(lastDrivePlay.teamParticipants?.find(p=>p.type==='offense')?.id??lastDrivePlay.end?.team?.id??lastDrivePlay.team?.id??'');
+   const situation={downDistanceText:lastDrivePlay.end?.downDistanceText??lastDrivePlay.end?.shortDownDistanceText??'',shortDownDistanceText:lastDrivePlay.end?.shortDownDistanceText??'',possessionText:lastDrivePlay.end?.possessionText??'',yardsToEndzone:lastDrivePlay.end?.yardsToEndzone,startYardsToEndzone:drivePlays[0]?.start?.yardsToEndzone??lastDrivePlay.end?.yardsToEndzone,distance:lastDrivePlay.end?.distance??10,offenseTeamId,text:lastDrivePlay.text??'',participants:(lastDrivePlay.participants??[]).slice(0,2).map(p=>({name:p.athlete?.displayName??p.athlete?.shortName??'',position:p.athlete?.position?.abbreviation??'',jersey:p.athlete?.jersey??'',headshot:p.athlete?.headshot?.href??''}))};
+   const wpEntries=d.winprobability??[];
+   const lastWp=wpEntries[wpEntries.length-1];
+   const winProb=lastWp?{home:lastWp.homeWinPercentage,tie:lastWp.tiePercentage??0}:null;
+   const gameSituation=liveMeta?.competitions?.[0]?.situation??null;
+   const liveCompetitors=liveMeta?.competitions?.[0]?.competitors??[];
+   const recordFor=(teamId)=>liveCompetitors.find(c=>String(c.team?.id)===String(teamId))?.records?.find(r=>r.type==='total'||r.name==='overall')?.summary??'';
+   const logoFor=(teamId)=>liveCompetitors.find(c=>String(c.team?.id)===String(teamId))?.team?.logo??'';
+   drive={situation,description:d.drives?.current?.description??'',winProb,homeTimeouts:gameSituation?.homeTimeouts??null,awayTimeouts:gameSituation?.awayTimeouts??null,clockText:liveMeta?.status?.type?.shortDetail??'',recordFor,logoFor};
+  }
+  state.gameDetails={headline:d.header?.competitions?.[0]?.status?.type?.detail||'',teams:comp,stats:[...rows.values()].filter(s=>/yard|passing|comp|rushing|first down|turnover|penalt|possession|sack/i.test(s.name)).slice(0,10),leaders,possessionTeamId,lastPlay:d.plays?.at?.(-1)?.text,highlights,drive};
  }catch{state.gameDetails=null}
  state.detailsLoading=false;render();
 }
@@ -267,7 +281,7 @@ function renderLiveCenter(){
   const body=items.length?items.map(l=>`<div class="live-leader-row"><span><small>${esc(l.category)}</small>${esc(l.name)}</span><b>${esc(l.value)}</b></div>`).join(''):'<p class="live-leaders-empty">Player leaders have not been posted by the provider.</p>';
   return `<div><p class="live-leaders-head">${esc(t.team?.abbreviation)} LEADERS</p>${body}</div>`;
  };
- return `<section class="live-center" aria-live="polite"><div class="live-center-head"><div><p class="eyebrow">LIVE GAME CENTER</p><h2>${state.detailsLoading?'Loading game statistics…':esc(d?.headline||'Game details unavailable')}</h2></div><button data-close-live>Close &times;</button></div>${d?`<div class="live-matchup">${d.teams.map(t=>`<div><span style="background:#${t.team?.color||'333'}">${esc((t.team?.abbreviation||'?')[0])}</span><b>${esc(t.team?.displayName||t.team?.shortDisplayName||'')}${String(t.team?.id)===d.possessionTeamId?' <span class="poss-icon" title="Has the ball">&#127944;</span>':''}</b><strong>${esc(t.score)}</strong></div>`).join('')}</div>${d.lastPlay?`<p class="last-play"><b>LATEST:</b> ${esc(d.lastPlay)}</p>`:''}<div class="boxscore"><div class="boxscore-head"><span>TEAM STAT</span><b>${esc(d.teams[0]?.team?.abbreviation)}</b><b>${esc(d.teams[1]?.team?.abbreviation)}</b></div>${d.stats.length?d.stats.map(stat=>`<div><span>${esc(stat.name)}</span><b>${esc(stat.away)}</b><b>${esc(stat.home)}</b></div>`).join(''):'<p>Detailed team statistics will populate after the game begins.</p>'}</div><div class="live-leaders"><div class="live-leaders-grid">${d.teams.map(leadersColumn).join('')}</div></div>${renderHighlights(d.highlights)}`:''}</section>`;
+ return `<section class="live-center" aria-live="polite"><div class="live-center-head"><div><p class="eyebrow">LIVE GAME CENTER</p><h2>${state.detailsLoading?'Loading game statistics…':esc(d?.headline||'Game details unavailable')}</h2></div><button data-close-live>Close &times;</button></div>${d?`${d.drive?renderDriveTracker(d,{status:d.headline}):`<div class="live-matchup">${d.teams.map(t=>`<div><span style="background:#${t.team?.color||'333'}">${esc((t.team?.abbreviation||'?')[0])}</span><b>${esc(t.team?.displayName||t.team?.shortDisplayName||'')}${String(t.team?.id)===d.possessionTeamId?' <span class="poss-icon" title="Has the ball">&#127944;</span>':''}</b><strong>${esc(t.score)}</strong></div>`).join('')}</div>`}${d.lastPlay?`<p class="last-play"><b>LATEST:</b> ${esc(d.lastPlay)}</p>`:''}<div class="boxscore"><div class="boxscore-head"><span>TEAM STAT</span><b>${esc(d.teams[0]?.team?.abbreviation)}</b><b>${esc(d.teams[1]?.team?.abbreviation)}</b></div>${d.stats.length?d.stats.map(stat=>`<div><span>${esc(stat.name)}</span><b>${esc(stat.away)}</b><b>${esc(stat.home)}</b></div>`).join(''):'<p>Detailed team statistics will populate after the game begins.</p>'}</div><div class="live-leaders"><div class="live-leaders-grid">${d.teams.map(leadersColumn).join('')}</div></div>${renderHighlights(d.highlights)}`:''}</section>`;
 }
 function renderTeamRow(t){
  const g=find(t.id);
