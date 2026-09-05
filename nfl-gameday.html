@@ -204,7 +204,8 @@ async function gameClick(g,teamAbbr,force,silent){
     const gameSituation=liveMeta?.competitions?.[0]?.situation??null;
     const liveCompetitors=liveMeta?.competitions?.[0]?.competitors??[];
     const recordFor=(teamId)=>liveCompetitors.find(c=>String(c.team?.id)===String(teamId))?.records?.find(r=>r.type==='total'||r.name==='overall')?.summary??'';
-    drive={situation,description:d.drives?.current?.description??'',winProb,homeTimeouts:gameSituation?.homeTimeouts??null,awayTimeouts:gameSituation?.awayTimeouts??null,clockText:g.status??'',recordFor};
+    const logoFor=(teamId)=>liveCompetitors.find(c=>String(c.team?.id)===String(teamId))?.team?.logo??'';
+    drive={situation,description:d.drives?.current?.description??'',winProb,homeTimeouts:gameSituation?.homeTimeouts??null,awayTimeouts:gameSituation?.awayTimeouts??null,clockText:g.status??'',recordFor,logoFor};
    }
   }
   const highlights=(d.videos||[]).slice(0,3).map(v=>({headline:v.headline||v.title||'Game highlights',thumbnail:v.thumbnail||'',src:v.links?.source?.HD?.href||v.links?.source?.full?.href||''})).filter(v=>v.src);
@@ -363,7 +364,10 @@ function renderDriveTracker(d,g){
   winProbHtml=`<div class="win-prob"><div class="win-prob-bar"><div class="wp-fill" style="width:${awayPct}%;background:#${awayTeam?.team?.color||'666'}"></div><div class="wp-fill" style="width:${homePct}%;background:#${homeTeam?.team?.color||'333'}"></div></div><div class="win-prob-labels"><span>${esc(awayTeam?.team?.abbreviation)} ${awayPct}%</span><span>WIN PROBABILITY</span><span>${esc(homeTeam?.team?.abbreviation)} ${homePct}%</span></div></div>`;
  }
  const timeoutDots=(count)=>count==null?'':`<div class="dt-timeouts">${[0,1,2].map(i=>`<span class="dt-timeout-dot${i<count?'':' used'}"></span>`).join('')}</div>`;
- const teamBlock=(t,timeouts,align)=>`<div class="dt-team ${align}">${t?.team?.logo?`<img class="espn-logo dt-team-logo" src="${esc(t.team.logo)}" alt="">`:''}<div class="dt-team-meta"><div class="dt-team-score-row">${t&&String(t.team?.id)===sit.offenseTeamId?'<span class="poss-icon" title="Has the ball">&#127944;</span>':''}<span class="dt-team-score">${esc(t?.score??'—')}</span></div><span class="dt-team-sub">${esc(d.drive.recordFor?.(t?.team?.id)??'')}</span>${timeoutDots(timeouts)}</div></div>`;
+ const teamBlock=(t,timeouts,align)=>{
+  const logo=t?.team?.logo||d.drive.logoFor?.(t?.team?.id)||'';
+  return `<div class="dt-team ${align}">${logo?`<img class="espn-logo dt-team-logo" src="${esc(logo)}" alt="">`:''}<div class="dt-team-meta"><div class="dt-team-score-row">${t&&String(t.team?.id)===sit.offenseTeamId?'<span class="poss-icon" title="Has the ball">&#127944;</span>':''}<span class="dt-team-score">${esc(t?.score??'—')}</span></div><span class="dt-team-sub">${esc(d.drive.recordFor?.(t?.team?.id)??'')}</span>${timeoutDots(timeouts)}</div></div>`;
+ };
  const arrowLeft=Math.min(startPct,ballPct);
  const arrowWidth=Math.max(1,Math.abs(ballPct-startPct));
  const arrowReversed=ballPct<startPct;

@@ -351,7 +351,7 @@ async function toggleGame(game,teamAbbr,force=false,silent=false){
     const winProb=lastWp?{home:lastWp.homeWinPercentage,tie:lastWp.tiePercentage??0}:null;
     const liveMeta=state.liveGames.find(entry=>entry.id===game.id);
     const gameSituation=liveMeta?.situation??null;
-    drive={situation,description:data.drives?.current?.description??'',winProb,homeTimeouts:gameSituation?.homeTimeouts??null,awayTimeouts:gameSituation?.awayTimeouts??null,clockText:game.status??''};
+    drive={situation,description:data.drives?.current?.description??'',winProb,homeTimeouts:gameSituation?.homeTimeouts??null,awayTimeouts:gameSituation?.awayTimeouts??null,clockText:game.status??'',metaTeams:liveMeta?.teams??[]};
    }
   }
   state.legacyDetails[game.id]={headline:data.header?.competitions?.[0]?.status?.type?.detail??'Final',teams:normalizedTeams,stats:stats.length?stats:[...rows.values()].slice(0,8),touchdowns,fieldGoals,extraPoints,twoPointConversions,safeties,scoringVerified,scoringSource,highlights,leaders,lastPlay,drive};
@@ -425,8 +425,12 @@ function renderDriveTracker(d,game){
   const awayPct=Math.round((1-wp.home-(wp.tie||0))*1000)/10;
   winProbHtml=`<div class="win-prob"><div class="win-prob-bar"><div class="wp-fill" style="width:${awayPct}%;background:${awayTeam?.color||'#666'}"></div><div class="wp-fill" style="width:${homePct}%;background:${homeTeam?.color||'#333'}"></div></div><div class="win-prob-labels"><span>${esc(awayTeam?.abbr)} ${awayPct}%</span><span>WIN PROBABILITY</span><span>${esc(homeTeam?.abbr)} ${homePct}%</span></div></div>`;
  }
+ const metaFor=(team)=>(d.drive.metaTeams||[]).find(m=>m.id===team?.id);
  const timeoutDots=(count)=>count==null?'':`<div class="dt-timeouts">${[0,1,2].map(i=>`<span class="dt-timeout-dot${i<count?'':' used'}"></span>`).join('')}</div>`;
- const teamBlock=(team,timeouts,align)=>`<div class="dt-team ${align}">${team?.logo?`<img class="espn-logo dt-team-logo" src="${esc(team.logo)}" alt="">`:''}<div class="dt-team-meta"><div class="dt-team-score-row">${team&&team.id===sit.offenseTeamId?'<span class="poss-icon" title="Has the ball">&#127944;</span>':''}<span class="dt-team-score">${esc(team?.score??'—')}</span></div><span class="dt-team-sub">${team?.rank?`#${team.rank} `:''}${esc(team?.record??'')}</span>${timeoutDots(timeouts)}</div></div>`;
+ const teamBlock=(team,timeouts,align)=>{
+  const meta=metaFor(team);
+  return `<div class="dt-team ${align}">${meta?.logo?`<img class="espn-logo dt-team-logo" src="${esc(meta.logo)}" alt="">`:''}<div class="dt-team-meta"><div class="dt-team-score-row">${team&&team.id===sit.offenseTeamId?'<span class="poss-icon" title="Has the ball">&#127944;</span>':''}<span class="dt-team-score">${esc(team?.score??'—')}</span></div><span class="dt-team-sub">${meta?.rank?`#${meta.rank} `:''}${esc(meta?.record??'')}</span>${timeoutDots(timeouts)}</div></div>`;
+ };
  const arrowLeft=Math.min(startPct,ballPct);
  const arrowWidth=Math.max(1,Math.abs(ballPct-startPct));
  const arrowReversed=ballPct<startPct;
