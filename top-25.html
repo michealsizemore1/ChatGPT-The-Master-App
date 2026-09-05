@@ -54,12 +54,33 @@ img{max-width:100%;display:block;vertical-align:middle}
 .team-name{min-width:0}
 .team-name>span:last-child{min-width:0}
 .team-name strong{overflow-wrap:break-word}
+.drive-tracker{margin:0 0 14px;padding:14px;background:#10231d;border:1px solid #ffffff1f;border-radius:2px}
+.drive-tracker-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;color:#d9f044;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.drive-tracker-head small{color:#ffffff99;font-weight:400;text-transform:none;letter-spacing:0;font-size:10px}
+.field-bar{display:flex;align-items:stretch;height:32px;margin-bottom:10px;border-radius:3px;overflow:hidden}
+.field-endzone{flex:0 0 32px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:800;letter-spacing:.04em}
+.field-track{position:relative;flex:1;background:repeating-linear-gradient(90deg,#16281f,#16281f 9.9%,#1c3226 9.9%,#1c3226 10%)}
+.first-down-marker{position:absolute;top:0;bottom:0;width:2px;background:#ffd54a;transform:translateX(-50%)}
+.ball-marker{position:absolute;top:50%;left:0;transform:translate(-50%,-50%);font-size:15px;filter:drop-shadow(0 0 2px #000)}
+.down-distance{margin:0 0 6px;color:#fff;font:700 17px Georgia,serif}
+.last-play-detail{margin:0 0 10px;color:#ffffffcc;font-size:12px;line-height:1.5}
+.play-participants{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.play-participant{display:flex;align-items:center;gap:8px;background:#ffffff0d;padding:6px 10px;border-radius:20px}
+.play-participant img,.participant-placeholder{width:26px;height:26px;border-radius:50%;object-fit:cover;background:#33443c;flex:0 0 26px}
+.play-participant span{display:flex;flex-direction:column;gap:1px}
+.play-participant b{color:#fff;font-size:11px;font-weight:700}
+.play-participant small{color:#9fb0aa;font-size:9px;letter-spacing:.05em;text-transform:uppercase}
+.win-prob{margin-top:2px}
+.win-prob-bar{display:flex;height:8px;border-radius:4px;overflow:hidden;background:#ffffff14}
+.win-prob-labels{display:flex;justify-content:space-between;margin-top:6px;color:#ffffffaa;font-size:9px;letter-spacing:.06em;font-weight:700}
+.win-prob-labels span:nth-child(2){color:#66756c;font-weight:400;text-transform:uppercase}
+@media(max-width:760px){.down-distance{font-size:20px}.last-play-detail{font-size:15px}.play-participant b{font-size:14px}.play-participant small{font-size:11px}.win-prob-labels{font-size:11px}.field-bar{height:38px}.field-endzone{font-size:11px;flex-basis:38px}}
 </style>
 </head>
 <body>
 <main id="app"></main>
 <script>
-const APP_VERSION='2026-09-05-1';
+const APP_VERSION='2026-09-05-2';
 (async function(){try{const res=await fetch(location.pathname+'?_cv='+Date.now(),{cache:'no-store'});
 const live=(await res.text()).match(/APP_VERSION='([^']+)'/);
 if(live&&live[1]!==APP_VERSION&&!sessionStorage.getItem('top25-v-'+live[1])){
@@ -279,7 +300,20 @@ async function toggleGame(game,teamAbbr,force=false,silent=false){
   const stats=[...rows.values()].filter(stat=>important.test(stat.name)).slice(0,14);
   const highlights=(data.videos??[]).slice(0,3).map(video=>({headline:String(video.headline??video.title??'Official game highlights'),url:String(video.links?.web?.href??video.links?.self?.href??'')})).filter(video=>video.url);
   const lastPlay=[highlights.length?`HIGHLIGHTS AVAILABLE: ${highlights.map(item=>`${item.headline} — ${item.url}`).join(' · ')}`:'',data.plays?.at?.(-1)?.text].filter(Boolean).join(' | ');
-  state.legacyDetails[game.id]={headline:data.header?.competitions?.[0]?.status?.type?.detail??'Final',teams:normalizedTeams,stats:stats.length?stats:[...rows.values()].slice(0,8),touchdowns,fieldGoals,extraPoints,twoPointConversions,safeties,scoringVerified,scoringSource,highlights,leaders,lastPlay};
+  let drive=null;
+  if(game.state==='in'){
+   const drivePlays=data.drives?.current?.plays??[];
+   const lastDrivePlay=drivePlays[drivePlays.length-1];
+   if(lastDrivePlay){
+    const offenseTeamId=String(lastDrivePlay.teamParticipants?.find(p=>p.type==='offense')?.id??lastDrivePlay.end?.team?.id??lastDrivePlay.team?.id??'');
+    const situation={downDistanceText:lastDrivePlay.end?.downDistanceText??lastDrivePlay.end?.shortDownDistanceText??'',possessionText:lastDrivePlay.end?.possessionText??'',yardsToEndzone:lastDrivePlay.end?.yardsToEndzone,distance:lastDrivePlay.end?.distance??10,offenseTeamId,text:lastDrivePlay.text??'',participants:(lastDrivePlay.participants??[]).slice(0,2).map(p=>({name:p.athlete?.displayName??p.athlete?.shortName??'',position:p.athlete?.position?.abbreviation??'',jersey:p.athlete?.jersey??'',headshot:p.athlete?.headshot?.href??''}))};
+    const wpEntries=data.winprobability??[];
+    const lastWp=wpEntries[wpEntries.length-1];
+    const winProb=lastWp?{home:lastWp.homeWinPercentage,tie:lastWp.tiePercentage??0}:null;
+    drive={situation,description:data.drives?.current?.description??'',winProb};
+   }
+  }
+  state.legacyDetails[game.id]={headline:data.header?.competitions?.[0]?.status?.type?.detail??'Final',teams:normalizedTeams,stats:stats.length?stats:[...rows.values()].slice(0,8),touchdowns,fieldGoals,extraPoints,twoPointConversions,safeties,scoringVerified,scoringSource,highlights,leaders,lastPlay,drive};
  }catch{}
  if(!silent)state.legacyLoading=null;
  render();
@@ -323,6 +357,33 @@ function renderLiveCenter(){
  const d=state.gameDetails;
  return `<section class="live-center" aria-live="polite"><div class="live-center-head"><div><p class="eyebrow">LIVE GAME CENTER</p><h2>${state.detailsLoading?'Loading game statistics…':esc(d?.headline||'Game details unavailable')}</h2></div><button data-close-live>Close &times;</button></div>${d?`<div class="live-matchup">${d.teams.map(team=>`<div><span style="background:${team.color}">${team.logo?`<img class="espn-logo" src="${esc(team.logo)}" alt="">`:esc((team.abbr||'?')[0])}</span><b>${team.rank?`#${team.rank} `:''}${esc(team.name)}</b><strong>${esc(team.score)}</strong></div>`).join('')}</div>${d.lastPlay?`<p class="last-play"><b>LATEST:</b> ${esc(d.lastPlay)}</p>`:''}<div class="boxscore"><div class="boxscore-head"><span>TEAM STAT</span><b>${esc(d.teams[0]?.abbr)}</b><b>${esc(d.teams[1]?.abbr)}</b></div>${d.stats.length?d.stats.map(stat=>`<div><span>${esc(stat.name)}</span><b>${esc(stat.away)}</b><b>${esc(stat.home)}</b></div>`).join(''):'<p>Detailed team statistics will populate after the game begins.</p>'}</div>`:''}</section>`;
 }
+function renderDriveTracker(d,game){
+ if(!d.drive||!d.drive.situation)return '';
+ const sit=d.drive.situation;
+ const offenseTeam=d.teams.find(team=>team.id===sit.offenseTeamId);
+ const defenseTeam=d.teams.find(team=>team.id!==sit.offenseTeamId);
+ const yardsToGo=sit.yardsToEndzone??50;
+ const ballPct=Math.max(2,Math.min(98,100-yardsToGo));
+ const firstDownPct=Math.max(2,Math.min(98,ballPct+(sit.distance||0)));
+ const isRedZone=yardsToGo<=20;
+ const participantsHtml=(sit.participants||[]).filter(p=>p.name).map(p=>`<div class="play-participant">${p.headshot?`<img class="player-headshot" src="${esc(p.headshot)}" alt="">`:'<div class="participant-placeholder"></div>'}<span><b>${esc(p.name)}</b><small>${[p.position,p.jersey?`#${p.jersey}`:''].filter(Boolean).map(esc).join(' · ')}</small></span></div>`).join('');
+ const wp=d.drive.winProb;
+ let winProbHtml='';
+ if(wp){
+  const homeTeam=d.teams.find(team=>team.homeAway==='home')||d.teams[1];
+  const awayTeam=d.teams.find(team=>team.homeAway==='away')||d.teams[0];
+  const homePct=Math.round(wp.home*1000)/10;
+  const awayPct=Math.round((1-wp.home-(wp.tie||0))*1000)/10;
+  winProbHtml=`<div class="win-prob"><div class="win-prob-bar"><div class="wp-fill" style="width:${awayPct}%;background:${awayTeam?.color||'#666'}"></div><div class="wp-fill" style="width:${homePct}%;background:${homeTeam?.color||'#333'}"></div></div><div class="win-prob-labels"><span>${esc(awayTeam?.abbr)} ${awayPct}%</span><span>WIN PROBABILITY</span><span>${esc(homeTeam?.abbr)} ${homePct}%</span></div></div>`;
+ }
+ return `<div class="drive-tracker"><div class="drive-tracker-head"><span>${isRedZone?'RED ZONE':'LIVE DRIVE'}</span>${d.drive.description?`<small>${esc(d.drive.description)}</small>`:''}</div>
+  <div class="field-bar"><div class="field-endzone" style="background:${offenseTeam?.color||'#333'}">${esc(offenseTeam?.abbr||'')}</div><div class="field-track"><div class="first-down-marker" style="left:${firstDownPct}%"></div><div class="ball-marker" style="left:${ballPct}%">&#127944;</div></div><div class="field-endzone" style="background:${defenseTeam?.color||'#333'}">${esc(defenseTeam?.abbr||'')}</div></div>
+  ${sit.downDistanceText?`<p class="down-distance">${esc(sit.downDistanceText)}</p>`:''}
+  ${sit.text?`<p class="last-play-detail">${esc(sit.text)}</p>`:''}
+  ${participantsHtml?`<div class="play-participants">${participantsHtml}</div>`:''}
+  ${winProbHtml}
+ </div>`;
+}
 function renderLegacyGamePanel(game,t){
  if(game.state==='pre'){
   return `<div class="legacy-game-panel"><p class="schedule-message"><b>${esc(game.status)}</b> · ${esc(mountainTime(new Date(game.date)))} MT${game.network?` · ${esc(game.network)}`:''}<br>Game statistics will appear once the game starts.</p></div>`;
@@ -348,7 +409,7 @@ function renderLegacyGamePanel(game,t){
   const leadersHtml=leaders.length?leaders.map(l=>`<div><span><small>${esc(l.category)}</small>${esc(l.name)}</span><b>${esc(l.value)}</b></div>`).join(''):'<small class="leaders-pending">Player leaders have not been posted by the provider.</small>';
   return `<section class="team-archive"><header><span><small>${team.id===t.espnId?'SELECTED TEAM':'OPPONENT'}</small><b>${esc(team.name)}</b></span><strong>${esc(team.score)}</strong></header><div class="team-stat-list">${stats}${extra}</div><div class="team-leaders"><p>PLAYER LEADERS</p>${leadersHtml}</div></section>`;
  }).join('');
- return `<div class="legacy-game-panel"><p class="archive-label">${game.state==='in'?'LIVE STATS':'GAME ARCHIVE'} · ${esc(d.headline)}</p><div class="team-archive-grid">${teamArchives}</div><p class="archive-label">SCORING SOURCE · ${esc(d.scoringSource??'ESPN')}</p>${d.lastPlay?`<p class="last-play"><b>LAST PLAY:</b> ${esc(d.lastPlay)}</p>`:''}</div>`;
+ return `<div class="legacy-game-panel">${game.state==='in'?renderDriveTracker(d,game):''}<p class="archive-label">${game.state==='in'?'LIVE STATS':'GAME ARCHIVE'} · ${esc(d.headline)}</p><div class="team-archive-grid">${teamArchives}</div><p class="archive-label">SCORING SOURCE · ${esc(d.scoringSource??'ESPN')}</p>${d.lastPlay?`<p class="last-play"><b>LAST PLAY:</b> ${esc(d.lastPlay)}</p>`:''}</div>`;
 }
 function renderScheduleGame(game,t){
  const isExpanded=state.expandedGameId===game.id;
@@ -453,7 +514,7 @@ document.getElementById('app').addEventListener('input',e=>{
  }
 });
 document.addEventListener('error',e=>{
- if(e.target&&e.target.classList&&e.target.classList.contains('espn-logo'))e.target.style.display='none';
+ if(e.target&&e.target.classList&&(e.target.classList.contains('espn-logo')||e.target.classList.contains('player-headshot')))e.target.style.display='none';
 },true);
 
 render();
