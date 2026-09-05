@@ -112,7 +112,7 @@ img{max-width:100%;display:block;vertical-align:middle}
 <body>
 <main id="app"></main>
 <script>
-const APP_VERSION='2026-09-05-9';
+const APP_VERSION='2026-09-05-10';
 (async function(){try{const res=await fetch(location.pathname+'?_cv='+Date.now(),{cache:'no-store'});
 const live=(await res.text()).match(/APP_VERSION='([^']+)'/);
 if(live&&live[1]!==APP_VERSION&&!sessionStorage.getItem('nflgd-v-'+live[1])){
@@ -229,7 +229,7 @@ async function gameClick(g,teamAbbr,force,silent){
    }
   }
   const highlights=(d.videos||[]).slice(0,3).map(v=>({headline:v.headline||v.title||'Game highlights',thumbnail:v.thumbnail||'',src:v.links?.source?.HD?.href||v.links?.source?.full?.href||''})).filter(v=>v.src);
-  state.details[g.id]={headline:d.header?.competitions?.[0]?.status?.type?.detail||(g.state==='in'?'In progress':'Final'),teams:comp,stats:[...rows.values()].filter(s=>/yard|passing|comp|rushing|first down|turnover|penalt|possession|sack/i.test(s.name)).slice(0,14),scoring:score,verified:comp.map((t,i)=>total(score[i])===Number(t.score||0)),leaders,highlights,lastPlay:d.plays?.at?.(-1)?.text,drive};
+  state.details[g.id]={headline:d.header?.competitions?.[0]?.status?.type?.detail||(g.state==='in'?'In progress':'Final'),teams:comp,stats:moveInterceptionsUnderPassing([...rows.values()].filter(s=>/yard|passing|comp|rushing|first down|turnover|penalt|possession|sack|intercept/i.test(s.name))).slice(0,14),scoring:score,verified:comp.map((t,i)=>total(score[i])===Number(t.score||0)),leaders,highlights,lastPlay:d.plays?.at?.(-1)?.text,drive};
  }catch{}
  if(!silent)state.loading=null;
  render();
@@ -272,7 +272,7 @@ async function loadGameDetails(){
    const logoFor=(teamId)=>liveCompetitors.find(c=>String(c.team?.id)===String(teamId))?.team?.logo??'';
    drive={situation,description:d.drives?.current?.description??'',winProb,homeTimeouts:gameSituation?.homeTimeouts??null,awayTimeouts:gameSituation?.awayTimeouts??null,clockText:liveMeta?.status?.type?.shortDetail??'',recordFor,logoFor};
   }
-  state.gameDetails={headline:d.header?.competitions?.[0]?.status?.type?.detail||'',teams:comp,stats:[...rows.values()].filter(s=>/yard|passing|comp|rushing|first down|turnover|penalt|possession|sack/i.test(s.name)).slice(0,10),leaders,possessionTeamId,lastPlay:d.plays?.at?.(-1)?.text,highlights,drive};
+  state.gameDetails={headline:d.header?.competitions?.[0]?.status?.type?.detail||'',teams:comp,stats:moveInterceptionsUnderPassing([...rows.values()].filter(s=>/yard|passing|comp|rushing|first down|turnover|penalt|possession|sack|intercept/i.test(s.name))).slice(0,10),leaders,possessionTeamId,lastPlay:d.plays?.at?.(-1)?.text,highlights,drive};
  }catch{state.gameDetails=null}
  state.detailsLoading=false;render();
 }
@@ -380,6 +380,19 @@ function renderGameDetailPanel(g){
  return `<div class="legacy-game-panel">${renderArchive(d,g)}</div>`;
 }
 function awayHomeTeams(teams){return [teams.find(t=>t.homeAway==='away'),teams.find(t=>t.homeAway==='home')]}
+// Interceptions come back from ESPN as their own standalone stat, not grouped under "Passing" --
+// move it to sit right under the passing-yards/comp-att/yards-per-pass rows so it reads as part
+// of that group, regardless of where the API happened to place it in the boxscore.
+function moveInterceptionsUnderPassing(stats){
+ const intIndex=stats.findIndex(s=>/intercept/i.test(s.name));
+ if(intIndex<0)return stats;
+ const [intStat]=stats.splice(intIndex,1);
+ let anchor=stats.findIndex(s=>/yards per pass/i.test(s.name));
+ if(anchor<0)anchor=stats.findIndex(s=>/comp\/att/i.test(s.name));
+ if(anchor<0)anchor=stats.findIndex(s=>/^passing$/i.test(s.name));
+ stats.splice(anchor>-1?anchor+1:stats.length,0,intStat);
+ return stats;
+}
 function renderLinescore(awayTeam,homeTeam){
  const extract=(team)=>(team?.linescores??[]).map(l=>String(l?.displayValue??l?.value??l??'-'));
  const awayScores=extract(awayTeam);
