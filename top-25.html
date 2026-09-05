@@ -110,7 +110,7 @@ img{max-width:100%;display:block;vertical-align:middle}
 <body>
 <main id="app"></main>
 <script>
-const APP_VERSION='2026-09-05-5';
+const APP_VERSION='2026-09-05-6';
 (async function(){try{const res=await fetch(location.pathname+'?_cv='+Date.now(),{cache:'no-store'});
 const live=(await res.text()).match(/APP_VERSION='([^']+)'/);
 if(live&&live[1]!==APP_VERSION&&!sessionStorage.getItem('top25-v-'+live[1])){
@@ -118,6 +118,18 @@ sessionStorage.setItem('top25-v-'+live[1],'1');location.replace(location.pathnam
 
 const mountainTime=(date)=>date.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZone:'America/Denver'});
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function formatLeaderValue(athlete,labels){
+ if(athlete.displayValue)return String(athlete.displayValue);
+ const stats=athlete.stats??[];
+ if(!labels||!labels.length)return stats.slice(0,3).join(' · ');
+ const parts=[];
+ if(stats[0]!=null)parts.push(`${labels[0]??''} ${stats[0]}`.trim());
+ const ydsIndex=labels.findIndex(l=>/^yds$/i.test(l));
+ if(ydsIndex>=0&&stats[ydsIndex]!=null)parts.push(`${stats[ydsIndex]} YDS`);
+ const tdIndex=labels.findIndex(l=>/^td$/i.test(l));
+ if(tdIndex>=0&&stats[tdIndex]!=null)parts.push(`${stats[tdIndex]} TD`);
+ return parts.length?parts.join(', '):stats.slice(0,3).join(' · ');
+}
 
 const teams=[
  {rank:1,name:'Ohio State',abbr:'OSU',espnId:'194',record:'0–0',prev:1,points:1672,pf:'—',pa:'—',ypg:'—',color:'#ba0c2f'},
@@ -273,7 +285,7 @@ async function loadGameDetails(){
     if(index===0)row.away=stat.displayValue??'—';if(index===1)row.home=stat.displayValue??'—';rows.set(stat.name,row);
    });
   });
-  const leaders=[];(data.boxscore?.players??[]).forEach(teamBlock=>{const teamId=String(teamBlock.team?.id??'');(teamBlock.statistics??[]).slice(0,4).forEach(category=>{const athlete=(category.athletes??[])[0];if(!athlete)return;const stats=athlete.stats??[];leaders.push({teamId,category:category.displayName??category.name??'Leader',name:athlete.athlete?.displayName??athlete.athlete?.shortName??'Team leader',value:String(athlete.displayValue??stats.slice(0,3).join(' · ')??'—')})})});
+  const leaders=[];(data.boxscore?.players??[]).forEach(teamBlock=>{const teamId=String(teamBlock.team?.id??'');(teamBlock.statistics??[]).slice(0,4).forEach(category=>{const athlete=(category.athletes??[])[0];if(!athlete)return;leaders.push({teamId,category:category.displayName??category.name??'Leader',name:athlete.athlete?.displayName??athlete.athlete?.shortName??'Team leader',value:formatLeaderValue(athlete,category.labels)})})});
   const drivePlays=data.drives?.current?.plays??[];
   const lastDrivePlay=drivePlays[drivePlays.length-1];
   const possessionTeamId=lastDrivePlay?String(lastDrivePlay.teamParticipants?.find(p=>p.type==='offense')?.id??lastDrivePlay.end?.team?.id??lastDrivePlay.team?.id??'')||null:null;
@@ -349,7 +361,7 @@ async function toggleGame(game,teamAbbr,force=false,silent=false){
   const scoringTotal=(index)=>touchdowns[index]*6+fieldGoals[index]*3+extraPoints[index]+twoPointConversions[index]*2+safeties[index]*2;
   const scoringSource=game.state==='in'?'ESPN (live)':'ESPN';
   const scoringVerified=normalizedTeams.map((team,index)=>scoringTotal(index)===(Number(team.score)||0));
-  const leaders=[];(data.boxscore?.players??[]).forEach(teamBlock=>{const teamId=String(teamBlock.team?.id??'');(teamBlock.statistics??[]).slice(0,4).forEach(category=>{const athlete=(category.athletes??[])[0];if(!athlete)return;const stats=athlete.stats??[];leaders.push({teamId,category:category.displayName??category.name??'Leader',name:athlete.athlete?.displayName??athlete.athlete?.shortName??'Team leader',value:String(athlete.displayValue??stats.slice(0,3).join(' · ')??'—')})})});
+  const leaders=[];(data.boxscore?.players??[]).forEach(teamBlock=>{const teamId=String(teamBlock.team?.id??'');(teamBlock.statistics??[]).slice(0,4).forEach(category=>{const athlete=(category.athletes??[])[0];if(!athlete)return;leaders.push({teamId,category:category.displayName??category.name??'Leader',name:athlete.athlete?.displayName??athlete.athlete?.shortName??'Team leader',value:formatLeaderValue(athlete,category.labels)})})});
   const important=/first down|third down|fourth down|total yards|passing|comp|yards per pass|rushing|turnover|sack|penalt|red zone|possession/i;
   const stats=[...rows.values()].filter(stat=>important.test(stat.name)).slice(0,14);
   const highlights=(data.videos??[]).slice(0,3).map(video=>({headline:String(video.headline??video.title??'Official game highlights'),thumbnail:String(video.thumbnail??''),src:String(video.links?.source?.HD?.href??video.links?.source?.full?.href??'')})).filter(video=>video.src);

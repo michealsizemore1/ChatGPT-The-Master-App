@@ -104,13 +104,25 @@ img{max-width:100%;display:block;vertical-align:middle}
 <body>
 <main id="app"></main>
 <script>
-const APP_VERSION='2026-09-05-5';
+const APP_VERSION='2026-09-05-6';
 (async function(){try{const res=await fetch(location.pathname+'?_cv='+Date.now(),{cache:'no-store'});
 const live=(await res.text()).match(/APP_VERSION='([^']+)'/);
 if(live&&live[1]!==APP_VERSION&&!sessionStorage.getItem('nflgd-v-'+live[1])){
 sessionStorage.setItem('nflgd-v-'+live[1],'1');location.replace(location.pathname+'?v='+live[1]+location.hash)}}catch(e){}})();
 
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function formatLeaderValue(athlete,labels){
+ if(athlete.displayValue)return String(athlete.displayValue);
+ const stats=athlete.stats??[];
+ if(!labels||!labels.length)return stats.slice(0,3).join(' · ');
+ const parts=[];
+ if(stats[0]!=null)parts.push(`${labels[0]??''} ${stats[0]}`.trim());
+ const ydsIndex=labels.findIndex(l=>/^yds$/i.test(l));
+ if(ydsIndex>=0&&stats[ydsIndex]!=null)parts.push(`${stats[ydsIndex]} YDS`);
+ const tdIndex=labels.findIndex(l=>/^td$/i.test(l));
+ if(tdIndex>=0&&stats[tdIndex]!=null)parts.push(`${stats[tdIndex]} TD`);
+ return parts.length?parts.join(', '):stats.slice(0,3).join(' · ');
+}
 
 const teams=[['BUF','Bills','2','AFC East'],['MIA','Dolphins','15','AFC East'],['NYJ','Jets','20','AFC East'],['NE','Patriots','17','AFC East'],['BAL','Ravens','33','AFC North'],['CIN','Bengals','4','AFC North'],['CLE','Browns','5','AFC North'],['PIT','Steelers','23','AFC North'],['IND','Colts','11','AFC South'],['JAX','Jaguars','30','AFC South'],['HOU','Texans','34','AFC South'],['TEN','Titans','10','AFC South'],['DEN','Broncos','7','AFC West'],['LAC','Chargers','24','AFC West'],['KC','Chiefs','12','AFC West'],['LV','Raiders','13','AFC West'],['DAL','Cowboys','6','NFC East'],['NYG','Giants','19','NFC East'],['PHI','Eagles','21','NFC East'],['WSH','Commanders','28','NFC East'],['CHI','Bears','3','NFC North'],['DET','Lions','8','NFC North'],['GB','Packers','9','NFC North'],['MIN','Vikings','16','NFC North'],['ATL','Falcons','1','NFC South'],['CAR','Panthers','29','NFC South'],['NO','Saints','18','NFC South'],['TB','Buccaneers','27','NFC South'],['ARI','Cardinals','22','NFC West'],['LAR','Rams','14','NFC West'],['SF','49ers','25','NFC West'],['SEA','Seahawks','26','NFC West']].map(([abbr,name,id,division])=>({abbr,name,id,division}));
 const api='https://site.api.espn.com/apis/site/v2/sports/football/nfl';
@@ -189,7 +201,7 @@ async function gameClick(g,teamAbbr,force,silent){
   });
   const total=(s)=>s[0]*6+s[1]*3+s[2]+s[3]*2+s[4]*2;
   const leaders=[];
-  (d.boxscore?.players||[]).forEach(b=>(b.statistics||[]).slice(0,4).forEach(c=>{const a=c.athletes?.[0];if(a)leaders.push({teamId:String(b.team?.id),category:c.displayName||c.name,name:a.athlete?.displayName,value:String(a.displayValue||(a.stats||[]).slice(0,3).join(' · '))})}));
+  (d.boxscore?.players||[]).forEach(b=>(b.statistics||[]).slice(0,4).forEach(c=>{const a=c.athletes?.[0];if(a)leaders.push({teamId:String(b.team?.id),category:c.displayName||c.name,name:a.athlete?.displayName,value:formatLeaderValue(a,c.labels)})}));
   let drive=null;
   if(g.state==='in'){
    const drivePlays=d.drives?.current?.plays??[];
@@ -233,7 +245,7 @@ async function loadGameDetails(){
   const rows=new Map();
   (d.boxscore?.teams||[]).forEach(b=>{const i=comp.findIndex(x=>String(x.team?.id)===String(b.team?.id));(b.statistics||[]).forEach(s=>{const q=rows.get(s.name)||{name:s.label||s.name,away:'—',home:'—'};if(i===0)q.away=s.displayValue||'—';if(i===1)q.home=s.displayValue||'—';rows.set(s.name,q)})});
   const leaders=[];
-  (d.boxscore?.players||[]).forEach(b=>(b.statistics||[]).slice(0,4).forEach(c=>{const a=c.athletes?.[0];if(a)leaders.push({teamId:String(b.team?.id),category:c.displayName||c.name,name:a.athlete?.displayName,value:String(a.displayValue||(a.stats||[]).slice(0,3).join(' · '))})}));
+  (d.boxscore?.players||[]).forEach(b=>(b.statistics||[]).slice(0,4).forEach(c=>{const a=c.athletes?.[0];if(a)leaders.push({teamId:String(b.team?.id),category:c.displayName||c.name,name:a.athlete?.displayName,value:formatLeaderValue(a,c.labels)})}));
   const drivePlays=d.drives?.current?.plays??[];
   const lastDrivePlay=drivePlays[drivePlays.length-1];
   const possessionTeamId=lastDrivePlay?String(lastDrivePlay.teamParticipants?.find(p=>p.type==='offense')?.id??lastDrivePlay.end?.team?.id??lastDrivePlay.team?.id??'')||null:null;
