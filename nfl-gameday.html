@@ -109,7 +109,7 @@ img{max-width:100%;display:block;vertical-align:middle}
 <body>
 <main id="app"></main>
 <script>
-const APP_VERSION='2026-09-05-12';
+const APP_VERSION='2026-09-06-1';
 (async function(){try{const res=await fetch(location.pathname+'?_cv='+Date.now(),{cache:'no-store'});
 const live=(await res.text()).match(/APP_VERSION='([^']+)'/);
 if(live&&live[1]!==APP_VERSION&&!sessionStorage.getItem('nflgd-v-'+live[1])){
@@ -503,11 +503,13 @@ function renderPlayoff(){
 function render(){
  document.getElementById('app').innerHTML=`
   ${renderTopbar()}
-  ${renderScoreStrip()}
   <div class="page">
    ${renderHero()}
-   ${renderLiveCenter()}
    ${renderTeamsSection()}
+  </div>
+  ${renderScoreStrip()}
+  <div class="page">
+   ${renderLiveCenter()}
    ${renderMetrics()}
    ${renderNews()}
    ${renderPlayoff()}
@@ -522,7 +524,7 @@ document.getElementById('app').addEventListener('click',e=>{
  const closeLiveBtn=e.target.closest('[data-close-live]');
  if(closeLiveBtn){state.selectedGameId=null;state.gameDetails=null;render();return}
  const scoreSelectBtn=e.target.closest('[data-score-select]');
- if(scoreSelectBtn){state.selectedGameId=scoreSelectBtn.dataset.scoreSelect;loadGameDetails();return}
+ if(scoreSelectBtn){state.selectedGameId=scoreSelectBtn.dataset.scoreSelect;loadGameDetails();requestAnimationFrame(()=>requestAnimationFrame(()=>document.querySelector('.live-center')?.scrollIntoView({behavior:'smooth',block:'start'})));return}
  const teamBtn=e.target.closest('[data-team-click]');
  if(teamBtn){teamClick(teamBtn.dataset.teamClick);return}
  const scheduleViewBtn=e.target.closest('[data-schedule-view]');

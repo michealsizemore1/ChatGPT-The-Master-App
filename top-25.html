@@ -115,7 +115,7 @@ img{max-width:100%;display:block;vertical-align:middle}
 <body>
 <main id="app"></main>
 <script>
-const APP_VERSION='2026-09-05-12';
+const APP_VERSION='2026-09-06-1';
 (async function(){try{const res=await fetch(location.pathname+'?_cv='+Date.now(),{cache:'no-store'});
 const live=(await res.text()).match(/APP_VERSION='([^']+)'/);
 if(live&&live[1]!==APP_VERSION&&!sessionStorage.getItem('top25-v-'+live[1])){
@@ -620,14 +620,16 @@ function renderMetrics(){
 function render(){
  document.getElementById('app').innerHTML=`
   ${renderTopbar()}
-  ${renderScoreStrip()}
   <div class="page" id="top">
    ${renderHero()}
-   ${renderLiveCenter()}
    <section class="content-grid">
     ${renderRankings()}
     ${renderSidebar()}
    </section>
+  </div>
+  ${renderScoreStrip()}
+  <div class="page">
+   ${renderLiveCenter()}
    ${renderMetrics()}
    <footer><span>TOP 25</span><p>2026 AP preseason rankings · Poll released August 17, 2026</p><small>Built for My Life Master App</small></footer>
   </div>
@@ -639,7 +641,7 @@ document.getElementById('app').addEventListener('click',e=>{
  if(navEl){e.preventDefault();navigate(navEl.dataset.nav);return}
  if(e.target.closest('[data-close-live]')){state.selectedGameId=null;state.gameDetails=null;render();return}
  const scoreEl=e.target.closest('[data-score-select]');
- if(scoreEl){state.selectedGameId=scoreEl.dataset.scoreSelect;loadGameDetails();return}
+ if(scoreEl){state.selectedGameId=scoreEl.dataset.scoreSelect;loadGameDetails();requestAnimationFrame(()=>requestAnimationFrame(()=>document.querySelector('.live-center')?.scrollIntoView({behavior:'smooth',block:'start'})));return}
  const teamEl=e.target.closest('[data-team-toggle]');
  if(teamEl){toggleSchedule(teamEl.dataset.teamToggle);return}
  const gameEl=e.target.closest('[data-game-id]');
