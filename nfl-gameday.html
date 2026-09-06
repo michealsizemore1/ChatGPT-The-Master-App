@@ -111,7 +111,7 @@ img{max-width:100%;display:block;vertical-align:middle}
 <body>
 <main id="app"></main>
 <script>
-const APP_VERSION='2026-09-06-8';
+const APP_VERSION='2026-09-06-9';
 (async function(){try{const res=await fetch(location.pathname+'?_cv='+Date.now(),{cache:'no-store'});
 const live=(await res.text()).match(/APP_VERSION='([^']+)'/);
 if(live&&live[1]!==APP_VERSION&&!sessionStorage.getItem('nflgd-v-'+live[1])){
@@ -143,21 +143,30 @@ const nflStories=[['Opening week','Regular-season results and storylines will up
 function readStoredSection(){
  try{
   const saved=sessionStorage.getItem('nflgd-section');
-  return ['Overview','Teams','Standings','Scores','Playoffs'].includes(saved)?saved:'Overview';
+  return ['Overview','Rankings','Standings','Scores','Playoffs'].includes(saved)?saved:'Overview';
  }catch(e){return 'Overview'}
 }
 function storeSection(section){
  try{sessionStorage.setItem('nflgd-section',section)}catch(e){}
 }
-const state={section:readStoredSection(),games:[],open:null,openGame:null,schedules:{},details:{},loading:null,query:'',sort:'division',metricView:'team',scheduleViewCurrent:'all',selectedGameId:null,gameDetails:null,detailsLoading:false};
+const state={section:readStoredSection(),games:[],open:null,openGame:null,schedules:{},details:{},loading:null,query:'',sort:'rank',metricView:'team',scheduleViewCurrent:'all',selectedGameId:null,gameDetails:null,detailsLoading:false};
 function navigate(destination){
  state.section=destination;storeSection(destination);render();
  window.scrollTo(0,0);
 }
 
 function find(id){return state.games.find(g=>g.competitions?.[0]?.competitors?.some(x=>String(x.team?.id)===id))}
+// Shared win-percentage-with-tiebreak score, used both to rank teams league-wide (the small
+// rank badge, and the flat Rankings sort) and to rank them within their own division.
+function rankValue(candidate){
+ const own=find(candidate.id)?.competitions?.[0]?.competitors?.find(x=>String(x.team?.id)===candidate.id);
+ const parts=String(own?.records?.[0]?.summary||'0-0-0').split('-').map(Number);
+ const wins=parts[0]||0,losses=parts[1]||0,ties=parts[2]||0,total=wins+losses+ties;
+ return total?((wins+ties*.5)/total)*100000+wins*100-losses:0;
+}
 function visibleTeams(){
  const list=teams.filter(t=>(t.name+t.abbr+t.division).toLowerCase().includes(state.query.toLowerCase()));
+ if(state.sort==='rank')return [...list].sort((a,b)=>rankValue(b)-rankValue(a));
  if(state.sort==='alphabetical')return [...list].sort((a,b)=>a.name.localeCompare(b.name));
  if(state.sort==='kickoff')return [...list].sort((a,b)=>new Date(find(a.id)?.date||'2999-01-01').getTime()-new Date(find(b.id)?.date||'2999-01-01').getTime());
  if(state.sort==='status')return [...list].sort((a,b)=>({in:0,post:1,pre:2}[find(a.id)?.status?.type?.state]??3)-({in:0,post:1,pre:2}[find(b.id)?.status?.type?.state]??3));
@@ -165,8 +174,7 @@ function visibleTeams(){
  return list;
 }
 function standingFor(team){
- const value=(candidate)=>{const own=find(candidate.id)?.competitions?.[0]?.competitors?.find(x=>String(x.team?.id)===candidate.id);const parts=String(own?.records?.[0]?.summary||'0-0-0').split('-').map(Number);const wins=parts[0]||0,losses=parts[1]||0,ties=parts[2]||0,total=wins+losses+ties;return total?((wins+ties*.5)/total)*100000+wins*100-losses:0};
- const rank=(pool)=>{const score=value(team);const better=pool.filter(candidate=>value(candidate)>score).length;const tied=pool.filter(candidate=>value(candidate)===score).length>1;return `${tied?'T':''}${better+1}`};
+ const rank=(pool)=>{const score=rankValue(team);const better=pool.filter(candidate=>rankValue(candidate)>score).length;const tied=pool.filter(candidate=>rankValue(candidate)===score).length>1;return `${tied?'T':''}${better+1}`};
  return {division:rank(teams.filter(candidate=>candidate.division===team.division)),league:rank(teams)};
 }
 
@@ -290,7 +298,7 @@ async function loadGameDetails(){
 }
 
 function renderTopbar(){
- const items=['Overview','Teams','Standings','Scores','Playoffs'];
+ const items=['Overview','Rankings','Standings','Scores','Playoffs'];
  return `<header class="topbar"><a class="home-button" href="https://michealsizemore1.github.io/ChatGPT-The-Master-App/">&#8962; <span>Home</span></a><button class="brand" data-nav="Overview"><span class="brand-mark">NFL</span><b>NFL GAMEDAY</b></button><nav>${items.map(x=>`<button class="${state.section===x?'active':''}" ${state.section===x?'aria-current="page"':''} data-nav="${x}">${x}</button>`).join('')}</nav></header>`;
 }
 function formatOnThe(text){
@@ -365,16 +373,17 @@ function renderTeamRow(t){
  const schedule=expanded?renderSchedule(t):'';
  return `<div class="team-entry">${row}${schedule}</div>`;
 }
-function renderTeamsSection(){
+function renderRankingsSection(){
  const list=visibleTeams();
  const rows=list.map((t,i)=>{
   const heading=(state.sort==='division'&&(i===0||list[i-1].division!==t.division))?`<div class="division-heading">${esc(t.division)}</div>`:'';
   return heading+renderTeamRow(t);
  }).join('');
- return `<section class="panel" id="teams">
-  <div class="panel-title"><div><p class="eyebrow">LEAGUE DIRECTORY</p><h2>NFL teams</h2></div>
+ return `<section class="panel" id="rankings">
+  <div class="panel-title"><div><p class="eyebrow">ALL 32 TEAMS</p><h2>Rankings</h2></div>
    <div class="team-controls">
     <select class="team-sort" id="sort-select" aria-label="Sort NFL teams">
+     <option value="rank" ${state.sort==='rank'?'selected':''}>Rank</option>
      <option value="division" ${state.sort==='division'?'selected':''}>Division</option>
      <option value="alphabetical" ${state.sort==='alphabetical'?'selected':''}>Alphabetical</option>
      <option value="record" ${state.sort==='record'?'selected':''}>Record</option>
@@ -556,8 +565,8 @@ function renderFooter(){
 function renderOverviewPage(){
  return `<div class="page" id="top">${renderHero()}<div class="overview-panels">${renderNews()}${renderMetrics()}</div>${renderFooter()}</div>`;
 }
-function renderTeamsPage(){
- return `<div class="page">${renderTeamsSection()}${renderFooter()}</div>`;
+function renderRankingsPage(){
+ return `<div class="page">${renderRankingsSection()}${renderFooter()}</div>`;
 }
 function renderStandingsPage(){
  return `<div class="page">${renderStandings()}${renderFooter()}</div>`;
@@ -569,7 +578,7 @@ function renderPlayoffsPage(){
  return `<div class="page">${renderPlayoff()}${renderFooter()}</div>`;
 }
 function render(){
- const pages={Overview:renderOverviewPage,Teams:renderTeamsPage,Standings:renderStandingsPage,Scores:renderScoresPage,Playoffs:renderPlayoffsPage};
+ const pages={Overview:renderOverviewPage,Rankings:renderRankingsPage,Standings:renderStandingsPage,Scores:renderScoresPage,Playoffs:renderPlayoffsPage};
  const page=pages[state.section]||renderOverviewPage;
  document.getElementById('app').innerHTML=`${renderTopbar()}${page()}`;
 }
