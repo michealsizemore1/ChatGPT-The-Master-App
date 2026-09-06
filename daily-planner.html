@@ -1540,7 +1540,7 @@ body{
   <div id="aiWeeklyBox" class="ai-box"></div>
   <div id="wDigest" class="week-digest"></div>
   <h2 class="day-score-heading">Day Score</h2><div id="wDayScore"></div>
-  <h2>Growth / Skills <small style="font-size:.62rem;font-weight:500;color:#64748b;">Language, Guitar and Reading / Audiobook</small></h2><div id="wGrowth"></div><h2>Fitness <small style="font-size:.62rem;font-weight:500;color:#64748b;">From Activities and Steps</small></h2><div id="wFitness"></div><h2>Wellness</h2><div id="wWellness"></div>
+  <h2>Growth / Skills <small style="font-size:.62rem;font-weight:500;color:#64748b;">Language and Guitar</small></h2><div id="wGrowth"></div><h2>Fitness <small style="font-size:.62rem;font-weight:500;color:#64748b;">From Activities and Steps</small></h2><div id="wFitness"></div><h2>Wellness</h2><div id="wWellness"></div>
 <h2>Nutrition</h2><div id="wNutrition"></div>
 <h2>Micronutrients</h2><div id="wNutritionMicro"></div>
 <h2>Spirituality</h2><div id="wSpirituality"></div>
@@ -11030,7 +11030,7 @@ function meditInitTab(){
 
 function renderGrowthActivityReport(hostId,periods){
   var host=document.getElementById(hostId);if(!host)return;
-  var entries=getSkillEntries(),specs=[['language','Language'],['guitar','Guitar'],['reading','Reading / Audiobook']];
+  var entries=getSkillEntries(),specs=[['language','Language'],['guitar','Guitar']];
   function kind(entry){var cat=String(entry&&entry.category||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();if(cat==='financial videos'||cat==='retirement videos')return'financial';if(cat==='udemy')return'udemy';if(cat==='gun range'||cat==='shooting')return'gun';if(cat==='language'||cat==='spanish'||cat==='language learning')return'language';if(cat==='guitar')return'guitar';if(cat==='reading audiobook'||cat==='reading'||cat==='audiobook')return'reading';return'';}
   function totals(period){var latest={};entries.forEach(function(entry){if(!entry||!entry.date||entry.date<period.start||entry.date>period.end)return;var k=kind(entry);if(k)latest[entry.date+'|'+k]=entry;});var out={};Object.keys(latest).forEach(function(key){var k=kind(latest[key]);out[k]=(out[k]||0)+parseSkillTimeMins(latest[key].time);});var cursor=new Date(period.start+'T12:00:00'),finish=new Date(period.end+'T12:00:00');while(cursor<=finish){var dateKey=dk(cursor);if(!latest[dateKey+'|reading']){try{var saved=JSON.parse(localStorage.getItem('planner_'+dateKey)||'{}'),legacy=parseTimedMins(saved.gaAudiobookTime);if(legacy)out.reading=(out.reading||0)+legacy;}catch(ignore){}}cursor.setDate(cursor.getDate()+1);}return out;}
   var grand={},rows=periods.map(function(period){var values=totals(period);specs.forEach(function(spec){grand[spec[0]]=(grand[spec[0]]||0)+(values[spec[0]]||0);});return'<tr><td>'+escHtml(period.label)+'</td>'+specs.map(function(spec){return'<td>'+((values[spec[0]]||0)?fmtMinsSeconds(values[spec[0]]):'-')+'</td>';}).join('')+'</tr>';});
