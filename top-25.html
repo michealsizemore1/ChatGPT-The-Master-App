@@ -62,7 +62,7 @@ img{max-width:100%;display:block;vertical-align:middle}
 .field-track{position:relative;flex:1;background:repeating-linear-gradient(90deg,#16281f,#16281f 9.9%,#1c3226 9.9%,#1c3226 10%)}
 .first-down-marker{position:absolute;top:0;bottom:0;width:2px;background:#ffd54a;transform:translateX(-50%)}
 .ball-marker{position:absolute;top:50%;left:0;transform:translate(-50%,-50%);font-size:15px;filter:drop-shadow(0 0 2px #000)}
-.linescore{margin:2px 0 14px;border:1px solid #ffffff1c;border-radius:4px;overflow:hidden}
+.linescore{margin:2px 0 14px;background:#000;border:1px solid #ffffff1c;border-radius:4px;overflow:hidden}
 .linescore-row{display:grid;align-items:center;padding:6px 10px;color:#fff;font-size:13px}
 .linescore-row+.linescore-row{border-top:1px solid #ffffff14}
 .linescore-row span{text-align:center}
@@ -115,7 +115,7 @@ img{max-width:100%;display:block;vertical-align:middle}
 <body>
 <main id="app"></main>
 <script>
-const APP_VERSION='2026-09-06-8';
+const APP_VERSION='2026-09-06-9';
 (async function(){try{const res=await fetch(location.pathname+'?_cv='+Date.now(),{cache:'no-store'});
 const live=(await res.text()).match(/APP_VERSION='([^']+)'/);
 if(live&&live[1]!==APP_VERSION&&!sessionStorage.getItem('top25-v-'+live[1])){
