@@ -1530,7 +1530,6 @@ body{
     <div id="goalBars"></div>
     <div class="goals-settings" id="goalsSettings">
       <div class="goal-input-row"><label style="width:110px;">Miles / week</label><input type="number" id="gMiles" min="0" placeholder="e.g. 25"> mi</div>
-      <div class="goal-input-row"><label style="width:110px;">Audiobook</label><input type="number" id="gAudio" min="0" placeholder="e.g. 120"> min</div>
       <div class="goal-input-row"><label style="width:110px;">Bible days</label><input type="number" id="gBible" min="0" max="7" placeholder="7"> /7</div>
       <div class="goal-input-row"><label style="width:110px;">Prayer days</label><input type="number" id="gPrayer" min="0" max="7" placeholder="7"> /7</div>
       <div class="goal-input-row"><label style="width:110px;">Running days</label><input type="number" id="gExercise" min="0" max="7" placeholder="4"> /7</div>
@@ -4611,7 +4610,7 @@ function renderWeeklyDigest(days,tot,wDayKeys,lbls){
   var daysLogged=days.filter(function(d){return d.score||d.miles||d.calories||d.audiobook||d.sleep;}).length;
   var activeDays=days.filter(function(d){return d.miles>0;}).length;
   var goals={};try{goals=JSON.parse(localStorage.getItem('weekly_goals')||'{}');}catch(ignore){}
-  var goalRows=[{name:'Miles',target:Number(goals.Miles)||0,actual:tot.miles||0},{name:'Audiobook',target:Number(goals.Audio)||0,actual:tot.audiobook||0},{name:'Bible',target:Number(goals.Bible)||0,actual:sp.bibleAudio||0},{name:'Prayer',target:Number(goals.Prayer)||0,actual:sp.aiPrayer||0},{name:'Running',target:Number(goals.Exercise)||0,actual:activeDays}].filter(function(goal){return goal.target>0;});
+  var goalRows=[{name:'Miles',target:Number(goals.Miles)||0,actual:tot.miles||0},{name:'Bible',target:Number(goals.Bible)||0,actual:sp.bibleAudio||0},{name:'Prayer',target:Number(goals.Prayer)||0,actual:sp.aiPrayer||0},{name:'Running',target:Number(goals.Exercise)||0,actual:activeDays}].filter(function(goal){return goal.target>0;});
   var reached=goalRows.filter(function(goal){return goal.actual>=goal.target;}).length;
   var goalText=goalRows.length?(reached+' of '+goalRows.length+' weekly targets reached'):'Set weekly targets to measure progress';
   var coverage=[
@@ -13085,13 +13084,13 @@ function migrateActivityDates(){
 // ── Weekly Goal Targets ───────────────────────────────────────────────────────
 function loadGoalSettings(){
   const g=JSON.parse(localStorage.getItem('weekly_goals')||'{}');
-  ['Miles','Audio','Fin','Bible','Prayer','Exercise'].forEach(k=>{
+  ['Miles','Fin','Bible','Prayer','Exercise'].forEach(k=>{
     const el=document.getElementById('g'+k);if(el&&g[k])el.value=g[k];
   });
 }
 function saveGoals(){
   const g={};
-  ['Miles','Audio','Fin','Bible','Prayer','Exercise'].forEach(k=>{
+  ['Miles','Fin','Bible','Prayer','Exercise'].forEach(k=>{
     const el=document.getElementById('g'+k);if(el&&el.value)g[k]=parseFloat(el.value)||0;
   });
   localStorage.setItem('weekly_goals',JSON.stringify(g));
@@ -13119,7 +13118,6 @@ function renderGoals(){
   }
   const actuals=[
     {key:'Miles',label:'Miles',actual:parseFloat(miles.toFixed(1)),unit:'mi',fmt:v=>v.toFixed(1)},
-    {key:'Audio',label:'Audiobook',actual:audioMin,unit:'min',fmt:v=>{const mins=Math.round(Number(v)||0);return mins>=60?Math.floor(mins/60)+'h '+(mins%60?mins%60+'m':''):mins+'m'}},
     {key:'Bible',label:'Bible',actual:bibleD,unit:'/7',fmt:v=>v+'/7'},
     {key:'Prayer',label:'Prayer',actual:prayerD,unit:'/7',fmt:v=>v+'/7'},
     {key:'Exercise',label:'Running',actual:exD,unit:'/7',fmt:v=>v+'/7'},
