@@ -115,7 +115,7 @@ img{max-width:100%;display:block;vertical-align:middle}
 <main id="app"></main>
 <a id="homeButton" href="index.html" title="Home" aria-label="Return to My Life Master App home" style="position:fixed;left:10px;bottom:10px;z-index:2147483000;display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;background:#14161a;color:#fff;text-decoration:none;font:700 18px/1 -apple-system,Segoe UI,Roboto,Arial,sans-serif;padding:0;border-radius:50%;box-shadow:0 4px 12px rgba(0,0,0,.24);opacity:.68;border:1px solid rgba(255,255,255,.18)" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.68">&#8962;</a>
 <script>
-const APP_VERSION='2026-09-06-12';
+const APP_VERSION='2026-09-06-13';
 (async function(){try{const res=await fetch(location.pathname+'?_cv='+Date.now(),{cache:'no-store'});
 const live=(await res.text()).match(/APP_VERSION='([^']+)'/);
 if(live&&live[1]!==APP_VERSION&&!sessionStorage.getItem('top25-v-'+live[1])){
@@ -164,15 +164,15 @@ const teams=[
  {rank:25,name:'Missouri',abbr:'MIZ',espnId:'142',record:'0–0',prev:25,points:117,pf:'—',pa:'—',ypg:'—',color:'#000000'}
 ];
 const stories=[
- ['Poll leader','Ohio State opens at No. 1 with 40 first-place votes'],
- ['Highest ever','Oregon earns its highest preseason ranking at No. 2'],
- ['Champion watch','Defending national champion Indiana begins at No. 6'],
- ['Irish rising','Notre Dame earns its highest preseason ranking since 2006'],
- ['Conference watch','The SEC leads all conferences with nine ranked teams'],
- ['Big 12 favorite','Conference champion Texas Tech leads the Big 12 at No. 12'],
- ['ACC trio','Miami, SMU and Louisville represent the ACC in the Top 25'],
- ['Back in the poll','No. 23 Houston earns its first preseason ranking in four years'],
- ['Big Ten streak','The Big Ten enters 2026 after winning three straight CFP titles']
+ ['Poll leader delivers','No. 1 Ohio State rolls past Ball State, 56-3, ahead of a Sept. 12 showdown with Texas'],
+ ['Statement win','The LSU rout of Clemson has the Tigers in position to jump toward No. 1 in the next poll'],
+ ['Big debut','Arch Manning throws for 305 yards and four touchdowns in the Texas opener'],
+ ['New coach, wild finish','Kyle Whittingham survives a last-second Hail Mary in his Michigan debut against Western Michigan'],
+ ['Fresh start in Happy Valley','Matt Campbell and Penn State open with a 45-0 shutout'],
+ ['Freshman phenom','Tennessee freshman Faizon Brandon throws three touchdowns in the first half of his debut'],
+ ['Transfer connection','Indiana transfers Josh Hoover and Nick Marsh click early in a 52-16 win over North Texas'],
+ ['Opening statement','Georgia opens the season with a 63-3 rout of Tennessee State'],
+ ['Quarterback battle','The Iowa competition between Hank Brown and Jeremy Hecklinski continues after a 33-0 half']
 ];
 const teamStats=[
  ['Third-down conversion %','Drive sustainability and the ability to keep the offense on the field.'],
