@@ -90,8 +90,8 @@ function nextEvent(t){const now=Date.now();return(t.events||[]).find(e=>new Date
 function readStoredSection(){
   try{
     const saved=sessionStorage.getItem('thew-section');
-    return ['Teams','Scores','Standings','Playoffs','FIBA'].includes(saved)?saved:'Teams';
-  }catch(e){return 'Teams'}
+    return ['Overview','Rankings','Standings','Scores','Playoffs','FIBA'].includes(saved)?saved:'Overview';
+  }catch(e){return 'Overview'}
 }
 function storeSection(section){
   try{sessionStorage.setItem('thew-section',section)}catch(e){}
@@ -111,12 +111,12 @@ function render(){
   document.getElementById('app').classList.toggle('hide',isFiba);
   document.getElementById('fibaView').classList.toggle('hide',!isFiba);
   if(isFiba)return;
-  const pages={Teams:renderTeamsPage,Scores:renderScoresPage,Standings:renderStandingsPage,Playoffs:renderPlayoffsPage};
-  const page=pages[state.section]||renderTeamsPage;
+  const pages={Overview:renderOverviewPage,Rankings:renderRankingsPage,Standings:renderStandingsPage,Scores:renderScoresPage,Playoffs:renderPlayoffsPage};
+  const page=pages[state.section]||renderOverviewPage;
   document.getElementById('app').innerHTML=page();
 }
 function renderTopbar(){
-  const items=['Teams','Scores','Standings','Playoffs','FIBA'];
+  const items=['Overview','Rankings','Standings','Scores','Playoffs','FIBA'];
   return `<div class="nav"><div class="brand"><strong>THE W</strong><span>WNBA command center</span></div><nav class="tabs" aria-label="WNBA sections">${items.map(x=>`<button class="${state.section===x?'active':''}" ${state.section===x?'aria-current="page"':''} data-nav="${x}">${x}</button>`).join('')}</nav></div>`;
 }
 function renderMetricsSection(){
@@ -190,8 +190,11 @@ function teamListInnerHtml(){
     }).join('');
   }).join('');
 }
-function renderTeamsPage(){
-  return `<div class="hero"><div class="eyebrow">Eastern &amp; Western Conferences · All 15 teams</div><div class="hero-row"><h1>The W</h1><div class="season">2026 SEASON <span class="status">LIVE</span></div></div></div><div class="panel"><div class="search"><input id="teamSearch" type="search" placeholder="⌕ Search teams" aria-label="Search teams" value="${esc(state.query)}"></div><div class="table-head"><span>Rank</span><span>Team</span><span>Record</span><span>Next</span></div><div id="teamList" class="${teamsStatus==='loading'?'loading':''}">${teamListInnerHtml()}</div></div>${renderMetricsSection()}${renderStoriesSection()}`;
+function renderOverviewPage(){
+  return `<div class="hero"><div class="eyebrow">Eastern &amp; Western Conferences · All 15 teams</div><div class="hero-row"><h1>The W</h1><div class="season">2026 SEASON <span class="status">LIVE</span></div></div></div>${renderStoriesSection()}${renderMetricsSection()}`;
+}
+function renderRankingsPage(){
+  return `<div class="panel"><div class="search"><input id="teamSearch" type="search" placeholder="⌕ Search teams" aria-label="Search teams" value="${esc(state.query)}"></div><div class="table-head"><span>Rank</span><span>Team</span><span>Record</span><span>Next</span></div><div id="teamList" class="${teamsStatus==='loading'?'loading':''}">${teamListInnerHtml()}</div></div>`;
 }
 function scoreCardsHtml(events){
   return events.map(e=>{
@@ -215,7 +218,7 @@ function scoresListInnerHtml(){
   return scoreCardsHtml(scoresEvents);
 }
 function renderScoresPage(){
-  return `<div class="section-card"><div class="eyebrow">Daily scoreboard</div><h2>WNBA scores</h2><div class="datebar"><input id="scoreDate" type="date" value="${esc(state.scoreDate)}"><button id="loadScores">View games</button></div><div id="scoreList" class="${scoresStatus==='loading'?'loading':''}">${scoresListInnerHtml()}</div></div>${renderMetricsSection()}${renderStoriesSection()}`;
+  return `<div class="section-card"><div class="eyebrow">Daily scoreboard</div><h2>WNBA scores</h2><div class="datebar"><input id="scoreDate" type="date" value="${esc(state.scoreDate)}"><button id="loadScores">View games</button></div><div id="scoreList" class="${scoresStatus==='loading'?'loading':''}">${scoresListInnerHtml()}</div></div>`;
 }
 function standingsListInnerHtml(){
   if(teamsStatus==='loading')return'Loading standings…';
@@ -228,7 +231,7 @@ function standingsListInnerHtml(){
   }).join('');
 }
 function renderStandingsPage(){
-  return `<div class="section-card"><div class="eyebrow">League rank</div><h2>WNBA standings</h2><div class="table-head" style="grid-template-columns:38px 1fr 62px 58px"><span>#</span><span>Team</span><span>W–L</span><span>PCT</span></div><div id="standingsList" class="${teamsStatus==='loading'?'loading':''}">${standingsListInnerHtml()}</div></div>${renderMetricsSection()}${renderStoriesSection()}`;
+  return `<div class="section-card"><div class="eyebrow">League rank</div><h2>WNBA standings</h2><div class="table-head" style="grid-template-columns:38px 1fr 62px 58px"><span>#</span><span>Team</span><span>W–L</span><span>PCT</span></div><div id="standingsList" class="${teamsStatus==='loading'?'loading':''}">${standingsListInnerHtml()}</div></div>`;
 }
 async function loadPlayoffs(){
   try{
@@ -237,7 +240,7 @@ async function loadPlayoffs(){
   }catch(e){}
 }
 function renderPlayoffsPage(){
-  return `<div class="section-card"><div class="eyebrow">2026 postseason</div><h2>WNBA Playoffs</h2><p class="note">The regular season ends September 24. The first round begins September 27, semifinals begin October 4, and the WNBA Finals begin October 17. Bracket games will appear here as soon as they are posted.</p><div id="playoffList">${scoreCardsHtml(playoffsEvents)}</div></div>${renderMetricsSection()}${renderStoriesSection()}`;
+  return `<div class="section-card"><div class="eyebrow">2026 postseason</div><h2>WNBA Playoffs</h2><p class="note">The regular season ends September 24. The first round begins September 27, semifinals begin October 4, and the WNBA Finals begin October 17. Bracket games will appear here as soon as they are posted.</p><div id="playoffList">${scoreCardsHtml(playoffsEvents)}</div></div>`;
 }
 
 function playerBoxHtml(data){const blocks=data.boxscore?.players||[];if(!blocks.length)return'';const tables=blocks.map(block=>{const cat=(block.statistics||[])[0]||{},cols=(cat.names&&cat.names.length?cat.names:cat.labels||[]),athletes=cat.athletes||[];if(!cols.length||!athletes.length)return'';const played=athletes.filter(a=>!a.didNotPlay&&(a.stats||[]).length),dnp=athletes.filter(a=>a.didNotPlay||!(a.stats||[]).length);if(!played.length)return'';const teamName=block.team?.shortDisplayName||block.team?.displayName||block.team?.abbreviation||'Team';return`<div class="player-box"><div class="player-box-team">${esc(teamName)}</div><div class="player-box-scroll"><table class="player-box-table"><thead><tr><th scope="col">Player</th>${cols.map(col=>`<th scope="col">${esc(col)}</th>`).join('')}</tr></thead><tbody>${played.map(a=>{const nm=a.athlete?.shortName||a.athlete?.displayName||'—',pos=a.athlete?.position?.abbreviation||'';return`<tr${a.starter?' class="starter"':''}><th scope="row">${esc(nm)}${pos?`<small>${esc(pos)}</small>`:''}</th>${cols.map((col,n)=>`<td>${esc((a.stats||[])[n]??'—')}</td>`).join('')}</tr>`}).join('')}${(cat.totals||[]).length?`<tr class="totals"><th scope="row">Team</th>${cols.map((col,n)=>`<td>${esc(cat.totals[n]??'—')}</td>`).join('')}</tr>`:''}</tbody></table></div>${dnp.length?`<div class="player-box-dnp">Did not play: ${dnp.map(a=>esc(a.athlete?.shortName||a.athlete?.displayName||'—')).join(', ')}</div>`:''}</div>`}).filter(Boolean).join('');return tables?`<div class="boxscore-title player-box-title">PLAYER BOX SCORE</div>${tables}`:''}
