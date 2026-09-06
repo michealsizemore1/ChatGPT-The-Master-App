@@ -28,7 +28,7 @@
   </div></main>
 <script>
 const SEASON=2026, API='https://site.api.espn.com/apis/site/v2/sports/basketball/wnba';
-const APP_VERSION='2026-09-06-1';
+const APP_VERSION='2026-09-06-2';
 // GitHub Pages caches this file for ten minutes, so a phone can sit on an old copy.
 // Compare against what is actually deployed and reload once if they differ.
 (async function(){try{const res=await fetch(location.pathname+'?_cv='+Date.now(),{cache:'no-store'});const live=(await res.text()).match(/APP_VERSION='([^']+)'/);if(live&&live[1]!==APP_VERSION&&!sessionStorage.getItem('thew-v-'+live[1])){sessionStorage.setItem('thew-v-'+live[1],'1');location.replace(location.pathname+'?v='+live[1])}}catch(e){}})();
@@ -176,18 +176,17 @@ async function showGameStats(event,eventId){
   state.gameDetailsLoading=false;
   render();
 }
+// Rankings tab: plain overall league-rank order, no conference grouping
+// (matches NFL Gameday / Top 25's Rankings tab). Conference groupings still
+// belong on the Standings tab -- see standingsListInnerHtml below.
 function teamListInnerHtml(){
   if(teamsStatus==='loading')return'Loading WNBA teams…';
   const q=state.query.trim().toLowerCase(),list=teams.filter(t=>!q||`${t.displayName} ${t.abbreviation}`.toLowerCase().includes(q));
   if(!list.length)return'<div class="empty">No teams match that search.</div>';
-  const groups=['Eastern Conference','Western Conference'];
-  return groups.map(group=>{
-    const conferenceTeams=teams.filter(t=>conferenceOf(t)===group),visible=conferenceTeams.filter(t=>list.includes(t));
-    if(!visible.length)return'';
-    return `<div class="group">${group} · Overall league rank</div>`+visible.map(t=>{
-      const n=nextEvent(t),expanded=state.open===String(t.id);
-      return `<article class="team-row" data-id="${esc(t.id)}"><span class="rank">${t.leagueRank||'—'}</span>${logo(t)}<div><div class="team-name">${esc(t.displayName)}</div><div class="abbr">${esc(t.abbreviation)} · ${group.replace('ern Conference','')}</div></div><div class="record">${esc(t.record||'—')}</div><div class="view">${expanded?'Close ↑':'View ↓'}</div><div class="next">${n?esc(gameLine(n,t)):(t.scheduleLoading?'Retrying…':t.scheduleError?"Couldn't load schedule":'Schedule unavailable')}</div>${expanded?scheduleHtml(t):''}</article>`;
-    }).join('');
+  const sorted=list.slice().sort((a,b)=>(a.leagueRank||999)-(b.leagueRank||999));
+  return sorted.map(t=>{
+    const n=nextEvent(t),expanded=state.open===String(t.id);
+    return `<article class="team-row" data-id="${esc(t.id)}"><span class="rank">${t.leagueRank||'—'}</span>${logo(t)}<div><div class="team-name">${esc(t.displayName)}</div><div class="abbr">${esc(t.abbreviation)} · ${conferenceOf(t).replace('ern Conference','')}</div></div><div class="record">${esc(t.record||'—')}</div><div class="view">${expanded?'Close ↑':'View ↓'}</div><div class="next">${n?esc(gameLine(n,t)):(t.scheduleLoading?'Retrying…':t.scheduleError?"Couldn't load schedule":'Schedule unavailable')}</div>${expanded?scheduleHtml(t):''}</article>`;
   }).join('');
 }
 function renderOverviewPage(){
