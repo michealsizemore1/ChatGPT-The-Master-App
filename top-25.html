@@ -115,7 +115,7 @@ img{max-width:100%;display:block;vertical-align:middle}
 <body>
 <main id="app"></main>
 <script>
-const APP_VERSION='2026-09-06-1';
+const APP_VERSION='2026-09-06-2';
 (async function(){try{const res=await fetch(location.pathname+'?_cv='+Date.now(),{cache:'no-store'});
 const live=(await res.text()).match(/APP_VERSION='([^']+)'/);
 if(live&&live[1]!==APP_VERSION&&!sessionStorage.getItem('top25-v-'+live[1])){
@@ -232,7 +232,6 @@ function filteredTeams(){return teams.filter(t=>t.name.toLowerCase().includes(st
 function activeTeam(){return teams.find(t=>t.abbr===state.selected)??teams[0]}
 const gameStateOrder={in:0,post:1,pre:2};
 function visibleGames(){return state.liveGames.filter(game=>game.teams.some(team=>rankedIds.has(team.id))).sort((a,b)=>(gameStateOrder[a.state]??3)-(gameStateOrder[b.state]??3)||new Date(a.date)-new Date(b.date))}
-function weeklyScores(){const result={};state.weeklyGames.forEach(game=>game.teams.forEach(team=>{if(!rankedIds.has(team.id))return;const opponent=game.teams.find(entry=>entry.id!==team.id);if(!opponent)return;const prefix=team.homeAway==='away'?'AT':'VS';result[team.id]=game.state==='pre'?`${prefix} ${opponent.name} · ${mountainTime(new Date(game.date))} MT · ${game.network||'TV TBD'}`:`${prefix} ${opponent.name} · ${team.score}–${opponent.score} ${game.state==='in'?'LIVE':'FINAL'}`}));return result}
 function currentRecords(){const result={};state.weeklyGames.forEach(game=>game.teams.forEach(team=>{if(team.record)result[team.id]=team.record.replace('-','–')}));return result}
 function metricSummary(name){const hint=name.toLowerCase().split(' ')[0];const rows=Object.entries(state.metricValues).map(([abbr,values])=>{const match=Object.entries(values).find(([key])=>key.includes(hint));return match?`${abbr} ${match[1]}`:null}).filter(Boolean).slice(0,3);return rows.length?rows.join(' · '):'Waiting for season statistics'}
 
@@ -404,12 +403,12 @@ function livePollTick(){
 }
 function navigate(destination){
  state.section=destination;render();
- const ids={Overview:'top',Rankings:'rankings',Scores:'scores',Teams:'teams'};
+ const ids={Overview:'top',Standings:'rankings',Scores:'scores',Teams:'teams'};
  requestAnimationFrame(()=>document.getElementById(ids[destination])?.scrollIntoView({behavior:'smooth',block:'start'}));
 }
 
 function renderTopbar(){
- const sections=['Overview','Rankings','Scores','Teams'];
+ const sections=['Overview','Standings','Scores','Teams'];
  return `<header class="topbar">
  <a class="home-button" href="https://michealsizemore1.github.io/ChatGPT-The-Master-App/" aria-label="Return to My Life Master App">&#8962; <span>Home</span></a>
  <a class="brand" href="#top" data-nav="Overview"><span class="brand-mark">25</span><span>SATURDAY<br><b>TOP 25</b></span></a>
@@ -573,7 +572,6 @@ function renderSchedulePanel(t){
 }
 function renderRankings(){
  const filtered=filteredTeams();
- const weekly=weeklyScores();
  const records=currentRecords();
  const rows=filtered.map((t,i)=>{
   const confHeading=(i===0||conferenceOf(filtered[i-1])!==conferenceOf(t))?`<div class="conference-heading">${esc(conferenceOf(t))}</div>`:'';
@@ -582,7 +580,7 @@ function renderRankings(){
   return `<div class="team-entry">${confHeading}
    <button data-team-toggle="${t.abbr}" aria-expanded="${isExpanded}" aria-controls="schedule-${t.abbr}" class="team-row ${state.selected===t.abbr?'selected':''}">
     <b>${t.rank}</b>
-    <span class="team-name"><i class="team-logo" style="background:${t.color}"><span>${esc(t.abbr)}</span><img class="espn-logo" src="https://a.espncdn.com/i/teamlogos/ncaa/500/${t.espnId}.png" alt="${esc(t.name)} logo"></i><span><strong>${esc(t.name)}</strong><small>${esc(t.abbr)}</small><small class="weekly-score">${weekly[t.espnId]?`THIS WEEK · ${esc(weekly[t.espnId])}`:'NO GAME THIS WEEK'}</small></span></span>
+    <span class="team-name"><i class="team-logo" style="background:${t.color}"><span>${esc(t.abbr)}</span><img class="espn-logo" src="https://a.espncdn.com/i/teamlogos/ncaa/500/${t.espnId}.png" alt="${esc(t.name)} logo"></i><span><strong>${esc(t.name)}</strong><small>${esc(t.abbr)}</small></span></span>
     <span class="team-record">${esc(records[t.espnId]??t.record)}</span>
     <strong>${t.points.toLocaleString()}</strong>
     <span class="schedule-cta">${isExpanded?'Close':'View'} <i>${isExpanded?'↑':'↓'}</i></span>
@@ -591,7 +589,7 @@ function renderRankings(){
   </div>`;
  }).join('');
  return `<article class="rankings panel anchor" id="rankings">
-  <div class="panel-title"><div><p class="eyebrow">AP PRESEASON POLL · ALL 25 TEAMS</p><h2>Top 25 rankings</h2></div><button data-nav="Scores">Season status ↑</button></div>
+  <div class="panel-title"><div><p class="eyebrow">AP PRESEASON POLL · ALL 25 TEAMS</p><h2>Standings</h2></div><button data-nav="Scores">Season status ↑</button></div>
   <div class="table-head"><span>RK</span><span>TEAM</span><span>REC</span><span>PTS</span><span>SCHEDULE</span></div>
   ${rows}
  </article>`;
@@ -603,7 +601,7 @@ function renderSidebar(){
   <article class="team-card panel anchor" id="teams">
    <div class="team-card-head" style="background:${active.color}"><span>${esc(active.abbr[0])}</span><div><p>TEAM SNAPSHOT</p><h2>${esc(active.name)}</h2><small>#${active.rank} · ${esc(active.record)}</small></div></div>
    <div class="metric-grid"><div><small>POINTS / GAME</small><strong>${active.pf}</strong><span>PRESEASON — NO GAMES YET</span></div><div><small>YARDS / GAME</small><strong>${active.ypg}</strong><span>PRESEASON — NO GAMES YET</span></div><div><small>POINTS ALLOWED</small><strong>${active.pa}</strong><span>PRESEASON — NO GAMES YET</span></div><div><small>AP POINTS</small><strong>${active.points}</strong><span>2026 PRESEASON POLL</span></div></div>
-   <button class="primary" data-nav="Rankings">Choose another team</button>
+   <button class="primary" data-nav="Standings">Choose another team</button>
   </article>
   <article class="news panel"><div class="panel-title"><div><p class="eyebrow">FIELD NOTES</p><h2>Top stories</h2></div></div>${storiesHtml}</article>
  </aside>`;
