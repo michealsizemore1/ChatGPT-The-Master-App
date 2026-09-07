@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-07T18:01:47+00:00",
+  "updatedAt": "2026-09-07T19:03:18+00:00",
   "source": "Yahoo Finance public chart data",
   "quotes": {
     "SCHD": {
@@ -87,10 +87,10 @@
       "currency": "USD"
     },
     "DX-Y.NYB": {
-      "price": 98.908,
+      "price": 98.916,
       "prev": 99.176,
-      "change": -0.268,
-      "changesPercentage": -0.2702,
+      "change": -0.26,
+      "changesPercentage": -0.2622,
       "volume": 0,
       "avgVolume": 0,
       "yearHigh": 101.8,
@@ -103,8 +103,8 @@
       "prev": 4476.6,
       "change": 0.0,
       "changesPercentage": 0.0,
-      "volume": 69461,
-      "avgVolume": 13951,
+      "volume": 70458,
+      "avgVolume": 14150,
       "yearHigh": 5586.2,
       "yearLow": 3590.0,
       "marketState": "",
@@ -115,30 +115,30 @@
       "prev": 91.48,
       "change": 0.0,
       "changesPercentage": 0.0,
-      "volume": 97700,
-      "avgVolume": 272259,
+      "volume": 98569,
+      "avgVolume": 272433,
       "yearHigh": 119.48,
       "yearLow": 54.98,
       "marketState": "",
       "currency": "USD"
     },
     "BTC-USD": {
-      "price": 79184.26,
+      "price": 79160.79,
       "prev": 80351.4,
-      "change": -1167.14,
-      "changesPercentage": -1.4525,
-      "volume": 24727377920,
-      "avgVolume": 28137004786,
+      "change": -1190.61,
+      "changesPercentage": -1.4818,
+      "volume": 24916312064,
+      "avgVolume": 28174791615,
       "yearHigh": 126198.07,
       "yearLow": 57747.766,
       "marketState": "",
       "currency": "USD"
     },
     "EURUSD=X": {
-      "price": 1.1629,
+      "price": 1.1627,
       "prev": 1.1621,
-      "change": 0.0008,
-      "changesPercentage": 0.0688,
+      "change": 0.0006,
+      "changesPercentage": 0.0516,
       "volume": 0,
       "avgVolume": 0,
       "yearHigh": 1.2024,
@@ -147,10 +147,10 @@
       "currency": "USD"
     },
     "JPY=X": {
-      "price": 154.353,
+      "price": 154.348,
       "prev": 156.221,
-      "change": -1.868,
-      "changesPercentage": -1.1957,
+      "change": -1.873,
+      "changesPercentage": -1.1989,
       "volume": 0,
       "avgVolume": 0,
       "yearHigh": 163.979,
@@ -175,8 +175,8 @@
       "prev": 6.6825,
       "change": 0.0,
       "changesPercentage": 0.0,
-      "volume": 14608,
-      "avgVolume": 4002,
+      "volume": 14681,
+      "avgVolume": 4017,
       "yearHigh": 6.75,
       "yearLow": 4.483,
       "marketState": "",
@@ -221,12 +221,12 @@
       "currency": "USD"
     },
     "BTC=F": {
-      "price": 79305.0,
+      "price": 79405.0,
       "prev": 80055.0,
-      "change": -750.0,
-      "changesPercentage": -0.9369,
-      "volume": 2268,
-      "avgVolume": 7988,
+      "change": -650.0,
+      "changesPercentage": -0.8119,
+      "volume": 2275,
+      "avgVolume": 7990,
       "yearHigh": 127240.0,
       "yearLow": 57850.0,
       "marketState": "",
@@ -260,18 +260,18 @@
     }
   ],
   "news": [
+    "UBS expects the Fed to lift rates twice before the end of the year. Here\u2019s why. - Investing.com",
+    "Fiera Capital Global Asset Allocation - September 2026 Market Update - Seeking Alpha",
     "CAPITAL IDEAS: How does the stock market perform after midterms? - The Berkshire Edge",
     "US Jobs Report Stuns Wall Street as Stocks Fall - stl.news",
     "Ticker: Key inflation data on deck - Boston Herald",
-    "Possible Stock Market Crash: When to Buy and Which Stocks Could Benefit - finchannel",
     "VUN: Why the Broader U.S. Stock Market Could Be the Story Investors Are Missing - kalkine.ca",
     "US Stocks Fall as Investors Await CPI Inflation Data and Earnings - SuaraGarut.ID",
-    "Strong Jobs Data and Inflation Keep Pressure on the Fed - Investing.com",
     "Tech Stocks Offset Banking Sector Losses Amid Beijing's Capital Plan - Devdiscourse",
     "Fed Interest Rate, Meaning, Importance, Impact on Economy - Vajiram & Ravi",
-    "Market Outlook: Crude Prices and Fed Predictions This Week - India News Network",
     "Upstox launches US stock investing for Indians, offers fractional shares in over 8,000 stocks and 2,000 ETFs - Fortune India",
-    "Holiday Halt: Why S&P 500, Nasdaq are closed for trading today - The Economic Times"
+    "Holiday Halt: Why S&P 500, Nasdaq are closed for trading today - The Economic Times",
+    "The Stock Market Is Flashing a Warning Seen Only 6 Times Since 1871, and History Is Crystal Clear That a Disaster Could Be Heading Toward Wall Street - The Motley Fool"
   ],
   "economy": [
     "CPI 2026-07 | 3.5% YoY",
@@ -282,11 +282,11 @@
     "2-Year Treasury 2026-08-28 | 4.34%"
   ],
   "macro": [
-    "DXY  98.91 \u25bc0.27%",
+    "DXY  98.92 \u25bc0.26%",
     "Gold  $4,476.60 \u25b20.00%",
     "WTI  $91.48 \u25b20.00%",
-    "Bitcoin  $79,184 \u25bc1.45%",
-    "EUR/USD  1.1629 \u25b20.07%",
+    "Bitcoin  $79,161 \u25bc1.48%",
+    "EUR/USD  1.1627 \u25b20.05%",
     "USD/JPY  154.35 \u25bc1.20%",
     "VIX  15.30 \u25b25.30%",
     "Copper  $6.683 \u25b20.00%"
