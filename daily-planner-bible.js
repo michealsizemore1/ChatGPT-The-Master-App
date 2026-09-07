@@ -1398,6 +1398,17 @@ function h2SyncFromJournal(){
     state.dismissedAuto=(state.dismissedAuto||[]).filter(function(id){return id!=='coding';});
     localStorage.setItem('habits2_coding_removed_v1','1');
   }
+  // Udemy, Financial Videos, and Read-or-Listen habits removed per user request — drop any
+  // existing habit cards for them and add them to dismissedAuto so they never get suggested
+  // or auto-created again (unlike the removals above, these use the SAME autoSource ids the
+  // auto-creation logic below still checks, so a plain filter alone would let them come right
+  // back on the next sync).
+  if(!localStorage.getItem('habits2_udemy_financial_library_removed_v1')){
+    state.habits=state.habits.filter(function(h){return['udemy','retirement-videos','library'].indexOf(h.autoSource)===-1;});
+    state.dismissedAuto=state.dismissedAuto||[];
+    ['udemy','retirement-videos','library'].forEach(function(id){if(state.dismissedAuto.indexOf(id)===-1)state.dismissedAuto.push(id);});
+    localStorage.setItem('habits2_udemy_financial_library_removed_v1','1');
+  }
   if(!localStorage.getItem('habits2_language_lessons_v1')){
     var languageHabit=state.habits.find(function(h){return h.autoSource==='language'||/^(language learning|language lessons)$/i.test(String(h.name||'').trim());});
     if(languageHabit){languageHabit.name='Language Lessons';languageHabit.category='Growth';languageHabit.color=languageHabit.color||'#0891b2';languageHabit.type='check';languageHabit.target=1;languageHabit.schedule='weekdays';languageHabit.weeklyTarget=5;languageHabit.days=[1,2,3,4,5];languageHabit.why=languageHabit.why||'Complete language lessons five days each week.';languageHabit.autoSource=languageHabit.autoSource||'language';}
@@ -1449,13 +1460,13 @@ function h2SyncFromJournal(){
     if(financialHabit){financialHabit.schedule='custom';financialHabit.days=[1,3,5];financialHabit.weeklyTarget=3;}
     localStorage.setItem('habits2_financial_mwf_v1','1');
   }
-  if(!state.habits.some(function(h){return h.autoSource==='udemy';})){
-    state.habits.push({id:'h2-auto-udemy',name:'Complete a Udemy Lesson',category:'Growth',color:'#7c3aed',type:'duration',target:20,schedule:'custom',weeklyTarget:3,days:[2,4,6],why:'Build consistent learning through current and future Udemy courses.',cue:'',minimum:'Complete one lesson or log at least 20 minutes',created:(firstSeen.udemy||todayKey)+'T12:00:00',autoSource:'udemy'});
-    state.dismissedAuto=(state.dismissedAuto||[]).filter(function(id){return id!=='udemy';});
-  }
-  localStorage.setItem('habits2_udemy_link_v1','1');
+  // Udemy removed per user request (see habits2_udemy_financial_library_removed_v1 above) — this
+  // used to force-create the habit unconditionally on every sync, ignoring dismissedAuto, so it
+  // has to stay deleted rather than just gated, or it would come right back.
   // "Financial Videos" also gets auto-created if it doesn't exist anywhere yet (once only), so it
   // shows up right away instead of waiting on 3+ days of logged evidence like a normal suggestion.
+  // (Now removed per user request too — the dismissedAuto entry set above is enough to suppress
+  // this one, since it already respects dismissedAuto.)
   if(!state.habits.some(function(h){return h.autoSource==='retirement-videos';})&&(state.dismissedAuto||[]).indexOf('retirement-videos')===-1){
     state.habits.push({id:'h2-auto-retirement-videos',name:'Watch Financial Videos',category:'Growth',color:'#b45309',type:'check',target:1,schedule:'custom',weeklyTarget:3,days:[1,3,5],why:'Build financial knowledge through focused video learning.',cue:'',minimum:'Watch one financial video',created:(firstSeen['retirement-videos']||todayKey)+'T12:00:00',autoSource:'retirement-videos'});
     state.dismissedAuto=(state.dismissedAuto||[]).filter(function(id){return id!=='retirement-videos';});
