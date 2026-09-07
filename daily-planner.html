@@ -1533,6 +1533,7 @@ body{
       <div class="goal-input-row"><label style="width:110px;">Bible days</label><input type="number" id="gBible" min="0" max="7" placeholder="7"> /7</div>
       <div class="goal-input-row"><label style="width:110px;">Prayer days</label><input type="number" id="gPrayer" min="0" max="7" placeholder="7"> /7</div>
       <div class="goal-input-row"><label style="width:110px;">Running days</label><input type="number" id="gExercise" min="0" max="7" placeholder="4"> /7</div>
+      <div class="goal-input-row"><label style="width:110px;">Audiobook / week</label><input type="number" id="gAudible" min="0" placeholder="e.g. 120"> min</div>
       <button onclick="saveGoals()" style="margin-top:6px;background:#667eea;color:white;border:none;border-radius:8px;padding:6px 18px;font-size:0.82rem;cursor:pointer;font-weight:600;">Save Goals</button>
     </div>
   </div>
@@ -1825,6 +1826,20 @@ body{
         <button id="audioPlanCreateBtn" onclick="createAudiobookFinishPlan()" style="background:#667eea;color:#fff;border:none;border-radius:7px;padding:8px 13px;font-size:0.8rem;font-weight:700;cursor:pointer;white-space:nowrap;">Create Schedule</button>
       </div>
       <div id="audioPlanResult" style="display:none;margin-top:10px;"></div>
+    </div>
+  </div>
+  <div class="section" style="margin-bottom:14px;">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div class="tri-check" data-key="gaAudiobook" onclick="triClick(this)" title="Mark today's audiobook listening complete"></div>
+      <div class="section-title" style="color:#4f46a5;background:linear-gradient(135deg,#f8f9ff,#eef0ff);border-left:4px solid #667eea;flex:1;">&#x1F3A7; Today's Listening</div>
+    </div>
+    <div style="background:#f8f9ff;border:1px solid #cfd5ff;border-radius:10px;padding:12px 14px;">
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;">
+        <div><label style="font-size:0.7rem;color:#4f46a5;font-weight:600;display:block;margin-bottom:3px;">What are you listening to?</label>
+          <input type="text" id="gaAudiobookText" placeholder="e.g. Atomic Habits" style="width:100%;box-sizing:border-box;border:1px solid #cfd5ff;border-radius:6px;padding:7px 9px;font-size:0.84rem;"></div>
+        <div><label style="font-size:0.7rem;color:#4f46a5;font-weight:600;display:block;margin-bottom:3px;">Time listened today</label>
+          <input type="text" id="gaAudiobookTime" placeholder="e.g. 45 min" style="width:100%;box-sizing:border-box;border:1px solid #cfd5ff;border-radius:6px;padding:7px 9px;font-size:0.84rem;"></div>
+      </div>
     </div>
   </div>
   <div class="audio-library-toolbar">

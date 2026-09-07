@@ -1348,13 +1348,13 @@ function migrateActivityDates(){
 // ── Weekly Goal Targets ───────────────────────────────────────────────────────
 function loadGoalSettings(){
   const g=JSON.parse(localStorage.getItem('weekly_goals')||'{}');
-  ['Miles','Fin','Bible','Prayer','Exercise'].forEach(k=>{
+  ['Miles','Fin','Bible','Prayer','Exercise','Audible'].forEach(k=>{
     const el=document.getElementById('g'+k);if(el&&g[k])el.value=g[k];
   });
 }
 function saveGoals(){
   const g={};
-  ['Miles','Fin','Bible','Prayer','Exercise'].forEach(k=>{
+  ['Miles','Fin','Bible','Prayer','Exercise','Audible'].forEach(k=>{
     const el=document.getElementById('g'+k);if(el&&el.value)g[k]=parseFloat(el.value)||0;
   });
   localStorage.setItem('weekly_goals',JSON.stringify(g));
@@ -1385,6 +1385,7 @@ function renderGoals(){
     {key:'Bible',label:'Bible',actual:bibleD,unit:'/7',fmt:v=>v+'/7'},
     {key:'Prayer',label:'Prayer',actual:prayerD,unit:'/7',fmt:v=>v+'/7'},
     {key:'Exercise',label:'Running',actual:exD,unit:'/7',fmt:v=>v+'/7'},
+    {key:'Audible',label:'Audiobook',actual:Math.round(audioMin),unit:'min',fmt:v=>fmtMins(v)},
   ];
   const wrap=document.getElementById('goalBars');if(!wrap)return;
   const hasAnyGoal=actuals.some(a=>g[a.key]>0);
