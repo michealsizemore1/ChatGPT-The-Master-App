@@ -63,13 +63,23 @@ for (const app of APPS) {
 // multiple <script src> files this session and a missing/misordered <script> tag is exactly the kind
 // of mistake that would otherwise only surface as a silent blank section.
 test.describe('split-file apps wire up correctly', () => {
-  test('daily-planner.html loads all 9 script chunks and initializes', async ({ page }) => {
+  test('daily-planner.html loads all 10 script chunks and initializes', async ({ page }) => {
     const failed = [];
     page.on('requestfailed', (req) => failed.push(req.url()));
     await page.goto('/daily-planner.html', { waitUntil: 'load' });
     await page.waitForTimeout(1000);
     const chunkFailures = failed.filter((u) => u.includes('daily-planner-'));
     expect(chunkFailures, `Failed script requests: ${chunkFailures.join(', ')}`).toEqual([]);
+
+    // Regression check for the FOOD LOG SYSTEM section extracted into daily-planner-food-log.js:
+    // confirm it executed in the right order relative to daily-planner-core.js (which it depends on)
+    // and that its globals/functions are actually reachable from the page.
+    const foodLogOk = await page.evaluate(() => {
+      return typeof MEALS !== 'undefined' && Array.isArray(MEALS) && MEALS.includes('breakfast')
+        && typeof renderFoodItems === 'function'
+        && typeof addFoodItem === 'function';
+    });
+    expect(foodLogOk).toBe(true);
   });
 
   test('retirement-planner.html loads all 11 script chunks and shows the local save badge', async ({ page }) => {
