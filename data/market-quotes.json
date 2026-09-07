@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-07T19:03:18+00:00",
+  "updatedAt": "2026-09-07T21:29:52+00:00",
   "source": "Yahoo Finance public chart data",
   "quotes": {
     "SCHD": {
@@ -87,10 +87,10 @@
       "currency": "USD"
     },
     "DX-Y.NYB": {
-      "price": 98.916,
+      "price": 99.176,
       "prev": 99.176,
-      "change": -0.26,
-      "changesPercentage": -0.2622,
+      "change": 0.0,
+      "changesPercentage": 0.0,
       "volume": 0,
       "avgVolume": 0,
       "yearHigh": 101.8,
@@ -123,22 +123,22 @@
       "currency": "USD"
     },
     "BTC-USD": {
-      "price": 79160.79,
+      "price": 79213.41,
       "prev": 80351.4,
-      "change": -1190.61,
-      "changesPercentage": -1.4818,
-      "volume": 24916312064,
-      "avgVolume": 28174791615,
+      "change": -1137.99,
+      "changesPercentage": -1.4163,
+      "volume": 24598321152,
+      "avgVolume": 28111193433,
       "yearHigh": 126198.07,
       "yearLow": 57747.766,
       "marketState": "",
       "currency": "USD"
     },
     "EURUSD=X": {
-      "price": 1.1627,
+      "price": 1.1628,
       "prev": 1.1621,
-      "change": 0.0006,
-      "changesPercentage": 0.0516,
+      "change": 0.0007,
+      "changesPercentage": 0.0602,
       "volume": 0,
       "avgVolume": 0,
       "yearHigh": 1.2024,
@@ -147,10 +147,10 @@
       "currency": "USD"
     },
     "JPY=X": {
-      "price": 154.348,
+      "price": 154.311,
       "prev": 156.221,
-      "change": -1.873,
-      "changesPercentage": -1.1989,
+      "change": -1.91,
+      "changesPercentage": -1.2226,
       "volume": 0,
       "avgVolume": 0,
       "yearHigh": 163.979,
@@ -221,12 +221,12 @@
       "currency": "USD"
     },
     "BTC=F": {
-      "price": 79405.0,
+      "price": 79355.0,
       "prev": 80055.0,
-      "change": -650.0,
-      "changesPercentage": -0.8119,
-      "volume": 2275,
-      "avgVolume": 7990,
+      "change": -700.0,
+      "changesPercentage": -0.8744,
+      "volume": 2340,
+      "avgVolume": 8003,
       "yearHigh": 127240.0,
       "yearLow": 57850.0,
       "marketState": "",
@@ -264,14 +264,14 @@
     "Fiera Capital Global Asset Allocation - September 2026 Market Update - Seeking Alpha",
     "CAPITAL IDEAS: How does the stock market perform after midterms? - The Berkshire Edge",
     "US Jobs Report Stuns Wall Street as Stocks Fall - stl.news",
-    "Ticker: Key inflation data on deck - Boston Herald",
+    "Strong U.S. Jobs Report Raises Fed Rate-Hike Bets as MoneySimpler Launches Free AI Automated Trading - markets.businessinsider.com",
+    "Here's Why This Friday Could Be One of the Most Critical Days for the Stock Market in September - theglobeandmail.com",
+    "The Economy Looks Strong. So Why Are Stocks Worried? - TradingView",
+    "Bitcoin ETFs Took In $731 Million in a Day While XRP ETF Inflows Fell 83% in a Week. Is Money Rotating to Bitcoin? - 24/7 Wall St.",
+    "The Week Ahead: US July Non-Farm Payrolls in Focus; PLTR, SanDisk, AMD, and SpaceX Earnings Ahead - TradingKey",
+    "Five things to watch in markets in the week ahead - Investing.com",
     "VUN: Why the Broader U.S. Stock Market Could Be the Story Investors Are Missing - kalkine.ca",
-    "US Stocks Fall as Investors Await CPI Inflation Data and Earnings - SuaraGarut.ID",
-    "Tech Stocks Offset Banking Sector Losses Amid Beijing's Capital Plan - Devdiscourse",
-    "Fed Interest Rate, Meaning, Importance, Impact on Economy - Vajiram & Ravi",
-    "Upstox launches US stock investing for Indians, offers fractional shares in over 8,000 stocks and 2,000 ETFs - Fortune India",
-    "Holiday Halt: Why S&P 500, Nasdaq are closed for trading today - The Economic Times",
-    "The Stock Market Is Flashing a Warning Seen Only 6 Times Since 1871, and History Is Crystal Clear That a Disaster Could Be Heading Toward Wall Street - The Motley Fool"
+    "Ticker: Key inflation data on deck - Boston Herald"
   ],
   "economy": [
     "CPI 2026-07 | 3.5% YoY",
@@ -282,12 +282,12 @@
     "2-Year Treasury 2026-08-28 | 4.34%"
   ],
   "macro": [
-    "DXY  98.92 \u25bc0.26%",
+    "DXY  99.18 \u25b20.00%",
     "Gold  $4,476.60 \u25b20.00%",
     "WTI  $91.48 \u25b20.00%",
-    "Bitcoin  $79,161 \u25bc1.48%",
-    "EUR/USD  1.1627 \u25b20.05%",
-    "USD/JPY  154.35 \u25bc1.20%",
+    "Bitcoin  $79,213 \u25bc1.42%",
+    "EUR/USD  1.1628 \u25b20.06%",
+    "USD/JPY  154.31 \u25bc1.22%",
     "VIX  15.30 \u25b25.30%",
     "Copper  $6.683 \u25b20.00%"
   ],
