@@ -16,7 +16,7 @@ function updateSharedNotes(value) {
   sharedNotesText = value;
   try { localStorage.setItem(SHARED_NOTES_KEY, value); } catch (e) { /* storage unavailable, ignore */ }
   renderSharedNotesTextareas();
-  schedulePlannerCloudSync();
+  markPlannerLocalSaved();
 }
 
 function daysSince(isoString) {
@@ -93,7 +93,7 @@ function saveState(includePortableData = false, suppressCloudSync = false) {
     checkpointHistory, spendingBasis, jobLossDate, dollarView, activePage
   };
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { /* storage unavailable, ignore */ }
-  if (!suppressCloudSync) schedulePlannerCloudSync();
+  if (!suppressCloudSync) markPlannerLocalSaved();
   // Accounts & Cards remains a separate tool and is intentionally excluded from planner backups.
   return state;
 }

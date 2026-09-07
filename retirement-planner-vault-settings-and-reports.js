@@ -441,7 +441,6 @@ window.addEventListener('afterprint', restoreApiKeyAfterPrint);
 
 function resetAllData() {
   if (!confirm('This resets the retirement plan, notes, checkpoints, and Coach conversation on this device. Document Vault files remain separate. Continue?')) return;
-  if (plannerCloudUser) cloudStorageSet(CLOUD_RESET_PENDING_KEY, '1');
   try {
     [STORAGE_KEY, ACTIVE_PAGE_KEY, EXPLORER_ANALYSIS_KEY, DOLLAR_VIEW_KEY, SPENDING_BASIS_KEY,
       JOB_LOSS_DATE_KEY, LAST_BACKUP_KEY, BACKUP_REMINDER_DISMISSED_KEY, SHARED_NOTES_KEY,
@@ -1453,12 +1452,10 @@ if (shellEl) {
     // "change" event when Refresh is clicked while an input still has focus, which previously made
     // the latest value disappear. This lightweight save does not rerun Monte Carlo on every keystroke.
     if (!e.target || !e.target.matches || !e.target.matches('input, select') || e.target.classList.contains('shared-notes-textarea')) return;
-    if (!plannerCloudReady) plannerCloudLocalEditDuringInit = true;
     if (e.target.id === 'retirementAge') rememberRetirementAgeSelection(e.target.value);
-    // Record the pending cloud change immediately. If Refresh is pressed before the short local-save
-    // timer fires, persistBeforeLeaving() will still save the value and the next load will know that
-    // this device—not the older cloud row—contains the newer plan.
-    markPlannerCloudDirty();
+    // Show the "Saving…" badge immediately. If Refresh is pressed before the short local-save timer
+    // fires, persistBeforeLeaving() still saves the value so nothing typed is lost.
+    markPlannerLocalDirty();
     clearTimeout(pendingFieldSave);
     pendingFieldSave = setTimeout(() => saveState(), 150);
   });
@@ -1468,7 +1465,6 @@ if (shellEl) {
     // render() pipeline, so typing/blurring in a notes box never triggers a 1000-simulation Monte
     // Carlo re-run just to save a few words of text.
     if (e.target && e.target.matches && e.target.matches('input, select')) {
-      if (!plannerCloudReady) plannerCloudLocalEditDuringInit = true;
       render();
     }
   });
