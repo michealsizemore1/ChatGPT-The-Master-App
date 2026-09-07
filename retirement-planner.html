@@ -6569,18 +6569,6 @@ async function plannerSessionDbSet(session) {
     return true;
   } catch (e) { return false; }
 }
-async function plannerSessionDbGet() {
-  try {
-    const db = await plannerSessionDbTimeout(plannerSessionDbOpen());
-    const session = await plannerSessionDbTimeout(new Promise((resolve, reject) => {
-      const request = db.transaction(PLANNER_SESSION_DB_STORE, 'readonly').objectStore(PLANNER_SESSION_DB_STORE).get('current');
-      request.onsuccess = () => resolve(request.result || null);
-      request.onerror = () => reject(request.error || new Error('Session could not be read'));
-    }));
-    db.close();
-    return session;
-  } catch (e) { return null; }
-}
 async function plannerSessionDbRemove() {
   try {
     const db = await plannerSessionDbTimeout(plannerSessionDbOpen());
@@ -6927,35 +6915,6 @@ function plannerAuthStorageWorks() {
     return false;
   }
 }
-async function signInToPlanner(event) {
-  if (event) event.preventDefault();
-  const button = els('cloudSignInBtn');
-  const email = (els('cloudAuthEmail') && els('cloudAuthEmail').value || '').trim();
-  const password = els('cloudAuthPassword') ? els('cloudAuthPassword').value : '';
-  if (!email || !password) { showCloudAuthMessage('Enter both your email and password.', true); return; }
-  if (button) { button.disabled = true; button.textContent = 'Signing in…'; }
-  showCloudAuthMessage('Securely signing in…');
-  try {
-    const result = await getPlannerLegacyRemoteClient().auth.signInWithPassword({ email, password });
-    if (result.error) throw result.error;
-    const session = result.data && result.data.session;
-    if (!session) throw new Error('legacy online service did not return a secure session.');
-    savePlannerCloudSession(session);
-    await plannerSessionDbSet(session);
-    cloudStorageSet(CLOUD_EMAIL_KEY, email);
-    if (!plannerAuthStorageWorks() || (!plannerAuthStorage.getItem(PLANNER_AUTH_STORAGE_KEY) &&
-        !plannerAuthStorage.getItem(PLANNER_REFRESH_STORAGE_KEY))) {
-      throw new Error('This browser signed in but did not retain the session. Allow on-device site data for this GitHub Pages address, then sign in again.');
-    }
-    if (els('cloudAuthPassword')) els('cloudAuthPassword').value = '';
-    await handlePlannerCloudSession(session);
-  } catch (e) {
-    showCloudAuthMessage(e && e.message ? e.message : 'Sign-in failed. Check the email and password.', true);
-    setCloudStatus('error', 'Sign-in needed', 'The local copy is still safe on this device. Sign in to resume synchronization.');
-  } finally {
-    if (button) { button.disabled = false; button.textContent = 'Sign in & load plan'; }
-  }
-}
 async function sendPlannerPasswordReset() {
   const email = (els('cloudAuthEmail') && els('cloudAuthEmail').value || '').trim();
   if (!email) { showCloudAuthMessage('Enter your email address first, then select Forgot password.', true); return; }
@@ -7249,43 +7208,6 @@ async function syncCloudNow(userInitiated = false) {
     }
   }
 }
-async function signOutOfPlanner() {
-  if (plannerCloudUser && cloudStorageGet(CLOUD_DIRTY_KEY)) await syncCloudNow(true);
-  try {
-    const result = await getPlannerLegacyRemoteClient().auth.signOut();
-    if (result.error) throw result.error;
-  } catch (e) { /* local sign-out must still complete if the network is unavailable */ }
-  savePlannerCloudSession(null);
-  await plannerSessionDbRemove();
-  plannerCloudUser = null;
-  plannerCloudTrackChanges = false;
-  updateCloudAccountUi();
-  setCloudStatus('unsigned', 'Sign in', 'Signed out. The cached local copy remains on this device.');
-  showPlannerSignIn();
-}
-async function readPlannerRecoverySessionFromUrl() {
-  if (!location.hash || !location.hash.includes('type=recovery')) return null;
-  const params = new URLSearchParams(location.hash.slice(1));
-  const accessToken = params.get('access_token');
-  const refreshToken = params.get('refresh_token');
-  if (!accessToken || !refreshToken) return null;
-  const user = await plannerLegacyRemoteRequest('/auth/v1/user', {
-    method:'GET',
-    headers:{ Authorization:`Bearer ${accessToken}` }
-  });
-  const expiresIn = Number(params.get('expires_in') || 3600);
-  const session = {
-    access_token:accessToken,
-    refresh_token:refreshToken,
-    token_type:params.get('token_type') || 'bearer',
-    expires_in:expiresIn,
-    expires_at:Math.floor(Date.now() / 1000) + expiresIn,
-    user
-  };
-  savePlannerCloudSession(session);
-  history.replaceState(null, '', '#settings');
-  return session;
-}
 async function initPlannerCloudSync() {
   plannerCloudSession = null;
   plannerCloudUser = null;
@@ -7300,46 +7222,6 @@ async function initPlannerCloudSync() {
       });
     if (window.indexedDB) indexedDB.deleteDatabase(PLANNER_SESSION_DB_NAME);
   } catch (e) {}
-  return;
-  updateCloudAccountUi();
-  setCloudStatus('checking', 'Restoringâ€¦', 'Restoring this deviceâ€™s saved secure session.');
-  const remembered = cloudStorageGet(CLOUD_EMAIL_KEY);
-  if (remembered && els('cloudAuthEmail')) els('cloudAuthEmail').value = remembered;
-  try {
-    if (!plannerAuthStorageWorks()) {
-      throw new Error('This browser is blocking persistent on-device site storage. Allow site data for this GitHub Pages address to stay signed in.');
-    }
-    const recoverySession = await readPlannerRecoverySessionFromUrl();
-    if (recoverySession) {
-      await completePlannerPasswordRecovery();
-      return;
-    }
-    let storedSession = readPlannerStoredSessionAny();
-    if (!storedSession) {
-      const databaseSession = await plannerSessionDbGet();
-      if (databaseSession && databaseSession.access_token && databaseSession.refresh_token && databaseSession.user) {
-        // IndexedDB is only a fallback. Its rotating refresh token can lag behind the localStorage copy,
-        // so it must never replace a session that the normal browser store successfully restored.
-        storedSession = databaseSession;
-        savePlannerCloudSession(storedSession);
-      }
-    }
-    if (storedSession) {
-      plannerCloudSession = storedSession;
-      const activeSession = await ensurePlannerCloudSession();
-      await handlePlannerCloudSession(activeSession);
-      return;
-    }
-    await handlePlannerCloudSession(null);
-  } catch (e) {
-    plannerCloudReady = true;
-    plannerCloudTrackChanges = true;
-    showCloudAuthMessage(e && e.message ? e.message : 'Secure synchronization could not be initialized.', true);
-    setCloudStatus(navigator.onLine === false ? 'offline' : 'error', navigator.onLine === false ? 'Offline' : 'Connection error',
-      'The local copy remains available. Continue offline or retry after checking the connection.');
-    updateCloudAccountUi();
-    showPlannerSignIn();
-  }
 }
 window.addEventListener('online', () => {
   if (plannerCloudUser) syncCloudNow(false);

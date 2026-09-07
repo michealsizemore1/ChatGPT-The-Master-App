@@ -13854,31 +13854,6 @@ function journalCloudWithTimeout(promise,ms,message){
     new Promise(function(resolve,reject){timer=setTimeout(function(){reject(new Error(message||'The connection timed out.'));},ms);})
   ]).finally(function(){clearTimeout(timer);});
 }
-function journalCloudDirectLock(name,acquireTimeout,fn){
-  return Promise.resolve().then(fn);
-}
-function journalInstallAIProxy(){
-  return;
-  if(window.__journalAIProxyInstalled)return;
-  window.__journalAIProxyInstalled=true;
-  window.fetch=async function(input,init){
-    var url=typeof input==='string'?input:(input&&input.url)||'';
-    if(url.indexOf('https://api.anthropic.com/v1/messages')!==0)return journalOriginalFetch(input,init);
-    if(!journalCloudClient||!journalCloudUser)throw new Error('Sign in to your private journal before using AI.');
-    var sessionResult=await journalCloudClient.auth.getSession();
-    var token=sessionResult.data&&sessionResult.data.session&&sessionResult.data.session.access_token;
-    if(!token)throw new Error('Your journal session expired. Sign in again to use AI.');
-    return journalOriginalFetch(JOURNAL_REMOTE_URL+'/functions/v1/anthropic-proxy',{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'Authorization':'Bearer '+token,
-        'apikey':JOURNAL_REMOTE_KEY
-      },
-      body:init&&init.body||'{}'
-    });
-  };
-}
 function journalAIAvailable(){return !!journalAIKey();}
 function journalAIKey(){
   try{return String(localStorage.getItem('ai_key')||'').trim();}catch(e){return'';}
@@ -13970,23 +13945,6 @@ async function journalProtectedFunction(body){
   var data=await response.json().catch(function(){return{};});
   if(!response.ok)throw new Error((data.error&&data.error.message)||('Anthropic returned error '+response.status+'.'));
   return data;
-  /* Retained below only as unreachable migration history. */
-  if(!journalCloudClient||!journalCloudUser)throw new Error('Sign in to your private journal first.');
-  async function sendProtectedRequest(forceRefresh){
-    var sessionResult=forceRefresh?await journalCloudClient.auth.refreshSession():await journalCloudClient.auth.getSession();
-    var token=sessionResult.data&&sessionResult.data.session&&sessionResult.data.session.access_token;
-    if(!token)throw new Error('Your journal session expired. Sign in again.');
-    return journalCloudWithTimeout(journalOriginalFetch(JOURNAL_REMOTE_URL+'/functions/v1/anthropic-proxy',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token,'apikey':JOURNAL_REMOTE_KEY},
-      body:JSON.stringify(body||{})
-    }),45000,'The protected AI service timed out. Please try again.');
-  }
-  var response=await sendProtectedRequest(false);
-  if(response.status===401)response=await sendProtectedRequest(true);
-  var data=await response.json().catch(function(){return{};});
-  if(!response.ok)throw new Error((data.error&&data.error.message)||('The protected journal service returned error '+response.status+'.'));
-  return data;
 }
 function journalCloudCanSyncKey(k){
   if(!k)return false;
@@ -13997,40 +13955,6 @@ function journalCloudCanSyncKey(k){
   if(lower.indexOf('service_role')>=0||lower.indexOf('sb_secret_')>=0||lower.indexOf('password')>=0)return false;
   return true;
 }
-function journalCloudIsQuotaError(e){
-  return !!(e&&(e.name==='QuotaExceededError'||e.name==='NS_ERROR_DOM_QUOTA_REACHED'||e.code===22||e.code===1014));
-}
-function journalCloudPruneRegenerableStorage(removeItemFn){
-  var remove=[],freed=0;
-  for(var i=0;i<localStorage.length;i++){
-    var k=localStorage.key(i)||'';
-    if(k.indexOf('workout_cache_')===0||k.indexOf('tw_caches_cleared_')===0||k==='ai_archive'||k==='ai_key')remove.push(k);
-  }
-  remove.forEach(function(k){
-    try{var v=localStorage.getItem(k)||'';freed+=(k.length+v.length)*2;(removeItemFn||Storage.prototype.removeItem).call(localStorage,k);}catch(ignore){}
-  });
-  return freed;
-}
-var journalCloudAuthStorage={
-  getItem:function(key){
-    try{var value=localStorage.getItem(key);if(value!=null)return value;}catch(ignore){}
-    try{return sessionStorage.getItem(key);}catch(ignore2){return null;}
-  },
-  setItem:function(key,value){
-    try{localStorage.setItem(key,value);try{sessionStorage.removeItem(key);}catch(ignore){}return;}
-    catch(e){
-      if(journalCloudIsQuotaError(e)){
-        try{journalCloudPruneRegenerableStorage();localStorage.setItem(key,value);return;}catch(ignore2){}
-      }
-      try{sessionStorage.setItem(key,value);return;}catch(ignore3){}
-      throw e;
-    }
-  },
-  removeItem:function(key){
-    try{localStorage.removeItem(key);}catch(ignore){}
-    try{sessionStorage.removeItem(key);}catch(ignore2){}
-  }
-};
 async function journalCloudPayload(){
   var out={};
   for(var i=0;i<localStorage.length;i++){
@@ -14217,32 +14141,6 @@ async function journalCloudPrepare(){
   if(localStorage.getItem('journal_cloud_dirty'))await journalCloudUpload(false,cloud.revision);
   else journalCloudSetStatus('Saved on this device and cloud','ok');
 }
-async function journalCloudSignIn(ev){
-  ev.preventDefault();
-  var btn=document.getElementById('cloudLoginBtn'),err=document.getElementById('cloudAuthError');
-  btn.disabled=true;btn.textContent='Signing in...';err.textContent='';
-  try{
-    if(!journalCloudClient)throw new Error('The secure sign-in service is not ready. Refresh the page and try again.');
-    var result=await journalCloudWithTimeout(journalCloudClient.auth.signInWithPassword({
-      email:document.getElementById('cloudEmail').value.trim(),
-      password:document.getElementById('cloudPassword').value
-    }),15000,'Sign-in took too long. Check the internet connection, close any other open journal tabs, and try again.');
-    if(result.error){
-      err.textContent=result.error.message==='Invalid login credentials'?'The email address or password was not recognized.':result.error.message;
-      return;
-    }
-    var session=result.data&&result.data.session;
-    if(session&&session.user){
-      journalCloudUser=session.user;
-      document.getElementById('cloudAuthGate').style.display='none';
-      setTimeout(journalCloudPrepare,0);
-    }
-  }catch(e){
-    err.textContent=e&&e.message?e.message:'Sign-in could not be completed. Please try again.';
-  }finally{
-    btn.disabled=false;btn.textContent='Sign In';
-  }
-}
 async function journalCloudSignOut(){
   if(!journalCloudClient)return;
   if(!confirm('Sign out of private cloud sync on this device? Your local journal information will remain on this device.'))return;
@@ -14297,19 +14195,6 @@ async function journalCloudSmartSync(){
     if(btn){btn.disabled=false;btn.innerHTML='Sync';}
   }
 }
-function journalCloudSyncNow(){journalCloudSmartSync();}
-async function journalCloudDownloadNow(){
-  if(!journalCloudUser){alert('Sign in to use cloud sync.');return;}
-  if(!confirm('Replace this device’s journal with the latest cloud copy?\n\nMake sure the device with your newest information has finished syncing first.'))return;
-  journalCloudSetStatus('Getting latest cloud journal...','busy');
-  var result=await journalCloudClient.from('journal_state').select('journal_data,updated_at').eq('user_id',journalCloudUser.id).maybeSingle();
-  if(result.error||!result.data){
-    journalCloudSetStatus('Could not get cloud journal','error');
-    alert('The latest cloud journal could not be downloaded. No information on this device was changed.');
-    return;
-  }
-  journalCloudApply(result.data.journal_data,result.data.updated_at,result.data.revision);
-}
 function journalCloudInit(){
   journalCloudClient=null;journalCloudUser=null;journalCloudReady=false;
   localStorage.removeItem('journal_cloud_dirty');
@@ -14317,65 +14202,6 @@ function journalCloudInit(){
   var localStatus=document.getElementById('v26SaveText');if(localStatus)localStatus.textContent='Saved on this device';
   try{hydrateBibleReadingArchiveStorage().then(function(){compactBibleReadingArchiveStorage();});}catch(ignoreBible){}
   try{hydrateActivitiesStorage();}catch(ignoreActivities){}
-  return;
-  try{
-    localStorage.removeItem('handwriting_2026-07-27');
-    localStorage.removeItem('handwriting_2026-07-29');
-    localStorage.setItem('journal_cloud_dirty','1');
-    localStorage.removeItem('ai_archive');
-    localStorage.removeItem('ai_key');
-    localStorage.removeItem('thinking_archive');
-    localStorage.removeItem('decision_journal_data');
-    localStorage.removeItem('financial_video_library_v1');
-    localStorage.removeItem('financial_video_weekly_goal');
-    hydrateBibleReadingArchiveStorage().then(function(){compactBibleReadingArchiveStorage();});
-    hydrateActivitiesStorage();
-  }catch(e){}
-  if(!window.legacyRemote||!window.legacyRemote.createClient){
-    document.getElementById('cloudAuthError').textContent='The secure sign-in service could not load. Check your internet connection and refresh.';
-    return;
-  }
-  journalCloudClient=window.legacyRemote.createClient(JOURNAL_REMOTE_URL,JOURNAL_REMOTE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,lock:journalCloudDirectLock,storage:journalCloudAuthStorage}});
-  journalInstallAIProxy();
-  document.getElementById('cloudLoginForm').addEventListener('submit',journalCloudSignIn);
-  journalCloudClient.auth.onAuthStateChange(function(event,session){
-    var next=session&&session.user||null,was=journalCloudUser;
-    journalCloudUser=next;
-    var gate=document.getElementById('cloudAuthGate');
-    if(next){
-      gate.style.display='none';if(!was)setTimeout(journalCloudPrepare,0);
-    }
-    else{
-      journalCloudReady=false;journalCloudPreparedFor='';gate.style.display='flex';journalCloudSetStatus('Signed out — saved locally','');
-    }
-  });
-  journalCloudClient.auth.getSession().then(function(r){
-    var session=r.data&&r.data.session;
-    if(session&&session.user){
-      journalCloudUser=session.user;
-      document.getElementById('cloudAuthGate').style.display='none';journalCloudPrepare();
-    }
-  });
-  var originalSet=Storage.prototype.setItem,originalRemove=Storage.prototype.removeItem;
-  Storage.prototype.setItem=function(k,v){
-    try{originalSet.call(this,k,v);}
-    catch(e){
-      if(this!==localStorage||!journalCloudIsQuotaError(e))throw e;
-      journalCloudPruneRegenerableStorage(originalRemove);
-      try{originalSet.call(this,k,v);}
-      catch(e2){journalCloudSetStatus('Device storage is full — cloud sync needed','error');throw e2;}
-    }
-    if(this===localStorage&&journalCloudCanSyncKey(k)){try{journalCloudSchedule();}catch(e){}}
-  };
-  Storage.prototype.removeItem=function(k){originalRemove.call(this,k);if(this===localStorage&&journalCloudCanSyncKey(k)){try{journalCloudSchedule();}catch(e){}}};
-  window.addEventListener('online',function(){if(journalCloudUser&&localStorage.getItem('journal_cloud_dirty'))journalCloudSmartSync();});
-  window.addEventListener('offline',function(){journalCloudSetStatus('Offline — saved on this device','error');});
-  document.addEventListener('visibilitychange',function(){
-    if(document.visibilityState==='hidden'&&journalCloudUser&&localStorage.getItem('journal_cloud_dirty')&&!journalCloudBusy)journalCloudSmartSync();
-  });
-  window.addEventListener('pagehide',function(){
-    if(journalCloudUser&&localStorage.getItem('journal_cloud_dirty')&&!journalCloudBusy)journalCloudSmartSync();
-  });
 }
 
 /* v26 quality-of-life enhancements. Existing storage keys and data remain unchanged. */
