@@ -16,7 +16,7 @@
 <body>
 <header class="top"><div id="topbarMount"></div></header>
 <main id="app"></main>
-<a id="homeButton" href="index.html" title="Home" aria-label="Return to My Life Master App home" style="position:fixed;left:10px;bottom:10px;z-index:2147483000;display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;background:#14161a;color:#fff;text-decoration:none;font:700 18px/1 -apple-system,Segoe UI,Roboto,Arial,sans-serif;padding:0;border-radius:50%;box-shadow:0 4px 12px rgba(0,0,0,.24);opacity:.68;border:1px solid rgba(255,255,255,.18)" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.68">&#8962;</a>
+<script src="home-button.js"></script>
 <main class="page"><div id="fibaView" class="hide">
   <section class="section-card" id="fibaIntroSection"><div class="eyebrow">International basketball · 16 nations</div><h2>FIBA Women's Basketball World Cup 2026</h2><p class="note">Berlin, Germany &middot; September 4&ndash;13, 2026. Four groups of four open the tournament, feeding a second round into the quarterfinals, semifinals and final. The United States is chasing a fifth straight title after beating China in the 2022 final; Europe sends a record eight teams, and Hungary and Italy are back for the first time since the 1990s.</p></section>
   <section class="section-card" id="fibaTeamsSection" style="padding:0;overflow:hidden"><div class="search"><input id="fibaTeamSearch" type="search" placeholder="⌕ Search FIBA teams" aria-label="Search FIBA teams"></div><div class="table-head"><span>Grp</span><span>Team</span><span>Record</span><span>Next</span></div><div id="fibaTeamList" class="loading">Loading FIBA World Cup field…</div></section>
@@ -26,12 +26,11 @@
   <section class="section-card metrics-section" id="fibaMetricsSection"><div class="panel-title"><div><div class="eyebrow">The stat board</div><h2>FIBA World Cup metrics</h2></div><div class="metric-tabs" id="fibaMetricTabs" role="tablist" aria-label="FIBA metric category"><button class="active" data-metric="team" role="tab" aria-selected="true">Team</button><button data-metric="player" role="tab" aria-selected="false">Player</button></div></div><p class="metrics-intro">Aggregated from completed World Cup games as they're played, since the provider doesn't publish a dedicated tournament statistics feed.</p><p id="fibaMetricsStatus" class="metrics-status"></p><div id="fibaMetricsGrid" class="metrics-grid"></div></section>
   <section class="section-card news" id="fibaStoriesSection"><div class="panel-title"><div><div class="eyebrow">Field notes</div><h2>FIBA storylines</h2></div></div><div id="fibaStoriesList"></div></section>
   </div></main>
+<script src="version-check.js"></script>
 <script>
 const SEASON=2026, API='https://site.api.espn.com/apis/site/v2/sports/basketball/wnba';
 const APP_VERSION='2026-09-06-4';
-// GitHub Pages caches this file for ten minutes, so a phone can sit on an old copy.
-// Compare against what is actually deployed and reload once if they differ.
-(async function(){try{const res=await fetch(location.pathname+'?_cv='+Date.now(),{cache:'no-store'});const live=(await res.text()).match(/APP_VERSION='([^']+)'/);if(live&&live[1]!==APP_VERSION&&!sessionStorage.getItem('thew-v-'+live[1])){sessionStorage.setItem('thew-v-'+live[1],'1');location.replace(location.pathname+'?v='+live[1]+location.hash)}}catch(e){}})();
+checkForNewerAppVersion(APP_VERSION, 'thew');
 
 const REAL_IDS={ATL:'20',CHI:'19',CON:'18',DAL:'3',GS:'129689',IND:'5',LV:'17',LA:'6',MIN:'8',NY:'9',PHX:'11',POR:'132052',SEA:'14',TOR:'131935',WSH:'16'};
 const FALLBACK=[['ATL','Atlanta Dream'],['CHI','Chicago Sky'],['CON','Connecticut Sun'],['DAL','Dallas Wings'],['GS','Golden State Valkyries'],['IND','Indiana Fever'],['LV','Las Vegas Aces'],['LA','Los Angeles Sparks'],['MIN','Minnesota Lynx'],['NY','New York Liberty'],['PHX','Phoenix Mercury'],['POR','Portland Fire'],['SEA','Seattle Storm'],['TOR','Toronto Tempo'],['WSH','Washington Mystics']]

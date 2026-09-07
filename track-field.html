@@ -309,13 +309,10 @@ html{font-size:14px}
   </section>
 </main>
 
+<script src="version-check.js"></script>
 <script>
 const APP_VERSION='2026-09-05-2';
-// GitHub Pages caches this file, so a phone can sit on an old copy. Reload once if a newer build is live.
-(async function(){try{const res=await fetch(location.pathname+'?_cv='+Date.now(),{cache:'no-store'});
-const live=(await res.text()).match(/APP_VERSION='([^']+)'/);
-if(live&&live[1]!==APP_VERSION&&!sessionStorage.getItem('tf-v-'+live[1])){
-sessionStorage.setItem('tf-v-'+live[1],'1');location.replace(location.pathname+'?v='+live[1]+location.hash)}}catch(e){}})();
+checkForNewerAppVersion(APP_VERSION, 'tf');
 
 // [name, country, ranking score, 2026 season best]  "rd" marks a road time used where there is no track mark.
 const TRACK_EVENTS=['100m','200m','400m','800m','1500m','5000m','10,000m'];
