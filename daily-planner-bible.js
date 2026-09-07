@@ -1409,6 +1409,15 @@ function h2SyncFromJournal(){
     ['udemy','retirement-videos','library'].forEach(function(id){if(state.dismissedAuto.indexOf(id)===-1)state.dismissedAuto.push(id);});
     localStorage.setItem('habits2_udemy_financial_library_removed_v1','1');
   }
+  // Daily Stretching and Daily Reflection removed per user request too — same pattern, but a
+  // separate one-time flag so this still runs even if the migration above already has, and vice
+  // versa (each batch of removals only needs to happen once, independent of the others).
+  if(!localStorage.getItem('habits2_stretch_reflection_removed_v1')){
+    state.habits=state.habits.filter(function(h){return['stretch','daily-reflection'].indexOf(h.autoSource)===-1;});
+    state.dismissedAuto=state.dismissedAuto||[];
+    ['stretch','daily-reflection'].forEach(function(id){if(state.dismissedAuto.indexOf(id)===-1)state.dismissedAuto.push(id);});
+    localStorage.setItem('habits2_stretch_reflection_removed_v1','1');
+  }
   if(!localStorage.getItem('habits2_language_lessons_v1')){
     var languageHabit=state.habits.find(function(h){return h.autoSource==='language'||/^(language learning|language lessons)$/i.test(String(h.name||'').trim());});
     if(languageHabit){languageHabit.name='Language Lessons';languageHabit.category='Growth';languageHabit.color=languageHabit.color||'#0891b2';languageHabit.type='check';languageHabit.target=1;languageHabit.schedule='weekdays';languageHabit.weeklyTarget=5;languageHabit.days=[1,2,3,4,5];languageHabit.why=languageHabit.why||'Complete language lessons five days each week.';languageHabit.autoSource=languageHabit.autoSource||'language';}
@@ -1438,12 +1447,10 @@ function h2SyncFromJournal(){
     var match=state.habits.find(function(h){return !h.autoSource&&normHabitName(h.name)===normHabitName(source.name);});
     if(match){match.autoSource=source.id;state.dismissedAuto=(state.dismissedAuto||[]).filter(function(id){return id!==source.id;});}
   });
-  // "Daily Stretching" additionally gets auto-created if it doesn't exist anywhere yet (once only).
-  if(!state.habits.some(function(h){return h.autoSource==='stretch';})&&!localStorage.getItem('habits2_stretch_link_v1')){
-    state.habits.push({id:'h2-auto-stretch',name:'Daily Stretching',category:'Health',color:'#0d9488',type:'check',target:1,schedule:'daily',weeklyTarget:7,days:[0,1,2,3,4,5,6],why:'Keep muscles loose and prevent injury.',cue:'',minimum:'',created:(firstSeen.stretch||todayKey)+'T12:00:00',autoSource:'stretch'});
-    state.dismissedAuto=(state.dismissedAuto||[]).filter(function(id){return id!=='stretch';});
-  }
-  localStorage.setItem('habits2_stretch_link_v1','1');
+  // "Daily Stretching" removed per user request (see habits2_stretch_reflection_removed_v1
+  // above) — this used to force-create the habit here (guarded only by a one-time flag, not
+  // dismissedAuto), so the block has to stay deleted rather than just gated, or a browser that
+  // never set that flag (e.g. a fresh install) would bring the habit right back.
   if(!state.habits.some(function(h){return h.autoSource==='hydration';})){
     state.habits.push({id:'h2-auto-hydration',name:'Reach 64 oz Water',category:'Health',color:'#0284c7',type:'count',target:64,schedule:'daily',weeklyTarget:7,days:[0,1,2,3,4,5,6],why:'Support endurance, recovery, and long-distance running with consistent hydration.',cue:'',minimum:'Begin logging water early in the day',created:(firstSeen.hydration||todayKey)+'T12:00:00',autoSource:'hydration'});
     state.dismissedAuto=(state.dismissedAuto||[]).filter(function(id){return id!=='hydration';});
