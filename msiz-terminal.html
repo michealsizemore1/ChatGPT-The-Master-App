@@ -3688,7 +3688,7 @@ function fetchCustomEtf(rawVal, inputEl, slotIdx){
     try{
       var r=await fetch('http://localhost:8888/api/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q,quotes:QUOTES})});
       var d=await r.json(); out.textContent=d.answer||'No response.';
-    }catch(e){out.textContent='Server offline.';}
+    }catch(e){out.textContent='Server offline — start the local python server on port 8888 to use Ask AI.';}
   }
   window.addEventListener('load',function(){setTimeout(generateBrief,2000);});
   </script>
