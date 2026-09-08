@@ -403,9 +403,7 @@ function renderJournalSchedule(){
   // Training duration varies a lot — a 12 mile run and a rest day shouldn't both hand off
   // to stretching 15 minutes later. Estimate real duration and push stretching/breakfast
   // back accordingly instead of using fixed slots that only work for a short easy day.
-  var trainingStartMins=450,trainingMinsEstimate=journalTodayTrainingMinutesEstimate(training,dateKey);
-  var stretchMins=trainingMinsEstimate>15?(trainingStartMins+trainingMinsEstimate):465;
-  var breakfastMins=Math.min(660,Math.max(465,stretchMins+25));
+  var trainingStartMins=450;
   var items=[
     {time:'6:30 AM',mins:390,label:'Review priorities, goals, calendar, email and schedule',detail:'Check complete after your morning review',done:!!d.reviewCheck,tab:'daily',checkId:'reviewCheck'},
     {time:'6:30 AM',mins:390,label:'Meditation',detail:'Begin the day with meditation and stillness',done:d.spMeditation==='green',tab:'meditate'},
@@ -414,7 +412,7 @@ function renderJournalSchedule(){
     {time:'7:15 AM',mins:435,label:'Walk Buddy',detail:'Take Buddy for a walk',done:localStorage.getItem('schedule_walkBuddy_'+dateKey)==='1',manual:'walkBuddy'},
     {time:journalMinsToClock(trainingStartMins),mins:trainingStartMins,label:restDay?'Rest day — no training scheduled':'Today’s training',detail:restDay?'Automatically complete because no workout is scheduled':training,done:activityDone,tab:'activities'},
     {time:'8:30 AM',mins:510,label:'Personal Hygiene',detail:'Shower, brush teeth, get ready for the day',done:localStorage.getItem('schedule_personalHygiene_'+dateKey)==='1',manual:'personalHygiene'},
-    {time:journalMinsToClock(breakfastMins),mins:breakfastMins,label:'Breakfast',detail:'Recovery meal and hydration after training',done:mealComplete('breakfast',breakfastMins),tab:'nutrition'},
+    {time:'9:00 AM',mins:540,label:'Breakfast',detail:'Recovery meal and hydration after training',done:mealComplete('breakfast',540),tab:'nutrition'},
     {time:'9:30 AM',mins:570,label:'Work',detail:'9:30 AM – 6:00 PM',done:true,tab:'daily',skip:!(today.getDay()>=1&&today.getDay()<=5),fixed:true},
     {time:'12:00 PM',mins:720,label:'Water checkpoint: 32 oz',detail:'Cumulative total: reach 32 ounces by noon',done:water>=32,tab:'nutrition'},
     {time:'12:00 PM',mins:720,label:'Lunch',detail:'Midday meal and hydration',done:mealComplete('lunch',720),tab:'nutrition'},
