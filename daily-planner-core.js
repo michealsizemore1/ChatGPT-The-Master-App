@@ -951,6 +951,7 @@ function journalGrowthHabitKindsForDate(dateKey){
   return kinds;
 }
 function journalGrowthHabitCalendarEvents(){
+  return[]; // Growth-habit auto-scheduling disabled at Michael's request (Sept 2026) -- he adds growth activities to My Schedule manually instead.
   var state=null;try{state=h2State();}catch(ignore){}if(!state||!Array.isArray(state.habits))return[];
   var habits=state.habits.filter(function(h){return h&&!h.archived&&journalGrowthHabitCalendarInfo(h);}),now=new Date(),start=new Date(now.getFullYear()-1,0,1),end=new Date(now.getFullYear()+1,11,31),events=[];
   for(var date=new Date(start);date<=end;date.setDate(date.getDate()+1)){
