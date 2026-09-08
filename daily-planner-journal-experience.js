@@ -329,7 +329,17 @@ function journalScheduleApplyOrder(items,dateKey){
   if(!Array.isArray(saved)||!saved.length)return items;
   var byId={};items.forEach(function(item){byId[item.id]=item;});var ordered=[];
   saved.forEach(function(id){if(byId[id]){ordered.push(byId[id]);delete byId[id];}});
-  items.forEach(function(item){if(byId[item.id]){ordered.push(item);delete byId[item.id];}});return ordered;
+  // Any item that isn't part of the saved drag order yet (a brand-new schedule item, a newly
+  // due Growth Activity, etc.) is inserted at its correct chronological spot among the
+  // already-ordered items -- not appended after everything else regardless of its time.
+  items.forEach(function(item){
+    if(!byId[item.id])return;
+    delete byId[item.id];
+    var insertAt=ordered.length,itemMins=Number(item.mins);if(!Number.isFinite(itemMins))itemMins=1440;
+    for(var i=0;i<ordered.length;i++){var otherMins=Number(ordered[i].mins);if(!Number.isFinite(otherMins))otherMins=1440;if(otherMins>itemMins){insertAt=i;break;}}
+    ordered.splice(insertAt,0,item);
+  });
+  return ordered;
 }
 function journalScheduleDragStart(event,id){
   _journalScheduleDragged=id;_journalScheduleSuppressClick=Date.now()+600;event.currentTarget.classList.add('dragging');
