@@ -942,6 +942,7 @@ function journalGrowthHabitDueDays(habit,info){
   var target=Math.max(1,Math.min(7,Number(habit.weeklyTarget||1))),patterns={1:[3],2:[2,5],3:[1,3,5],4:[1,2,4,6],5:[1,2,3,4,5],6:[1,2,3,4,5,6],7:[0,1,2,3,4,5,6]};return patterns[target];
 }
 function journalGrowthHabitKindsForDate(dateKey){
+  return[]; // Growth-activity auto-scheduling onto My Schedule disabled at Michael's request (Sept 2026) -- he adds Growth Activities manually, and Remove should stick.
   var state=null;try{state=h2State();}catch(ignore){}if(!state||!Array.isArray(state.habits))return[];
   var date=new Date(dateKey+'T00:00:00'),day=date.getDay(),kinds=[];
   state.habits.forEach(function(habit){
