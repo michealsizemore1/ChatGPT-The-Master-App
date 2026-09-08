@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#241f1c">
+<title>NCAA Cross Country &mdash; Division I Rankings</title>
+<style>
+:root{--ink:#221f1d;--dark:#241f1c;--track:#c0472b;--gold:#e8b64c;--paper:#f5f1ea;--card:#fffdf9;--line:#e2dbd0;--muted:#7b736a}
+*{box-sizing:border-box}html{font-size:15px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:Georgia,'Times New Roman',serif}
+.sans,.nav,.eyebrow,.chip,button,input,.tag{font-family:Arial,Helvetica,sans-serif}
+.top{position:sticky;top:0;z-index:20;background:var(--dark);color:#fff;border-bottom:1px solid #3d3531}
+.nav{height:100px;max-width:980px;margin:auto;display:flex;align-items:center;gap:22px;padding:0 24px}
+.home{width:43px;height:52px;border:1px solid #574c46;border-radius:6px;color:#fff;display:grid;place-items:center;text-decoration:none;font-size:20px}
+.brand{margin-right:auto}
+.brand strong{display:block;font-size:23px;letter-spacing:.08em}
+.brand span{display:block;color:var(--gold);font-size:9px;letter-spacing:.22em;text-transform:uppercase;margin-top:4px}
+.tabs{display:flex;align-self:stretch}
+.tabs button{position:relative;border:0;background:transparent;color:#b2a79f;font-weight:800;font-size:14px;padding:0 15px;cursor:pointer}
+.tabs button.active{color:#fff}
+.tabs button.active:after{content:"";height:4px;background:var(--track);position:absolute;left:13px;right:13px;bottom:0}
+.page{max-width:920px;margin:0 auto;padding:30px 24px 70px}
+.hero{background:var(--card);border:1px solid var(--line);padding:27px 29px 22px}
+.eyebrow{font-size:10px;letter-spacing:.22em;font-weight:800;color:#6d655d;text-transform:uppercase}
+.hero h1{font-size:39px;font-weight:500;margin:12px 0 4px}
+.hero-row{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.stamp{font:700 11px Arial,Helvetica,sans-serif;color:#5f574f}
+.stamp b{color:var(--track)}
+.source{font:11px/1.6 Arial,Helvetica,sans-serif;color:var(--muted);margin:10px 0 0}
+.source a{color:var(--track)}
+.panel{background:var(--card);border:1px solid var(--line);border-top:0}
+.controls{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:13px}
+.ctl-row{display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap}.seg{display:flex;gap:6px}.sortseg{margin-left:auto}.sortseg button.active{background:var(--track);border-color:var(--track);color:#fff}.sortseg button[disabled]{opacity:.4;cursor:not-allowed}.sortlabel{font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#a29a91;align-self:center;margin-right:-4px}
+.seg button{border:1px solid var(--line);background:#fff;color:var(--muted);font:800 11px Arial,Helvetica,sans-serif;letter-spacing:.09em;text-transform:uppercase;padding:9px 18px;cursor:pointer}
+.seg button.active{background:var(--dark);color:#fff;border-color:var(--dark)}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.chips button{flex:0 0 auto;border:1px solid var(--line);background:#fff;color:#4d463f;font:800 12px Arial,Helvetica,sans-serif;padding:9px 15px;cursor:pointer;border-radius:2px}
+.chips button.active{background:var(--track);color:#fff;border-color:var(--track)}
+.list-head{display:grid;grid-template-columns:44px minmax(0,1fr) 96px;gap:10px;padding:12px 18px;background:#ebe5db;color:#77706a;font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.16em;text-transform:uppercase}
+.list-head span:last-child{text-align:right}
+.athlete{display:grid;grid-template-columns:44px minmax(0,1fr) 96px;gap:10px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line)}
+.athlete:nth-child(odd){background:#fbf8f3}
+.rank{font-size:23px;color:#b9b1a7}
+.athlete.podium .rank{color:var(--track)}
+.name{font-size:19px;line-height:1.15}
+.country{font:10px Arial,Helvetica,sans-serif;letter-spacing:.16em;color:#8b847c;margin-top:5px}
+.figure{text-align:right}
+.figure b{display:block;font:800 17px Arial,Helvetica,sans-serif;font-variant-numeric:tabular-nums}
+.figure b.none{color:#b9b1a7;font-weight:400}
+.figure small{display:block;font:10px Arial,Helvetica,sans-serif;color:#8b847c;margin-top:4px;letter-spacing:.04em}
+.event-note{padding:14px 18px;font:12px/1.6 Arial,Helvetica,sans-serif;color:var(--muted);border-bottom:1px solid var(--line);background:#fbf8f3}
+.section-card{background:var(--card);border:1px solid var(--line);padding:22px;margin-bottom:18px}
+.section-card h2{font-size:28px;font-weight:500;margin:0 0 6px}
+.section-card p.note{font:13px/1.6 Arial,Helvetica,sans-serif;color:var(--muted);margin:0 0 16px}
+.meet,.story{display:grid;grid-template-columns:74px minmax(0,1fr);gap:14px;padding:15px 0;border-top:1px solid var(--line)}
+.meet:first-of-type,.story:first-of-type{border-top:0}
+.meet-date{font:800 11px Arial,Helvetica,sans-serif;letter-spacing:.06em;color:var(--track);line-height:1.45;text-transform:uppercase}
+.meet-date small{display:block;color:#a29a91;font-weight:700}
+.meet h3,.story h3{margin:0 0 4px;font-size:19px;font-weight:500;line-height:1.2}
+.meet .where,.story .where{font:12px Arial,Helvetica,sans-serif;color:#5f574f}
+.meet .detail,.story .detail{font:12px/1.55 Arial,Helvetica,sans-serif;color:var(--muted);margin-top:6px}.meet .watch{font:12px/1.5 Arial,Helvetica,sans-serif;color:#3f3933;margin-top:8px;padding:8px 10px;background:#fbf5f2;border-left:3px solid var(--track)}.meet .watch b{font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--track);display:block;margin-bottom:3px}
+.tag{display:inline-block;margin-top:8px;font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.12em;text-transform:uppercase;padding:4px 8px;border:1px solid var(--line);color:#6d655d;background:#fbf8f3}
+.tag.major{border-color:var(--track);color:var(--track)}
+.tag.champs{border-color:#2f6d4f;color:#2f6d4f}
+.done{display:grid;grid-template-columns:74px minmax(0,1fr) auto;gap:12px;align-items:baseline;padding:11px 0;border-top:1px solid var(--line);font-family:Arial,Helvetica,sans-serif}
+.done:first-of-type{border-top:0}
+.done .d{font:800 11px Arial,Helvetica,sans-serif;color:#a29a91;letter-spacing:.06em;text-transform:uppercase}
+.done .m{font-size:14px;color:#3f3933}
+.done .f{font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--track)}
+.rec-flag{display:block;font:700 9px Arial,Helvetica,sans-serif;letter-spacing:.09em;text-transform:uppercase;color:#a2812c;margin-top:4px}
+.rec-new .rec-ev{color:var(--track)}
+.rec{display:grid;grid-template-columns:110px minmax(0,1fr) auto;gap:12px;align-items:baseline;padding:12px 0;border-top:1px solid var(--line)}
+.rec:first-of-type{border-top:0}
+.rec-ev{font:800 12px Arial,Helvetica,sans-serif;letter-spacing:.05em;text-transform:uppercase;color:var(--ink)}
+.rec-ev small{display:block;font:700 9px Arial,Helvetica,sans-serif;letter-spacing:.08em;color:#a29a91;text-transform:uppercase;margin-top:4px}
+.rec-who b{font:500 17px Georgia,'Times New Roman',serif;display:block}
+.rec-who small{display:block;font:10px Arial,Helvetica,sans-serif;letter-spacing:.05em;color:#8b847c;margin-top:4px}
+.rec-mark{font:800 17px Arial,Helvetica,sans-serif;font-variant-numeric:tabular-nums;color:var(--track);text-align:right}
+.meet-links{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.meet-links a{font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.11em;text-transform:uppercase;color:var(--track);border:1px solid var(--line);background:#fbf8f3;padding:5px 9px;text-decoration:none}
+.meet-links a:hover{background:var(--track);border-color:var(--track);color:#fff}
+.story h3 a{color:inherit;text-decoration:none;box-shadow:inset 0 -1px 0 rgba(192,71,43,.35)}
+.story h3 a:hover{color:var(--track)}
+.newsdate{font:800 11px Arial,Helvetica,sans-serif;letter-spacing:.06em;color:var(--track);line-height:1.45;text-transform:uppercase}
+.newsdate small{display:block;color:#a29a91;font-weight:700}
+.hide{display:none!important}
+@media(max-width:680px){
+.story{grid-template-columns:64px minmax(0,1fr);gap:11px}
+.rec{grid-template-columns:minmax(0,1fr) auto;gap:10px}
+.rec-ev{grid-column:1/-1}
+.rec-who b{font-size:16px}
+html{font-size:14px}
+.ctl-row{gap:8px}.sortseg{margin-left:0}.seg button{padding:9px 13px}
+.nav{height:106px;display:grid;grid-template-columns:42px 1fr;padding:10px 14px 0;gap:7px 11px}
+.home{height:46px}.brand strong{font-size:19px}
+.tabs{grid-column:1/-1;height:44px;justify-content:flex-start;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tabs button{padding:0 10px;font-size:13px;flex:0 0 auto}
+.tabs button.active:after{left:7px;right:7px}
+.page{padding:12px 14px 60px}
+.hero{padding:19px 16px}.hero h1{font-size:32px}
+.list-head,.athlete{grid-template-columns:32px minmax(0,1fr) 84px;padding-left:12px;padding-right:12px;gap:8px}
+.rank{font-size:20px}.name{font-size:17px}
+.figure b{font-size:16px}
+.meet{grid-template-columns:64px minmax(0,1fr);gap:11px}
+.done{grid-template-columns:60px minmax(0,1fr)}
+.done .f{grid-column:2}
+}
+</style>
+</head>
+<body>
+<header class="top"><div class="nav">
+  <a class="home" href="index.html" aria-label="Home">&#8962;</a>
+  <div class="brand"><strong>CROSS COUNTRY</strong><span>NCAA Division I command center</span></div>
+  <nav class="tabs" aria-label="Sections">
+    <button class="active" data-tab="rankings">Rankings</button>
+    <button data-tab="meets">Meets</button>
+    <button data-tab="records">Records</button>
+    <button data-tab="news">News</button>
+  </nav>
+</div></header>
+
+<main class="page">
+  <section id="rankingsView">
+    <div class="hero">
+      <div class="eyebrow">USTFCCCA national coaches&rsquo; poll</div>
+      <div class="hero-row"><h1>Rankings</h1><div class="stamp">PRESEASON <b>1 SEP 2026</b></div></div>
+      <p class="source">The preseason NCAA Division I coaches&rsquo; poll, voted on before a single result is in. The No.&nbsp;1 team&rsquo;s first-place-vote count is shown alongside its points; in-season polls follow weekly through October as races are run. <a href="https://www.ustfccca.org/rankings-polls/cross-country" target="_blank" rel="noopener">ustfccca.org</a></p>
+    </div>
+    <div class="panel">
+      <div class="controls">
+        <div class="ctl-row"><div class="seg" role="tablist" aria-label="Category"><button class="active" data-gender="men" role="tab" aria-selected="true">Men</button><button data-gender="women" role="tab" aria-selected="false">Women</button></div></div>
+      </div>
+      <div class="event-note" id="rankNote"></div>
+      <div class="list-head"><span>Rank</span><span>Team</span><span>Points</span></div>
+      <div id="rankList"></div>
+      <div class="event-note" id="rankRV"></div>
+    </div>
+  </section>
+
+  <section id="meetsView" class="hide">
+    <div class="hero">
+      <div class="eyebrow">The 2026 fall calendar</div>
+      <div class="hero-row"><h1>Meets</h1><div class="stamp">TODAY <b>8 SEP 2026</b></div></div>
+      <p class="source">Every major Division I invitational from the season opener through the national championship, with conference, regional and NCAA dates. <a href="https://www.ncaa.com/news/cross-country-women/article/2026-07-20/cross-country-schedule-when-does-2026-college-cross-country-season-start" target="_blank" rel="noopener">ncaa.com</a></p>
+    </div>
+    <div class="section-card">
+      <div class="eyebrow">Opening weekend &middot; Sep 4&ndash;5</div>
+      <h2>Results</h2>
+      <p class="note">Season openers are lightly contested by the ranked teams, so nothing here moves the polls &mdash; but a few carried real results.</p>
+      <div id="resultsList"></div>
+    </div>
+    <div class="section-card" style="margin-top:18px">
+      <div class="eyebrow">What&rsquo;s next</div>
+      <h2>Schedule</h2>
+      <p class="note">Dates and hosts for the marquee invitationals, then the postseason.</p>
+      <div id="scheduleList"></div>
+    </div>
+  </section>
+
+  <section id="recordsView" class="hide">
+    <div class="hero">
+      <div class="eyebrow">Championship history</div>
+      <div class="hero-row"><h1>Records</h1><div class="stamp">2026 SITE <b>TERRE HAUTE, IN</b></div></div>
+      <p class="source">The 2025 champions, and where the 2026 title will be decided. <a href="https://en.wikipedia.org/wiki/2025_NCAA_Division_I_Cross_Country_Championships" target="_blank" rel="noopener">Wikipedia</a></p>
+    </div>
+    <div class="section-card">
+      <div class="eyebrow">Nov 22, 2025 &middot; Gans Creek Cross Country Course, Columbia, MO</div>
+      <h2>2025 champions</h2>
+      <div id="champList"></div>
+    </div>
+    <div class="section-card" style="margin-top:18px">
+      <div class="eyebrow">Nov 21, 2026 &middot; LaVern Gibson Championship Cross Country Course</div>
+      <h2>2026 championship site</h2>
+      <p class="note" style="margin:0">Terre Haute, Indiana, hosted by Indiana State &mdash; the course&rsquo;s 14th time holding the Division I Championships, following 2002, 2004&ndash;2011, 2013, 2014, 2016 and 2019. Pre-Nationals is run on the same course five weeks earlier, on October 16, as a dress rehearsal.</p>
+    </div>
+  </section>
+
+  <section id="newsView" class="hide">
+    <div class="hero">
+      <div class="eyebrow">NCAA cross country</div>
+      <div class="hero-row"><h1>News</h1><div class="stamp">CHECKED <b>8 SEP 2026</b></div></div>
+      <p class="source">Tap a headline to read it at the source.</p>
+    </div>
+    <div class="section-card">
+      <div id="newsList"></div>
+    </div>
+  </section>
+</main>
+
+<script src="version-check.js"></script>
+<script>
+const APP_VERSION='2026-09-08-1';
+checkForNewerAppVersion(APP_VERSION, 'xc');
+
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+// USTFCCCA NCAA DI Cross Country National Coaches' Poll -- Preseason, released September 1, 2026.
+// [rank, team, points, first-place votes (0 when none)]
+const POLL_DATE='September 1, 2026';
+const RANK_MEN=[
+ [1,'Oklahoma State',330,11],[2,'New Mexico',314,0],[3,'Iowa State',313,0],[4,'Alabama',292,0],[5,'Oregon',288,0],
+ [6,'Colorado',275,0],[7,'Northern Arizona',254,0],[8,'Wake Forest',251,0],[9,'BYU',248,0],[10,'Wisconsin',222,0],
+ [11,'Washington State',217,0],[12,'Eastern Kentucky',204,0],[13,'Syracuse',202,0],[14,'Notre Dame',189,0],[15,'Arkansas',179,0],
+ [16,'Butler',161,0],[17,'Michigan State',144,0],[18,'Tulsa',137,0],[19,'Harvard',127,0],[20,'Georgia',119,0],
+ [21,'Florida',106,0],[22,'Tulane',95,0],[23,'Air Force',92,0],[24,'California Baptist',79,0],[25,'Princeton',65,0],
+ [26,'Louisville',47,0],[27,'Stanford',40,0],[28,'Tennessee',33,0],[29,'Kansas',32,0],[30,'Missouri',15,0]
+];
+const RV_MEN='Utah State (13), Michigan (13), Georgetown (12), Arizona (3), Virginia Tech (2), Minnesota (1), Villanova (1)';
+const RANK_WOMEN=[
+ [1,'NC State',330,11],[2,'New Mexico',312,0],[3,'Iowa State',301,0],[4,'BYU',300,0],[5,'Oregon',283,0],
+ [6,'Notre Dame',268,0],[7,'West Virginia',262,0],[8,'Northern Arizona',253,0],[9,'Stanford',244,0],[10,'Penn State',217,0],
+ [11,'Northwestern',204,0],[11,'Alabama',204,0],[13,'North Carolina',186,0],[14,'Florida',185,0],[15,'Virginia',178,0],
+ [16,'South Carolina',172,0],[17,'Oklahoma State',162,0],[18,'Colorado',148,0],[19,'Arkansas',121,0],[20,'Utah',117,0],
+ [21,'Washington State',116,0],[22,'Washington',91,0],[23,'Princeton',87,0],[24,'Missouri',59,0],[25,'Toledo',54,0],
+ [26,'Duke',51,0],[27,'Villanova',46,0],[28,'Boston College',44,0],[29,'Georgetown',34,0],[30,'Wake Forest',32,0]
+];
+const RV_WOMEN='Tennessee (14), Boise State (9), Wisconsin (9), Providence (6), Michigan State (6), LSU (5), Texas A&M (4), Virginia Tech (1)';
+
+const state={gender:'men'};
+function rankRow(entry,podium){
+  const rank=entry[0],team=entry[1],pts=entry[2],votes=entry[3];
+  const sub=votes?(votes+' first-place vote'+(votes===1?'':'s')):'points';
+  return '<article class="athlete'+(podium?' podium':'')+'"><span class="rank">'+rank+'</span><div><div class="name">'+esc(team)+'</div></div><div class="figure"><b>'+pts+'</b><small>'+esc(sub)+'</small></div></article>';
+}
+function renderRankings(){
+  const list=state.gender==='men'?RANK_MEN:RANK_WOMEN;
+  const rv=state.gender==='men'?RV_MEN:RV_WOMEN;
+  $('#rankNote').textContent=(state.gender==='men'?"Men's":"Women's")+' preseason poll, released '+POLL_DATE+'. Ranked by points from a national panel of Division I head coaches.';
+  $('#rankList').innerHTML=list.map(function(r){return rankRow(r,r[0]<=3)}).join('');
+  $('#rankRV').innerHTML='<b>Also receiving votes:</b> '+esc(rv);
+  $$('#rankingsView .seg button').forEach(function(b){const on=b.dataset.gender===state.gender;b.classList.toggle('active',on);b.setAttribute('aria-selected',on)});
+}
+$$('#rankingsView .seg button').forEach(function(btn){btn.onclick=function(){state.gender=btn.dataset.gender;renderRankings()}});
+
+// -------- Meets --------
+// Season-opener results checked 8 September 2026; schedule from official team/conference releases.
+const RESULTS=[
+ {d:'Sep 4',name:'Season openers',where:'Wisconsin, Elon, Iowa State and others',detail:'The Badger Preview (Wisconsin), Friday Night Lights Elon Opener, and Iowa State’s Cyclone Preview kicked off the year as low-key, lightly contested tune-ups.'},
+ {d:'Sep 5',name:'Cowboy Preview',where:'Stillwater, Oklahoma',detail:'Preseason No. 1 Oklahoma State swept its home opener; in-state rival Oklahoma took second in both races. Sooners freshman Domtila Cheruto won the women’s 3K in 10:04.2, and junior Thobias Cheruiyot was runner-up in the men’s 5K in 15:02.6.'}
+];
+const SCHEDULE=[
+ {d:'Sep 11',name:'Virginia Invitational & Spartan Run',where:'Charlottesville, VA · East Lansing, MI',detail:'Early tests hosted by Virginia and Michigan State.'},
+ {d:'Sep 18',name:'Roy Griak Invitational & adidas XC Challenge',where:'Minneapolis, MN (host: Minnesota) · host: NC State',detail:'The first weekend with real depth in the fields, drawing several ranked teams.'},
+ {d:'Sep 25',name:'Gans Creek Classic',where:'Columbia, MO (host: Missouri)',detail:'Run on the actual 2025 NCAA Championships course.'},
+ {d:'Sep 26',name:'Cowboy Jamboree',where:'Stillwater, OK (host: Oklahoma State)',detail:'One of the sport’s largest and longest-running invitationals.'},
+ {d:'Oct 2',name:'Joe Piane Notre Dame Invitational & Paul Short Run',where:'Notre Dame, IN · Bethlehem, PA (host: Lehigh)',detail:'Two of the fall’s highest-volume, most heavily scouted meets.'},
+ {d:'Oct 9',name:'Nuttycombe Wisconsin Invitational',where:'Madison, WI (host: Wisconsin)',detail:'The marquee regular-season meet, drawing nearly every ranked team in the country.'},
+ {d:'Oct 16',name:'Pre-Nationals & IC4A/ECAC Championships',where:'Terre Haute, IN (host: Indiana State) · New York',detail:'Pre-Nationals runs on the LaVern Gibson course — a dress rehearsal for the national championship five weeks later.'},
+ {d:'Oct 29–Nov 1',name:'Conference Championships',where:'Nationwide',detail:'Every Division I conference crowns its champion.'},
+ {d:'Nov 13',name:'NCAA Regional Championships',where:'Nine regional sites nationwide',detail:'The top teams and individuals from each region advance to nationals.'},
+ {d:'Nov 21',name:'NCAA Division I Championships',where:'Terre Haute, IN (host: Indiana State)',detail:'The men’s and women’s national championship races at the LaVern Gibson Championship Cross Country Course.',tag:'Championship'}
+];
+function renderMeets(){
+  $('#resultsList').innerHTML=RESULTS.map(function(m){return '<article class="meet"><div class="meet-date">'+esc(m.d)+'<small>2026</small></div><div><h3>'+esc(m.name)+'</h3><div class="where">'+esc(m.where)+'</div><div class="detail">'+esc(m.detail)+'</div></div></article>'}).join('');
+  $('#scheduleList').innerHTML=SCHEDULE.map(function(m){return '<article class="meet"><div class="meet-date">'+esc(m.d)+'<small>2026</small></div><div><h3>'+esc(m.name)+'</h3><div class="where">'+esc(m.where)+'</div><div class="detail">'+esc(m.detail)+'</div>'+(m.tag?'<span class="tag champs">'+esc(m.tag)+'</span>':'')+'</div></article>'}).join('');
+}
+
+// -------- Records --------
+// 2025 NCAA DI Cross Country Championships, 22 Nov 2025, Gans Creek CC Course, Columbia, MO.
+const CHAMPIONS=[
+ {group:'Men’s team',champ:'NC State',note:'Defeated runner-up BYU.'},
+ {group:'Women’s team',champ:'Oklahoma State',note:'Defeated runner-up New Mexico.'},
+ {group:'Men’s individual',champ:'Habtom Samuel, New Mexico',note:'28:33.9 for 10K — turned professional in July 2026 and will not defend the title.'},
+ {group:'Women’s individual',champ:'Doris Lemngole, Alabama',note:'18:25.4 for 6K.'}
+];
+function renderRecords(){
+  $('#champList').innerHTML=CHAMPIONS.map(function(c){return '<div class="rec"><div class="rec-ev">'+esc(c.group)+'</div><div class="rec-who"><b>'+esc(c.champ)+'</b></div><div class="rec-mark" style="text-align:left;font-size:12px;color:var(--muted);font-weight:700">'+esc(c.note)+'</div></div>'}).join('');
+}
+
+// -------- News --------
+// [ISO date, headline, source, url, summary]. Checked 8 September 2026.
+const NEWS=[
+ ['2026-09-05','Oklahoma State sweeps home-opening Cowboy Preview','Oklahoma Athletics','https://soonersports.com/news/2026/9/5/cross-country-sooners-take-second-at-cowboy-jamboree','Preseason No. 1 Oklahoma State topped both races in Stillwater; in-state rival Oklahoma was runner-up in each.'],
+ ['2026-09-01','Oklahoma State men, NC State women debut at No. 1 in preseason polls','USTFCCCA','https://www.ustfccca.org/2026/09/featured/2026-ncaa-di-mens-cross-country-national-coaches-poll-preseason','Both programs earned all 11 first-place votes as the coaches released their preseason Division I polls.'],
+ ['2026-07-07','Defending men’s champion Habtom Samuel turns pro, will skip 2026 season','The Stride Report','https://www.thestridereport.com/post/breaking-new-mexico-phenom-habtom-samuel-to-turn-pro','New Mexico’s reigning individual champion announced he is turning professional, reversing an earlier plan to run one more cross country season.']
+];
+const NEWS_MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function newsDate(iso){const p=String(iso).split('-');return {d:(+p[2])+' '+NEWS_MONTHS[+p[1]-1],y:p[0]}}
+function renderNews(){
+  $('#newsList').innerHTML=NEWS.map(function(row){const dt=newsDate(row[0]);
+    return '<article class="story"><div class="newsdate">'+esc(dt.d)+'<small>'+esc(dt.y)+'</small></div><div>'
+      +'<h3><a href="'+esc(row[3])+'" target="_blank" rel="noopener">'+esc(row[1])+'</a></h3>'
+      +'<div class="where">'+esc(row[2])+'</div>'
+      +'<div class="detail">'+esc(row[4])+'</div></div></article>';
+  }).join('');
+}
+
+// -------- Tabs --------
+const TABS=['rankings','meets','records','news'];
+function showTab(name){
+  $$('.tabs button').forEach(function(b){b.classList.toggle('active',b.dataset.tab===name)});
+  TABS.forEach(function(x){$('#'+x+'View').classList.toggle('hide',x!==name)});
+  try{localStorage.setItem('xc-tab',name)}catch(e){}
+}
+$$('.tabs button').forEach(function(btn){btn.onclick=function(){showTab(btn.dataset.tab)}});
+
+let startTab='rankings';
+try{const saved=localStorage.getItem('xc-tab');if(TABS.indexOf(saved)>-1)startTab=saved;}catch(e){}
+showTab(startTab);
+renderRankings();renderMeets();renderRecords();renderNews();
+</script>
+</body>
+</html>
