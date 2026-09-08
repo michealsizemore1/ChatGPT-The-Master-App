@@ -617,7 +617,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;paddi
 @keyframes micPulse{from{opacity:1;}to{opacity:0.6;}}
 
 /* ── Meal Sections ── */
-.meal-section{border:1px solid #f0e8d8;border-radius:10px;margin-bottom:10px;overflow:hidden;border-left:4px solid #e67e22;box-shadow:0 1px 4px rgba(15,23,42,.06);}
+.meal-section{border:1px solid #f0e8d8;border-radius:10px;margin-bottom:10px;overflow:hidden;border-left:4px solid #e67e22;box-shadow:0 1px 2px rgba(15,23,42,.08),0 8px 16px rgba(15,23,42,.12);}
 .meal-header{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#fffaf4;cursor:pointer;font-weight:700;font-size:0.88rem;color:#5d3a00;user-select:none;gap:4px;overflow:hidden;}
 .meal-header:hover{background:#fff3e0;}
 .meal-body{padding:8px 10px;background:#fff;}
@@ -2706,7 +2706,7 @@ body{
 <div class="tab-panel" id="tab-nutrition"><div class="panel">
   <!-- NUTRITION / FOOD LOG -->
   <div class="section-title orange" style="margin-bottom:7px;"><span>&#x1F957; Nutrition</span></div>
-  <div id="dailyCalorieAdvisor" style="background:linear-gradient(135deg,#fff7ed,#f0fdf4);border:1px solid #fdba74;border-radius:12px;padding:13px 14px;margin-bottom:16px;box-shadow:0 2px 10px rgba(154,52,18,.08);">
+  <div id="dailyCalorieAdvisor" style="background:linear-gradient(135deg,#fff7ed,#f0fdf4);border:1px solid #fdba74;border-radius:12px;padding:13px 14px;margin-bottom:16px;box-shadow:0 1px 2px rgba(154,52,18,.12),0 12px 26px rgba(154,52,18,.2);">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:9px;">
       <div>
         <div style="font-size:.9rem;font-weight:800;color:#9a3412;">&#x1F525; Daily Calorie Intake Target</div>
@@ -2792,7 +2792,7 @@ body{
   <!-- Legacy flat list (hidden, kept for compat) -->
   <div id="foodItemsList" style="display:none;"></div>
   <!-- Macro totals bar -->
-  <div id="macroTotalsBar" style="display:block;background:#f8f9fa;border:1px solid #e9ecef;border-radius:8px;padding:8px 10px;margin-bottom:16px;font-size:0.8rem;box-shadow:0 2px 8px rgba(15,23,42,.05);">
+  <div id="macroTotalsBar" style="display:block;background:#f8f9fa;border:1px solid #e9ecef;border-radius:8px;padding:8px 10px;margin-bottom:16px;font-size:0.8rem;box-shadow:0 1px 2px rgba(15,23,42,.08),0 12px 24px rgba(15,23,42,.16);">
     <div style="font-weight:700;color:#555;margin-bottom:4px;">Daily Totals</div>
     <div id="dailyFoodQuality" style="display:none;margin:6px 0 8px;padding:8px 9px;background:#fff;border:1px solid #dbe3ec;border-radius:8px;">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.76rem;font-weight:800;color:#334155;margin-bottom:6px;">
@@ -2886,7 +2886,7 @@ body{
     </div>
   </div>
   <!-- Favorites / Meals panel -->
-  <div id="favMealPanel" style="display:block;background:#fffdf5;border:1px solid #f0c080;border-radius:10px;padding:10px 12px;margin-bottom:16px;box-shadow:0 2px 8px rgba(154,105,20,.07);">
+  <div id="favMealPanel" style="display:block;background:#fffdf5;border:1px solid #f0c080;border-radius:10px;padding:10px 12px;margin-bottom:16px;box-shadow:0 1px 2px rgba(154,105,20,.1),0 12px 24px rgba(154,105,20,.18);">
     <div style="display:flex;gap:8px;margin-bottom:8px;">
       <button onclick="showFavTab('favs')" id="favTabBtn" style="flex:1;background:#f39c12;color:#fff;border:none;padding:5px;border-radius:6px;font-size:0.8rem;cursor:pointer;font-weight:700;">⭐ Favorites (<span id="favoriteFoodsCount">0</span>)</button>
       <button onclick="showFavTab('healthy')" id="healthyTabBtn" style="flex:1;background:#e9ecef;color:#555;border:none;padding:5px;border-radius:6px;font-size:0.8rem;cursor:pointer;font-weight:700;">✅ Healthy 7+ (<span id="healthyFoodsCount">0</span>)</button>
@@ -2908,7 +2908,7 @@ body{
     <div id="mealsList" style="display:none;max-height:200px;overflow-y:auto;"></div>
   </div>
   <!-- AI Food Search -->
-  <div id="aiFoodSearchPanel" style="background:#f0f4ff;border:1px solid #c7d2fe;border-radius:10px;padding:10px 12px;margin-bottom:16px;box-shadow:0 2px 8px rgba(67,56,202,.07);">
+  <div id="aiFoodSearchPanel" style="background:#f0f4ff;border:1px solid #c7d2fe;border-radius:10px;padding:10px 12px;margin-bottom:16px;box-shadow:0 1px 2px rgba(67,56,202,.1),0 12px 24px rgba(67,56,202,.18);">
     <div style="font-size:0.82rem;font-weight:700;color:#4338ca;margin-bottom:7px;">&#x1F50D; AI Food Search</div>
     <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:6px;">
       <input type="text" id="aiFoodQuery" placeholder="Search any food..." style="width:100%;border:1px solid #a5b4fc;border-radius:6px;padding:6px 9px;font-size:0.82rem;box-sizing:border-box;" onkeydown="if(event.key==='Enter')aiSearchFood()"/>
@@ -2929,7 +2929,7 @@ body{
   <!-- AI Fuel insight box -->
   <div id="nutritionAIBox" class="ai-box" style="display:none;margin-bottom:16px;"></div>
   <!-- Water intake -->
-  <div class="water-row" style="margin-top:0;margin-bottom:16px;padding:12px 14px;background:#fff;border:1px solid #f0e8d8;border-radius:10px;box-shadow:0 2px 8px rgba(15,23,42,.05);">
+  <div class="water-row" style="margin-top:0;margin-bottom:16px;padding:12px 14px;background:#fff;border:1px solid #f0e8d8;border-radius:10px;box-shadow:0 1px 2px rgba(15,23,42,.08),0 12px 24px rgba(15,23,42,.16);">
     <label style="font-size:0.92rem;color:#555;font-weight:600;">&#x1F4A7; Water Intake:</label>
     <div class="water-ctrl" style="margin-top:4px;">
       <button class="water-pm" onclick="changeWater(-1)">&#x2212;</button>
