@@ -94,6 +94,11 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:Georgia,'Time
 .team-card .result{margin-top:9px;font:12px/1.55 Arial,Helvetica,sans-serif;color:#3f3933;padding:8px 10px;background:#fbf5f2;border-left:3px solid var(--track)}
 .team-card .result b{font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--track);display:block;margin-bottom:3px}
 .team-card .gap{margin-top:8px;font:italic 12px/1.5 Arial,Helvetica,sans-serif;color:var(--muted)}
+.team-card .runners{margin-top:9px;font:12px/1.6 Arial,Helvetica,sans-serif;padding-top:9px;border-top:1px dashed var(--line)}
+.team-card .runners b{display:block;font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#6d655d;margin-bottom:3px}
+.team-card .runners .rn{color:#3f3933}
+.team-card .runners .rn small{color:#a29a91;font-size:10px}
+.team-card .runners .rnote{display:block;margin-top:3px;font-style:italic;color:var(--muted);font-size:11px}
 
 .meet-links{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
 .meet-links a{font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.11em;text-transform:uppercase;color:var(--track);border:1px solid var(--line);background:#fbf8f3;padding:5px 9px;text-decoration:none}
@@ -325,56 +330,82 @@ function renderNews(){
 const TEAMS=[
  {conf:'Big 12',name:'Oklahoma State',ranks:[['M',1]],
   sched:[['Sep 5','Cowboy Preview','Stillwater, OK (host)'],['Sep 26','Cowboy Jamboree','Stillwater, OK (host)'],['Oct 17','Weis-Crockett Invitational','Stillwater, OK (host)'],['Oct 31','Big 12 Championships','Stillwater, OK (host)'],['Nov 13','NCAA Midwest Regional','Ames, IA'],['Nov 21','NCAA Championships','Terre Haute, IN']],
-  result:{d:'Sep 5',text:'The men won the Cowboy Preview with 31 points, ahead of in-state rival Oklahoma (2nd).'}},
+  result:{d:'Sep 5',text:'The men won the Cowboy Preview with 31 points, ahead of in-state rival Oklahoma (2nd).'},
+  runners:{M:{note:'No ranked depth chart published — grad students and seniors shown.',list:[['Tate Barr','Gr'],['Riley McGowan','Gr'],['Jacob Deacon','Sr'],['Ayden Granados','Sr'],['Adisu Guadie','Sr'],['Hamish Hart','Sr'],['Ian Kemey','Sr']]}}},
  {conf:'Big 12',name:'Iowa State',ranks:[['M',3],['W',3]],
   sched:[['Sep 4','Cyclone Preview','Ames, IA (host)'],['Sep 18','Home Meet #2','Ames, IA (host)'],['Oct 9','Nuttycombe Invitational','Madison, WI'],['Oct 31','Big 12 Championships','Stillwater, OK'],['Nov 13','NCAA Midwest Regional','Ames, IA (host)'],['Nov 21','NCAA Championships','Terre Haute, IN']],
-  result:{d:'Sep 4',text:'At the Cyclone Preview, the men placed 3rd and the women 5th.'}},
+  result:{d:'Sep 4',text:'At the Cyclone Preview, the men placed 3rd and the women 5th.'},
+  runners:{M:{note:'Returning All-Americans plus top newcomers, per Iowa State’s 2026 Cyclone Preview primer.',list:[['Robin Kwemoi Bera','All-American'],['Meshack Kimutai','All-American'],['Rodgers Kiplimo','All-American'],['Joash Ruto','All-American'],['Dylan Maloney','newcomer'],['Mikah Peters','newcomer'],['Carson Driemeier','newcomer']]},
+   W:{note:'Only these three were named in the program’s preview; the rest of the women’s roster wasn’t published there.',list:[['Mercy Kibet','All-American'],['Betty Kipkore','All-American'],['Sophia Keditukei','newcomer']]}}},
  {conf:'Big 12',name:'Colorado',ranks:[['M',6]],
   sched:[['Sep 4','Wyoming Invitational','Cheyenne, WY'],['Sep 19','John McNichols Invitational / Roadrunners Invitational (squad split)','Terre Haute, IN / Denver, CO'],['Oct 9','Nuttycombe Invitational','Madison, WI'],['Oct 31','Big 12 Championships','Stillwater, OK'],['Nov 13','NCAA Mountain Regional','Albuquerque, NM'],['Nov 21','NCAA Championships','Terre Haute, IN']],
-  result:{d:'Sep 4',text:'The men placed 3rd at the Wyoming Invitational; the women did not post a team score.'}},
+  result:{d:'Sep 4',text:'The men placed 3rd at the Wyoming Invitational; the women did not post a team score.'},
+  runners:{M:{note:'No ranked depth chart published — most experienced (5th/4th-year) roster members shown.',list:[['Isaiah Givens','5th yr'],['Lukas Haug','5th yr'],['Tanner Newkirk','5th yr'],['Charles Robertson','5th yr'],['Dean Casey','4th yr'],['Kole Mathison','4th yr'],['Dominic Serem','4th yr']]}}},
  {conf:'Big 12',name:'BYU',ranks:[['M',9],['W',4]],
   sched:[['Sep 4','Utah Valley Invitational','Orem, UT'],['Sep 19','John McNichols Invitational','Terre Haute, IN'],['Oct 9','Nuttycombe Invitational','Madison, WI'],['Oct 31','Big 12 Championships','Stillwater, OK'],['Nov 13','NCAA Mountain Regional','Albuquerque, NM'],['Nov 21','NCAA Championships','Terre Haute, IN']],
-  result:{d:'Sep 4',text:'The men won the Utah Valley Invitational with 17 points; the women’s score from that meet was not published.'}},
+  result:{d:'Sep 4',text:'The men won the Utah Valley Invitational with 17 points; the women’s score from that meet was not published.'},
+  runners:{M:{note:'No ranked depth chart published — seniors and juniors shown.',list:[['James Corrigan','Sr'],['Carter Cutting','Jr'],['Max Davis','Jr'],['Isaac Hedengren','Jr'],['Noah Jenkins','Jr'],['Hunter Kitchen','Jr'],['Land Lambert','Jr']]},
+   W:{note:'No ranked depth chart published — seniors and juniors shown.',list:[['Carmen Alder','Sr'],['Riley Chamberlain','Sr'],['Jacey Harkins-Farmer','Sr'],['Taylor Lovell','Sr'],['Taylor Rohatinsky','Sr'],['Vanessa Alder','Jr'],['Lexi Goff-Thompson','Jr']]}}},
  {conf:'Big 12',name:'West Virginia',ranks:[['W',7]],
   sched:[['Sep 11','RMU Invitational','Clinton, PA'],['Sep 19','John McNichols Invitational','Terre Haute, IN'],['Oct 9–10','Nuttycombe Invitational / Carnegie Mellon Invitational (squad split)','Madison, WI / Clinton, PA'],['Oct 31','Big 12 Championship','Stillwater, OK'],['Nov 13','NCAA Mid-Atlantic Regional','Bethlehem, PA'],['Nov 21','NCAA Championship','Terre Haute, IN']],
-  result:null,gap:'Season opens Sep. 11 at the RMU Invitational — no result posted yet.'},
+  result:null,gap:'Season opens Sep. 11 at the RMU Invitational — no result posted yet.',
+  runners:{W:{note:'Anastasia Chepkorir (a Texas Tech transfer) is highlighted by the program as a top returner; other names are the most senior roster members — no full depth chart published.',list:[['Anastasia Chepkorir','Sr, transfer'],['Emily Bryce','Gr'],['Audrey Hall','Sr'],['Lexi Lamb','Sr'],['Joy Naukot','Jr'],['Mary Delaney','R-Jr'],['Mercy Kinyanjui','R-Jr']]}}},
  {conf:'ACC',name:'Wake Forest',ranks:[['M',8]],
   sched:[['Sep 11','Virginia Invitational (women)','Earlysville, VA'],['Sep 18','adidas XC Challenge (men)','Cary, NC'],['Sep 26','Meadows Challenge (women)','Princeton, NJ'],['Oct 9','Nuttycombe Invitational','Madison, WI'],['Oct 30','ACC Championships','Blacksburg, VA'],['Nov 13','NCAA Southeast Regional','Spartanburg, SC'],['Nov 21','NCAA Championships','Terre Haute, IN']],
-  result:null,gap:'Neither the men’s (Sep. 18) nor women’s (Sep. 11) opener has been run yet.'},
+  result:null,gap:'Neither the men’s (Sep. 18) nor women’s (Sep. 11) opener has been run yet.',
+  runners:{M:{note:'The program was tabbed the 2026 ACC preseason favorite as a team; no individual depth chart published — redshirt seniors, grad students and seniors shown.',list:[['Gavin Ehlers','R-Sr'],['Bryce Gilmore','R-Sr'],['Paul Specht','Gr'],['Alex Thompson','Gr'],['Rocky Hansen','Sr'],['Hunter Jones','Sr'],['Aidan Ross','Sr']]}}},
  {conf:'ACC',name:'NC State',ranks:[['W',1]],
   sched:[['Sep 18','adidas XC Challenge','Cary, NC (host)'],['Oct 2','Dill Family Foundation Invitational / Joe Piane Invitational (squad split)','Greenville, NC / South Bend, IN'],['Oct 16','Pre-Nationals','Terre Haute, IN'],['Oct 30','ACC Championships','Blacksburg, VA'],['Nov 13','NCAA Southeast Regionals','Spartanburg, SC'],['Nov 21','NCAA Championships','Terre Haute, IN']],
-  result:null,gap:'The reigning women’s national champions open the season Sep. 18 — no result yet.'},
+  result:null,gap:'The reigning women’s national champions open the season Sep. 18 — no result yet.',
+  runners:{W:{note:'2025 NCAA Championships finishes, per the program’s 2026 season preview.',list:[['Hannah Gapes','5th, 2025 NCAAs'],['Grace Hartman','6th, 2025 NCAAs'],['Bethany Michalak','29th, 2025 NCAAs'],['Angelina Napoleon','40th, 2025 NCAAs'],['Sadie Engelhardt','51st, 2025 NCAAs'],['Rachel Forsyth','transfer, 2024 All-American']]}}},
  {conf:'ACC',name:'Notre Dame',ranks:[['W',6]],
   sched:[['Oct 2','Joe Piane Notre Dame Invitational','Notre Dame, IN (host)'],['Oct 30','ACC Championships','Blacksburg, VA'],['Nov 21','NCAA Championships','Terre Haute, IN']],
-  result:null,gap:'Notre Dame’s own schedule listing could not be loaded; only meets confirmed via other teams’ schedules are shown, so the early-season slate here is incomplete.'},
+  result:null,gap:'Notre Dame’s own schedule listing could not be loaded; only meets confirmed via other teams’ schedules are shown, so the early-season slate here is incomplete.',
+  runners:{W:{note:'Notre Dame’s roster page doesn’t distinguish top runners — the fifth-year and senior class is shown.',list:[['Mary Grace Hegberg','5th yr'],['Gretchen Farley','Sr'],['Bridget Gallagher','Sr'],['Isabella Guillamondegui','Sr'],['Kaleigh Gunsiorowski','Sr'],['Arianne Olson','Sr'],['Reagan Riley','Sr']]}}},
  {conf:'ACC',name:'Stanford',ranks:[['W',9]],
   sched:[['Sep 4','USF Invitational','San Francisco, CA'],['Sep 19','John McNicols Invitational','Terre Haute, IN'],['Oct 2','Pacific Invitational','Stockton, CA'],['Oct 9','Nuttycombe Invitational','Madison, WI'],['Oct 17','Bronco Invitational','Sunnyvale, CA'],['Oct 30','ACC Championships','Blacksburg, VA'],['Nov 13','NCAA West Regional','Sacramento, CA'],['Nov 21','NCAA Championships','Terre Haute, IN']],
-  result:{d:'Sep 4',text:'At the USF Invitational, the women placed 6th (145 pts) and the men 5th (150 pts).'}},
+  result:{d:'Sep 4',text:'At the USF Invitational, the women placed 6th (145 pts) and the men 5th (150 pts).'},
+  runners:{W:{note:'No ranked depth chart published — the fifth-year and senior class is shown.',list:[['Julia Flynn','5th yr'],['Amy Bunnage','Sr'],['Amelia Everett','Sr'],['Sophia Kennedy','Sr'],['Irene Riggs','Sr'],['Madison Shults','Sr'],['Hillary Studdert','Sr']]}}},
  {conf:'Big Ten',name:'Oregon',ranks:[['M',5],['W',5]],
   sched:[['Sep 26','Mike Johnson Classic (women) / Cowboy Jamboree (men)','Monmouth, OR / Stillwater, OK'],['Oct 9','Bill Dellinger Invitational','Springfield, OR (host)'],['Oct 30','Big Ten Championships','Madison, WI'],['Nov 13','NCAA West Regional','Sacramento, CA'],['Nov 21','NCAA Championships','Terre Haute, IN']],
-  result:null,gap:'Season opens Sep. 26 — no result yet.'},
+  result:null,gap:'Season opens Sep. 26 — no result yet.',
+  runners:{M:{note:'Simeon Birnbaum is highlighted by the program for his collegiate 1500m record; other names are the most senior roster members.',list:[['Simeon Birnbaum','Sr'],['Evan Bishop','6th yr'],['Benjamin Balazs','5th yr'],['Evan Jenkins','5th yr'],['Connor McCormick','5th yr'],['Aiden Smith','5th yr'],['Connor Burns','Sr']]},
+   W:{note:'No ranked depth chart published — the fifth-year and senior class is shown.',list:[['Kendall Martin','5th yr'],['Samantha McDonnell','5th yr'],['Ava Parekh','5th yr'],['Juliet Cherubet','Sr'],['Bahiya El Arfaoui','Sr'],['Dalia Frias','Sr'],['Allura Markow','Sr']]}}},
  {conf:'Big Ten',name:'Wisconsin',ranks:[['M',10]],
   sched:[['Sep 4','Badger Classic','Madison, WI (host)'],['Sep 19','John McNichols Invitational','Terre Haute, IN'],['Sep 25','Sean Earl Lakefront Invitational','Chicago, IL'],['Oct 9','Nuttycombe Invitational','Madison, WI (host)'],['Oct 30','Big Ten Championships','Madison, WI (host)'],['Nov 13','NCAA Great Lakes Regional','East Lansing, MI'],['Nov 21','NCAA Championships','Terre Haute, IN']],
-  result:{d:'Sep 4',text:'Beat No. 11 Northwestern at the home-hosted Badger Classic; full team scores from the meet were not published.'}},
+  result:{d:'Sep 4',text:'Beat No. 11 Northwestern at the home-hosted Badger Classic; full team scores from the meet were not published.'},
+  runners:{M:{note:'Christian de Vaal was named a Big Ten runner to watch, and Grady Lenn was a Big Ten Freshman of the Week; other names are the most senior roster members.',list:[['Christian de Vaal','Sr'],['Grady Lenn','Fr'],['Logan Measner','5th yr'],['Micah Wilson','5th yr'],['Andrew Casey','Sr'],['Nick Gilles','Sr'],['Matan Ivri','Sr']]}}},
  {conf:'Big Ten',name:'Penn State',ranks:[['W',10]],
   sched:[['Sep 4','Dolan Duals','Lock Haven, PA'],['Sep 11','Harry Groves Spiked Shoe Invitational','University Park, PA (host)'],['Sep 26','Princeton Fall Classic','Princeton, NJ'],['Oct 2','Paul Short Run','Bethlehem, PA'],['Oct 9','Nuttycombe Invitational','Madison, WI'],['Oct 16','NCAA Pre-National Invitational','Terre Haute, IN'],['Oct 30','Big Ten Championships','Madison, WI'],['Nov 13','NCAA Mid-Atlantic Regional','Bethlehem, PA'],['Nov 21','NCAA Championships','Terre Haute, IN']],
-  result:{d:'Sep 4',text:'Swept both the men’s and women’s races at the Dolan Duals.'}},
+  result:{d:'Sep 4',text:'Swept both the men’s and women’s races at the Dolan Duals.'},
+  runners:{W:{note:'No ranked depth chart published — grad students, the lone junior and the sophomore class are shown.',list:[['Charlotte Costich','Gr'],['Katie Dallas','Gr'],['Lea Hatcher','Gr'],['Ella White','Jr'],['Liliah Gordon','So'],['Jane Kratz','So'],['Wren Kucler','So']]}}},
  {conf:'SEC',name:'Alabama',ranks:[['M',4]],
   sched:[['Sep 5','City Auto Memphis Twilight Classic','Memphis, TN'],['Sep 18','Southern Showcase','Jacksonville, AL'],['Sep 26','Meadows Challenge','Princeton, NJ'],['Oct 16','Crimson Classic','Tuscaloosa, AL (host)'],['Oct 30','SEC Championships','Columbia, MO'],['Nov 13','NCAA South Regional','Tallahassee, FL'],['Nov 21','NCAA Championships','Terre Haute, IN']],
-  result:{d:'Sep 5',text:'The women placed 3rd (98 pts) and the men 3rd (103 pts) at the Memphis Twilight Classic.'}},
+  result:{d:'Sep 5',text:'The women placed 3rd (98 pts) and the men 3rd (103 pts) at the Memphis Twilight Classic.'},
+  runners:{M:{note:'No ranked depth chart published — seniors and juniors shown.',list:[['Jackson Harris','Sr'],['Dennis Kipruto','Sr'],['Charlie Rogers','Sr'],['Adin Lathrop','Jr'],['Dismus Lokira','Jr'],['Evan Simpson','Jr'],['Evan Trapp','Jr']]}}},
  {conf:'Mountain West',name:'New Mexico',ranks:[['M',2],['W',2]],
   sched:[['Sep 5','UNM Lobo XC Invite','Albuquerque, NM (host)'],['Sep 26','Cowboy Jamboree','Stillwater, OK'],['Oct 10','Nuttycombe Invitational','Madison, WI'],['Oct 30','Mountain West Championships','Reno, NV'],['Nov 13','NCAA Mountain Regional','Albuquerque, NM (host)'],['Nov 21','NCAA Championships','Terre Haute, IN']],
-  result:null,gap:'A result from the Lobos’ own Sep. 5 season opener has not been published.'},
+  result:null,gap:'A result from the Lobos’ own Sep. 5 season opener has not been published.',
+  runners:{M:{note:'No ranked depth chart published — most experienced (5th/4th/3rd-year) roster members shown.',list:[['Drew Rogers','5th yr'],['Vincent Chirchir','4th yr'],['Evans Kiplagat','4th yr'],['Lukas Kiprop','4th yr'],['Bilal Safadi','4th yr'],['Joshua Abraham','3rd yr'],['Rhys Crawford','3rd yr']]},
+   W:{note:'No ranked depth chart published — most experienced (5th/4th/3rd-year) roster members shown.',list:[['Tina Nisoli','5th yr'],['Elia Ton-That','5th yr'],['Jasmine Wood','5th yr'],['Mercy Kirarei','4th yr'],['Noel Barlette','3rd yr'],['Anya Belisle','3rd yr'],['Li-Mari Dekker','3rd yr']]}}},
  {conf:'Big Sky',name:'Northern Arizona',ranks:[['M',7],['W',8]],
   sched:[['Sep 2','George Kyte Classic','Flagstaff, AZ (host)'],['Sep 19','John McNichols Invitational','Terre Haute, IN'],['Oct 9','Nuttycombe Invitational','Madison, WI'],['Oct 30','Big Sky Championships','Flagstaff, AZ (host)'],['Nov 13','NCAA Mountain Regional','Albuquerque, NM'],['Nov 21','NCAA Championships','Terre Haute, IN']],
-  result:null,gap:'No result has been published yet for the Sep. 2 opener.'}
+  result:null,gap:'No result has been published yet for the Sep. 2 opener.',
+  runners:{M:{note:'No ranked depth chart published — seniors and one junior shown.',list:[['Ethan Godsey','Sr'],['Justin Keyes','Sr'],['Aidan Puffer','Sr'],['Erik Le Roux','Sr'],['Ford Washburn','Sr'],['Iker Sánchez López','Sr'],['Rheinhardt Harrison','Jr']]},
+   W:{note:'No ranked depth chart published — the sixth-year, seniors and juniors are shown.',list:[['Grace Copeland','6th yr'],['Hayley Burns','Sr'],['Sophie Coutts','Sr'],['Keira Moore','Sr'],['Ava Mitchell','Jr'],['Emma Stutzman','Jr'],['Odessa Zentz','Jr']]}}}
 ];
+function runnersBlock(g,r){
+  const label=(g==='M'?'Men':'Women')+' — top returners';
+  const names=r.list.map(function(n){return esc(n[0])+' <small>('+esc(n[1])+')</small>'}).join(', ');
+  return '<div class="runners"><b>'+esc(label)+'</b><span class="rn">'+names+'</span><span class="rnote">'+esc(r.note)+'</span></div>';
+}
 function teamCard(t){
   const rk=t.ranks.map(function(r){return (r[0]==='M'?'MEN #':'WOMEN #')+r[1]}).join(' &middot; ');
   const sched=t.sched.map(function(s){return '<div><b>'+esc(s[0])+'</b>'+esc(s[1])+' &mdash; '+esc(s[2])+'</div>'}).join('');
   const foot=t.result?('<div class="result"><b>Result &mdash; '+esc(t.result.d)+'</b>'+esc(t.result.text)+'</div>')
     :(t.gap?('<div class="gap">'+esc(t.gap)+'</div>'):'');
-  return '<div class="team-card"><div class="tname">'+esc(t.name)+'<span class="rk">'+rk+'</span></div><div class="sched">'+sched+'</div>'+foot+'</div>';
+  const runners=t.runners?t.ranks.map(function(r){return t.runners[r[0]]?runnersBlock(r[0],t.runners[r[0]]):''}).join(''):'';
+  return '<div class="team-card"><div class="tname">'+esc(t.name)+'<span class="rk">'+rk+'</span></div><div class="sched">'+sched+'</div>'+foot+runners+'</div>';
 }
 function renderConferences(){
   const order=['Big 12','ACC','Big Ten','SEC','Mountain West','Big Sky'];
@@ -383,7 +414,6 @@ function renderConferences(){
     return '<div class="conf-block"><div class="conf-name">'+esc(c)+' &middot; '+teams.length+' team'+(teams.length===1?'':'s')+'</div>'+teams.map(teamCard).join('')+'</div>';
   }).join('');
 }
-
 // -------- Tabs --------
 const TABS=['rankings','meets','records','news','conferences'];
 function showTab(name){
