@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-11T21:50:24+00:00",
+  "updatedAt": "2026-09-11T23:47:09+00:00",
   "source": "Yahoo Finance public chart data",
   "quotes": {
     "SCHD": {
@@ -123,12 +123,12 @@
       "currency": "USD"
     },
     "BTC-USD": {
-      "price": 77262.15,
+      "price": 77194.79,
       "prev": 76535.95,
-      "change": 726.2,
-      "changesPercentage": 0.9488,
-      "volume": 37171965952,
-      "avgVolume": 30915818016,
+      "change": 658.84,
+      "changesPercentage": 0.8608,
+      "volume": 37648863232,
+      "avgVolume": 31011197472,
       "yearHigh": 126198.07,
       "yearLow": 57747.766,
       "marketState": "",
@@ -221,12 +221,12 @@
       "currency": "USD"
     },
     "BTC=F": {
-      "price": 77430.0,
+      "price": 77300.0,
       "prev": 77430.0,
-      "change": 0.0,
-      "changesPercentage": 0.0,
-      "volume": 7757,
-      "avgVolume": 8076,
+      "change": -130.0,
+      "changesPercentage": -0.1679,
+      "volume": 8,
+      "avgVolume": 6139,
       "yearHigh": 127240.0,
       "yearLow": 57850.0,
       "marketState": "",
@@ -260,18 +260,18 @@
     }
   ],
   "news": [
-    "What Will Stocks Do If the Fed Raises Rates? - investopedia.com",
     "Wall St Week Ahead Investors brace for possible rate hike at uncertain Fed meeting - Reuters",
+    "Wall Street Cheers Clarity on Fed Outlook\u2014Even if It Means Higher Rates - WSJ",
+    "How Is the Economy Doing? Washington Says It's Fixed, but the Numbers Don't Agree - briefs.co",
+    "What Will Stocks Do If the Fed Raises Rates? - Investopedia",
+    "Daily: Equities should withstand higher yields - UBS",
+    "The Fed can hike, but it won\u2019t derail gold\u2019s long-term bull market \u2013 analysts - KITCO",
     "Stocks, bonds rally after August inflation report By Reuters - Investing.com",
-    "Why Stocks Could Weather Coming Rate Hikes Just Fine - Business Insider",
+    "Why Stocks Could Weather Coming Rate Hikes Just Fine - businessinsider.com",
+    "Stock Market Today, Friday, September 11th, 2026 - stl.news",
     "With Just 5 Days to Next FOMC Meeting, Odds of Fed Rate Hike Surge to Over 85% - 24/7 Wall St.",
-    "What a Fed Rate Hike Would Mean for Investors and Savers - nerdwallet.com",
-    "Kevin Mahn sees S&P 500 pullbacks as chances to stay invested - thestreet.com",
-    "Stock Market Today: Dow Jones, S&P 500 Futures Gains Ahead of August Inflation Data \u2014 ORCL, ADBE, RH in Focus - TradingView",
-    "5 Things That Investors Might Consider Ahead Of The Fed's Rate Decision (US2Y) - Seeking Alpha",
-    "U.S. consumer price growth firm in August, boosting Fed rate hike bets - Investing.com",
-    "High Treasury yields aren't breaking the stock market yet, economists say - Business Insider",
-    "Diesel Prices Just Shattered $6 a Gallon \u2014 Here\u2019s Why Your Grocery Bill Could Be Next - 24/7 Wall St."
+    "What a Fed Rate Hike Would Mean for Investors and Savers - NerdWallet",
+    "Kevin Mahn sees S&P 500 pullbacks as chances to stay invested - thestreet.com"
   ],
   "economy": [
     "CPI 2026-07 | 3.5% YoY",
@@ -285,7 +285,7 @@
     "DXY  99.09 \u25b20.05%",
     "Gold  $4,390.00 \u25bc0.39%",
     "WTI  $99.99 \u25bc2.43%",
-    "Bitcoin  $77,262 \u25b20.95%",
+    "Bitcoin  $77,195 \u25b20.86%",
     "EUR/USD  1.1602 \u25bc0.09%",
     "USD/JPY  153.55 \u25bc0.52%",
     "VIX  15.84 \u25bc11.21%",
