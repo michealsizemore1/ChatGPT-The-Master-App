@@ -82,6 +82,19 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:Georgia,'Time
 .champ .grp{font:800 11px Arial,Helvetica,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#a29a91}
 .champ .who{font:500 20px Georgia,'Times New Roman',serif;color:var(--ink);margin-top:4px}
 .champ .note{font:12px/1.55 Arial,Helvetica,sans-serif;color:var(--muted);margin-top:5px}
+.conf-block{margin-bottom:18px}
+.conf-block:last-child{margin-bottom:0}
+.conf-name{padding:12px 18px;background:#ebe5db;color:#4d463f;font:800 11px Arial,Helvetica,sans-serif;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--line);border-bottom:0}
+.team-card{padding:15px 18px;border:1px solid var(--line);border-top:0;background:var(--card)}
+.team-card .tname{font:500 20px Georgia,'Times New Roman',serif;color:var(--ink)}
+.team-card .tname .rk{font:800 10px Arial,Helvetica,sans-serif;color:var(--track);margin-left:8px;letter-spacing:.04em;vertical-align:middle}
+.team-card .sched{margin-top:8px;font:12px/1.7 Arial,Helvetica,sans-serif;color:var(--muted)}
+.team-card .sched div{padding:1px 0}
+.team-card .sched b{color:#5f574f;font-weight:800;display:inline-block;min-width:80px}
+.team-card .result{margin-top:9px;font:12px/1.55 Arial,Helvetica,sans-serif;color:#3f3933;padding:8px 10px;background:#fbf5f2;border-left:3px solid var(--track)}
+.team-card .result b{font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--track);display:block;margin-bottom:3px}
+.team-card .gap{margin-top:8px;font:italic 12px/1.5 Arial,Helvetica,sans-serif;color:var(--muted)}
+
 .meet-links{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
 .meet-links a{font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.11em;text-transform:uppercase;color:var(--track);border:1px solid var(--line);background:#fbf8f3;padding:5px 9px;text-decoration:none}
 .meet-links a:hover{background:var(--track);border-color:var(--track);color:#fff}
@@ -122,6 +135,7 @@ html{font-size:14px}
     <button data-tab="meets">Meets</button>
     <button data-tab="records">Records</button>
     <button data-tab="news">News</button>
+    <button data-tab="conferences">Conferences</button>
   </nav>
 </div></header>
 
@@ -190,6 +204,15 @@ html{font-size:14px}
     <div class="section-card">
       <div id="newsList"></div>
     </div>
+  </section>
+
+  <section id="conferencesView" class="hide">
+    <div class="hero">
+      <div class="eyebrow">Top 10, by conference</div>
+      <div class="hero-row"><h1>Conferences</h1><div class="stamp">15 TEAMS <b>6 CONFERENCES</b></div></div>
+      <p class="source">Every team ranked in the men&rsquo;s or women&rsquo;s top 10, grouped by conference, with its full 2026 schedule and results checked as of September 11, 2026. A team ranked in both polls appears once, with both rankings shown.</p>
+    </div>
+    <div id="confList"></div>
   </section>
 </main>
 
@@ -292,8 +315,77 @@ function renderNews(){
   }).join('');
 }
 
+
+// -------- Conferences (top 10 men + top 10 women, 15 distinct schools) --------
+// Conference assignments as of the 2026 season (post-realignment: Oregon/Wisconsin/Penn State/UCLA/USC/Washington
+// in the Big Ten; Stanford/Cal in the ACC; BYU/Colorado/Iowa State/Oklahoma State/West Virginia in the Big 12).
+// Schedules and season-opener results pulled from each school's official 2026 cross country schedule page,
+// checked September 11, 2026. Where a result or meet detail could not be confirmed, that gap is noted rather
+// than guessed at.
+const TEAMS=[
+ {conf:'Big 12',name:'Oklahoma State',ranks:[['M',1]],
+  sched:[['Sep 5','Cowboy Preview','Stillwater, OK (host)'],['Sep 26','Cowboy Jamboree','Stillwater, OK (host)'],['Oct 17','Weis-Crockett Invitational','Stillwater, OK (host)'],['Oct 31','Big 12 Championships','Stillwater, OK (host)'],['Nov 13','NCAA Midwest Regional','Ames, IA'],['Nov 21','NCAA Championships','Terre Haute, IN']],
+  result:{d:'Sep 5',text:'The men won the Cowboy Preview with 31 points, ahead of in-state rival Oklahoma (2nd).'}},
+ {conf:'Big 12',name:'Iowa State',ranks:[['M',3],['W',3]],
+  sched:[['Sep 4','Cyclone Preview','Ames, IA (host)'],['Sep 18','Home Meet #2','Ames, IA (host)'],['Oct 9','Nuttycombe Invitational','Madison, WI'],['Oct 31','Big 12 Championships','Stillwater, OK'],['Nov 13','NCAA Midwest Regional','Ames, IA (host)'],['Nov 21','NCAA Championships','Terre Haute, IN']],
+  result:{d:'Sep 4',text:'At the Cyclone Preview, the men placed 3rd and the women 5th.'}},
+ {conf:'Big 12',name:'Colorado',ranks:[['M',6]],
+  sched:[['Sep 4','Wyoming Invitational','Cheyenne, WY'],['Sep 19','John McNichols Invitational / Roadrunners Invitational (squad split)','Terre Haute, IN / Denver, CO'],['Oct 9','Nuttycombe Invitational','Madison, WI'],['Oct 31','Big 12 Championships','Stillwater, OK'],['Nov 13','NCAA Mountain Regional','Albuquerque, NM'],['Nov 21','NCAA Championships','Terre Haute, IN']],
+  result:{d:'Sep 4',text:'The men placed 3rd at the Wyoming Invitational; the women did not post a team score.'}},
+ {conf:'Big 12',name:'BYU',ranks:[['M',9],['W',4]],
+  sched:[['Sep 4','Utah Valley Invitational','Orem, UT'],['Sep 19','John McNichols Invitational','Terre Haute, IN'],['Oct 9','Nuttycombe Invitational','Madison, WI'],['Oct 31','Big 12 Championships','Stillwater, OK'],['Nov 13','NCAA Mountain Regional','Albuquerque, NM'],['Nov 21','NCAA Championships','Terre Haute, IN']],
+  result:{d:'Sep 4',text:'The men won the Utah Valley Invitational with 17 points; the women’s score from that meet was not published.'}},
+ {conf:'Big 12',name:'West Virginia',ranks:[['W',7]],
+  sched:[['Sep 11','RMU Invitational','Clinton, PA'],['Sep 19','John McNichols Invitational','Terre Haute, IN'],['Oct 9–10','Nuttycombe Invitational / Carnegie Mellon Invitational (squad split)','Madison, WI / Clinton, PA'],['Oct 31','Big 12 Championship','Stillwater, OK'],['Nov 13','NCAA Mid-Atlantic Regional','Bethlehem, PA'],['Nov 21','NCAA Championship','Terre Haute, IN']],
+  result:null,gap:'Season opens Sep. 11 at the RMU Invitational — no result posted yet.'},
+ {conf:'ACC',name:'Wake Forest',ranks:[['M',8]],
+  sched:[['Sep 11','Virginia Invitational (women)','Earlysville, VA'],['Sep 18','adidas XC Challenge (men)','Cary, NC'],['Sep 26','Meadows Challenge (women)','Princeton, NJ'],['Oct 9','Nuttycombe Invitational','Madison, WI'],['Oct 30','ACC Championships','Blacksburg, VA'],['Nov 13','NCAA Southeast Regional','Spartanburg, SC'],['Nov 21','NCAA Championships','Terre Haute, IN']],
+  result:null,gap:'Neither the men’s (Sep. 18) nor women’s (Sep. 11) opener has been run yet.'},
+ {conf:'ACC',name:'NC State',ranks:[['W',1]],
+  sched:[['Sep 18','adidas XC Challenge','Cary, NC (host)'],['Oct 2','Dill Family Foundation Invitational / Joe Piane Invitational (squad split)','Greenville, NC / South Bend, IN'],['Oct 16','Pre-Nationals','Terre Haute, IN'],['Oct 30','ACC Championships','Blacksburg, VA'],['Nov 13','NCAA Southeast Regionals','Spartanburg, SC'],['Nov 21','NCAA Championships','Terre Haute, IN']],
+  result:null,gap:'The reigning women’s national champions open the season Sep. 18 — no result yet.'},
+ {conf:'ACC',name:'Notre Dame',ranks:[['W',6]],
+  sched:[['Oct 2','Joe Piane Notre Dame Invitational','Notre Dame, IN (host)'],['Oct 30','ACC Championships','Blacksburg, VA'],['Nov 21','NCAA Championships','Terre Haute, IN']],
+  result:null,gap:'Notre Dame’s own schedule listing could not be loaded; only meets confirmed via other teams’ schedules are shown, so the early-season slate here is incomplete.'},
+ {conf:'ACC',name:'Stanford',ranks:[['W',9]],
+  sched:[['Sep 4','USF Invitational','San Francisco, CA'],['Sep 19','John McNicols Invitational','Terre Haute, IN'],['Oct 2','Pacific Invitational','Stockton, CA'],['Oct 9','Nuttycombe Invitational','Madison, WI'],['Oct 17','Bronco Invitational','Sunnyvale, CA'],['Oct 30','ACC Championships','Blacksburg, VA'],['Nov 13','NCAA West Regional','Sacramento, CA'],['Nov 21','NCAA Championships','Terre Haute, IN']],
+  result:{d:'Sep 4',text:'At the USF Invitational, the women placed 6th (145 pts) and the men 5th (150 pts).'}},
+ {conf:'Big Ten',name:'Oregon',ranks:[['M',5],['W',5]],
+  sched:[['Sep 26','Mike Johnson Classic (women) / Cowboy Jamboree (men)','Monmouth, OR / Stillwater, OK'],['Oct 9','Bill Dellinger Invitational','Springfield, OR (host)'],['Oct 30','Big Ten Championships','Madison, WI'],['Nov 13','NCAA West Regional','Sacramento, CA'],['Nov 21','NCAA Championships','Terre Haute, IN']],
+  result:null,gap:'Season opens Sep. 26 — no result yet.'},
+ {conf:'Big Ten',name:'Wisconsin',ranks:[['M',10]],
+  sched:[['Sep 4','Badger Classic','Madison, WI (host)'],['Sep 19','John McNichols Invitational','Terre Haute, IN'],['Sep 25','Sean Earl Lakefront Invitational','Chicago, IL'],['Oct 9','Nuttycombe Invitational','Madison, WI (host)'],['Oct 30','Big Ten Championships','Madison, WI (host)'],['Nov 13','NCAA Great Lakes Regional','East Lansing, MI'],['Nov 21','NCAA Championships','Terre Haute, IN']],
+  result:{d:'Sep 4',text:'Beat No. 11 Northwestern at the home-hosted Badger Classic; full team scores from the meet were not published.'}},
+ {conf:'Big Ten',name:'Penn State',ranks:[['W',10]],
+  sched:[['Sep 4','Dolan Duals','Lock Haven, PA'],['Sep 11','Harry Groves Spiked Shoe Invitational','University Park, PA (host)'],['Sep 26','Princeton Fall Classic','Princeton, NJ'],['Oct 2','Paul Short Run','Bethlehem, PA'],['Oct 9','Nuttycombe Invitational','Madison, WI'],['Oct 16','NCAA Pre-National Invitational','Terre Haute, IN'],['Oct 30','Big Ten Championships','Madison, WI'],['Nov 13','NCAA Mid-Atlantic Regional','Bethlehem, PA'],['Nov 21','NCAA Championships','Terre Haute, IN']],
+  result:{d:'Sep 4',text:'Swept both the men’s and women’s races at the Dolan Duals.'}},
+ {conf:'SEC',name:'Alabama',ranks:[['M',4]],
+  sched:[['Sep 5','City Auto Memphis Twilight Classic','Memphis, TN'],['Sep 18','Southern Showcase','Jacksonville, AL'],['Sep 26','Meadows Challenge','Princeton, NJ'],['Oct 16','Crimson Classic','Tuscaloosa, AL (host)'],['Oct 30','SEC Championships','Columbia, MO'],['Nov 13','NCAA South Regional','Tallahassee, FL'],['Nov 21','NCAA Championships','Terre Haute, IN']],
+  result:{d:'Sep 5',text:'The women placed 3rd (98 pts) and the men 3rd (103 pts) at the Memphis Twilight Classic.'}},
+ {conf:'Mountain West',name:'New Mexico',ranks:[['M',2],['W',2]],
+  sched:[['Sep 5','UNM Lobo XC Invite','Albuquerque, NM (host)'],['Sep 26','Cowboy Jamboree','Stillwater, OK'],['Oct 10','Nuttycombe Invitational','Madison, WI'],['Oct 30','Mountain West Championships','Reno, NV'],['Nov 13','NCAA Mountain Regional','Albuquerque, NM (host)'],['Nov 21','NCAA Championships','Terre Haute, IN']],
+  result:null,gap:'A result from the Lobos’ own Sep. 5 season opener has not been published.'},
+ {conf:'Big Sky',name:'Northern Arizona',ranks:[['M',7],['W',8]],
+  sched:[['Sep 2','George Kyte Classic','Flagstaff, AZ (host)'],['Sep 19','John McNichols Invitational','Terre Haute, IN'],['Oct 9','Nuttycombe Invitational','Madison, WI'],['Oct 30','Big Sky Championships','Flagstaff, AZ (host)'],['Nov 13','NCAA Mountain Regional','Albuquerque, NM'],['Nov 21','NCAA Championships','Terre Haute, IN']],
+  result:null,gap:'No result has been published yet for the Sep. 2 opener.'}
+];
+function teamCard(t){
+  const rk=t.ranks.map(function(r){return (r[0]==='M'?'MEN #':'WOMEN #')+r[1]}).join(' &middot; ');
+  const sched=t.sched.map(function(s){return '<div><b>'+esc(s[0])+'</b>'+esc(s[1])+' &mdash; '+esc(s[2])+'</div>'}).join('');
+  const foot=t.result?('<div class="result"><b>Result &mdash; '+esc(t.result.d)+'</b>'+esc(t.result.text)+'</div>')
+    :(t.gap?('<div class="gap">'+esc(t.gap)+'</div>'):'');
+  return '<div class="team-card"><div class="tname">'+esc(t.name)+'<span class="rk">'+rk+'</span></div><div class="sched">'+sched+'</div>'+foot+'</div>';
+}
+function renderConferences(){
+  const order=['Big 12','ACC','Big Ten','SEC','Mountain West','Big Sky'];
+  $('#confList').innerHTML=order.map(function(c){
+    const teams=TEAMS.filter(function(t){return t.conf===c});
+    return '<div class="conf-block"><div class="conf-name">'+esc(c)+' &middot; '+teams.length+' team'+(teams.length===1?'':'s')+'</div>'+teams.map(teamCard).join('')+'</div>';
+  }).join('');
+}
+
 // -------- Tabs --------
-const TABS=['rankings','meets','records','news'];
+const TABS=['rankings','meets','records','news','conferences'];
 function showTab(name){
   $$('.tabs button').forEach(function(b){b.classList.toggle('active',b.dataset.tab===name)});
   TABS.forEach(function(x){$('#'+x+'View').classList.toggle('hide',x!==name)});
@@ -304,7 +396,7 @@ $$('.tabs button').forEach(function(btn){btn.onclick=function(){showTab(btn.data
 let startTab='rankings';
 try{const saved=localStorage.getItem('xc-tab');if(TABS.indexOf(saved)>-1)startTab=saved;}catch(e){}
 showTab(startTab);
-renderRankings();renderMeets();renderRecords();renderNews();
+renderRankings();renderMeets();renderRecords();renderNews();renderConferences();
 </script>
 </body>
 </html>
