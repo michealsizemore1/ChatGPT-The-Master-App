@@ -279,15 +279,19 @@ const SCHEDULE=[
  {d:'Sep 25',name:'Gans Creek Classic',where:'Columbia, MO (host: Missouri)',detail:'Run on the actual 2025 NCAA Championships course.'},
  {d:'Sep 26',name:'Cowboy Jamboree',where:'Stillwater, OK (host: Oklahoma State)',detail:'One of the sport’s largest and longest-running invitationals.'},
  {d:'Oct 2',name:'Joe Piane Notre Dame Invitational & Paul Short Run',where:'Notre Dame, IN · Bethlehem, PA (host: Lehigh)',detail:'Two of the fall’s highest-volume, most heavily scouted meets.'},
- {d:'Oct 9',name:'Nuttycombe Wisconsin Invitational',where:'Madison, WI (host: Wisconsin)',detail:'The marquee regular-season meet, drawing nearly every ranked team in the country.'},
+ {d:'Oct 9',name:'Nuttycombe Wisconsin Invitational',where:'Madison, WI (host: Wisconsin)',detail:'The marquee regular-season meet, drawing nearly every ranked team in the country.',
+  watch:{label:'FloTrack',text:'FloTrack (subscription) has streamed Nuttycombe live in past years; no free broadcast found.'}},
  {d:'Oct 16',name:'Pre-Nationals & IC4A/ECAC Championships',where:'Terre Haute, IN (host: Indiana State) · New York',detail:'Pre-Nationals runs on the LaVern Gibson course — a dress rehearsal for the national championship five weeks later.'},
- {d:'Oct 29–Nov 1',name:'Conference Championships',where:'Nationwide',detail:'Every Division I conference crowns its champion.'},
- {d:'Nov 13',name:'NCAA Regional Championships',where:'Nine regional sites nationwide',detail:'The top teams and individuals from each region advance to nationals.'},
- {d:'Nov 21',name:'NCAA Division I Championships',where:'Terre Haute, IN (host: Indiana State)',detail:'The men’s and women’s national championship races at the LaVern Gibson Championship Cross Country Course.',tag:'Championship'}
+ {d:'Oct 29–Nov 1',name:'Conference Championships',where:'Nationwide',detail:'Every Division I conference crowns its champion.',
+  watch:{label:'varies by conference',text:'Based on past years, not independently confirmed for 2026: Big 12 and Big Sky on ESPN+; ACC on ACC Network (also Fubo); SEC on SEC Network (also Fubo); Big Ten on B1G+ (the conference’s own streaming app); Mountain West through the conference’s own site (themw.com/watch).'}},
+ {d:'Nov 13',name:'NCAA Regional Championships',where:'Nine regional sites nationwide',detail:'The top teams and individuals from each region advance to nationals.',
+  watch:{label:'FloTrack',text:'FloTrack (subscription) has streamed the individual regionals live in past years, region by region; no free broadcast found.'}},
+ {d:'Nov 21',name:'NCAA Division I Championships',where:'Terre Haute, IN (host: Indiana State)',detail:'The men’s and women’s national championship races at the LaVern Gibson Championship Cross Country Course.',tag:'Championship',
+  watch:{label:'ESPNU + FloTrack',text:'The 2025 championships aired live on ESPNU under the NCAA’s 2024–2032 media rights deal with ESPN, and also streamed on FloTrack (subscription); 2026 will very likely follow the same pattern, but the exact 2026 channel/time wasn’t independently confirmed. The regular-season invitationals on this schedule (Griak, Gans Creek, Cowboy Jamboree, Joe Piane/Paul Short, Pre-Nationals) have no confirmed streaming found — most aren’t broadcast anywhere beyond a free feed on the host school’s own site, if that.'}}
 ];
 function renderMeets(){
   $('#resultsList').innerHTML=RESULTS.map(function(m){return '<article class="meet"><div class="meet-date">'+esc(m.d)+'<small>2026</small></div><div><h3>'+esc(m.name)+'</h3><div class="where">'+esc(m.where)+'</div><div class="detail">'+esc(m.detail)+'</div></div></article>'}).join('');
-  $('#scheduleList').innerHTML=SCHEDULE.map(function(m){return '<article class="meet"><div class="meet-date">'+esc(m.d)+'<small>2026</small></div><div><h3>'+esc(m.name)+'</h3><div class="where">'+esc(m.where)+'</div><div class="detail">'+esc(m.detail)+'</div>'+(m.tag?'<span class="tag champs">'+esc(m.tag)+'</span>':'')+'</div></article>'}).join('');
+  $('#scheduleList').innerHTML=SCHEDULE.map(function(m){return '<article class="meet"><div class="meet-date">'+esc(m.d)+'<small>2026</small></div><div><h3>'+esc(m.name)+'</h3><div class="where">'+esc(m.where)+'</div><div class="detail">'+esc(m.detail)+'</div>'+(m.watch?'<div class="watch"><b>Watch — '+esc(m.watch.label)+'</b>'+esc(m.watch.text)+'</div>':'')+(m.tag?'<span class="tag champs">'+esc(m.tag)+'</span>':'')+'</div></article>'}).join('');
 }
 
 // -------- Records --------
