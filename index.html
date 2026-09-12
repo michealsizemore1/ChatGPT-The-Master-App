@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
 <title>My Life Master App</title>
 <style>
   :root{
@@ -15,8 +15,10 @@
     --accent-ink:#0d2f80;
   }
   *{box-sizing:border-box}
+  html{overflow-x:hidden}
   body{
     margin:0;
+    overflow-x:hidden;
     font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
     background:var(--bg);
     color:var(--ink);
