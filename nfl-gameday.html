@@ -315,7 +315,7 @@ function scoreRowTeam(c,st,t){
  const sit=c.situation;
  const hasBall=st==='in'&&sit&&String(sit.possession)===String(t.team?.id);
  const record=(t.records||[]).find(r=>r.type==='total'||r.name==='overall')?.summary;
- return `<div class="sr-team">${t.team?.logo?`<img class="espn-logo sr-logo" src="${esc(t.team.logo)}" alt="">`:'<span class="sr-logo sr-logo-fallback"></span>'}<span class="sr-name">${esc(t.team?.shortDisplayName||t.team?.displayName||t.team?.abbreviation||'')}</span>${st==='pre'&&record?`<span class="sr-record">${esc(record)}</span>`:''}${hasBall?'<span class="poss-icon" title="Has the ball">&#127944;</span>':''}<strong class="sr-score">${st==='pre'?'':esc(t.score)}</strong></div>`;
+ return `<div class="sr-team">${t.team?.logo?`<img class="espn-logo sr-logo" src="${esc(t.team.logo)}" alt="">`:'<span class="sr-logo sr-logo-fallback"></span>'}<span class="sr-name">${esc(t.team?.shortDisplayName||t.team?.displayName||t.team?.abbreviation||'')}</span>${record?`<span class="sr-record">${esc(record)}</span>`:''}${hasBall?'<span class="poss-icon" title="Has the ball">&#127944;</span>':''}<strong class="sr-score">${st==='pre'?'':esc(t.score)}</strong></div>`;
 }
 function renderScore(g){
  const c=g.competitions?.[0]||{};

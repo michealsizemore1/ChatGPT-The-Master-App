@@ -443,7 +443,7 @@ function scoreRowSituation(game){
 function scoreRowTeam(game,team){
  const sit=game.situation;
  const hasBall=game.state==='in'&&sit&&String(sit.possession)===String(team.id);
- return `<div class="sr-team${rankedIds.has(team.id)?' ranked':''}">${team.logo?`<img class="espn-logo sr-logo" src="${esc(team.logo)}" alt="">`:'<span class="sr-logo sr-logo-fallback"></span>'}${team.rank?`<b class="sr-rank">${team.rank}</b>`:''}<span class="sr-name">${esc(team.name)}</span>${game.state==='pre'&&team.record?`<span class="sr-record">${esc(team.record)}</span>`:''}${hasBall?'<span class="poss-icon" title="Has the ball">&#127944;</span>':''}<strong class="sr-score">${game.state==='pre'?'':esc(team.score)}</strong></div>`;
+ return `<div class="sr-team${rankedIds.has(team.id)?' ranked':''}">${team.logo?`<img class="espn-logo sr-logo" src="${esc(team.logo)}" alt="">`:'<span class="sr-logo sr-logo-fallback"></span>'}${team.rank?`<b class="sr-rank">${team.rank}</b>`:''}<span class="sr-name">${esc(team.name)}</span>${team.record?`<span class="sr-record">${esc(team.record)}</span>`:''}${hasBall?'<span class="poss-icon" title="Has the ball">&#127944;</span>':''}<strong class="sr-score">${game.state==='pre'?'':esc(team.score)}</strong></div>`;
 }
 function renderScoreStrip(){
  const games=visibleGames();
