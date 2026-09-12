@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#241f1c">
+<title>NCAA Track &amp; Field &mdash; Division I Championships</title>
+<style>
+:root{--ink:#221f1d;--dark:#241f1c;--track:#c0472b;--gold:#e8b64c;--paper:#f5f1ea;--card:#fffdf9;--line:#e2dbd0;--muted:#7b736a}
+*{box-sizing:border-box}html{font-size:17px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:Georgia,'Times New Roman',serif}
+.sans,.nav,.eyebrow,.chip,button,input,.tag{font-family:Arial,Helvetica,sans-serif}
+.top{position:sticky;top:0;z-index:20;background:var(--dark);color:#fff;border-bottom:1px solid #3d3531}
+.nav{height:100px;max-width:980px;margin:auto;display:flex;align-items:center;gap:22px;padding:0 24px}
+.home{width:43px;height:52px;border:1px solid #574c46;border-radius:6px;color:#fff;display:grid;place-items:center;text-decoration:none;font-size:23px}
+.brand{margin-right:auto}
+.brand strong{display:block;font-size:26px;letter-spacing:.08em}
+.brand span{display:block;color:var(--gold);font-size:10px;letter-spacing:.22em;text-transform:uppercase;margin-top:4px}
+.tabs{display:flex;align-self:stretch}
+.tabs button{position:relative;border:0;background:transparent;color:#b2a79f;font-weight:800;font-size:16px;padding:0 15px;cursor:pointer}
+.tabs button.active{color:#fff}
+.tabs button.active:after{content:"";height:4px;background:var(--track);position:absolute;left:13px;right:13px;bottom:0}
+.page{max-width:920px;margin:0 auto;padding:30px 24px 70px}
+.hero{background:var(--card);border:1px solid var(--line);padding:27px 29px 22px}
+.eyebrow{font-size:12px;letter-spacing:.22em;font-weight:800;color:#6d655d;text-transform:uppercase}
+.hero h1{font-size:45px;font-weight:500;margin:12px 0 4px}
+.hero-row{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.stamp{font:700 13px Arial,Helvetica,sans-serif;color:#5f574f}
+.stamp b{color:var(--track)}
+.source{font:13px/1.6 Arial,Helvetica,sans-serif;color:var(--muted);margin:10px 0 0}
+.source a{color:var(--track)}
+.panel{background:var(--card);border:1px solid var(--line);border-top:0}
+.controls{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:13px}
+.ctl-row{display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap}.seg{display:flex;gap:6px}
+.seg button{border:1px solid var(--line);background:#fff;color:var(--muted);font:800 13px Arial,Helvetica,sans-serif;letter-spacing:.09em;text-transform:uppercase;padding:9px 18px;cursor:pointer}
+.seg button.active{background:var(--dark);color:#fff;border-color:var(--dark)}
+.list-head{display:grid;grid-template-columns:44px minmax(0,1fr) 96px;gap:10px;padding:12px 18px;background:#ebe5db;color:#77706a;font:800 10px Arial,Helvetica,sans-serif;letter-spacing:.16em;text-transform:uppercase}
+.list-head span:last-child{text-align:right}
+.athlete{display:grid;grid-template-columns:44px minmax(0,1fr) 96px;gap:10px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line)}
+.athlete:nth-child(odd){background:#fbf8f3}
+.rank{font-size:26px;color:#b9b1a7}
+.athlete.podium .rank{color:var(--track)}
+.name{font-size:22px;line-height:1.15}
+.name small{font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#a2812c;font-weight:800;letter-spacing:.04em;margin-left:4px}
+.figure{text-align:right}
+.figure b{display:block;font:800 20px Arial,Helvetica,sans-serif;font-variant-numeric:tabular-nums}
+.figure small{display:block;font:12px Arial,Helvetica,sans-serif;color:#8b847c;margin-top:4px;letter-spacing:.04em}
+.event-note{padding:14px 18px;font:14px/1.6 Arial,Helvetica,sans-serif;color:var(--muted);border-bottom:1px solid var(--line);background:#fbf8f3}
+.section-card{background:var(--card);border:1px solid var(--line);padding:22px;margin-bottom:18px}
+.section-card h2{font-size:32px;font-weight:500;margin:0 0 6px}
+.section-card p.note{font:15px/1.6 Arial,Helvetica,sans-serif;color:var(--muted);margin:0 0 16px}
+.tag{display:inline-block;margin-top:8px;font:800 10px Arial,Helvetica,sans-serif;letter-spacing:.12em;text-transform:uppercase;padding:4px 8px;border:1px solid var(--line);color:#6d655d;background:#fbf8f3}
+.tag.major{border-color:var(--track);color:var(--track)}
+.hide{display:none!important}
+.conf-block{margin-bottom:18px}
+.conf-block:last-child{margin-bottom:0}
+.conf-name{padding:12px 18px;background:#ebe5db;color:#4d463f;font:800 13px Arial,Helvetica,sans-serif;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--line);border-bottom:0}
+.team-card{padding:15px 18px;border:1px solid var(--line);border-top:0;background:var(--card)}
+.team-card .tname{font:500 23px Georgia,'Times New Roman',serif;color:var(--ink)}
+.team-card .tname .rk{font:800 12px Arial,Helvetica,sans-serif;color:var(--track);margin-left:8px;letter-spacing:.04em;vertical-align:middle}
+.team-card .sched{margin-top:8px;font:14px/1.7 Arial,Helvetica,sans-serif;color:var(--muted)}
+.team-card .sched div{padding:1px 0}
+.team-card .sched b{color:#5f574f;font-weight:800;display:inline-block;min-width:130px}
+.team-card .result{margin-top:9px;font:14px/1.55 Arial,Helvetica,sans-serif;color:#3f3933;padding:8px 10px;background:#fbf5f2;border-left:3px solid var(--track)}
+.team-card .result b{font:800 10px Arial,Helvetica,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--track);display:block;margin-bottom:3px}
+.team-card .gap{margin-top:8px;font:italic 14px/1.5 Arial,Helvetica,sans-serif;color:var(--muted)}
+.team-card .runners{margin-top:9px;font:14px/1.6 Arial,Helvetica,sans-serif;padding-top:9px;border-top:1px dashed var(--line)}
+.team-card .runners b{display:block;font:800 10px Arial,Helvetica,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#6d655d;margin-bottom:3px}
+.team-card .runners .rn{color:#3f3933}
+.team-card .runners .rn small{color:#a29a91;font-size:12px}
+.team-card .runners .rnote{display:block;margin-top:3px;font-style:italic;color:var(--muted);font-size:13px}
+.meet,.story{display:grid;grid-template-columns:74px minmax(0,1fr);gap:14px;padding:15px 0;border-top:1px solid var(--line)}
+.meet:first-of-type,.story:first-of-type{border-top:0}
+.meet-date{font:800 13px Arial,Helvetica,sans-serif;letter-spacing:.06em;color:var(--track);line-height:1.45;text-transform:uppercase}
+.meet-date small{display:block;color:#a29a91;font-weight:700}
+.meet h3{margin:0 0 4px;font-size:22px;font-weight:500;line-height:1.2}
+.meet .where{font:14px Arial,Helvetica,sans-serif;color:#5f574f}
+.meet .detail{font:14px/1.55 Arial,Helvetica,sans-serif;color:var(--muted);margin-top:6px}
+.meet .watch{font:14px/1.5 Arial,Helvetica,sans-serif;color:#3f3933;margin-top:8px;padding:8px 10px;background:#fbf5f2;border-left:3px solid var(--track)}
+.meet .watch b{font:800 10px Arial,Helvetica,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--track);display:block;margin-bottom:3px}
+@media(max-width:680px){
+html{font-size:16px}
+.ctl-row{gap:8px}.seg button{padding:9px 13px}
+.nav{height:106px;display:grid;grid-template-columns:42px 1fr;padding:10px 14px 0;gap:7px 11px}
+.home{height:46px}.brand strong{font-size:22px}
+.tabs{grid-column:1/-1;height:44px;justify-content:flex-start;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tabs button{padding:0 10px;font-size:15px;flex:0 0 auto}
+.tabs button.active:after{left:7px;right:7px}
+.page{padding:12px 14px 60px}
+.hero{padding:19px 16px}.hero h1{font-size:37px}
+.list-head,.athlete{grid-template-columns:32px minmax(0,1fr) 84px;padding-left:12px;padding-right:12px;gap:8px}
+.rank{font-size:23px}.name{font-size:20px}
+.figure b{font-size:18px}
+.meet{grid-template-columns:64px minmax(0,1fr);gap:11px}
+.team-card .sched b{min-width:110px}
+}
+</style>
+</head>
+<body>
+<header class="top"><div class="nav">
+  <a class="home" href="index.html" aria-label="Home">&#8962;</a>
+  <div class="brand"><strong>NCAA TRACK &amp; FIELD</strong><span>Division I command center</span></div>
+  <nav class="tabs" aria-label="Sections">
+    <button class="active" data-tab="standings">Standings</button>
+    <button data-tab="teams">Teams</button>
+    <button data-tab="calendar">Calendar</button>
+  </nav>
+</div></header>
+
+<main class="page">
+  <section id="standingsView">
+    <div class="hero">
+      <div class="eyebrow">2026 NCAA Division I Outdoor Championships &middot; running events covered</div>
+      <div class="hero-row"><h1>Standings</h1><div class="stamp">FINAL <b>10&ndash;13 JUN 2026</b></div></div>
+      <p class="source">Final team standings from the 2026 NCAA Division I Outdoor Track &amp; Field Championships at Hayward Field, Eugene, OR. Team points reflect the full meet &mdash; field and combined events included &mdash; even though this app covers running events only, so the standout performers on the Teams tab are a subset of who actually scored. <a href="https://www.letsrun.com/news/2026/06/2026-ncaa-mens-track-and-field-championships-results-and-videos/" target="_blank" rel="noopener">letsrun.com</a> &middot; <a href="https://www.ustfccca.org/2026/06/featured/meet-recap-2026-ncaa-di-outdoor-track-field-championships" target="_blank" rel="noopener">ustfccca.org</a></p>
+    </div>
+    <div class="panel">
+      <div class="controls">
+        <div class="ctl-row"><div class="seg" role="tablist" aria-label="Category"><button class="active" data-gender="men" role="tab" aria-selected="true">Men</button><button data-gender="women" role="tab" aria-selected="false">Women</button></div></div>
+      </div>
+      <div class="event-note" id="standNote"></div>
+      <div class="list-head"><span>Rank</span><span>Team</span><span>Points</span></div>
+      <div id="standList"></div>
+      <div class="event-note" id="standFoot"></div>
+    </div>
+  </section>
+
+  <section id="teamsView" class="hide">
+    <div class="hero">
+      <div class="eyebrow">Top 10 men&rsquo;s + top 10 women&rsquo;s teams &middot; 14 schools</div>
+      <div class="hero-row"><h1>Teams</h1><div class="stamp">BY CONFERENCE <b>4 LEAGUES</b></div></div>
+      <p class="source">Every team that finished in the men&rsquo;s or women&rsquo;s final top 10, grouped by conference, with its 2026 outdoor result, 2027 championship-trail dates, and a few standout running-event performers from the 2026 meet. A team ranked in both polls appears once, with both finishes shown. Checked September 2026.</p>
+    </div>
+    <div class="section-card">
+      <div class="eyebrow">Why the schedules below aren&rsquo;t team-specific</div>
+      <h2>About the 2027 dates</h2>
+      <p class="note" style="margin:0">Spot-checked in September 2026, most of these programs (USC, Oregon, Iowa State and Kansas State confirmed) hadn&rsquo;t yet posted a 2026&ndash;27 meet schedule beyond the completed 2025&ndash;26 season &mdash; spring dual-meet and invitational slates for track &amp; field typically aren&rsquo;t released this early. So instead of guessing, every team card below shows the same real, sourced championship trail: its conference championship window, the NCAA Indoor and Outdoor Championships, and the NCAA First Round regional stage. Arkansas is the one confirmed exception &mdash; its full 2026&ndash;27 indoor schedule was already public, noted on its card.</p>
+    </div>
+    <div id="teamsList"></div>
+  </section>
+
+  <section id="calendarView" class="hide">
+    <div class="hero">
+      <div class="eyebrow">Indoor, then outdoor</div>
+      <div class="hero-row"><h1>Calendar</h1><div class="stamp">NEXT UP <b>2027 SEASON</b></div></div>
+      <p class="source">The 2026 outdoor season is complete; here&rsquo;s what&rsquo;s confirmed so far for the 2027 postseason, plus the general shape of the calendar between now and then.</p>
+    </div>
+    <div class="section-card">
+      <div class="eyebrow">Mar 12&ndash;13, 2027 &middot; Randal Tyson Track Center</div>
+      <h2>NCAA Indoor Championships</h2>
+      <p class="note" style="margin:0 0 10px">Hosted by Arkansas in Fayetteville, AR &mdash; confirmed by Arkansas&rsquo;s own athletics department, the USTFCCCA future-championships calendar, and Arkansas&rsquo;s already-published 2026&ndash;27 team schedule, which independently lists the same dates. One outlier: the University at Buffalo&rsquo;s own posted schedule lists it as Mar 13&ndash;14 &mdash; likely a transcription variance on their end, since the two more-authoritative sources (the host school and USTFCCCA) agree on Mar 12&ndash;13.</p>
+      <div class="meet"><div class="meet-date">Mar 12&ndash;13<small>2027</small></div><div><h3>NCAA Indoor Championships</h3><div class="where">Fayetteville, AR (host: Arkansas)</div></div></div>
+    </div>
+    <div class="section-card" style="margin-top:18px">
+      <div class="eyebrow">Jun 9&ndash;12, 2027 &middot; Hayward Field</div>
+      <h2>NCAA Outdoor Championships</h2>
+      <p class="note" style="margin:0 0 10px">Eugene, OR continues as host &mdash; Oregon has held the meet at Hayward Field every year since 2022 and is confirmed through at least 2028. The host site is corroborated by multiple sources; the exact Jun 9&ndash;12 dates come from the USTFCCCA calendar alone, so treat them as likely but not fully cross-confirmed.</p>
+      <div class="meet"><div class="meet-date">Jun 9&ndash;12<small>2027</small></div><div><h3>NCAA Outdoor Championships</h3><div class="where">Eugene, OR (Hayward Field, University of Oregon)</div></div></div>
+    </div>
+    <div class="section-card" style="margin-top:18px">
+      <div class="eyebrow">Between now and nationals</div>
+      <h2>How the calendar falls into place</h2>
+      <p class="note">Based on the 2026 season&rsquo;s actual clustering &mdash; 2027 conference championship dates hadn&rsquo;t been announced as of this check.</p>
+      <div id="patternList"></div>
+    </div>
+    <div class="section-card" style="margin-top:18px">
+      <div class="eyebrow">Worth knowing</div>
+      <h2>Regionals aren&rsquo;t assigned by school</h2>
+      <p class="note" style="margin:0">The NCAA East and West First Round regionals split the field using one national, descending-order performance list per event &mdash; not by conference or geography. Two athletes from the same school in different events can easily land at different regionals in the same year, and the split isn&rsquo;t knowable in advance. That&rsquo;s why no team on the Teams tab is shown assigned to a specific region.</p>
+    </div>
+  </section>
+</main>
+
+<script src="version-check.js"></script>
+<script>
+const APP_VERSION='2026-09-12-1';
+checkForNewerAppVersion(APP_VERSION, 'nctf');
+
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+// -------- Standings (final 2026 NCAA Outdoor team scores) --------
+// Checked against LetsRun's results recaps and each school's own athletics-site recap, September 2026.
+// [rank, team, points, flag]
+const STAND_MEN=[
+ [1,'Arkansas',56],[2,'Georgia',49],[3,'Tennessee',46],[4,'LSU',42],[5,'Oregon',40],
+ [6,'Auburn',33],[7,'Louisville',32],[8,'Kansas State',30],[9,'Nebraska',28],[10,'USC',27]
+];
+const STAND_WOMEN=[
+ [1,'Georgia',50],[2,'Florida',43,'†'],[3,'Arkansas',38],[4,'Oregon',36],[5,'USC',32],
+ [6,'Iowa State',30],[7,'Washington',28],[8,'Illinois',27],[8,'Nebraska',27],[10,'LSU',24]
+];
+const state={gender:'men'};
+function standRow(entry,podium){
+  const rank=entry[0],team=entry[1],pts=entry[2],flag=entry[3];
+  return '<article class="athlete'+(podium?' podium':'')+'"><span class="rank">'+rank+'</span><div><div class="name">'+esc(team)+(flag?' <small>'+esc(flag)+'</small>':'')+'</div></div><div class="figure"><b>'+pts+'</b><small>points</small></div></article>';
+}
+function renderStandings(){
+  const list=state.gender==='men'?STAND_MEN:STAND_WOMEN;
+  $('#standNote').textContent=(state.gender==='men'?"Men's":"Women's")+' final team standings, 2026 NCAA Division I Outdoor Track & Field Championships. Arkansas’s men’s title was its first outdoor championship since 2003; Georgia’s women won outright.';
+  $('#standList').innerHTML=list.map(function(r){return standRow(r,r[0]<=3)}).join('');
+  $('#standFoot').innerHTML=state.gender==='men'
+    ? '<b>Note:</b> places 8&ndash;10 (Kansas State, Nebraska, USC) scored no confirmed running-event points on the Teams tab — see each card for what actually scored.'
+    : '<b>† Florida:</b> shown at 43 points per LetsRun and Florida’s own athletics recap; USTFCCCA’s recap lists 41 — an unresolved single-point discrepancy between sources. <b>8th place</b> is a tie between Illinois and Nebraska at 27 points each.';
+  $$('#standingsView .seg button').forEach(function(b){const on=b.dataset.gender===state.gender;b.classList.toggle('active',on);b.setAttribute('aria-selected',on)});
+}
+$$('#standingsView .seg button').forEach(function(btn){btn.onclick=function(){state.gender=btn.dataset.gender;renderStandings()}});
+
+// -------- Teams (top 10 men + top 10 women, 14 distinct schools) --------
+// Standout performers are running events only (sprints through distance, hurdles, relays) from the
+// actual 2026 NCAA Outdoor Championships. Where no running-event scorer could be confirmed for a
+// team, that is stated explicitly rather than guessed at. Checked September 2026.
+const TRAIL={
+ 'SEC':[['Late Feb 2027','SEC Indoor Championship','site/date not yet announced'],
+        ['Mar 12–13, 2027','NCAA Indoor Championships','Fayetteville, AR (host: Arkansas)'],
+        ['Mid-May 2027','SEC Outdoor Championship','site/date not yet announced'],
+        ['Late May 2027','NCAA East/West First Round','nine sites — assigned per athlete/event nationally, not by school'],
+        ['Jun 9–12, 2027','NCAA Outdoor Championships','Eugene, OR (Hayward Field)']],
+ 'Big Ten':[['Late Feb 2027','Big Ten Indoor Championship','site/date not yet announced — 2026 edition ran Feb 26–28'],
+        ['Mar 12–13, 2027','NCAA Indoor Championships','Fayetteville, AR (host: Arkansas)'],
+        ['Mid-May 2027','Big Ten Outdoor Championship','site/date not yet announced'],
+        ['Late May 2027','NCAA East/West First Round','nine sites — assigned per athlete/event nationally, not by school'],
+        ['Jun 9–12, 2027','NCAA Outdoor Championships','Eugene, OR (Hayward Field)']],
+ 'ACC':[['Late Feb 2027','ACC Indoor Championship','site/date not yet announced'],
+        ['Mar 12–13, 2027','NCAA Indoor Championships','Fayetteville, AR (host: Arkansas)'],
+        ['Mid-May 2027','ACC Outdoor Championship','site/date not yet announced'],
+        ['Late May 2027','NCAA East/West First Round','nine sites — assigned per athlete/event nationally, not by school'],
+        ['Jun 9–12, 2027','NCAA Outdoor Championships','Eugene, OR (Hayward Field)']],
+ 'Big 12':[['Late Feb 2027','Big 12 Indoor Championship','site/date not yet announced — 2026 edition concluded Feb 28'],
+        ['Mar 12–13, 2027','NCAA Indoor Championships','Fayetteville, AR (host: Arkansas)'],
+        ['Mid-May 2027','Big 12 Outdoor Championship','site/date not yet announced'],
+        ['Late May 2027','NCAA East/West First Round','nine sites — assigned per athlete/event nationally, not by school'],
+        ['Jun 9–12, 2027','NCAA Outdoor Championships','Eugene, OR (Hayward Field)']]
+};
+const TEAMS=[
+ {conf:'SEC',name:'Arkansas',ranks:[['M',1,56],['W',3,38]],
+  extra:[['Dec 2026–Feb 2027','Indoor dual meets','Arkansas’s own 2026–27 schedule is already public — the only program checked with a full slate posted this early, fitting since it hosts the 2027 NCAA Indoor meet']],
+  result:{text:'Won the men’s team title outright with 56 points — Arkansas’s first men’s outdoor championship since 2003. The women placed 3rd with 38.'},
+  runners:{M:{note:'2026 NCAA Outdoor Championship scorers.',list:[['Tyrice Taylor','800m, 2nd, 1:44.30'],['Rivaldo Marshall','800m, 3rd, 1:44.93'],['Jelani Watkins','100m, 3rd, 9.87']]},
+   W:{note:'2026 NCAA Outdoor Championship scorers.',list:[['Sanu Jallow','800m champion, 1:56.85 (collegiate record)'],['Women’s 4×400 relay (Butler, Batista, Brown, Jallow)','champions, 3:18.88, #2 all-time collegiate']]}}},
+ {conf:'SEC',name:'Georgia',ranks:[['W',1,50],['M',2,49]],
+  result:{text:'The women won the national title outright with 50 points; the men were runner-up with 49.'},
+  runners:{W:{note:'2026 NCAA Outdoor Championship scorers.',list:[['Adaejah Hodge','200m champion, 21.68 (collegiate record)'],['Dejanea Oakley','400m champion, 48.79 (collegiate record)']]},
+   M:{note:'2026 NCAA Outdoor Championship scorers.',list:[['Jonathan Simms','400m, 2nd, 43.92 PR'],['Sidi Njie','400m, 3rd, 44.20 PR'],['Men’s 4×400 relay','champions, 2:57.93, edged LSU by 0.03']]}}},
+ {conf:'SEC',name:'Tennessee',ranks:[['M',3,46]],
+  result:{text:'The men placed 3rd with 46 points, keyed by a national title in the 4×100 relay.'},
+  runners:{M:{note:'2026 NCAA Outdoor Championship scorers.',list:[['Men’s 4×100 relay (Folson, Howell, McCallum, Clark)','champions, 37.98, school record — Tennessee’s first 4×100 title since 1983'],['Davonte Howell','100m, 4th, 9.88'],["T'Mars McCallum",'200m, 5th, 20.09'],['Marc Anthony Ibrahim','400m hurdles, 4th, 49.06']]}}},
+ {conf:'SEC',name:'LSU',ranks:[['M',4,42],['W',10,24]],
+  result:{text:'The men placed 4th with 42 points; the women placed 10th with 24.'},
+  runners:{M:{note:'2026 NCAA Outdoor Championship scorers.',list:[['Jaiden Reid','200m champion, 19.63 (collegiate record); 100m, 2nd, 9.82'],['Men’s 4×400 relay','2nd, 2:57.96, lost a photo finish to Georgia']]},
+   W:{note:'2026 NCAA Outdoor Championship scorers.',list:[['Shawnti Jackson','200m, 2nd, 22.12; 100m, 3rd, 11.01'],['Women’s 4×100 relay (Hinckson, Godbless, Bigam, Jackson)','2nd, 41.74, LSU school record']]}}},
+ {conf:'Big Ten',name:'Oregon',ranks:[['M',5,40],['W',4,36]],
+  result:{text:'The men placed 5th with 40 points and the women 4th with 36 — no fuller scorer breakdown beyond the two individual champions below was found in available sources, though the team totals imply additional scorers.'},
+  runners:{M:{note:'2026 NCAA Outdoor Championship scorer.',list:[['Simeon Birnbaum','1500m champion, 3:36.05']]},
+   W:{note:'2026 NCAA Outdoor Championship scorer.',list:[['Aaliyah McCormick','100m hurdles champion (defending), 12.47']]}}},
+ {conf:'SEC',name:'Auburn',ranks:[['M',6,33]],
+  result:{text:'The men placed 6th with 33 points.'},
+  runners:{M:{note:'2026 NCAA Outdoor Championship scorers.',list:[['Kanyinsola Ajayi','100m champion, 9.72'],['Ja’Kobe Tharp','110m hurdles champion, 12.90']]}}},
+ {conf:'ACC',name:'Louisville',ranks:[['M',7,32]],
+  result:{text:'The men placed 7th with 32 points.'},
+  runners:{M:{note:'2026 NCAA Outdoor Championship scorers.',list:[['Geoffrey Kirwa','3000m steeplechase champion, 8:17.46'],['Elsingi Kipruto','10,000m, 2nd, 27:54.04']]}}},
+ {conf:'Big 12',name:'Kansas State',ranks:[['M',8,30]],
+  result:{text:'The men placed 8th with 30 points, scored entirely by field- and combined-event athletes.'},
+  runners:{M:{gap:'No verified running-event standout — every confirmed Kansas State scorer (Tah Chikomba, long jump champion; Selva Prabhu, triple jump champion; Uroy Ryan, long jump bronze; Emil Uhlin and Dorian Charles, decathlon) competed in a field or combined event.'}}},
+ {conf:'Big Ten',name:'Nebraska',ranks:[['M',9,28],['W',8,27]],
+  result:{text:'The men placed 9th with 28 points; the women tied for 8th with 27.'},
+  runners:{M:{gap:'No verified running-event standout for the men’s team — the only identifiable men’s scorer found competed in the high jump and placed 12th, below the normal scoring line, so the team’s actual point-scoring events aren’t fully documented in available sources.'},
+   W:{note:'2026 NCAA Outdoor Championship scorer.',list:[['Kelsie Belquist','400m hurdles, 5th, First Team All-America']]}}},
+ {conf:'Big Ten',name:'USC',ranks:[['W',5,32],['M',10,27]],
+  result:{text:'The women placed 5th with 32 points, keyed by a repeat title in the 4×100 relay; the men placed 10th with 27.'},
+  runners:{W:{note:'2026 NCAA Outdoor Championship scorers.',list:[['Women’s 4×100 relay (DeFrand, Brahe-Pedersen, Whyte, Selby)','defending champions, 41.58, school record'],['Madison Whyte','400m, 2nd, 48.97 (#3 all-time NCAA)'],['Dajaz DeFrand','200m, 6th, 22.44']]},
+   M:{note:'2026 NCAA Outdoor Championship scorer.',list:[['Edward Nketia','100m, 5th, 9.95; 200m, 6th, 20.19']]}}},
+ {conf:'SEC',name:'Florida',ranks:[['W',2,43]],
+  result:{text:'The women placed 2nd — 43 points per LetsRun and Florida’s own athletics recap; USTFCCCA’s recap instead lists 41, an unresolved single-point discrepancy between sources.'},
+  runners:{W:{note:'2026 NCAA Outdoor Championship scorers.',list:[['Gabrielle Matthews','200m, 4th, 22.29; 100m, 6th, 11.12'],['Judy Chepkoech','5000m, 3rd, 15:14.04'],['Hilda Olemomoi','5000m, 6th, 15:16.23']]}}},
+ {conf:'Big 12',name:'Iowa State',ranks:[['W',6,30]],
+  result:{text:'The women placed 6th with 30 points — a program-high finish.'},
+  runners:{W:{note:'2026 NCAA Outdoor Championship scorers.',list:[['Mercyline Kirwa','5000m, 2nd, 15:13.72 PR (also won the 10,000m earlier in the meet)'],['Betty Kipkore','5000m, 4th, 15:14.43']]}}},
+ {conf:'Big Ten',name:'Washington',ranks:[['W',7,28]],
+  result:{text:'The women placed 7th with 28 points, scored entirely by pole vault and heptathlon.'},
+  runners:{W:{gap:'No verified running-event standout — every confirmed Washington scorer (Amanda Moll, pole vault champion; Hana Moll, pole vault 2nd; Sofia Cosculluela, heptathlon champion) competed in a field or combined event.'}}},
+ {conf:'Big Ten',name:'Illinois',ranks:[['W',8,27]],
+  result:{text:'The women tied for 8th with 27 points, scored entirely by field- and combined-event athletes.'},
+  runners:{W:{gap:'No verified running-event standout — every identified Illinois scorer (Rose Yeboah, high jump 2nd; JaiCieonna Gero-Holt and Meagan Humphries, heptathlon) competed in a field or combined event, and a dedicated search found no Illinois athlete on the podium in a standalone running event at this meet.'}}}
+];
+function runnersBlock(g,r){
+  const label=(g==='M'?'Men':'Women')+' — standout runners';
+  if(r.gap){
+    return '<div class="runners"><b>'+esc(label)+'</b><span class="rnote">'+esc(r.gap)+'</span></div>';
+  }
+  const names=r.list.map(function(n){return esc(n[0])+' <small>('+esc(n[1])+')</small>'}).join(', ');
+  return '<div class="runners"><b>'+esc(label)+'</b><span class="rn">'+names+'</span>'+(r.note?'<span class="rnote">'+esc(r.note)+'</span>':'')+'</div>';
+}
+function teamCard(t){
+  const rk=t.ranks.map(function(r){return (r[0]==='M'?'MEN #':'WOMEN #')+r[1]+' · '+r[2]+' pts'}).join(' &nbsp;/&nbsp; ');
+  const extra=(t.extra||[]).map(function(s){return '<div><b>'+esc(s[0])+'</b>'+esc(s[1])+' &mdash; '+esc(s[2])+'</div>'}).join('');
+  const trail=(TRAIL[t.conf]||[]).map(function(s){return '<div><b>'+esc(s[0])+'</b>'+esc(s[1])+' &mdash; '+esc(s[2])+'</div>'}).join('');
+  const foot='<div class="result"><b>2026 Outdoor result</b>'+esc(t.result.text)+'</div>';
+  const runners=t.runners?Object.keys(t.runners).map(function(g){return runnersBlock(g,t.runners[g])}).join(''):'';
+  return '<div class="team-card"><div class="tname">'+esc(t.name)+'<span class="rk">'+rk+'</span></div><div class="sched">'+extra+trail+'</div>'+foot+runners+'</div>';
+}
+function renderTeams(){
+  const order=['SEC','Big Ten','ACC','Big 12'];
+  $('#teamsList').innerHTML=order.map(function(c){
+    const teams=TEAMS.filter(function(t){return t.conf===c});
+    return '<div class="conf-block"><div class="conf-name">'+esc(c)+' &middot; '+teams.length+' team'+(teams.length===1?'':'s')+'</div>'+teams.map(teamCard).join('')+'</div>';
+  }).join('');
+}
+
+// -------- Calendar season pattern --------
+// Based on the 2026 season's actual clustering, per conference/team press releases checked Sept 2026.
+const PATTERN=[
+ {d:'Late Feb',name:'Conference indoor championships',where:'Nationwide',detail:'Every Division I conference crowns an indoor champion. 2026 evidence: Big Ten Indoor ran Feb 26–28; Big 12 Indoor concluded Feb 28. 2027 dates hadn’t been announced as of this check.'},
+ {d:'Mar 12–13',name:'NCAA Indoor Championships',where:'Fayetteville, AR (host: Arkansas)',detail:'The men’s and women’s national indoor championships.',tag:'Championship'},
+ {d:'Mid-May',name:'Conference outdoor championships',where:'Nationwide',detail:'2026 evidence: SEC Outdoor and Big Ten Outdoor both concluded by May 17. 2027 dates hadn’t been announced as of this check.'},
+ {d:'Late May',name:'NCAA East/West First Round',where:'Nine regional sites nationwide',detail:'The top performers in each event advance to nationals. Assignment is per athlete/event on one national descending-order list — not by school or conference — so it can’t be known in advance which regional a given team’s athletes will compete at.'},
+ {d:'Jun 9–12',name:'NCAA Outdoor Championships',where:'Eugene, OR (Hayward Field)',detail:'The men’s and women’s national outdoor championships, continuing Oregon’s run as host (confirmed through at least 2028).',tag:'Championship'}
+];
+function renderPattern(){
+  $('#patternList').innerHTML=PATTERN.map(function(m){return '<article class="meet"><div class="meet-date">'+esc(m.d)+'<small>2027</small></div><div><h3>'+esc(m.name)+'</h3><div class="where">'+esc(m.where)+'</div><div class="detail">'+esc(m.detail)+'</div>'+(m.tag?'<span class="tag major">'+esc(m.tag)+'</span>':'')+'</div></article>'}).join('');
+}
+
+// -------- Tabs --------
+const TABS=['standings','teams','calendar'];
+function showTab(name){
+  $$('.tabs button').forEach(function(b){b.classList.toggle('active',b.dataset.tab===name)});
+  TABS.forEach(function(x){$('#'+x+'View').classList.toggle('hide',x!==name)});
+  try{localStorage.setItem('nctf-tab',name)}catch(e){}
+}
+$$('.tabs button').forEach(function(btn){btn.onclick=function(){showTab(btn.dataset.tab)}});
+
+let startTab='standings';
+try{const saved=localStorage.getItem('nctf-tab');if(TABS.indexOf(saved)>-1)startTab=saved;}catch(e){}
+showTab(startTab);
+renderStandings();renderTeams();renderPattern();
+</script>
+</body>
+</html>
