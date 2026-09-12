@@ -42,9 +42,14 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:Georgia,'Time
 .athlete.podium .rank{color:var(--track)}
 .name{font-size:22px;line-height:1.15}
 .name small{font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#a2812c;font-weight:800;letter-spacing:.04em;margin-left:4px}
+.country{font:12px Arial,Helvetica,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#8b847c;margin-top:5px}
 .figure{text-align:right}
 .figure b{display:block;font:800 20px Arial,Helvetica,sans-serif;font-variant-numeric:tabular-nums}
+.figure b.none{color:#b9b1a7;font-weight:400}
 .figure small{display:block;font:12px Arial,Helvetica,sans-serif;color:#8b847c;margin-top:4px;letter-spacing:.04em}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.chips button{flex:0 0 auto;border:1px solid var(--line);background:#fff;color:#4d463f;font:800 12px Arial,Helvetica,sans-serif;padding:9px 15px;cursor:pointer;border-radius:2px;white-space:nowrap}
+.chips button.active{background:var(--track);color:#fff;border-color:var(--track)}
 .event-note{padding:14px 18px;font:14px/1.6 Arial,Helvetica,sans-serif;color:var(--muted);border-bottom:1px solid var(--line);background:#fbf8f3}
 .section-card{background:var(--card);border:1px solid var(--line);padding:22px;margin-bottom:18px}
 .section-card h2{font-size:32px;font-weight:500;margin:0 0 6px}
@@ -102,6 +107,7 @@ html{font-size:16px}
   <div class="brand"><strong>NCAA TRACK &amp; FIELD</strong><span>Division I command center</span></div>
   <nav class="tabs" aria-label="Sections">
     <button class="active" data-tab="standings">Standings</button>
+    <button data-tab="events">Events</button>
     <button data-tab="teams">Teams</button>
     <button data-tab="calendar">Calendar</button>
   </nav>
@@ -122,6 +128,23 @@ html{font-size:16px}
       <div class="list-head"><span>Rank</span><span>Team</span><span>Points</span></div>
       <div id="standList"></div>
       <div class="event-note" id="standFoot"></div>
+    </div>
+  </section>
+
+  <section id="eventsView" class="hide">
+    <div class="hero">
+      <div class="eyebrow">Standout performances by distance &middot; 2026 NCAA Outdoor Championships</div>
+      <div class="hero-row"><h1>Events</h1><div class="stamp">COVERAGE <b>PARTIAL</b></div></div>
+      <p class="source">Every running performance from the Teams tab, broken down by race distance instead of by team &mdash; each place shown is the athlete&rsquo;s actual finish at the 2026 NCAA Outdoor Championships. This is not a complete top-10-per-event list: it only includes athletes from the 14 schools that made a final top-10 team standing, so some places in between are missing where the scorer was on a different team. Field and combined events are excluded throughout this app.</p>
+    </div>
+    <div class="panel">
+      <div class="controls">
+        <div class="ctl-row"><div class="seg" role="tablist" aria-label="Category"><button class="active" data-gender="men" role="tab" aria-selected="true">Men</button><button data-gender="women" role="tab" aria-selected="false">Women</button></div></div>
+        <div class="chips" id="eventsChips" role="tablist" aria-label="Distance"></div>
+      </div>
+      <div class="event-note" id="eventsNote"></div>
+      <div class="list-head"><span>Rank</span><span>Athlete</span><span>Mark</span></div>
+      <div id="eventsList"></div>
     </div>
   </section>
 
@@ -205,6 +228,70 @@ function renderStandings(){
   $$('#standingsView .seg button').forEach(function(b){const on=b.dataset.gender===state.gender;b.classList.toggle('active',on);b.setAttribute('aria-selected',on)});
 }
 $$('#standingsView .seg button').forEach(function(btn){btn.onclick=function(){state.gender=btn.dataset.gender;renderStandings()}});
+
+// -------- Events (the same standout performers from Teams, grouped by distance) --------
+// Every entry here also appears in a team card on the Teams tab; place and mark are the athlete's
+// actual finish at the 2026 NCAA Outdoor Championships. Not exhaustive per event — see hero note.
+const EVENT_ORDER=['100m','200m','400m','800m','1500m','5000m','10,000m','Hurdles (100m/110m)','400m Hurdles','3000m Steeplechase','4×100 Relay','4×400 Relay'];
+const PERFORMANCES=[
+ {event:'100m',gender:'men',place:1,name:'Kanyinsola Ajayi',team:'Auburn',mark:'9.72'},
+ {event:'100m',gender:'men',place:2,name:'Jaiden Reid',team:'LSU',mark:'9.82'},
+ {event:'100m',gender:'men',place:3,name:'Jelani Watkins',team:'Arkansas',mark:'9.87'},
+ {event:'100m',gender:'men',place:4,name:'Davonte Howell',team:'Tennessee',mark:'9.88'},
+ {event:'100m',gender:'men',place:5,name:'Edward Nketia',team:'USC',mark:'9.95'},
+ {event:'100m',gender:'women',place:3,name:'Shawnti Jackson',team:'LSU',mark:'11.01'},
+ {event:'100m',gender:'women',place:6,name:'Gabrielle Matthews',team:'Florida',mark:'11.12'},
+ {event:'200m',gender:'men',place:1,name:'Jaiden Reid',team:'LSU',mark:'19.63',note:'collegiate record'},
+ {event:'200m',gender:'men',place:5,name:'T’Mars McCallum',team:'Tennessee',mark:'20.09'},
+ {event:'200m',gender:'men',place:6,name:'Edward Nketia',team:'USC',mark:'20.19'},
+ {event:'200m',gender:'women',place:1,name:'Adaejah Hodge',team:'Georgia',mark:'21.68',note:'collegiate record'},
+ {event:'200m',gender:'women',place:2,name:'Shawnti Jackson',team:'LSU',mark:'22.12'},
+ {event:'200m',gender:'women',place:4,name:'Gabrielle Matthews',team:'Florida',mark:'22.29'},
+ {event:'200m',gender:'women',place:6,name:'Dajaz DeFrand',team:'USC',mark:'22.44'},
+ {event:'400m',gender:'men',place:2,name:'Jonathan Simms',team:'Georgia',mark:'43.92',note:'PR'},
+ {event:'400m',gender:'men',place:3,name:'Sidi Njie',team:'Georgia',mark:'44.20',note:'PR'},
+ {event:'400m',gender:'women',place:1,name:'Dejanea Oakley',team:'Georgia',mark:'48.79',note:'collegiate record'},
+ {event:'400m',gender:'women',place:2,name:'Madison Whyte',team:'USC',mark:'48.97',note:'#3 all-time NCAA'},
+ {event:'800m',gender:'men',place:2,name:'Tyrice Taylor',team:'Arkansas',mark:'1:44.30'},
+ {event:'800m',gender:'men',place:3,name:'Rivaldo Marshall',team:'Arkansas',mark:'1:44.93'},
+ {event:'800m',gender:'women',place:1,name:'Sanu Jallow',team:'Arkansas',mark:'1:56.85',note:'collegiate record'},
+ {event:'1500m',gender:'men',place:1,name:'Simeon Birnbaum',team:'Oregon',mark:'3:36.05'},
+ {event:'5000m',gender:'women',place:2,name:'Mercyline Kirwa',team:'Iowa State',mark:'15:13.72',note:'PR; also won the 10,000m earlier in the meet'},
+ {event:'5000m',gender:'women',place:3,name:'Judy Chepkoech',team:'Florida',mark:'15:14.04'},
+ {event:'5000m',gender:'women',place:4,name:'Betty Kipkore',team:'Iowa State',mark:'15:14.43'},
+ {event:'5000m',gender:'women',place:6,name:'Hilda Olemomoi',team:'Florida',mark:'15:16.23'},
+ {event:'10,000m',gender:'men',place:2,name:'Elsingi Kipruto',team:'Louisville',mark:'27:54.04'},
+ {event:'Hurdles (100m/110m)',gender:'men',place:1,name:'Ja’Kobe Tharp',team:'Auburn',mark:'12.90',note:'110m hurdles'},
+ {event:'Hurdles (100m/110m)',gender:'women',place:1,name:'Aaliyah McCormick',team:'Oregon',mark:'12.47',note:'100m hurdles, defending champion'},
+ {event:'400m Hurdles',gender:'men',place:4,name:'Marc Anthony Ibrahim',team:'Tennessee',mark:'49.06'},
+ {event:'400m Hurdles',gender:'women',place:5,name:'Kelsie Belquist',team:'Nebraska',mark:'',note:'First Team All-America'},
+ {event:'3000m Steeplechase',gender:'men',place:1,name:'Geoffrey Kirwa',team:'Louisville',mark:'8:17.46'},
+ {event:'4×100 Relay',gender:'men',place:1,name:'Tennessee',team:'Tennessee',mark:'37.98',note:'Folson, Howell, McCallum, Clark — school record, first title since 1983'},
+ {event:'4×100 Relay',gender:'women',place:1,name:'USC',team:'USC',mark:'41.58',note:'DeFrand, Brahe-Pedersen, Whyte, Selby — defending champions, school record'},
+ {event:'4×100 Relay',gender:'women',place:2,name:'LSU',team:'LSU',mark:'41.74',note:'Hinckson, Godbless, Bigam, Jackson — school record'},
+ {event:'4×400 Relay',gender:'men',place:1,name:'Georgia',team:'Georgia',mark:'2:57.93',note:'edged LSU by 0.03'},
+ {event:'4×400 Relay',gender:'men',place:2,name:'LSU',team:'LSU',mark:'2:57.96'},
+ {event:'4×400 Relay',gender:'women',place:1,name:'Arkansas',team:'Arkansas',mark:'3:18.88',note:'Butler, Batista, Brown, Jallow — #2 all-time collegiate'}
+];
+const evState={gender:'men',key:null};
+function eventsForGender(g){
+  const set={};PERFORMANCES.forEach(function(p){if(p.gender===g)set[p.event]=true});
+  return EVENT_ORDER.filter(function(e){return set[e]});
+}
+function perfRow(p){
+  return '<article class="athlete'+(p.place<=3?' podium':'')+'"><span class="rank">'+p.place+'</span><div><div class="name">'+esc(p.name)+'</div><div class="country">'+esc(p.team)+'</div></div><div class="figure"><b'+(p.mark?'':' class="none"')+'>'+esc(p.mark||'—')+'</b>'+(p.note?'<small>'+esc(p.note)+'</small>':'')+'</div></article>';
+}
+function renderEvents(){
+  const evs=eventsForGender(evState.gender);
+  if(!evState.key||evs.indexOf(evState.key)===-1)evState.key=evs[0];
+  $('#eventsChips').innerHTML=evs.map(function(e){return '<button class="'+(e===evState.key?'active':'')+'" data-event="'+esc(e)+'">'+esc(e)+'</button>'}).join('');
+  const list=PERFORMANCES.filter(function(p){return p.gender===evState.gender&&p.event===evState.key}).sort(function(a,b){return a.place-b.place});
+  $('#eventsNote').textContent=(evState.gender==='men'?"Men's":"Women's")+' '+evState.key+' — sourced finishers among athletes on the 14 top-10 teams, not a full top-10 list for the event.';
+  $('#eventsList').innerHTML=list.map(perfRow).join('');
+  $$('#eventsView .seg button').forEach(function(b){const on=b.dataset.gender===evState.gender;b.classList.toggle('active',on);b.setAttribute('aria-selected',on)});
+  $$('#eventsChips button').forEach(function(b){b.onclick=function(){evState.key=b.dataset.event;renderEvents()}});
+}
+$$('#eventsView .seg button').forEach(function(btn){btn.onclick=function(){evState.gender=btn.dataset.gender;evState.key=null;renderEvents()}});
 
 // -------- Teams (top 10 men + top 10 women, 14 distinct schools) --------
 // Standout performers are running events only (sprints through distance, hurdles, relays) from the
@@ -321,7 +408,7 @@ function renderPattern(){
 }
 
 // -------- Tabs --------
-const TABS=['standings','teams','calendar'];
+const TABS=['standings','events','teams','calendar'];
 function showTab(name){
   $$('.tabs button').forEach(function(b){b.classList.toggle('active',b.dataset.tab===name)});
   TABS.forEach(function(x){$('#'+x+'View').classList.toggle('hide',x!==name)});
@@ -332,7 +419,7 @@ $$('.tabs button').forEach(function(btn){btn.onclick=function(){showTab(btn.data
 let startTab='standings';
 try{const saved=localStorage.getItem('nctf-tab');if(TABS.indexOf(saved)>-1)startTab=saved;}catch(e){}
 showTab(startTab);
-renderStandings();renderTeams();renderPattern();
+renderStandings();renderEvents();renderTeams();renderPattern();
 </script>
 </body>
 </html>
