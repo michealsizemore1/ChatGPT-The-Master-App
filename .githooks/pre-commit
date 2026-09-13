@@ -1,0 +1,27 @@
+#!/bin/sh
+# Keeps the "Last updated" banner on the My Life Master App home page (index.html)
+# in sync with reality: every time you commit, this stamps today's date into it
+# and folds that change into the same commit -- no more manually editing the date.
+#
+# One-time setup (only needs to be run once per clone of this repo):
+#   git config core.hooksPath .githooks
+#
+# After that, this file runs automatically before every `git commit`.
+
+node -e '
+const fs = require("fs");
+if (fs.existsSync("index.html")) {
+  const today = new Date().toLocaleDateString("en-US", {month:"long", day:"numeric", year:"numeric"});
+  const html = fs.readFileSync("index.html", "utf8");
+  const updated = html.replace(/(<div class="updated">Last updated )[^<]+(<\/div>)/, "$1" + today + "$2");
+  if (updated !== html) {
+    fs.writeFileSync("index.html", updated);
+    console.log("pre-commit: stamped index.html with \"Last updated " + today + "\"");
+  }
+}
+'
+
+# Fold the (possibly just-updated) index.html into this commit.
+git add index.html 2>/dev/null || true
+
+exit 0

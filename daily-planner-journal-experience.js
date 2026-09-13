@@ -390,7 +390,7 @@ function renderJournalSchedule(){
     // planning aid and should not keep an entered meal gray earlier in the day.
     return mealLogged(meal);
   }
-  var reflected=['jAccomplish','jImprov','jGratitude','jNotes'].some(function(key){return String(d[key]||'').trim();}),sleepRoutine=journalSleepRoutineState(dateKey);
+  var reflected=['jAccomplish','jImprov','jGratitude','jNotes'].some(function(key){return String(d[key]||'').trim();});
   var wellnessKeys=['wBP','wMeds','wWght','wSleep'],wellnessRecorded=journalLinkedGreenCount(wellnessKeys,d);
   var faithKeys=['spDailyBread','spBibleAudio','spAIPrayer'],faithDone=journalLinkedGreenCount(faithKeys,d);
   var loggedRun=(getActivities()||[]).some(function(activity){return activity&&activity.date===dateKey&&/run/i.test([activity.type,activity.title].filter(Boolean).join(' '));});
@@ -419,8 +419,7 @@ function renderJournalSchedule(){
     {time:'5:30 PM',mins:1050,label:'Dinner',detail:'Evening meal and nutrition update',done:mealComplete('dinner',1050),tab:'nutrition'},
     {time:'6:00 PM',mins:1080,label:'Water checkpoint: 64 oz',detail:'Cumulative total: reach 64 ounces by 6:00 PM',done:water>=64,tab:'nutrition'},
     {time:'10:00 PM',mins:1320,label:'Journal accomplishments and gratitude',detail:'Capture the day while it is fresh',done:reflected,tab:'daily'},
-    {time:'10:30 PM',mins:1350,label:'Prepare priorities for tomorrow',detail:'Close the day intentionally',done:localStorage.getItem('schedule_eveningPlanning_'+dateKey)==='1'||!!d.prepJournalCheck,tab:'daily',manual:'eveningPlanning'},
-    {time:'11:00 PM',mins:1380,label:'Begin sleep routine',detail:sleepRoutine.count+' of 6 routine steps completed',done:sleepRoutine.count>=4,partial:sleepRoutine.count>0&&sleepRoutine.count<4,tab:'wellness',sleepRoutineChecklist:true}
+    {time:'10:30 PM',mins:1350,label:'Prepare priorities for tomorrow',detail:'Close the day intentionally',done:localStorage.getItem('schedule_eveningPlanning_'+dateKey)==='1'||!!d.prepJournalCheck,tab:'daily',manual:'eveningPlanning'}
   ].filter(function(item){return !item.skip;});
   // Growth habits are placed directly onto My Schedule on the days selected in Habits. A manually
   // scheduled activity is also retained even when it is not a normal habit day. Defaults are staggered
