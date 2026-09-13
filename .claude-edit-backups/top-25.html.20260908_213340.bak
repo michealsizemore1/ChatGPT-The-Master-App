@@ -25,7 +25,7 @@ img{max-width:100%;display:block;vertical-align:middle}
 .playoff-panel{margin:34px 0 70px}.playoff-intro{padding:0 22px 22px;margin:0;color:#68756e;font:15px/1.55 Georgia,serif}.bracket-round-label{margin:0;padding:0 22px 10px;font-size:10px;letter-spacing:.1em;font-weight:700;color:#68756e;text-transform:uppercase}.byes-round{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:0 22px 30px}.bracket-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;padding:0 22px 26px;align-items:stretch}.bracket-round{display:flex;flex-direction:column}.bracket-round-games{display:flex;flex-direction:column;justify-content:space-around;flex:1;gap:14px}.bracket-game{border:1px solid var(--line);background:var(--paper);border-radius:4px;overflow:hidden}.bracket-team{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line)}.bracket-team:last-child{border-bottom:0}.bracket-seed{flex:0 0 24px;height:24px;display:grid;place-items:center;background:var(--ink);color:#fff;border-radius:50%;font:700 11px Arial,sans-serif}.bracket-team.tbd .bracket-seed{background:#e2ded4;color:#8a8f85}.bracket-team-info{display:grid;gap:2px;min-width:0}.bracket-name{font:15px Georgia,serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bracket-team.tbd .bracket-name{color:#9aa39d;font-style:italic;font-weight:400}.bracket-team-info small{color:#68756e;font-size:9px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}@media(max-width:900px){.byes-round{grid-template-columns:repeat(2,1fr)}.bracket-grid{grid-template-columns:repeat(2,1fr);row-gap:26px}}@media(max-width:620px){.playoff-intro{padding:0 14px 18px}.bracket-round-label{padding:0 14px 10px}.byes-round{grid-template-columns:1fr;padding:0 14px 24px}.bracket-grid{grid-template-columns:1fr;padding:0 14px 22px}}
 @media(max-width:900px){.topbar nav{display:flex!important;gap:22px}.topbar .brand{display:none}}
 @media(max-width:620px){.topbar nav{gap:18px}.topbar nav button{font-size:12px}.topbar .search{display:none}}
-:root{--ink:#10231d;--cream:#f3efe5;--paper:#fffdf7;--lime:#d9f044;--line:#d8d2c5}html{scroll-behavior:smooth}body{background:var(--cream);color:var(--ink);font-family:Arial,Helvetica,sans-serif}.topbar{height:76px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 max(28px,calc((100vw - 1400px)/2));background:var(--ink);color:#fff;position:sticky;top:0;z-index:20}.brand{display:flex;color:#fff;text-decoration:none;align-items:center;gap:11px;font-size:10px;letter-spacing:.13em;line-height:1.15;width:max-content}.brand-mark{display:grid;place-items:center;width:39px;height:39px;border:1px solid #ffffff55;border-radius:50%;color:var(--lime);font:700 18px Georgia,serif}nav{display:flex;gap:32px;height:100%}nav button{background:none;border:0;color:#ffffff99;font-size:13px;font-weight:700;cursor:pointer;position:relative}nav button.active,nav button:hover{color:#fff}nav button.active:after{content:'';position:absolute;height:3px;background:var(--lime);bottom:0;left:0;right:0}.search{justify-self:end;width:210px;height:38px;background:#ffffff10;border:1px solid #ffffff22;border-radius:4px;display:flex;align-items:center;gap:8px;padding:0 12px}.search input{width:100%;border:0;outline:0;background:transparent;color:#fff;font-size:12px}.search input::placeholder{color:#ffffff77}.score-strip{display:flex;flex-direction:column;gap:10px;background:#0b1b16;color:#fff;padding:20px max(28px,calc((100vw - 1400px)/2))}.score-row-wrap{background:#0c0c0c;border:1px solid #ffffff1a;border-radius:8px;overflow:hidden}.score-row{display:grid;grid-template-columns:1fr auto;column-gap:14px;align-items:center;width:100%;background:transparent;border:0;color:#fff;text-align:left;cursor:pointer;padding:12px 14px}.score-row:hover{background:#ffffff0a}.score-row.live{box-shadow:inset 3px 0 var(--lime)}.sr-teams{display:flex;flex-direction:column;gap:9px;min-width:0}.sr-team{display:flex;align-items:center;gap:7px;min-width:0}.sr-logo{width:26px;height:26px;object-fit:contain;flex:0 0 26px}.sr-logo-fallback{background:#26302b;border-radius:50%}.sr-rank{color:#ffffff88;font-size:11px;font-weight:700;flex:0 0 auto}.sr-name{flex:1;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}.sr-team.ranked .sr-name{font-weight:700;color:#fff}.sr-record{color:#ffffff77;font-size:12px;flex:0 0 auto}.sr-score{font:700 18px Georgia,serif;min-width:24px;text-align:right;flex:0 0 auto}.poss-slot{flex:0 0 18px;display:inline-flex;align-items:center;justify-content:center}.sr-situation{text-align:right;color:#ffffffcc;font-size:12px;line-height:1.5;white-space:nowrap;flex:0 0 auto}.sr-situation span{display:block}.sr-situation span:first-child{font-weight:700;color:#fff;font-size:13px}.sr-final{color:#ffffff99;letter-spacing:.05em}.sr-network{display:flex;align-items:center;gap:6px;padding:7px 14px;border-top:1px solid #ffffff14;color:#ffffff99;font-size:11px;letter-spacing:.03em}.score-row-empty{margin:0;padding:22px;background:#0c0c0c;border:1px solid #ffffff1a;border-radius:8px;color:#ffffffbb;font-size:13px}.page{max-width:1400px;margin:auto;padding:0 28px}.hero{padding:72px 0 62px;border-bottom:1px solid var(--line)}.eyebrow{margin:0 0 10px;font-size:10px;letter-spacing:.17em;font-weight:800;color:#68756e}h1{font:clamp(48px,6.6vw,92px)/.88 Georgia,serif;letter-spacing:-.055em;margin:0}h1 em{color:#355a4e;font-weight:400}.lede{max-width:540px;font:18px/1.6 Georgia,serif;color:#627069;margin:28px 0 0}.content-grid{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(330px,.75fr);gap:28px;padding:38px 0 80px}.panel{background:var(--paper);border:1px solid var(--line)}.panel-title{min-height:84px;padding:20px 22px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}.panel-title h2{font:26px Georgia,serif;margin:0}.panel-title button{border:0;background:none;color:#5f6d65;font-size:11px;font-weight:700;cursor:pointer}.table-head,.team-row{display:grid;grid-template-columns:42px minmax(180px,1fr) 70px 65px 70px;align-items:center;gap:8px;padding:0 18px}.table-head{height:34px;background:#eee9de;font-size:8px;letter-spacing:.12em;color:#758078}.team-row{border:0;border-top:1px solid #e5e0d5;width:100%;min-height:67px;background:transparent;text-align:left;cursor:pointer}.team-row:hover,.team-row.selected{background:#f4f6e7}.team-row>b:first-child{font:20px Georgia,serif}.team-row>span,.team-row>strong{font-size:12px}.team-row .up{color:#237a42}.team-row .down{color:#a83b30}.team-name{display:flex;align-items:center;gap:12px}.team-name i{width:35px;height:35px;border-radius:50%;display:grid;place-items:center;color:#fff;font-style:normal;font:700 14px Georgia,serif}.team-name span{display:grid;min-width:0}.team-name strong{font:16px Georgia,serif;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;max-width:100%}.team-name small{color:#7a847d;font-size:8px;letter-spacing:.12em;margin-top:3px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.overview-panels{display:flex;flex-direction:column;gap:28px;padding:38px 0 60px}.news .panel-title{min-height:76px}.story{display:grid;grid-template-columns:35px 1fr;gap:8px;padding:18px 20px;border-top:1px solid var(--line)}.story>b{font:17px Georgia,serif;color:#96a098}.story span{display:grid;gap:5px}.story small{color:#778179;font-size:8px;letter-spacing:.1em;text-transform:uppercase}.story strong{font:14px/1.35 Georgia,serif}footer{border-top:1px solid var(--line);min-height:90px;display:flex;align-items:center;gap:22px;color:#738078;font-size:10px}footer>span{font:700 20px Georgia,serif;color:var(--ink)}footer small{margin-left:auto}@media(max-width:900px){.topbar{grid-template-columns:1fr auto}.topbar nav{display:none}.search{width:180px}.content-grid{grid-template-columns:1fr}}@media(max-width:620px){.topbar{padding:0 18px}.search{width:44px}.search input{display:none}.page{padding:0 18px}.score-strip{padding:16px 14px;gap:8px}.hero{padding:48px 0}.content-grid{padding-top:22px}.table-head,.team-row{grid-template-columns:34px 1fr 52px 52px}.table-head span:last-child,.team-row>strong:last-child{display:none}.team-row{padding:0 10px}.panel-title{padding:18px 14px}footer{align-items:flex-start;flex-direction:column;padding:25px 0;gap:7px}footer small{margin-left:0}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+:root{--ink:#10231d;--cream:#f3efe5;--paper:#fffdf7;--lime:#d9f044;--line:#d8d2c5}html{scroll-behavior:smooth}body{background:var(--cream);color:var(--ink);font-family:Arial,Helvetica,sans-serif}.topbar{height:76px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 max(28px,calc((100vw - 1400px)/2));background:var(--ink);color:#fff;position:sticky;top:0;z-index:20}.brand{display:flex;color:#fff;text-decoration:none;align-items:center;gap:11px;font-size:10px;letter-spacing:.13em;line-height:1.15;width:max-content}.brand-mark{display:grid;place-items:center;width:39px;height:39px;border:1px solid #ffffff55;border-radius:50%;color:var(--lime);font:700 18px Georgia,serif}nav{display:flex;gap:32px;height:100%}nav button{background:none;border:0;color:#ffffff99;font-size:13px;font-weight:700;cursor:pointer;position:relative}nav button.active,nav button:hover{color:#fff}nav button.active:after{content:'';position:absolute;height:3px;background:var(--lime);bottom:0;left:0;right:0}.search{justify-self:end;width:210px;height:38px;background:#ffffff10;border:1px solid #ffffff22;border-radius:4px;display:flex;align-items:center;gap:8px;padding:0 12px}.search input{width:100%;border:0;outline:0;background:transparent;color:#fff;font-size:12px}.search input::placeholder{color:#ffffff77}.score-strip{display:flex;flex-direction:column;gap:10px;background:#0b1b16;color:#fff;padding:20px max(28px,calc((100vw - 1400px)/2))}.score-row-wrap{background:#0c0c0c;border:1px solid #ffffff1a;border-radius:8px;overflow:hidden}.score-row{display:grid;grid-template-columns:1fr auto;column-gap:14px;align-items:center;width:100%;background:transparent;border:0;color:#fff;text-align:left;cursor:pointer;padding:12px 14px}.score-row:hover{background:#ffffff0a}.score-row.live{box-shadow:inset 3px 0 var(--lime)}.sr-teams{display:flex;flex-direction:column;gap:9px;min-width:0}.sr-team{display:flex;align-items:center;gap:7px;min-width:0}.sr-logo{width:26px;height:26px;object-fit:contain;flex:0 0 26px}.sr-logo-fallback{background:#26302b;border-radius:50%}.sr-rank{color:#ffffff88;font-size:11px;font-weight:700;flex:0 0 auto}.sr-name{flex:1;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}.sr-team.ranked .sr-name{font-weight:700;color:#fff}.sr-record{color:#ffffff77;font-size:12px;flex:0 0 auto}.sr-score{font:700 18px Georgia,serif;min-width:24px;text-align:right;flex:0 0 auto}.sr-situation{text-align:right;color:#ffffffcc;font-size:12px;line-height:1.5;white-space:nowrap;flex:0 0 auto}.sr-situation span{display:block}.sr-situation span:first-child{font-weight:700;color:#fff;font-size:13px}.sr-final{color:#ffffff99;letter-spacing:.05em}.sr-network{display:flex;align-items:center;gap:6px;padding:7px 14px;border-top:1px solid #ffffff14;color:#ffffff99;font-size:11px;letter-spacing:.03em}.score-row-empty{margin:0;padding:22px;background:#0c0c0c;border:1px solid #ffffff1a;border-radius:8px;color:#ffffffbb;font-size:13px}.page{max-width:1400px;margin:auto;padding:0 28px}.hero{padding:72px 0 62px;border-bottom:1px solid var(--line)}.eyebrow{margin:0 0 10px;font-size:10px;letter-spacing:.17em;font-weight:800;color:#68756e}h1{font:clamp(48px,6.6vw,92px)/.88 Georgia,serif;letter-spacing:-.055em;margin:0}h1 em{color:#355a4e;font-weight:400}.lede{max-width:540px;font:18px/1.6 Georgia,serif;color:#627069;margin:28px 0 0}.content-grid{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(330px,.75fr);gap:28px;padding:38px 0 80px}.panel{background:var(--paper);border:1px solid var(--line)}.panel-title{min-height:84px;padding:20px 22px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}.panel-title h2{font:26px Georgia,serif;margin:0}.panel-title button{border:0;background:none;color:#5f6d65;font-size:11px;font-weight:700;cursor:pointer}.table-head,.team-row{display:grid;grid-template-columns:42px minmax(180px,1fr) 70px 65px 70px;align-items:center;gap:8px;padding:0 18px}.table-head{height:34px;background:#eee9de;font-size:8px;letter-spacing:.12em;color:#758078}.team-row{border:0;border-top:1px solid #e5e0d5;width:100%;min-height:67px;background:transparent;text-align:left;cursor:pointer}.team-row:hover,.team-row.selected{background:#f4f6e7}.team-row>b:first-child{font:20px Georgia,serif}.team-row>span,.team-row>strong{font-size:12px}.team-row .up{color:#237a42}.team-row .down{color:#a83b30}.team-name{display:flex;align-items:center;gap:12px}.team-name i{width:35px;height:35px;border-radius:50%;display:grid;place-items:center;color:#fff;font-style:normal;font:700 14px Georgia,serif}.team-name span{display:grid;min-width:0}.team-name strong{font:16px Georgia,serif;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;max-width:100%}.team-name small{color:#7a847d;font-size:8px;letter-spacing:.12em;margin-top:3px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.overview-panels{display:flex;flex-direction:column;gap:28px;padding:38px 0 60px}.news .panel-title{min-height:76px}.story{display:grid;grid-template-columns:35px 1fr;gap:8px;padding:18px 20px;border-top:1px solid var(--line)}.story>b{font:17px Georgia,serif;color:#96a098}.story span{display:grid;gap:5px}.story small{color:#778179;font-size:8px;letter-spacing:.1em;text-transform:uppercase}.story strong{font:14px/1.35 Georgia,serif}footer{border-top:1px solid var(--line);min-height:90px;display:flex;align-items:center;gap:22px;color:#738078;font-size:10px}footer>span{font:700 20px Georgia,serif;color:var(--ink)}footer small{margin-left:auto}@media(max-width:900px){.topbar{grid-template-columns:1fr auto}.topbar nav{display:none}.search{width:180px}.content-grid{grid-template-columns:1fr}}@media(max-width:620px){.topbar{padding:0 18px}.search{width:44px}.search input{display:none}.page{padding:0 18px}.score-strip{padding:16px 14px;gap:8px}.hero{padding:48px 0}.content-grid{padding-top:22px}.table-head,.team-row{grid-template-columns:34px 1fr 52px 52px}.table-head span:last-child,.team-row>strong:last-child{display:none}.team-row{padding:0 10px}.panel-title{padding:18px 14px}footer{align-items:flex-start;flex-direction:column;padding:25px 0;gap:7px}footer small{margin-left:0}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 .metric-feed{display:block;margin-top:8px;color:#87934a;font-size:9px;letter-spacing:.08em;text-transform:uppercase}
 .team-logo{position:relative;flex:0 0 35px;min-width:35px;aspect-ratio:1/1;border-radius:50%;overflow:hidden}.team-logo>span{font-size:9px;font-weight:800;color:#fff}.team-logo>img{position:absolute;inset:3px;width:calc(100% - 6px)!important;height:calc(100% - 6px)!important;margin:auto;background:transparent;object-fit:contain;border-radius:50%}
 @media(max-width:760px){.schedule-head{font-size:15px}.schedule-head small{font-size:13px}.schedule-game{font-size:18px;min-height:66px}.schedule-game small{font-size:15px}.archive-label{font-size:16px;padding:20px 14px}.team-archive>header{padding:20px}.team-archive>header small{font-size:13px}.team-archive>header b{font-size:28px}.team-archive>header strong{font-size:50px}.team-stat-list{padding:10px 16px}.team-stat-list>div,.team-leaders>div{min-height:58px;font-size:20px}.team-stat-list b,.team-leaders b{font-size:20px}.team-leaders{padding:12px 16px 18px}.team-leaders>p{font-size:16px}.team-leaders span small{font-size:13px}.leaders-pending{font-size:17px}.legacy-game-panel .last-play{font-size:18px;line-height:1.6}}
@@ -53,11 +53,6 @@ img{max-width:100%;display:block;vertical-align:middle}
 .team-name{min-width:0}
 .team-name>span:last-child{min-width:0}
 .team-name strong{overflow-wrap:break-word}
-.fbs-head{display:grid;grid-template-columns:1fr 90px;align-items:center;gap:8px;height:34px;padding:0 18px;background:#eee9de;font-size:8px;letter-spacing:.12em;color:#758078}
-.fbs-row{display:grid;grid-template-columns:1fr 90px;align-items:center;gap:8px;padding:12px 18px;min-height:64px}
-.fbs-row .team-record{font-size:14px;color:#4c5850;text-align:right;font-weight:600}
-@media(min-width:621px){.fbs-head{font-size:10px}}
-@media(max-width:620px){.fbs-row{padding:10px 10px;min-height:70px}}
 .drive-tracker{margin:0 0 14px;padding:16px 14px 14px;background:#000;border:1px solid #ffffff1a;border-radius:8px}
 .drive-tracker-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;color:#d9f044;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
 .drive-tracker-head small{color:#ffffff99;font-weight:400;text-transform:none;letter-spacing:0;font-size:10px}
@@ -121,7 +116,7 @@ img{max-width:100%;display:block;vertical-align:middle}
 <script src="home-button.js"></script>
 <script src="version-check.js"></script>
 <script>
-const APP_VERSION='2026-09-13-1';
+const APP_VERSION='2026-09-06-13';
 checkForNewerAppVersion(APP_VERSION, 'top25');
 
 const mountainTime=(date)=>date.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZone:'America/Denver'});
@@ -140,150 +135,31 @@ function formatLeaderValue(athlete,labels){
 }
 
 const teams=[
- {rank:1,name:'Ohio State',abbr:'OSU',espnId:'194',record:'1–0',prev:1,points:1684,pf:'—',pa:'—',ypg:'—',color:'#ba0c2f'},
- {rank:2,name:'Georgia',abbr:'UGA',espnId:'61',record:'1–0',prev:3,points:1532,pf:'—',pa:'—',ypg:'—',color:'#ba0c2f'},
- {rank:3,name:'Notre Dame',abbr:'ND',espnId:'87',record:'1–0',prev:4,points:1512,pf:'—',pa:'—',ypg:'—',color:'#0c2340'},
- {rank:4,name:'Texas',abbr:'TEX',espnId:'251',record:'1–0',prev:5,points:1462,pf:'—',pa:'—',ypg:'—',color:'#bf5700'},
- {rank:5,name:'Indiana',abbr:'IND',espnId:'84',record:'1–0',prev:6,points:1428,pf:'—',pa:'—',ypg:'—',color:'#990000'},
- {rank:6,name:'Oregon',abbr:'ORE',espnId:'2483',record:'1–0',prev:2,points:1422,pf:'—',pa:'—',ypg:'—',color:'#154733'},
- {rank:7,name:'Miami',abbr:'MIA',espnId:'2390',record:'1–0',prev:7,points:1405,pf:'—',pa:'—',ypg:'—',color:'#f47321'},
- {rank:8,name:'LSU',abbr:'LSU',espnId:'99',record:'1–0',prev:11,points:1315,pf:'—',pa:'—',ypg:'—',color:'#461d7c'},
- {rank:9,name:'Ole Miss',abbr:'MISS',espnId:'145',record:'1–0',prev:9,points:1154,pf:'—',pa:'—',ypg:'—',color:'#ce1126'},
- {rank:10,name:'Texas A&M',abbr:'TAMU',espnId:'245',record:'1–0',prev:8,points:1079,pf:'—',pa:'—',ypg:'—',color:'#500000'},
- {rank:11,name:'Oklahoma',abbr:'OU',espnId:'201',record:'1–0',prev:10,points:1039,pf:'—',pa:'—',ypg:'—',color:'#841617'},
- {rank:12,name:'Alabama',abbr:'ALA',espnId:'333',record:'1–0',prev:13,points:910,pf:'—',pa:'—',ypg:'—',color:'#9e1b32'},
- {rank:13,name:'Texas Tech',abbr:'TTU',espnId:'2641',record:'1–0',prev:12,points:900,pf:'—',pa:'—',ypg:'—',color:'#cc0000'},
- {rank:14,name:'USC',abbr:'USC',espnId:'30',record:'2–0',prev:15,points:861,pf:'—',pa:'—',ypg:'—',color:'#990000'},
- {rank:15,name:'BYU',abbr:'BYU',espnId:'252',record:'1–0',prev:14,points:840,pf:'—',pa:'—',ypg:'—',color:'#002e5d'},
- {rank:16,name:'Penn State',abbr:'PSU',espnId:'213',record:'1–0',prev:18,points:621,pf:'—',pa:'—',ypg:'—',color:'#041e42'},
- {rank:17,name:'SMU',abbr:'SMU',espnId:'2567',record:'1–0',prev:19,points:501,pf:'—',pa:'—',ypg:'—',color:'#c8102e'},
- {rank:18,name:'Tennessee',abbr:'TENN',espnId:'2633',record:'1–0',prev:20,points:491,pf:'—',pa:'—',ypg:'—',color:'#ff8200'},
- {rank:19,name:'Washington',abbr:'WASH',espnId:'264',record:'1–0',prev:17,points:489,pf:'—',pa:'—',ypg:'—',color:'#4b2e83'},
- {rank:20,name:'Utah',abbr:'UTAH',espnId:'254',record:'1–0',prev:21,points:381,pf:'—',pa:'—',ypg:'—',color:'#cc0000'},
- {rank:21,name:'Iowa',abbr:'IOWA',espnId:'2294',record:'1–0',prev:22,points:369,pf:'—',pa:'—',ypg:'—',color:'#000000'},
- {rank:22,name:'Houston',abbr:'HOU',espnId:'248',record:'1–0',prev:23,points:214,pf:'—',pa:'—',ypg:'—',color:'#c8102e'},
- {rank:23,name:'Missouri',abbr:'MIZ',espnId:'142',record:'1–0',prev:25,points:182,pf:'—',pa:'—',ypg:'—',color:'#000000'},
- {rank:24,name:'Louisville',abbr:'LOU',espnId:'97',record:'0–1',prev:24,points:163,pf:'—',pa:'—',ypg:'—',color:'#ad0000'},
- {rank:25,name:'Virginia',abbr:'UVA',espnId:'258',record:'1–0',prev:null,points:89,pf:'—',pa:'—',ypg:'—',color:'#232d4b'}
-];
-// Every other FBS team -- i.e. the full 138-team FBS field minus the 25 teams already in the
-// poll above. Used by the "All Teams" tab only; these aren't ranked so they carry no rank/points,
-// just a conference grouping and a record filled in live from the same weekly scoreboard fetch
-// (loadWeek/currentRecords) that already covers the whole FBS slate, not just ranked teams.
-const otherFbsTeams=[
- {name:'Boston College',abbr:'BC',espnId:'103',conference:'ACC',color:'#98002e'},
- {name:'California',abbr:'CAL',espnId:'25',conference:'ACC',color:'#003262'},
- {name:'Clemson',abbr:'CLEM',espnId:'228',conference:'ACC',color:'#f56600'},
- {name:'Duke',abbr:'DUKE',espnId:'150',conference:'ACC',color:'#012169'},
- {name:'Florida State',abbr:'FSU',espnId:'52',conference:'ACC',color:'#782f40'},
- {name:'Georgia Tech',abbr:'GT',espnId:'59',conference:'ACC',color:'#b3a369'},
- {name:'NC State',abbr:'NCSU',espnId:'152',conference:'ACC',color:'#cc0000'},
- {name:'North Carolina',abbr:'UNC',espnId:'153',conference:'ACC',color:'#7bafd4'},
- {name:'Pittsburgh',abbr:'PITT',espnId:'221',conference:'ACC',color:'#003594'},
- {name:'Stanford',abbr:'STAN',espnId:'24',conference:'ACC',color:'#8c1515'},
- {name:'Syracuse',abbr:'SYR',espnId:'183',conference:'ACC',color:'#d44500'},
- {name:'Virginia Tech',abbr:'VT',espnId:'259',conference:'ACC',color:'#630031'},
- {name:'Wake Forest',abbr:'WAKE',espnId:'154',conference:'ACC',color:'#9e7e38'},
- {name:'Illinois',abbr:'ILL',espnId:'356',conference:'Big Ten',color:'#e84a27'},
- {name:'Maryland',abbr:'MD',espnId:'120',conference:'Big Ten',color:'#e21833'},
- {name:'Michigan',abbr:'MICH',espnId:'130',conference:'Big Ten',color:'#00274c'},
- {name:'Michigan State',abbr:'MSU',espnId:'127',conference:'Big Ten',color:'#18453b'},
- {name:'Minnesota',abbr:'MINN',espnId:'135',conference:'Big Ten',color:'#7a0019'},
- {name:'Nebraska',abbr:'NEB',espnId:'158',conference:'Big Ten',color:'#e41c38'},
- {name:'Northwestern',abbr:'NW',espnId:'77',conference:'Big Ten',color:'#4e2a84'},
- {name:'Purdue',abbr:'PUR',espnId:'2509',conference:'Big Ten',color:'#cfb991'},
- {name:'Rutgers',abbr:'RUTG',espnId:'164',conference:'Big Ten',color:'#cc0033'},
- {name:'UCLA',abbr:'UCLA',espnId:'26',conference:'Big Ten',color:'#2d68c4'},
- {name:'Wisconsin',abbr:'WISC',espnId:'275',conference:'Big Ten',color:'#c5050c'},
- {name:'Arizona',abbr:'ARIZ',espnId:'12',conference:'Big 12',color:'#ab0520'},
- {name:'Arizona State',abbr:'ASU',espnId:'9',conference:'Big 12',color:'#8c1d40'},
- {name:'Baylor',abbr:'BAY',espnId:'239',conference:'Big 12',color:'#003015'},
- {name:'Cincinnati',abbr:'CIN',espnId:'2132',conference:'Big 12',color:'#e00122'},
- {name:'Colorado',abbr:'COLO',espnId:'38',conference:'Big 12',color:'#cfb87c'},
- {name:'Iowa State',abbr:'ISU',espnId:'66',conference:'Big 12',color:'#c8102e'},
- {name:'Kansas',abbr:'KU',espnId:'2305',conference:'Big 12',color:'#0051ba'},
- {name:'Kansas State',abbr:'KSU',espnId:'2306',conference:'Big 12',color:'#512888'},
- {name:'Oklahoma State',abbr:'OKST',espnId:'197',conference:'Big 12',color:'#ff7300'},
- {name:'TCU',abbr:'TCU',espnId:'2628',conference:'Big 12',color:'#4d1979'},
- {name:'UCF',abbr:'UCF',espnId:'2116',conference:'Big 12',color:'#ba9b37'},
- {name:'West Virginia',abbr:'WVU',espnId:'277',conference:'Big 12',color:'#eaaa00'},
- {name:'Arkansas',abbr:'ARK',espnId:'8',conference:'SEC',color:'#9d2235'},
- {name:'Auburn',abbr:'AUB',espnId:'2',conference:'SEC',color:'#0c2340'},
- {name:'Florida',abbr:'FLA',espnId:'57',conference:'SEC',color:'#0021a5'},
- {name:'Kentucky',abbr:'UK',espnId:'96',conference:'SEC',color:'#0033a0'},
- {name:'Mississippi State',abbr:'MSST',espnId:'344',conference:'SEC',color:'#660000'},
- {name:'South Carolina',abbr:'SC',espnId:'2579',conference:'SEC',color:'#73000a'},
- {name:'Vanderbilt',abbr:'VAN',espnId:'238',conference:'SEC',color:'#866d4b'},
- {name:'Army',abbr:'ARMY',espnId:'349',conference:'American',color:'#c5a253'},
- {name:'Charlotte',abbr:'CLT',espnId:'2429',conference:'American',color:'#046a38'},
- {name:'East Carolina',abbr:'ECU',espnId:'151',conference:'American',color:'#592a8a'},
- {name:'Florida Atlantic',abbr:'FAU',espnId:'2226',conference:'American',color:'#c41230'},
- {name:'Memphis',abbr:'MEM',espnId:'235',conference:'American',color:'#003087'},
- {name:'Navy',abbr:'NAVY',espnId:'2426',conference:'American',color:'#00205b'},
- {name:'North Texas',abbr:'UNT',espnId:'249',conference:'American',color:'#00853e'},
- {name:'Rice',abbr:'RICE',espnId:'242',conference:'American',color:'#003b71'},
- {name:'Temple',abbr:'TEM',espnId:'218',conference:'American',color:'#9e1b32'},
- {name:'Tulane',abbr:'TULN',espnId:'2655',conference:'American',color:'#006747'},
- {name:'Tulsa',abbr:'TLSA',espnId:'202',conference:'American',color:'#002d5c'},
- {name:'UAB',abbr:'UAB',espnId:'5',conference:'American',color:'#1e6b52'},
- {name:'USF',abbr:'USF',espnId:'58',conference:'American',color:'#006747'},
- {name:'UTSA',abbr:'UTSA',espnId:'2636',conference:'American',color:'#0c2340'},
- {name:'Delaware',abbr:'DEL',espnId:'48',conference:'Conference USA',color:'#00539f'},
- {name:'FIU',abbr:'FIU',espnId:'2229',conference:'Conference USA',color:'#0a2240'},
- {name:'Jacksonville State',abbr:'JVST',espnId:'55',conference:'Conference USA',color:'#a6192e'},
- {name:'Kennesaw State',abbr:'KENN',espnId:'338',conference:'Conference USA',color:'#000000'},
- {name:'Liberty',abbr:'LIB',espnId:'2335',conference:'Conference USA',color:'#ce1126'},
- {name:'Louisiana Tech',abbr:'LT',espnId:'2348',conference:'Conference USA',color:'#00285e'},
- {name:'Middle Tennessee',abbr:'MTSU',espnId:'2393',conference:'Conference USA',color:'#0066cc'},
- {name:'Missouri State',abbr:'MOST',espnId:'2623',conference:'Conference USA',color:'#6a0032'},
- {name:'New Mexico State',abbr:'NMSU',espnId:'166',conference:'Conference USA',color:'#8c0b31'},
- {name:'Sam Houston',abbr:'SHSU',espnId:'2534',conference:'Conference USA',color:'#f04e23'},
- {name:'Western Kentucky',abbr:'WKU',espnId:'98',conference:'Conference USA',color:'#c60c30'},
- {name:'Akron',abbr:'AKR',espnId:'2006',conference:'MAC',color:'#00285e'},
- {name:'Ball State',abbr:'BALL',espnId:'2050',conference:'MAC',color:'#ba0c2f'},
- {name:'Bowling Green',abbr:'BGSU',espnId:'189',conference:'MAC',color:'#fe5000'},
- {name:'Buffalo',abbr:'BUFF',espnId:'2084',conference:'MAC',color:'#005bbb'},
- {name:'Central Michigan',abbr:'CMU',espnId:'2117',conference:'MAC',color:'#6a0032'},
- {name:'Eastern Michigan',abbr:'EMU',espnId:'2199',conference:'MAC',color:'#046a38'},
- {name:'Kent State',abbr:'KENT',espnId:'2309',conference:'MAC',color:'#002664'},
- {name:'UMass',abbr:'UMASS',espnId:'113',conference:'MAC',color:'#881c1c'},
- {name:'Miami (OH)',abbr:'M-OH',espnId:'193',conference:'MAC',color:'#c41230'},
- {name:'Ohio',abbr:'OHIO',espnId:'195',conference:'MAC',color:'#00694e'},
- {name:'Sacramento State',abbr:'SAC',espnId:'16',conference:'MAC',color:'#043927'},
- {name:'Toledo',abbr:'TOL',espnId:'2649',conference:'MAC',color:'#00246b'},
- {name:'Western Michigan',abbr:'WMU',espnId:'2711',conference:'MAC',color:'#532e1f'},
- {name:'Air Force',abbr:'AF',espnId:'2005',conference:'Mountain West',color:'#0033a0'},
- {name:'Hawaiʻi',abbr:'HAW',espnId:'62',conference:'Mountain West',color:'#024731'},
- {name:'Nevada',abbr:'NEV',espnId:'2440',conference:'Mountain West',color:'#003366'},
- {name:'New Mexico',abbr:'UNM',espnId:'167',conference:'Mountain West',color:'#ba0c2f'},
- {name:'North Dakota State',abbr:'NDSU',espnId:'2449',conference:'Mountain West',color:'#144734'},
- {name:'Northern Illinois',abbr:'NIU',espnId:'2459',conference:'Mountain West',color:'#c8102e'},
- {name:'San José State',abbr:'SJSU',espnId:'23',conference:'Mountain West',color:'#0055a2'},
- {name:'UNLV',abbr:'UNLV',espnId:'2439',conference:'Mountain West',color:'#cf0a2c'},
- {name:'UTEP',abbr:'UTEP',espnId:'2638',conference:'Mountain West',color:'#041e42'},
- {name:'Wyoming',abbr:'WYO',espnId:'2751',conference:'Mountain West',color:'#492f24'},
- {name:'Boise State',abbr:'BSU',espnId:'68',conference:'Pac-12',color:'#0033a0'},
- {name:'Colorado State',abbr:'CSU',espnId:'36',conference:'Pac-12',color:'#1e4d2b'},
- {name:'Fresno State',abbr:'FRES',espnId:'278',conference:'Pac-12',color:'#db0032'},
- {name:'Oregon State',abbr:'ORST',espnId:'204',conference:'Pac-12',color:'#dc4405'},
- {name:'San Diego State',abbr:'SDSU',espnId:'21',conference:'Pac-12',color:'#a6192e'},
- {name:'Texas State',abbr:'TXST',espnId:'326',conference:'Pac-12',color:'#501214'},
- {name:'Utah State',abbr:'USU',espnId:'328',conference:'Pac-12',color:'#0f2439'},
- {name:'Washington State',abbr:'WSU',espnId:'265',conference:'Pac-12',color:'#981e32'},
- {name:'App State',abbr:'APP',espnId:'2026',conference:'Sun Belt',color:'#000000'},
- {name:'Arkansas State',abbr:'ARST',espnId:'2032',conference:'Sun Belt',color:'#cc092f'},
- {name:'Coastal Carolina',abbr:'CCU',espnId:'324',conference:'Sun Belt',color:'#006f71'},
- {name:'Georgia Southern',abbr:'GASO',espnId:'290',conference:'Sun Belt',color:'#041e42'},
- {name:'Georgia State',abbr:'GAST',espnId:'2247',conference:'Sun Belt',color:'#0039a6'},
- {name:'James Madison',abbr:'JMU',espnId:'256',conference:'Sun Belt',color:'#450084'},
- {name:'Louisiana',abbr:'ULL',espnId:'309',conference:'Sun Belt',color:'#ce181e'},
- {name:'Marshall',abbr:'MRSH',espnId:'276',conference:'Sun Belt',color:'#00b140'},
- {name:'Old Dominion',abbr:'ODU',espnId:'295',conference:'Sun Belt',color:'#003057'},
- {name:'South Alabama',abbr:'USA',espnId:'6',conference:'Sun Belt',color:'#002b5c'},
- {name:'Southern Miss',abbr:'USM',espnId:'2572',conference:'Sun Belt',color:'#ffc72c'},
- {name:'Troy',abbr:'TROY',espnId:'2653',conference:'Sun Belt',color:'#8a0203'},
- {name:'UL Monroe',abbr:'ULM',espnId:'2433',conference:'Sun Belt',color:'#8b2331'},
- {name:'UConn',abbr:'CONN',espnId:'41',conference:'Independent',color:'#000e2f'}
+ {rank:1,name:'Ohio State',abbr:'OSU',espnId:'194',record:'0–0',prev:1,points:1672,pf:'—',pa:'—',ypg:'—',color:'#ba0c2f'},
+ {rank:2,name:'Oregon',abbr:'ORE',espnId:'2483',record:'0–0',prev:2,points:1597,pf:'—',pa:'—',ypg:'—',color:'#154733'},
+ {rank:3,name:'Georgia',abbr:'UGA',espnId:'61',record:'0–0',prev:3,points:1513,pf:'—',pa:'—',ypg:'—',color:'#ba0c2f'},
+ {rank:4,name:'Notre Dame',abbr:'ND',espnId:'87',record:'0–0',prev:4,points:1510,pf:'—',pa:'—',ypg:'—',color:'#0c2340'},
+ {rank:5,name:'Texas',abbr:'TEX',espnId:'251',record:'0–0',prev:5,points:1483,pf:'—',pa:'—',ypg:'—',color:'#bf5700'},
+ {rank:6,name:'Indiana',abbr:'IND',espnId:'84',record:'0–0',prev:6,points:1440,pf:'—',pa:'—',ypg:'—',color:'#990000'},
+ {rank:7,name:'Miami',abbr:'MIA',espnId:'2390',record:'0–0',prev:7,points:1379,pf:'—',pa:'—',ypg:'—',color:'#f47321'},
+ {rank:8,name:'Texas A&M',abbr:'TAMU',espnId:'245',record:'0–0',prev:8,points:1131,pf:'—',pa:'—',ypg:'—',color:'#500000'},
+ {rank:9,name:'Ole Miss',abbr:'MISS',espnId:'145',record:'0–0',prev:9,points:1102,pf:'—',pa:'—',ypg:'—',color:'#ce1126'},
+ {rank:10,name:'Oklahoma',abbr:'OU',espnId:'201',record:'0–0',prev:10,points:1047,pf:'—',pa:'—',ypg:'—',color:'#841617'},
+ {rank:11,name:'LSU',abbr:'LSU',espnId:'99',record:'0–0',prev:11,points:988,pf:'—',pa:'—',ypg:'—',color:'#461d7c'},
+ {rank:12,name:'Texas Tech',abbr:'TTU',espnId:'2641',record:'0–0',prev:12,points:983,pf:'—',pa:'—',ypg:'—',color:'#cc0000'},
+ {rank:13,name:'Alabama',abbr:'ALA',espnId:'333',record:'0–0',prev:13,points:904,pf:'—',pa:'—',ypg:'—',color:'#9e1b32'},
+ {rank:14,name:'BYU',abbr:'BYU',espnId:'252',record:'0–0',prev:14,points:839,pf:'—',pa:'—',ypg:'—',color:'#002e5d'},
+ {rank:15,name:'USC',abbr:'USC',espnId:'30',record:'0–0',prev:15,points:839,pf:'—',pa:'—',ypg:'—',color:'#990000'},
+ {rank:16,name:'Michigan',abbr:'MICH',espnId:'130',record:'0–0',prev:16,points:718,pf:'—',pa:'—',ypg:'—',color:'#00274c'},
+ {rank:17,name:'Washington',abbr:'WASH',espnId:'264',record:'0–0',prev:17,points:501,pf:'—',pa:'—',ypg:'—',color:'#4b2e83'},
+ {rank:18,name:'Penn State',abbr:'PSU',espnId:'213',record:'0–0',prev:18,points:482,pf:'—',pa:'—',ypg:'—',color:'#041e42'},
+ {rank:19,name:'SMU',abbr:'SMU',espnId:'2567',record:'0–0',prev:19,points:434,pf:'—',pa:'—',ypg:'—',color:'#c8102e'},
+ {rank:20,name:'Tennessee',abbr:'TENN',espnId:'2633',record:'0–0',prev:20,points:394,pf:'—',pa:'—',ypg:'—',color:'#ff8200'},
+ {rank:21,name:'Utah',abbr:'UTAH',espnId:'254',record:'0–0',prev:21,points:304,pf:'—',pa:'—',ypg:'—',color:'#cc0000'},
+ {rank:22,name:'Iowa',abbr:'IOWA',espnId:'2294',record:'0–0',prev:22,points:260,pf:'—',pa:'—',ypg:'—',color:'#000000'},
+ {rank:23,name:'Houston',abbr:'HOU',espnId:'248',record:'0–0',prev:23,points:252,pf:'—',pa:'—',ypg:'—',color:'#c8102e'},
+ {rank:24,name:'Louisville',abbr:'LOU',espnId:'97',record:'0–0',prev:24,points:194,pf:'—',pa:'—',ypg:'—',color:'#ad0000'},
+ {rank:25,name:'Missouri',abbr:'MIZ',espnId:'142',record:'0–0',prev:25,points:117,pf:'—',pa:'—',ypg:'—',color:'#000000'}
 ];
 const stories=[
  ['Poll leader delivers','No. 1 Ohio State rolls past Ball State, 56-3, ahead of a Sept. 12 showdown with Texas'],
@@ -323,9 +199,6 @@ const playerStats=[
 
 const rankedIds=new Set(teams.map(team=>team.espnId));
 const conferenceOrder=['ACC','Big Ten','Big 12','SEC','Independent'];
-// Order for the "All Teams" tab, which spans every FBS conference rather than just the five
-// the AP Top 25 currently touches.
-const fbsConferenceOrder=['ACC','Big Ten','Big 12','SEC','American','Conference USA','MAC','Mountain West','Pac-12','Sun Belt','Independent'];
 const conferenceById={'2390':'ACC','2567':'ACC','97':'ACC','194':'Big Ten','2483':'Big Ten','84':'Big Ten','30':'Big Ten','130':'Big Ten','264':'Big Ten','213':'Big Ten','2294':'Big Ten','2641':'Big 12','252':'Big 12','254':'Big 12','248':'Big 12','61':'SEC','251':'SEC','245':'SEC','145':'SEC','201':'SEC','99':'SEC','333':'SEC','2633':'SEC','142':'SEC','87':'Independent'};
 const conferenceOf=(team)=>conferenceById[team.espnId]??'Independent';
 const normalizeGame=(event)=>{
@@ -349,7 +222,7 @@ const normalizeScheduleGame=(event,team)=>{
 function readStoredSection(){
  try{
   const saved=sessionStorage.getItem('top25-section');
-  return ['Overview','Rankings','Standings','Scores','Playoffs','All Teams'].includes(saved)?saved:'Overview';
+  return ['Overview','Rankings','Standings','Scores','Playoffs'].includes(saved)?saved:'Overview';
  }catch(e){return 'Overview'}
 }
 function storeSection(section){
@@ -547,7 +420,7 @@ function navigate(destination){
 }
 
 function renderTopbar(){
- const sections=['Overview','Rankings','Standings','Scores','Playoffs','All Teams'];
+ const sections=['Overview','Rankings','Standings','Scores','Playoffs'];
  return `<header class="topbar">
  <a class="brand" href="#top" data-nav="Overview"><span class="brand-mark">25</span><span>SATURDAY<br><b>TOP 25</b></span></a>
  <nav aria-label="Dashboard sections">${sections.map(item=>`<button class="${state.section===item?'active':''}" ${state.section===item?'aria-current="page"':''} data-nav="${item}">${item}</button>`).join('')}</nav>
@@ -570,7 +443,7 @@ function scoreRowSituation(game){
 function scoreRowTeam(game,team){
  const sit=game.situation;
  const hasBall=game.state==='in'&&sit&&String(sit.possession)===String(team.id);
- return `<div class="sr-team${rankedIds.has(team.id)?' ranked':''}">${team.logo?`<img class="espn-logo sr-logo" src="${esc(team.logo)}" alt="">`:'<span class="sr-logo sr-logo-fallback"></span>'}${team.rank?`<b class="sr-rank">${team.rank}</b>`:''}<span class="sr-name">${esc(team.name)}</span>${team.record?`<span class="sr-record">${esc(team.record)}</span>`:''}<span class="poss-slot">${hasBall?'<span class="poss-icon" title="Has the ball">&#127944;</span>':''}</span><strong class="sr-score">${game.state==='pre'?'':esc(team.score)}</strong></div>`;
+ return `<div class="sr-team${rankedIds.has(team.id)?' ranked':''}">${team.logo?`<img class="espn-logo sr-logo" src="${esc(team.logo)}" alt="">`:'<span class="sr-logo sr-logo-fallback"></span>'}${team.rank?`<b class="sr-rank">${team.rank}</b>`:''}<span class="sr-name">${esc(team.name)}</span>${game.state==='pre'&&team.record?`<span class="sr-record">${esc(team.record)}</span>`:''}${hasBall?'<span class="poss-icon" title="Has the ball">&#127944;</span>':''}<strong class="sr-score">${game.state==='pre'?'':esc(team.score)}</strong></div>`;
 }
 function renderScoreStrip(){
  const games=visibleGames();
@@ -589,7 +462,7 @@ function renderScoreStrip(){
  return `<section class="score-strip anchor" id="scores" aria-label="Top 25 scoreboard">${rows}${orphanLiveCenter}</section>`;
 }
 function renderHero(){
- return `<section class="hero"><div><p class="eyebrow">2026 AP TOP 25 POLL · SEPTEMBER 8</p><h1>The pulse of the<br><em>Top 25.</em></h1><p class="lede">The complete AP Top 25, poll points and team snapshots—all in one Saturday dashboard.</p></div></section>`;
+ return `<section class="hero"><div><p class="eyebrow">2026 AP PRESEASON POLL · AUGUST 17</p><h1>The pulse of the<br><em>Top 25.</em></h1><p class="lede">The complete AP Top 25, poll points and team snapshots—all in one Saturday dashboard.</p></div></section>`;
 }
 function renderLiveCenter(){
  if(!state.selectedGameId&&!state.detailsLoading)return '';
@@ -741,7 +614,7 @@ function renderRankingsList(){
  const records=currentRecords();
  const rows=filtered.map(t=>rankingRow(t,records)).join('');
  return `<article class="rankings panel" id="rankings">
-  <div class="panel-title"><div><p class="eyebrow">AP TOP 25 POLL · ALL 25 TEAMS</p><h2>Rankings</h2></div><button data-nav="Scores">Season status ↑</button></div>
+  <div class="panel-title"><div><p class="eyebrow">AP PRESEASON POLL · ALL 25 TEAMS</p><h2>Rankings</h2></div><button data-nav="Scores">Season status ↑</button></div>
   <div class="table-head"><span>RK</span><span>TEAM</span><span>REC</span><span>PTS</span><span>SCHEDULE</span></div>
   ${rows}
  </article>`;
@@ -755,34 +628,9 @@ function renderStandingsList(){
   return rankingRow(t,records,confHeading);
  }).join('');
  return `<article class="rankings panel" id="standings-list">
-  <div class="panel-title"><div><p class="eyebrow">AP TOP 25 POLL · BY CONFERENCE</p><h2>Standings</h2></div></div>
+  <div class="panel-title"><div><p class="eyebrow">AP PRESEASON POLL · BY CONFERENCE</p><h2>Standings</h2></div></div>
   <div class="table-head"><span>RK</span><span>TEAM</span><span>REC</span><span>PTS</span><span>SCHEDULE</span></div>
   ${rows}
- </article>`;
-}
-// All Teams tab: every FBS team that isn't already in the Top 25 above, grouped by conference.
-// No rank/points/schedule columns here -- these teams aren't part of the poll, so there's nothing
-// to rank them by. Records come from the same weekly whole-FBS scoreboard fetch (loadWeek) that
-// already powers currentRecords() for the ranked tabs, so they fill in live once that loads.
-function fbsTeamRow(t,records,confHeading){
- return `<div class="team-entry">${confHeading||''}
-  <div class="fbs-row">
-   <span class="team-name"><i class="team-logo" style="background:${t.color}"><span>${esc(t.abbr)}</span><img class="espn-logo" src="https://a.espncdn.com/i/teamlogos/ncaa/500/${t.espnId}.png" alt="${esc(t.name)} logo"></i><span><strong>${esc(t.name)}</strong><small>${esc(t.abbr)}</small></span></span>
-   <span class="team-record">${esc(records[t.espnId]??'—')}</span>
-  </div>
- </div>`;
-}
-function renderAllTeamsList(){
- const filtered=otherFbsTeams.filter(t=>t.name.toLowerCase().includes(state.query.toLowerCase())).sort((a,b)=>fbsConferenceOrder.indexOf(a.conference)-fbsConferenceOrder.indexOf(b.conference)||a.name.localeCompare(b.name));
- const records=currentRecords();
- const rows=filtered.map((t,i)=>{
-  const confHeading=(i===0||filtered[i-1].conference!==t.conference)?`<div class="conference-heading">${esc(t.conference)}</div>`:'';
-  return fbsTeamRow(t,records,confHeading);
- }).join('');
- return `<article class="rankings panel" id="all-teams-list">
-  <div class="panel-title"><div><p class="eyebrow">FULL FBS FIELD · ${otherFbsTeams.length} MORE TEAMS</p><h2>All Teams</h2></div></div>
-  <div class="fbs-head"><span>TEAM</span><span>REC</span></div>
-  ${rows||'<p class="schedule-message" style="color:#68756e;padding:20px 18px">No teams match that search.</p>'}
  </article>`;
 }
 function renderNews(){
@@ -848,7 +696,7 @@ function renderPlayoffs(){
  </section>`;
 }
 function renderFooter(){
- return `<footer><span>TOP 25</span><p>2026 AP Top 25 rankings · Poll released September 8, 2026</p><small>Built for My Life Master App</small></footer>`;
+ return `<footer><span>TOP 25</span><p>2026 AP preseason rankings · Poll released August 17, 2026</p><small>Built for My Life Master App</small></footer>`;
 }
 // Each tab renders its own self-contained page -- nothing from another tab (in particular,
 // no score content) ever appears alongside it.
@@ -867,11 +715,8 @@ function renderScoresPage(){
 function renderPlayoffsPage(){
  return `<div class="page">${renderPlayoffs()}${renderFooter()}</div>`;
 }
-function renderAllTeamsPage(){
- return `<div class="page">${renderAllTeamsList()}${renderFooter()}</div>`;
-}
 function render(){
- const pages={Overview:renderOverviewPage,Rankings:renderRankingsPage,Standings:renderStandingsPage,Scores:renderScoresPage,Playoffs:renderPlayoffsPage,'All Teams':renderAllTeamsPage};
+ const pages={Overview:renderOverviewPage,Rankings:renderRankingsPage,Standings:renderStandingsPage,Scores:renderScoresPage,Playoffs:renderPlayoffsPage};
  const page=pages[state.section]||renderOverviewPage;
  document.getElementById('app').innerHTML=`
   ${renderTopbar()}

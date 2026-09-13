@@ -1,0 +1,3123 @@
+{
+  "app": "Michael & Cynthia's Money",
+  "version": 1,
+  "exportedAt": "2026-09-07T20:00:00.000Z",
+  "data": {
+    "goals": [
+      {
+        "id": "5op2zlhv198k",
+        "icon": "\ud83c\udfaf",
+        "name": "Rebuild HYSA",
+        "color": "#4f46e5",
+        "target": 8000,
+        "current": 6000,
+        "deadline": "2026-12-31"
+      }
+    ],
+    "rules": [
+      {
+        "id": "4hgwb7y8399p",
+        "keyword": "Starbucks",
+        "category": "Dining & Coffee"
+      }
+    ],
+    "budgets": {
+      "Pets": 150,
+      "Books": 60,
+      "Personal Support": 3500
+    },
+    "accounts": [
+      {
+        "id": "acc_cindy_cc",
+        "name": "Cindy's Credit Card",
+        "type": "credit",
+        "balance": -1022.84,
+        "institution": "ICCU",
+        "openingBalance": 178.23
+      },
+      {
+        "id": "acc_cindy_chk",
+        "name": "Cindy's Checking",
+        "type": "checking",
+        "balance": 241.66,
+        "institution": "ICCU",
+        "openingBalance": 321.66
+      },
+      {
+        "id": "acc_mike_chk",
+        "name": "Mike's Checking",
+        "type": "checking",
+        "balance": 2261.24,
+        "institution": "ICCU",
+        "openingBalance": 2681.47
+      },
+      {
+        "id": "acc_household_savings",
+        "name": "Household Savings",
+        "type": "savings",
+        "balance": 50.18,
+        "institution": "ICCU",
+        "openingBalance": 50.18
+      },
+      {
+        "id": "acc_household_hysa",
+        "name": "Household HYSA",
+        "type": "savings",
+        "balance": 4400.0,
+        "institution": "ICCU",
+        "openingBalance": 4416.96
+      },
+      {
+        "id": "3u95nau78wlq",
+        "apr": null,
+        "name": "Sequence of Returns Risk (T-Bills)",
+        "type": "investment",
+        "balance": 451.47,
+        "institution": "M1 Finance"
+      },
+      {
+        "id": "b8g25sws9wow",
+        "apr": null,
+        "name": "All Things Bucket",
+        "type": "investment",
+        "balance": 11878.56,
+        "institution": "M1 Finance "
+      },
+      {
+        "id": "x409tyhjddsp",
+        "apr": null,
+        "name": "Traditional TSP ",
+        "type": "investment",
+        "balance": 101637.01,
+        "institution": "Thrift Savings Plan "
+      },
+      {
+        "id": "pzjr7582edzs",
+        "apr": null,
+        "name": "Roth TSP",
+        "type": "investment",
+        "balance": 82129.8,
+        "institution": "Thrift Savings Plan "
+      },
+      {
+        "id": "acc_discover_cc",
+        "apr": null,
+        "name": "Discovercard",
+        "type": "credit",
+        "balance": 0,
+        "institution": "Discover",
+        "openingBalance": 0
+      },
+      {
+        "id": "wl8st7td15zy",
+        "apr": 5.1,
+        "name": "Car Loan",
+        "type": "loan",
+        "balance": 14028.2,
+        "institution": "ICCU"
+      }
+    ],
+    "auditLog": [
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:25:45.610Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:25:46.463Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:29:01.635Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:29:01.636Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:29:01.636Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:29:01.636Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:29:01.637Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:29:01.637Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:29:01.637Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:29:01.637Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:29:01.638Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:29:01.638Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:29:01.638Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:29:01.638Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:29:42.494Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:29:43.096Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:29:43.255Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:29:43.629Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:29:43.995Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:29:44.536Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:29:44.864Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:29:45.893Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:29:46.232Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:29:46.791Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:29:47.267Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:29:47.617Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:29:47.909Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:29:48.214Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:29:48.582Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:29:48.731Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:29:49.164Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:29:49.489Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:29:51.852Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:31:12.764Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:31:12.765Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:33:10.648Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:33:15.896Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:33:16.368Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:33:22.192Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:34:04.114Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:34:07.242Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:34:13.315Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:34:16.518Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:34:19.148Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:35:01.294Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:36:41.660Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:36:41.661Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:37:10.235Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:37:10.236Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:37:29.860Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:37:29.861Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:37:48.663Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:52:38.932Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:52:38.960Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:53:07.306Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:53:07.703Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:53:07.751Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:53:07.802Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:53:07.853Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:53:07.905Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:53:07.955Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:53:08.006Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:53:08.061Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:53:08.111Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:53:08.171Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:53:08.279Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:53:08.379Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:53:08.483Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:53:08.586Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:53:08.694Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:53:11.691Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:53:11.856Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:53:13.055Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:53:15.512Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:53:15.655Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:53:16.529Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:53:17.056Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:53:20.471Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:53:20.595Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:53:22.063Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:53:23.041Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:53:25.416Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:53:25.563Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:53:26.849Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:53:27.465Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:53:36.584Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:53:37.677Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:53:39.769Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T18:53:41.608Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T20:46:11.802Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T20:46:11.912Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T20:57:28.684Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T20:57:28.812Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T21:11:06.733Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T21:11:06.734Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T21:11:28.969Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-16T21:11:28.969Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-17T00:28:08.145Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-08-17T00:28:08.243Z"
+      },
+      {
+        "label": "Budget data updated",
+        "at": "2026-09-07T18:13:00.612Z"
+      }
+    ],
+    "paidBills": {
+      "2026-07": {
+        "sub_boldin": true,
+        "sub_costco": true,
+        "o723rcvqistj": true,
+        "sub_siriusxm": true,
+        "sub_youtube_premium": true,
+        "cand_ring_protect_plan": true,
+        "sub_planet_fitness_real": true
+      },
+      "2026-08": {
+        "o723rcvqistj": true
+      }
+    },
+    "watchlists": [
+      {
+        "id": "dphm0h85zurx",
+        "type": "merchant",
+        "query": "Starbucks",
+        "target": 75
+      }
+    ],
+    "budgetPlans": {},
+    "investments": [
+      {
+        "id": "d0iw3wmr8v8i",
+        "name": "Traditional TSP",
+        "category": "US Stocks",
+        "value": 106161.42
+      },
+      {
+        "id": "0lqkoltx8v8i",
+        "name": "Roth TSP",
+        "category": "US Stocks",
+        "value": 85751.58
+      },
+      {
+        "id": "fbzp5k398v8i",
+        "name": "SCHD",
+        "category": "US Stocks",
+        "value": 6364.09
+      },
+      {
+        "id": "tuksv1bk8v8i",
+        "name": "QQQM",
+        "category": "US Stocks",
+        "value": 5522.73
+      },
+      {
+        "id": "xutpsla28v8i",
+        "name": "IBIT",
+        "category": "US Stocks",
+        "value": 785.26
+      },
+      {
+        "id": "i9cb93bz8v8i",
+        "name": "SGOV",
+        "category": "Bonds",
+        "value": 926.19
+      }
+    ],
+    "privacyPrefs": {
+      "viewer": "Household",
+      "hideBalances": false
+    },
+    "sectionNotes": {
+      "ai": "",
+      "budgets": "",
+      "accounts": "",
+      "settings": "",
+      "dashboard": "",
+      "transactions": "1. Amazon: $21.20: Blue Cup \ud83e\udd64 \n2. Amazon: $42.40 Bowl \ud83e\udd63 \n3. Amazon: $29.68: Food Jar \ud83e\uded9 \n4. Best Buy: 249.08\n5. Ulta: $23.42\n6. Target: $25.31",
+      "subscriptions": "Upload credit card transactions."
+    },
+    "sinkingFunds": [],
+    "transactions": [
+      {
+        "id": "13jr620a1mmf",
+        "date": "2026-09-07",
+        "accountId": "acc_cindy_cc",
+        "merchant": "Jitterz Espresso",
+        "category": "Dining & Coffee",
+        "amount": -25.8,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "60niqkw3ffyw",
+        "date": "2026-09-07",
+        "accountId": "acc_cindy_cc",
+        "merchant": "Sierra",
+        "category": "Shopping",
+        "amount": -52.98,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "55efc043jhi9",
+        "date": "2026-09-07",
+        "accountId": "acc_cindy_cc",
+        "merchant": "Safeway (Hayden)",
+        "category": "Groceries",
+        "amount": -15.62,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "8zsir0go6bqa",
+        "date": "2026-09-07",
+        "accountId": "acc_cindy_cc",
+        "merchant": "Fisherman's Market & Grill",
+        "category": "Dining & Coffee",
+        "amount": -85.92,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "ue166x9ggfm8",
+        "date": "2026-09-07",
+        "accountId": "acc_cindy_cc",
+        "merchant": "Amazon Marketplace",
+        "category": "Shopping",
+        "amount": -9.0,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "d2ax82pg34ns",
+        "date": "2026-09-07",
+        "accountId": "acc_cindy_cc",
+        "merchant": "TJ Maxx",
+        "category": "Shopping",
+        "amount": -31.78,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "4kdwbsjbrj3r",
+        "date": "2026-09-07",
+        "accountId": "acc_cindy_cc",
+        "merchant": "Amazon Marketplace",
+        "category": "Shopping",
+        "amount": -34.97,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "hejgwlgjgz5l",
+        "date": "2026-09-07",
+        "accountId": "acc_cindy_cc",
+        "merchant": "Starbucks",
+        "category": "Dining & Coffee",
+        "amount": -25.0,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "nuap4uzf642n",
+        "date": "2026-09-07",
+        "accountId": "acc_cindy_cc",
+        "merchant": "Starbucks",
+        "category": "Dining & Coffee",
+        "amount": -15.0,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "mrf19hn8qnda",
+        "date": "2026-09-07",
+        "accountId": "acc_cindy_cc",
+        "merchant": "Maverik",
+        "category": "Transportation",
+        "amount": -69.01,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "1ts5a285gwqw",
+        "date": "2026-09-07",
+        "accountId": "acc_cindy_cc",
+        "merchant": "Ulta",
+        "category": "Personal Care",
+        "amount": -43.96,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "p5yhr8r07b1p",
+        "date": "2026-09-06",
+        "accountId": "acc_cindy_cc",
+        "merchant": "CDA Pet Market (Dalton Gardens)",
+        "category": "Pets",
+        "amount": -22.25,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "zjenkjy7zhp7",
+        "date": "2026-09-06",
+        "accountId": "acc_cindy_cc",
+        "merchant": "Amazon Marketplace",
+        "category": "Shopping",
+        "amount": -69.68,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "d6icpxb1ou2u",
+        "date": "2026-09-06",
+        "accountId": "acc_cindy_cc",
+        "merchant": "Starbucks",
+        "category": "Dining & Coffee",
+        "amount": -20.0,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "yogq7chrjhbt",
+        "date": "2026-09-06",
+        "accountId": "acc_cindy_cc",
+        "merchant": "North 40 Outfitters",
+        "category": "Shopping",
+        "amount": -90.5,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "9y43umiyraum",
+        "date": "2026-09-06",
+        "accountId": "acc_cindy_cc",
+        "merchant": "Amazon Marketplace",
+        "category": "Shopping",
+        "amount": -28.61,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "g8ik96b57dvf",
+        "date": "2026-09-06",
+        "accountId": "acc_cindy_chk",
+        "merchant": "Venmo (Leah)",
+        "category": "Transfer",
+        "amount": -50.0,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "64jhblc92jyi",
+        "date": "2026-09-05",
+        "accountId": "acc_cindy_cc",
+        "merchant": "Amazon",
+        "category": "Shopping",
+        "amount": -31.8,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "7tm82ilbfa3s",
+        "date": "2026-09-05",
+        "accountId": "acc_cindy_cc",
+        "merchant": "Super 1 Foods",
+        "category": "Groceries",
+        "amount": -36.42,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "lay2899jd28w",
+        "date": "2026-09-05",
+        "accountId": "acc_cindy_cc",
+        "merchant": "CDA Pet Market (Dalton Gardens)",
+        "category": "Pets",
+        "amount": -43.42,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "qs5vpc07vur1",
+        "date": "2026-09-05",
+        "accountId": "acc_cindy_cc",
+        "merchant": "Sierra Trading Post",
+        "category": "Shopping",
+        "amount": -16.94,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "zmgbywnu9tq9",
+        "date": "2026-09-05",
+        "accountId": "acc_cindy_chk",
+        "merchant": "Venmo (Leah)",
+        "category": "Transfer",
+        "amount": -30.0,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "m4p7ub1rpqru",
+        "date": "2026-09-04",
+        "accountId": "acc_cindy_cc",
+        "merchant": "Amazon",
+        "category": "Shopping",
+        "amount": -24.65,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "y9mnq1mxsyhx",
+        "date": "2026-09-04",
+        "accountId": "acc_cindy_cc",
+        "merchant": "Walmart",
+        "category": "Groceries",
+        "amount": -37.97,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "6zj3g4oh8kbn",
+        "date": "2026-09-04",
+        "accountId": "acc_cindy_cc",
+        "merchant": "Amazon",
+        "category": "Shopping",
+        "amount": -19.08,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "dpsvd9c9kl1y",
+        "date": "2026-09-04",
+        "accountId": "acc_cindy_cc",
+        "merchant": "Target",
+        "category": "Shopping",
+        "amount": -25.96,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "cr7krchhllte",
+        "date": "2026-09-04",
+        "accountId": "acc_cindy_cc",
+        "merchant": "Amazon Marketplace",
+        "category": "Shopping",
+        "amount": -34.97,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "e89v7gff31yl",
+        "date": "2026-09-04",
+        "accountId": "acc_mike_chk",
+        "merchant": "Idaho Power",
+        "category": "Utilities",
+        "amount": -183.54,
+        "person": "Michael",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "9qc3rxgff4mb",
+        "date": "2026-09-03",
+        "accountId": "acc_cindy_cc",
+        "merchant": "Vintage Stock",
+        "category": "Entertainment",
+        "amount": -30.73,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "ad9whzlsl7ck",
+        "date": "2026-09-03",
+        "accountId": "acc_cindy_cc",
+        "merchant": "Amazon Marketplace",
+        "category": "Shopping",
+        "amount": -10.59,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "vjm4jpanuemv",
+        "date": "2026-09-03",
+        "accountId": "acc_cindy_cc",
+        "merchant": "Wendy's",
+        "category": "Dining & Coffee",
+        "amount": -14.82,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "jprag636t95n",
+        "date": "2026-09-03",
+        "accountId": "acc_cindy_cc",
+        "merchant": "Ace Hardware",
+        "category": "Housing",
+        "amount": -6.35,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "gd59kzw4b73x",
+        "date": "2026-09-03",
+        "accountId": "acc_cindy_cc",
+        "merchant": "Jersey Mike's Subs",
+        "category": "Dining & Coffee",
+        "amount": -36.86,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "23zclnitki7w",
+        "date": "2026-09-03",
+        "accountId": "acc_cindy_cc",
+        "merchant": "Amazon",
+        "category": "Shopping",
+        "amount": -22.09,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "rww9p0fg2r0y",
+        "date": "2026-09-03",
+        "accountId": "acc_cindy_cc",
+        "merchant": "Walmart",
+        "category": "Groceries",
+        "amount": -41.33,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "gfpf70rcy5s1",
+        "date": "2026-09-03",
+        "accountId": "acc_cindy_cc",
+        "merchant": "Joe Coffee - Cornerstone",
+        "category": "Dining & Coffee",
+        "amount": -19.76,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "9acy3kouq890",
+        "date": "2026-09-03",
+        "accountId": "acc_mike_chk",
+        "merchant": "Transfer from Household HYSA",
+        "category": "Transfer",
+        "amount": 16.96,
+        "person": "Michael",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "id852vpk1js5",
+        "date": "2026-09-03",
+        "accountId": "acc_mike_chk",
+        "merchant": "State Farm",
+        "category": "Insurance",
+        "amount": -56.01,
+        "person": "Michael",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "jfwjfl57trci",
+        "date": "2026-09-03",
+        "accountId": "acc_mike_chk",
+        "merchant": "State Farm",
+        "category": "Insurance",
+        "amount": -67.64,
+        "person": "Michael",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "7tr8li0dsujp",
+        "date": "2026-09-03",
+        "accountId": "acc_household_hysa",
+        "merchant": "Transfer to Mike's Checking",
+        "category": "Transfer",
+        "amount": -16.96,
+        "person": "Joint",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "p180hajmsnmx",
+        "date": "2026-09-02",
+        "accountId": "acc_cindy_cc",
+        "merchant": "Blondies Way Coffee (Boise)",
+        "category": "Dining & Coffee",
+        "amount": -16.55,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "76o2wij3eif6",
+        "date": "2026-09-01",
+        "accountId": "acc_cindy_cc",
+        "merchant": "Northwest Pets (Meridian)",
+        "category": "Pets",
+        "amount": -12.7,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "23uanz80ecad",
+        "date": "2026-09-01",
+        "accountId": "acc_cindy_cc",
+        "merchant": "Maverik",
+        "category": "Transportation",
+        "amount": -68.0,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "nbjvuhm9hbrd",
+        "date": "2026-09-01",
+        "accountId": "acc_cindy_cc",
+        "merchant": "Starbucks",
+        "category": "Dining & Coffee",
+        "amount": -10.0,
+        "person": "Cynthia",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "lxinsrev81tq",
+        "date": "2026-09-01",
+        "accountId": "acc_mike_chk",
+        "merchant": "M1 Finance",
+        "category": "Investing",
+        "amount": -25.0,
+        "person": "Michael",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "i6um0omu2cka",
+        "date": "2026-09-01",
+        "accountId": "acc_mike_chk",
+        "merchant": "Lumen Technologies",
+        "category": "Utilities",
+        "amount": -105.0,
+        "person": "Michael",
+        "notes": "",
+        "cleared": true,
+        "receipt": null,
+        "needsReview": false
+      },
+      {
+        "id": "yt9nnqzyrb9u",
+        "date": "2026-07-17",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -21.23,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Planet Fitness",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "wbkblc0urb9u",
+        "date": "2026-07-16",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": 58.22,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Transfer",
+        "merchant": "Discover Payment",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "r21ez6derb9u",
+        "date": "2026-07-16",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -9.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Ring Protect Plan",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "z79n2hp0rb9u",
+        "date": "2026-07-12",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -10,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Anthropic API",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "76izv9f3rb9u",
+        "date": "2026-07-07",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -191.93,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "SiriusXM",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "aj3vrhserb9u",
+        "date": "2026-07-01",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -26.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "YouTube Premium",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "nhaphec0rb9u",
+        "date": "2026-06-30",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": 254,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Transfer",
+        "merchant": "Discover Payment",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "tlu70tbjrb9u",
+        "date": "2026-06-25",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -191.16,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Anthropic Claude Subscription",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "2n1bubkfrb9u",
+        "date": "2026-06-23",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": 70.2,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Transfer",
+        "merchant": "Discover Payment",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "ddk3hkczrb9u",
+        "date": "2026-06-16",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -9.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Ring Protect Plan",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "b238i1c3rb9u",
+        "date": "2026-06-12",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -9,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Netlify",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "i1fesrgfrb9u",
+        "date": "2026-06-11",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -19.08,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Audible",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "qcvi38k7rb9u",
+        "date": "2026-06-10",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -5,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Anthropic API",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "nhttei28rb9u",
+        "date": "2026-06-08",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -20,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Anthropic Claude Subscription",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "f1knhwaxrb9u",
+        "date": "2026-06-08",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -4.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "NoteWise AI",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "ufgl6xcerb9u",
+        "date": "2026-06-07",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -10,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Perplexity AI",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "z3wiadddrb9u",
+        "date": "2026-06-06",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -10,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Perplexity AI",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "sx47lwd8rb9u",
+        "date": "2026-06-06",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -20,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Perplexity AI",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "xu15hrovrb9u",
+        "date": "2026-06-02",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -6.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Garmin Connect+",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "58n9cb2wrb9u",
+        "date": "2026-06-01",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -26.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "YouTube Premium",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "w30yiftcrb9u",
+        "date": "2026-05-28",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": 11.05,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Transfer",
+        "merchant": "Discover Payment",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "56lmz0qmrb9u",
+        "date": "2026-05-28",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": 9,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "FloSports",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "o7pkrglsrb9u",
+        "date": "2026-05-22",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": 34.97,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Transfer",
+        "merchant": "Discover Payment",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "e93jqc8trb9u",
+        "date": "2026-05-17",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -1.06,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Planet Fitness",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "5kwir48krb9u",
+        "date": "2026-05-16",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -9.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Ring Protect Plan",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "ks6neki9rb9u",
+        "date": "2026-05-08",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -4.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "NoteWise AI",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "86a80r5zrb9u",
+        "date": "2026-05-02",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -6.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Garmin Connect+",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "oy6mpdnhrb9u",
+        "date": "2026-05-01",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -22.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "YouTube Premium",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "u46jc0s4rb9u",
+        "date": "2026-04-22",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": 18.98,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Transfer",
+        "merchant": "Discover Payment",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "ftzb0l2lrb9u",
+        "date": "2026-04-20",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": 129.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Transfer",
+        "merchant": "Discover Payment",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "qne6le8xrb9u",
+        "date": "2026-04-17",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -8.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Acorn TV",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "2qunuaolrb9u",
+        "date": "2026-04-16",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -9.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Ring Protect Plan",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "onrr0dborb9u",
+        "date": "2026-04-15",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": 33.17,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Transfer",
+        "merchant": "Discover Payment",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "47pu8lqirb9u",
+        "date": "2026-04-15",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -129.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Microsoft 365",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "xd4v40b8rb9u",
+        "date": "2026-04-10",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": 147.34,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Transfer",
+        "merchant": "Discover Payment",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "kb056z4crb9u",
+        "date": "2026-04-08",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -4.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "NoteWise AI",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "0mlmfs3xrb9u",
+        "date": "2026-04-02",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -147.34,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Amazon Prime",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "lcrfjzaqrb9u",
+        "date": "2026-04-02",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -6.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Garmin Connect+",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "hlwve9phrb9u",
+        "date": "2026-04-01",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -22.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "YouTube Premium",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "exjrmkz3rb9u",
+        "date": "2026-03-31",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": 0.9,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Health & Fitness",
+        "merchant": "iFIT",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "sw4cpazirb9u",
+        "date": "2026-03-31",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": 0.9,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Health & Fitness",
+        "merchant": "iFIT",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "lgmlzc83rb9u",
+        "date": "2026-03-25",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": 27.98,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Transfer",
+        "merchant": "Discover Payment",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "xia8lygjrb9u",
+        "date": "2026-03-20",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -17.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Netflix",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "qt5nj27drb9u",
+        "date": "2026-03-16",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -9.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Ring Protect Plan",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "sh68i6qprb9u",
+        "date": "2026-03-12",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": 1.67,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Income",
+        "merchant": "Discover Cashback Bonus",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "or1yi5zyrb9u",
+        "date": "2026-03-12",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": 41.67,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Transfer",
+        "merchant": "Discover Payment",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "2fc23mnerb9u",
+        "date": "2026-03-07",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -13.36,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Audible",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "idgyuemmrb9u",
+        "date": "2026-03-05",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": 18.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Transfer",
+        "merchant": "Discover Payment",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "burruf5qrb9u",
+        "date": "2026-03-02",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -6.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Garmin Connect+",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "zuj8fzyrrb9u",
+        "date": "2026-03-01",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -22.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "YouTube Premium",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "lk8k2c2trb9u",
+        "date": "2026-02-28",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -18.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Udemy",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "n2x6743qrb9u",
+        "date": "2026-02-19",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": 9.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Transfer",
+        "merchant": "Discover Payment",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "25eiy1lerb9u",
+        "date": "2026-02-18",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": 41.48,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Transfer",
+        "merchant": "Discover Payment",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "yse2x69drb9u",
+        "date": "2026-02-16",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -9.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Ring Protect Plan",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "7rsriyyarb9u",
+        "date": "2026-02-10",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -18.49,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "HBO Max",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "os2b61gmrb9u",
+        "date": "2026-02-01",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -22.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "YouTube Premium",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "ychsbm5crb9u",
+        "date": "2026-01-31",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": 55.82,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Transfer",
+        "merchant": "Discover Payment",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "ualq2yyzrb9u",
+        "date": "2026-01-29",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -15.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Udemy",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "mfu3e0merb9u",
+        "date": "2026-01-27",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -15.85,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Audible",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "fe7814jprb9u",
+        "date": "2026-01-25",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -11.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Kindle Unlimited",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "95n1aq1hrb9u",
+        "date": "2026-01-25",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -11.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Kindle Unlimited",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "5do3or4wrb9u",
+        "date": "2026-01-21",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": 49.97,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Transfer",
+        "merchant": "Discover Payment",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "wzjo31f6rb9u",
+        "date": "2026-01-17",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -16.68,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Audible",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "juqtbifarb9u",
+        "date": "2026-01-16",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -9.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Ring Protect Plan",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "axztt1zqrb9u",
+        "date": "2026-01-14",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": 32.9,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Transfer",
+        "merchant": "Discover Payment",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "y0cy2i82rb9u",
+        "date": "2026-01-13",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": 179.82,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Transfer",
+        "merchant": "Discover Payment",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "u42yvbq4rb9u",
+        "date": "2026-01-12",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -5.94,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Audible",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "s81puqzzrb9u",
+        "date": "2026-01-10",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -6.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Word Search World",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "595ec2gbrb9u",
+        "date": "2026-01-10",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -14.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Words of Wonders",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "hinoohwhrb9u",
+        "date": "2026-01-07",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -179.82,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "SiriusXM",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "x85uew1wrb9u",
+        "date": "2026-01-01",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -5.29,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Audible",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "nlng6ay9rb9u",
+        "date": "2026-01-01",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -22.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "YouTube Premium",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "t2i0rd82rb9u",
+        "date": "2025-12-31",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": 14.8,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Transfer",
+        "merchant": "Discover Payment",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "wte8hwhsrb9u",
+        "date": "2025-12-30",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": 26.97,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Transfer",
+        "merchant": "Discover Payment",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "cyekvah7rb9u",
+        "date": "2025-12-28",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -14.8,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Audible",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "uqos4lo4rb9u",
+        "date": "2025-12-28",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -1.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Gear Tracker",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "a3628wznrb9u",
+        "date": "2025-12-25",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -11.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Kindle Unlimited",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "k5rd9sezrb9u",
+        "date": "2025-11-24",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": 4.14,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Income",
+        "merchant": "Discover Cashback Bonus",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "fiew0h11rb9u",
+        "date": "2025-11-24",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -12.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Paramount+",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "pbya6jw8rb9u",
+        "date": "2025-11-24",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": 116.79,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Transfer",
+        "merchant": "Discover Payment",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "s22c25cirb9u",
+        "date": "2025-11-22",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -10.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Frndly TV",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "1avd1c16rb9u",
+        "date": "2025-11-20",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -16.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Peacock",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "rr7h2mtcrb9u",
+        "date": "2025-11-16",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -9.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Ring Protect Plan",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "2b4lky2trb9u",
+        "date": "2025-11-15",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -17.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Netflix",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "31c02zw7rb9u",
+        "date": "2025-11-02",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -39.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "ESPN+",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "ql87unpprb9u",
+        "date": "2025-11-01",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -22.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "YouTube Premium",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "9n2z0h29rb9u",
+        "date": "2025-10-29",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": 1.98,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Transfer",
+        "merchant": "Discover Payment",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "wn2kidlkrb9u",
+        "date": "2025-10-28",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -1.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Gear Tracker",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "ma9j31evrb9u",
+        "date": "2025-10-26",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": 68.95,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Transfer",
+        "merchant": "Discover Payment",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "jtnj857rrb9u",
+        "date": "2025-10-25",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -0.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Kindle Unlimited",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "g0lssc7nrb9u",
+        "date": "2025-10-25",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -0.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Kindle Unlimited",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "uxruvvw4rb9u",
+        "date": "2025-10-24",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -12.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Paramount+",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "3ziyxia0rb9u",
+        "date": "2025-10-22",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -10.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Frndly TV",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "pe6dzc9wrb9u",
+        "date": "2025-10-20",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -16.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Peacock",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "cax7i3ocrb9u",
+        "date": "2025-10-16",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": 369.95,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Transfer",
+        "merchant": "Discover Payment",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "g070ypawrb9u",
+        "date": "2025-10-16",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -9.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Ring Protect Plan",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "jk3ik3ztrb9u",
+        "date": "2025-10-15",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -17.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Netflix",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "smu0x203rb9u",
+        "date": "2025-10-05",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -4.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Komoot",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "qebaj7rtrb9u",
+        "date": "2025-10-02",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -10,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "ESPN+",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "x9mdtyehrb9u",
+        "date": "2025-10-02",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -29.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "ESPN+",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "1qm22qayrb9u",
+        "date": "2025-10-02",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -299.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Experian Credit Report",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "jytshc43rb9u",
+        "date": "2025-10-01",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -22.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "YouTube Premium",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "1qpa79xbrb9u",
+        "date": "2025-09-28",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -1.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Gear Tracker",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "5noufo38rb9u",
+        "date": "2025-09-27",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": 12.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Transfer",
+        "merchant": "Discover Payment",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "ky1lnv32rb9u",
+        "date": "2025-09-24",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -12.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Paramount+",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "0gijirsbrb9u",
+        "date": "2025-09-24",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": 168.31,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Transfer",
+        "merchant": "Discover Payment",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "af9k39dxrb9u",
+        "date": "2025-09-21",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -10.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Frndly TV",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "cj4y28osrb9u",
+        "date": "2025-09-20",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -16.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Peacock",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "e27xube7rb9u",
+        "date": "2025-09-16",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -9.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Ring Protect Plan",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "pha9a5itrb9u",
+        "date": "2025-09-15",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -17.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Netflix",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "zm04x3lkrb9u",
+        "date": "2025-09-10",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -7.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Hallmark Movies Now",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "31w2v6swrb9u",
+        "date": "2025-09-09",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -42.39,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Barnes & Noble Membership",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "w8re74nzrb9u",
+        "date": "2025-09-02",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -29.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "ESPN+",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "g2rcv6oirb9u",
+        "date": "2025-09-02",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -8.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Acorn TV",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "q4lwkiy1rb9u",
+        "date": "2025-09-01",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -22.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "YouTube Premium",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "2m9u90ycrb9u",
+        "date": "2025-08-27",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": 38.92,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Transfer",
+        "merchant": "Discover Payment",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "o8o8ot3srb9u",
+        "date": "2025-08-24",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -12.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "CBS",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "8p4xhqwerb9u",
+        "date": "2025-08-23",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": 65,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Transfer",
+        "merchant": "Discover Payment",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "ehjndzoxrb9u",
+        "date": "2025-08-20",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -13.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Peacock",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "q4iskg64rb9u",
+        "date": "2025-08-16",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -8.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "BritBox",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "zla2ye8mrb9u",
+        "date": "2025-08-16",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -9.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Ring Protect Plan",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "y62npdc7rb9u",
+        "date": "2025-08-15",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -17.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Netflix",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "8gwjw0shrb9u",
+        "date": "2025-08-10",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -7.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Hallmark Movies Now",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "73aecewirb9u",
+        "date": "2025-08-02",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -8.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Acorn TV",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "hnb6cejcrb9u",
+        "date": "2025-08-01",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -22.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "YouTube Premium",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "aqu3g7sgrb9u",
+        "date": "2025-07-30",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": 179.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Transfer",
+        "merchant": "Discover Payment",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "xg9noqs6rb9u",
+        "date": "2025-07-27",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": -179.99,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Subscriptions",
+        "merchant": "Best Buy Total",
+        "accountId": "acc_discover_cc"
+      },
+      {
+        "id": "inww4dh8rb9u",
+        "date": "2025-07-26",
+        "notes": "Imported from Discover statement CSVs (Jul 2025 - Jul 2026)",
+        "amount": 243.77,
+        "person": "Michael",
+        "splits": [],
+        "cleared": true,
+        "category": "Transfer",
+        "merchant": "Discover Payment",
+        "accountId": "acc_discover_cc"
+      }
+    ],
+    "paycheckItems": [],
+    "registerNotes": {
+      "acc_household_hysa": "$10 is unaccounted for."
+    },
+    "subscriptions": [
+      {
+        "id": "cand_ring_protect_plan",
+        "active": true,
+        "amount": 9.99,
+        "person": "Michael",
+        "cadence": "Monthly",
+        "category": "Subscriptions",
+        "merchant": "Ring Protect Plan",
+        "dayOfMonth": 16,
+        "priceHistory": [
+          {
+            "date": "2026-07-16",
+            "amount": 9.99
+          }
+        ]
+      },
+      {
+        "id": "cand_garmin_connect",
+        "active": false,
+        "amount": 6.99,
+        "person": "Michael",
+        "cadence": "Monthly",
+        "category": "Subscriptions",
+        "merchant": "Garmin Connect+",
+        "dayOfMonth": 2,
+        "priceHistory": [
+          {
+            "date": "2026-06-02",
+            "amount": 6.99
+          }
+        ]
+      },
+      {
+        "id": "cand_notewise_ai",
+        "active": false,
+        "amount": 4.99,
+        "person": "Michael",
+        "cadence": "Monthly",
+        "category": "Subscriptions",
+        "merchant": "NoteWise AI",
+        "dayOfMonth": 8,
+        "priceHistory": [
+          {
+            "date": "2026-06-08",
+            "amount": 4.99
+          }
+        ]
+      },
+      {
+        "id": "cand_paramount",
+        "active": false,
+        "amount": 12.99,
+        "person": "Michael",
+        "cadence": "Monthly",
+        "category": "Subscriptions",
+        "merchant": "Paramount+",
+        "dayOfMonth": 24,
+        "priceHistory": [
+          {
+            "date": "2025-11-24",
+            "amount": 12.99
+          }
+        ]
+      },
+      {
+        "id": "cand_frndly_tv",
+        "active": false,
+        "amount": 10.99,
+        "person": "Michael",
+        "cadence": "Monthly",
+        "category": "Subscriptions",
+        "merchant": "Frndly TV",
+        "dayOfMonth": 22,
+        "priceHistory": [
+          {
+            "date": "2025-11-22",
+            "amount": 10.99
+          }
+        ]
+      },
+      {
+        "id": "cand_udemy",
+        "active": false,
+        "amount": 17.49,
+        "person": "Michael",
+        "cadence": "Monthly",
+        "category": "Subscriptions",
+        "merchant": "Udemy",
+        "dayOfMonth": 28,
+        "priceHistory": [
+          {
+            "date": "2026-02-28",
+            "amount": 17.49
+          }
+        ]
+      },
+      {
+        "id": "cand_hallmark_movies_now",
+        "active": false,
+        "amount": 7.99,
+        "person": "Michael",
+        "cadence": "Monthly",
+        "category": "Subscriptions",
+        "merchant": "Hallmark Movies Now",
+        "dayOfMonth": 10,
+        "priceHistory": [
+          {
+            "date": "2025-09-10",
+            "amount": 7.99
+          }
+        ]
+      },
+      {
+        "id": "sub_youtube_premium",
+        "active": true,
+        "amount": 26.99,
+        "person": "Michael",
+        "cadence": "Monthly",
+        "category": "Subscriptions",
+        "merchant": "YouTube Premium",
+        "dayOfMonth": 1,
+        "priceHistory": [
+          {
+            "date": "2025-08-01",
+            "amount": 22.99
+          },
+          {
+            "date": "2026-06-01",
+            "amount": 26.99
+          }
+        ]
+      },
+      {
+        "id": "sub_planet_fitness_real",
+        "active": true,
+        "amount": 21.23,
+        "person": "Michael",
+        "cadence": "Monthly",
+        "category": "Subscriptions",
+        "merchant": "Planet Fitness",
+        "dayOfMonth": 17,
+        "priceHistory": [
+          {
+            "date": "2026-07-17",
+            "amount": 21.23
+          }
+        ]
+      },
+      {
+        "id": "sub_siriusxm",
+        "active": true,
+        "amount": 191.93,
+        "person": "Michael",
+        "cadence": "Semi-Annual",
+        "category": "Subscriptions",
+        "merchant": "SiriusXM",
+        "dayOfMonth": 6,
+        "priceHistory": [
+          {
+            "date": "2026-01-07",
+            "amount": 179.82
+          },
+          {
+            "date": "2026-07-07",
+            "amount": 191.93
+          }
+        ],
+        "billingDates": [
+          {
+            "month": 1,
+            "day": 6
+          },
+          {
+            "month": 7,
+            "day": 7
+          }
+        ]
+      },
+      {
+        "id": "sub_amazon_prime_real",
+        "active": true,
+        "amount": 147.34,
+        "person": "Michael",
+        "cadence": "Annual",
+        "category": "Subscriptions",
+        "merchant": "Amazon Prime",
+        "dayOfMonth": 2,
+        "priceHistory": [
+          {
+            "date": "2026-04-02",
+            "amount": 147.34
+          }
+        ]
+      },
+      {
+        "id": "sub_microsoft_365",
+        "active": true,
+        "amount": 129.99,
+        "person": "Michael",
+        "cadence": "Annual",
+        "category": "Subscriptions",
+        "merchant": "Microsoft 365",
+        "dayOfMonth": 15,
+        "priceHistory": [
+          {
+            "date": "2026-04-15",
+            "amount": 129.99
+          }
+        ]
+      },
+      {
+        "id": "sub_claude_pro",
+        "active": true,
+        "amount": 191.16,
+        "person": "Michael",
+        "cadence": "Annual",
+        "category": "Subscriptions",
+        "merchant": "Claude Pro (Anthropic)",
+        "dayOfMonth": 25,
+        "priceHistory": [
+          {
+            "date": "2026-06-25",
+            "amount": 191.16
+          }
+        ]
+      },
+      {
+        "id": "sub_barnes_noble",
+        "active": true,
+        "amount": 42.39,
+        "person": "Michael",
+        "cadence": "Annual",
+        "category": "Subscriptions",
+        "merchant": "Barnes & Noble Membership",
+        "dayOfMonth": 9,
+        "priceHistory": [
+          {
+            "date": "2025-08-09",
+            "amount": 42.39
+          }
+        ]
+      },
+      {
+        "id": "sub_costco",
+        "active": true,
+        "amount": 130,
+        "person": "Joint",
+        "cadence": "Annual",
+        "category": "Subscriptions",
+        "merchant": "Costco",
+        "dayOfMonth": 30,
+        "priceHistory": [
+          {
+            "date": "2026-07-28",
+            "amount": 0
+          },
+          {
+            "date": "2025-11-30",
+            "amount": 130
+          }
+        ]
+      },
+      {
+        "id": "sub_boldin",
+        "active": true,
+        "amount": 96,
+        "person": "Joint",
+        "cadence": "Annual",
+        "category": "Subscriptions",
+        "merchant": "Boldin",
+        "dayOfMonth": 17,
+        "priceHistory": [
+          {
+            "date": "2025-12-17",
+            "amount": 0
+          },
+          {
+            "date": "2025-12-17",
+            "amount": 96
+          }
+        ]
+      },
+      {
+        "id": "o723rcvqistj",
+        "active": true,
+        "amount": 299.99,
+        "person": "Michael",
+        "cadence": "Annual",
+        "category": "Subscriptions",
+        "merchant": "Experian Credit Report",
+        "dayOfMonth": 2,
+        "priceHistory": [
+          {
+            "date": "2025-10-02",
+            "amount": 299.99
+          }
+        ]
+      }
+    ],
+    "recurringBills": [],
+    "budgetRollovers": {
+      "Housing": false
+    },
+    "netWorthHistory": [
+      {
+        "month": "2026-08",
+        "netWorth": 187590.58999999997
+      },
+      {
+        "month": "2026-09",
+        "netWorth": 185990.58999999997
+      }
+    ],
+    "reconciliations": {},
+    "customCategories": [
+      "Fuel",
+      "Firearms & Accessories",
+      "Credit Card / Loan Payment",
+      "Investing",
+      "Home",
+      "Clothing & Apparel",
+      "Insurance",
+      "Service",
+      "Sinking Funds",
+      "ATM",
+      "Exercise & Accessories",
+      "Medical",
+      "Cleaning & Laundry",
+      "Electronics",
+      "Gifts"
+    ],
+    "notificationPrefs": {
+      "enabled": true,
+      "message": "Notifications are enabled."
+    },
+    "cindyRegisterNotes": "Add an undo button.",
+    "hiddenBudgetCategories": [
+      "Kids"
+    ],
+    "investmentBaselineDate": "2026-08-04",
+    "investmentCurrentValue": 196096.94,
+    "investmentContributions": [
+      {
+        "id": "k1ylwmheg5in",
+        "date": "2026-08-04",
+        "note": "Traditional TSP",
+        "amount": 770.3,
+        "targetId": "account:x409tyhjddsp",
+        "targetName": "Traditional TSP "
+      },
+      {
+        "id": "hh105nxfy1f3",
+        "date": "2026-08-04",
+        "note": "Roth TSP",
+        "amount": 770.3,
+        "targetId": "account:pzjr7582edzs",
+        "targetName": "Roth TSP"
+      },
+      {
+        "id": "bso52qgx1nsk",
+        "date": "2026-08-04",
+        "note": "Brokerage",
+        "amount": 100,
+        "targetId": "account:b8g25sws9wow",
+        "targetName": "All Things Bucket"
+      },
+      {
+        "id": "rlnk9gfe2b69",
+        "date": "2026-08-04",
+        "note": "Brokerage",
+        "amount": 80,
+        "targetId": "account:3u95nau78wlq",
+        "targetName": "Sequence of Returns Risk (T-Bills)"
+      }
+    ],
+    "investmentStartingValue": 196096.94,
+    "autoPaidBills": {},
+    "manualBills": {},
+    "subscriptionSinkingFundsInitialized": false,
+    "creditScores": [],
+    "trips": [],
+    "financialReviewPrefs": {
+      "earlyIncomeToNextMonth": true
+    }
+  }
+}

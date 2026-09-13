@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Life Master App</title>
+<style>
+  :root{
+    --ink:#14161a;
+    --bg:#f4f5f7;
+    --card:#ffffff;
+    --border:#e3e5e9;
+    --muted:#666b73;
+    --accent:#2f6fed;
+    --accent-ink:#0d2f80;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    line-height:1.5;
+  }
+  header{
+    background:var(--ink);
+    color:#fff;
+    padding:46px 6vw 40px;
+  }
+  header .eyebrow{
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:#9aa1ad;
+    font-weight:700;
+  }
+  header h1{
+    margin:10px 0 8px;
+    font-size:clamp(28px,4vw,42px);
+    letter-spacing:-.02em;
+  }
+  header p{
+    margin:0;
+    max-width:640px;
+    color:#c4c8cf;
+    font-size:15px;
+  }
+  main{
+    max-width:1100px;
+    margin:0 auto;
+    padding:38px 6vw 70px;
+  }
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:16px;
+  }
+  .section-title{margin:0 0 5px;font-size:18px;letter-spacing:-.01em}
+  .section-intro{margin:0 0 14px;font-size:13px;color:var(--muted)}
+  .growth-title{margin-top:30px}
+  .growth-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media(min-width:1150px){
+    main{max-width:1320px}
+    .life-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+  }
+  .card{
+    display:flex;
+    flex-direction:column;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:22px 22px 20px;
+    text-decoration:none;
+    color:var(--ink);
+    box-shadow:0 1px 2px rgba(20,22,26,.04);
+    transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease;
+  }
+  .card:hover{
+    transform:translateY(-2px);
+    box-shadow:0 10px 28px rgba(20,22,26,.10);
+    border-color:#cfd3da;
+  }
+  .card .icon{
+    width:44px;
+    height:44px;
+    border-radius:10px;
+    display:grid;
+    place-items:center;
+    font-size:21px;
+    margin-bottom:14px;
+  }
+  .card h2{
+    font-size:17px;
+    margin:0 0 6px;
+  }
+  .card p{
+    font-size:13.5px;
+    color:var(--muted);
+    margin:0 0 16px;
+    flex:1;
+  }
+  .card .tags{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-bottom:14px;
+  }
+  .card .tags span{
+    font-size:10.5px;
+    font-weight:700;
+    letter-spacing:.03em;
+    text-transform:uppercase;
+    background:#f0f1f3;
+    color:var(--muted);
+    padding:4px 8px;
+    border-radius:6px;
+  }
+  .card .open{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+    min-height:38px;
+    border-radius:8px;
+    background:#eef3ff;
+    font-size:13px;
+    font-weight:700;
+    color:var(--accent-ink);
+  }
+  .finance .icon{background:#e7f0ff;color:#1c4ed8}
+  .life .icon{background:#eafbf1;color:#0f8a4c}
+  .money .icon{background:#fff3e0;color:#b45a09}
+  .lang .icon{background:#fdeaea;color:#b0392c}
+  .family .icon{background:#eef1f8;color:#1b2b52}
+  .ebay .icon{background:#fff4d6;color:#9a6500}
+  .invest .icon{background:#071628;color:#00d4c8}
+
+  .note{
+    margin-top:30px;
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:16px 20px;
+    font-size:13px;
+    color:var(--muted);
+  }
+  .note b{color:var(--ink)}
+  .info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:18px}
+  .info-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:17px 19px;font-size:13px;color:var(--muted)}
+  .info-card h2{margin:0 0 7px;font-size:15px;color:var(--ink)}
+  .info-card p{margin:0}
+  .privacy{border-left:4px solid #b45a09;background:#fffaf2}
+  .backup{border-left:4px solid #2f6fed;background:#f7f9ff}
+  .backup-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:13px}
+  .backup-btn{border:1px solid #2f6fed;border-radius:9px;padding:10px 14px;background:#2f6fed;color:#fff;font:inherit;font-weight:800;cursor:pointer}
+  .backup-btn.secondary{background:#fff;color:#244fad}
+  .backup-status{margin-top:9px;min-height:18px;font-size:12px;font-weight:700;color:#2457bf}
+  .updated{margin-top:9px;font-size:11px;color:#9aa1ad;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+  footer{
+    text-align:center;
+    font-size:12px;
+    color:#9aa1ad;
+    padding:0 6vw 40px;
+  }
+  @media(max-width:520px){
+    header{padding:34px 5vw 30px}
+    main{padding:28px 5vw 50px}
+    .grid{grid-template-columns:1fr;gap:12px}
+    .growth-grid{grid-template-columns:1fr}
+    .card{padding:16px}
+    .card .icon{width:38px;height:38px;margin-bottom:10px}
+    .card p{margin-bottom:11px}
+    .card .tags{margin-bottom:10px}
+    .info-grid{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Personal Tools</div>
+  <h1>My Life Master App</h1>
+  <p>One place for daily planning, budgeting, retirement, family protection, personal growth, and your eBay resale business. Use the small &#8962; button in the bottom-left corner of any tool to return here.</p>
+  <div class="updated">Last updated August 27, 2026</div>
+</header>
+
+<main>
+  <h2 class="section-title">Life Essentials</h2>
+  <p class="section-intro">The tools that support your daily life, finances, future, and family protection.</p>
+  <div class="grid life-grid">
+
+    <a class="card life" href="daily-planner.html">
+      <div class="icon">&#129517;</div>
+      <h2>My Life Command Center</h2>
+      <p>Daily and long-range planning, training, meditation, nutrition, wellness, habits, journaling, and learning.</p>
+      <div class="tags"><span>Local storage</span><span>Backup available</span></div>
+      <div class="open">Open My Life Command Center &rarr;</div>
+    </a>
+
+    <a class="card money" href="budget-tracker.html">
+      <div class="icon">&#128176;</div>
+      <h2>Budget &amp; Net Worth</h2>
+      <p>Accounts, transactions, subscriptions, cash flow, goals, and Budget AI for Michael &amp; Cynthia's money.</p>
+      <div class="tags"><span>This device</span><span>Backup available</span></div>
+      <div class="open">Open Budget Tracker &rarr;</div>
+    </a>
+
+    <a class="card finance" href="retirement-planner.html">
+      <div class="icon">&#129518;</div>
+      <h2>Retirement &amp; Credit</h2>
+      <p>Michael &amp; Cynthia's retirement projections, planning tools, and Cindy's credit-card register.</p>
+      <div class="tags"><span>Local storage</span><span>Backup available</span></div>
+      <div class="open">Open Retirement Planner &rarr;</div>
+    </a>
+
+    <a class="card family" href="family-benefits-hub.html">
+      <div class="icon">&#128737;</div>
+      <h2>Family Benefits Hub</h2>
+      <p>Survivor benefits reference, key contacts, documents, passwords, important dates, and estate-planning notes.</p>
+      <div class="tags"><span>This device</span><span>Backup available</span></div>
+      <div class="open">Open Family Benefits Hub &rarr;</div>
+    </a>
+
+    <a class="card invest" href="msiz-terminal.html">
+      <div class="icon">&#128200;</div>
+      <h2>MSIZ Terminal</h2>
+      <p>Portfolio holdings, allocation, performance, dividends, risk, comparisons, projections, and market research.</p>
+      <div class="tags"><span>Portfolio analytics</span><span>Local storage</span></div>
+      <div class="open">Open MSIZ Terminal &rarr;</div>
+    </a>
+
+  </div>
+
+  <h2 class="section-title growth-title">Sports</h2>
+  <p class="section-intro">League schedules, scores, standings, and postseason tracking.</p>
+  <div class="grid growth-grid">
+    <a class="card football" href="top-25.html">
+      <div class="icon">&#127944;</div>
+      <h2>Saturday Top 25</h2>
+      <p>College football rankings, live scores, team schedules, completed-game statistics, and verified scoring details.</p>
+      <div class="tags"><span>Live scores</span><span>Schedules</span><span>Box scores</span></div>
+      <div class="open">Open Saturday Top 25 &rarr;</div>
+    </a>
+
+    <a class="card football" href="nfl-gameday.html">
+      <div class="icon">&#127944;</div>
+      <h2>NFL Gameday</h2>
+      <p>All 32 teams, weekly scores, Mountain Time kickoffs, streaming networks, team logos, standings, statistics, highlights, and playoff tracking.</p>
+      <div class="tags"><span>Live scores</span><span>Mountain Time</span><span>Standings</span></div>
+      <div class="open">Open NFL Gameday &rarr;</div>
+    </a>
+    <a class="card life" href="track-field.html">
+      <div class="icon">&#127939;</div>
+      <h2>Track &amp; Field</h2>
+      <p>World Athletics rankings with season-best times, top 10 per event from 100m to 10,000m plus road running and marathon, 2026 world bests from 50km to 100 miles, and the meet calendar.</p>
+      <div class="tags"><span>Track, road &amp; ultra</span><span>Season bests</span><span>Meet calendar</span></div>
+      <div class="open">Open Track &amp; Field &rarr;</div>
+    </a>
+    <a class="card life" href="the-w.html">
+      <div class="icon">W</div>
+      <h2>The W</h2>
+      <p>All 15 WNBA teams with league rankings, schedules, daily scores, standings, and playoff coverage.</p>
+      <div class="tags"><span>WNBA</span><span>2026 season</span><span>Live updates</span></div>
+      <div class="open">Open The W &rarr;</div>
+    </a>
+  </div>
+
+  <h2 class="section-title growth-title">Business</h2>
+  <p class="section-intro">Operate and grow MCS Second Hand Treasures from its dedicated workspace.</p>
+  <div class="grid growth-grid">
+    <a class="card ebay" href="ebay-tracker.html">
+      <div class="icon">&#128230;</div>
+      <h2>eBay Business Tracker</h2>
+      <p>Sales, inventory, expenses, returns, sourcing, mileage, buyers, analytics, goals, taxes, and the complete business plan.</p>
+      <div class="tags"><span>This device</span><span>Business plan included</span><span>Backup available</span></div>
+      <div class="open">Open eBay Business Tracker &rarr;</div>
+    </a>
+  </div>
+
+  <h2 class="section-title growth-title">Personal Growth &amp; Learning</h2>
+  <p class="section-intro">Learning tools that support personal development and long-term goals.</p>
+  <div class="grid growth-grid">
+    <a class="card lang" href="spanish-learning.html">
+      <div class="icon">&#128483;</div>
+      <h2>Spanish Learning &mdash; Luma</h2>
+      <p>Lessons, the Practice Lab, your Personal Plan, and the Spanish immersion studio.</p>
+      <div class="tags"><span>This device</span><span>Optional growth</span><span>Backup available</span></div>
+      <div class="open">Open Spanish Learning &rarr;</div>
+    </a>
+  </div>
+
+  <div class="info-grid">
+    <section class="info-card privacy">
+      <h2>Privacy &amp; security</h2>
+      <p>This website and its source files are public. Do not place passwords, account numbers, private documents, API secrets, or other sensitive information directly inside the published HTML files. Information entered into the tools is stored in this browser on this device.</p>
+    </section>
+    <section class="info-card backup">
+      <h2>Back up the entire Master App</h2>
+      <p>Download one backup containing the information saved by all tools in this browser. Keep the file somewhere safe because there is no automatic online copy.</p>
+      <div class="backup-actions">
+        <button class="backup-btn" type="button" onclick="downloadMasterBackup()">Download Full Backup</button>
+        <button class="backup-btn secondary" type="button" onclick="document.getElementById('masterBackupFile').click()">Restore Full Backup</button>
+        <input id="masterBackupFile" type="file" accept="application/json,.json" hidden onchange="restoreMasterBackup(this)">
+      </div>
+      <div class="backup-status" id="masterBackupStatus" role="status" aria-live="polite"></div>
+    </section>
+    <section class="info-card storage">
+      <h2>Storage usage</h2>
+      <p>Every tool on this site shares one storage limit on this device. See what's using it up before anything runs out unexpectedly.</p>
+      <div class="backup-actions">
+        <button class="backup-btn secondary" type="button" onclick="checkStorageUsage()">Refresh</button>
+      </div>
+      <div id="storageUsageResult" style="margin-top:10px;"></div>
+    </section>
+  </div>
+
+  <div class="note">
+    <b>How storage works:</b> All tools save information in this browser on this device. Clearing browser data may remove information that has not been downloaded in a backup.
+  </div>
+</main>
+
+<footer>My Life Master App &middot; your connected personal tools</footer>
+
+<script src="master-backup-shared.js"></script>
+<script>
+
+/* ---- Storage usage diagnostic ---- */
+var STORAGE_LABEL_RULES=[
+  {test:function(k){return k==='meridian_money_data_v5';},label:'Budget & Net Worth Tracker'},
+  {test:function(k){return k.indexOf('planner_')===0;},label:'My Life Command Center — daily entries'},
+  {test:function(k){return k==='meditation_archive';},label:'AI Prayer Archive (My Life Command Center)'},
+  {test:function(k){return k==='bible_reading_archive';},label:'Bible Reading Archive — local copy (My Life Command Center)'},
+  {test:function(k){return k==='current_training_plan';},label:'Training Plan (My Life Command Center)'},
+  {test:function(k){return k==='activities_data';},label:'Activities — local copy (My Life Command Center)'},
+  {test:function(k){return k.indexOf('retirementPlanner')===0;},label:'Retirement & Credit Planner'},
+  {test:function(k){return k==='mcsAIKey';},label:'eBay Business Tracker — AI key'},
+  {test:function(k){return k==='autoHideMenu'||k==='lastSection'||k.indexOf('navGroup_')===0;},label:'Family Benefits Hub — preferences'},
+  {test:function(k){return k==='journal_cloud_dirty';},label:'My Life Command Center — sync flag'}
+];
+function storageFriendlyLabel(key){
+  for(var i=0;i<STORAGE_LABEL_RULES.length;i++){if(STORAGE_LABEL_RULES[i].test(key))return STORAGE_LABEL_RULES[i].label;}
+  return key;
+}
+function storageEscHtml(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];});}
+function storageFmtBytes(n){
+  if(n>=1024*1024)return (n/(1024*1024)).toFixed(2)+' MB';
+  if(n>=1024)return (n/1024).toFixed(1)+' KB';
+  return n+' B';
+}
+async function checkStorageUsage(){
+  var out=document.getElementById('storageUsageResult');
+  if(!out)return;
+  out.innerHTML='<div style="color:#666;">Checking…</div>';
+  var groups={},totalLS=0;
+  for(var i=0;i<localStorage.length;i++){
+    var key=localStorage.key(i);
+    var value=localStorage.getItem(key)||'';
+    var size=0;
+    try{size=new Blob([key+value]).size;}catch(e){size=(key.length+value.length)*2;}
+    totalLS+=size;
+    var label=storageFriendlyLabel(key);
+    if(!groups[label])groups[label]={bytes:0,count:0};
+    groups[label].bytes+=size;
+    groups[label].count+=1;
+  }
+  var rows=Object.keys(groups).map(function(label){return {label:label,bytes:groups[label].bytes,count:groups[label].count};});
+  rows.sort(function(a,b){return b.bytes-a.bytes;});
+
+  var quotaLine='';
+  try{
+    if(navigator.storage&&navigator.storage.estimate){
+      var est=await navigator.storage.estimate();
+      if(est&&typeof est.usage==='number'){
+        var pct=est.quota?Math.round(est.usage/est.quota*100):null;
+        quotaLine='<div style="margin-bottom:10px;padding:10px 12px;background:#eef2ff;border-radius:8px;">'
+          +'<b>Everything this site stores on this device:</b> '+storageFmtBytes(est.usage)+(est.quota?' of about '+storageFmtBytes(est.quota)+' available'+(pct!==null?' ('+pct+'%)':''):'')
+          +'<div style="font-size:11px;color:#666;margin-top:4px;">Includes the localStorage breakdown below, plus the Bible Reading Archive and a few other items stored separately (IndexedDB) that aren’t broken out here.</div>'
+          +'</div>';
+      }
+    }
+  }catch(estErr){}
+
+  var tableRows=rows.map(function(r){
+    var pctOfLS=totalLS?Math.round(r.bytes/totalLS*100):0;
+    return '<tr>'
+      +'<td style="padding:5px 8px;border-bottom:1px solid #eee;">'+storageEscHtml(r.label)+(r.count>1?' <span style="color:#999;">('+r.count+' items)</span>':'')+'</td>'
+      +'<td style="padding:5px 8px;border-bottom:1px solid #eee;text-align:right;white-space:nowrap;">'+storageFmtBytes(r.bytes)+'</td>'
+      +'<td style="padding:5px 8px;border-bottom:1px solid #eee;text-align:right;color:#999;white-space:nowrap;">'+pctOfLS+'%</td>'
+      +'</tr>';
+  }).join('');
+
+  out.innerHTML=quotaLine
+    +'<div style="font-size:12px;color:#666;margin-bottom:6px;">localStorage total: <b>'+storageFmtBytes(totalLS)+'</b> across '+localStorage.length+' item'+(localStorage.length===1?'':'s')+'</div>'
+    +'<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12.5px;">'
+    +'<thead><tr><th style="text-align:left;padding:5px 8px;border-bottom:2px solid #ddd;">Where it is</th><th style="text-align:right;padding:5px 8px;border-bottom:2px solid #ddd;">Size</th><th style="text-align:right;padding:5px 8px;border-bottom:2px solid #ddd;">%</th></tr></thead>'
+    +'<tbody>'+tableRows+'</tbody></table></div>'
+    +'<div style="font-size:11px;color:#999;margin-top:8px;">Checked on this device/browser only — your phone and computer each have their own separate storage.</div>';
+}
+checkStorageUsage();
+</script>
+</body>
+</html>
+
