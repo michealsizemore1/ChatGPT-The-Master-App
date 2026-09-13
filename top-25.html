@@ -53,11 +53,13 @@ img{max-width:100%;display:block;vertical-align:middle}
 .team-name{min-width:0}
 .team-name>span:last-child{min-width:0}
 .team-name strong{overflow-wrap:break-word}
-.fbs-head{display:grid;grid-template-columns:1fr 90px;align-items:center;gap:8px;height:34px;padding:0 18px;background:#eee9de;font-size:8px;letter-spacing:.12em;color:#758078}
-.fbs-row{display:grid;grid-template-columns:1fr 90px;align-items:center;gap:8px;padding:12px 18px;min-height:64px}
+.fbs-head{display:grid;grid-template-columns:42px minmax(160px,1fr) 120px 70px;align-items:center;gap:8px;height:34px;padding:0 18px;background:#eee9de;font-size:8px;letter-spacing:.12em;color:#758078}
+.fbs-row{display:grid;grid-template-columns:42px minmax(160px,1fr) 120px 70px;align-items:center;gap:8px;padding:12px 18px;min-height:64px}
+.fbs-row>b{font:20px Georgia,serif}
+.fbs-conf{font-size:11px;color:#68756e;letter-spacing:.03em}
 .fbs-row .team-record{font-size:14px;color:#4c5850;text-align:right;font-weight:600}
 @media(min-width:621px){.fbs-head{font-size:10px}}
-@media(max-width:620px){.fbs-row{padding:10px 10px;min-height:70px}}
+@media(max-width:620px){.fbs-head,.fbs-row{grid-template-columns:30px 1fr 62px}.fbs-head span:nth-child(3),.fbs-row .fbs-conf{display:none}.fbs-row{padding:10px 10px;min-height:70px}.fbs-row>b{font:18px Georgia,serif}}
 .drive-tracker{margin:0 0 14px;padding:16px 14px 14px;background:#000;border:1px solid #ffffff1a;border-radius:8px}
 .drive-tracker-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;color:#d9f044;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
 .drive-tracker-head small{color:#ffffff99;font-weight:400;text-transform:none;letter-spacing:0;font-size:10px}
@@ -121,7 +123,7 @@ img{max-width:100%;display:block;vertical-align:middle}
 <script src="home-button.js"></script>
 <script src="version-check.js"></script>
 <script>
-const APP_VERSION='2026-09-13-2';
+const APP_VERSION='2026-09-13-3';
 checkForNewerAppVersion(APP_VERSION, 'top25');
 
 const mountainTime=(date)=>date.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZone:'America/Denver'});
@@ -167,123 +169,127 @@ const teams=[
  {rank:25,name:'Virginia',abbr:'UVA',espnId:'258',record:'1–0',prev:null,points:89,pf:'—',pa:'—',ypg:'—',color:'#232d4b'}
 ];
 // Every other FBS team -- i.e. the full 138-team FBS field minus the 25 teams already in the
-// poll above. Used by the "All Teams" tab only; these aren't ranked so they carry no rank/points,
-// just a conference grouping and a record filled in live from the same weekly scoreboard fetch
-// (loadWeek/currentRecords) that already covers the whole FBS slate, not just ranked teams.
+// poll above. Used by the "All Teams" tab, shown as a single ranked list continuing after the
+// AP Top 25 (No. 26 onward). The AP poll itself doesn't rank beyond 25, so `rank` here comes
+// from TeamRankings.com's predictive computer rating instead -- a real, published ranking, but
+// a different methodology than the AP voters, so don't expect it to agree exactly with where a
+// team "should" sit relative to the Top 25. The four most recent FBS transitions (no rating
+// history yet) carry rank:null and sort to the bottom, alphabetically. Records still come live
+// from the same weekly whole-FBS scoreboard fetch (loadWeek/currentRecords) used elsewhere.
 const otherFbsTeams=[
- {name:'Boston College',abbr:'BC',espnId:'103',conference:'ACC',color:'#98002e'},
- {name:'California',abbr:'CAL',espnId:'25',conference:'ACC',color:'#003262'},
- {name:'Clemson',abbr:'CLEM',espnId:'228',conference:'ACC',color:'#f56600'},
- {name:'Duke',abbr:'DUKE',espnId:'150',conference:'ACC',color:'#012169'},
- {name:'Florida State',abbr:'FSU',espnId:'52',conference:'ACC',color:'#782f40'},
- {name:'Georgia Tech',abbr:'GT',espnId:'59',conference:'ACC',color:'#b3a369'},
- {name:'NC State',abbr:'NCSU',espnId:'152',conference:'ACC',color:'#cc0000'},
- {name:'North Carolina',abbr:'UNC',espnId:'153',conference:'ACC',color:'#7bafd4'},
- {name:'Pittsburgh',abbr:'PITT',espnId:'221',conference:'ACC',color:'#003594'},
- {name:'Stanford',abbr:'STAN',espnId:'24',conference:'ACC',color:'#8c1515'},
- {name:'Syracuse',abbr:'SYR',espnId:'183',conference:'ACC',color:'#d44500'},
- {name:'Virginia Tech',abbr:'VT',espnId:'259',conference:'ACC',color:'#630031'},
- {name:'Wake Forest',abbr:'WAKE',espnId:'154',conference:'ACC',color:'#9e7e38'},
- {name:'Illinois',abbr:'ILL',espnId:'356',conference:'Big Ten',color:'#e84a27'},
- {name:'Maryland',abbr:'MD',espnId:'120',conference:'Big Ten',color:'#e21833'},
- {name:'Michigan',abbr:'MICH',espnId:'130',conference:'Big Ten',color:'#00274c'},
- {name:'Michigan State',abbr:'MSU',espnId:'127',conference:'Big Ten',color:'#18453b'},
- {name:'Minnesota',abbr:'MINN',espnId:'135',conference:'Big Ten',color:'#7a0019'},
- {name:'Nebraska',abbr:'NEB',espnId:'158',conference:'Big Ten',color:'#e41c38'},
- {name:'Northwestern',abbr:'NW',espnId:'77',conference:'Big Ten',color:'#4e2a84'},
- {name:'Purdue',abbr:'PUR',espnId:'2509',conference:'Big Ten',color:'#cfb991'},
- {name:'Rutgers',abbr:'RUTG',espnId:'164',conference:'Big Ten',color:'#cc0033'},
- {name:'UCLA',abbr:'UCLA',espnId:'26',conference:'Big Ten',color:'#2d68c4'},
- {name:'Wisconsin',abbr:'WISC',espnId:'275',conference:'Big Ten',color:'#c5050c'},
- {name:'Arizona',abbr:'ARIZ',espnId:'12',conference:'Big 12',color:'#ab0520'},
- {name:'Arizona State',abbr:'ASU',espnId:'9',conference:'Big 12',color:'#8c1d40'},
- {name:'Baylor',abbr:'BAY',espnId:'239',conference:'Big 12',color:'#003015'},
- {name:'Cincinnati',abbr:'CIN',espnId:'2132',conference:'Big 12',color:'#e00122'},
- {name:'Colorado',abbr:'COLO',espnId:'38',conference:'Big 12',color:'#cfb87c'},
- {name:'Iowa State',abbr:'ISU',espnId:'66',conference:'Big 12',color:'#c8102e'},
- {name:'Kansas',abbr:'KU',espnId:'2305',conference:'Big 12',color:'#0051ba'},
- {name:'Kansas State',abbr:'KSU',espnId:'2306',conference:'Big 12',color:'#512888'},
- {name:'Oklahoma State',abbr:'OKST',espnId:'197',conference:'Big 12',color:'#ff7300'},
- {name:'TCU',abbr:'TCU',espnId:'2628',conference:'Big 12',color:'#4d1979'},
- {name:'UCF',abbr:'UCF',espnId:'2116',conference:'Big 12',color:'#ba9b37'},
- {name:'West Virginia',abbr:'WVU',espnId:'277',conference:'Big 12',color:'#eaaa00'},
- {name:'Arkansas',abbr:'ARK',espnId:'8',conference:'SEC',color:'#9d2235'},
- {name:'Auburn',abbr:'AUB',espnId:'2',conference:'SEC',color:'#0c2340'},
- {name:'Florida',abbr:'FLA',espnId:'57',conference:'SEC',color:'#0021a5'},
- {name:'Kentucky',abbr:'UK',espnId:'96',conference:'SEC',color:'#0033a0'},
- {name:'Mississippi State',abbr:'MSST',espnId:'344',conference:'SEC',color:'#660000'},
- {name:'South Carolina',abbr:'SC',espnId:'2579',conference:'SEC',color:'#73000a'},
- {name:'Vanderbilt',abbr:'VAN',espnId:'238',conference:'SEC',color:'#866d4b'},
- {name:'Army',abbr:'ARMY',espnId:'349',conference:'American',color:'#c5a253'},
- {name:'Charlotte',abbr:'CLT',espnId:'2429',conference:'American',color:'#046a38'},
- {name:'East Carolina',abbr:'ECU',espnId:'151',conference:'American',color:'#592a8a'},
- {name:'Florida Atlantic',abbr:'FAU',espnId:'2226',conference:'American',color:'#c41230'},
- {name:'Memphis',abbr:'MEM',espnId:'235',conference:'American',color:'#003087'},
- {name:'Navy',abbr:'NAVY',espnId:'2426',conference:'American',color:'#00205b'},
- {name:'North Texas',abbr:'UNT',espnId:'249',conference:'American',color:'#00853e'},
- {name:'Rice',abbr:'RICE',espnId:'242',conference:'American',color:'#003b71'},
- {name:'Temple',abbr:'TEM',espnId:'218',conference:'American',color:'#9e1b32'},
- {name:'Tulane',abbr:'TULN',espnId:'2655',conference:'American',color:'#006747'},
- {name:'Tulsa',abbr:'TLSA',espnId:'202',conference:'American',color:'#002d5c'},
- {name:'UAB',abbr:'UAB',espnId:'5',conference:'American',color:'#1e6b52'},
- {name:'USF',abbr:'USF',espnId:'58',conference:'American',color:'#006747'},
- {name:'UTSA',abbr:'UTSA',espnId:'2636',conference:'American',color:'#0c2340'},
- {name:'Delaware',abbr:'DEL',espnId:'48',conference:'Conference USA',color:'#00539f'},
- {name:'FIU',abbr:'FIU',espnId:'2229',conference:'Conference USA',color:'#0a2240'},
- {name:'Jacksonville State',abbr:'JVST',espnId:'55',conference:'Conference USA',color:'#a6192e'},
- {name:'Kennesaw State',abbr:'KENN',espnId:'338',conference:'Conference USA',color:'#000000'},
- {name:'Liberty',abbr:'LIB',espnId:'2335',conference:'Conference USA',color:'#ce1126'},
- {name:'Louisiana Tech',abbr:'LT',espnId:'2348',conference:'Conference USA',color:'#00285e'},
- {name:'Middle Tennessee',abbr:'MTSU',espnId:'2393',conference:'Conference USA',color:'#0066cc'},
- {name:'Missouri State',abbr:'MOST',espnId:'2623',conference:'Conference USA',color:'#6a0032'},
- {name:'New Mexico State',abbr:'NMSU',espnId:'166',conference:'Conference USA',color:'#8c0b31'},
- {name:'Sam Houston',abbr:'SHSU',espnId:'2534',conference:'Conference USA',color:'#f04e23'},
- {name:'Western Kentucky',abbr:'WKU',espnId:'98',conference:'Conference USA',color:'#c60c30'},
- {name:'Akron',abbr:'AKR',espnId:'2006',conference:'MAC',color:'#00285e'},
- {name:'Ball State',abbr:'BALL',espnId:'2050',conference:'MAC',color:'#ba0c2f'},
- {name:'Bowling Green',abbr:'BGSU',espnId:'189',conference:'MAC',color:'#fe5000'},
- {name:'Buffalo',abbr:'BUFF',espnId:'2084',conference:'MAC',color:'#005bbb'},
- {name:'Central Michigan',abbr:'CMU',espnId:'2117',conference:'MAC',color:'#6a0032'},
- {name:'Eastern Michigan',abbr:'EMU',espnId:'2199',conference:'MAC',color:'#046a38'},
- {name:'Kent State',abbr:'KENT',espnId:'2309',conference:'MAC',color:'#002664'},
- {name:'UMass',abbr:'UMASS',espnId:'113',conference:'MAC',color:'#881c1c'},
- {name:'Miami (OH)',abbr:'M-OH',espnId:'193',conference:'MAC',color:'#c41230'},
- {name:'Ohio',abbr:'OHIO',espnId:'195',conference:'MAC',color:'#00694e'},
- {name:'Sacramento State',abbr:'SAC',espnId:'16',conference:'MAC',color:'#043927'},
- {name:'Toledo',abbr:'TOL',espnId:'2649',conference:'MAC',color:'#00246b'},
- {name:'Western Michigan',abbr:'WMU',espnId:'2711',conference:'MAC',color:'#532e1f'},
- {name:'Air Force',abbr:'AF',espnId:'2005',conference:'Mountain West',color:'#0033a0'},
- {name:'Hawaiʻi',abbr:'HAW',espnId:'62',conference:'Mountain West',color:'#024731'},
- {name:'Nevada',abbr:'NEV',espnId:'2440',conference:'Mountain West',color:'#003366'},
- {name:'New Mexico',abbr:'UNM',espnId:'167',conference:'Mountain West',color:'#ba0c2f'},
- {name:'North Dakota State',abbr:'NDSU',espnId:'2449',conference:'Mountain West',color:'#144734'},
- {name:'Northern Illinois',abbr:'NIU',espnId:'2459',conference:'Mountain West',color:'#c8102e'},
- {name:'San José State',abbr:'SJSU',espnId:'23',conference:'Mountain West',color:'#0055a2'},
- {name:'UNLV',abbr:'UNLV',espnId:'2439',conference:'Mountain West',color:'#cf0a2c'},
- {name:'UTEP',abbr:'UTEP',espnId:'2638',conference:'Mountain West',color:'#041e42'},
- {name:'Wyoming',abbr:'WYO',espnId:'2751',conference:'Mountain West',color:'#492f24'},
- {name:'Boise State',abbr:'BSU',espnId:'68',conference:'Pac-12',color:'#0033a0'},
- {name:'Colorado State',abbr:'CSU',espnId:'36',conference:'Pac-12',color:'#1e4d2b'},
- {name:'Fresno State',abbr:'FRES',espnId:'278',conference:'Pac-12',color:'#db0032'},
- {name:'Oregon State',abbr:'ORST',espnId:'204',conference:'Pac-12',color:'#dc4405'},
- {name:'San Diego State',abbr:'SDSU',espnId:'21',conference:'Pac-12',color:'#a6192e'},
- {name:'Texas State',abbr:'TXST',espnId:'326',conference:'Pac-12',color:'#501214'},
- {name:'Utah State',abbr:'USU',espnId:'328',conference:'Pac-12',color:'#0f2439'},
- {name:'Washington State',abbr:'WSU',espnId:'265',conference:'Pac-12',color:'#981e32'},
- {name:'App State',abbr:'APP',espnId:'2026',conference:'Sun Belt',color:'#000000'},
- {name:'Arkansas State',abbr:'ARST',espnId:'2032',conference:'Sun Belt',color:'#cc092f'},
- {name:'Coastal Carolina',abbr:'CCU',espnId:'324',conference:'Sun Belt',color:'#006f71'},
- {name:'Georgia Southern',abbr:'GASO',espnId:'290',conference:'Sun Belt',color:'#041e42'},
- {name:'Georgia State',abbr:'GAST',espnId:'2247',conference:'Sun Belt',color:'#0039a6'},
- {name:'James Madison',abbr:'JMU',espnId:'256',conference:'Sun Belt',color:'#450084'},
- {name:'Louisiana',abbr:'ULL',espnId:'309',conference:'Sun Belt',color:'#ce181e'},
- {name:'Marshall',abbr:'MRSH',espnId:'276',conference:'Sun Belt',color:'#00b140'},
- {name:'Old Dominion',abbr:'ODU',espnId:'295',conference:'Sun Belt',color:'#003057'},
- {name:'South Alabama',abbr:'USA',espnId:'6',conference:'Sun Belt',color:'#002b5c'},
- {name:'Southern Miss',abbr:'USM',espnId:'2572',conference:'Sun Belt',color:'#ffc72c'},
- {name:'Troy',abbr:'TROY',espnId:'2653',conference:'Sun Belt',color:'#8a0203'},
- {name:'UL Monroe',abbr:'ULM',espnId:'2433',conference:'Sun Belt',color:'#8b2331'},
- {name:'UConn',abbr:'CONN',espnId:'41',conference:'Independent',color:'#000e2f'}
+ {rank:26,name:'Florida State',abbr:'FSU',espnId:'52',conference:'ACC',color:'#782f40'},
+ {rank:27,name:'Clemson',abbr:'CLEM',espnId:'228',conference:'ACC',color:'#f56600'},
+ {rank:28,name:'Michigan',abbr:'MICH',espnId:'130',conference:'Big Ten',color:'#00274c'},
+ {rank:29,name:'Kansas State',abbr:'KSU',espnId:'2306',conference:'Big 12',color:'#512888'},
+ {rank:30,name:'NC State',abbr:'NCSU',espnId:'152',conference:'ACC',color:'#cc0000'},
+ {rank:31,name:'Auburn',abbr:'AUB',espnId:'2',conference:'SEC',color:'#0c2340'},
+ {rank:32,name:'Oklahoma State',abbr:'OKST',espnId:'197',conference:'Big 12',color:'#ff7300'},
+ {rank:33,name:'Florida',abbr:'FLA',espnId:'57',conference:'SEC',color:'#0021a5'},
+ {rank:34,name:'Arizona',abbr:'ARIZ',espnId:'12',conference:'Big 12',color:'#ab0520'},
+ {rank:35,name:'Iowa State',abbr:'ISU',espnId:'66',conference:'Big 12',color:'#c8102e'},
+ {rank:36,name:'Kentucky',abbr:'UK',espnId:'96',conference:'SEC',color:'#0033a0'},
+ {rank:37,name:'UCF',abbr:'UCF',espnId:'2116',conference:'Big 12',color:'#ba9b37'},
+ {rank:38,name:'Kansas',abbr:'KU',espnId:'2305',conference:'Big 12',color:'#0051ba'},
+ {rank:39,name:'Wisconsin',abbr:'WISC',espnId:'275',conference:'Big Ten',color:'#c5050c'},
+ {rank:40,name:'West Virginia',abbr:'WVU',espnId:'277',conference:'Big 12',color:'#eaaa00'},
+ {rank:41,name:'TCU',abbr:'TCU',espnId:'2628',conference:'Big 12',color:'#4d1979'},
+ {rank:42,name:'Virginia Tech',abbr:'VT',espnId:'259',conference:'ACC',color:'#630031'},
+ {rank:43,name:'South Carolina',abbr:'SC',espnId:'2579',conference:'SEC',color:'#73000a'},
+ {rank:44,name:'Memphis',abbr:'MEM',espnId:'235',conference:'American',color:'#003087'},
+ {rank:45,name:'Arkansas',abbr:'ARK',espnId:'8',conference:'SEC',color:'#9d2235'},
+ {rank:46,name:'Nebraska',abbr:'NEB',espnId:'158',conference:'Big Ten',color:'#e41c38'},
+ {rank:47,name:'Georgia Tech',abbr:'GT',espnId:'59',conference:'ACC',color:'#b3a369'},
+ {rank:48,name:'Colorado',abbr:'COLO',espnId:'38',conference:'Big 12',color:'#cfb87c'},
+ {rank:49,name:'North Carolina',abbr:'UNC',espnId:'153',conference:'ACC',color:'#7bafd4'},
+ {rank:50,name:'UCLA',abbr:'UCLA',espnId:'26',conference:'Big Ten',color:'#2d68c4'},
+ {rank:51,name:'Liberty',abbr:'LIB',espnId:'2335',conference:'Conference USA',color:'#ce1126'},
+ {rank:52,name:'Boise State',abbr:'BSU',espnId:'68',conference:'Pac-12',color:'#0033a0'},
+ {rank:53,name:'California',abbr:'CAL',espnId:'25',conference:'ACC',color:'#003262'},
+ {rank:54,name:'Maryland',abbr:'MD',espnId:'120',conference:'Big Ten',color:'#e21833'},
+ {rank:55,name:'Syracuse',abbr:'SYR',espnId:'183',conference:'ACC',color:'#d44500'},
+ {rank:56,name:'Tulane',abbr:'TULN',espnId:'2655',conference:'American',color:'#006747'},
+ {rank:57,name:'App State',abbr:'APP',espnId:'2026',conference:'Sun Belt',color:'#000000'},
+ {rank:58,name:'Mississippi State',abbr:'MSST',espnId:'344',conference:'SEC',color:'#660000'},
+ {rank:59,name:'Duke',abbr:'DUKE',espnId:'150',conference:'ACC',color:'#012169'},
+ {rank:60,name:'Cincinnati',abbr:'CIN',espnId:'2132',conference:'Big 12',color:'#e00122'},
+ {rank:61,name:'Baylor',abbr:'BAY',espnId:'239',conference:'Big 12',color:'#003015'},
+ {rank:62,name:'USF',abbr:'USF',espnId:'58',conference:'American',color:'#006747'},
+ {rank:63,name:'UTSA',abbr:'UTSA',espnId:'2636',conference:'American',color:'#0c2340'},
+ {rank:64,name:'Oregon State',abbr:'ORST',espnId:'204',conference:'Pac-12',color:'#dc4405'},
+ {rank:65,name:'Rutgers',abbr:'RUTG',espnId:'164',conference:'Big Ten',color:'#cc0033'},
+ {rank:66,name:'Pittsburgh',abbr:'PITT',espnId:'221',conference:'ACC',color:'#003594'},
+ {rank:67,name:'Minnesota',abbr:'MINN',espnId:'135',conference:'Big Ten',color:'#7a0019'},
+ {rank:68,name:'Washington State',abbr:'WSU',espnId:'265',conference:'Pac-12',color:'#981e32'},
+ {rank:69,name:'Arizona State',abbr:'ASU',espnId:'9',conference:'Big 12',color:'#8c1d40'},
+ {rank:70,name:'Fresno State',abbr:'FRES',espnId:'278',conference:'Pac-12',color:'#db0032'},
+ {rank:71,name:'Boston College',abbr:'BC',espnId:'103',conference:'ACC',color:'#98002e'},
+ {rank:72,name:'Wake Forest',abbr:'WAKE',espnId:'154',conference:'ACC',color:'#9e7e38'},
+ {rank:73,name:'Miami (OH)',abbr:'M-OH',espnId:'193',conference:'MAC',color:'#c41230'},
+ {rank:74,name:'Louisiana',abbr:'ULL',espnId:'309',conference:'Sun Belt',color:'#ce181e'},
+ {rank:75,name:'UNLV',abbr:'UNLV',espnId:'2439',conference:'Mountain West',color:'#cf0a2c'},
+ {rank:76,name:'Rice',abbr:'RICE',espnId:'242',conference:'American',color:'#003b71'},
+ {rank:77,name:'James Madison',abbr:'JMU',espnId:'256',conference:'Sun Belt',color:'#450084'},
+ {rank:78,name:'Toledo',abbr:'TOL',espnId:'2649',conference:'MAC',color:'#00246b'},
+ {rank:79,name:'Northwestern',abbr:'NW',espnId:'77',conference:'Big Ten',color:'#4e2a84'},
+ {rank:80,name:'South Alabama',abbr:'USA',espnId:'6',conference:'Sun Belt',color:'#002b5c'},
+ {rank:81,name:'Michigan State',abbr:'MSU',espnId:'127',conference:'Big Ten',color:'#18453b'},
+ {rank:82,name:'Jacksonville State',abbr:'JVST',espnId:'55',conference:'Conference USA',color:'#a6192e'},
+ {rank:83,name:'Stanford',abbr:'STAN',espnId:'24',conference:'ACC',color:'#8c1515'},
+ {rank:84,name:'Purdue',abbr:'PUR',espnId:'2509',conference:'Big Ten',color:'#cfb991'},
+ {rank:85,name:'Texas State',abbr:'TXST',espnId:'326',conference:'Pac-12',color:'#501214'},
+ {rank:86,name:'Navy',abbr:'NAVY',espnId:'2426',conference:'American',color:'#00205b'},
+ {rank:87,name:'Troy',abbr:'TROY',espnId:'2653',conference:'Sun Belt',color:'#8a0203'},
+ {rank:88,name:'Western Kentucky',abbr:'WKU',espnId:'98',conference:'Conference USA',color:'#c60c30'},
+ {rank:89,name:'North Texas',abbr:'UNT',espnId:'249',conference:'American',color:'#00853e'},
+ {rank:90,name:'Coastal Carolina',abbr:'CCU',espnId:'324',conference:'Sun Belt',color:'#006f71'},
+ {rank:91,name:'UAB',abbr:'UAB',espnId:'5',conference:'American',color:'#1e6b52'},
+ {rank:92,name:'Army',abbr:'ARMY',espnId:'349',conference:'American',color:'#c5a253'},
+ {rank:93,name:'Vanderbilt',abbr:'VAN',espnId:'238',conference:'SEC',color:'#866d4b'},
+ {rank:94,name:'Wyoming',abbr:'WYO',espnId:'2751',conference:'Mountain West',color:'#492f24'},
+ {rank:95,name:'Air Force',abbr:'AF',espnId:'2005',conference:'Mountain West',color:'#0033a0'},
+ {rank:96,name:'East Carolina',abbr:'ECU',espnId:'151',conference:'American',color:'#592a8a'},
+ {rank:97,name:'Northern Illinois',abbr:'NIU',espnId:'2459',conference:'Mountain West',color:'#c8102e'},
+ {rank:98,name:'Colorado State',abbr:'CSU',espnId:'36',conference:'Pac-12',color:'#1e4d2b'},
+ {rank:99,name:'Bowling Green',abbr:'BGSU',espnId:'189',conference:'MAC',color:'#fe5000'},
+ {rank:100,name:'Florida Atlantic',abbr:'FAU',espnId:'2226',conference:'American',color:'#c41230'},
+ {rank:101,name:'Marshall',abbr:'MRSH',espnId:'276',conference:'Sun Belt',color:'#00b140'},
+ {rank:102,name:'Ohio',abbr:'OHIO',espnId:'195',conference:'MAC',color:'#00694e'},
+ {rank:103,name:'Utah State',abbr:'USU',espnId:'328',conference:'Pac-12',color:'#0f2439'},
+ {rank:104,name:'Georgia Southern',abbr:'GASO',espnId:'290',conference:'Sun Belt',color:'#041e42'},
+ {rank:105,name:'Western Michigan',abbr:'WMU',espnId:'2711',conference:'MAC',color:'#532e1f'},
+ {rank:106,name:'San Diego State',abbr:'SDSU',espnId:'21',conference:'Pac-12',color:'#a6192e'},
+ {rank:107,name:'Old Dominion',abbr:'ODU',espnId:'295',conference:'Sun Belt',color:'#003057'},
+ {rank:108,name:'Arkansas State',abbr:'ARST',espnId:'2032',conference:'Sun Belt',color:'#cc092f'},
+ {rank:109,name:'San José State',abbr:'SJSU',espnId:'23',conference:'Mountain West',color:'#0055a2'},
+ {rank:110,name:'Tulsa',abbr:'TLSA',espnId:'202',conference:'American',color:'#002d5c'},
+ {rank:111,name:'Central Michigan',abbr:'CMU',espnId:'2117',conference:'MAC',color:'#6a0032'},
+ {rank:112,name:'Charlotte',abbr:'CLT',espnId:'2429',conference:'American',color:'#046a38'},
+ {rank:113,name:'Southern Miss',abbr:'USM',espnId:'2572',conference:'Sun Belt',color:'#ffc72c'},
+ {rank:114,name:'Middle Tennessee',abbr:'MTSU',espnId:'2393',conference:'Conference USA',color:'#0066cc'},
+ {rank:115,name:'Georgia State',abbr:'GAST',espnId:'2247',conference:'Sun Belt',color:'#0039a6'},
+ {rank:116,name:'Sam Houston',abbr:'SHSU',espnId:'2534',conference:'Conference USA',color:'#f04e23'},
+ {rank:117,name:'Ball State',abbr:'BALL',espnId:'2050',conference:'MAC',color:'#ba0c2f'},
+ {rank:118,name:'Hawaiʻi',abbr:'HAW',espnId:'62',conference:'Mountain West',color:'#024731'},
+ {rank:119,name:'Buffalo',abbr:'BUFF',espnId:'2084',conference:'MAC',color:'#005bbb'},
+ {rank:120,name:'UConn',abbr:'CONN',espnId:'41',conference:'Independent',color:'#000e2f'},
+ {rank:121,name:'Eastern Michigan',abbr:'EMU',espnId:'2199',conference:'MAC',color:'#046a38'},
+ {rank:122,name:'Louisiana Tech',abbr:'LT',espnId:'2348',conference:'Conference USA',color:'#00285e'},
+ {rank:123,name:'UMass',abbr:'UMASS',espnId:'113',conference:'MAC',color:'#881c1c'},
+ {rank:124,name:'New Mexico State',abbr:'NMSU',espnId:'166',conference:'Conference USA',color:'#8c0b31'},
+ {rank:125,name:'Temple',abbr:'TEM',espnId:'218',conference:'American',color:'#9e1b32'},
+ {rank:126,name:'Illinois',abbr:'ILL',espnId:'356',conference:'Big Ten',color:'#e84a27'},
+ {rank:127,name:'UTEP',abbr:'UTEP',espnId:'2638',conference:'Mountain West',color:'#041e42'},
+ {rank:128,name:'Akron',abbr:'AKR',espnId:'2006',conference:'MAC',color:'#00285e'},
+ {rank:129,name:'Nevada',abbr:'NEV',espnId:'2440',conference:'Mountain West',color:'#003366'},
+ {rank:130,name:'FIU',abbr:'FIU',espnId:'2229',conference:'Conference USA',color:'#0a2240'},
+ {rank:131,name:'UL Monroe',abbr:'ULM',espnId:'2433',conference:'Sun Belt',color:'#8b2331'},
+ {rank:132,name:'Kent State',abbr:'KENT',espnId:'2309',conference:'MAC',color:'#002664'},
+ {rank:133,name:'New Mexico',abbr:'UNM',espnId:'167',conference:'Mountain West',color:'#ba0c2f'},
+ {rank:134,name:'Kennesaw State',abbr:'KENN',espnId:'338',conference:'Conference USA',color:'#000000'},
+ {rank:null,name:'Delaware',abbr:'DEL',espnId:'48',conference:'Conference USA',color:'#00539f'},
+ {rank:null,name:'Missouri State',abbr:'MOST',espnId:'2623',conference:'Conference USA',color:'#6a0032'},
+ {rank:null,name:'North Dakota State',abbr:'NDSU',espnId:'2449',conference:'Mountain West',color:'#144734'},
+ {rank:null,name:'Sacramento State',abbr:'SAC',espnId:'16',conference:'MAC',color:'#043927'}
 ];
 const stories=[
  ['Poll leader delivers','No. 1 Ohio State rolls past Ball State, 56-3, ahead of a Sept. 12 showdown with Texas'],
@@ -323,9 +329,6 @@ const playerStats=[
 
 const rankedIds=new Set(teams.map(team=>team.espnId));
 const conferenceOrder=['ACC','Big Ten','Big 12','SEC','Independent'];
-// Order for the "All Teams" tab, which spans every FBS conference rather than just the five
-// the AP Top 25 currently touches.
-const fbsConferenceOrder=['ACC','Big Ten','Big 12','SEC','American','Conference USA','MAC','Mountain West','Pac-12','Sun Belt','Independent'];
 const conferenceById={'2390':'ACC','2567':'ACC','97':'ACC','194':'Big Ten','2483':'Big Ten','84':'Big Ten','30':'Big Ten','130':'Big Ten','264':'Big Ten','213':'Big Ten','2294':'Big Ten','2641':'Big 12','252':'Big 12','254':'Big 12','248':'Big 12','61':'SEC','251':'SEC','245':'SEC','145':'SEC','201':'SEC','99':'SEC','333':'SEC','2633':'SEC','142':'SEC','87':'Independent'};
 const conferenceOf=(team)=>conferenceById[team.espnId]??'Independent';
 const normalizeGame=(event)=>{
@@ -760,28 +763,30 @@ function renderStandingsList(){
   ${rows}
  </article>`;
 }
-// All Teams tab: every FBS team that isn't already in the Top 25 above, grouped by conference.
-// No rank/points/schedule columns here -- these teams aren't part of the poll, so there's nothing
-// to rank them by. Records come from the same weekly whole-FBS scoreboard fetch (loadWeek) that
-// already powers currentRecords() for the ranked tabs, so they fill in live once that loads.
-function fbsTeamRow(t,records,confHeading){
- return `<div class="team-entry">${confHeading||''}
+// All Teams tab: a single flat list continuing right where the AP Top 25 leaves off (No. 26
+// onward), covering every other FBS team. The AP poll doesn't rank that far itself, so the order/
+// rank number here comes from TeamRankings.com's predictive computer rating -- see the comment
+// on otherFbsTeams above for why that won't always agree with where a team "should" sit. Records
+// come from the same weekly whole-FBS scoreboard fetch (loadWeek) that already powers
+// currentRecords() for the ranked tabs, so they fill in live once that loads.
+function fbsTeamRow(t,records){
+ return `<div class="team-entry">
   <div class="fbs-row">
+   <b>${t.rank??'NR'}</b>
    <span class="team-name"><i class="team-logo" style="background:${t.color}"><span>${esc(t.abbr)}</span><img class="espn-logo" src="https://a.espncdn.com/i/teamlogos/ncaa/500/${t.espnId}.png" alt="${esc(t.name)} logo"></i><span><strong>${esc(t.name)}</strong><small>${esc(t.abbr)}</small></span></span>
+   <span class="fbs-conf">${esc(t.conference)}</span>
    <span class="team-record">${esc(records[t.espnId]??'—')}</span>
   </div>
  </div>`;
 }
 function renderAllTeamsList(){
- const filtered=otherFbsTeams.filter(t=>t.name.toLowerCase().includes(state.query.toLowerCase())).sort((a,b)=>fbsConferenceOrder.indexOf(a.conference)-fbsConferenceOrder.indexOf(b.conference)||a.name.localeCompare(b.name));
+ const filtered=otherFbsTeams.filter(t=>t.name.toLowerCase().includes(state.query.toLowerCase())).sort((a,b)=>(a.rank??999)-(b.rank??999)||a.name.localeCompare(b.name));
  const records=currentRecords();
- const rows=filtered.map((t,i)=>{
-  const confHeading=(i===0||filtered[i-1].conference!==t.conference)?`<div class="conference-heading">${esc(t.conference)}</div>`:'';
-  return fbsTeamRow(t,records,confHeading);
- }).join('');
+ const rows=filtered.map(t=>fbsTeamRow(t,records)).join('');
  return `<article class="rankings panel" id="all-teams-list">
-  <div class="panel-title"><div><p class="eyebrow">FULL FBS FIELD · ${otherFbsTeams.length} MORE TEAMS</p><h2>All Teams</h2></div></div>
-  <div class="fbs-head"><span>TEAM</span><span>REC</span></div>
+  <div class="panel-title"><div><p class="eyebrow">NO. 26 AND ON · RANKED BY TEAMRANKINGS.COM</p><h2>All Teams</h2></div></div>
+  <p class="playoff-intro">The AP Top 25 doesn't rank teams past No. 25, so everything below is ordered by TeamRankings.com's predictive computer rating instead -- a real, published ranking, but a different methodology than the AP voters use. Four recent FBS transitions with no rating history yet are listed last as NR.</p>
+  <div class="fbs-head"><span>RK</span><span>TEAM</span><span>CONF</span><span>REC</span></div>
   ${rows||'<p class="schedule-message" style="color:#68756e;padding:20px 18px">No teams match that search.</p>'}
  </article>`;
 }
