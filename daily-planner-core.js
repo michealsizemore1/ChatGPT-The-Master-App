@@ -79,10 +79,14 @@ function triClick(el){
   } else {
     applyTriState(el,next);
   }
+  // Marking Dog Walk done in Activities also checks off the matching "Walk
+  // Buddy" item on My Schedule (and un-checks it if Dog Walk is un-marked),
+  // so the two stay in sync instead of tracking the walk twice.
+  if(key==='exDogWalk')localStorage.setItem('schedule_walkBuddy_'+dk(today),next==='green'?'1':'0');
   save();
   updateCompactSectionCounts();
   renderDailyCheckOverview();
-  if(['gaFinancialVideos','gaAudiobook','gaUdemy','gaGunRange','gaLanguage','gaGuitar','exStretch','exMassage','wBP','wMeds','wWght','wSleep','wHeadache','spDailyBread','spBibleAudio','spAIPrayer'].indexOf(key)!==-1)renderJournalSchedule();
+  if(['gaFinancialVideos','gaAudiobook','gaUdemy','gaGunRange','gaLanguage','gaGuitar','exStretch','exMassage','exDogWalk','wBP','wMeds','wWght','wSleep','wHeadache','spDailyBread','spBibleAudio','spAIPrayer'].indexOf(key)!==-1)renderJournalSchedule();
   const wt=document.getElementById('tab-weekly');
   if(wt&&wt.classList.contains('active'))try{renderWeekly();}catch(e){}
 }
