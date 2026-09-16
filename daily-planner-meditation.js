@@ -1117,6 +1117,20 @@ function meditAIPrompt(type){
   },function(err){res.textContent='Error: '+err;});
 }
 
+/* --- Guided Worship (Bible & Worship) --- */
+function bibleWorshipAIPrompt(){
+  var res=document.getElementById('bibleWorshipAIResult');
+  if(!res)return;
+  res.style.display='block';res.textContent='⏳ Preparing your worship moment...';
+  var verse=(localStorage.getItem('medit_scripture')||'').trim()||'"Be still, and know that I am God." — Psalm 46:10';
+  var prompt='You are a gentle Christian worship guide. Today\'s scripture focus is: "'+verse+'"\n\nCreate a brief, guided worship moment (3-5 minutes) centered on praise rather than petition. Include: 1) A short call to worship, 2) A few lines connecting the verse to who God is, 3) A simple sung or spoken praise response the person can say or sing aloud, 4) A closing blessing. Keep it warm, reverent, and easy to follow. Under 220 words.';
+  aiCall(prompt,2200,function(text){
+    res.style.display='block';
+    res.innerHTML='<div style="white-space:pre-wrap;line-height:1.6;color:#3b0764;">'+escHtml(text)+'</div>';
+    _aiLastShown['bibleWorshipAIResult']={text:text,lbl:'Guided Worship'};
+  },function(err){res.textContent='Error: '+err;});
+}
+
 /* --- Session Logging --- */
 function meditSaveSession(auto){
   var notes=document.getElementById('meditNotes')?document.getElementById('meditNotes').value:'';
