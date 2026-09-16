@@ -80,13 +80,19 @@ function triClick(el){
     applyTriState(el,next);
   }
   // Marking Dog Walk done in Activities also checks off the matching "Walk
-  // Buddy" item on My Schedule (and un-checks it if Dog Walk is un-marked),
-  // so the two stay in sync instead of tracking the walk twice.
+  // Buddy" item on My Schedule (and un-checks it if Dog Walk is un-marked).
+  // Walk Buddy tracks its own done state in localStorage rather than reading
+  // this checkbox directly, so it needs this explicit bridge to stay in sync.
   if(key==='exDogWalk')localStorage.setItem('schedule_walkBuddy_'+dk(today),next==='green'?'1':'0');
   save();
   updateCompactSectionCounts();
   renderDailyCheckOverview();
-  if(['gaFinancialVideos','gaAudiobook','gaUdemy','gaGunRange','gaLanguage','gaGuitar','exStretch','exMassage','exDogWalk','wBP','wMeds','wWght','wSleep','wHeadache','spDailyBread','spBibleAudio','spAIPrayer'].indexOf(key)!==-1)renderJournalSchedule();
+  // Every other My Schedule item (Meditation, Wellness, Bible/Faith, Growth
+  // Activities, etc.) reads its done state directly off the matching
+  // check(s) above, so re-rendering My Schedule here — after any check in any
+  // section — is what keeps it showing the current state instead of a stale
+  // one. renderJournalSchedule() itself no-ops if My Schedule isn't on screen.
+  renderJournalSchedule();
   const wt=document.getElementById('tab-weekly');
   if(wt&&wt.classList.contains('active'))try{renderWeekly();}catch(e){}
 }
@@ -130,7 +136,7 @@ function updateCompactSectionCounts(){
   var physical=document.getElementById('physicalExerciseCount');
   if(task)task.textContent=compactDoneCount(['pt0c','pt1c','pt2c'])+'/3';
   if(goals)goals.textContent=compactDoneCount(['dg0c','dg1c','dg2c'])+'/3';
-  if(physical)physical.textContent=compactDoneCount(['exStrength','exStretch','exMassage','exWalk','exDogWalk'])+'/5';
+  if(physical)physical.textContent=compactDoneCount(['exStrength','exWalk','exDogWalk'])+'/3';
 }
 function toggleAITools(){
   toggleCompactSection('aiToolsBody','aiToolsArrow',document.getElementById('aiToolsToggle'));
@@ -280,7 +286,7 @@ function parseBP(s){if(!s)return{sys:0,dia:0};const m=s.match(/(\d+)\s*\/\s*(\d+
 function buildStars(){const ss=document.getElementById('scoreStars');if(!ss)return;ss.innerHTML='';for(let i=1;i<=5;i++){const s=document.createElement('span');s.className='star'+(i<=scoreVal?' active':'');s.textContent='★';s.onclick=()=>{scoreVal=(scoreVal===i)?i-1:i;buildStars();save();};ss.appendChild(s);}updateTodayGlance();}
 
 // All text/number fields
-const TXS=['spDailyBreadText','spMeditationText','gaAudiobookText','gaAudiobookTime','gaSkillText','gaSkillTime','wBPVal','wPulseVal','wMedsVal','wWghtVal','wSleepVal','wHeadacheNote','exStrengthVal','exBikeVal','exStretchVal','exMassageVal','exWalkVal','exDogWalkVal','nuCalVal','nuProtVal','nuFatVal','nuCarbsVal','jAccomplish','jImprov','jGratitude','jNotes','habitIdentity','habitReflection','mnotes-breakfast','mnotes-lunch','mnotes-dinner','mnotes-snack','mnotes-liquids','mnotes-sports'];
+const TXS=['spDailyBreadText','spMeditationText','gaAudiobookText','gaAudiobookTime','gaSkillText','gaSkillTime','wBPVal','wPulseVal','wMedsVal','wWghtVal','wSleepVal','wHeadacheNote','exStrengthVal','exBikeVal','exWalkVal','exDogWalkVal','nuCalVal','nuProtVal','nuFatVal','nuCarbsVal','jAccomplish','jImprov','jGratitude','jNotes','habitIdentity','habitReflection','mnotes-breakfast','mnotes-lunch','mnotes-dinner','mnotes-snack','mnotes-liquids','mnotes-sports'];
 const NMS=['exSteps','wSleepScore','exMassageMinutes','gaFinancialVideosTime'];
 const PTIDS=['pt0','pt1','pt2','dg0','dg1','dg2'];
 
