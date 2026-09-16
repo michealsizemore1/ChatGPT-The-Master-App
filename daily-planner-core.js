@@ -286,7 +286,7 @@ function parseBP(s){if(!s)return{sys:0,dia:0};const m=s.match(/(\d+)\s*\/\s*(\d+
 function buildStars(){const ss=document.getElementById('scoreStars');if(!ss)return;ss.innerHTML='';for(let i=1;i<=5;i++){const s=document.createElement('span');s.className='star'+(i<=scoreVal?' active':'');s.textContent='★';s.onclick=()=>{scoreVal=(scoreVal===i)?i-1:i;buildStars();save();};ss.appendChild(s);}updateTodayGlance();}
 
 // All text/number fields
-const TXS=['spDailyBreadText','spMeditationText','gaAudiobookText','gaAudiobookTime','gaSkillText','gaSkillTime','wBPVal','wPulseVal','wMedsVal','wWghtVal','wSleepVal','wHeadacheNote','exStrengthVal','exBikeVal','exWalkVal','exDogWalkVal','nuCalVal','nuProtVal','nuFatVal','nuCarbsVal','jAccomplish','jImprov','jGratitude','jNotes','habitIdentity','habitReflection','mnotes-breakfast','mnotes-lunch','mnotes-dinner','mnotes-snack','mnotes-liquids','mnotes-sports'];
+const TXS=['spDailyBreadText','spMeditationText','gaAudiobookText','gaAudiobookTime','gaSkillText','gaSkillTime','wBPVal','wPulseVal','wMedsVal','wWghtVal','wSleepVal','exStrengthVal','exBikeVal','exWalkVal','exDogWalkVal','nuCalVal','nuProtVal','nuFatVal','nuCarbsVal','jAccomplish','jImprov','jGratitude','jNotes','habitIdentity','habitReflection','mnotes-breakfast','mnotes-lunch','mnotes-dinner','mnotes-snack','mnotes-liquids','mnotes-sports'];
 const NMS=['exSteps','wSleepScore','exMassageMinutes','gaFinancialVideosTime'];
 const PTIDS=['pt0','pt1','pt2','dg0','dg1','dg2'];
 
