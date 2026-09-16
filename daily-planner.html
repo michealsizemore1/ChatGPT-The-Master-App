@@ -2274,59 +2274,7 @@ body{
         <div class="tri-check" data-key="spBibleAudio" onclick="triClick(this)" title="Mark Bible & Worship complete"></div>
         <div class="section-title" style="color:#6d4c41;background:linear-gradient(135deg,#fff8f0,#fdebd0);border-left:4px solid #e67e22;flex:1;">&#x1F3A7; Bible &amp; Worship</div>
       </div>
-      <div style="background:#fff8f0;border:1px solid #fdba74;border-radius:10px;padding:12px 14px;margin-bottom:12px;">
-        <div style="margin-bottom:6px;">
-          <button onclick="nybAutoFill(true)" title="Fill in today's One Year Chronological Bible NLT reading" style="background:#fff3e0;color:#c2410c;border:1px solid #fdba74;border-radius:6px;padding:3px 9px;font-size:0.71rem;font-weight:700;cursor:pointer;white-space:nowrap;">&#x1F4D6; Auto-fill Today</button>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
-          <div>
-            <label style="font-size:0.7rem;color:#92400e;font-weight:600;display:block;margin-bottom:3px;">Book / Title</label>
-            <input type="text" id="audibleBook" placeholder="e.g. The One Year Chronological Bible (NLT)"
-              oninput="meditSaveAudible()"
-              style="width:100%;border:1px solid #fdba74;border-radius:6px;padding:5px 8px;font-size:0.82rem;box-sizing:border-box;outline:none;background:#fff;color:#78350f;">
-          </div>
-          <div>
-            <label style="font-size:0.7rem;color:#92400e;font-weight:600;display:block;margin-bottom:3px;">Day</label>
-            <input type="text" id="audibleChapter" placeholder="e.g. June 26"
-              oninput="meditSaveAudible()"
-              style="width:100%;border:1px solid #fdba74;border-radius:6px;padding:5px 8px;font-size:0.82rem;box-sizing:border-box;outline:none;background:#fff;color:#78350f;">
-          </div>
-        </div>
-        <div style="margin-bottom:8px;">
-          <label style="font-size:0.7rem;color:#92400e;font-weight:600;display:block;margin-bottom:3px;">Passages Listened To <span style="font-weight:400;color:#b45309;">(e.g. "Job 1-3, Psalm 8")</span></label>
-          <textarea id="audiblePassages" rows="3" placeholder="The complete linked passages for today will appear here."
-            oninput="meditSaveAudible()"
-            style="width:100%;border:1px solid #fdba74;border-radius:6px;padding:6px 8px;font-size:0.82rem;box-sizing:border-box;outline:none;background:#fff;color:#78350f;resize:vertical;line-height:1.45;"></textarea>
-        </div>
-        <div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap;">
-          <button onclick="audibleSummarize()"
-            style="background:#f97316;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:0.82rem;cursor:pointer;font-weight:700;">&#x2728; Summarize Today&#39;s Reading</button>
-          <button id="bibleReadingSaveBtn" onclick="saveBibleReadingToArchive(this)"
-            style="background:#d97706;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:0.82rem;cursor:pointer;font-weight:700;">&#x1F4BE; Save Reading to Archive</button>
-          <span style="font-size:0.67rem;color:#b45309;">Enter the passages you heard above for an accurate summary.</span>
-        </div>
-        <div id="audibleAIResult" style="display:none;background:#fff8f0;border:1px solid #fdba74;border-radius:8px;padding:12px;margin-top:8px;font-size:0.87rem;color:#78350f;line-height:1.6;white-space:pre-wrap;"></div>
-        <div id="bibleSpeechControls" style="display:none;align-items:center;gap:7px;flex-wrap:wrap;margin-top:8px;padding:9px 10px;background:#fffbeb;border:1px solid #fcd34d;border-radius:9px;">
-          <button type="button" id="bibleSpeechReadBtn" onclick="bibleSpeechRead()" style="background:#0a3161;color:#fff;border:none;border-radius:7px;padding:6px 11px;font-size:.76rem;font-weight:700;cursor:pointer;">&#x25B6; Read Summary</button>
-          <button type="button" id="bibleSpeechPauseBtn" onclick="bibleSpeechPauseResume()" disabled style="background:#fff;color:#92400e;border:1px solid #fcd34d;border-radius:7px;padding:6px 10px;font-size:.76rem;font-weight:700;cursor:pointer;">&#x23F8; Pause</button>
-          <button type="button" id="bibleSpeechStopBtn" onclick="bibleSpeechStop()" disabled style="background:#fff;color:#b91c1c;border:1px solid #fca5a5;border-radius:7px;padding:6px 10px;font-size:.76rem;font-weight:700;cursor:pointer;">&#x25A0; Stop</button>
-          <label style="font-size:.68rem;font-weight:700;color:#92400e;">Voice <select id="bibleSpeechVoice" onchange="bibleSpeechVoiceChanged()" style="max-width:210px;border:1px solid #fcd34d;border-radius:6px;padding:5px;font-size:.72rem;background:#fff;"></select></label>
-          <label style="font-size:.68rem;font-weight:700;color:#92400e;">Speed <select id="bibleSpeechRate" onchange="bibleSpeechSavePrefs()" style="border:1px solid #fcd34d;border-radius:6px;padding:5px;font-size:.72rem;background:#fff;"><option value="0.6">0.6x</option><option value="0.7">0.7x</option><option value="0.8">0.8x</option><option value="0.9">0.9x</option><option value="1" selected>1.0x</option><option value="1.1">1.1x</option><option value="1.25">1.25x</option></select></label>
-          <span id="bibleSpeechStatus" style="font-size:.68rem;color:#b45309;margin-left:auto;">Ready to read</span>
-        </div>
-      </div>
-
-      <!-- Bible Reading Archive -->
-      <div style="margin-top:14px;">
-        <div onclick="toggleBibleArchive()" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;background:#fff3e0;border:1px solid #fcd34d;border-radius:8px;padding:9px 12px;">
-          <span style="font-size:0.8rem;font-weight:700;color:#92400e;">&#x1F4C1; Bible Reading Archive</span>
-          <span id="bibleArchiveArrow" style="font-size:0.8rem;color:#b45309;">&#x25B6;</span>
-        </div>
-        <div id="bibleArchivePanel" style="display:none;border:1px solid #fcd34d;border-top:none;border-radius:0 0 8px 8px;background:#fffdf7;padding:10px 12px;">
-          <div id="bibleArchiveList" style="font-size:0.83rem;color:#78350f;"></div>
-          <div id="bibleArchiveEmpty" style="font-size:0.82rem;color:#94a3b8;text-align:center;padding:10px 0;">No summaries saved yet. Tap <strong>Save to Archive</strong> after summarizing.</div>
-        </div>
-      </div>
+      <div style="font-size:0.72rem;color:#92400e;font-weight:600;margin:5px 0 0 30px;">Takes place on Sundays</div>
     </div>
 
 
