@@ -1086,10 +1086,7 @@ function meditVerseSummary(){
   aiCall(prompt,2000,function(text){
     _meditPending={text:text,type:'verse',label:'Verse Explanation',date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})};
     box.style.display='block';
-    box.innerHTML='<div style="white-space:pre-wrap;line-height:1.6;">'+escHtml(text)+'</div>'
-      +'<div style="margin-top:9px;padding-top:8px;border-top:1px solid #c4b5fd;">'
-      +'<button id="meditVerseArchiveBtn" onclick="saveToMeditArchive(this)" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:20px;padding:6px 14px;font-size:0.76rem;font-weight:700;cursor:pointer;box-shadow:0 2px 5px rgba(109,40,217,0.3);">&#x1F4C1; Save to AI Prayer Archive</button>'
-      +'</div>';
+    box.innerHTML='<div style="white-space:pre-wrap;line-height:1.6;">'+escHtml(text)+'</div>';
   },function(err){box.textContent='Error: '+err;});
 }
 
@@ -1115,10 +1112,7 @@ function meditAIPrompt(type){
   aiCall(prompt,3000,function(text){
     _meditPending={text:text,type:type,label:typeLabel,date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})};
     res.style.display='block';
-    res.innerHTML='<div style="white-space:pre-wrap;line-height:1.6;color:#3b0764;">'+escHtml(text)+'</div>'
-      +'<div style="display:flex;gap:8px;margin-top:10px;padding-top:8px;border-top:1px solid #d8b4fe;flex-wrap:wrap;">'
-      +'<button id="meditArchiveSaveBtn" onclick="saveToMeditArchive(this)" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:20px;padding:7px 16px;font-size:0.78rem;font-weight:700;cursor:pointer;box-shadow:0 2px 6px rgba(109,40,217,0.35);letter-spacing:.01em;">&#x1F4C1; Save to AI Prayer Archive</button>'
-      +'</div>';
+    res.innerHTML='<div style="white-space:pre-wrap;line-height:1.6;color:#3b0764;">'+escHtml(text)+'</div>';
     _aiLastShown['meditAIResult']={text:text,lbl:'Meditation — '+typeLabel};
   },function(err){res.textContent='Error: '+err;});
 }
