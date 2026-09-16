@@ -2282,53 +2282,6 @@ body{
     <!-- Bible entries follow the journal's active date. -->
     <input type="hidden" id="bibleDate">
 
-    <!-- Combined Sermon and Bible Study Section -->
-    <div class="section" style="margin-bottom:10px;">
-<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-  <div class="tri-check" data-key="spSermon" onclick="triClick(this)" title="Mark sermon or Bible study complete"></div>
-  <div class="section-title" style="color:#6d4c41;background:linear-gradient(135deg,#fff8f0,#fdebd0);border-left:4px solid #e67e22;flex:1;">&#x1F4D6; Sermon &amp; Bible Study</div>
-  <span id="bBibleAutoSaveStatus" style="font-size:0.7rem;color:#528062;white-space:nowrap;"></span>
-  <button id="bBibleSaveBtn" onclick="saveBibleEntry(true)" style="background:linear-gradient(135deg,#e67e22,#d35400);color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:0.8rem;cursor:pointer;white-space:nowrap;">&#x1F4BE; Save</button>
-</div>
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#f0fff4;border-radius:8px;padding:9px 10px;margin-top:9px;">
-        <label style="background:#1e6b3a;color:#fff;border-radius:7px;padding:7px 12px;font-size:0.8rem;font-weight:700;cursor:pointer;white-space:nowrap;">&#x1F4C2; Upload Sermon Transcript
-          <input type="file" id="bTranscriptFile" accept=".txt,.md,.text,.rtf" onchange="loadTranscriptFile(event)" style="display:none;">
-        </label>
-        <button type="button" onclick="aiTranscriptFill()" id="bTranscriptAIBtn" style="background:#27ae60;color:#fff;border:none;border-radius:7px;padding:7px 12px;font-size:0.8rem;cursor:pointer;font-weight:700;white-space:nowrap;">&#x1F9E0; Fill Fields with AI</button>
-        <span id="bTranscriptStatus" style="font-size:0.74rem;color:#528062;flex:1;min-width:180px;">Transcript is temporary and will not be saved.</span>
-        <textarea id="bTranscriptText" style="display:none;" aria-hidden="true"></textarea>
-      </div>
-      <div style="font-size:0.72rem;font-weight:800;color:#9a5a24;text-transform:uppercase;letter-spacing:.05em;margin:10px 0 2px;">Source details</div>
-      <div class="task-row"><label style="min-width:110px;font-weight:600;">Title / Topic:</label><input type="text" id="bSermonTitle" placeholder="Sermon or study title…" style="flex:1;border:1px solid #e9ecef;border-radius:6px;padding:5px 8px;font-size:0.85rem;"></div>
-      <div class="task-row"><label style="min-width:110px;font-weight:600;">Speaker / Teacher:</label><input type="text" id="bSermonSpeaker" placeholder="Pastor, speaker, or study leader…" style="flex:1;border:1px solid #e9ecef;border-radius:6px;padding:5px 8px;font-size:0.85rem;"></div>
-      <div class="task-row" style="gap:6px;flex-wrap:wrap;">
-        <label style="min-width:90px;font-weight:600;">&#x1F517; URL <span style="font-size:.68rem;color:#98a2b3;">(optional)</span>:</label>
-        <input type="url" id="bSermonURL" placeholder="https://…" style="flex:1;min-width:180px;border:1px solid #e9ecef;border-radius:6px;padding:5px 8px;font-size:0.85rem;">
-        <button type="button" id="bYouTubeFillBtn" onclick="youtubeTranscriptFill()" style="background:#dc2626;color:#fff;border:none;padding:5px 12px;border-radius:6px;font-size:0.8rem;font-weight:700;cursor:pointer;white-space:nowrap;">&#x25B6; Fill from YouTube</button>
-        <button onclick="openBibleSermonLink()" style="background:#667eea;color:#fff;border:none;padding:5px 12px;border-radius:6px;font-size:0.8rem;cursor:pointer;white-space:nowrap;">&#x25B6; Watch</button>
-      </div>
-      <div style="font-size:0.72rem;font-weight:800;color:#9a5a24;text-transform:uppercase;letter-spacing:.05em;margin:12px 0 2px;">Scripture &amp; message</div>
-      <div class="task-row"><label style="min-width:110px;font-weight:600;">Scripture:</label><input type="text" id="bScripture" placeholder="e.g. John 3:16, Psalm 23" style="flex:1;border:1px solid #e9ecef;border-radius:6px;padding:5px 8px;font-size:0.85rem;"></div>
-      <div class="task-row"><label style="min-width:110px;font-weight:600;">Key Verse:</label><input type="text" id="bKeyVerse" placeholder="Write out the key verse…" style="flex:1;border:1px solid #e9ecef;border-radius:6px;padding:5px 8px;font-size:0.85rem;"></div>
-      <div class="task-row"><label style="min-width:110px;font-weight:600;">Main Theme:</label><input type="text" id="bTheme" placeholder="Central message or topic…" style="flex:1;border:1px solid #e9ecef;border-radius:6px;padding:5px 8px;font-size:0.85rem;"></div>
-      <textarea id="bNotes" style="display:none;" aria-hidden="true"></textarea>
-      <textarea id="bApplication" style="display:none;" aria-hidden="true"></textarea>
-      <div class="task-row" style="flex-direction:column;align-items:flex-start;gap:4px;">
-        <label style="font-weight:600;">Reflection &amp; Life Application</label>
-        <textarea id="bSermonNotes" placeholder="Key points, observations, what stood out, and how you will apply it…" rows="5" style="width:100%;border:1px solid #e9ecef;border-radius:6px;padding:8px;font-size:0.85rem;resize:vertical;font-family:inherit;box-sizing:border-box;"></textarea><button type="button" class="mic-btn" onclick="startVoice('bSermonNotes',this)" title="Voice input">🎤 Mic</button>
-      </div>
-      <details id="monthlySermonArchive" style="margin-top:12px;background:#fffaf4;border-radius:9px;padding:0;overflow:hidden;">
-        <summary style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 11px;cursor:pointer;color:#7c2d12;font-size:.8rem;font-weight:800;list-style:none;">
-          <span>&#x1F4C1; <span id="monthlySermonArchiveTitle">Current Month Sermon Archive</span></span>
-          <span id="monthlySermonArchiveCount" style="font-size:.72rem;color:#9a5a24;">0 saved</span>
-        </summary>
-        <div style="padding:0 11px 11px;">
-          <div id="monthlySermonArchiveList"></div>
-          <button type="button" id="deleteMonthlySermonsBtn" onclick="deleteCurrentMonthSermons()" style="display:none;margin-top:8px;background:#fff1f2;color:#b42318;border:1px solid #fecdd3;border-radius:6px;padding:6px 10px;font-size:.74rem;cursor:pointer;">Delete This Month</button>
-        </div>
-      </details>
-    </div>
-
   </div>
 </div>
 
