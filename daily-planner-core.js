@@ -1412,9 +1412,9 @@ function gRow(l,m,t){const b=t?'background:#f8f9fa;font-weight:700':'';const ski
 function fRow(l,m,t){const b=t?'background:#f8f9fa;font-weight:700':'';return`<tr style="${b}"><td>${l}</td><td>${m.miles?m.miles.toFixed(1):'-'}</td><td>${m.pace?fmtPace(m.pace):'-'}</td><td>${m.watts?Math.round(m.watts):'-'}</td><td>${fmtMins(m.time)}</td><td>${m.steps?Math.round(m.steps):'-'}</td><td>${m.dogWalk?(Math.round(m.dogWalk*10)/10)%1===0?Math.round(m.dogWalk):+(m.dogWalk.toFixed(1)):'-'}</td><td>${m.walk?(Math.round(m.walk*10)/10)%1===0?Math.round(m.walk):+(m.walk.toFixed(1)):'-'}</td></tr>`;}
 function wRow(l,m,t){const b=t?'background:#f8f9fa;font-weight:700':'';const bp=m.bpSys?Math.round(m.bpSys)+'/'+Math.round(m.bpDia):'-';const hd=m.headache?`<span style='color:#2563eb;font-weight:700;'>${t?m.headache+'d':'✓'}</span>`:'-';return`<tr style="${b}"><td>${l}</td><td>${m.weight?m.weight.toFixed(1):'-'}</td><td>${m.sleep?fmtMins(m.sleep):'-'}</td><td>${m.sleepScore?m.sleepScore.toFixed(0):'-'}</td><td>${bp}</td><td>${m.pulse?Math.round(m.pulse):'-'}</td><td>${hd}</td></tr>`;}
 const gH='<table class="summary-table"><thead><tr><th>Period</th><th>Audiobook</th><th>Learning &amp; Growth</th></tr></thead><tbody>';
-const fH='<table class="summary-table"><thead><tr><th>Period</th><th>Miles</th><th>Pace</th><th>Watts</th><th>Time</th><th>Steps</th><th>Stretch</th><th>Massage</th><th>Dog Walk</th><th>Walk</th></tr></thead><tbody>';
+const fH='<table class="summary-table"><thead><tr><th>Period</th><th>Miles</th><th>Pace</th><th>Watts</th><th>Time</th><th>Steps</th><th>Dog Walk</th><th>Walk</th></tr></thead><tbody>';
 gRow=function(l,m,t){const b=t?'background:#f8f9fa;font-weight:700':'';const skillCell=m.skillDone?(t?m.skillDone+'d':'&#x2705;'):'-';return`<tr style="${b}"><td>${l}</td><td>${fmtMinsSeconds(m.audiobook)}</td><td>${skillCell}</td></tr>`;};
-fRow=function(l,m,t){const b=t?'background:#f8f9fa;font-weight:700':'';return`<tr style="${b}"><td>${l}</td><td>${m.miles?m.miles.toFixed(1):'-'}</td><td>${m.pace?fmtPace(m.pace):'-'}</td><td>${m.watts?Math.round(m.watts):'-'}</td><td>${fmtMinsSeconds(m.time)}</td><td>${m.steps?Math.round(m.steps):'-'}</td><td>${fmtMinsSeconds(m.stretch)}</td><td>${fmtMinsSeconds(m.massage)}</td><td>${m.dogWalk?(Math.round(m.dogWalk*10)/10)%1===0?Math.round(m.dogWalk):+(m.dogWalk.toFixed(1)):'-'}</td><td>${m.walk?(Math.round(m.walk*10)/10)%1===0?Math.round(m.walk):+(m.walk.toFixed(1)):'-'}</td></tr>`;};
+fRow=function(l,m,t){const b=t?'background:#f8f9fa;font-weight:700':'';return`<tr style="${b}"><td>${l}</td><td>${m.miles?m.miles.toFixed(1):'-'}</td><td>${m.pace?fmtPace(m.pace):'-'}</td><td>${m.watts?Math.round(m.watts):'-'}</td><td>${fmtMinsSeconds(m.time)}</td><td>${m.steps?Math.round(m.steps):'-'}</td><td>${m.dogWalk?(Math.round(m.dogWalk*10)/10)%1===0?Math.round(m.dogWalk):+(m.dogWalk.toFixed(1)):'-'}</td><td>${m.walk?(Math.round(m.walk*10)/10)%1===0?Math.round(m.walk):+(m.walk.toFixed(1)):'-'}</td></tr>`;};
 const wH='<table class="summary-table"><thead><tr><th>Period</th><th>Weight</th><th>Sleep</th><th>Sleep Score</th><th>Avg BP</th><th>Pulse</th><th>Headache</th></tr></thead><tbody>';
 const dsH='<table class="summary-table day-score-table"><thead><tr><th>Period</th><th>Day Score</th></tr></thead><tbody>';
 function dsRow(l,m,t){const b=t?'background:#f8f9fa;font-weight:700':'';return`<tr style="${b}"><td>${l}</td><td>${m.score?m.score.toFixed(1)+' / 5':'-'}</td></tr>`;}
@@ -1987,17 +1987,21 @@ function renderMilesChart(){
   const today2=new Date();
   for(let i=59;i>=0;i--){
     const d=new Date(today2);d.setDate(today2.getDate()-i);
+    // Pull mileage straight from logged Activities for every day in the window,
+    // not just days that also have a saved Daily journal record — a run logged
+    // on a day the journal tab was never opened has no 'planner_' entry, and
+    // was previously being skipped entirely, making the chart look empty even
+    // with real mileage on the books.
     const r=localStorage.getItem('planner_'+dk(d));
-    if(r){
-      const dd=JSON.parse(r);const dm=getDM(dd,dk(d));const m=dm.miles||parseFloat(dd.exMiles)||0;
-      entries.push({date:dk(d),val:m,label:d.toLocaleDateString('en-US',{month:'numeric',day:'numeric'})});
-    }
+    const dd=r?JSON.parse(r):{};
+    const dm=getDM(dd,dk(d));const m=dm.miles||parseFloat(dd.exMiles)||0;
+    entries.push({date:dk(d),val:m,label:d.toLocaleDateString('en-US',{month:'numeric',day:'numeric'})});
   }
   const withMiles=entries.filter(e=>e.val>0);
   wrap.style.display='block';
   if(withMiles.length<2){
     const c=document.getElementById('milesChart');if(c){const ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);}
-    const avg=document.getElementById('milesChartAvg');if(avg)avg.textContent='No mileage logged yet. Log miles on the Daily tab under Exercise → Miles.';
+    const avg=document.getElementById('milesChartAvg');if(avg)avg.textContent='No mileage logged in the last 60 days. Log a run on the Activities tab to see it here.';
     return;
   }
   const doDraw=()=>{
