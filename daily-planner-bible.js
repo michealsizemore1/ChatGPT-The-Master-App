@@ -1447,13 +1447,18 @@ function h2SyncFromJournal(){
     var match=state.habits.find(function(h){return !h.autoSource&&normHabitName(h.name)===normHabitName(source.name);});
     if(match){match.autoSource=source.id;state.dismissedAuto=(state.dismissedAuto||[]).filter(function(id){return id!==source.id;});}
   });
-  // "Daily Stretching" removed per user request (see habits2_stretch_reflection_removed_v1
-  // above) — this used to force-create the habit here (guarded only by a one-time flag, not
-  // dismissedAuto), so the block has to stay deleted rather than just gated, or a browser that
-  // never set that flag (e.g. a fresh install) would bring the habit right back.
-  if(!state.habits.some(function(h){return h.autoSource==='hydration';})){
-    state.habits.push({id:'h2-auto-hydration',name:'Reach 64 oz Water',category:'Health',color:'#0284c7',type:'count',target:64,schedule:'daily',weeklyTarget:7,days:[0,1,2,3,4,5,6],why:'Support endurance, recovery, and long-distance running with consistent hydration.',cue:'',minimum:'Begin logging water early in the day',created:(firstSeen.hydration||todayKey)+'T12:00:00',autoSource:'hydration'});
-    state.dismissedAuto=(state.dismissedAuto||[]).filter(function(id){return id!=='hydration';});
+  // "Reach 64 oz Water" removed per user request — same pattern as Stretching/Reflection
+  // above: drop any existing habit card and record 'hydration' in dismissedAuto so the
+  // self-heal and suggestion logic below (which both skip any sourceId already in
+  // dismissedAuto) never brings it back. This block used to force-create the habit here
+  // unconditionally on every sync (guarded only by a one-time flag, not dismissedAuto), so
+  // it has to stay deleted rather than just gated, or a browser that never set that flag
+  // (e.g. a fresh install) would bring the habit right back.
+  if(!localStorage.getItem('habits2_hydration_removed_v1')){
+    state.habits=state.habits.filter(function(h){return h.autoSource!=='hydration';});
+    state.dismissedAuto=state.dismissedAuto||[];
+    if(state.dismissedAuto.indexOf('hydration')===-1)state.dismissedAuto.push('hydration');
+    localStorage.setItem('habits2_hydration_removed_v1','1');
   }
   var habitRenameMap={hydration:'Reach 64 oz Water',nutrition:'Log Meals & Nutrition',training:'Follow Training Plan',steps:'Reach 10,000 Steps',library:'Read or Listen Daily',udemy:'Complete a Udemy Lesson','retirement-videos':'Watch Financial Videos'};
   state.habits.forEach(function(h){if(habitRenameMap[h.autoSource])h.name=habitRenameMap[h.autoSource];if(h.autoSource==='hydration'){h.type='count';h.target=64;h.schedule='daily';h.weeklyTarget=7;h.category='Health';h.why='Support endurance, recovery, and long-distance running with consistent hydration.';}if(h.autoSource==='steps'){h.type='count';h.target=10000;h.schedule='daily';h.weeklyTarget=7;h.category='Fitness';h.why='Build consistent daily movement by reaching 10,000 steps.';}if(h.autoSource==='udemy'){h.type='duration';h.target=20;h.category='Growth';h.why='Build consistent learning through current and future Udemy courses.';h.minimum='Complete one lesson or log at least 20 minutes';}if(h.autoSource==='retirement-videos'){h.category='Growth';h.why='Build financial knowledge through focused video learning.';}});
