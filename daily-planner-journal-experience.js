@@ -414,7 +414,6 @@ function renderJournalSchedule(){
     {time:'9:00 AM',mins:540,label:'Walk Buddy',detail:'Take Buddy for a walk',done:localStorage.getItem('schedule_walkBuddy_'+dateKey)==='1',manual:'walkBuddy'},
     {time:'12:00 PM',mins:720,label:'Water checkpoint: 32 oz',detail:'Cumulative total: reach 32 ounces by noon',done:water>=32,tab:'nutrition'},
     {time:'12:00 PM',mins:720,label:'Lunch',detail:'Midday meal and hydration',done:mealComplete('lunch',720),tab:'nutrition'},
-    {time:'5:00 PM',mins:1020,label:'Water checkpoint: 64 oz',detail:'Cumulative total: reach 64 ounces by 6:00 PM',done:water>=64,tab:'nutrition'},
     {time:'5:30 PM',mins:1050,label:'Dinner',detail:'Evening meal and nutrition update',done:mealComplete('dinner',1050),tab:'nutrition'},
     {time:journalMinsToClock(trainingStartMins),mins:trainingStartMins,label:restDay?'Rest day — no training scheduled':'Today’s training',detail:restDay?'Automatically complete because no workout is scheduled':training,done:activityDone,tab:'activities'},
     {time:'8:00 PM',mins:1200,label:'Journal accomplishments and gratitude',detail:'Capture the day while it is fresh',done:reflected,tab:'daily'},
