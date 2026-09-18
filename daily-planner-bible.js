@@ -1425,6 +1425,19 @@ function h2SyncFromJournal(){
     state.dismissedAuto=(state.dismissedAuto||[]).filter(function(id){return id!=='language';});
     localStorage.setItem('habits2_language_lessons_v1','1');
   }
+  // "Language Lessons" removed from Habits per user request (for now) — same pattern as
+  // Hydration above: drop any existing habit card and record 'language' in dismissedAuto so
+  // the self-heal and suggestion logic below (which both skip any sourceId already in
+  // dismissedAuto) never brings it back. This supersedes the habits2_language_lessons_v1
+  // block just above, which un-dismisses/creates this habit unconditionally the first time
+  // it runs — that flag is already set on existing installs, so this new block is what
+  // actually removes the habit going forward.
+  if(!localStorage.getItem('habits2_language_removed_v1')){
+    state.habits=state.habits.filter(function(h){return h.autoSource!=='language';});
+    state.dismissedAuto=state.dismissedAuto||[];
+    if(state.dismissedAuto.indexOf('language')===-1)state.dismissedAuto.push('language');
+    localStorage.setItem('habits2_language_removed_v1','1');
+  }
   ['evening-planning','sleep-routine','daily-reflection'].forEach(function(sourceId){
     if(state.habits.some(function(h){return h.autoSource===sourceId;})||(state.dismissedAuto||[]).indexOf(sourceId)!==-1)return;
     var source=sources.find(function(item){return item.id===sourceId;});if(!source)return;

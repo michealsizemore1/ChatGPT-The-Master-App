@@ -1118,7 +1118,7 @@ function meditAIPrompt(type){
   aiCall(prompt,3000,function(text){
     _meditPending={text:text,type:type,label:typeLabel,date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})};
     res.style.display='block';
-    res.innerHTML='<div style="white-space:pre-wrap;line-height:1.6;color:#3b0764;">'+escHtml(text)+'</div>';
+    res.innerHTML='<div style="white-space:pre-wrap;line-height:1.6;color:#3b0764;">'+escHtml(text)+'</div><div style="text-align:right;margin-top:8px;padding-top:6px;border-top:1px solid rgba(0,0,0,0.08);"><button onclick="archiveAIResp(\'meditAIResult\')" style="font-size:0.75rem;padding:3px 10px;border-radius:6px;border:none;background:#8e44ad;color:#fff;cursor:pointer;">&#x1F4BE; Save</button></div>';
     _aiLastShown['meditAIResult']={text:text,lbl:'Meditation — '+typeLabel};
   },function(err){res.textContent='Error: '+err;});
 }
@@ -1132,7 +1132,7 @@ function bibleWorshipAIPrompt(){
   var prompt='You are a gentle Christian worship guide. Today\'s scripture focus is: "'+verse+'"\n\nCreate a brief, guided worship moment (3-5 minutes) centered on praise rather than petition. Include: 1) A short call to worship, 2) A few lines connecting the verse to who God is, 3) A simple sung or spoken praise response the person can say or sing aloud, 4) A closing blessing. Keep it warm, reverent, and easy to follow. Under 220 words.';
   aiCall(prompt,2200,function(text){
     res.style.display='block';
-    res.innerHTML='<div style="white-space:pre-wrap;line-height:1.6;color:#3b0764;">'+escHtml(text)+'</div>';
+    res.innerHTML='<div style="white-space:pre-wrap;line-height:1.6;color:#3b0764;">'+escHtml(text)+'</div><div style="text-align:right;margin-top:8px;padding-top:6px;border-top:1px solid rgba(0,0,0,0.08);"><button onclick="archiveAIResp(\'bibleWorshipAIResult\')" style="font-size:0.75rem;padding:3px 10px;border-radius:6px;border:none;background:#8e44ad;color:#fff;cursor:pointer;">&#x1F4BE; Save</button></div>';
     _aiLastShown['bibleWorshipAIResult']={text:text,lbl:'Guided Worship'};
   },function(err){res.textContent='Error: '+err;});
 }
