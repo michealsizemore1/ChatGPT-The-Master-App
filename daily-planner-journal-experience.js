@@ -132,8 +132,46 @@ function journalLinkedGreenCount(keys,data){
   }).length;
 }
 function journalToggleScheduleDetail(kind){_journalScheduleOpenDetail=_journalScheduleOpenDetail===kind?'':kind;renderJournalSchedule();}
+// Today's meditation session, if one was logged, so My Schedule can show what
+// was actually done instead of the generic reminder text.
+function journalMeditationTodayLine(){
+  try{
+    var sessions=JSON.parse(localStorage.getItem('medit_sessions')||'[]');
+    var todayKey=(typeof meditTodayKey==='function')?meditTodayKey():dk(today);
+    var entry=sessions.find(function(s){return s.date===todayKey;});
+    if(entry&&entry.dur)return entry.dur+' min session logged today';
+  }catch(ignore){}
+  return'Begin the day with meditation and stillness';
+}
+// Quick actions for the Meditation card on My Schedule — mark complete or
+// jump straight into a timed session without leaving the schedule view.
+function journalMeditationQuickToggle(event){
+  if(event){event.preventDefault();event.stopPropagation();}
+  var next=journalCheckState(journalViewData(),'spMeditation')==='green'?'':'green';
+  document.querySelectorAll('.tri-check[data-key="spMeditation"]').forEach(function(el){applyTriState(el,next);});
+  save();
+  renderJournalSchedule();
+}
+function journalMeditationQuickStart(event,minutes){
+  if(event){event.preventDefault();event.stopPropagation();}
+  switchTab('meditate',null);
+  setTimeout(function(){
+    if(typeof meditSetDuration==='function')meditSetDuration(minutes);
+    if(typeof meditStartStop==='function'&&!_meditRunning)meditStartStop();
+    var timer=document.getElementById('meditTimerDisplay');
+    if(timer)timer.scrollIntoView({behavior:'smooth',block:'center'});
+  },80);
+}
 function journalScheduleDetailHtml(kind,data){
   if(_journalScheduleOpenDetail!==kind)return'';
+  if(kind==='meditation'){
+    var meditDone=journalCheckState(data,'spMeditation')==='green';
+    return'<div class="journal-schedule-detail-panel">'
+      +'<button type="button" class="journal-schedule-detail-row" onclick="journalMeditationQuickToggle(event)"><i class="journal-schedule-detail-dot '+(meditDone?'green':'')+'"></i><span>'+(meditDone?'Meditation complete':'Mark meditation complete')+'</span></button>'
+      +'<div class="journal-schedule-medit-quickstart"><span class="journal-schedule-medit-label">Start a session:</span>'
+      +[5,10,15,20].map(function(m){return'<button type="button" class="journal-schedule-medit-btn" onclick="journalMeditationQuickStart(event,'+m+')">'+m+'m</button>';}).join('')
+      +'</div></div>';
+  }
   var rows=kind==='faith'?[['Daily Bread','spDailyBread','bible'],['Bible reading','spBibleAudio','bible'],['Prayer','spAIPrayer','bible']]:kind==='wellness'?[['Blood pressure','wBP','wellness'],['Medications','wMeds','wellness'],['Weight','wWght','wellness'],['Sleep','wSleep','wellness']]:[['Strength','exStrength','activities'],['Walk','exWalk','activities'],['Dog walk','exDogWalk','activities'],['10,000 steps','exStepsCheck','activities']];
   return'<div class="journal-schedule-detail-panel">'+rows.map(function(row){var status=journalCheckState(data,row[1]);return'<button type="button" class="journal-schedule-detail-row" onclick="journalOpenDailyCheck(event,\''+row[2]+'\',\''+row[1]+'\')"><i class="journal-schedule-detail-dot '+status+'"></i><span>'+row[0]+'</span></button>';}).join('')+'</div>';
 }
@@ -406,7 +444,7 @@ function renderJournalSchedule(){
   var items=[
     {time:'5:00 AM',mins:300,label:'Review priorities, goals, calendar, email and schedule',detail:'Check complete after your morning review',done:!!d.reviewCheck,tab:'daily',checkId:'reviewCheck'},
     {time:'5:05 AM',mins:305,label:'Personal Hygiene',detail:'Shower, brush teeth, get ready for the day',done:localStorage.getItem('schedule_personalHygiene_'+dateKey)==='1',manual:'personalHygiene'},
-    {time:'5:15 AM',mins:315,label:'Meditation',detail:'Begin the day with meditation and stillness',done:d.spMeditation==='green',tab:'meditate'},
+    {time:'5:15 AM',mins:315,label:'Meditation',detail:journalMeditationTodayLine(),done:d.spMeditation==='green',tab:'meditate',detailKind:'meditation'},
     {time:'5:20 AM',mins:320,label:'Wellness check and water',detail:wellnessRecorded+' of 4 wellness items complete',done:wellnessRecorded===4,partial:wellnessRecorded>0&&wellnessRecorded<4,tab:'wellness',detailKind:'wellness'},
     {time:'5:30 AM',mins:330,label:'Bible reading and prayer',detail:faithDone+' of 3 faith practices complete',done:faithDone===3,partial:faithDone>0&&faithDone<3,tab:'bible',detailKind:'faith'},
     {time:'5:45 AM',mins:345,label:'Breakfast',detail:'Recovery meal and hydration after training',done:mealComplete('breakfast',345),tab:'nutrition'},

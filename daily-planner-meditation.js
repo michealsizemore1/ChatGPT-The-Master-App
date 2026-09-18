@@ -46,6 +46,12 @@ function meditStartStop(){
       document.getElementById('meditTimerStatus').textContent='COMPLETE ✓';
       meditPlayBell();setTimeout(meditPlayBell,1500);
       meditSaveSession(true);
+      // Finishing a full guided session also marks Meditation done on My
+      // Schedule, mirroring the Dog Walk -> Walk Buddy bridge, so completing
+      // the timer here shows up there without a separate manual tap.
+      document.querySelectorAll('.tri-check[data-key="spMeditation"]').forEach(function(el){applyTriState(el,'green');});
+      save();
+      if(typeof renderJournalSchedule==='function')renderJournalSchedule();
     }
   },1000);
 }
