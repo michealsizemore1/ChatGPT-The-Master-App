@@ -1346,6 +1346,7 @@ body{
   <div style="display:flex;gap:8px;flex-wrap:wrap;">
     <button type="button" class="ai-btn" style="background:#8e44ad;" onclick="openAskJournal()">&#x1F4AC; Ask AI</button>
     <button class="ai-btn" style="background:#2980b9;" onclick="openJournalSearch()">&#x1F50D; Search</button>
+    <button class="ai-btn" style="background:#16a085;" onclick="openAIArchive()">&#x1F4C1; Saved</button>
   </div>
   <!-- Ask AI expand panel -->
   <div id="askJournalBox" style="display:none;background:#f8f0ff;border:1px solid #d8b4fe;border-radius:8px;padding:12px;margin-top:8px;width:100%;box-sizing:border-box;">
@@ -2437,6 +2438,17 @@ body{
       </select>
     </div>
     <div id="journalSearchResults" style="overflow-y:auto;flex:1;"></div>
+  </div>
+</div>
+
+<!-- AI Archive Modal (Saved AI Responses) -->
+<div class="modal-overlay" id="aiArchiveModal" style="display:none;">
+  <div class="modal" style="max-width:600px;max-height:85vh;display:flex;flex-direction:column;">
+    <h2>&#x1F4C1; Saved AI Responses</h2>
+    <div id="aiArchiveList" style="overflow-y:auto;flex:1;margin-bottom:12px;"></div>
+    <div style="text-align:right;">
+      <button onclick="closeAIArchive()" style="background:#f0f0f0;color:#555;border:none;padding:8px 14px;border-radius:6px;cursor:pointer;">Close</button>
+    </div>
   </div>
 </div>
 

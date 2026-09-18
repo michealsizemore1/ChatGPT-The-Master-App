@@ -2223,7 +2223,12 @@ function aiShow(boxId,text,archLabel){
   const el=document.getElementById(boxId);
   if(!el)return;
   el.style.display='block';
-  el.innerHTML='<div style="white-space:pre-wrap;line-height:1.6;">'+escHtml(text)+'</div>';
+  var saveHtml='';
+  if(archLabel){
+    _aiLastShown[boxId]={text:text,lbl:archLabel};
+    saveHtml='<div style="text-align:right;margin-top:8px;padding-top:6px;border-top:1px solid rgba(0,0,0,0.08);"><button onclick="archiveAIResp(\''+boxId+'\')" style="font-size:0.75rem;padding:3px 10px;border-radius:6px;border:none;background:#8e44ad;color:#fff;cursor:pointer;">&#x1F4BE; Save</button></div>';
+  }
+  el.innerHTML='<div style="white-space:pre-wrap;line-height:1.6;">'+escHtml(text)+'</div>'+saveHtml;
   el.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 function archiveAIResp(boxId){
