@@ -444,7 +444,7 @@ function renderJournalSchedule(){
   var items=[
     {time:'5:00 AM',mins:300,label:'Review priorities, goals, calendar, email and schedule',detail:'Check complete after your morning review',done:!!d.reviewCheck,tab:'daily',checkId:'reviewCheck'},
     {time:'5:05 AM',mins:305,label:'Personal Hygiene',detail:'Shower, brush teeth, get ready for the day',done:localStorage.getItem('schedule_personalHygiene_'+dateKey)==='1',manual:'personalHygiene'},
-    {time:'5:15 AM',mins:315,label:'Meditation',detail:journalMeditationTodayLine(),done:d.spMeditation==='green',tab:'meditate',detailKind:'meditation'},
+    {time:'5:15 AM',mins:315,label:'Meditation',detail:journalMeditationTodayLine(),done:d.spMeditation==='green',tab:'meditate',detailKind:'meditation',linkedCheckKey:'spMeditation'},
     {time:'5:20 AM',mins:320,label:'Wellness check and water',detail:wellnessRecorded+' of 4 wellness items complete',done:wellnessRecorded===4,partial:wellnessRecorded>0&&wellnessRecorded<4,tab:'wellness',detailKind:'wellness'},
     {time:'5:30 AM',mins:330,label:'Bible reading and prayer',detail:faithDone+' of 3 faith practices complete',done:faithDone===3,partial:faithDone>0&&faithDone<3,tab:'bible',detailKind:'faith'},
     {time:'5:45 AM',mins:345,label:'Breakfast',detail:'Recovery meal and hydration after training',done:mealComplete('breakfast',345),tab:'nutrition'},
