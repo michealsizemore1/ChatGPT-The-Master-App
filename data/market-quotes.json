@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-18T21:46:03+00:00",
+  "updatedAt": "2026-09-18T23:48:29+00:00",
   "source": "Yahoo Finance public chart data",
   "quotes": {
     "SCHD": {
@@ -67,8 +67,8 @@
       "prev": 51778.04,
       "change": -95.4,
       "changesPercentage": -0.1842,
-      "volume": 846991233,
-      "avgVolume": 493094246,
+      "volume": 858494006,
+      "avgVolume": 495394801,
       "yearHigh": 54744.33,
       "yearLow": 45057.28,
       "marketState": "",
@@ -123,12 +123,12 @@
       "currency": "USD"
     },
     "BTC-USD": {
-      "price": 81197.48,
+      "price": 80882.51,
       "prev": 76350.68,
-      "change": 4846.8,
-      "changesPercentage": 6.3481,
-      "volume": 39539109888,
-      "avgVolume": 32222783526,
+      "change": 4531.83,
+      "changesPercentage": 5.9355,
+      "volume": 40358993920,
+      "avgVolume": 32386760333,
       "yearHigh": 126198.07,
       "yearLow": 57747.766,
       "marketState": "",
@@ -221,12 +221,12 @@
       "currency": "USD"
     },
     "BTC=F": {
-      "price": 81340.0,
+      "price": 81180.0,
       "prev": 81330.0,
-      "change": 10.0,
-      "changesPercentage": 0.0123,
-      "volume": 7,
-      "avgVolume": 9131,
+      "change": -150.0,
+      "changesPercentage": -0.1844,
+      "volume": 13,
+      "avgVolume": 9132,
       "yearHigh": 127240.0,
       "yearLow": 57850.0,
       "marketState": "",
@@ -260,6 +260,7 @@
     }
   ],
   "news": [
+    "The cost of capital is rising. Did stocks get the memo? - Chase Bank",
     "Jim Cramer sends strong warning to stock market investors - thestreet.com",
     "The cost of capital is rising. Did stocks get the memo? - J.P. Morgan Private Bank",
     "The Fed\u2019s never been so confident on economic growth. What investors should do now, according to KKR. - MarketWatch",
@@ -269,9 +270,8 @@
     "Global Market: Fed rate hike signals tougher road ahead for stocks, bonds - The Economic Times",
     "Economic data releases and Fed speech highlight Monday\u2019s calendar By Investing.com - Investing.com India",
     "Investors buy US stocks at fastest pace in three months, BofA says - Reuters",
-    "Wall Street drifts as bond yields rise and oil prices swing - BNN Bloomberg",
     "Aussie investors using AI to trade in a volatile market - inkl",
-    "Stock Market Today: Dow and Nasdaq Jump as Markets Retrace Post-Fed Moves - Eurasia Business News"
+    "Fed Rate Hike Seen as Clearing Event as Taiwan Stocks Surge Over 1,000 Points in Two Days; Advisory Firm Sees Path to 50,000 - finance.biggo.com"
   ],
   "economy": [
     "CPI 2026-07 | 3.5% YoY",
@@ -285,7 +285,7 @@
     "DXY  100.22 \u25bc0.03%",
     "Gold  $4,415.90 \u25b20.37%",
     "WTI  $95.47 \u25bc1.81%",
-    "Bitcoin  $81,197 \u25b26.35%",
+    "Bitcoin  $80,883 \u25b25.94%",
     "EUR/USD  1.1489 \u25b20.08%",
     "USD/JPY  156.85 \u25b20.58%",
     "VIX  14.81 \u25bc16.37%",
