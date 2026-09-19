@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-19T00:07:16+00:00",
+  "updatedAt": "2026-09-19T00:08:56+00:00",
   "source": "Yahoo Finance public chart data",
   "quotes": {
     "SCHD": {
@@ -123,12 +123,12 @@
       "currency": "USD"
     },
     "BTC-USD": {
-      "price": 80869.52,
+      "price": 80854.99,
       "prev": 80877.27,
-      "change": -7.75,
-      "changesPercentage": -0.0096,
-      "volume": 40495616000,
-      "avgVolume": 33040266341,
+      "change": -22.28,
+      "changesPercentage": -0.0275,
+      "volume": 40496361472,
+      "avgVolume": 33040452709,
       "yearHigh": 126198.07,
       "yearLow": 57747.766,
       "marketState": "",
@@ -264,11 +264,11 @@
     "Jim Cramer sends strong warning to stock market investors - thestreet.com",
     "The cost of capital is rising. Did stocks get the memo? - J.P. Morgan Private Bank",
     "The Fed\u2019s never been so confident on economic growth. What investors should do now, according to KKR. - MarketWatch",
+    "Economic data releases and Fed speech highlight Monday\u2019s calendar - Investing.com",
     "BIG NUMBER | 2.59% - ETF Database",
     "Wall St Week Ahead Investors focus on rate path, AI slowdown after Fed hike - Reuters",
     "What\u2019s Ahead in 2027 and Beyond for Inflation, Fed Rate Cuts, and More - Morningstar",
     "Global Market: Fed rate hike signals tougher road ahead for stocks, bonds - The Economic Times",
-    "Economic data releases and Fed speech highlight Monday\u2019s calendar By Investing.com - Investing.com India",
     "Investors buy US stocks at fastest pace in three months, BofA says - Reuters",
     "Aussie investors using AI to trade in a volatile market - inkl",
     "Fed Rate Hike Seen as Clearing Event as Taiwan Stocks Surge Over 1,000 Points in Two Days; Advisory Firm Sees Path to 50,000 - finance.biggo.com"
@@ -285,7 +285,7 @@
     "DXY  100.22 \u25bc0.03%",
     "Gold  $4,415.90 \u25b20.37%",
     "WTI  $95.47 \u25bc1.81%",
-    "Bitcoin  $80,870 \u25bc0.01%",
+    "Bitcoin  $80,855 \u25bc0.03%",
     "EUR/USD  1.1489 \u25b20.08%",
     "USD/JPY  156.85 \u25b20.58%",
     "VIX  14.81 \u25bc16.37%",
