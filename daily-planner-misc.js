@@ -426,6 +426,11 @@ function setChartMode(m){actChartMode=m;document.getElementById('chartMiBtn').cl
 function saveCPAndRender(){const v=document.getElementById('cpInput').value;localStorage.setItem('cp_value',v||'');renderActivities();}
 function getCP(){return parseFloat(localStorage.getItem('cp_value'))||0;}
 function powerZone(p,cp){if(!cp||!p)return null;const r=p/cp;if(r<0.55)return{z:'Z1',cls:'z1'};if(r<0.75)return{z:'Z2',cls:'z2'};if(r<0.90)return{z:'Z3',cls:'z3'};if(r<1.05)return{z:'Z4',cls:'z4'};return{z:'Z5',cls:'z5'};}
+function saveMaxHRAndRender(){const v=document.getElementById('hrMaxInput').value;localStorage.setItem('max_hr_value',v||'');renderActivities();}
+function getMaxHR(){const stored=parseFloat(localStorage.getItem('max_hr_value'));return stored>0?stored:174;}
+// Garmin's standard 5-zone heart-rate model, as a percentage of max heart rate:
+// Z1 50-60%, Z2 60-70%, Z3 70-80%, Z4 80-90%, Z5 90-100%+. Below 50% is untracked (resting/warm-up).
+function hrZone(hr,maxHR){if(!maxHR||!hr)return null;const r=hr/maxHR;if(r<0.50)return null;if(r<0.60)return{z:'Z1',cls:'z1'};if(r<0.70)return{z:'Z2',cls:'z2'};if(r<0.80)return{z:'Z3',cls:'z3'};if(r<0.90)return{z:'Z4',cls:'z4'};return{z:'Z5',cls:'z5'};}
 
 function goToActivityDate(dateStr){
   const target=new Date(dateStr+'T00:00:00');
@@ -700,6 +705,9 @@ function renderActivities(){
   const cpEl=document.getElementById('cpInput');
   if(cpEl&&!cpEl.value){const stored=localStorage.getItem('cp_value');if(stored)cpEl.value=stored;}
   const cp=getCP();
+  const hrMaxEl=document.getElementById('hrMaxInput');
+  if(hrMaxEl&&!hrMaxEl.value){const stored=localStorage.getItem('max_hr_value');if(stored)hrMaxEl.value=stored;}
+  const maxHR=getMaxHR();
   const acts=getActivities();
   const cnt=document.getElementById('actCount');
   if(cnt)cnt.textContent=acts.length?acts.length+' activit'+(acts.length!==1?'ies':'y'):'';
@@ -776,7 +784,7 @@ function renderActivities(){
     if(a.duration)stats.push('<span class="act-stat">&#x23F1; <strong>'+fmtDuration(a.duration)+'</strong></span>');
     if(a.pace)stats.push('<span class="act-stat">&#x1F3C3; <strong>'+a.pace+'</strong>/mi</span>');
     if(a.power){var zone=powerZone(a.power,cp);var zb=zone?'<span class="zone-badge '+zone.cls+'">'+zone.z+'</span>':'';stats.push('<span class="act-stat">&#x26A1; <strong>'+a.power+'</strong>W'+zb+'</span>');}
-    if(a.heartRate)stats.push('<span class="act-stat">&#x2764; <strong>'+a.heartRate+'</strong> bpm</span>');
+    if(a.heartRate){var hzone=hrZone(a.heartRate,maxHR);var hzb=hzone?'<span class="zone-badge '+hzone.cls+'">'+hzone.z+'</span>':'';stats.push('<span class="act-stat">&#x2764; <strong>'+a.heartRate+'</strong> bpm'+hzb+'</span>');}
     if(a.cadence)stats.push('<span class="act-stat">&#x1F9B5; <strong>'+a.cadence+'</strong> spm</span>');
     if(a.calories)stats.push('<span class="act-stat">&#x1F525; <strong>'+a.calories+'</strong> cal</span>');
     if(a.elevGain)stats.push('<span class="act-stat">&#x26F0; <strong>'+a.elevGain+'</strong> ft</span>');
@@ -1118,6 +1126,9 @@ function generateTrainingPlan(){
   const allPowers=recent.filter(a=>a.power>0).map(a=>a.power);
   const avgPower=allPowers.length?Math.round(allPowers.reduce((s,v)=>s+v,0)/allPowers.length):0;
   const cp=getCP();
+  const allHRs=recent.filter(a=>a.heartRate>0).map(a=>a.heartRate);
+  const avgHR=allHRs.length?Math.round(allHRs.reduce((s,v)=>s+v,0)/allHRs.length):0;
+  const maxHR=getMaxHR();
   const activeWeeks=Object.keys(weekBuckets).length;
   const totalWeeks=Math.round(historyDays/7);const consistencyPct=activeWeeks>0?Math.round((activeWeeks/totalWeeks)*100):0;
 
@@ -1154,6 +1165,8 @@ function generateTrainingPlan(){
     `- Average pace: ${fmtPace(avgPaceSec)} min/mile`,
     avgPower?`- Average running power: ${avgPower}W`:'',
     cp?`- Critical Power (CP): ${cp}W`:'',
+    avgHR?`- Average heart rate: ${avgHR} bpm`:'',
+    maxHR?`- Max heart rate (Garmin HR zones): ${maxHR} bpm`:'',
     `- Training consistency: ${activeWeeks} of last 13 weeks active (${consistencyPct}%)`,
   ].filter(Boolean).join('\n');
 
