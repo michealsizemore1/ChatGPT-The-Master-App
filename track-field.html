@@ -240,9 +240,9 @@ html{font-size:14px}
 
   <section id="entriesView" class="hide">
     <div class="hero">
-      <div class="eyebrow">Diamond League Final &middot; Brussels</div>
-      <div class="hero-row"><h1>Entries</h1><div class="stamp">PUBLISHED <b>2 SEP 2026</b></div></div>
-      <p class="source">Confirmed start lists for the flat running events at the Allianz Memorial Van Damme, with each entrant&rsquo;s season best, personal best and world ranking. Race times are Mountain, and the full two-day timetable is below the lists. <a href="https://brussels.diamondleague.com/en/programme-results/" target="_blank" rel="noopener">brussels.diamondleague.com</a></p>
+      <div class="eyebrow">Diamond League Final &middot; Brussels &middot; Concluded</div>
+      <div class="hero-row"><h1>Entries</h1><div class="stamp">CONCLUDED <b>5 SEP 2026</b></div></div>
+      <p class="source">Brussels closed out the 2026 Diamond League season on Sep 4&ndash;5 &mdash; Emmanuel Wanyonyi completed a four-peat in the men&rsquo;s 800m, and national or meet records fell in the men&rsquo;s 400m and women&rsquo;s shot put. The start lists and timetable below are kept as the record of who raced; every Diamond Trophy winner is at <a href="https://www.diamondleague.com/the-2026-wanda-diamond-league-champions/" target="_blank" rel="noopener">diamondleague.com</a>. For what&rsquo;s live right now: the World Road Running Championships are underway in Copenhagen (Sep 19&ndash;20) &mdash; see the Road tab.</p>
     </div>
     <div class="panel">
       <div class="controls">
@@ -311,7 +311,7 @@ html{font-size:14px}
 
 <script src="version-check.js"></script>
 <script>
-const APP_VERSION='2026-09-05-2';
+const APP_VERSION='2026-09-19-1';
 checkForNewerAppVersion(APP_VERSION, 'tf');
 
 // [name, country, ranking score, 2026 season best]  "rd" marks a road time used where there is no track mark.
@@ -497,17 +497,13 @@ const ENTRIES={
  }
 };
 const ENTRIES_PENDING=[
- ['World Athletics Ultimate Championship','Budapest, Sep 11-13','Fields are decided by Olympic and world titles, Diamond League final wins and the world rankings, so entries firm up once Brussels is done.'],
- ['World Athletics Road Running Championships','Copenhagen, Sep 19-20','National teams are usually confirmed in the final week before the race.'],
  ['Berlin Marathon','Sep 27','Elite fields are announced race by race, typically a couple of weeks out.'],
  ['Chicago Marathon','Oct 11','Elite field announced closer to race day.'],
  ['New York City Marathon','Nov 1','Elite field announced closer to race day.']
 ];
 const UPCOMING=[
- {d:'Sep 4-5',y:'2026',name:'Wanda Diamond League Final',where:'Brussels, Belgium',detail:'The season finale runs over two days for the first time, with Diamond Trophies decided in every discipline.',watch:'FloTrack &middot; Fri from 10:30 AM MDT, Sat from 10:10 AM MDT',tag:'Diamond League',cls:'major',links:[['Official programme','https://brussels.diamondleague.com/en/programme-results/'],['Ones to watch','https://www.diamondleague.com/wdl-final-2026-in-brussels-ones-to-watch-on-day-one/'],['Entry lists','https://www.diamondleague.com/wdl-final-in-brussels-entry-lists-published/']]},
- {d:'Sep 11-13',y:'2026',name:'World Athletics Ultimate Championship',where:'Budapest, Hungary',detail:'Inaugural edition. Sixteen athletes per track event, eight per field event, and a US$10 million purse. Entry comes from Olympic and world titles, Diamond League final wins, and the world rankings.',watch:'US broadcaster not yet announced &middot; first session 9:00 AM MDT',tag:'Championship',cls:'champs',links:[['Official site','https://worldathletics.org/competitions/world-athletics-ultimate-championship/2026'],['Exceptional invitations','https://worldathletics.org/competitions/world-athletics-ultimate-championship/2026/news/press-releases/exceptional-invitations-ultimate-championship'],['Kerr vs Ingebrigtsen','https://www.letsrun.com/news/2026/08/kerr-vs-jakob-is-on-world-athletics-bends-rules-to-grant-budapest-invitations/']]},
- {d:'Sep 19-20',y:'2026',name:'World Athletics Road Running Championships',where:'Copenhagen, Denmark',detail:'Half marathon, 5km and the mile, with mass-participation races at 5km and the mile.',watch:'Broadcaster not yet announced &middot; World Athletics streams selected territories',tag:'Championship',cls:'champs',links:[['Official site','https://worldathletics.org/competitions/world-athletics-road-running-championships/copenhagen26/main-page'],['Kenyan team','https://worldathletics.org/competitions/world-athletics-road-running-championships/copenhagen26/news/news/wrrc-copenhagen-26-kenya-team'],['USATF roster','https://www.usatf.org/news/2026/usatf-announces-roster-for-world-road-running-cham']]},
- {d:'Sep 27',y:'2026',name:'Berlin Marathon',where:'Berlin, Germany',detail:'The fastest of the majors and the usual home of world record attempts.',watch:'FloSports &middot; 1:00 AM MDT',tag:'Marathon major',cls:'major',links:[['Official site','https://www.bmw-berlin-marathon.com/en/'],['Elite field','https://www.bmw-berlin-marathon.com/en/news-media/news/detail/top-stars-complete-the-bmw-berlin-marathon-field-for-thrilling-races']]},
+ {d:'Sep 19-20',y:'2026',name:'World Athletics Road Running Championships',where:'Copenhagen, Denmark',detail:'Half marathon, 5km and the mile. Saturday\'s mile and 5km are done \u2014 Dawit Seare (ERI) won the men\'s 5km in 12:56 ahead of Jakob Ingebrigtsen, while Agathe Guillemot and Robert Farken took the miles \u2014 and the elite half marathon runs Sunday.',watch:'World Athletics streams selected territories',tag:'Championship',cls:'champs',links:[['Official site','https://worldathletics.org/competitions/world-athletics-road-running-championships/copenhagen26/main-page'],['Schedule &amp; results guide','https://www.letsrun.com/news/2026/09/2026-world-athletics-road-running-championships-schedule-start-lists-results-link-how-to-watch-the-world-half-5k-mile/']]},
+ {d:'Sep 27',y:'2026',name:'Berlin Marathon',where:'Berlin, Germany',detail:'The fastest of the majors and the usual home of world record attempts. World record holder Tigst Assefa headlines a women\'s field that also includes defending champion Rosemary Wanjiru.',watch:'FloSports &middot; 1:00 AM MDT',tag:'Marathon major',cls:'major',links:[['Official site','https://www.bmw-berlin-marathon.com/en/'],['Elite field','https://www.bmw-berlin-marathon.com/en/news-media/news/detail/top-stars-complete-the-bmw-berlin-marathon-field-for-thrilling-races']]},
  {d:'Oct 11',y:'2026',name:'Chicago Marathon',where:'Chicago, USA',detail:'Flat, fast, and the second of the autumn majors.',watch:'Peacock and NBC Chicago &middot; 6:00 AM MDT',tag:'Marathon major',cls:'major',links:[['Official site','https://www.chicagomarathon.com/']]},
  {d:'Nov 1',y:'2026',name:'New York City Marathon',where:'New York, USA',detail:'Five boroughs and the largest field in the sport. Clocks go back the same morning, so the start lands at 6:00 AM once Mountain Time returns to standard.',watch:'ESPN2 and ABC &middot; 6:00 AM MST',tag:'Marathon major',cls:'major',links:[['Official site','https://www.nyrr.org/tcsnycmarathon']]},
  {d:'Dec 6',y:'2026',name:'Shanghai Marathon',where:'Shanghai, China',detail:'A candidate race under assessment to join the majors in 2027.',watch:'No US broadcast confirmed',tag:'Candidate major',cls:'',links:[]}
@@ -522,33 +518,31 @@ const DL_SEASON=[
 
 // Section news. [ISO date, headline, publisher, url, one-line summary]
 // Checked 3 September 2026; the twice-weekly refresh replaces these.
-const NEWS_CHECKED='2026-09-03';
+const NEWS_CHECKED='2026-09-19';
 const NEWS={
  track:[
-  ['2026-09-02','Diamond League reaches climax with Ultimate places up for grabs','World Athletics','https://worldathletics.org/news/news/diamond-league-final-brussels-2026-day-one','Brussels closes the season with automatic Budapest places on the line alongside the Diamond Trophies.'],
-  ['2026-08-29','Explainer: wild cards in the Diamond League Final','Wanda Diamond League','https://www.diamondleague.com/explainer-wild-cards-in-the-wdl-final/','How national and global wild cards get athletes into the final without finishing top of the standings.'],
+  ['2026-09-13','Jefferson-Wooden and Bednarek sweep the sprints as USA tops the Ultimate Championship','NBC Sports','https://www.nbcsports.com/olympics/news/world-athletics-ultimate-championship-results-2026','USA won 10 golds across the 28-event format in Budapest; Josh Kerr held off Cameron Myers in the 1500m and Djamel Sedjati sprang the 800m upset.'],
+  ['2026-09-05','Wanyonyi completes an 800m four-peat as Diamond League champions are crowned in Brussels','FloTrack','https://www.flotrack.org/articles/16158918-diamond-league-champions-2026-full-list-of-winners','Collen Kebinatshipi (400m) and Chase Jackson (shot put) also broke meet or national records across the two-day final.'],
   ['2026-08-27','Dos Santos and Russell break world records in Zurich','Wanda Diamond League','https://www.diamondleague.com/dos-santos-and-russell-break-world-records-in-zurich/','Alison dos Santos ran 45.80 in the 400m hurdles, 0.14 inside Warholm’s mark; Masai Russell followed with 12.09 in the 100m hurdles less than 40 minutes later.']
  ],
  road:[
+  ['2026-09-19','Seare denies Ingebrigtsen in the Copenhagen 5km as Farken and Guillemot lead the mile','LetsRun','https://www.letsrun.com/news/2026/09/2026-world-athletics-road-running-championships-schedule-start-lists-results-link-how-to-watch-the-world-half-5k-mile/','Eritrea’s Dawit Seare ran a national record 12:56 to beat Ingebrigtsen on day one in Copenhagen; the elite half marathon follows on Sunday.'],
   ['2026-08-29','Gobena breaks course record while Jepchirchir dominates in Sydney','World Athletics','https://worldathletics.org/competitions/world-athletics-label-road-races/news/sydney-marathon-2026-gobena-jepchirchir','Addisu Gobena won in 2:04:42, three seconds clear and inside the course record; Peres Jepchirchir took the women’s race in 2:18:31.'],
-  ['2026-08-11','Top stars complete the BMW Berlin Marathon field','BMW Berlin Marathon','https://www.bmw-berlin-marathon.com/en/news-media/news/detail/top-stars-complete-the-bmw-berlin-marathon-field-for-thrilling-races','Gabriel Geay and Guye Adola join the men’s field for 27 September, with Dubai winner Bedatu Hirpa added to the women’s.'],
-  ['2026-05-26','USATF announces its roster for the World Road Running Championships','USATF','https://www.usatf.org/news/2026/usatf-announces-roster-for-world-road-running-cham','Nineteen athletes named for Copenhagen, among them half marathon American record holders Weini Kelati and Conner Mantz.']
+  ['2026-08-11','Top stars complete the BMW Berlin Marathon field','BMW Berlin Marathon','https://www.bmw-berlin-marathon.com/en/news-media/news/detail/top-stars-complete-the-bmw-berlin-marathon-field-for-thrilling-races','Gabriel Geay and Guye Adola join the men’s field for 27 September, with Dubai winner Bedatu Hirpa added to the women’s.']
  ],
  ultra:[
-  ['2026-09-01','Nick Fowler sets the overall and self-supported Pacific Crest Trail FKT','iRunFar','https://www.irunfar.com/nick-fowler-pacific-crest-trail-fkt-2026','Averaged 56.7 miles a day for more than 45 days on the 2,650-mile trail.'],
+  ['2026-09-13','Kevin Stewart and Sarah Ostaszewski win Wasatch Front 100 to close the Grand Slam','Ultra Running Magazine','https://ultrarunning.com/featured/ultra-weekend-recap-september-13-2026/','Stewart ran 20:41:09 and Ostaszewski 25:18:50 in Utah; Rose Vigneault also set a women’s course record at Ultra-Trail Harricana.'],
   ['2026-08-29','2026 UTMB results: Ben Dhiman and Blandine L’Hirondel win','iRunFar','https://www.irunfar.com/2026-utmb-results','The sport’s biggest weekend closes with a first UTMB title for Dhiman and a Mont-Blanc win for L’Hirondel.'],
   ['2026-08-28','2026 CCC results: Yngvild Kaspersen and Cristian Minoggio triumph','iRunFar','https://www.irunfar.com/2026-ccc-results','The 100km race from Courmayeur goes to Norway and Italy.'],
-  ['2026-08-27','2026 OCC results: Frédéric Tranchand and Lauren Gregory win dramatic races','iRunFar','https://www.irunfar.com/2026-occ-results','France and the United States take the opening title of UTMB week.']
+  ['2026-09-01','Nick Fowler sets the overall and self-supported Pacific Crest Trail FKT','iRunFar','https://www.irunfar.com/nick-fowler-pacific-crest-trail-fkt-2026','Averaged 56.7 miles a day for more than 45 days on the 2,650-mile trail.']
  ],
  entries:[
-  ['2026-09-03','Ones to watch on day two','Wanda Diamond League','https://www.diamondleague.com/wdl-final-in-brussels-ones-to-watch-on-day-two/','Five names for Saturday, with an all-time Diamond League record within reach.'],
-  ['2026-09-03','Press conference on the eve of the final','Wanda Diamond League','https://www.diamondleague.com/wdl-final-in-brussels-2026-press-conference/','Duplantis, Bol and Russell among those facing the media before the two-day final.'],
-  ['2026-09-02','Ones to watch on day one','Wanda Diamond League','https://www.diamondleague.com/wdl-final-2026-in-brussels-ones-to-watch-on-day-one/','Friday’s picks, including the men’s 100m and 1500m.'],
-  ['2026-09-02','Entry lists published','Wanda Diamond League','https://www.diamondleague.com/wdl-final-in-brussels-entry-lists-published/','The full rosters behind the start lists on this page.']
+  ['2026-09-19','World Road Running Championships underway in Copenhagen','LetsRun','https://www.letsrun.com/news/2026/09/2026-world-athletics-road-running-championships-schedule-start-lists-results-link-how-to-watch-the-world-half-5k-mile/','Seare and Guillemot took Saturday’s mile and 5km titles; the elite half marathon start lists are set for Sunday morning.'],
+  ['2026-09-05','Diamond League Final champions crowned in Brussels','FloTrack','https://www.flotrack.org/articles/16158918-diamond-league-champions-2026-full-list-of-winners','Wanyonyi’s 800m four-peat headlined a two-day final that closed out the 2026 Diamond League season.']
  ],
  calendar:[
-  ['2026-08-24','Exceptional invitations announced for the Ultimate Championship','World Athletics','https://worldathletics.org/competitions/world-athletics-ultimate-championship/2026/news/press-releases/exceptional-invitations-ultimate-championship','Josh Kerr, Jakob Ingebrigtsen and Gianmarco Tamberi handed places in Budapest; the men’s 1500m field expands to 13.'],
-  ['2026-08-24','Kerr vs Ingebrigtsen is on for Budapest','LetsRun','https://www.letsrun.com/news/2026/08/kerr-vs-jakob-is-on-world-athletics-bends-rules-to-grant-budapest-invitations/','Neither man qualified on ranking; it will be their first meeting in more than two years.'],
+  ['2026-09-19','World Road Running Championships underway in Copenhagen','LetsRun','https://www.letsrun.com/news/2026/09/2026-world-athletics-road-running-championships-schedule-start-lists-results-link-how-to-watch-the-world-half-5k-mile/','Mass and elite mile and 5km races ran Saturday; the elite half marathon closes the championships on Sunday.'],
+  ['2026-09-13','World Athletics Ultimate Championship concludes in Budapest','NBC Sports','https://www.nbcsports.com/olympics/news/world-athletics-ultimate-championship-results-2026','USA topped the medal table with 10 golds across the new 28-event format.'],
   ['2026-08-21','Ngetich and Ebenyo lead the Kenyan team for Copenhagen','World Athletics','https://worldathletics.org/competitions/world-athletics-road-running-championships/copenhagen26/news/news/wrrc-copenhagen-26-kenya-team','World 10km record holder Agnes Ngetich and half marathon silver medallist Daniel Ebenyo head a 16-strong squad.']
  ]
 };
