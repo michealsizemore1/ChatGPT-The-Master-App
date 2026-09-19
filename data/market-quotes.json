@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-18T23:48:29+00:00",
+  "updatedAt": "2026-09-19T00:07:16+00:00",
   "source": "Yahoo Finance public chart data",
   "quotes": {
     "SCHD": {
@@ -123,12 +123,12 @@
       "currency": "USD"
     },
     "BTC-USD": {
-      "price": 80882.51,
-      "prev": 76350.68,
-      "change": 4531.83,
-      "changesPercentage": 5.9355,
-      "volume": 40358993920,
-      "avgVolume": 32386760333,
+      "price": 80869.52,
+      "prev": 80877.27,
+      "change": -7.75,
+      "changesPercentage": -0.0096,
+      "volume": 40495616000,
+      "avgVolume": 33040266341,
       "yearHigh": 126198.07,
       "yearLow": 57747.766,
       "marketState": "",
@@ -221,11 +221,11 @@
       "currency": "USD"
     },
     "BTC=F": {
-      "price": 81180.0,
+      "price": 81060.0,
       "prev": 81330.0,
-      "change": -150.0,
-      "changesPercentage": -0.1844,
-      "volume": 13,
+      "change": -270.0,
+      "changesPercentage": -0.332,
+      "volume": 14,
       "avgVolume": 9132,
       "yearHigh": 127240.0,
       "yearLow": 57850.0,
@@ -264,7 +264,7 @@
     "Jim Cramer sends strong warning to stock market investors - thestreet.com",
     "The cost of capital is rising. Did stocks get the memo? - J.P. Morgan Private Bank",
     "The Fed\u2019s never been so confident on economic growth. What investors should do now, according to KKR. - MarketWatch",
-    "BIG NUMBER | 2.59% - etfdb.com",
+    "BIG NUMBER | 2.59% - ETF Database",
     "Wall St Week Ahead Investors focus on rate path, AI slowdown after Fed hike - Reuters",
     "What\u2019s Ahead in 2027 and Beyond for Inflation, Fed Rate Cuts, and More - Morningstar",
     "Global Market: Fed rate hike signals tougher road ahead for stocks, bonds - The Economic Times",
@@ -285,7 +285,7 @@
     "DXY  100.22 \u25bc0.03%",
     "Gold  $4,415.90 \u25b20.37%",
     "WTI  $95.47 \u25bc1.81%",
-    "Bitcoin  $80,883 \u25b25.94%",
+    "Bitcoin  $80,870 \u25bc0.01%",
     "EUR/USD  1.1489 \u25b20.08%",
     "USD/JPY  156.85 \u25b20.58%",
     "VIX  14.81 \u25bc16.37%",
