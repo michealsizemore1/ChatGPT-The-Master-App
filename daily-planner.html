@@ -2798,6 +2798,12 @@ body{
     </div>
     <div style="margin-bottom:6px;">
       <input type="text" id="favSearch" placeholder="🔍 Search saved foods..." oninput="renderFoodLibrarySearch()" style="width:100%;border:1px solid #e9c87b;border-radius:6px;padding:5px 8px;font-size:0.8rem;box-sizing:border-box;margin-bottom:6px;">
+      <select id="favSortBy" onchange="renderFoodLibrarySearch()" style="width:100%;border:1px solid #e9c87b;border-radius:6px;padding:5px 8px;font-size:0.8rem;box-sizing:border-box;margin-bottom:6px;">
+        <option value="">Sort: as saved</option>
+        <option value="prot_desc">🥩 Highest protein</option>
+        <option value="carbs_desc">🍞 Highest carbs</option>
+        <option value="fat_asc">🥑 Lowest fat</option>
+      </select>
       <select id="favTargetMeal" style="width:100%;border:1px solid #e9c87b;border-radius:6px;padding:5px 8px;font-size:0.8rem;box-sizing:border-box;">
         <option value="breakfast">🌅 Add to Breakfast</option>
         <option value="lunch">🥗 Add to Lunch</option>
