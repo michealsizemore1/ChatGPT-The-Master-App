@@ -921,7 +921,7 @@ function importHealthyFoodsFromSavedNutrition(force){
   saved.forEach(function(item){var key=String(item&&item.name||'').trim().toLowerCase();if(key)latestByName[key]=item;});
   var rebuilt=[];
   Object.keys(latestByName).forEach(function(key){
-    var item=latestByName[key];inferFoodMacroSources(item);var quality=runnerFoodQuality(item);if(quality.score<7)return;
+    var item=latestByName[key];inferFoodMacroSources(item);var quality=runnerFoodQuality(item);if(quality.score<7||quality.confidence==='Low')return;
     var copy={name:String(item.name).trim(),cal:item.cal,prot:item.prot,fat:item.fat,carbs:item.carbs,fiber:item.fiber,sugar:item.sugar,sodium:item.sodium,servingLabel:item.servingLabel||'1 serving',servings:parseFloat(item.servings)||1,proteinSource:item.proteinSource||'',carbSource:item.carbSource||'',fatSource:item.fatSource||'',barcode:item.barcode||'',imageUrl:item.imageUrl||'',imageData:item.imageData||'',score:quality.score,label:quality.label,confidence:quality.confidence,confidencePct:quality.confidencePct,updatedAt:new Date().toISOString()};
     MICRO_FIELDS.forEach(function(field){copy[field]=item[field]!=null?item[field]:null;});rebuilt.push(copy);
   });
@@ -932,7 +932,7 @@ function captureHealthyFoods(log){
   (log||[]).forEach(function(item){
     if(!item||!String(item.name||'').trim())return;
     var quality=runnerFoodQuality(item),key=String(item.name).trim().toLowerCase(),idx=healthy.findIndex(function(food){return String(food.name||'').trim().toLowerCase()===key;});
-    if(quality.score<7){if(idx>=0){healthy.splice(idx,1);changed=true;}return;}
+    if(quality.score<7||quality.confidence==='Low'){if(idx>=0){healthy.splice(idx,1);changed=true;}return;}
     var copy={name:String(item.name).trim(),cal:item.cal,prot:item.prot,fat:item.fat,carbs:item.carbs,fiber:item.fiber,sugar:item.sugar,sodium:item.sodium,servingLabel:item.servingLabel||'1 serving',servings:parseFloat(item.servings)||1,proteinSource:item.proteinSource||'',carbSource:item.carbSource||'',fatSource:item.fatSource||'',barcode:item.barcode||'',imageUrl:item.imageUrl||'',imageData:item.imageData||'',score:quality.score,label:quality.label,confidence:quality.confidence,confidencePct:quality.confidencePct,updatedAt:new Date().toISOString()};
     MICRO_FIELDS.forEach(function(field){copy[field]=item[field]!=null?item[field]:null;});
     if(idx<0)healthy.push(copy);else healthy[idx]=copy;changed=true;
@@ -957,7 +957,7 @@ function renderHealthyFoodsList(){
   importHealthyFoodsFromSavedNutrition();
   var all=getHealthyFoods();updateHealthyFoodsCount(all.length);var q=(document.getElementById('favSearch')||{value:''}).value.toLowerCase().trim(),foods=q?all.filter(function(food){return String(food.name||'').toLowerCase().includes(q);}):all;foods=applyFoodSort(foods);
   var rescan='<div style="font-size:.68rem;color:#64748b;margin:0 0 6px;">Use 📷 Take for the camera or 🖼 Choose for a picture already on your phone.</div><button onclick="rescanHealthyFoodsAndImages(this)" style="width:100%;margin:0 0 5px;background:#ecfdf5;color:#166534;border:1px solid #86efac;border-radius:6px;padding:7px;font-size:.74rem;font-weight:800;cursor:pointer;">↻ Rescan foods & barcode pictures</button><div id="healthyRescanStatus" role="status" aria-live="polite" style="display:none;font-size:.7rem;font-weight:700;line-height:1.35;margin:0 2px 7px;"></div>';
-  if(!foods.length){el.innerHTML=rescan+'<div style="font-size:.8rem;color:#64748b;text-align:center;padding:12px;line-height:1.4;">No saved foods currently score 7.0 or higher.</div>';return;}
+  if(!foods.length){el.innerHTML=rescan+'<div style="font-size:.8rem;color:#64748b;text-align:center;padding:12px;line-height:1.4;">No saved foods currently score 7.0+ with enough data confidence (low-confidence foods are left out).</div>';return;}
   el.innerHTML=rescan+foods.map(function(food){var idx=all.indexOf(food);return '<div style="padding:7px 0;border-bottom:1px solid #dcfce7;font-size:.82rem;">'
     +'<div style="display:flex;align-items:center;gap:6px;">'
       +foodThumbnailHtml(food,'healthy',idx)+'<div style="flex:1;min-width:0;"><div style="font-weight:800;color:#166534;">'+escHtml(food.name)+'</div><div style="color:#64748b;font-size:.72rem;">'+Number(food.score||7).toFixed(1)+'/10 · '+escHtml(food.label||'Good')+' · '+escHtml(food.confidence||'')+' confidence</div><div style="color:#64748b;font-size:.7rem;">'+(food.cal?'🔥'+food.cal+' ':'')+(food.prot?'🥩'+food.prot+'g ':'')+(food.carbs?'🍞'+food.carbs+'g ':'')+(food.fat?'🥑'+food.fat+'g':'')+'</div></div>'
