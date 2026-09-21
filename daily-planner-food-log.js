@@ -73,11 +73,11 @@ function inferFoodMacroSources(item){
   var name=String(item.name||''),classificationText=[name,item.ingredientsText,item.categoriesText].filter(Boolean).join(' '),changed=false;
   var remembered=foodSourceCorrections()[foodSourceCorrectionKey(name)];
   if(remembered){['proteinSource','carbSource','fatSource'].forEach(function(field){if(item[field]!==remembered[field]){item[field]=remembered[field]||'unknown';changed=true;}});item.sourceConfidence='High';item.sourceMethod='Remembered correction';return changed;}
-  var proteinSupport=['chicken breast','chicken','turkey','fish','salmon','tuna','shrimp','lean beef','sirloin','egg white','egg','greek yogurt','yogurt','cottage cheese','milk protein','casein','milk','tofu','tempeh','bean','lentil','chickpea','pea protein','soy protein','protein isolate','protein concentrate','protein powder','whey','seitan'];
+  var proteinSupport=['chicken breast','chicken','turkey','fish','salmon','tuna','tilapia','cod','halibut','mahi mahi','shrimp','lean beef','sirloin','bison','pork tenderloin','egg white','egg','greek yogurt','yogurt','cottage cheese','milk protein','casein','milk','tofu','tempeh','edamame','bean','lentil','chickpea','pea protein','soy protein','protein isolate','protein concentrate','protein powder','protein shake','whey protein','whey','seitan'];
   var proteinLimit=['bacon','sausage','hot dog','pepperoni','salami','bologna','fried chicken','processed meat','mechanically separated','cured meat','pork rind','rib','cheese'];
-  var carbSupport=['oatmeal','oat','brown rice','wild rice','quinoa','whole grain','whole wheat','whole rye','barley','farro','bran','bean','lentil','chickpea','sweet potato','potato','corn','sweet corn','fruit','dried fruit','raisin','apple','banana','berry','berries','orange','vegetable','broccoli','spinach'];
+  var carbSupport=['oatmeal','oat','brown rice','wild rice','quinoa','whole grain','whole wheat','whole rye','barley','farro','bran','bean','lentil','chickpea','sweet potato','potato','corn','sweet corn','fruit','dried fruit','raisin','apple','banana','berry','berries','strawberry','strawberries','blueberry','blueberries','raspberry','raspberries','blackberry','blackberries','grape','pear','peach','peaches','mango','mangoes','pineapple','watermelon','cantaloupe','kiwi','plum','cherry','cherries','grapefruit','apricot','pomegranate','orange','vegetable','broccoli','spinach','carrot','kale','cauliflower','zucchini','cucumber','bell pepper','asparagus','pea','cabbage','brussels sprout','tomato','tomatoes','squash','green bean'];
   var carbLimit=['candy','soda','soft drink','juice','sports drink','energy gel','gel','chew','sugar','cane sugar','corn syrup','high fructose corn syrup','honey','syrup','enriched wheat flour','refined flour','white flour','cookie','cake','pastry','donut','doughnut','white bread','white rice','sweetened cereal'];
-  var fatSupport=['olive oil','canola oil','sunflower oil','safflower oil','soybean oil','sesame oil','avocado','almond','walnut','peanut','nut butter','seed','chia','flax','salmon','tuna'];
+  var fatSupport=['olive oil','canola oil','sunflower oil','safflower oil','soybean oil','avocado oil','sesame oil','avocado','almond','walnut','peanut','cashew','pistachio','pecan','hazelnut','macadamia','nut butter','seed','chia','flax','salmon','tuna','mackerel','sardine','trout','olive'];
   var fatLimit=['butter','lard','shortening','coconut oil','palm oil','palm kernel oil','hydrogenated oil','partially hydrogenated oil','cream','cheese','bacon','sausage','pepperoni','fried'];
   if((parseFloat(item.prot)||0)>0&&!item.proteinSource){var proteinChoice=foodSourceChoice(classificationText,proteinSupport,proteinLimit);if(proteinChoice){item.proteinSource=proteinChoice;changed=true;}}
   if((parseFloat(item.carbs)||0)>0&&!item.carbSource){var carbChoice=foodSourceChoice(classificationText,carbSupport,carbLimit);if(carbChoice){item.carbSource=carbChoice;changed=true;}}
@@ -91,7 +91,8 @@ function runnerFoodQuality(item){
   item=item||{};
   var calories=Math.max(0,parseFloat(item.cal)||0),protein=Math.max(0,parseFloat(item.prot)||0),carbs=Math.max(0,parseFloat(item.carbs)||0),fat=Math.max(0,parseFloat(item.fat)||0);
   var fiber=Math.max(0,parseFloat(item.fiber)||0),sugar=Math.max(0,parseFloat(item.sugar)||0),sodium=Math.max(0,parseFloat(item.sodium)||0);
-  var sports=item.meal==='sports',score=5,reasons=[];
+  var sportsNameMatch=/\b(energy gel|gu energy|gels?|chews?|electrolyte|sports drink|gatorade|powerade|nuun|tailwind|skratch|maurten|clif shot|hammer gel|recovery drink|bcaa)\b/i.test(String(item.name||''));
+  var sports=item.meal==='sports'||sportsNameMatch,score=5,reasons=[];
   var dateKey=dk(today),activityText='';
   try{activityText=(getActivities()||[]).filter(function(a){return a&&a.date===dateKey;}).map(function(a){return [a.title,a.type,a.workout].filter(Boolean).join(' ');}).join(' ');}catch(ignoreActivity){}
   try{activityText+=' '+(typeof journalTodayTrainingSummary==='function'?journalTodayTrainingSummary():'');}catch(ignoreSummary){}
@@ -110,7 +111,7 @@ function runnerFoodQuality(item){
   if(!sports&&sugar>=20&&fiber<3){score-=1;reasons.push('high sugar with little fiber');}else if(!sports&&sugar>=10&&fiber<2){score-=0.5;}
   if(!sports&&sodium>=700){score-=0.5;reasons.push('high sodium');}
   var text=[item.name,item.ingredientsText,item.categoriesText].filter(Boolean).join(' ').toLowerCase();
-  if(/\b(vegetable|fruit|dried fruit|raisin|raisins|berries|banana|apple|orange|oat|oatmeal|whole grain|whole wheat|bean|lentil|quinoa|brown rice|sweet potato|potato|potatoes|corn|salmon|tuna)\b/.test(text)){score+=0.75;reasons.push('whole-food ingredients');}
+  if(/\b(vegetable|fruit|dried fruit|raisin|raisins|berries|strawberry|strawberries|blueberry|blueberries|raspberry|raspberries|blackberry|blackberries|grape|grapes|pear|pears|peach|peaches|mango|pineapple|watermelon|banana|apple|orange|oat|oatmeal|whole grain|whole wheat|bean|lentil|quinoa|brown rice|sweet potato|potato|potatoes|corn|carrot|carrots|kale|cauliflower|zucchini|cucumber|pepper|peppers|asparagus|pea|peas|cabbage|tomato|tomatoes|squash|salmon|tuna|tilapia|cod)\b/.test(text)){score+=0.75;reasons.push('whole-food ingredients');}
   // Oats provide a nutrient-dense carbohydrate base for endurance training. Give
   // plain or lightly sweetened oatmeal credit without extending the bonus to
   // dessert-style products with a large added-sugar load.
