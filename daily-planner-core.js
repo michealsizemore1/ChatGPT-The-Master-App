@@ -1423,7 +1423,7 @@ let weekOff2=0;
 // ── Nutrition + Spirituality summary helpers ──────────────────────────────
 const nuH='<table class="summary-table"><thead><tr><th>Period</th><th>Calories</th><th>Protein (g)</th><th>Fat (g)</th><th>Carbs (g)</th><th>Water (oz)</th></tr></thead><tbody>';
 const nuMicroH='<table class="summary-table"><thead><tr><th>Period</th><th>Fiber (g)</th><th>Sugar (g)</th><th>Sodium (mg)</th><th>Vit A (mcg)</th><th>Vit C (mg)</th><th>Vit D (mcg)</th><th>Calcium (mg)</th><th>Iron (mg)</th><th>Potassium (mg)</th></tr></thead><tbody>';
-const spirH='<table class="summary-table"><thead><tr><th>Period</th><th>Meditation</th><th>AI Prayer</th><th>Bible Audio & Worship</th><th>Daily Bread</th></tr></thead><tbody>';
+const spirH='<table class="summary-table"><thead><tr><th>Period</th><th>Meditation</th><th>Bible Audio</th><th>Worship</th><th>AI Prayer</th><th>Daily Bread</th></tr></thead><tbody>';
 
 function getNuDay(dateKey){
   var cal=0,prot=0,fat=0,carbs=0;
@@ -1482,6 +1482,7 @@ function getSpiritDay(dateKey){
     hasMeditation:pd.spMeditation==='green',
     hasAIPrayer:pd.spAIPrayer==='green',
     hasBibleAudio:pd.spBibleAudio==='green',
+    hasWorship:pd.spWorship==='green',
     hasDailyBread:pd.spDailyBread==='green'
   };
 }
@@ -1500,9 +1501,10 @@ function aggSpir(arr){
       meditation: a.meditation+(s.hasMeditation?1:(s.meditation||0)),
       aiPrayer: a.aiPrayer+(s.hasAIPrayer?1:(s.aiPrayer||0)),
       bibleAudio: a.bibleAudio+(s.hasBibleAudio?1:(s.bibleAudio||0)),
+      worship: a.worship+(s.hasWorship?1:(s.worship||0)),
       dailyBread: a.dailyBread+(s.hasDailyBread?1:(s.dailyBread||0))
     };
-  },{meditation:0,aiPrayer:0,bibleAudio:0,dailyBread:0});
+  },{meditation:0,aiPrayer:0,bibleAudio:0,worship:0,dailyBread:0});
 }
 
 function nuRow(l,n,isTot){
@@ -1536,16 +1538,18 @@ function spirRow(l,s,isTot){
   if(typeof s.hasMeditation!=='undefined'){
     return '<tr style="'+b+'"><td>'+l+'</td>'
       +'<td>'+(s.hasMeditation?'🧘':'-')+'</td>'
-      +'<td>'+(s.hasAIPrayer?'✨':'-')+'</td>'
       +'<td>'+(s.hasBibleAudio?'🎧':'-')+'</td>'
+      +'<td>'+(s.hasWorship?'🎶':'-')+'</td>'
+      +'<td>'+(s.hasAIPrayer?'✨':'-')+'</td>'
       +'<td>'+(s.hasDailyBread?'📰':'-')+'</td></tr>';
   }
   // Aggregated (count fields)
   var n=function(v){return v?v:'-';};
   return '<tr style="'+b+'"><td>'+l+'</td>'
     +'<td>'+n(s.meditation)+'</td>'
-    +'<td>'+n(s.aiPrayer)+'</td>'
     +'<td>'+n(s.bibleAudio)+'</td>'
+    +'<td>'+n(s.worship)+'</td>'
+    +'<td>'+n(s.aiPrayer)+'</td>'
     +'<td>'+n(s.dailyBread)+'</td></tr>';
 }
 

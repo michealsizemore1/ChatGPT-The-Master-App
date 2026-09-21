@@ -99,6 +99,7 @@ function journalHomeStreakSummary(){
   var actIdx=_buildActivityDateIndex(),cache={};
   var defs=[
     {label:'Bible',fn:function(d){return d.spBibleAudio==='green';}},
+    {label:'Worship',fn:function(d){return d.spWorship==='green';}},
     {label:'Prayer',fn:function(d){return d.spAIPrayer==='green';}},
     {label:'Running',fn:function(d,dateKey){return !!actIdx.run[dateKey];}},
     {label:'Water',fn:function(d){return(parseFloat(d.waterOz)||parseFloat(d.waterCount)*8||0)>=64;}}
@@ -172,7 +173,7 @@ function journalScheduleDetailHtml(kind,data){
       +[5,10,15,20].map(function(m){return'<button type="button" class="journal-schedule-medit-btn" onclick="journalMeditationQuickStart(event,'+m+')">'+m+'m</button>';}).join('')
       +'</div></div>';
   }
-  var rows=kind==='faith'?[['Daily Bread','spDailyBread','bible'],['Bible reading','spBibleAudio','bible'],['Prayer','spAIPrayer','bible']]:kind==='wellness'?[['Blood pressure','wBP','wellness'],['Medications','wMeds','wellness'],['Weight','wWght','wellness'],['Sleep','wSleep','wellness']]:[['Strength','exStrength','activities'],['Walk','exWalk','activities'],['Dog walk','exDogWalk','activities'],['10,000 steps','exStepsCheck','activities']];
+  var rows=kind==='faith'?[['Daily Bread','spDailyBread','bible'],['Bible reading','spBibleAudio','bible'],['Worship','spWorship','bible'],['Prayer','spAIPrayer','bible']]:kind==='wellness'?[['Blood pressure','wBP','wellness'],['Medications','wMeds','wellness'],['Weight','wWght','wellness'],['Sleep','wSleep','wellness']]:[['Strength','exStrength','activities'],['Walk','exWalk','activities'],['Dog walk','exDogWalk','activities'],['10,000 steps','exStepsCheck','activities']];
   return'<div class="journal-schedule-detail-panel">'+rows.map(function(row){var status=journalCheckState(data,row[1]);return'<button type="button" class="journal-schedule-detail-row" onclick="journalOpenDailyCheck(event,\''+row[2]+'\',\''+row[1]+'\')"><i class="journal-schedule-detail-dot '+status+'"></i><span>'+row[0]+'</span></button>';}).join('')+'</div>';
 }
 function journalToggleHiddenCheck(event,id){if(event){event.preventDefault();event.stopPropagation();}var target=document.getElementById(id);if(target){target.checked=!target.checked;save();renderJournalSchedule();}}
@@ -426,7 +427,7 @@ function renderJournalSchedule(){
   }
   var reflected=['jAccomplish','jImprov','jGratitude','jNotes'].some(function(key){return String(d[key]||'').trim();});
   var wellnessKeys=['wBP','wMeds','wWght','wSleep'],wellnessRecorded=journalLinkedGreenCount(wellnessKeys,d);
-  var faithKeys=['spDailyBread','spBibleAudio','spAIPrayer'],faithDone=journalLinkedGreenCount(faithKeys,d);
+  var faithKeys=['spDailyBread','spBibleAudio','spWorship','spAIPrayer'],faithDone=journalLinkedGreenCount(faithKeys,d);
   var loggedRun=(getActivities()||[]).some(function(activity){return activity&&activity.date===dateKey&&/run/i.test([activity.type,activity.title].filter(Boolean).join(' '));});
   var noTraining=!String(training||'').trim(),restDay=noTraining||/rest day|no workout scheduled/i.test(training),activityDone=loggedRun||restDay;
   // Training-plan text doesn't always use the literal word "run" (e.g. "Secondary Long 7 mi @
@@ -442,7 +443,7 @@ function renderJournalSchedule(){
     {time:'5:05 AM',mins:305,label:'Personal Hygiene',detail:'Shower, brush teeth, get ready for the day',done:localStorage.getItem('schedule_personalHygiene_'+dateKey)==='1',manual:'personalHygiene'},
     {time:'5:15 AM',mins:315,label:'Meditation',detail:journalMeditationTodayLine(),done:d.spMeditation==='green',tab:'meditate',detailKind:'meditation',linkedCheckKey:'spMeditation'},
     {time:'5:20 AM',mins:320,label:'Wellness check and water',detail:wellnessRecorded+' of 4 wellness items complete',done:wellnessRecorded===4,partial:wellnessRecorded>0&&wellnessRecorded<4,tab:'wellness',detailKind:'wellness'},
-    {time:'5:30 AM',mins:330,label:'Bible reading and prayer',detail:faithDone+' of 3 faith practices complete',done:faithDone===3,partial:faithDone>0&&faithDone<3,tab:'bible',detailKind:'faith'},
+    {time:'5:30 AM',mins:330,label:'Bible, worship & prayer',detail:faithDone+' of 4 faith practices complete',done:faithDone===4,partial:faithDone>0&&faithDone<4,tab:'bible',detailKind:'faith'},
     {time:'5:45 AM',mins:345,label:'Breakfast',detail:'Recovery meal and hydration after training',done:mealComplete('breakfast',345),tab:'nutrition'},
     {time:'6:00 AM',mins:360,label:'Work',detail:'9:30 AM – 6:00 PM',done:true,tab:'daily',skip:!(today.getDay()>=1&&today.getDay()<=5),fixed:true},
     {time:'9:00 AM',mins:540,label:'Walk Buddy',detail:'Take Buddy for a walk',done:localStorage.getItem('schedule_walkBuddy_'+dateKey)==='1',manual:'walkBuddy'},

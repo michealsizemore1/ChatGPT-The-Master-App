@@ -1005,7 +1005,8 @@ async function submitAskJournal(){
     const label=d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
     const parts=[];
     // Spirituality
-    if(dd.spBibleAudio==='green')parts.push('Bible & Worship: ✓ completed');
+    if(dd.spBibleAudio==='green')parts.push('Bible Audio: ✓ completed');
+    if(dd.spWorship==='green')parts.push('Worship: ✓ completed');
     if(dd.spDailyBreadText)parts.push('Daily Bread: '+dd.spDailyBreadText);
     if(dd.spMeditation==='green'||dd.spMeditationText)parts.push('Meditation: '+(dd.spMeditationText||'✓')+
       (dd.spMeditationVal?' ('+dd.spMeditationVal+' min)':''));
