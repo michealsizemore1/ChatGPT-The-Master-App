@@ -240,9 +240,9 @@ html{font-size:14px}
 
   <section id="entriesView" class="hide">
     <div class="hero">
-      <div class="eyebrow">Diamond League Final &middot; Brussels &middot; Concluded</div>
-      <div class="hero-row"><h1>Entries</h1><div class="stamp">CONCLUDED <b>5 SEP 2026</b></div></div>
-      <p class="source">Brussels closed out the 2026 Diamond League season on Sep 4&ndash;5 &mdash; Emmanuel Wanyonyi completed a four-peat in the men&rsquo;s 800m, and national or meet records fell in the men&rsquo;s 400m and women&rsquo;s shot put. The start lists and timetable below are kept as the record of who raced; every Diamond Trophy winner is at <a href="https://www.diamondleague.com/the-2026-wanda-diamond-league-champions/" target="_blank" rel="noopener">diamondleague.com</a>. For what&rsquo;s live right now: the World Road Running Championships are underway in Copenhagen (Sep 19&ndash;20) &mdash; see the Road tab.</p>
+      <div class="eyebrow">BMW Berlin Marathon &middot; Sep 27 &middot; Elite fields set</div>
+      <div class="hero-row"><h1>Entries</h1><div class="stamp">STARTS <b>27 SEP 2026</b></div></div>
+      <p class="source">Berlin&rsquo;s elite fields were confirmed in mid-August, 67 runners across the two lists. Defending champion Sabastian Sawe withdrew Aug 27 with an injury, so Gabriel Geay (2:03:00) and Getaneh Molla (2:03:34) now lead the men; Tigst Assefa, the 2:11:53 course-record holder from 2023, headlines the women and says she will chase the world record again. Race day is Sunday Sep 27, with the elite start at 9:15 AM CEST (1:15 AM MDT). Results land at <a href="https://www.bmw-berlin-marathon.com/en/your-race/results" target="_blank" rel="noopener">bmw-berlin-marathon.com</a>.</p>
     </div>
     <div class="panel">
       <div class="controls">
@@ -254,9 +254,9 @@ html{font-size:14px}
       <div id="entriesList"></div>
     </div>
     <div class="section-card" style="margin-top:18px">
-      <div class="eyebrow">King Baudouin Stadium &middot; Sep 4&ndash;5</div>
+      <div class="eyebrow">Brandenburg Gate &middot; Sep 27</div>
       <h2>Meet timetable</h2>
-      <p class="note">Every event of the two-day final. Mountain Time first, Brussels local time underneath. Coverage starts 10:00 AM MDT both evenings on FloTrack.</p>
+      <p class="note">The elite start, men and women together. Mountain Time first, Berlin local time underneath. Broadcast coverage begins around 1:00 AM MDT on FloSports.</p>
       <div class="tt-head">
         <div class="seg" id="ttDays" role="tablist" aria-label="Day"></div>
         <span class="sortlabel">Show</span>
@@ -311,7 +311,7 @@ html{font-size:14px}
 
 <script src="version-check.js"></script>
 <script>
-const APP_VERSION='2026-09-19-2';
+const APP_VERSION='2026-09-21-1';
 checkForNewerAppVersion(APP_VERSION, 'tf');
 
 // [name, country, ranking score, 2026 season best]  "rd" marks a road time used where there is no track mark.
@@ -381,50 +381,31 @@ const ULTRA={
   '100M':[['Courtney Dauwalter','USA',833,'40-44'],['Katie Schide','USA',830,'23-34'],['Jennifer Lichter','USA',830,'23-34'],['Riley Brady','USA',817,'23-34'],['Antonina Iushina','RUS',816,'23-34'],['Tara Dower','USA',814,'23-34'],['Marianne Hogan','CAN',809,'35-39'],['Fuzhao Xiang','CHN',806,'35-39'],['Caitlin Fielder','NZL',805,'23-34'],["Blandine L'Hirondel",'FRA',804,'35-39']]
  }
 };
-// Brussels Diamond League Final entry lists, published 2 September 2026.
-// [name, country, season best, personal best, world rank ('' when unranked)]
-const ENTRY_EVENTS=['100m','200m','400m','800m','1500m','5000m'];
-// Official two-day programme, times as published in Brussels local time (CEST).
-// A third element links the row to the start list it belongs to.
+// Berlin Marathon elite entry lists, published 12 Aug 2026 (Sawe withdrew 27 Aug 2026).
+// [name, country, entry mark used as both SB and PB, personal best, world rank (blank; not published for this field)]
+const ENTRY_EVENTS=['Marathon'];
+// Elite start only; men and women start together. Berlin sits on CEST, same offset as Brussels.
 const TIMETABLE=[
- {label:'Friday 4 September',short:'Fri 4 Sep',rows:[
-  ['18:05','Girls’ Youth 100m'],['18:10','Girls’ Youth High Jump'],['18:13','Boys’ Youth 100m'],
-  ['18:21','Girls’ Youth 1000m'],['18:30','Women’s Shot Put'],['18:32','Boys’ Youth 1000m'],
-  ['18:38','Men’s Long Jump'],['18:45','Girls’ Youth 4x100m'],['18:49','Women’s Discus'],
-  ['18:55','Boys’ Youth 4x100m'],['19:05','Mixed Club 100m'],['19:13','Men’s T63 Blades 100m'],
-  ['19:22','Women’s Invitational 400m'],['19:31','Men’s Invitational 400m'],['19:59','Men’s Pole Vault'],
-  ['20:04','Women’s 400m Hurdles'],['20:09','Men’s High Jump'],['20:14','Men’s 100m','men/100m'],
-  ['20:23','Women’s 3000m Steeplechase'],['20:37','Men’s Discus'],['20:42','Men’s 800m','men/800m'],
-  ['20:48','Women’s Triple Jump'],['20:55','Men’s 110m Hurdles'],['21:03','Women’s 5000m','women/5000m'],
-  ['21:26','Men’s 1500m','men/1500m'],['21:41','Women’s 200m','women/200m'],['21:52','Men’s 400m','men/400m']
- ]},
- {label:'Saturday 5 September',short:'Sat 5 Sep',rows:[
-  ['17:10','Mixed Club Challenge 4x400m – Group G'],['17:25','Boys’ Youth High Jump'],
-  ['17:40','Mixed Club Challenge 4x400m – Group F'],['17:50','Mixed Club Challenge 4x400m – Group E'],
-  ['17:58','Mixed Allianz Eagles 1500m'],['18:05','Women’s Javelin'],
-  ['18:10','Mixed Club Challenge 4x400m – Group D'],['18:20','Mixed Club Challenge 4x400m – Group C'],
-  ['18:28','Men’s Shot Put'],['18:30','Mixed Club Challenge 4x400m – Group B'],
-  ['18:40','Mixed Club Challenge 4x400m – Group A'],['18:54','Mixed Equal Rights Run 100m'],
-  ['19:02','Mixed Frame Running 100m'],['19:21','Men’s Triple Jump'],['19:31','Mixed Turbo Relay 4x100m'],
-  ['19:39','Women’s T54 Wheelchair 400m'],['19:44','Women’s Invitational 100m'],['19:54','Men’s Invitational 100m'],
-  ['19:58','Women’s Pole Vault'],['20:06','Women’s 400m','women/400m'],['20:16','Women’s High Jump'],
-  ['20:24','Women’s 100m','women/100m'],['20:32','Men’s 5000m','men/5000m'],['20:40','Men’s Javelin'],
-  ['20:49','Men’s 200m','men/200m'],['20:58','Women’s Long Jump'],['21:05','Women’s 1500m','women/1500m'],
-  ['21:10','Women’s 100m Hurdles'],['21:20','Men’s 3000m Steeplechase'],['21:30','Women’s 800m','women/800m'],
-  ['21:52','Men’s 400m Hurdles']
+ {label:'Sunday 27 September',short:'Sun 27 Sep',rows:[
+  ['09:15','Men’s Marathon','men/Marathon'],['09:15','Women’s Marathon','women/Marathon']
  ]}
 ];
-// Brussels sits on CEST and Denver on MDT for both dates, so the gap is a flat eight hours.
+const ENTRY_MEET_CITY='Berlin';
+const ENTRY_RESULTS_URL='https://www.bmw-berlin-marathon.com/en/your-race/results';
+const ENTRY_RESULTS_LABEL='bmw-berlin-marathon.com';
+// Elite marathon finishers arrive roughly two to two-and-a-half hours after the gun, so the
+// live window needs a much longer buffer than a track meet's last race; Brussels used 40 minutes.
+const ENTRY_LIVE_BUFFER_MIN=180;
+// Berlin and Brussels both sit on CEST, and Denver is on MDT for these dates, so the gap is a flat eight hours.
 function toMountain(hhmm){const p=hhmm.split(':'),H=(+p[0]+24-8)%24;return `${H%12||12}:${p[1]} ${H>=12?'PM':'AM'}`}
-// The 32 Diamond finals are the men's and women's events; youth, club, invitational and para races support them.
+// Men's and women's championship or major races count as finals; support races render dimmed.
 function isFinalEvent(n){return /^(Men|Women)/.test(n)&&!/Invitational|T63|T54/.test(n)}
 // ---- Live status for the timetable ----------------------------------------
-// No results feed exists for this meet (worldathletics.org blocks scripted access, and Diamond
-// League publishes no public API), so "live" here means an honest, purely time-driven read of the
-// schedule: which event is on right now, and which have already finished, computed straight from
-// each device's own clock against the published start times — never a guessed or fabricated result.
-// Brussels runs CEST (UTC+2) for both days of this meet, so a row's real UTC instant is its local
-// time minus two hours, dated against the day the TIMETABLE entry belongs to.
+// No public results feed exists for this meet, so "live" here means an honest, purely time-driven
+// read of the schedule: which event is on right now, and which have already finished, computed
+// straight from each device's own clock against the published start times, never a guessed result.
+// The meet runs CEST (UTC+2), so a row's real UTC instant is its local time minus two hours, dated
+// against the day the TIMETABLE entry belongs to.
 function ttRowDateUTC(dayIndex,hhmm){
  const day=TIMETABLE[dayIndex],dom=+(day.label.match(/(\d+)/)||[])[1]||(4+dayIndex);
  const p=hhmm.split(':').map(Number);
@@ -435,7 +416,7 @@ function ttRowDateUTC(dayIndex,hhmm){
 // gap between sessions can't make a day look like it's still "live".
 function ttDayWindow(dayIndex){
  const rows=TIMETABLE[dayIndex].rows;
- return {start:ttRowDateUTC(dayIndex,rows[0][0]).getTime(), end:ttRowDateUTC(dayIndex,rows[rows.length-1][0]).getTime()+40*60000};
+ return {start:ttRowDateUTC(dayIndex,rows[0][0]).getTime(), end:ttRowDateUTC(dayIndex,rows[rows.length-1][0]).getTime()+ENTRY_LIVE_BUFFER_MIN*60000};
 }
 function ttRowStatuses(dayIndex){
  const rows=TIMETABLE[dayIndex].rows,now=Date.now(),win=ttDayWindow(dayIndex);
@@ -447,28 +428,29 @@ function ttRowStatuses(dayIndex){
 function ttLiveIndexInDay(rows,dayIndex,now){let idx=-1;for(let i=0;i<rows.length;i++){if(ttRowDateUTC(dayIndex,rows[i][0]).getTime()<=now)idx=i;else break}return idx}
 // One phase for the whole meet, used by the banner and to pick which day opens by default.
 function ttMeetPhase(){
- const now=Date.now(),w0=ttDayWindow(0),w1=ttDayWindow(1);
- if(now<w0.start)return{kind:'before',ms:w0.start-now};
- if(now>=w1.end)return{kind:'after'};
- if(now>=w0.start&&now<w0.end){
-  const idx=ttLiveIndexInDay(TIMETABLE[0].rows,0,now);
-  if(idx>-1)return{kind:'live',day:0,idx};
+ const now=Date.now();
+ const wins=TIMETABLE.map((_,i)=>ttDayWindow(i));
+ const first=wins[0],last=wins[wins.length-1];
+ if(now<first.start)return{kind:'before',ms:first.start-now};
+ if(now>=last.end)return{kind:'after'};
+ for(let i=0;i<TIMETABLE.length;i++){
+  const w=wins[i];
+  if(now>=w.start&&now<w.end){
+   const idx=ttLiveIndexInDay(TIMETABLE[i].rows,i,now);
+   if(idx>-1)return{kind:'live',day:i,idx};
+  }
+  if(now<w.start)return{kind:'gap',ms:w.start-now,label:i===1?'Day two starts in':`Day ${i+1} starts in`};
  }
- if(now>=w1.start&&now<w1.end){
-  const idx=ttLiveIndexInDay(TIMETABLE[1].rows,1,now);
-  if(idx>-1)return{kind:'live',day:1,idx};
- }
- if(now<w1.start)return{kind:'gap',ms:w1.start-now,label:'Day two starts in'};
- return{kind:'gap',ms:0,label:'Day two is underway'};
+ return{kind:'gap',ms:0,label:'Between sessions'};
 }
-function ttDefaultDay(){return Date.now()>=ttDayWindow(0).end?1:0}
+function ttDefaultDay(){for(let i=0;i<TIMETABLE.length;i++){if(Date.now()<ttDayWindow(i).end)return i}return TIMETABLE.length-1}
 function ttFmtCountdown(ms){if(ms<=0)return'any moment';const mins=Math.round(ms/60000),h=Math.floor(mins/60),m=mins%60;return h>0?`${h}h ${m}m`:`${m}m`}
 function ttBadge(status){return status==='live'?'<span class="tt-badge live">Live</span>':status==='final'?'<span class="tt-badge final">Final</span>':''}
 function renderTtBanner(){
  const el=$('#ttLiveBanner');if(!el)return;
  const phase=ttMeetPhase();
  if(phase.kind==='before'){el.innerHTML=`<div class="tt-live-banner off"><b>Starts soon</b> Day one begins in ${esc(ttFmtCountdown(phase.ms))}</div>`;return}
- if(phase.kind==='after'){el.innerHTML=`<div class="tt-live-banner off"><b>Final complete</b> Full results at <a href="https://brussels.diamondleague.com/en/programme-results/" target="_blank" rel="noopener">brussels.diamondleague.com</a></div>`;return}
+ if(phase.kind==='after'){el.innerHTML=`<div class="tt-live-banner off"><b>Final complete</b> Full results at <a href="${ENTRY_RESULTS_URL}" target="_blank" rel="noopener">${esc(ENTRY_RESULTS_LABEL)}</a></div>`;return}
  if(phase.kind==='gap'){el.innerHTML=`<div class="tt-live-banner off"><b>Between sessions</b> ${esc(phase.label)}${phase.ms?' &middot; '+esc(ttFmtCountdown(phase.ms)):''}</div>`;return}
  const row=TIMETABLE[phase.day].rows[phase.idx];
  el.innerHTML=`<div class="tt-live-banner"><span class="dot"></span><b>Live now</b> ${esc(row[1])}<span class="tt-live-time">${esc(toMountain(row[0]))} MDT</span></div>`;
@@ -480,33 +462,23 @@ const ENTRY_WHEN=(()=>{const out={men:{},women:{}};
  return out})();
 const ENTRIES={
  men:{
-  '100m':[['Kayinsola Ajayi','NGR','9.84','9.84','4'],['Trayvon Bromell','USA','9.91','9.76','8'],['Christian Coleman','USA','9.90','9.76','11'],['Emmanuel Eseme','CMR','9.89','9.83','9'],['Lachlan Kennedy','AUS','9.85','9.85','17'],['Gift Leotlela','RSA','9.91','9.87','6'],['Oblique Seville','JAM','9.82','9.77','1'],['Akani Simbine','RSA','9.93','9.82','10'],['Simon Verherstraeten','BEL','10.12','10.06','51']],
-  '200m':[['Kenneth Bednarek','USA','19.62','19.57','3'],['Makanakaishe Charamba','ZIM','19.88','19.88','7'],['Sinesipho Dambile','RSA','19.74','19.74','4'],['Jos\u00e9 Figueroa','PUR','19.76','19.76','10'],['Courtney Lindsey','USA','20.19','19.71','14'],['Reynier Mena','CUB','20.04','19.63','19'],['Timoth\u00e9 Mumenthaler','SUI','20.09','20.09','23'],['Letsile Tebogo','BOT','19.84','19.46','1']],
-  '400m':[['Chris Bailey','USA','44.06','44.06','10'],['Matthew Hudson-Smith','GBR','44.09','43.44','6'],['Busang Collen Kebinatshipi','BOT','43.44','43.44','1'],['Khaleb McRae','USA','44.40','43.91','9'],['Zakithi Nene','RSA','43.89','43.76','3'],['Jacory Patterson','USA','43.96','43.85','2'],['Jereem Richards','TTO','44.44','43.72','5'],['Daniel Segers','BEL','44.81','44.63','21']],
-  '800m':[['Marco Arop','CAN','1:41.84','1:41.20','2'],['Eliott Crestan','BEL','1:43.85','1:42.43','9'],['Tobias Gr\u00f8nstad','NOR','1:43.61','1:43.61','25'],['Yanis Meziane','FRA','1:43.96','1:43.71','22'],['Slimane Moula','ALG','1:43.41','1:42.77','18'],['Ben Pattison','GBR','1:43.34','1:42.27','12'],['Djamel Sedjati','ALG','1:41.83','1:41.46','3'],['Gabriel Tual','FRA','1:43.66','1:41.61','15'],['Jan Vukovi\u010d','SLO','1:46.11','1:45.85','98'],['Emmanuel Wanyonyi','KEN','1:41.76','1:41.11','1']],
-  '1500m':[['Timothy Cheruiyot','KEN','3:30.67','3:28.28','3'],['Vincent Ciattei','USA','3:30.90','3:30.90','9'],['Robert Farken','GER','3:30.09','3:30.09','8'],['Jake Heyward','GBR','3:31.47','3:31.08','16'],['Cole Hocker','USA','3:31.16','3:27.65',''],['Jakob Ingebrigtsen','NOR','3:31.19','3:26.73',''],['Christian Jackson','USA','3:41.53','3:41.53',''],['Hobbs Kessler','USA','3:31.76','3:29.45','14'],['Boaz Kiprugut','KEN','3:46.5h','3:35.26',''],['Phanuel Kipkosgei Koech','KEN','3:31.09','3:27.72','17'],['Cameron Myers','AUS','3:28.00','3:28.00','1'],['Yared Nuguse','USA','3:29.36','3:27.80','2'],['Ethan Strand','USA','3:30.77','3:30.25','10'],['Ruben Verheyden','BEL','3:32.38','3:30.99','20']],
-  '5000m':[['Mounir Akbache','FRA','','',''],['Birhanu Balew','BRN','12:47.73','12:47.73','2'],['Graham Blanks','USA','12:49.99','12:48.20','9'],['Reynold Cheruiyot','KEN','','13:16.40',''],['Grant Fisher','USA','12:49.61','12:46.96','6'],['Cornelius Kemboi','KEN','12:56.02','12:56.02','13'],['Jacob Krop','KEN','12:53.71','12:45.71','11'],['Dominic Lokinyomo Lobalu','SUI','12:52.54','12:50.87','16'],['Biniam Mehary','ETH','12:54.35','12:45.93','12'],['Egide Ntakarutimana','BDI','12:56.06','12:56.06','18'],['Tshepo Tshite','RSA','13:20.92','13:20.92',''],['Nico Young','USA','12:58.33','12:45.27','10']]
+  'Marathon':[['Gabriel Geay','TAN','2:03:00','2:03:00',''],['Getaneh Molla','ETH','2:03:34','2:03:34',''],['Guye Adola','ETH','2:03:46','2:03:46',''],['Shura Kitata','ETH','2:03:59','2:03:59',''],['Dejene Hailu','ETH','2:04:15','2:04:15',''],['Erick Sang','KEN','2:04:30','2:04:30',''],['Selemon Barega','ETH','2:05:00','2:05:00',''],['Taresa Tolosa','ETH','2:05:17','2:05:17',''],['Tadu Abate','ETH','2:05:38','2:05:38',''],['Asefa Boki','ETH','2:05:40','2:05:40',''],['Kenya Sonota','JPN','2:05:59','2:05:59',''],['Tsubasa Ichiyama','JPN','2:06:00','2:06:00',''],['Kiyoto Hirabayashi','JPN','2:06:14','2:06:14',''],['Yuhei Urano','JPN','2:06:23','2:06:23',''],['Hidekazu Hijikata','JPN','2:06:26','2:06:26',''],['Yusuke Nishiyama','JPN','2:06:31','2:06:31',''],['Naoki Koyama','JPN','2:06:33','2:06:33',''],['Andamlak Belihu','ETH','2:06:40','2:06:40',''],['Kazuya Nishiyama','JPN','2:06:45','2:06:45',''],['Daisuke Uekado','JPN','2:06:54','2:06:54',''],['Jie He','CHN','2:06:57','2:06:57',''],['Sebastian Hendel','GER','2:07:33','2:07:33',''],['Shin Kimura','JPN','2:07:34','2:07:34',''],['Richard Yator','KEN','2:07:36','2:07:36',''],['Haftom Welday','GER','2:08:13','2:08:13',''],['Aaron Bienenfeld','GER','2:08:47','2:08:47',''],['Johannes Motschmann','GER','2:10:39','2:10:39',''],['Florian von Muschwitz','GER','2:15:03','2:15:03',''],['Jakob Lange','GER','2:16:43','2:16:43',''],['David Gärtlein','GER','2:18:01','2:18:01',''],['Julian Großkopf','GER','2:18:17','2:18:17',''],['Michel Nouguier','GER','2:20:13','2:20:13',''],['Fabian Liebig','GER','2:21:51','2:21:51',''],['Fabian Borggrefe','GER','2:23:31','2:23:31',''],['Silvan Rauscher','GER','','','']]
  },
  women:{
-  '100m':[['Tina Clayton','JAM','10.85','10.76','3'],['Zaynab Dosso','ITA','11.07','11.01','10'],['Zoe Hobbs','NZL','10.93','10.93','11'],['Amy Hunt','GBR','10.97','10.97','6'],['Delphine Nkansa','BEL','11.07','11.07','35'],["Sha'Carri Richardson",'USA','10.77','10.65','4'],['Jonielle Smith','JAM','10.89','10.89','8'],['Bogl\u00e1rka Tak\u00e1cs','HUN','11.13','11.06','38'],['Patrizia van der Weken','LUX','11.05','11.00','13']],
-  '200m':[['Julien Alfred','LCA','21.51','21.51',''],['Anavia Battle','USA','22.21','21.95','5'],['Success Eduan','GBR','22.43','22.43','21'],['Amy Hunt','GBR','22.19','22.08','3'],['Audrey Leduc','CAN','22.38','22.36','22'],['Jenna Prandini','USA','22.36','21.89','15'],['Cambrea Sturgis','USA','21.93','21.93','11'],['Kayla White','USA','21.92','21.92','7']],
-  '400m':[['Natalia Bukowiecka','POL','49.57','48.90','4'],['Aaliyah Butler','USA','48.84','48.84','8'],['Roxana G\u00f3mez','CUB','49.99','49.48','9'],['Henriette J\u00e6ger','NOR','49.04','49.04','3'],['Lurdes Gloria Manuel','CZE','49.37','49.37','6'],['Marileidy Paulino','DOM','48.48','47.98','1'],['Helena Ponette','BEL','50.31','50.31','31'],['Nickisha Pryce','JAM','49.27','48.57','5']],
-  '800m':[['Sarah Billings','AUS','1:57.01','1:57.01','14'],['Femke Bol','NED','1:54.71','1:54.71','5'],['Rachel Klopfenstein','MRI','1:58.73','1:58.60','53'],['Camille Laus','BEL','1:59.43','1:59.43','66'],['Oratile Nowe','BOT','1:57.32','1:56.76','12'],['Prudence Sekgodiso','RSA','1:56.83','1:56.83','10'],['Saida Tsehaye','ETH','1:56.92','1:56.92',''],['Veronica Vancardo','SUI','1:58.20','1:58.20','33'],['Audrey Werro','SUI','1:53.70','1:53.70','2'],['Addison Wiley','USA','1:57.70','1:56.83','9']],
-  '1500m':[['Abbey Caldwell','AUS','3:56.12','3:56.12','10'],['Tsige Duguma','ETH','3:55.06','3:55.06',''],['Dorcas Ewoi','KEN','3:55.58','3:54.92','2'],['Agathe Guillemot','FRA','3:56.24','3:56.24','9'],['Birke Haylom','ETH','3:55.56','3:53.22','4'],['Nikki Hiltz','USA','3:59.26','3:55.33','5'],['Jessica Hull','AUS','3:55.20','3:50.83','1'],['Georgia Hunter Bell','GBR','3:55.63','3:52.61','3'],['Lorea Ibarzabal','ESP','4:07.28','4:07.28',''],['Klaudia Kazimierska','POL','3:55.59','3:55.59','6'],['Emily Mackay','USA','3:56.24','3:55.90','11'],['Mariska Parewyck','BEL','4:09.67','4:08.40','']],
-  '5000m':[['Marta Alemayo','ETH','14:32.84','14:32.84','18'],['Likina Amebaw','ETH','14:18.41','14:18.41','1'],['Rose Davies','AUS','14:44.53','14:31.45','8'],['Medina Eisa','ETH','14:22.51','14:16.54','7'],['Senayet Getachew','ETH','14:22.37','14:22.37','5'],['Georgia Griffith','AUS','14:44.64','14:32.82','25'],['Freweyni Hailu','ETH','14:18.94','14:18.94','3'],['Linden Hall','AUS','14:40.81','14:40.81','19'],['Maureen Koster','NED','14:33.56','14:33.56','15'],['Hirut Meshesha','ETH','14:22.56','14:22.56','20'],['Francine Niyomukunzi','BDI','14:41.46','14:41.46','30'],['Jana Van Lent','BEL','15:05.04','14:37.47','51']]
+  'Marathon':[['Tigst Assefa','ETH','2:11:53','2:11:53',''],['Rosemary Wanjiru','KEN','2:16:14','2:16:14',''],['Bedatu Hirpa','ETH','2:18:27','2:18:27',''],['Dera Dida','ETH','2:18:32','2:18:32',''],['Zeineba Yimer','ETH','2:18:47','2:18:47',''],['Bosena Mulatie','ETH','2:19:00','2:19:00',''],['Misgane Alemayehu','ETH','2:19:08','2:19:08',''],['Bekelech Gudeta','ETH','2:19:39','2:19:39',''],['Evaline Chirchir','KEN','2:20:33','2:20:33',''],['Deshun Zhang','CHN','2:20:53','2:20:53',''],['Gadise Mulu','ETH','2:20:59','2:20:59',''],['Eebbisee Addunyaa','ETH','2:21:13','2:21:13',''],['Aminet Ahmed','ETH','2:21:24','2:21:24',''],['Rika Kaseda','JPN','2:21:55','2:21:55',''],['Mao Uesugi','JPN','2:22:11','2:22:11',''],['Pascaline Jelagat','KEN','2:22:44','2:22:44',''],['Manon Trapp','FRA','2:23:38','2:23:38',''],['Natsuki Omori','JPN','2:23:45','2:23:45',''],['Fatima Gardadi','MAR','2:24:06','2:24:06',''],['Jacqueline Gaughan','USA','2:24:40','2:24:40',''],['Rino Goshima','JPN','2:24:44','2:24:44',''],['Kodi Kleven','USA','2:24:48','2:24:48',''],['Lucy Reid','GBR','2:26:37','2:26:37',''],['Kristina Hendel','GER','2:27:29','2:27:29',''],['Anna Langerwisch','GER','2:32:13','2:32:13',''],['Thea Heim','GER','2:33:25','2:33:25',''],['Cara Zollenkopf','GER','2:36:05','2:36:05',''],['Esther Pfeiffer','GER','2:37:00','2:37:00',''],['Katja Fischer','GER','2:40:13','2:40:13',''],['Sophia Wunsch','GER','2:40:49','2:40:49',''],['Jule Vetter','GER','2:42:18','2:42:18','']]
  }
 };
 const ENTRIES_PENDING=[
- ['Berlin Marathon','Sep 27','Elite fields are announced race by race, typically a couple of weeks out.'],
  ['Chicago Marathon','Oct 11','Elite field announced closer to race day.'],
  ['New York City Marathon','Nov 1','Elite field announced closer to race day.']
 ];
 const UPCOMING=[
- {d:'Sep 19-20',y:'2026',name:'World Athletics Road Running Championships',where:'Copenhagen, Denmark',detail:'Half marathon, 5km and the mile. Saturday\'s mile and 5km are done \u2014 Dawit Seare (ERI) won the men\'s 5km in 12:56 ahead of Jakob Ingebrigtsen, while Agathe Guillemot and Robert Farken took the miles \u2014 and the elite half marathon runs Sunday.',watch:'World Athletics streams selected territories',tag:'Championship',cls:'champs',links:[['Official site','https://worldathletics.org/competitions/world-athletics-road-running-championships/copenhagen26/main-page'],['Schedule &amp; results guide','https://www.letsrun.com/news/2026/09/2026-world-athletics-road-running-championships-schedule-start-lists-results-link-how-to-watch-the-world-half-5k-mile/']]},
- {d:'Sep 27',y:'2026',name:'Berlin Marathon',where:'Berlin, Germany',detail:'The fastest of the majors and the usual home of world record attempts. World record holder Tigst Assefa headlines a women\'s field that also includes defending champion Rosemary Wanjiru.',watch:'FloSports &middot; 1:00 AM MDT',tag:'Marathon major',cls:'major',links:[['Official site','https://www.bmw-berlin-marathon.com/en/'],['Elite field','https://www.bmw-berlin-marathon.com/en/news-media/news/detail/top-stars-complete-the-bmw-berlin-marathon-field-for-thrilling-races']]},
+ {d:'Sep 27',y:'2026',name:'Berlin Marathon',where:'Berlin, Germany',detail:'Sabastian Sawe, last year’s champion, withdrew Aug 27 with an injury — Gabriel Geay (2:03:00) and Getaneh Molla (2:03:34) now lead a men’s field with seven sub-2:05 runners. Tigst Assefa, the 2:11:53 course-record holder from 2023, headlines the women and says she will chase the world record again.',watch:'FloSports &middot; 1:00 AM MDT',tag:'Marathon major',cls:'major',links:[['Official site','https://www.bmw-berlin-marathon.com/en/'],['Elite field','https://marathonhandbook.com/berlin-marathon-elite-field-start-list/'],['Sawe withdraws','https://thekenyatimes.com/sports/sabastian-sawe-berlin-2/']]},
  {d:'Oct 11',y:'2026',name:'Chicago Marathon',where:'Chicago, USA',detail:'Flat, fast, and the second of the autumn majors.',watch:'Peacock and NBC Chicago &middot; 6:00 AM MDT',tag:'Marathon major',cls:'major',links:[['Official site','https://www.chicagomarathon.com/']]},
  {d:'Nov 1',y:'2026',name:'New York City Marathon',where:'New York, USA',detail:'Five boroughs and the largest field in the sport. Clocks go back the same morning, so the start lands at 6:00 AM once Mountain Time returns to standard.',watch:'ESPN2 and ABC &middot; 6:00 AM MST',tag:'Marathon major',cls:'major',links:[['Official site','https://www.nyrr.org/tcsnycmarathon']]},
- {d:'Dec 6',y:'2026',name:'Shanghai Marathon',where:'Shanghai, China',detail:'A candidate race under assessment to join the majors in 2027.',watch:'No US broadcast confirmed',tag:'Candidate major',cls:'',links:[]}
+ {d:'Dec 6',y:'2026',name:'Shanghai Marathon',where:'Shanghai, China',detail:'A candidate race under assessment to join the majors in 2027.',watch:'No US broadcast confirmed',tag:'Candidate major',cls:'',links:[]},
+ {d:'Dec 6',y:'2026',name:'Valencia Marathon',where:'Valencia, Spain',detail:'One of the fastest courses in the world — Agnes Ngetich’s half marathon and 10km world bests have both come on these roads.',watch:'Broadcast details not yet announced',tag:'Elite race',cls:'',links:[['Official site','https://www.valenciaciudaddelrunning.com/en/marathon/']]},
+ {d:'Mar 7',y:'2027',name:'Tokyo Marathon',where:'Tokyo, Japan',detail:'The newest of the six World Marathon Majors and the first big race of the 2027 season.',watch:'Broadcast details not yet announced',tag:'Marathon major',cls:'major',links:[['Official site','https://www.marathon.tokyo/en/']]}
 ];
 const DL_SEASON=[
  ['May 16','Keqiao / Shanghai','China'],['May 23','Xiamen','China'],['May 31','Rabat','Morocco'],
@@ -517,40 +489,43 @@ const DL_SEASON=[
 ];
 
 // Section news. [ISO date, headline, publisher, url, one-line summary]
-// Checked 3 September 2026; the twice-weekly refresh replaces these.
-const NEWS_CHECKED='2026-09-19';
+// Checked 21 September 2026; the twice-weekly refresh replaces these.
+const NEWS_CHECKED='2026-09-21';
 const NEWS={
  track:[
+  ['2026-09-18','Richardson and Thomas headline Athlos London wins as the pro circuit closes out its season','NBC Sports','https://www.nbcsports.com/olympics/news/gabby-thomas-shacarri-richardson-athlos-results-2026','Sha’Carri Richardson won the 100m in 10.80 and Gabby Thomas the 200m in 22.13; Keely Hodgkinson (800m) and Marileidy Paulino (400m) also won at StoneX Stadium.'],
   ['2026-09-13','Jefferson-Wooden and Bednarek sweep the sprints as USA tops the Ultimate Championship','NBC Sports','https://www.nbcsports.com/olympics/news/world-athletics-ultimate-championship-results-2026','USA won 10 golds across the 28-event format in Budapest; Josh Kerr held off Cameron Myers in the 1500m and Djamel Sedjati sprang the 800m upset.'],
   ['2026-09-05','Wanyonyi completes an 800m four-peat as Diamond League champions are crowned in Brussels','FloTrack','https://www.flotrack.org/articles/16158918-diamond-league-champions-2026-full-list-of-winners','Collen Kebinatshipi (400m) and Chase Jackson (shot put) also broke meet or national records across the two-day final.'],
   ['2026-08-27','Dos Santos and Russell break world records in Zurich','Wanda Diamond League','https://www.diamondleague.com/dos-santos-and-russell-break-world-records-in-zurich/','Alison dos Santos ran 45.80 in the 400m hurdles, 0.14 inside Warholm’s mark; Masai Russell followed with 12.09 in the 100m hurdles less than 40 minutes later.']
  ],
  road:[
+  ['2026-09-20','Ngetich breaks the women-only half marathon world record as Copenhagen closes','World Athletics','https://worldathletics.org/en/competitions/world-athletics-road-running-championships/copenhagen26/news/report/road-running-copenhagen-26-women-half-marathon','Agnes Ngetich ran 1:05:15 to take one second off Peres Jepchirchir’s 2020 mark; Andreas Almgren won the men’s race in a European record 58:06.'],
   ['2026-09-19','Seare denies Ingebrigtsen in the Copenhagen 5km as Farken and Guillemot lead the mile','LetsRun','https://www.letsrun.com/news/2026/09/2026-world-athletics-road-running-championships-schedule-start-lists-results-link-how-to-watch-the-world-half-5k-mile/','Eritrea’s Dawit Seare ran a national record 12:56 to beat Ingebrigtsen on day one in Copenhagen; the elite half marathon follows on Sunday.'],
-  ['2026-08-29','Gobena breaks course record while Jepchirchir dominates in Sydney','World Athletics','https://worldathletics.org/competitions/world-athletics-label-road-races/news/sydney-marathon-2026-gobena-jepchirchir','Addisu Gobena won in 2:04:42, three seconds clear and inside the course record; Peres Jepchirchir took the women’s race in 2:18:31.'],
-  ['2026-08-11','Top stars complete the BMW Berlin Marathon field','BMW Berlin Marathon','https://www.bmw-berlin-marathon.com/en/news-media/news/detail/top-stars-complete-the-bmw-berlin-marathon-field-for-thrilling-races','Gabriel Geay and Guye Adola join the men’s field for 27 September, with Dubai winner Bedatu Hirpa added to the women’s.']
+  ['2026-09-16','Assefa, Wanjiru and Geay lead loaded Berlin Marathon fields after Sawe’s injury withdrawal','FloTrack','https://www.flotrack.org/articles/16185163-tigst-assefa-rosemary-wanjiru-gabriel-geay-lead-berlin-marathon','Defending champion Sabastian Sawe pulled out Aug 27; Assefa says she will go for her own world record again on Sep 27.'],
+  ['2026-08-29','Gobena breaks course record while Jepchirchir dominates in Sydney','World Athletics','https://worldathletics.org/competitions/world-athletics-label-road-races/news/sydney-marathon-2026-gobena-jepchirchir','Addisu Gobena won in 2:04:42, three seconds clear and inside the course record; Peres Jepchirchir took the women’s race in 2:18:31.']
  ],
  ultra:[
+  ['2026-09-14','Smith sweeps The Rut as Eckert sets a women’s 6-day world record','iRunFar','https://www.irunfar.com/this-week-in-running-september-14-2026','Cam Smith won both the VK and 28k in Montana; Megan Eckert covered 636.482 miles over six days for an American and world best.'],
   ['2026-09-13','Kevin Stewart and Sarah Ostaszewski win Wasatch Front 100 to close the Grand Slam','Ultra Running Magazine','https://ultrarunning.com/featured/ultra-weekend-recap-september-13-2026/','Stewart ran 20:41:09 and Ostaszewski 25:18:50 in Utah; Rose Vigneault also set a women’s course record at Ultra-Trail Harricana.'],
-  ['2026-08-29','2026 UTMB results: Ben Dhiman and Blandine L’Hirondel win','iRunFar','https://www.irunfar.com/2026-utmb-results','The sport’s biggest weekend closes with a first UTMB title for Dhiman and a Mont-Blanc win for L’Hirondel.'],
-  ['2026-08-28','2026 CCC results: Yngvild Kaspersen and Cristian Minoggio triumph','iRunFar','https://www.irunfar.com/2026-ccc-results','The 100km race from Courmayeur goes to Norway and Italy.'],
-  ['2026-09-01','Nick Fowler sets the overall and self-supported Pacific Crest Trail FKT','iRunFar','https://www.irunfar.com/nick-fowler-pacific-crest-trail-fkt-2026','Averaged 56.7 miles a day for more than 45 days on the 2,650-mile trail.']
+  ['2026-09-01','Nick Fowler sets the overall and self-supported Pacific Crest Trail FKT','iRunFar','https://www.irunfar.com/nick-fowler-pacific-crest-trail-fkt-2026','Averaged 56.7 miles a day for more than 45 days on the 2,650-mile trail.'],
+  ['2026-08-29','2026 UTMB results: Ben Dhiman and Blandine L’Hirondel win','iRunFar','https://www.irunfar.com/2026-utmb-results','The sport’s biggest weekend closes with a first UTMB title for Dhiman and a Mont-Blanc win for L’Hirondel.']
  ],
  entries:[
-  ['2026-09-19','World Road Running Championships underway in Copenhagen','LetsRun','https://www.letsrun.com/news/2026/09/2026-world-athletics-road-running-championships-schedule-start-lists-results-link-how-to-watch-the-world-half-5k-mile/','Seare and Guillemot took Saturday’s mile and 5km titles; the elite half marathon start lists are set for Sunday morning.'],
-  ['2026-09-05','Diamond League Final champions crowned in Brussels','FloTrack','https://www.flotrack.org/articles/16158918-diamond-league-champions-2026-full-list-of-winners','Wanyonyi’s 800m four-peat headlined a two-day final that closed out the 2026 Diamond League season.']
+  ['2026-09-16','Assefa, Wanjiru and Geay lead loaded Berlin Marathon fields after Sawe’s injury withdrawal','FloTrack','https://www.flotrack.org/articles/16185163-tigst-assefa-rosemary-wanjiru-gabriel-geay-lead-berlin-marathon','Defending champion Sabastian Sawe pulled out Aug 27; Assefa, the 2023 course-record holder, says she will go for the world record again.'],
+  ['2026-08-27','Sabastian Sawe withdraws from the Berlin Marathon with injury','The Kenya Times','https://thekenyatimes.com/sports/sabastian-sawe-berlin-2/','The London record-breaker and defending Berlin champion pulls out a month before race day.'],
+  ['2026-08-14','Berlin’s elite field runs 25 deep under 2:08 across 67 entrants','Marathon Handbook','https://marathonhandbook.com/berlin-marathon-elite-field-start-list/','Organisers released the full men’s and women’s start lists; Olympic 10,000m champion Selemon Barega sits eighth among the men.']
  ],
  calendar:[
-  ['2026-09-19','World Road Running Championships underway in Copenhagen','LetsRun','https://www.letsrun.com/news/2026/09/2026-world-athletics-road-running-championships-schedule-start-lists-results-link-how-to-watch-the-world-half-5k-mile/','Mass and elite mile and 5km races ran Saturday; the elite half marathon closes the championships on Sunday.'],
-  ['2026-09-13','World Athletics Ultimate Championship concludes in Budapest','NBC Sports','https://www.nbcsports.com/olympics/news/world-athletics-ultimate-championship-results-2026','USA topped the medal table with 10 golds across the new 28-event format.'],
-  ['2026-08-21','Ngetich and Ebenyo lead the Kenyan team for Copenhagen','World Athletics','https://worldathletics.org/competitions/world-athletics-road-running-championships/copenhagen26/news/news/wrrc-copenhagen-26-kenya-team','World 10km record holder Agnes Ngetich and half marathon silver medallist Daniel Ebenyo head a 16-strong squad.']
+  ['2026-09-20','Ngetich’s world record caps the World Road Running Championships in Copenhagen','Al Jazeera','https://www.aljazeera.com/sports/2026/9/20/kenyas-ngetich-breaks-women-only-half-marathon-world-record-by-a-second','Kenya swept the mile, 5km and half marathon golds across the two-day championships.'],
+  ['2026-09-16','Berlin opens the fall marathon major run with Assefa chasing her own world record','FloTrack','https://www.flotrack.org/articles/16185163-tigst-assefa-rosemary-wanjiru-gabriel-geay-lead-berlin-marathon','Berlin (Sep 27) leads into Chicago (Oct 11) and New York (Nov 1) to close out the record-eligible fall season.'],
+  ['2026-09-13','World Athletics Ultimate Championship concludes in Budapest','NBC Sports','https://www.nbcsports.com/olympics/news/world-athletics-ultimate-championship-results-2026','USA topped the medal table with 10 golds across the new 28-event format.']
  ]
 };
 
 // World records. [event, mark, athlete, country, venue, date, note]
 // Track and road from the World Athletics world-record tables; ultra from the IAU record lists.
-// Both read 3 September 2026.
-const RECORDS_CHECKED='2026-09-19';
+// Both read 21 September 2026.
+const RECORDS_CHECKED='2026-09-21';
 const RECORDS={
  track:{
   men:[
@@ -586,7 +561,7 @@ const RECORDS={
   men:[
    ['5km','12:49','Berihu Aregawi','ETH','Barcelona','31 Dec 2021',''],
    ['10km','26:31','Yomif Kejelcha','ETH','Castellon','16 Feb 2025',''],
-   ['Half marathon','56:51','Yomif Kejelcha','ETH','Buenos Aires','23 Aug 2026','previous record Kejelcha 57:30, Valencia, 27 Oct 2024','pending'],
+   ['Half marathon','56:51','Yomif Kejelcha','ETH','Buenos Aires','23 Aug 2026','previous record Jacob Kiplimo 57:20, Lisbon, 8 Mar 2026','pending'],
    ['Marathon','1:59:30','Sabastian Sawe','KEN','London','26 Apr 2026','']
   ],
   women:[
@@ -595,7 +570,7 @@ const RECORDS={
    ['10km','28:46','Agnes Ngetich','KEN','Valencia','14 Jan 2024','mixed race'],
    ['10km','29:27','Agnes Ngetich','KEN','Herzogenaurach','26 Apr 2025','women-only race'],
    ['Half marathon','1:02:52','Letesenbet Gidey','ETH','Valencia','24 Oct 2021','mixed race'],
-   ['Half marathon','1:05:16','Peres Jepchirchir','KEN','Gdynia','17 Oct 2020','women-only race'],
+   ['Half marathon','1:05:15','Agnes Ngetich','KEN','Copenhagen','20 Sep 2026','women-only race — previous record Peres Jepchirchir 1:05:16, Gdynia, 17 Oct 2020','pending'],
    ['Marathon','2:09:56','Ruth Chepngetich','KEN','Chicago','13 Oct 2024','mixed race'],
    ['Marathon','2:15:41','Tigst Assefa','ETH','London','26 Apr 2026','women-only race']
   ]
@@ -631,7 +606,7 @@ const RECORD_SOURCE={
 
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-const state={track:{gender:'men',key:'100m',sort:'points'},road:{gender:'men',key:'10km – Half marathon',sort:'points'},ultra:{gender:'men',key:'50K',sort:'points'},entries:{gender:'men',key:'100m',sort:'points'}};
+const state={track:{gender:'men',key:'100m',sort:'points'},road:{gender:'men',key:'10km – Half marathon',sort:'points'},ultra:{gender:'men',key:'50K',sort:'points'},entries:{gender:'men',key:'Marathon',sort:'points'}};
 // Times come in several shapes: 9.82, 1:41.76, 12:47.62, 1:59:30, and road marks like '26:55 rd'.
 function timeSeconds(v){if(!v)return Infinity;const m=String(v).match(/[0-9]+(?::[0-9]+)*(?:\.[0-9]+)?/);if(!m)return Infinity;const parts=m[0].split(':').map(Number);if(parts.some(n=>!Number.isFinite(n)))return Infinity;return parts.reduce((a,b)=>a*60+b,0)}
 
@@ -698,7 +673,7 @@ function restoreView(){
   let saved=null;
   try{saved=JSON.parse(localStorage.getItem('tf-view')||'null')}catch(e){}
   if(saved){
-    if(saved.tt){if(saved.tt.day===0||saved.tt.day===1)ttState.day=saved.tt.day;
+    if(saved.tt){if(Number.isInteger(saved.tt.day)&&saved.tt.day>=0&&saved.tt.day<TIMETABLE.length)ttState.day=saved.tt.day;
       if(saved.tt.scope==='all'||saved.tt.scope==='finals')ttState.scope=saved.tt.scope}
     TABS.forEach(t=>{if(saved.state&&saved.state[t])applyView(t,saved.state[t])});
     if(TABS.indexOf(saved.tab)>-1)activeTab=saved.tab;
@@ -730,8 +705,8 @@ function renderTimetable(){
     const[t,n,key]=r,status=statuses[day.rows.indexOf(r)],badge=ttBadge(status);
     const actions=[];
     if(key)actions.push(`<button class="tt-link" data-entry="${esc(key)}">Start list</button>`);
-    if(status==='final')actions.push(`<a class="tt-result-link" href="https://brussels.diamondleague.com/en/programme-results/" target="_blank" rel="noopener">Result &#8599;</a>`);
-    return`<div class="tt-row${isFinalEvent(n)?'':' support'}${status==='live'?' is-live':''}"><div class="t">${esc(toMountain(t))}<span class="tz">MDT</span><small>${esc(t)} Brussels</small></div><div class="e">${esc(n)}${badge}</div><div class="tt-actions">${actions.join('')}</div></div>`;
+    if(status==='final')actions.push(`<a class="tt-result-link" href="${ENTRY_RESULTS_URL}" target="_blank" rel="noopener">Result &#8599;</a>`);
+    return`<div class="tt-row${isFinalEvent(n)?'':' support'}${status==='live'?' is-live':''}"><div class="t">${esc(toMountain(t))}<span class="tz">MDT</span><small>${esc(t)} ${esc(ENTRY_MEET_CITY)}</small></div><div class="e">${esc(n)}${badge}</div><div class="tt-actions">${actions.join('')}</div></div>`;
   }).join('');
   $$('#ttDays button').forEach(b=>b.onclick=()=>{ttState.day=+b.dataset.day;renderTimetable()});
   $$('#ttScope button').forEach(b=>b.onclick=()=>{ttState.scope=b.dataset.scope;$$('#ttScope button').forEach(x=>x.classList.toggle('active',x===b));renderTimetable()});
@@ -816,7 +791,7 @@ $$('.tabs button').forEach(btn=>btn.onclick=()=>showTab(btn.dataset.tab));
   });
 });
 restoreView();renderAll();renderCalendar();renderTimetable();renderNews();
-// Keeps the Brussels timetable's live badges and banner current while the tab sits open.
+// Keeps the timetable's live badges and banner current while the tab sits open.
 setInterval(renderTimetable,30000);
 </script>
 </body>
