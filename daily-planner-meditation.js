@@ -173,14 +173,33 @@ function meditLoadYT(url){
 var _audiblePending={};
 var _bibleSpeechChunks=[],_bibleSpeechIndex=0,_bibleSpeechPaused=false,_bibleSpeechToken=0,_bibleSpeechUtterance=null;
 function bibleSpeechSupported(){return'speechSynthesis'in window&&'SpeechSynthesisUtterance'in window;}
+function speechVoiceQualityScore(v){
+  var name=(v.name||'').toLowerCase();
+  var score=0;
+  if(v.localService===false)score+=3;
+  if(/neural|wavenet|studio|natural|premium|enhanced|plus/.test(name))score+=4;
+  if(/online/.test(name))score+=1;
+  if(/compact/.test(name))score-=3;
+  if(v.default)score+=0.5;
+  return score;
+}
+function speechPickBestVoice(voices,savedId){
+  if(!voices||!voices.length)return null;
+  if(savedId){var saved=voices.find(function(v){return(v.voiceURI||v.name)===savedId;});if(saved)return saved;}
+  var english=voices.filter(function(v){return /^en/i.test(v.lang||'');});
+  var pool=english.length?english:voices;
+  var best=pool[0],bestScore=speechVoiceQualityScore(best);
+  pool.forEach(function(v){var s=speechVoiceQualityScore(v);if(s>bestScore){best=v;bestScore=s;}});
+  return best;
+}
 function bibleSpeechPopulateVoices(){
   var select=document.getElementById('bibleSpeechVoice');if(!select||!bibleSpeechSupported())return;
   var voices=window.speechSynthesis.getVoices().filter(function(v){return /^(en|es)(?:-|_|$)/i.test(v.lang||'');}),saved='';try{saved=localStorage.getItem('bible_speech_voice')||'';}catch(ignore){}
-  voices.sort(function(a,b){var al=/^en/i.test(a.lang)?0:1,bl=/^en/i.test(b.lang)?0:1;return al-bl||a.name.localeCompare(b.name);});
+  voices.sort(function(a,b){var al=/^en/i.test(a.lang)?0:1,bl=/^en/i.test(b.lang)?0:1;return al-bl||(speechVoiceQualityScore(b)-speechVoiceQualityScore(a))||a.name.localeCompare(b.name);});
   select.innerHTML='';
-  voices.forEach(function(v){var option=document.createElement('option');option.value=v.voiceURI||v.name;option.textContent=(/^es/i.test(v.lang)?'Spanish: ':'English: ')+v.name+' ('+v.lang+')';option.dataset.voiceName=v.name;select.appendChild(option);});
+  voices.forEach(function(v){var option=document.createElement('option');var star=speechVoiceQualityScore(v)>0?'\u2728 ':'';option.value=v.voiceURI||v.name;option.textContent=star+(/^es/i.test(v.lang)?'Spanish: ':'English: ')+v.name+' ('+v.lang+')';option.dataset.voiceName=v.name;select.appendChild(option);});
   var match=voices.find(function(v){return (v.voiceURI||v.name)===saved||v.name===saved;});
-  if(match){select.value=match.voiceURI||match.name;}else if(voices.length){var preferred=voices.find(function(v){return /^en-US/i.test(v.lang)&&v.default;})||voices.find(function(v){return /^en-US/i.test(v.lang);})||voices[0];select.value=preferred.voiceURI||preferred.name;}
+  if(match){select.value=match.voiceURI||match.name;}else if(voices.length){var preferred=speechPickBestVoice(voices.filter(function(v){return /^en/i.test(v.lang);}))||voices[0];select.value=preferred.voiceURI||preferred.name;}
   if(!voices.length){var unavailable=document.createElement('option');unavailable.value='';unavailable.textContent='No English or Spanish voices installed';select.appendChild(unavailable);}
 }
 function bibleSpeechSavePrefs(){try{localStorage.setItem('bible_speech_voice',(document.getElementById('bibleSpeechVoice')||{}).value||'');localStorage.setItem('bible_speech_rate',(document.getElementById('bibleSpeechRate')||{}).value||'1');}catch(ignore){}}
@@ -217,7 +236,7 @@ function bibleSpeechSetState(state){
 var _bibleSpeechKeepAlive=null;
 function bibleSpeechPickVoice(voiceId){
   var voices=window.speechSynthesis.getVoices()||[];
-  return voices.find(function(v){return (v.voiceURI||v.name)===voiceId;})||voices.find(function(v){return /^en-US/i.test(v.lang)&&v.default;})||voices.find(function(v){return /^en/i.test(v.lang);})||voices[0]||null;
+  return speechPickBestVoice(voices,voiceId);
 }
 function bibleSpeechNoVoiceWarning(){
   var status=document.getElementById('bibleSpeechStatus');if(status)status.textContent='No voice responded — check device TTS settings';
@@ -228,7 +247,7 @@ function bibleSpeechSpeakNext(token){
   var utterance=new SpeechSynthesisUtterance(_bibleSpeechChunks[_bibleSpeechIndex]),voiceId=(document.getElementById('bibleSpeechVoice')||{}).value||'',voice=bibleSpeechPickVoice(voiceId);_bibleSpeechUtterance=utterance;if(voice){utterance.voice=voice;utterance.lang=voice.lang;}else{utterance.lang='en-US';}utterance.rate=parseFloat((document.getElementById('bibleSpeechRate')||{}).value)||1;utterance.pitch=1;utterance.volume=1;
   var started=false;
   utterance.onstart=function(){started=true;};
-  utterance.onend=function(){if(token!==_bibleSpeechToken)return;started=true;_bibleSpeechUtterance=null;_bibleSpeechIndex++;setTimeout(function(){bibleSpeechSpeakNext(token);},120);};
+  utterance.onend=function(){if(token!==_bibleSpeechToken)return;started=true;_bibleSpeechUtterance=null;_bibleSpeechIndex++;setTimeout(function(){bibleSpeechSpeakNext(token);},300);};
   utterance.onerror=function(e){started=true;_bibleSpeechUtterance=null;if(e.error==='canceled'||e.error==='interrupted')return;bibleSpeechStop(true);var status=document.getElementById('bibleSpeechStatus');if(status)status.textContent='Voice error: '+(e.error||'playback failed')+'. Try another voice.';};
   try{window.speechSynthesis.resume();window.speechSynthesis.speak(utterance);}catch(e){_bibleSpeechUtterance=null;bibleSpeechStop(true);var status=document.getElementById('bibleSpeechStatus');if(status)status.textContent='Voice playback is blocked in this browser.';}
   // Some Android/Chrome + WebView combos accept speak() but the device has no working
@@ -269,21 +288,34 @@ function cardSpeechText(resultId){
   var el=document.getElementById(resultId);if(!el)return'';
   return(el.innerText||el.textContent||'').replace(/\s+/g,' ').trim();
 }
+function speechPauseFor(text){
+  var t=(text||'').trim(),last=t.charAt(t.length-1);
+  if(last==='.'||last==='!'||last==='?')return 420;
+  if(last===';'||last===':')return 300;
+  if(last===','||last==='\u2014'||last==='-')return 220;
+  return 90;
+}
+function speechSplitClauses(sentence){
+  return sentence.replace(/([,;:]|\u2014)\s+/g,'$1\n').split(/\n+/).map(function(s){return s.trim();}).filter(Boolean);
+}
 function cardSpeechMakeChunks(text){
   var sentences=text.replace(/([.!?])\s+/g,'$1\n').split(/\n+/),chunks=[];
   sentences.forEach(function(sentence){
     sentence=sentence.trim();if(!sentence)return;
-    if(sentence.length<=160){chunks.push(sentence);return;}
-    var words=sentence.split(/\s+/),current='';
-    words.forEach(function(word){if((current+' '+word).trim().length>160&&current){chunks.push(current);current=word;}else current+=(current?' ':'')+word;});
-    if(current)chunks.push(current);
+    var pieces=sentence.length>70?speechSplitClauses(sentence):[sentence];
+    pieces.forEach(function(piece){
+      if(piece.length<=160){chunks.push(piece);return;}
+      var words=piece.split(/\s+/),current='';
+      words.forEach(function(word){if((current+' '+word).trim().length>160&&current){chunks.push(current);current=word;}else current+=(current?' ':'')+word;});
+      if(current)chunks.push(current);
+    });
   });
   return chunks;
 }
 function cardSpeechPickVoice(){
   if(!bibleSpeechSupported())return null;
   var voices=window.speechSynthesis.getVoices()||[],saved='';try{saved=localStorage.getItem('bible_speech_voice')||'';}catch(ignore){}
-  return voices.find(function(v){return(v.voiceURI||v.name)===saved;})||voices.find(function(v){return /^en-US/i.test(v.lang)&&v.default;})||voices.find(function(v){return /^en/i.test(v.lang);})||voices[0]||null;
+  return speechPickBestVoice(voices,saved);
 }
 function cardSpeechSetBtn(btnId,state){
   var btn=document.getElementById(btnId);if(!btn)return;
@@ -305,7 +337,7 @@ function cardSpeechSpeakNext(token,btnId){
   utterance.rate=savedRate;utterance.pitch=1;utterance.volume=1;
   var started=false;
   utterance.onstart=function(){started=true;};
-  utterance.onend=function(){if(token!==_cardSpeech.token)return;started=true;_cardSpeech.idx++;setTimeout(function(){cardSpeechSpeakNext(token,btnId);},120);};
+  utterance.onend=function(){if(token!==_cardSpeech.token)return;started=true;var pause=speechPauseFor(_cardSpeech.chunks[_cardSpeech.idx]);_cardSpeech.idx++;setTimeout(function(){cardSpeechSpeakNext(token,btnId);},pause);};
   utterance.onerror=function(e){started=true;if(e.error==='canceled'||e.error==='interrupted')return;cardSpeechStop(true);};
   try{window.speechSynthesis.resume();window.speechSynthesis.speak(utterance);}catch(e){cardSpeechStop(true);return;}
   setTimeout(function(){
