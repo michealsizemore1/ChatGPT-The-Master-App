@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-22T21:14:41+00:00",
+  "updatedAt": "2026-09-22T21:30:15+00:00",
   "source": "Yahoo Finance public chart data",
   "quotes": {
     "SCHD": {
@@ -79,18 +79,18 @@
       "prev": 27122.094,
       "change": 122.183,
       "changesPercentage": 0.4505,
-      "volume": 7990426000,
-      "avgVolume": 9988835200,
+      "volume": 8013386000,
+      "avgVolume": 9993427200,
       "yearHigh": 27288.791,
       "yearLow": 20690.25,
       "marketState": "",
       "currency": "USD"
     },
     "DX-Y.NYB": {
-      "price": 100.543,
+      "price": 100.542,
       "prev": 100.429,
-      "change": 0.114,
-      "changesPercentage": 0.1135,
+      "change": 0.113,
+      "changesPercentage": 0.1125,
       "volume": 0,
       "avgVolume": 0,
       "yearHigh": 101.8,
@@ -123,12 +123,12 @@
       "currency": "USD"
     },
     "BTC-USD": {
-      "price": 86273.33,
+      "price": 86242.45,
       "prev": 86597.82,
-      "change": -324.49,
-      "changesPercentage": -0.3747,
-      "volume": 41640873984,
-      "avgVolume": 36292209681,
+      "change": -355.37,
+      "changesPercentage": -0.4104,
+      "volume": 41511346176,
+      "avgVolume": 36266304120,
       "yearHigh": 126198.07,
       "yearLow": 57747.766,
       "marketState": "",
@@ -147,10 +147,10 @@
       "currency": "USD"
     },
     "JPY=X": {
-      "price": 157.359,
+      "price": 157.409,
       "prev": 157.311,
-      "change": 0.048,
-      "changesPercentage": 0.0305,
+      "change": 0.098,
+      "changesPercentage": 0.0623,
       "volume": 0,
       "avgVolume": 0,
       "yearHigh": 163.979,
@@ -225,8 +225,8 @@
       "prev": 86290.0,
       "change": 70.0,
       "changesPercentage": 0.0811,
-      "volume": 10354,
-      "avgVolume": 12670,
+      "volume": 2,
+      "avgVolume": 10082,
       "yearHigh": 127240.0,
       "yearLow": 57850.0,
       "marketState": "",
@@ -266,12 +266,12 @@
     "LPL Financial, Northern Trust, Ameriprise Financial, Morgan Stanley, and Paymentus Stocks Trade Down, What You Need To Know - TradingView",
     "Fed\u2019s Williams defends current monetary policy framework - Investing.com",
     "Stock Market Investors Just Got Bad News About President Trump\u2019s Economy. History Says This Will Happen Next. - The Globe and Mail",
-    "Ray Dalio: AI will both be productivity miracle and devastaing bubble - fortune.com",
     "The stock market is quietly accelerating a retirement wave - thestreet.com",
-    "PGIM Quant Solutions International Equity Fund Q2 2026 Commentary - Seeking Alpha",
+    "Ray Dalio: AI will both be productivity miracle and devastaing bubble - Fortune",
+    "Federal Reserve Interest Rate Predictions for 2026 - Norada Real Estate Investments",
     "Investors Snub Wall Street, Build $5.1 Trillion Cash Fortress as Fed Pushes Rates Toward 4.75% - 24/7 Wall St.",
-    "Will $100 Oil Push U.S. Farm Costs Even Higher This Fall? - AgroLatam",
-    "3 Things You Need to Know This Week | Diplomatic Events, PMIs, Consumer Sentiment - Fisher Investments"
+    "PGIM Quant Solutions International Equity Fund Q2 2026 Commentary - Seeking Alpha",
+    "Will $100 Oil Push U.S. Farm Costs Even Higher This Fall? - AgroLatam"
   ],
   "economy": [
     "CPI 2026-07 | 3.5% YoY",
@@ -285,9 +285,9 @@
     "DXY  100.54 \u25b20.11%",
     "Gold  $4,396.20 \u25b20.28%",
     "WTI  $89.85 \u25bc2.73%",
-    "Bitcoin  $86,273 \u25bc0.37%",
+    "Bitcoin  $86,242 \u25bc0.41%",
     "EUR/USD  1.1452 \u25bc0.15%",
-    "USD/JPY  157.36 \u25b20.03%",
+    "USD/JPY  157.41 \u25b20.06%",
     "VIX  14.21 \u25bc4.44%",
     "Copper  $6.905 \u25b22.11%"
   ],
