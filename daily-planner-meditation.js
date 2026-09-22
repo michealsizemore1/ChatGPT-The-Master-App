@@ -243,7 +243,7 @@ function bibleSpeechSpeakNext(token){
   },2500);
 }
 function bibleSpeechRead(){
-  if(!bibleSpeechSupported()){alert('Text-to-speech is not available in this browser.');return;}var text=bibleSpeechText();if(!text){alert('Create the Bible reading summary first.');return;}
+  if(!bibleSpeechSupported()){alert('Text-to-speech is not available in this browser.');return;}if(typeof _cardSpeech!=='undefined'&&_cardSpeech.activeBtn)cardSpeechStop();var text=bibleSpeechText();if(!text){alert('Create the Bible reading summary first.');return;}
   _bibleSpeechToken++;var token=_bibleSpeechToken;
   _bibleSpeechChunks=bibleSpeechMakeChunks(text);_bibleSpeechIndex=0;_bibleSpeechPaused=false;bibleSpeechSavePrefs();bibleSpeechSetState('speaking');
   if(_bibleSpeechKeepAlive){clearInterval(_bibleSpeechKeepAlive);_bibleSpeechKeepAlive=null;}
@@ -259,6 +259,75 @@ function bibleSpeechRead(){
 function bibleSpeechPauseResume(){if(!bibleSpeechSupported()||!window.speechSynthesis.speaking)return;if(_bibleSpeechPaused){window.speechSynthesis.resume();_bibleSpeechPaused=false;}else{window.speechSynthesis.pause();_bibleSpeechPaused=true;}bibleSpeechSetState('speaking');}
 function bibleSpeechStop(finished){if(bibleSpeechSupported())window.speechSynthesis.cancel();if(_bibleSpeechKeepAlive){clearInterval(_bibleSpeechKeepAlive);_bibleSpeechKeepAlive=null;}_bibleSpeechUtterance=null;_bibleSpeechToken++;_bibleSpeechChunks=[];_bibleSpeechIndex=0;_bibleSpeechPaused=false;bibleSpeechSetState('idle');if(!finished){var status=document.getElementById('bibleSpeechStatus');if(status)status.textContent='Stopped';}}
 if(bibleSpeechSupported()){window.speechSynthesis.onvoiceschanged=bibleSpeechPopulateVoices;}
+
+/* --- Bible tab: Listen button on each AI response card (Scripture Focus,
+   Worship, AI Prayer). Shares the browser's speechSynthesis engine with the
+   One Year Bible reader above -- starting one stops the other -- but keeps
+   its own lightweight state so any card's Listen button can drive it. --- */
+var _cardSpeech={token:0,chunks:[],idx:0,activeBtn:null,keepAlive:null};
+function cardSpeechText(resultId){
+  var el=document.getElementById(resultId);if(!el)return'';
+  return(el.innerText||el.textContent||'').replace(/\s+/g,' ').trim();
+}
+function cardSpeechMakeChunks(text){
+  var sentences=text.replace(/([.!?])\s+/g,'$1\n').split(/\n+/),chunks=[];
+  sentences.forEach(function(sentence){
+    sentence=sentence.trim();if(!sentence)return;
+    if(sentence.length<=160){chunks.push(sentence);return;}
+    var words=sentence.split(/\s+/),current='';
+    words.forEach(function(word){if((current+' '+word).trim().length>160&&current){chunks.push(current);current=word;}else current+=(current?' ':'')+word;});
+    if(current)chunks.push(current);
+  });
+  return chunks;
+}
+function cardSpeechPickVoice(){
+  if(!bibleSpeechSupported())return null;
+  var voices=window.speechSynthesis.getVoices()||[],saved='';try{saved=localStorage.getItem('bible_speech_voice')||'';}catch(ignore){}
+  return voices.find(function(v){return(v.voiceURI||v.name)===saved;})||voices.find(function(v){return /^en-US/i.test(v.lang)&&v.default;})||voices.find(function(v){return /^en/i.test(v.lang);})||voices[0]||null;
+}
+function cardSpeechSetBtn(btnId,state){
+  var btn=document.getElementById(btnId);if(!btn)return;
+  btn.innerHTML=state==='speaking'?'&#x23F9; Stop':'&#x1F50A; Listen';
+}
+function cardSpeechStop(finished){
+  if(bibleSpeechSupported())window.speechSynthesis.cancel();
+  if(_cardSpeech.keepAlive){clearInterval(_cardSpeech.keepAlive);_cardSpeech.keepAlive=null;}
+  _cardSpeech.token++;_cardSpeech.chunks=[];_cardSpeech.idx=0;
+  if(_cardSpeech.activeBtn)cardSpeechSetBtn(_cardSpeech.activeBtn,'idle');
+  _cardSpeech.activeBtn=null;
+}
+function cardSpeechSpeakNext(token,btnId){
+  if(token!==_cardSpeech.token)return;
+  if(_cardSpeech.idx>=_cardSpeech.chunks.length){cardSpeechStop(true);return;}
+  var utterance=new SpeechSynthesisUtterance(_cardSpeech.chunks[_cardSpeech.idx]),voice=cardSpeechPickVoice();
+  if(voice){utterance.voice=voice;utterance.lang=voice.lang;}else{utterance.lang='en-US';}
+  var savedRate=1;try{savedRate=parseFloat(localStorage.getItem('bible_speech_rate'))||1;}catch(ignore){}
+  utterance.rate=savedRate;utterance.pitch=1;utterance.volume=1;
+  var started=false;
+  utterance.onstart=function(){started=true;};
+  utterance.onend=function(){if(token!==_cardSpeech.token)return;started=true;_cardSpeech.idx++;setTimeout(function(){cardSpeechSpeakNext(token,btnId);},120);};
+  utterance.onerror=function(e){started=true;if(e.error==='canceled'||e.error==='interrupted')return;cardSpeechStop(true);};
+  try{window.speechSynthesis.resume();window.speechSynthesis.speak(utterance);}catch(e){cardSpeechStop(true);return;}
+  setTimeout(function(){
+    if(token!==_cardSpeech.token)return;
+    if(!started&&!window.speechSynthesis.speaking&&!window.speechSynthesis.pending){
+      cardSpeechStop(true);
+      bibleSpeechNoVoiceWarning();
+    }
+  },2500);
+}
+function toggleCardSpeech(resultId,btnId){
+  if(!bibleSpeechSupported()){alert('Text-to-speech is not available in this browser.');return;}
+  if(_cardSpeech.activeBtn===btnId){cardSpeechStop();return;}
+  var text=cardSpeechText(resultId);
+  if(!text){alert('Nothing to listen to yet -- generate a response first.');return;}
+  if(_cardSpeech.activeBtn)cardSpeechStop();
+  if(window.speechSynthesis.speaking||window.speechSynthesis.pending)window.speechSynthesis.cancel();
+  _cardSpeech.token++;var token=_cardSpeech.token;
+  _cardSpeech.chunks=cardSpeechMakeChunks(text);_cardSpeech.idx=0;_cardSpeech.activeBtn=btnId;
+  cardSpeechSetBtn(btnId,'speaking');
+  setTimeout(function(){cardSpeechSpeakNext(token,btnId);},80);
+}
 function audibleSummarize(){
   var passages=(document.getElementById('audiblePassages')||{}).value||'';
   var day=(document.getElementById('audibleChapter')||{}).value||'';
