@@ -70,11 +70,18 @@ async function migrateVaultFromLocalStorage() {
   let old = null;
   try { const raw = localStorage.getItem(VAULT_STORAGE_KEY); if (raw) old = JSON.parse(raw); } catch (e) { /* ignore corrupt old data */ }
   if (!old || !old.length) return;
+  let failures = 0;
   for (const d of old) {
     try { await vaultDBPut({ ...d, fileBlob: null, sizeOriginal: d.sizeOriginal || (d.extractedText ? d.extractedText.length : 0) }); }
-    catch (e) { /* best-effort — skip any record that fails to migrate rather than blocking the rest */ }
+    catch (e) { failures++; /* best-effort — skip any record that fails to migrate rather than blocking the rest */ }
   }
-  try { localStorage.removeItem(VAULT_STORAGE_KEY); } catch (e) { /* ignore */ }
+  // Only clear the old copy once every record actually made it into IndexedDB — if IndexedDB is
+  // unavailable or blocked (private browsing, a storage-blocking extension, a full quota), every
+  // migration attempt fails and the old data must survive so it can migrate on a later visit
+  // instead of being silently deleted with nothing to show for it.
+  if (failures === 0) {
+    try { localStorage.removeItem(VAULT_STORAGE_KEY); } catch (e) { /* ignore */ }
+  }
 }
 
 async function initVaultStorage() {
@@ -444,7 +451,8 @@ function resetAllData() {
   try {
     [STORAGE_KEY, ACTIVE_PAGE_KEY, EXPLORER_ANALYSIS_KEY, DOLLAR_VIEW_KEY, SPENDING_BASIS_KEY,
       JOB_LOSS_DATE_KEY, LAST_BACKUP_KEY, BACKUP_REMINDER_DISMISSED_KEY, SHARED_NOTES_KEY,
-      CHECKPOINT_BASELINE_KEY, CHECKPOINT_HISTORY_KEY, COACH_CHAT_HISTORY_KEY]
+      CHECKPOINT_BASELINE_KEY, CHECKPOINT_HISTORY_KEY, COACH_CHAT_HISTORY_KEY,
+      RETIREMENT_AGE_PENDING_KEY]
       .forEach(key => localStorage.removeItem(key));
   } catch (e) {}
   location.reload();
@@ -461,7 +469,12 @@ function payoffStatsFromSchedule(sched, currentAge, originalBalance) {
   const totalPaid = sched.paymentDuringYear.slice(0, payoffYearIdx >= 0 ? payoffYearIdx + 1 : sched.paymentDuringYear.length)
     .reduce((s, p) => s + p, 0);
   const totalInterest = sched.neverPaysOff ? null : Math.max(0, totalPaid - originalBalance);
-  return { payoffAge, totalInterest, neverPaysOff: sched.neverPaysOff, payoffYearIdx, payoffMonthIndex: sched.payoffMonthIndex };
+  // A debt that amortizes fine but just doesn't finish within the projection horizon (maxYears) is
+  // NOT the same as one that never pays off at current payments -- neverPaysOff stays false, but
+  // payoffMonthIndex is also null since the loop never reached zero balance. Callers need to tell
+  // these two null-payoffAge cases apart instead of treating both as "no data."
+  const payoffBeyondHorizon = !sched.neverPaysOff && sched.payoffMonthIndex == null;
+  return { payoffAge, totalInterest, neverPaysOff: sched.neverPaysOff, payoffYearIdx, payoffMonthIndex: sched.payoffMonthIndex, payoffBeyondHorizon };
 }
 // Exact calendar month/year a debt actually pays off in, from its real amortization schedule — not an
 // approximation from age or birth month, which have nothing to do with when a fixed monthly payment
@@ -516,19 +529,24 @@ function renderDebtPayoffPlan(inputs, ctx) {
     return `
     <tr>
       <td>${i + 1}</td>
-      <td>${it.name}</td>
+      <td>${vaultEsc(it.name)}</td>
       <td>${fmtMoney(it.balance)}</td>
       <td>${it.apr.toFixed(1)}%</td>
       <td>${fmtMoney(it.payment)}/mo</td>
-      <td>${it.neverPaysOff ? 'Never at this payment' : payoffLabel(it.payoffAge, it.payoffMonthIndex)}</td>
+      <td>${it.neverPaysOff ? 'Never at this payment' : it.payoffBeyondHorizon ? 'Beyond plan horizon' : payoffLabel(it.payoffAge, it.payoffMonthIndex)}</td>
       <td>${it.neverPaysOff ? '—' : fmtMoney(it.totalInterest)}</td>
       <td>${extraCell}</td>
     </tr>`;
   }).join('');
 
   const anyNeverPaysOff = items.some(it => it.neverPaysOff);
+  const anyBeyondHorizon = items.some(it => it.payoffBeyondHorizon);
   if (anyNeverPaysOff) {
     freeAgeEl.textContent = 'Some debts never pay off at current payments';
+  } else if (anyBeyondHorizon) {
+    // Don't compute a numeric "debt-free by age X" headline that would silently exclude the debt
+    // taking the longest to pay off just because its payoff falls past the projection horizon.
+    freeAgeEl.textContent = 'At least one debt pays off beyond your plan horizon';
   } else {
     const maxPayoffItem = items.reduce((a, b) => (a.payoffAge >= b.payoffAge ? a : b));
     freeAgeEl.textContent = payoffLabel(maxPayoffItem.payoffAge, maxPayoffItem.payoffMonthIndex);
@@ -1084,6 +1102,11 @@ function render() {
   // mainstream planners easier without weakening the underlying household test.
   const standardComparableScore = runMonteCarlo({ ...inputs, enhancedMonteCarlo:false }, ctx, 1000);
   renderFinancialWellness(inputs, ctx, result, score);
+  // Cached for renderCoachTips() (savings-and-coach.js), which is invoked with no arguments from two
+  // different call sites (this render() pass, and showPage() when navigating straight to Coach) --
+  // neither has inputs/ctx/result/score naturally in scope, so this is the same "compute once during
+  // render(), read later from a global" pattern lastSnapshot below already uses.
+  lastCoachContext = { inputs, ctx, result, score };
 
   // Mini Monte Carlo scores for all three spending bases (Job Loss / Must Spend / Like to Spend), shown
   // right in the header toggle so you can compare all three at a glance without switching the active one.

@@ -493,10 +493,18 @@ const SS_CLAIMING_FACTORS = { 62:0.700, 63:0.750, 64:0.800, 65:0.8667, 66:0.9333
 // Whatever age/monthly-amount is actually entered on the Income page is treated as the known data point
 // and backed out to an equivalent Full Retirement Age amount (PIA) via the factor table above, so every
 // candidate claiming age below is derived from that SAME underlying benefit rather than re-guessing it.
+// SS_CLAIMING_FACTORS only tabulates ages 62-70 (Social Security's actual claiming window); clamp
+// any out-of-range age to that window's nearest edge instead of silently falling back to a 1.0
+// ("no adjustment") factor, which understated the true benefit for anyone whose saved claiming age
+// was, e.g., 71 (a plausible "delay further" input) or below 62.
+function ssClaimingFactorForAge(age) {
+  const clamped = Math.max(62, Math.min(70, Math.round(age)));
+  return SS_CLAIMING_FACTORS[clamped] || 1;
+}
 function ssMonthlyAtAge(baseInputs, targetAge) {
-  const enteredFactor = SS_CLAIMING_FACTORS[baseInputs.ssAge] || 1;
+  const enteredFactor = ssClaimingFactorForAge(baseInputs.ssAge);
   const pia = baseInputs.ssMonthly / enteredFactor;
-  const targetFactor = SS_CLAIMING_FACTORS[targetAge] || 1;
+  const targetFactor = ssClaimingFactorForAge(targetAge);
   return pia * targetFactor;
 }
 function runSSClaimingComparison(inputs, ctx) {

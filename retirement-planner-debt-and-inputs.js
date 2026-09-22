@@ -4,7 +4,7 @@ function renderDebtRows() {
   const container = els('debtRows');
   container.innerHTML = debts.map((d,i) => `
     <div class="row-item debt-row">
-      <input type="text" value="${d.name||''}" placeholder="Name" oninput="updateDebt(${i},'name',this.value)" title="Name — shown wherever this debt's payments are itemized (Income vs Expenses chart, Debt Payoff Plan)">
+      <input type="text" value="${vaultEsc(d.name||'')}" placeholder="Name" oninput="updateDebt(${i},'name',this.value)" title="Name — shown wherever this debt's payments are itemized (Income vs Expenses chart, Debt Payoff Plan)">
       <select onchange="updateDebt(${i},'category',this.value)">
         ${DEBT_CATEGORIES.map(c => `<option value="${c}" ${c===d.category?'selected':''}>${c}</option>`).join('')}
       </select>

@@ -150,7 +150,13 @@ function getProjectionAgeBounds() {
 // (yearly bar charts: labels like 'Age 62') or {x,y} points (the Dashboard line chart).
 function findAgeIndex(chart, age) {
   if (chart.data.labels && chart.data.labels.length) {
-    return chart.data.labels.indexOf('Age ' + age);
+    // Exact match first (covers every chart whose labels are plain "Age N"); fall back to matching
+    // just the leading "Age N" prefix for charts like Income that append "(you)"/"(spouse)" once a
+    // death event is in play (survivorship what-if, or either person's real life expectancy ending
+    // before the other's).
+    const exact = chart.data.labels.indexOf('Age ' + age);
+    if (exact !== -1) return exact;
+    return chart.data.labels.findIndex(label => typeof label === 'string' && label.match(/^Age\s+(\d+)/i) && +label.match(/^Age\s+(\d+)/i)[1] === age);
   }
   const ds = chart.data.datasets && chart.data.datasets[0];
   if (!ds || !ds.data) return -1;

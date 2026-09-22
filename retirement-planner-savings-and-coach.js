@@ -114,6 +114,9 @@ function renderSavingsPage() {
 }
 
 // ---------- Coach: rule-based suggestions ----------
+// Set by render() (retirement-planner-vault-settings-and-reports.js) each time it runs, since
+// renderCoachTips() below is invoked with no arguments from two different call sites.
+let lastCoachContext = null;
 function generateCoachSuggestions(inputs, ctx, result, score) {
   const tips = [];
   const add = (severity, icon, text) => tips.push({ severity, icon, text });
@@ -158,7 +161,19 @@ function renderCoachTips() {
   const container = els('coachTips');
   if (!container) return;
   const wellnessSummary = els('wellnessSummaryDetail') ? els('wellnessSummaryDetail').textContent : '';
+  let tipsHtml = '';
+  try {
+    if (lastCoachContext) {
+      const { inputs, ctx, result, score } = lastCoachContext;
+      const tips = generateCoachSuggestions(inputs, ctx, result, score);
+      tipsHtml = `<div class="coach-tips-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">` +
+        tips.map(t => `<div class="coach-tip coach-tip-${t.severity}" style="display:flex;gap:8px;align-items:flex-start;padding:10px 12px;border-radius:8px;background:var(--card-bg,rgba(120,120,120,0.08));"><span aria-hidden="true">${t.icon}</span><span style="font-size:15px;line-height:1.5;">${escapeHtml(t.text)}</span></div>`).join('') +
+        `</div>`;
+    }
+  } catch (e) { /* Coach tips are a bonus layer over the Wellness summary below -- never let a
+    scoring hiccup blank out the whole Coach page. */ }
   container.innerHTML = `
+    ${tipsHtml}
     <p style="font-size:16px;color:var(--muted);line-height:1.55;margin:0 0 14px;">${wellnessSummary || 'Financial Wellness identifies the plan areas that deserve attention without blending them into one score.'}</p>
     <div style="display:flex;flex-wrap:wrap;gap:10px;">
       <button type="button" class="add-btn" onclick="showPage('wellness')">Review Financial Wellness</button>
@@ -314,7 +329,13 @@ function escapeHtml(str) {
 // hasn't loaded yet (slow connection, blocked domain, etc.) so a reply is still readable either way.
 function renderMarkdown(text) {
   if (window.marked && typeof window.marked.parse === 'function') {
-    try { return marked.parse(text || ''); } catch (e) { /* fall through to plain-text fallback below */ }
+    try {
+      const html = marked.parse(text || '');
+      if (window.DOMPurify && typeof window.DOMPurify.sanitize === 'function') return DOMPurify.sanitize(html);
+      // DOMPurify didn't load (blocked CDN, slow connection) -- fall back to the safe plain-text
+      // path rather than ever inserting unsanitized marked() output into innerHTML.
+      return escapeHtml(text).replace(/\n/g, '<br>');
+    } catch (e) { /* fall through to plain-text fallback below */ }
   }
   return escapeHtml(text).replace(/\n/g, '<br>');
 }

@@ -254,13 +254,13 @@ function renderExpenseRows() {
   const container = els('expenseRows');
   container.innerHTML = expenses.map((e,i) => `
     <div class="row-item expense-row">
-      <input type="text" value="${e.name||''}" placeholder="Name" oninput="updateExpense(${i},'name',this.value)">
+      <input type="text" value="${vaultEsc(e.name||'')}" placeholder="Name" oninput="updateExpense(${i},'name',this.value)">
       <select onchange="updateExpense(${i},'category',this.value)">
         ${EXPENSE_CATEGORIES.map(c => `<option value="${c}" ${c===e.category?'selected':''}>${c}</option>`).join('')}
       </select>
-      <input type="number" value="${e.jobLoss != null ? e.jobLoss : (e.mustSpend != null ? e.mustSpend : e.amount)}" step="10" title="Test column: what you'd spend on this if you lost your job" oninput="updateExpense(${i},'jobLoss',this.value)">
-      <input type="number" value="${e.mustSpend != null ? e.mustSpend : e.amount}" step="10" oninput="updateExpense(${i},'mustSpend',this.value)">
-      <input type="number" value="${e.amount}" step="10" oninput="updateExpense(${i},'amount',this.value)">
+      <input type="number" value="${e.jobLoss != null ? e.jobLoss : (e.mustSpend != null ? e.mustSpend : e.amount)}" step="10" min="0" title="Test column: what you'd spend on this if you lost your job" oninput="updateExpense(${i},'jobLoss',this.value)">
+      <input type="number" value="${e.mustSpend != null ? e.mustSpend : e.amount}" step="10" min="0" oninput="updateExpense(${i},'mustSpend',this.value)">
+      <input type="number" value="${e.amount}" step="10" min="0" oninput="updateExpense(${i},'amount',this.value)">
       <button class="remove-btn" onclick="removeExpense(${i})" title="Remove">×</button>
     </div>
     <div class="expense-date-row">
@@ -606,7 +606,7 @@ function renderSurvivorExpenseChecklist() {
     <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;color:var(--muted);font-size:16px;gap:10px;">
       <label style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;cursor:pointer;">
         <input type="checkbox" ${item.survivorContinues===false?'':'checked'} onchange="setSurvivorContinues('${arrName}',${i},this.checked)">
-        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${label}</span>
+        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${vaultEsc(label)}</span>
       </label>
       <span style="flex:0 0 auto;display:flex;align-items:center;gap:4px;">$<input type="number" value="${overrideVal !== '' ? overrideVal : normalAmount}" step="5" ${item.survivorContinues===false?'disabled':''} style="width:80px;padding:4px 6px;font-size:15px;" onchange="setSurvivorAmount('${arrName}',${i},this.value)">${suffix != null ? suffix : '/mo'}</span>
     </div>`;
@@ -632,12 +632,12 @@ function renderFutureExpenseRows() {
   if (!container) return;
   container.innerHTML = futureExpenses.map((f,i) => `
     <div class="row-item future-row">
-      <input type="text" value="${f.name||''}" placeholder="Description" oninput="updateFutureExpense(${i},'name',this.value)">
+      <input type="text" value="${vaultEsc(f.name||'')}" placeholder="Description" oninput="updateFutureExpense(${i},'name',this.value)">
       <div class="age-cell">
         <input type="number" value="${f.age}" step="1" title="Your age when it hits" oninput="updateFutureExpense(${i},'age',this.value)">
         <input type="month" value="${f.dateValue||''}" title="Or pick a month/year" onchange="setFutureExpenseAgeFromDate(${i}, this.value)">
       </div>
-      <input type="number" value="${f.amount}" step="100" title="${f.recurring ? 'Amount PER YEAR, today\u2019s $ (recurring rows are annual, not monthly)' : 'Amount, today\u2019s $ (one-time)'}" oninput="updateFutureExpense(${i},'amount',this.value)">
+      <input type="number" value="${f.amount}" step="100" min="0" title="${f.recurring ? 'Amount PER YEAR, today\u2019s $ (recurring rows are annual, not monthly)' : 'Amount, today\u2019s $ (one-time)'}" oninput="updateFutureExpense(${i},'amount',this.value)">
       <select onchange="updateFutureExpense(${i},'recurring',this.value)">
         <option value="false" ${!f.recurring?'selected':''}>One-time</option>
         <option value="true" ${f.recurring?'selected':''}>Yearly until...</option>
@@ -751,12 +751,12 @@ function renderWindfallRows() {
   if (!container) return;
   container.innerHTML = windfalls.map((w,i) => `
     <div class="row-item windfall-row">
-      <input type="text" value="${w.name||''}" placeholder="Description" oninput="updateWindfall(${i},'name',this.value)">
+      <input type="text" value="${vaultEsc(w.name||'')}" placeholder="Description" oninput="updateWindfall(${i},'name',this.value)">
       <div class="age-cell">
         <input type="number" value="${w.age}" step="1" title="Your age when received" oninput="updateWindfall(${i},'age',this.value)">
         <input type="month" value="${w.dateValue||''}" title="Or pick a month/year" onchange="setWindfallAgeFromDate(${i}, this.value)">
       </div>
-      <input type="number" value="${w.amount}" step="1000" title="Amount ($)" oninput="updateWindfall(${i},'amount',this.value)">
+      <input type="number" value="${w.amount}" step="1000" min="0" title="Amount ($)" oninput="updateWindfall(${i},'amount',this.value)">
       <select onchange="updateWindfall(${i},'destination',this.value)">
         <option value="Brokerage" ${w.destination==='Brokerage'?'selected':''}>Into Brokerage</option>
         <option value="Cash" ${w.destination==='Cash'?'selected':''}>Into HYSA</option>
@@ -796,12 +796,12 @@ function renderInsuranceRows() {
   if (!container) return;
   container.innerHTML = insurancePolicies.map((p,i) => `
     <div class="row-item insurance-row">
-      <input type="text" value="${p.name||''}" placeholder="Policy name" oninput="updateInsurancePolicy(${i},'name',this.value)">
+      <input type="text" value="${vaultEsc(p.name||'')}" placeholder="Policy name" oninput="updateInsurancePolicy(${i},'name',this.value)">
       <select onchange="updateInsurancePolicy(${i},'type',this.value)">
         ${INSURANCE_TYPES.map(t => `<option value="${t}" ${t===p.type?'selected':''}>${t}</option>`).join('')}
       </select>
-      <input type="number" value="${p.premium}" step="1" oninput="updateInsurancePolicy(${i},'premium',this.value)">
-      <input type="number" value="${p.coverage}" step="1000" oninput="updateInsurancePolicy(${i},'coverage',this.value)">
+      <input type="number" value="${p.premium}" step="1" min="0" oninput="updateInsurancePolicy(${i},'premium',this.value)">
+      <input type="number" value="${p.coverage}" step="1000" min="0" oninput="updateInsurancePolicy(${i},'coverage',this.value)">
       <button class="remove-btn" onclick="removeInsurancePolicy(${i})" title="Remove">×</button>
     </div>
   `).join('');
@@ -809,7 +809,10 @@ function renderInsuranceRows() {
 }
 function updateInsurancePolicy(i, field, value) {
   insurancePolicies[i][field] = (field==='premium'||field==='coverage') ? +value : value;
-  if (field === 'name' && /(sbp|spb)/i.test(value || '')) insurancePolicies[i].survivorContinues = false;
+  // Bidirectional: an SBP/SPB-named policy is assumed to stop at death (survivorContinues=false),
+  // but editing the name to no longer match un-does that assumption too, instead of leaving it
+  // stuck off forever once any name briefly contained "sbp"/"spb" (e.g. a typo passing through).
+  if (field === 'name') insurancePolicies[i].survivorContinues = /(sbp|spb)/i.test(value || '') ? false : true;
   els('insuranceTotal').textContent = fmtMoney(insurancePolicies.reduce((s,p) => s + (+p.premium||0), 0)) + '/mo';
   render();
 }
@@ -822,8 +825,8 @@ function renderBrokeragePieRows() {
   const container = els('brokeragePieRows');
   container.innerHTML = brokeragePies.map((p,i) => `
     <div class="row-item pie-row">
-      <input type="text" value="${p.name}" placeholder="Pie name" oninput="updateBrokeragePie(${i},'name',this.value)">
-      <input type="number" value="${p.balance}" step="0.01" oninput="updateBrokeragePie(${i},'balance',this.value)">
+      <input type="text" value="${vaultEsc(p.name||'')}" placeholder="Pie name" oninput="updateBrokeragePie(${i},'name',this.value)">
+      <input type="number" value="${p.balance}" step="0.01" min="0" oninput="updateBrokeragePie(${i},'balance',this.value)">
       <select onchange="updateBrokeragePie(${i},'accountType',this.value)">
         <option value="taxable" ${(p.accountType||'taxable')==='taxable'?'selected':''}>Taxable</option>
         <option value="roth_ira" ${p.accountType==='roth_ira'?'selected':''}>Roth IRA</option>
@@ -866,7 +869,7 @@ function renderExcessIncomeDestinationOptions() {
   if (!brokeragePies.some(p => p.name === excessIncomeDestinationPieName) && brokeragePies.length) {
     excessIncomeDestinationPieName = brokeragePies[0].name;
   }
-  sel.innerHTML = brokeragePies.map((p,i) => `<option value="${p.name}" ${p.name===excessIncomeDestinationPieName?'selected':''}>${p.name || 'Pie '+(i+1)}</option>`).join('');
+  sel.innerHTML = brokeragePies.map((p,i) => `<option value="${vaultEsc(p.name)}" ${p.name===excessIncomeDestinationPieName?'selected':''}>${vaultEsc(p.name || 'Pie '+(i+1))}</option>`).join('');
 }
 function updateExcessIncomeDestination(name) {
   excessIncomeDestinationPieName = name;
@@ -884,7 +887,7 @@ function renderRothConversionSourceOptions() {
   if (rothConversionSourceName !== 'hysa' && !brokeragePies.some(p => p.name === rothConversionSourceName)) {
     rothConversionSourceName = 'hysa';
   }
-  const pieOptions = brokeragePies.map((p,i) => `<option value="${p.name}" ${p.name===rothConversionSourceName?'selected':''}>${p.name || 'Pie '+(i+1)}</option>`).join('');
+  const pieOptions = brokeragePies.map((p,i) => `<option value="${vaultEsc(p.name)}" ${p.name===rothConversionSourceName?'selected':''}>${vaultEsc(p.name || 'Pie '+(i+1))}</option>`).join('');
   sel.innerHTML = `<option value="hysa" ${rothConversionSourceName==='hysa'?'selected':''}>HYSA (bank)</option>` + pieOptions;
 }
 function updateRothConversionSource(name) {
@@ -898,7 +901,7 @@ function renderPieContributionRows() {
   if (!container) return;
   container.innerHTML = brokeragePies.map((p,i) => `
     <div class="row-item contrib-row">
-      <span class="pie-name-label">${p.name || 'Unnamed pie'}</span>
+      <span class="pie-name-label">${vaultEsc(p.name || 'Unnamed pie')}</span>
       <input type="number" value="${p.contribution||0}" step="10" oninput="updatePieContribution(${i},this.value)">
     </div>
   `).join('');

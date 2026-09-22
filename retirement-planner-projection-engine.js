@@ -28,11 +28,12 @@ function setSocialSecurityAge(age) {
 // about 7 weeks of that age-year still on the job, not the full 12 months the "< retirementAge" branch
 // assumes for every other working year, and not the 0 months the post-retirement branch assumes for
 // every later year either. Computes what fraction of that one transition year (from the birthday that
-// starts the age-retirementAge year, through the actual retirement date) was still spent working, so the
-// displayed income for that single row can be pro-rated instead of silently dropping to $0 a few weeks
-// early. Purely a display-layer refinement — r.income only feeds charts/reports/the AI summary, never
-// the actual withdrawal/contribution math (nothing in projectRun's post-retirement branch reads it) — so
-// this can't disturb any real dollar-flow calculation, Monte Carlo result, or account balance.
+// starts the age-retirementAge year, through the actual retirement date) was still spent working.
+// r.income (the display figure) is pro-rated by this fraction, AND so are that same transition year's
+// Traditional/Roth/match contributions further down in projectRun — those get added directly to
+// balTrad/balRoth/balBrokeragePies, so this value does reach real account balances for the transition
+// year specifically, not merely the chart/report display figure. Every other year (fully before or
+// fully after retirement) is unaffected either way.
 function workingFractionOfFinalYear(inputs) {
   const [by, bm, bd] = (inputs.birthDateRaw || '').split('-').map(Number);
   const [ry, rm, rd] = (inputs.retirementDateRaw || '').split('-').map(Number);

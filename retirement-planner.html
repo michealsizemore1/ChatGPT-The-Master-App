@@ -16,6 +16,11 @@
      Claude chat actually looks. Loaded with `defer` for the same reason as pdf.js/mammoth above; the chat
      send functions check `window.marked` exists before using it and fall back to plain text if it didn't load. -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/16.3.0/lib/marked.umd.min.js" defer></script>
+<!-- Sanitizes Ask AI / Coach chat replies (rendered via marked.js above) before they reach innerHTML,
+     since the model's context includes the user's own free-text field names verbatim. Loaded with
+     `defer` for the same reason as the libraries above; renderMarkdown() falls back to plain text if
+     it didn't load, rather than ever skipping sanitization. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js" defer></script>
 <!-- Planner records are stored locally in this browser. Use JSON Backup & Restore regularly. -->
 <style>
   :root{
@@ -2067,7 +2072,7 @@
       </div>
       <div class="page-header"><h2>Document Vault</h2><p>Upload important documents (PDF, Word, or plain text) to keep them searchable — informational only, doesn't feed the projection math.</p></div>
 
-      <div class="note" style="margin-top:0;">The original file is saved (up to ~25 MB each) so you can open or download it again later, alongside its extracted <b>text</b> for search and Ask AI (up to ~1 MB of text per document — very long documents just won't be fully searchable past that point, but the original file itself is never truncated). Stored in this browser's own document storage, separate from the rest of your plan data. Everything stays in this browser only, unless you use Ask AI below with your own Anthropic API key, in which case the relevant document text is sent to Anthropic to answer your question.</div>
+      <div class="note" style="margin-top:0;"><b>Not password-protected or encrypted:</b> anyone who can use this browser profile can open these files, the same as any other page in this app — treat it as a filing folder, not a safe. The original file is saved (up to ~25 MB each) so you can open or download it again later, alongside its extracted <b>text</b> for search and Ask AI (up to ~1 MB of text per document — very long documents just won't be fully searchable past that point, but the original file itself is never truncated). Stored in this browser's own document storage, separate from the rest of your plan data. Everything stays in this browser only, unless you use Ask AI below with your own Anthropic API key, in which case the relevant document text is sent to Anthropic to answer your question.</div>
 
       <div class="card">
         <h3 onclick="toggleCard(this)">Upload</h3>
@@ -2822,17 +2827,17 @@
   </div>
 </div>
 
-<script src="retirement-planner-core.js"></script>
-<script src="retirement-planner-tax-and-social-security.js"></script>
-<script src="retirement-planner-navigation-and-charts.js"></script>
-<script src="retirement-planner-accounts-and-legacy-cloud.js"></script>
-<script src="retirement-planner-money-inputs.js"></script>
-<script src="retirement-planner-debt-and-inputs.js"></script>
-<script src="retirement-planner-projection-engine.js"></script>
-<script src="retirement-planner-explorers-and-analysis.js"></script>
-<script src="retirement-planner-charts.js"></script>
-<script src="retirement-planner-savings-and-coach.js"></script>
-<script src="retirement-planner-vault-settings-and-reports.js"></script>
+<script src="retirement-planner-core.js?v=2026-09-04-fixes1"></script>
+<script src="retirement-planner-tax-and-social-security.js?v=2026-09-04-fixes1"></script>
+<script src="retirement-planner-navigation-and-charts.js?v=2026-09-04-fixes1"></script>
+<script src="retirement-planner-accounts-and-legacy-cloud.js?v=2026-09-04-fixes1"></script>
+<script src="retirement-planner-money-inputs.js?v=2026-09-04-fixes1"></script>
+<script src="retirement-planner-debt-and-inputs.js?v=2026-09-04-fixes1"></script>
+<script src="retirement-planner-projection-engine.js?v=2026-09-04-fixes1"></script>
+<script src="retirement-planner-explorers-and-analysis.js?v=2026-09-04-fixes1"></script>
+<script src="retirement-planner-charts.js?v=2026-09-04-fixes1"></script>
+<script src="retirement-planner-savings-and-coach.js?v=2026-09-04-fixes1"></script>
+<script src="retirement-planner-vault-settings-and-reports.js?v=2026-09-04-fixes1"></script>
 <script src="master-backup-shared.js"></script>
 </body>
 </html>

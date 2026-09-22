@@ -86,7 +86,8 @@ function idahoTaxOwed(taxableIncome, rate, inflationFactor = 1, filingStatus = '
 // month for the first 36 months and 5/12 of 1% for each additional month. Waiting past FRA does not
 // increase a regular spousal benefit.
 function spousalEarlyClaimMultiplier(startAge, fraAge = 67) {
-  const monthsEarly = Math.max(0, Math.round((fraAge - Math.min(fraAge, +startAge || fraAge)) * 12));
+  const clampedStartAge = Math.max(62, Math.min(fraAge, +startAge || fraAge));
+  const monthsEarly = Math.max(0, Math.round((fraAge - clampedStartAge) * 12));
   const first36 = Math.min(36, monthsEarly);
   const additional = Math.max(0, monthsEarly - 36);
   return Math.max(0, 1 - first36 * (0.25 / 36) - additional * (0.05 / 12));
