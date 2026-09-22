@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-09-22-1">
+<meta name="app-build" content="2026-09-22-2">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#667eea">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,7 +16,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
 (function(){
-  var build='2026-09-22-1',checking=false;
+  var build='2026-09-22-2',checking=false;
   function checkForAppUpdate(){
     if(checking||location.protocol==='file:')return;checking=true;
     fetch(location.pathname+'?update-check='+Date.now(),{cache:'no-store'}).then(function(response){return response.text();}).then(function(html){var match=html.match(/name=["']app-build["']\s+content=["']([^"']+)/i);if(match&&match[1]!==build){location.replace(location.pathname+'?v='+encodeURIComponent(match[1]));}}).catch(function(){}).finally(function(){checking=false;});
@@ -1249,7 +1249,7 @@ body{
 @media(max-width:700px){.h2-header{display:block}.h2-header-actions{justify-content:flex-start;margin-top:10px}.h2-summary-grid{grid-template-columns:repeat(2,1fr)}.h2-form-grid,.h2-insight-grid,.h2-coach-grid{grid-template-columns:1fr}.h2-wide{grid-column:auto}.h2-progress-row{grid-template-columns:1fr}.h2-habit-top,.h2-suggestion{grid-template-columns:1fr}.h2-habit-actions,.h2-suggestion-actions{justify-content:flex-end}.h2-today-control{flex-wrap:wrap}.h2-today-control button{flex:1;min-width:72px}.h2-date-btn{min-width:100px}}
 </style>
 </head>
-<body><script src="home-button.js?v=2026-09-22-1"></script>
+<body><script src="home-button.js?v=2026-09-22-2"></script>
 
 <div class="journal-floating-title" id="journalFloatingTitle" aria-hidden="true">&#x1F9ED; My Life Command Center</div>
 
@@ -2091,6 +2091,7 @@ body{
       <button class="lib-add-btn" style="background:#27ae60;" onclick="exportActivities()">&#x1F4BE; Export</button>
       <button id="actExpandAllBtn" style="display:none;background:#e67e22;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:0.75rem;cursor:pointer;" onclick="expandAllActs()">&#x229E; Expand</button>
       <button id="actCollapseAllBtn" style="display:none;background:#888;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:0.75rem;cursor:pointer;" onclick="collapseAllActs()">&#x229F; Collapse</button>
+      <button id="actCompareBtn" style="background:#7c3aed;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:0.75rem;cursor:pointer;" onclick="toggleCompareMode()">&#x2696;&#xFE0F; Compare</button>
     </div>
   </div>
 
@@ -2212,6 +2213,15 @@ body{
   </div>
 
   <div id="runMetricsPanel" style="display:none;background:#fff8f0;border:1px solid #f5cba7;border-radius:10px;padding:14px 16px;margin-bottom:12px;"></div>
+
+  <!-- Compare selection bar -->
+  <div id="actCompareBar" style="display:none;align-items:center;gap:8px;background:#f3e8ff;border:1px solid #d8b4fe;border-radius:8px;padding:8px 12px;margin-bottom:10px;flex-wrap:wrap;">
+    <span id="actCompareCount" style="font-size:0.82rem;font-weight:700;color:#6d28d9;">0 selected</span>
+    <button onclick="showActivityCompare()" style="background:#7c3aed;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:0.8rem;cursor:pointer;font-weight:600;">&#x1F4CA; Compare Now</button>
+    <button onclick="clearCompareSelection()" style="background:#f0f0f0;color:#555;border:none;border-radius:6px;padding:5px 12px;font-size:0.8rem;cursor:pointer;">Clear</button>
+  </div>
+  <div id="activityComparePanel" style="display:none;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;margin-bottom:14px;"></div>
+
   <div id="activityList"></div>
   </div>
 
@@ -2966,17 +2976,17 @@ body{
     </div>
   </div>
 </div>
-<script src="daily-planner-core.js?v=2026-09-22-1"></script>
-<script src="daily-planner-food-log.js?v=2026-09-22-1"></script>
-<script src="daily-planner-bible.js?v=2026-09-22-1"></script>
-<script src="daily-planner-meditation.js?v=2026-09-22-1"></script>
-<script src="daily-planner-journal-archive.js?v=2026-09-22-1"></script>
-<script src="daily-planner-file-uploads.js?v=2026-09-22-1"></script>
-<script src="daily-planner-shoe-tracker.js?v=2026-09-22-1"></script>
-<script src="daily-planner-misc.js?v=2026-09-22-1"></script>
-<script src="daily-planner-journal-experience.js?v=2026-09-22-1"></script>
-<script src="master-backup-shared.js?v=2026-09-22-1"></script>
-<script src="daily-planner-storage-qol.js?v=2026-09-22-1"></script>
+<script src="daily-planner-core.js?v=2026-09-22-2"></script>
+<script src="daily-planner-food-log.js?v=2026-09-22-2"></script>
+<script src="daily-planner-bible.js?v=2026-09-22-2"></script>
+<script src="daily-planner-meditation.js?v=2026-09-22-2"></script>
+<script src="daily-planner-journal-archive.js?v=2026-09-22-2"></script>
+<script src="daily-planner-file-uploads.js?v=2026-09-22-2"></script>
+<script src="daily-planner-shoe-tracker.js?v=2026-09-22-2"></script>
+<script src="daily-planner-misc.js?v=2026-09-22-2"></script>
+<script src="daily-planner-journal-experience.js?v=2026-09-22-2"></script>
+<script src="master-backup-shared.js?v=2026-09-22-2"></script>
+<script src="daily-planner-storage-qol.js?v=2026-09-22-2"></script>
 <button class="journal-float-top" id="journalFloatTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">&#x2191; Top</button>
 <div id="v26Toast" class="v26-toast" role="status" aria-live="polite"></div>
 </body>

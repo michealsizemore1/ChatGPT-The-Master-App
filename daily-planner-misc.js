@@ -141,6 +141,8 @@ function importBackup(ev){
 
 // ── Activities ────────────────────────────────────────────
 let editingActivityId=null;
+var compareMode=false;
+var compareSelected=new Set();
 function getActivities(){
   if(Array.isArray(_activitiesLargeCache))return _activitiesLargeCache;
   try{const r=localStorage.getItem('activities_data');return r?JSON.parse(r):[];}catch(e){return[];}
@@ -290,6 +292,7 @@ function editActivity(id){
 function deleteActivity(id){
   if(!confirm('Delete this activity?'))return;
   saveActivities(getActivities().filter(a=>a.id!==id));
+  compareSelected.delete(id);
   renderActivities();
 }
 
@@ -705,6 +708,87 @@ function toggleActSources(){
   if(c)c.innerHTML=open?'&#x25B6;':'&#x25BC;';
 }
 
+function toggleCompareMode(){
+  compareMode=!compareMode;
+  if(!compareMode){
+    compareSelected.clear();
+    var panel=document.getElementById('activityComparePanel');
+    if(panel)panel.style.display='none';
+  }
+  renderActivities();
+}
+function toggleCompareSelect(id){
+  if(compareSelected.has(id)){
+    compareSelected.delete(id);
+  }else{
+    if(compareSelected.size>=4){alert('You can compare up to 4 activities at a time.');return;}
+    compareSelected.add(id);
+  }
+  updateCompareBar();
+}
+function clearCompareSelection(){
+  compareSelected.clear();
+  var panel=document.getElementById('activityComparePanel');
+  if(panel)panel.style.display='none';
+  renderActivities();
+}
+function updateCompareBar(){
+  var bar=document.getElementById('actCompareBar');
+  if(!bar)return;
+  var n=compareSelected.size;
+  if(!compareMode||n===0){bar.style.display='none';return;}
+  bar.style.display='flex';
+  var cnt=document.getElementById('actCompareCount');
+  if(cnt)cnt.textContent=n+(n===1?' selected (pick at least 2)':' selected');
+}
+function showActivityCompare(){
+  var panel=document.getElementById('activityComparePanel');
+  if(!panel)return;
+  if(compareSelected.size<2){alert('Select at least 2 activities to compare.');return;}
+  var chosen=getActivities().filter(function(a){return compareSelected.has(a.id);});
+  chosen.sort(function(a,b){return(a.date||'').localeCompare(b.date||'');});
+  var typeColor={Run:'#e67e22',Ride:'#8e44ad',Walk:'#27ae60',Swim:'#2980b9',Strength:'#e74c3c',Other:'#95a5a6'};
+  var rows=[
+    {label:'Date',get:function(a){var d=a.date?new Date(a.date+'T00:00:00'):null;return d&&!isNaN(d.getTime())?d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):(a.date||'\u2014');}},
+    {label:'Type',get:function(a){return a.type||'\u2014';}},
+    {label:'Distance (mi)',get:function(a){return parseFloat(a.distance)||0;},fmt:function(v){return v?v.toFixed(2):'\u2014';},best:'max'},
+    {label:'Duration',get:function(a){return parseMins(a.duration);},fmt:function(v,a){return a.duration?fmtDuration(a.duration):'\u2014';}},
+    {label:'Avg Pace (/mi)',get:function(a){return a.pace?parsePace(a.pace):0;},fmt:function(v,a){return a.pace||'\u2014';},best:'min'},
+    {label:'Avg Power (W)',get:function(a){return parseFloat(a.power)||0;},fmt:function(v){return v?v+' W':'\u2014';},best:'max'},
+    {label:'Avg HR (bpm)',get:function(a){return parseFloat(a.heartRate)||0;},fmt:function(v){if(!v)return'\u2014';var z=hrZone(v);return v+' bpm'+(z?' ('+z.z+')':'');}},
+    {label:'Cadence (spm)',get:function(a){return parseFloat(a.cadence)||0;},fmt:function(v){return v?v+' spm':'\u2014';},best:'max'},
+    {label:'Calories',get:function(a){return parseFloat(a.calories)||0;},fmt:function(v){return v?v:'\u2014';},best:'max'},
+    {label:'Elev Gain (ft)',get:function(a){return parseFloat(a.elevGain)||0;},fmt:function(v){return v?v+' ft':'\u2014';},best:'max'},
+    {label:'Execution Score',get:function(a){return parseFloat(a.execScore)||0;},fmt:function(v){return v?v+'/100':'\u2014';},best:'max'},
+    {label:'Source',get:function(a){return a.source||'manual';}}
+  ];
+  var head='<tr><th style="text-align:left;padding:6px 8px;font-size:0.78rem;color:#888;border-bottom:2px solid #e5e7eb;">Metric</th>'
+    +chosen.map(function(a){var tc=typeColor[a.type]||'#95a5a6';return'<th style="text-align:center;padding:6px 8px;font-size:0.78rem;border-bottom:2px solid #e5e7eb;color:'+tc+';">'+escHtml(a.title||a.type||'Activity')+'</th>';}).join('')
+    +'</tr>';
+  var body=rows.map(function(r){
+    var vals=chosen.map(function(a){return r.get(a);});
+    var bestVal=null;
+    if(r.best){
+      var nz=vals.filter(function(v){return typeof v==='number'&&v>0;});
+      if(nz.length>1)bestVal=r.best==='max'?Math.max.apply(null,nz):Math.min.apply(null,nz);
+    }
+    var cells=chosen.map(function(a,i){
+      var v=vals[i];
+      var disp=r.fmt?r.fmt(v,a):(v||'\u2014');
+      var isBest=bestVal!==null&&v===bestVal&&v>0;
+      return'<td style="text-align:center;padding:6px 8px;font-size:0.84rem;border-bottom:1px solid #f1f1f1;'+(isBest?'background:#eafaf1;color:#1a7f4e;font-weight:700;':'')+'">'+disp+(isBest?' &#x1F3C6;':'')+'</td>';
+    }).join('');
+    return'<tr><td style="padding:6px 8px;font-size:0.8rem;color:#555;font-weight:600;border-bottom:1px solid #f1f1f1;white-space:nowrap;">'+r.label+'</td>'+cells+'</tr>';
+  }).join('');
+  panel.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">'
+    +'<div style="font-size:0.9rem;font-weight:700;color:#7c3aed;">&#x1F4CA; Comparing '+chosen.length+' Activities</div>'
+    +'<button onclick="document.getElementById(\'activityComparePanel\').style.display=\'none\';" style="background:#f0f0f0;color:#555;border:none;border-radius:6px;padding:4px 10px;font-size:0.78rem;cursor:pointer;">&#x2715; Close</button>'
+    +'</div>'
+    +'<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'+head+body+'</table></div>'
+    +'<div style="font-size:0.7rem;color:#aaa;margin-top:8px;">&#x1F3C6; = best value among the selected activities for that metric.</div>';
+  panel.style.display='block';
+  panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
 function renderActivities(){
   renderMileageSummary();
   const cpEl=document.getElementById('cpInput');
@@ -717,6 +801,13 @@ function renderActivities(){
   const cnt=document.getElementById('actCount');
   if(cnt)cnt.textContent=acts.length?acts.length+' activit'+(acts.length!==1?'ies':'y'):'';
   const el=document.getElementById('activityList');if(!el)return;
+
+  var compBtn=document.getElementById('actCompareBtn');
+  if(compBtn){
+    compBtn.style.background=compareMode?'#4c1d95':'#7c3aed';
+    compBtn.textContent=compareMode?'\u2716 Exit Compare':'\u2696\uFE0F Compare';
+  }
+  updateCompareBar();
 
   const filterType=(document.getElementById('actFilterType')||{}).value||'';
   const rawSrc=(document.getElementById('actFilterSource')||{}).value;
@@ -803,8 +894,10 @@ function renderActivities(){
     var marginLeft=inGroup?'margin-left:12px;':'';
     var dateHtml=showDate?'<div class="act-date">&#x1F4C5; '+showDate+'</div>':'';
     var journalBtn=!inGroup?'<button class="act-journal-btn" onclick="goToActivityDate(\''+a.date+'\')" title="Jump to Journal">&#x1F4D3;</button>':'';
+    var compareBox=compareMode?('<input type="checkbox" onclick="event.stopPropagation();toggleCompareSelect('+a.id+')" '+(compareSelected.has(a.id)?'checked':'')+' style="width:17px;height:17px;cursor:pointer;flex-shrink:0;accent-color:#7c3aed;" title="Select to compare">'):'';
     return '<div class="act-card '+(a.type||'other').toLowerCase()+'" style="border-left-color:'+tc+';'+marginLeft+'">'
       +'<div style="display:flex;justify-content:space-between;align-items:center;gap:6px;cursor:pointer;" onclick="toggleActCard('+a.id+')">'
+      +compareBox
       +'<div style="flex:1;min-width:0;">'
       +'<span class="act-badge '+(a.source||'manual')+'" onclick="event.stopPropagation();cycleActSource('+a.id+')" title="Click to change source" style="cursor:pointer;">'+(a.source||'manual')+'</span>'
       +' <span style="font-size:0.75rem;font-weight:700;color:'+tc+';text-transform:uppercase;">'+escHtml(a.type||'')+'</span>'
