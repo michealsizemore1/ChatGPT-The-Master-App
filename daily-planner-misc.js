@@ -430,7 +430,12 @@ function saveMaxHRAndRender(){const v=document.getElementById('hrMaxInput').valu
 function getMaxHR(){const stored=parseFloat(localStorage.getItem('max_hr_value'));return stored>0?stored:174;}
 // Garmin's standard 5-zone heart-rate model, as a percentage of max heart rate:
 // Z1 50-60%, Z2 60-70%, Z3 70-80%, Z4 80-90%, Z5 90-100%+. Below 50% is untracked (resting/warm-up).
-function hrZone(hr,maxHR){if(!maxHR||!hr)return null;const r=hr/maxHR;if(r<0.50)return null;if(r<0.60)return{z:'Z1',cls:'z1'};if(r<0.70)return{z:'Z2',cls:'z2'};if(r<0.80)return{z:'Z3',cls:'z3'};if(r<0.90)return{z:'Z4',cls:'z4'};return{z:'Z5',cls:'z5'};}
+// Karvonen (heart-rate-reserve) training zones from the user's personal test results:
+// resting HR 50 bpm, max HR 174 bpm. Stored as fixed bpm boundaries rather than a
+// percent-of-max-HR calculation, since Karvonen needs resting HR too -- these boundaries
+// were generated directly from that formula already, so recomputing here would need a
+// separate resting-HR input this app doesn't currently collect.
+function hrZone(hr){if(!hr)return null;if(hr<112)return null;if(hr<124)return{z:'Z1',cls:'z1'};if(hr<137)return{z:'Z2',cls:'z2'};if(hr<149)return{z:'Z3',cls:'z3'};if(hr<162)return{z:'Z4',cls:'z4'};return{z:'Z5',cls:'z5'};}
 
 function goToActivityDate(dateStr){
   const target=new Date(dateStr+'T00:00:00');
