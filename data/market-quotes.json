@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-22T21:30:15+00:00",
+  "updatedAt": "2026-09-22T21:45:49+00:00",
   "source": "Yahoo Finance public chart data",
   "quotes": {
     "SCHD": {
@@ -79,18 +79,18 @@
       "prev": 27122.094,
       "change": 122.183,
       "changesPercentage": 0.4505,
-      "volume": 8013386000,
-      "avgVolume": 9993427200,
+      "volume": 8014146000,
+      "avgVolume": 9993579200,
       "yearHigh": 27288.791,
       "yearLow": 20690.25,
       "marketState": "",
       "currency": "USD"
     },
     "DX-Y.NYB": {
-      "price": 100.542,
+      "price": 100.541,
       "prev": 100.429,
-      "change": 0.113,
-      "changesPercentage": 0.1125,
+      "change": 0.112,
+      "changesPercentage": 0.1115,
       "volume": 0,
       "avgVolume": 0,
       "yearHigh": 101.8,
@@ -123,12 +123,12 @@
       "currency": "USD"
     },
     "BTC-USD": {
-      "price": 86242.45,
+      "price": 86212.76,
       "prev": 86597.82,
-      "change": -355.37,
-      "changesPercentage": -0.4104,
-      "volume": 41511346176,
-      "avgVolume": 36266304120,
+      "change": -385.06,
+      "changesPercentage": -0.4447,
+      "volume": 41486360576,
+      "avgVolume": 36261307000,
       "yearHigh": 126198.07,
       "yearLow": 57747.766,
       "marketState": "",
@@ -147,10 +147,10 @@
       "currency": "USD"
     },
     "JPY=X": {
-      "price": 157.409,
+      "price": 157.336,
       "prev": 157.311,
-      "change": 0.098,
-      "changesPercentage": 0.0623,
+      "change": 0.025,
+      "changesPercentage": 0.0159,
       "volume": 0,
       "avgVolume": 0,
       "yearHigh": 163.979,
@@ -262,14 +262,14 @@
   "news": [
     "Stock Investors Should Root for a Rate Hike. Yeah, Really. - WSJ",
     "What\u2019s Next for US Stocks After the Fed Rate Hike - Morningstar",
-    "Stock Market Investors Just Got Bad News About President Trump\u2019s Economy. History Says This Will Happen Next. - The Motley Fool",
+    "Stock Market Investors Just Got Bad News About President Trump\u2019s Economy. History Says This Will Happen Next. - fool.com",
+    "WEX, Raymond James, Sallie Mae, Voya Financial, and Charles Schwab Shares Plummet, What You Need To Know - The Globe and Mail",
     "LPL Financial, Northern Trust, Ameriprise Financial, Morgan Stanley, and Paymentus Stocks Trade Down, What You Need To Know - TradingView",
     "Fed\u2019s Williams defends current monetary policy framework - Investing.com",
-    "Stock Market Investors Just Got Bad News About President Trump\u2019s Economy. History Says This Will Happen Next. - The Globe and Mail",
+    "NerdWallet, Sezzle, Tradeweb Markets, and Bread Financial Shares Are Falling, What You Need To Know - StockStory",
     "The stock market is quietly accelerating a retirement wave - thestreet.com",
     "Ray Dalio: AI will both be productivity miracle and devastaing bubble - Fortune",
-    "Federal Reserve Interest Rate Predictions for 2026 - Norada Real Estate Investments",
-    "Investors Snub Wall Street, Build $5.1 Trillion Cash Fortress as Fed Pushes Rates Toward 4.75% - 24/7 Wall St.",
+    "Investors Snub Wall Street, Build $5.1 Trillion Cash Fortress as Fed Pushes Rates Toward 4.75% - 247wallst.com",
     "PGIM Quant Solutions International Equity Fund Q2 2026 Commentary - Seeking Alpha",
     "Will $100 Oil Push U.S. Farm Costs Even Higher This Fall? - AgroLatam"
   ],
@@ -285,9 +285,9 @@
     "DXY  100.54 \u25b20.11%",
     "Gold  $4,396.20 \u25b20.28%",
     "WTI  $89.85 \u25bc2.73%",
-    "Bitcoin  $86,242 \u25bc0.41%",
+    "Bitcoin  $86,213 \u25bc0.44%",
     "EUR/USD  1.1452 \u25bc0.15%",
-    "USD/JPY  157.41 \u25b20.06%",
+    "USD/JPY  157.34 \u25b20.02%",
     "VIX  14.21 \u25bc4.44%",
     "Copper  $6.905 \u25b22.11%"
   ],
