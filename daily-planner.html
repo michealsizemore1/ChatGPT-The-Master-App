@@ -2734,41 +2734,6 @@ body{
       </div>
       <div id="dailyFoodQualityNote" style="font-size:.66rem;color:#64748b;line-height:1.35;margin-top:5px;">Across all meals today</div>
     </div>
-    <div style="display:flex;gap:12px;flex-wrap:wrap;">
-      <span>&#x1F525; <strong id="totCal">0</strong> kcal</span>
-      <span>&#x1F969; <strong id="totProt">0</strong>g protein</span>
-      <span>&#x1F9C8; <strong id="totFat">0</strong>g fat</span>
-      <span>&#x1F35E; <strong id="totCarbs">0</strong>g carbs</span>
-      <span>&#x1F4A7; <strong id="totWater">—</strong> water</span>
-    </div>
-    <div id="calorieOverIndicator" role="status" aria-live="polite" style="display:none;margin-top:8px;border:1px solid #fca5a5;border-radius:8px;background:#fee2e2;color:#991b1b;padding:8px 10px;font-size:.8rem;font-weight:900;"></div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;padding-top:6px;border-top:1px dashed #dcdcdc;font-size:0.74rem;color:#666;">
-      <span>&#x1FA78; <strong id="totIron">0</strong>mg iron</span>
-      <span>&#x1F9B4; <strong id="totCalcium">0</strong>mg calcium</span>
-      <span>&#x2600;&#xFE0F; <strong id="totVitD">0</strong>mcg vitamin D</span>
-    </div>
-    <div id="topMicroQuality" style="display:none;margin-top:8px;padding:8px 9px;background:#fff;border:1px solid #dbe3ec;border-radius:8px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.76rem;font-weight:800;color:#334155;margin-bottom:6px;">
-        <span>Top 3 micronutrient quality</span><span id="topMicroQualityLabel">—</span>
-      </div>
-      <div id="topMicroQualityTrack" role="meter" aria-label="Combined daily iron, calcium, and vitamin D target completion" aria-valuemin="1" aria-valuemax="10" style="height:11px;position:relative;border-radius:999px;background:linear-gradient(90deg,#dc2626 0%,#f97316 25%,#facc15 50%,#84cc16 75%,#16a34a 100%);box-shadow:inset 0 0 0 1px rgba(15,23,42,.12);">
-        <span id="topMicroQualityMarker" style="position:absolute;top:50%;left:0%;width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #0f172a;box-sizing:border-box;transform:translate(-50%,-50%);box-shadow:0 1px 3px rgba(15,23,42,.35);"></span>
-      </div>
-      <div id="topMicroQualityNote" style="font-size:.66rem;color:#64748b;line-height:1.35;margin-top:5px;">Iron, calcium, and vitamin D target coverage</div>
-      <div id="topMicroBreakdown" style="display:grid;gap:7px;margin-top:9px;padding-top:8px;border-top:1px dashed #dbe3ec;"></div>
-    </div>
-    <details style="margin-top:6px;padding-bottom:6px;">
-      <summary style="cursor:pointer;font-size:.72rem;color:#64748b;font-weight:800;">Micronutrient Details</summary>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:7px;font-size:0.74rem;color:#666;">
-      <span>&#x1F33E; <strong id="totFiber">0</strong>g fiber</span>
-      <span>&#x1F36C; <strong id="totSugar">0</strong>g sugar</span>
-      <span>&#x1F9C2; <strong id="totSodium">0</strong>mg sodium</span>
-      <span>&#x1F955; <strong id="totVitA">0</strong>mcg vit A</span>
-      <span>&#x1F34A; <strong id="totVitC">0</strong>mg vit C</span>
-      <span>&#x1F34C; <strong id="totPotassium">0</strong>mg potassium</span>
-      </div>
-      <div style="font-size:.62rem;color:#94a3b8;margin-top:5px;line-height:1.35;">These totals are only as complete as the nutrition information available for each logged food.</div>
-    </details>
     <div id="macroRatioWrap" style="margin-top:8px;padding-top:7px;border-top:1px dashed #dcdcdc;">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:5px;">
         <div><strong style="font-size:0.86rem;color:#334155;">Daily Macro Ratio</strong><div id="macroTrainingLabel" style="font-size:0.7rem;color:#475569;margin-top:2px;">Rest-day target</div><div id="performanceFuelNote" style="display:none;font-size:0.68rem;color:#1e40af;margin-top:4px;line-height:1.35;"></div></div>
@@ -2815,6 +2780,41 @@ body{
       <details style="margin-top:6px;"><summary style="cursor:pointer;font-size:.66rem;color:#64748b;font-weight:700;">&#9432; How source classifications work</summary><div style="font-size:0.64rem;color:#64748b;margin-top:5px;line-height:1.35;">Source mix is not a medical “good/bad” score. Simple carbohydrates can be useful around training. Foods are classified automatically from their names and available ingredient information; use each food’s dropdowns to correct mixed or unusual foods.</div></details>
       </details>
     </div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+      <span>&#x1F525; <strong id="totCal">0</strong> kcal</span>
+      <span>&#x1F969; <strong id="totProt">0</strong>g protein</span>
+      <span>&#x1F9C8; <strong id="totFat">0</strong>g fat</span>
+      <span>&#x1F35E; <strong id="totCarbs">0</strong>g carbs</span>
+      <span>&#x1F4A7; <strong id="totWater">—</strong> water</span>
+    </div>
+    <div id="calorieOverIndicator" role="status" aria-live="polite" style="display:none;margin-top:8px;border:1px solid #fca5a5;border-radius:8px;background:#fee2e2;color:#991b1b;padding:8px 10px;font-size:.8rem;font-weight:900;"></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;padding-top:6px;border-top:1px dashed #dcdcdc;font-size:0.74rem;color:#666;">
+      <span>&#x1FA78; <strong id="totIron">0</strong>mg iron</span>
+      <span>&#x1F9B4; <strong id="totCalcium">0</strong>mg calcium</span>
+      <span>&#x2600;&#xFE0F; <strong id="totVitD">0</strong>mcg vitamin D</span>
+    </div>
+    <div id="topMicroQuality" style="display:none;margin-top:8px;padding:8px 9px;background:#fff;border:1px solid #dbe3ec;border-radius:8px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.76rem;font-weight:800;color:#334155;margin-bottom:6px;">
+        <span>Top 3 micronutrient quality</span><span id="topMicroQualityLabel">—</span>
+      </div>
+      <div id="topMicroQualityTrack" role="meter" aria-label="Combined daily iron, calcium, and vitamin D target completion" aria-valuemin="1" aria-valuemax="10" style="height:11px;position:relative;border-radius:999px;background:linear-gradient(90deg,#dc2626 0%,#f97316 25%,#facc15 50%,#84cc16 75%,#16a34a 100%);box-shadow:inset 0 0 0 1px rgba(15,23,42,.12);">
+        <span id="topMicroQualityMarker" style="position:absolute;top:50%;left:0%;width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #0f172a;box-sizing:border-box;transform:translate(-50%,-50%);box-shadow:0 1px 3px rgba(15,23,42,.35);"></span>
+      </div>
+      <div id="topMicroQualityNote" style="font-size:.66rem;color:#64748b;line-height:1.35;margin-top:5px;">Iron, calcium, and vitamin D target coverage</div>
+      <div id="topMicroBreakdown" style="display:grid;gap:7px;margin-top:9px;padding-top:8px;border-top:1px dashed #dbe3ec;"></div>
+    </div>
+    <details style="margin-top:6px;padding-bottom:6px;">
+      <summary style="cursor:pointer;font-size:.72rem;color:#64748b;font-weight:800;">Micronutrient Details</summary>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:7px;font-size:0.74rem;color:#666;">
+      <span>&#x1F33E; <strong id="totFiber">0</strong>g fiber</span>
+      <span>&#x1F36C; <strong id="totSugar">0</strong>g sugar</span>
+      <span>&#x1F9C2; <strong id="totSodium">0</strong>mg sodium</span>
+      <span>&#x1F955; <strong id="totVitA">0</strong>mcg vit A</span>
+      <span>&#x1F34A; <strong id="totVitC">0</strong>mg vit C</span>
+      <span>&#x1F34C; <strong id="totPotassium">0</strong>mg potassium</span>
+      </div>
+      <div style="font-size:.62rem;color:#94a3b8;margin-top:5px;line-height:1.35;">These totals are only as complete as the nutrition information available for each logged food.</div>
+    </details>
   </div>
   <!-- Favorites / Meals panel -->
   <div id="favMealPanel" style="display:block;background:#fffdf5;border:1px solid #f0c080;border-radius:10px;padding:10px 12px;margin-bottom:16px;box-shadow:0 1px 3px rgba(154,105,20,.18),0 8px 16px rgba(154,105,20,.22),0 26px 48px rgba(154,105,20,.26);">
