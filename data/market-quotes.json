@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-23T21:44:32+00:00",
+  "updatedAt": "2026-09-23T22:00:06+00:00",
   "source": "Yahoo Finance public chart data",
   "quotes": {
     "SCHD": {
@@ -87,10 +87,10 @@
       "currency": "USD"
     },
     "DX-Y.NYB": {
-      "price": 101.112,
+      "price": 101.105,
       "prev": 100.601,
-      "change": 0.511,
-      "changesPercentage": 0.5079,
+      "change": 0.504,
+      "changesPercentage": 0.501,
       "volume": 0,
       "avgVolume": 0,
       "yearHigh": 101.8,
@@ -100,9 +100,9 @@
     },
     "GC=F": {
       "price": 4322.7,
-      "prev": 4376.4,
-      "change": -53.7,
-      "changesPercentage": -1.227,
+      "prev": 4318.4,
+      "change": 4.3,
+      "changesPercentage": 0.0996,
       "volume": 140658,
       "avgVolume": 139995,
       "yearHigh": 5586.2,
@@ -112,9 +112,9 @@
     },
     "CL=F": {
       "price": 92.71,
-      "prev": 90.52,
-      "change": 2.19,
-      "changesPercentage": 2.4194,
+      "prev": 92.16,
+      "change": 0.55,
+      "changesPercentage": 0.5968,
       "volume": 350772,
       "avgVolume": 154092,
       "yearHigh": 119.48,
@@ -123,22 +123,22 @@
       "currency": "USD"
     },
     "BTC-USD": {
-      "price": 84497.45,
+      "price": 84407.04,
       "prev": 86195.28,
-      "change": -1697.83,
-      "changesPercentage": -1.9697,
-      "volume": 46767775744,
-      "avgVolume": 37402015113,
+      "change": -1788.24,
+      "changesPercentage": -2.0746,
+      "volume": 46765752320,
+      "avgVolume": 37401610428,
       "yearHigh": 126198.07,
       "yearLow": 57747.766,
       "marketState": "",
       "currency": "USD"
     },
     "EURUSD=X": {
-      "price": 1.1388,
+      "price": 1.1387,
       "prev": 1.1453,
-      "change": -0.0065,
-      "changesPercentage": -0.5675,
+      "change": -0.0066,
+      "changesPercentage": -0.5763,
       "volume": 0,
       "avgVolume": 0,
       "yearHigh": 1.2024,
@@ -147,10 +147,10 @@
       "currency": "USD"
     },
     "JPY=X": {
-      "price": 158.231,
+      "price": 158.28,
       "prev": 157.316,
-      "change": 0.915,
-      "changesPercentage": 0.5816,
+      "change": 0.964,
+      "changesPercentage": 0.6128,
       "volume": 0,
       "avgVolume": 0,
       "yearHigh": 163.979,
@@ -171,14 +171,14 @@
       "currency": "USD"
     },
     "HG=F": {
-      "price": 6.792,
-      "prev": 6.836,
-      "change": -0.044,
-      "changesPercentage": -0.6437,
+      "price": 6.7915,
+      "prev": 6.7535,
+      "change": 0.038,
+      "changesPercentage": 0.5627,
       "volume": 39438,
       "avgVolume": 10494,
       "yearHigh": 6.912,
-      "yearLow": 4.558,
+      "yearLow": 4.5585,
       "marketState": "",
       "currency": "USD"
     }
@@ -186,9 +186,9 @@
   "futures": {
     "ES=F": {
       "price": 7772.75,
-      "prev": 7831.75,
-      "change": -59.0,
-      "changesPercentage": -0.7533,
+      "prev": 7772.5,
+      "change": 0.25,
+      "changesPercentage": 0.0032,
       "volume": 1488717,
       "avgVolume": 1428870,
       "yearHigh": 7848.5,
@@ -198,9 +198,9 @@
     },
     "YM=F": {
       "price": 51868.0,
-      "prev": 52279.0,
-      "change": -411.0,
-      "changesPercentage": -0.7862,
+      "prev": 51873.0,
+      "change": -5.0,
+      "changesPercentage": -0.0096,
       "volume": 73819,
       "avgVolume": 70308,
       "yearHigh": 54884.0,
@@ -210,9 +210,9 @@
     },
     "NQ=F": {
       "price": 30776.0,
-      "prev": 31028.5,
-      "change": -252.5,
-      "changesPercentage": -0.8138,
+      "prev": 30764.75,
+      "change": 11.25,
+      "changesPercentage": 0.0366,
       "volume": 526330,
       "avgVolume": 533022,
       "yearHigh": 31094.75,
@@ -221,12 +221,12 @@
       "currency": "USD"
     },
     "BTC=F": {
-      "price": 84150.0,
+      "price": 84550.0,
       "prev": 84495.0,
-      "change": -345.0,
-      "changesPercentage": -0.4083,
-      "volume": 14,
-      "avgVolume": 11896,
+      "change": 55.0,
+      "changesPercentage": 0.0651,
+      "volume": 38,
+      "avgVolume": 11902,
       "yearHigh": 127240.0,
       "yearLow": 57850.0,
       "marketState": "",
@@ -261,17 +261,17 @@
   ],
   "news": [
     "Above the Noise: Looking beyond the headlines - invesco.com",
+    "This Boring Market Is Good News For Investors (NYSEARCA:SPY) - Seeking Alpha",
     "Will the Federal Reserve Trigger a Bear Market? History Has Good and Bad News for Investors - The Motley Fool",
     "Five-year US Treasury yield tops 5% for first time since 2007 - Yahoo Finance Singapore",
     "Fed's Higher-for-Longer Stance: 3 Picks as AI, Oil & Markets Diverge - TradingView",
-    "A Near-Record Market Is Ignoring The Economy's Biggest Risk - Seeking Alpha",
     "Global Bond Markets Are in Turmoil. Here's Why Investors Shouldn't Panic. - The Globe and Mail",
     "Pressure from the bond market hits a new level, and U.S. stocks slide on worries about inflation - bnnbloomberg.ca",
     "Will the Canada Investment Summit advance the sustainable economy? - Corporate Knights",
     "The Economy Is Booming, So the Market Indexes Fell. Go Figure. - The Motley Fool",
     "Jobless claims, building permits, and new home sales due Thursday By Investing.com - Investing.com Australia",
     "Quantitative Tightening Explained: How the Fed Shrinks Its Balance Sheet - webull.com",
-    "A must-read for U.S. stock investors! Here's a sneak peek at October's major events\u2014mark these key dates that could drive market moves. - \u5bcc\u9014\u725b\u725b"
+    "A Near-Record Market Is Ignoring The Economy's Biggest Risk - Seeking Alpha"
   ],
   "economy": [
     "CPI 2026-07 | 3.5% YoY",
@@ -282,14 +282,14 @@
     "2-Year Treasury 2026-08-28 | 4.34%"
   ],
   "macro": [
-    "DXY  101.11 \u25b20.51%",
-    "Gold  $4,322.70 \u25bc1.23%",
-    "WTI  $92.71 \u25b22.42%",
-    "Bitcoin  $84,497 \u25bc1.97%",
-    "EUR/USD  1.1388 \u25bc0.57%",
-    "USD/JPY  158.23 \u25b20.58%",
+    "DXY  101.11 \u25b20.50%",
+    "Gold  $4,322.70 \u25b20.10%",
+    "WTI  $92.71 \u25b20.60%",
+    "Bitcoin  $84,407 \u25bc2.07%",
+    "EUR/USD  1.1387 \u25bc0.58%",
+    "USD/JPY  158.28 \u25b20.61%",
     "VIX  15.18 \u25b26.83%",
-    "Copper  $6.792 \u25bc0.64%"
+    "Copper  $6.792 \u25b20.56%"
   ],
   "errors": {
     "economy": "The read operation timed out"
