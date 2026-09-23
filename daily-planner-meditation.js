@@ -284,9 +284,16 @@ if(bibleSpeechSupported()){window.speechSynthesis.onvoiceschanged=bibleSpeechPop
    One Year Bible reader above -- starting one stops the other -- but keeps
    its own lightweight state so any card's Listen button can drive it. --- */
 var _cardSpeech={token:0,chunks:[],idx:0,activeBtn:null,keepAlive:null};
+function cardSpeechStripSymbols(text){
+  return(text||'')
+    .replace(/\[([^\]]+)\]\([^)]*\)/g,'$1')
+    .replace(/[*_~`#>|\[\]]+/g,'')
+    .replace(/\s+/g,' ')
+    .trim();
+}
 function cardSpeechText(resultId){
   var el=document.getElementById(resultId);if(!el)return'';
-  return(el.innerText||el.textContent||'').replace(/\s+/g,' ').trim();
+  return cardSpeechStripSymbols(el.innerText||el.textContent||'');
 }
 function speechPauseFor(text){
   var t=(text||'').trim(),last=t.charAt(t.length-1);
