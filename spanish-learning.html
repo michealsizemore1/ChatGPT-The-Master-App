@@ -191,5 +191,6 @@
     function lessonChoice(value){const lesson=getStructuredLesson(state.lessonIndex||0),correct=value===lesson.answer,nav=labcontent.querySelector(".guided-nav");let feedback=document.getElementById("lessonAnswerFeedback");if(!feedback&&nav){feedback=document.createElement("p");feedback.id="lessonAnswerFeedback";nav.before(feedback)}if(feedback){feedback.className="answer-feedback "+(correct?"correct":"retry");feedback.textContent=correct?"Correct! “"+value+"” is the right answer.":"Not quite. Try another choice, or return to the phrase list for a quick review."}notify(correct?"Correct · excellent recall":"Try again · review the phrases above")}
     if(memoryGuide&&!memoryGuide.dataset.headerFeedbackGuide){memoryGuide.dataset.headerFeedbackGuide="true";memoryGuide.insertAdjacentHTML("beforeend","<p><b>Always-visible header:</b> The Luma and Spanish bar remains at the top while you scroll. <b>Lesson answers:</b> When you choose a meaning or sound answer, a green Correct message or a red Try another choice message now appears directly inside the lesson.</p>")}
   </script>
+<script src="master-backup-shared.js"></script>
 </body>
 </html>
