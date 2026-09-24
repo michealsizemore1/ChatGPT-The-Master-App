@@ -18,3 +18,8 @@
 **/test-results/
 **/playwright-report/
 **/playwright/.cache/
+
+# Personal financial/data backup exports should never be committed to this
+# public repo -- keep them on this device only.
+Claude outputs/*backup*.json
+Claude outputs/*Backup*.json
