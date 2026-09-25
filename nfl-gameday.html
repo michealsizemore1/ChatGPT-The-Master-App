@@ -147,7 +147,7 @@ function readStoredSection(){
 function storeSection(section){
  try{sessionStorage.setItem('nflgd-section',section)}catch(e){}
 }
-const state={section:readStoredSection(),games:[],open:null,openGame:null,schedules:{},details:{},loading:null,query:'',sort:'rank',metricView:'team',scheduleViewCurrent:'all',selectedGameId:null,gameDetails:null,detailsLoading:false};
+const state={section:readStoredSection(),games:[],open:null,openGame:null,schedules:{},details:{},loading:null,query:'',sort:'rank',metricView:'team',scheduleViewCurrent:'all',selectedGameId:null,gameDetails:null,detailsLoading:false,metricsData:null,metricsLoading:false};
 function navigate(destination){
  state.section=destination;storeSection(destination);render();
  window.scrollTo(0,0);
@@ -518,9 +518,68 @@ function renderHighlights(highlights){
  if(!highlights||!highlights.length)return '';
  return `<div class="highlights"><p class="archive-label">GAME HIGHLIGHTS</p><div class="highlights-grid">${highlights.map(item=>`<figure class="highlight-clip"><video controls preload="metadata" playsinline ${item.thumbnail?`poster="${esc(item.thumbnail)}"`:''}><source src="${esc(item.src)}" type="video/mp4"></video><figcaption>${esc(item.headline)}</figcaption></figure>`).join('')}</div></div>`;
 }
+const teamMetricFields=['thirdDown','redZone','turnover','yardsPerPlay','possession','scoringOff','scoringDef','passYards','rushYards','penalties'];
+function formatMetricValue(field,value){
+ if(value==null||!Number.isFinite(value))return null;
+ if(field==='thirdDown'||field==='redZone')return `${value.toFixed(1)}%`;
+ if(field==='turnover')return value>0?`+${value}`:`${value}`;
+ if(field==='yardsPerPlay')return value.toFixed(1);
+ if(field==='possession'){const m=Math.floor(value/60),s=Math.round(value%60);return `${m}:${String(s).padStart(2,'0')}`}
+ if(field==='scoringOff'||field==='scoringDef')return `${value.toFixed(1)} PPG`;
+ if(field==='passYards'||field==='rushYards')return `${value.toFixed(1)} YPG`;
+ if(field==='penalties')return `${value.toFixed(1)}/GM`;
+ return String(value);
+}
+async function loadEssentialMetrics(){
+ if(state.metricsLoading)return;
+ state.metricsLoading=true;
+ render();
+ try{
+  const rows=await Promise.all(teams.map(async t=>{
+   try{
+    const [statsRes,teamRes]=await Promise.all([fetch(`${api}/teams/${encodeURIComponent(t.id)}/statistics`,{cache:'no-store'}).then(r=>r.json()),fetch(`${api}/teams/${encodeURIComponent(t.id)}`,{cache:'no-store'}).then(r=>r.json())]);
+    const cats=statsRes.results?.stats?.categories||[];
+    const stat=(cat,name)=>cats.find(c=>c.name===cat)?.stats?.find(s=>s.name===name)?.value;
+    const gamesPlayed=Number(stat('rushing','teamGamesPlayed')||stat('passing','teamGamesPlayed')||0);
+    if(!gamesPlayed)return null;
+    const totalYards=Number(stat('rushing','totalYards')||0);
+    const totalPlays=Number(stat('rushing','totalOffensivePlays')||0);
+    const possessionSeconds=Number(stat('miscellaneous','possessionTimeSeconds')||0);
+    const totalPenalties=Number(stat('miscellaneous','totalPenalties')||0);
+    const record=(teamRes.team?.record?.items||[]).find(x=>x.type==='total');
+    const recStat=(name)=>record?.stats?.find(s=>s.name===name)?.value;
+    return{abbr:t.abbr,name:t.name,thirdDown:Number(stat('miscellaneous','thirdDownConvPct')),redZone:Number(stat('miscellaneous','redzoneScoringPct')),turnover:Number(stat('miscellaneous','turnOverDifferential')),yardsPerPlay:totalPlays?totalYards/totalPlays:null,possession:possessionSeconds/gamesPlayed,scoringOff:Number(recStat('avgPointsFor')),scoringDef:Number(recStat('avgPointsAgainst')),passYards:Number(stat('passing','passingYardsPerGame')),rushYards:Number(stat('rushing','rushingYardsPerGame')),penalties:totalPenalties/gamesPlayed};
+   }catch(e){return null}
+  }));
+  const valid=rows.filter(Boolean);
+  const lowerIsBetter=new Set(['scoringDef','penalties']);
+  const leaders={};
+  teamMetricFields.forEach(field=>{
+   const ranked=valid.filter(r=>Number.isFinite(r[field]));
+   if(!ranked.length){leaders[field]=null;return}
+   const best=ranked.reduce((a,b)=>(lowerIsBetter.has(field)?b[field]<a[field]:b[field]>a[field])?b:a);
+   leaders[field]={abbr:best.abbr,name:best.name,value:best[field]};
+  });
+  state.metricsData=leaders;
+ }catch(e){}
+ finally{state.metricsLoading=false;render()}
+}
 function renderMetrics(){
  const list=state.metricView==='team'?teamMetrics:playerMetrics;
- const items=list.map((m,i)=>`<article class="metric-item"><span>${String(i+1).padStart(2,'0')}</span><div><h3>${esc(m[0])}</h3><p>${esc(m[1])}</p><small class="metric-feed">Waiting for season statistics</small></div></article>`).join('');
+ const items=list.map((m,i)=>{
+  let feed='Waiting for season statistics';
+  if(state.metricView==='team'){
+   const field=teamMetricFields[i];
+   const leader=state.metricsData?.[field];
+   if(leader){
+    const display=formatMetricValue(field,leader.value);
+    feed=display?(leader.abbr+' '+leader.name+' — '+display):'Waiting for season statistics';
+   }else if(state.metricsLoading){
+    feed='Loading live stats…';
+   }
+  }
+  return `<article class="metric-item"><span>${String(i+1).padStart(2,'0')}</span><div><h3>${esc(m[0])}</h3><p>${esc(m[1])}</p><small class="metric-feed">${esc(feed)}</small></div></article>`;
+ }).join('');
  return `<section class="panel metrics-section" id="metrics">
   <div class="panel-title"><div><p class="eyebrow">THE STAT BOARD</p><h2>Essential metrics</h2></div><div class="metric-tabs"><button class="${state.metricView==='team'?'active':''}" data-metric-view="team">Team</button><button class="${state.metricView==='player'?'active':''}" data-metric-view="player">Player</button></div></div>
   <p class="metrics-intro">Live season values refresh automatically as games are completed. A dash means the provider has not posted that metric yet.</p>
@@ -673,9 +732,11 @@ document.addEventListener('error',e=>{
 
 render();
 loadScores();
+loadEssentialMetrics();
 setInterval(loadScores,120000);
 setInterval(livePollTick,90000);
 setInterval(()=>{if(state.selectedGameId)loadGameDetails()},120000);
+setInterval(loadEssentialMetrics,1800000);
 </script>
 </body>
 </html>
