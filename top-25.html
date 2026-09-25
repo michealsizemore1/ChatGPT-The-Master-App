@@ -450,7 +450,7 @@ async function loadGameDetails(){
  }catch{state.gameDetails=null}
  state.detailsLoading=false;render();
 }
-async const teamMetricFields=['thirdDown','redZone','turnover','yardsPerPlay','possession','scoringOff','scoringDef','passDefRating','rushYards','penalties'];
+const teamMetricFields=['thirdDown','redZone','turnover','yardsPerPlay','possession','scoringOff','scoringDef','passDefRating','rushYards','penalties'];
 const teamMetricLowerBetter=new Set(['scoringDef','passDefRating','penalties']);
 function formatTeamMetricValue(field,value){
  if(value==null||!Number.isFinite(value))return null;
