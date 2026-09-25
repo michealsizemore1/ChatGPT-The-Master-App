@@ -147,7 +147,7 @@ function readStoredSection(){
 function storeSection(section){
  try{sessionStorage.setItem('nflgd-section',section)}catch(e){}
 }
-const state={section:readStoredSection(),games:[],open:null,openGame:null,schedules:{},details:{},loading:null,query:'',sort:'rank',metricView:'team',scheduleViewCurrent:'all',selectedGameId:null,gameDetails:null,detailsLoading:false,metricsData:null,metricsLoading:false};
+const state={section:readStoredSection(),games:[],open:null,openGame:null,schedules:{},details:{},loading:null,query:'',sort:'rank',metricView:'team',scheduleViewCurrent:'all',selectedGameId:null,gameDetails:null,detailsLoading:false,metricsData:null,metricsLoading:false,playerMetricsData:null,playerMetricsLoading:false};
 function navigate(destination){
  state.section=destination;storeSection(destination);render();
  window.scrollTo(0,0);
@@ -564,6 +564,38 @@ async function loadEssentialMetrics(){
  }catch(e){}
  finally{state.metricsLoading=false;render()}
 }
+const playerMetricFields=['passingYards','quarterbackRating','rushingYards','receivingYards','totalTouchdowns','sacks','interceptions','totalTackles',null,null];
+function formatPlayerMetricValue(field,displayValue){
+ if(displayValue==null)return null;
+ const suffix={passingYards:'YDS',rushingYards:'YDS',receivingYards:'YDS',totalTouchdowns:'TD',sacks:'SACKS',interceptions:'INT',totalTackles:'TKL',quarterbackRating:'RTG'}[field]||'';
+ return suffix?`${displayValue} ${suffix}`:String(displayValue);
+}
+async function loadPlayerLeaders(){
+ if(state.playerMetricsLoading)return;
+ state.playerMetricsLoading=true;
+ render();
+ try{
+  const res=await fetch('https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/2026/types/2/leaders',{cache:'no-store'});
+  const data=await res.json();
+  const cats=data.categories||[];
+  const fields=[...new Set(playerMetricFields.filter(Boolean))];
+  const leaders={};
+  await Promise.all(fields.map(async field=>{
+   try{
+    const cat=cats.find(c=>c.name===field);
+    const top=cat?.leaders?.[0];
+    if(!top){leaders[field]=null;return}
+    const [athlete,team]=await Promise.all([
+     fetch(top.athlete.$ref.replace('http://','https://'),{cache:'no-store'}).then(r=>r.json()).catch(()=>null),
+     fetch(top.team.$ref.replace('http://','https://'),{cache:'no-store'}).then(r=>r.json()).catch(()=>null)
+    ]);
+    leaders[field]={name:athlete&&athlete.displayName||'',abbr:team&&team.abbreviation||'',displayValue:top.displayValue};
+   }catch(e){leaders[field]=null}
+  }));
+  state.playerMetricsData=leaders;
+ }catch(e){}
+ finally{state.playerMetricsLoading=false;render()}
+}
 function renderMetrics(){
  const list=state.metricView==='team'?teamMetrics:playerMetrics;
  const items=list.map((m,i)=>{
@@ -575,6 +607,15 @@ function renderMetrics(){
     const display=formatMetricValue(field,leader.value);
     feed=display?(leader.abbr+' '+leader.name+' — '+display):'Waiting for season statistics';
    }else if(state.metricsLoading){
+    feed='Loading live stats…';
+   }
+  }else if(state.metricView==='player'){
+   const field=playerMetricFields[i];
+   const leader=field?state.playerMetricsData?.[field]:null;
+   if(leader){
+    const display=formatPlayerMetricValue(field,leader.displayValue);
+    feed=display?(leader.abbr+' '+leader.name+' — '+display):'Waiting for season statistics';
+   }else if(state.playerMetricsLoading){
     feed='Loading live stats…';
    }
   }
@@ -733,10 +774,12 @@ document.addEventListener('error',e=>{
 render();
 loadScores();
 loadEssentialMetrics();
+loadPlayerLeaders();
 setInterval(loadScores,120000);
 setInterval(livePollTick,90000);
 setInterval(()=>{if(state.selectedGameId)loadGameDetails()},120000);
 setInterval(loadEssentialMetrics,1800000);
+setInterval(loadPlayerLeaders,1800000);
 </script>
 </body>
 </html>
