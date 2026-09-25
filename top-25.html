@@ -365,7 +365,7 @@ const state={
  liveGames:[],weeklyGames:[],liveError:false,lastUpdated:null,
  selectedGameId:null,gameDetails:null,detailsLoading:false,
  expandedGameId:null,legacyDetails:{},legacyLoading:null,
- metricView:'team',metricValues:{}
+ metricView:'team',metricValues:{},teamMetricLeaders:{},teamMetricsLoading:false,playerMetricLeaders:{},playerMetricsLoading:false
 };
 
 function filteredTeams(){return teams.filter(t=>t.name.toLowerCase().includes(state.query.toLowerCase())).sort((a,b)=>conferenceOrder.indexOf(conferenceOf(a))-conferenceOrder.indexOf(conferenceOf(b))||a.rank-b.rank)}
@@ -450,29 +450,84 @@ async function loadGameDetails(){
  }catch{state.gameDetails=null}
  state.detailsLoading=false;render();
 }
+async const teamMetricFields=['thirdDown','redZone','turnover','yardsPerPlay','possession','scoringOff','scoringDef','passDefRating','rushYards','penalties'];
+const teamMetricLowerBetter=new Set(['scoringDef','passDefRating','penalties']);
+function formatTeamMetricValue(field,value){
+ if(value==null||!Number.isFinite(value))return null;
+ if(field==='thirdDown'||field==='redZone')return `${value.toFixed(1)}%`;
+ if(field==='turnover')return value>0?`+${value}`:`${value}`;
+ if(field==='yardsPerPlay')return value.toFixed(1);
+ if(field==='possession'){const m=Math.floor(value/60),s=Math.round(value%60);return `${m}:${String(s).padStart(2,'0')}`}
+ if(field==='scoringOff'||field==='scoringDef')return `${value.toFixed(1)} PPG`;
+ if(field==='passDefRating')return `${value.toFixed(1)} RTG`;
+ if(field==='rushYards')return `${value.toFixed(1)} YPG`;
+ if(field==='penalties')return `${value.toFixed(1)}/GM`;
+ return String(value);
+}
 async function loadTeamStats(){
- const entries=await Promise.all(teams.map(async team=>{
-  try{
-   const direct=await fetch(`https://site.api.espn.com/apis/site/v2/sports/football/college-football/teams/${team.espnId}/statistics`,{cache:'no-store'});
-   if(direct.ok){
-    const data=await direct.json();const stats=data.results??data.statistics??data.stats??[];const values={};
-    (Array.isArray(stats)?stats:Object.values(stats).flat()).forEach(stat=>{const value=stat.displayValue??stat.value??stat.perGame??stat.percentage;if(value!=null)values[String(stat.name??stat.label??'').toLowerCase()]=String(value)});
-    if(Object.keys(values).length)return [team.abbr,values];
-   }
-   const completed=state.liveGames.find(game=>game.state==='post'&&game.teams.some(entry=>entry.id===team.espnId));
-   if(completed){
-    const summary=await fetch(`https://site.api.espn.com/apis/site/v2/sports/football/college-football/summary?event=${completed.id}`,{cache:'no-store'});
-    if(summary.ok){
-     const data=await summary.json();const values={};
-     (data.boxscore?.teams??[]).filter(entry=>entry.team?.id===team.espnId).flatMap(entry=>entry.statistics??[]).forEach(stat=>{const value=stat.displayValue??stat.value;if(value!=null)values[String(stat.name??stat.label??'').toLowerCase()]=String(value)});
-     if(Object.keys(values).length)return [team.abbr,values];
-    }
-   }
-   return null;
-  }catch{return null}
- }));
- state.metricValues=Object.fromEntries(entries.filter(Boolean));
+ if(state.teamMetricsLoading)return;
+ state.teamMetricsLoading=true;
  render();
+ try{
+  const rows=await Promise.all(teams.map(async t=>{
+   try{
+    const res=await fetch(`https://site.api.espn.com/apis/site/v2/sports/football/college-football/teams/${t.espnId}/statistics`,{cache:'no-store'});
+    const data=await res.json();
+    const own=data.results?.stats?.categories||[];
+    const opp=Array.isArray(data.results?.opponent)?data.results.opponent:[];
+    const stat=(cats,cat,name)=>cats.find(c=>c.name===cat)?.stats?.find(s=>s.name===name)?.value;
+    const gamesPlayed=Number(stat(own,'rushing','teamGamesPlayed')||stat(own,'passing','teamGamesPlayed')||0);
+    if(!gamesPlayed)return null;
+    const totalYards=Number(stat(own,'rushing','totalYards')||0);
+    const totalPlays=Number(stat(own,'rushing','totalOffensivePlays')||0);
+    const possessionSeconds=Number(stat(own,'miscellaneous','possessionTimeSeconds')||0);
+    const totalPenalties=Number(stat(own,'miscellaneous','totalPenalties')||0);
+    return{abbr:t.abbr,name:t.name,thirdDown:Number(stat(own,'miscellaneous','thirdDownConvPct')),redZone:Number(stat(own,'miscellaneous','redzoneScoringPct')),turnover:Number(stat(own,'miscellaneous','turnOverDifferential')),yardsPerPlay:totalPlays?totalYards/totalPlays:null,possession:possessionSeconds/gamesPlayed,scoringOff:Number(stat(own,'scoring','totalPointsPerGame')),scoringDef:Number(stat(opp,'scoring','totalPointsPerGame')),passDefRating:Number(stat(opp,'passing','QBRating')),rushYards:Number(stat(own,'rushing','rushingYardsPerGame')),penalties:totalPenalties/gamesPlayed};
+   }catch(e){return null}
+  }));
+  const valid=rows.filter(Boolean);
+  const leaders={};
+  teamMetricFields.forEach(field=>{
+   const ranked=valid.filter(r=>Number.isFinite(r[field]));
+   if(!ranked.length){leaders[field]=null;return}
+   const best=ranked.reduce((a,b)=>(teamMetricLowerBetter.has(field)?b[field]<a[field]:b[field]>a[field])?b:a);
+   leaders[field]={abbr:best.abbr,name:best.name,value:best[field]};
+  });
+  state.teamMetricLeaders=leaders;
+ }catch(e){}
+ finally{state.teamMetricsLoading=false;render()}
+}
+const playerMetricFields=['passingYards','quarterbackRating','rushingYards',null,null,'sacks','interceptions','totalTackles',null,null];
+function formatPlayerMetricValue(field,displayValue){
+ if(displayValue==null)return null;
+ const suffix={passingYards:'YDS',rushingYards:'YDS',sacks:'SACKS',interceptions:'INT',totalTackles:'TKL',quarterbackRating:'RTG'}[field]||'';
+ return suffix?`${displayValue} ${suffix}`:String(displayValue);
+}
+async function loadPlayerLeaders(){
+ if(state.playerMetricsLoading)return;
+ state.playerMetricsLoading=true;
+ render();
+ try{
+  const res=await fetch('https://sports.core.api.espn.com/v2/sports/football/leagues/college-football/seasons/2026/types/2/leaders',{cache:'no-store'});
+  const data=await res.json();
+  const cats=data.categories||[];
+  const fields=[...new Set(playerMetricFields.filter(Boolean))];
+  const leaders={};
+  await Promise.all(fields.map(async field=>{
+   try{
+    const cat=cats.find(c=>c.name===field);
+    const top=cat?.leaders?.[0];
+    if(!top){leaders[field]=null;return}
+    const [athlete,team]=await Promise.all([
+     fetch(top.athlete.$ref.replace('http://','https://'),{cache:'no-store'}).then(r=>r.json()).catch(()=>null),
+     fetch(top.team.$ref.replace('http://','https://'),{cache:'no-store'}).then(r=>r.json()).catch(()=>null)
+    ]);
+    leaders[field]={name:athlete&&athlete.displayName||'',abbr:team&&team.abbreviation||'',displayValue:top.displayValue};
+   }catch(e){leaders[field]=null}
+  }));
+  state.playerMetricLeaders=leaders;
+ }catch(e){}
+ finally{state.playerMetricsLoading=false;render()}
 }
 async function toggleSchedule(abbr){
  state.selected=abbr;
@@ -803,7 +858,29 @@ function renderNews(){
 }
 function renderMetrics(){
  const list=state.metricView==='team'?teamStats:playerStats;
- const items=list.map(([name,description],index)=>`<article class="metric-item"><span>${String(index+1).padStart(2,'0')}</span><div><h3>${esc(name)}</h3><p>${esc(description)}</p><small class="metric-feed">${state.metricView==='team'?`${esc(metricSummary(name))}${Object.keys(state.metricValues).length?` · ${Object.keys(state.metricValues).length}/25 teams reporting`:''}`:'Waiting for season statistics'}</small></div></article>`).join('');
+ const items=list.map(([name,description],index)=>{
+  let feed='Waiting for season statistics';
+  if(state.metricView==='team'){
+   const field=teamMetricFields[index];
+   const leader=state.teamMetricLeaders?.[field];
+   if(leader){
+    const display=formatTeamMetricValue(field,leader.value);
+    feed=display?(leader.abbr+' '+leader.name+' — '+display):'Waiting for season statistics';
+   }else if(state.teamMetricsLoading){
+    feed='Loading live stats…';
+   }
+  }else if(state.metricView==='player'){
+   const field=playerMetricFields[index];
+   const leader=field?state.playerMetricLeaders?.[field]:null;
+   if(leader){
+    const display=formatPlayerMetricValue(field,leader.displayValue);
+    feed=display?(leader.abbr+' '+leader.name+' — '+display):'Waiting for season statistics';
+   }else if(state.playerMetricsLoading){
+    feed='Loading live stats…';
+   }
+  }
+  return `<article class="metric-item"><span>${String(index+1).padStart(2,'0')}</span><div><h3>${esc(name)}</h3><p>${esc(description)}</p><small class="metric-feed">${esc(feed)}</small></div></article>`;
+ }).join('');
  return `<section class="metrics-section panel" id="metrics">
   <div class="panel-title"><div><p class="eyebrow">THE STAT BOARD</p><h2>Essential metrics</h2></div><div class="metric-tabs" role="tablist" aria-label="Metric category"><button class="${state.metricView==='team'?'active':''}" data-metric-view="team" role="tab" aria-selected="${state.metricView==='team'}">Team</button><button class="${state.metricView==='player'?'active':''}" data-metric-view="player" role="tab" aria-selected="${state.metricView==='player'}">Player</button></div></div>
   <p class="metrics-intro">Live season values refresh automatically as games are completed. A dash means the provider has not posted that metric yet.</p>
@@ -927,11 +1004,13 @@ loadScores();
 loadAllSchedules();
 loadWeek();
 loadTeamStats();
+loadPlayerLeaders();
 setInterval(loadScores,120000);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')loadScores()});
 setInterval(loadWeek,120000);
 setInterval(()=>{if(state.selectedGameId)loadGameDetails()},120000);
 setInterval(loadTeamStats,300000);
+setInterval(loadPlayerLeaders,1800000);
 setInterval(livePollTick,90000);
 </script>
 </body>
