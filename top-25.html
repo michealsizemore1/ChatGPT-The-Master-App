@@ -371,7 +371,7 @@ const state={
 function filteredTeams(){return teams.filter(t=>t.name.toLowerCase().includes(state.query.toLowerCase())).sort((a,b)=>conferenceOrder.indexOf(conferenceOf(a))-conferenceOrder.indexOf(conferenceOf(b))||a.rank-b.rank)}
 // Straight 1-25 poll order, no conference grouping -- used by the Rankings tab.
 function filteredTeamsByRank(){return teams.filter(t=>t.name.toLowerCase().includes(state.query.toLowerCase())).sort((a,b)=>a.rank-b.rank)}
-const gameStateOrder={in:0,post:1,pre:2};
+const gameStateOrder={in:0,pre:1,post:2};
 function visibleGames(){return state.liveGames.filter(game=>game.teams.some(team=>rankedIds.has(team.id))).sort((a,b)=>(gameStateOrder[a.state]??3)-(gameStateOrder[b.state]??3)||new Date(a.date)-new Date(b.date))}
 function currentRecords(){const result={};state.weeklyGames.forEach(game=>game.teams.forEach(team=>{if(team.record)result[team.id]=team.record.replace('-','–')}));return result}
 function metricSummary(name){const hint=name.toLowerCase().split(' ')[0];const rows=Object.entries(state.metricValues).map(([abbr,values])=>{const match=Object.entries(values).find(([key])=>key.includes(hint));return match?`${abbr} ${match[1]}`:null}).filter(Boolean).slice(0,3);return rows.length?rows.join(' · '):'Waiting for season statistics'}
