@@ -1,4 +1,4 @@
-// ══════════════════════════════════════════════════════
+Page_DownPage_DownPage_DownPage_DownPage_DownPage_DownPage_DownPage_DownPage_DownPage_DownPage_Down// ══════════════════════════════════════════════════════
 // FOOD LOG SYSTEM
 // ══════════════════════════════════════════════════════
 if(!window._foodLog)window._foodLog=[];
@@ -800,7 +800,7 @@ function isFav(item){
 
 function macroRatioStorageKey(dateKey){return'macro_ratio_settings_'+(dateKey||dk(today));}
 function macroRatioSettings(dateKey){
-  dateKey=dateKey||dk(today);var defaults={enabled:false,prot:25,carbs:45,fat:30},raw=localStorage.getItem(macroRatioStorageKey(dateKey));
+  dateKey=dateKey||dk(today);var defaults={enabled:true,prot:15,carbs:60,fat:25},raw=localStorage.getItem(macroRatioStorageKey(dateKey));
   // Migrate the former all-days setting once, preserving it only for the day
   // being viewed when this version first opens. Every other date stays independent.
   if(!raw&&localStorage.getItem('macro_ratio_settings_migrated_v2')!=='1'){
