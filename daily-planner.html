@@ -2953,6 +2953,11 @@ body{
         <button onclick="document.getElementById('macroMealsModal').style.display='none'" aria-label="Close" style="background:none;border:none;font-size:1.2rem;color:#64748b;cursor:pointer;line-height:1;">✕</button>
       </div>
       <div style="font-size:.72rem;color:#78716c;margin-bottom:10px;line-height:1.4;">Whole-food meals calculated so their calories break down to roughly 20% protein, 60% carbs and 20% fat — a high-carb split. Each has a real gram amount and a rough kitchen measure; small amounts (a teaspoon, a few grams) are normal since they're solved to hit the ratio exactly.</div>
+      <div style="border-top:1px solid #e2e8f0;margin-bottom:10px;padding-top:10px;">
+        <strong style="font-size:.8rem;color:#166534;">⭐ From Your Foods</strong>
+        <div style="font-size:.68rem;color:#78716c;margin:2px 0 8px;line-height:1.35;">Closest 20/60/20 matches built from your Favorites and Healthy 7+ list, in addition to the AI ideas below.</div>
+        <div id="macroMealsPersonalList"></div>
+      </div>
       <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;">
         <button type="button" onclick="filterMacroMeals('all')" class="mm-filter-btn" data-mm-filter="all" style="flex:1 1 0;min-width:60px;background:#0f766e;color:#fff;border:none;padding:5px 4px;border-radius:6px;font-size:.68rem;font-weight:700;cursor:pointer;">All</button>
         <button type="button" onclick="filterMacroMeals('breakfast')" class="mm-filter-btn" data-mm-filter="breakfast" style="flex:1 1 0;min-width:60px;background:#e9ecef;color:#555;border:none;padding:5px 4px;border-radius:6px;font-size:.68rem;font-weight:700;cursor:pointer;">🌅 Breakfast</button>
