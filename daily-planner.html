@@ -2666,7 +2666,8 @@ body{
     <label title="Take a photo of the Nutrition Facts and ingredients" style="flex:1 1 0;min-width:88px;text-align:center;white-space:nowrap;background:#e67e22;color:#fff;border:none;padding:6px 3px;border-radius:6px;font-size:0.67rem;font-weight:700;cursor:pointer;">&#x1F4F7; Camera<input type="file" id="foodLabelCamera" accept="image/*" capture="environment" style="display:none" onchange="scanFoodLabel(event)"></label>
     <label title="Upload an existing photo or screenshot of Nutrition Facts and ingredients" style="flex:1 1 0;min-width:88px;text-align:center;white-space:nowrap;background:#c2650f;color:#fff;border:none;padding:6px 3px;border-radius:6px;font-size:0.67rem;font-weight:700;cursor:pointer;">&#x1F5BC; Upload<input type="file" id="foodLabelScan" accept="image/*" style="display:none" onchange="scanFoodLabel(event)"></label>
     <button onclick="openBarcodeScanner()" title="Scan a packaged food barcode" style="flex:1 1 0;min-width:88px;white-space:nowrap;background:#0f766e;color:#fff;border:none;padding:6px 3px;border-radius:6px;font-size:0.67rem;font-weight:700;cursor:pointer;">&#x25A5; Barcode</button>
-    <button onclick="openFuelAIModal()" title="Analyze how a day's nutrition affected the next day's run" style="flex:1 1 0;min-width:88px;white-space:nowrap;background:#8e44ad;color:#fff;border:none;padding:6px 3px;border-radius:6px;font-size:0.67rem;font-weight:700;cursor:pointer;">&#x1F9E0; Fuel AI</button>
+    <button onclick="openMacroMealsModal()" title="Healthy meal ideas at 20% protein / 60% carbs / 20% fat" style="flex:1 1 0;min-width:88px;white-space:nowrap;background:#059669;color:#fff;border:none;padding:6px 3px;border-radius:6px;font-size:0.67rem;font-weight:700;cursor:pointer;">🥗 Meal Ideas</button>
+  <button onclick="openFuelAIModal()" title="Analyze how a day's nutrition affected the next day's run" style="flex:1 1 0;min-width:88px;white-space:nowrap;background:#8e44ad;color:#fff;border:none;padding:6px 3px;border-radius:6px;font-size:0.67rem;font-weight:700;cursor:pointer;">&#x1F9E0; Fuel AI</button>
     <button onclick="openCopyDayModal()" style="flex:1 1 0;min-width:88px;white-space:nowrap;background:#16a085;color:#fff;border:none;padding:6px 3px;border-radius:6px;font-size:0.67rem;font-weight:700;cursor:pointer;">&#x1F4C5; Copy Day</button>
   </div>
   <!-- Meal sections -->
@@ -2943,6 +2944,28 @@ body{
     </div>
   </div>
 </div>
+
+
+  <div id="macroMealsModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:12px;padding:20px;width:92%;max-width:480px;max-height:84vh;overflow-y:auto;box-shadow:0 4px 24px rgba(0,0,0,0.18);">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:4px;">
+        <h3 style="margin:0;font-size:1rem;color:#166534;">🥗 Healthy Meals · 20% Protein / 60% Carbs / 20% Fat</h3>
+        <button onclick="document.getElementById('macroMealsModal').style.display='none'" aria-label="Close" style="background:none;border:none;font-size:1.2rem;color:#64748b;cursor:pointer;line-height:1;">✕</button>
+      </div>
+      <div style="font-size:.72rem;color:#78716c;margin-bottom:10px;line-height:1.4;">Whole-food meals calculated so their calories break down to roughly 20% protein, 60% carbs and 20% fat — a high-carb split. Each has a real gram amount and a rough kitchen measure; small amounts (a teaspoon, a few grams) are normal since they're solved to hit the ratio exactly.</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;">
+        <button type="button" onclick="filterMacroMeals('all')" class="mm-filter-btn" data-mm-filter="all" style="flex:1 1 0;min-width:60px;background:#0f766e;color:#fff;border:none;padding:5px 4px;border-radius:6px;font-size:.68rem;font-weight:700;cursor:pointer;">All</button>
+        <button type="button" onclick="filterMacroMeals('breakfast')" class="mm-filter-btn" data-mm-filter="breakfast" style="flex:1 1 0;min-width:60px;background:#e9ecef;color:#555;border:none;padding:5px 4px;border-radius:6px;font-size:.68rem;font-weight:700;cursor:pointer;">🌅 Breakfast</button>
+        <button type="button" onclick="filterMacroMeals('lunch')" class="mm-filter-btn" data-mm-filter="lunch" style="flex:1 1 0;min-width:60px;background:#e9ecef;color:#555;border:none;padding:5px 4px;border-radius:6px;font-size:.68rem;font-weight:700;cursor:pointer;">🥗 Lunch</button>
+        <button type="button" onclick="filterMacroMeals('dinner')" class="mm-filter-btn" data-mm-filter="dinner" style="flex:1 1 0;min-width:60px;background:#e9ecef;color:#555;border:none;padding:5px 4px;border-radius:6px;font-size:.68rem;font-weight:700;cursor:pointer;">🍽️ Dinner</button>
+        <button type="button" onclick="filterMacroMeals('snack')" class="mm-filter-btn" data-mm-filter="snack" style="flex:1 1 0;min-width:60px;background:#e9ecef;color:#555;border:none;padding:5px 4px;border-radius:6px;font-size:.68rem;font-weight:700;cursor:pointer;">🍎 Snack</button>
+      </div>
+      <div id="macroMealsList"></div>
+      <div style="border-top:1px solid #f0f0f0;margin-top:10px;padding-top:10px;">
+        <button type="button" onclick="applyTodayMacroRatio(20,60,20)" style="width:100%;background:#0f766e;color:#fff;border:none;padding:8px;border-radius:6px;font-size:.78rem;font-weight:700;cursor:pointer;">🎯 Also set today's Daily Macro Ratio target to 20/60/20</button>
+      </div>
+    </div>
+  </div>
 
 <!-- Barcode Scanner Modal -->
 <div id="barcodeScannerModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.62);z-index:9250;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;" onclick="if(event.target===this)closeBarcodeScanner()">
