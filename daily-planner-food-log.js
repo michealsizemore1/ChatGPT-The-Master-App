@@ -56,6 +56,7 @@ function openMacroMealsModal(){
   modal.style.display='flex';
   window._macroMealsFilter='all';
   renderMacroMealsList();
+  renderPersonalMacroMeals();
 }
 function filterMacroMeals(type){
   window._macroMealsFilter=type;
@@ -99,6 +100,84 @@ function applyTodayMacroRatio(prot,carbs,fat){
   if(typeof updateMacroTotals==='function')updateMacroTotals();
   if(typeof v26Toast==='function')v26Toast('Daily Macro Ratio set to '+prot+'/'+carbs+'/'+fat+' for today');
 }
+// ── Personal-list macro-meal matches (built from Favorites + Healthy 7+) ──
+function personalFoodPool(){
+  var favs=getFavorites()||[],healthy=getHealthyFoods()||[];
+  var byName={};
+  healthy.forEach(function(f){if(f&&f.name)byName[String(f.name).trim().toLowerCase()]=f;});
+  favs.forEach(function(f){if(f&&f.name)byName[String(f.name).trim().toLowerCase()]=f;});
+  return Object.keys(byName).map(function(k){return byName[k];}).filter(function(f){
+    return Number.isFinite(f.cal)&&f.cal>0&&Number.isFinite(f.prot)&&Number.isFinite(f.carbs)&&Number.isFinite(f.fat);
+  });
+}
+function macroMealDeviation(prot,carbs,fat,kcal){
+  if(!(kcal>0))return Infinity;
+  var p=prot*4/kcal*100,c=carbs*4/kcal*100,f=fat*9/kcal*100;
+  return Math.abs(p-20)+Math.abs(c-60)+Math.abs(f-20);
+}
+function buildPersonalMacroMeals(){
+  var pool=personalFoodPool(),results=[];
+  pool.forEach(function(a){
+    if(a.cal<150||a.cal>900)return;
+    results.push({items:[a],kcal:a.cal,prot:a.prot,carbs:a.carbs,fat:a.fat,dev:macroMealDeviation(a.prot,a.carbs,a.fat,a.cal)});
+  });
+  for(var i=0;i<pool.length;i++){
+    for(var j=i+1;j<pool.length;j++){
+      var a=pool[i],b=pool[j],kcal=a.cal+b.cal,prot=a.prot+b.prot,carbs=a.carbs+b.carbs,fat=a.fat+b.fat;
+      if(kcal<150||kcal>900)continue;
+      results.push({items:[a,b],kcal:kcal,prot:prot,carbs:carbs,fat:fat,dev:macroMealDeviation(prot,carbs,fat,kcal)});
+    }
+  }
+  results.sort(function(x,y){return x.dev-y.dev;});
+  var seen={},top=[];
+  for(var k=0;k<results.length&&top.length<6;k++){
+    var r=results[k],key=r.items.map(function(it){return String(it.name).toLowerCase();}).sort().join('|');
+    if(seen[key])continue;
+    seen[key]=true;top.push(r);
+  }
+  return top;
+}
+function renderPersonalMacroMeals(){
+  var wrap=document.getElementById('macroMealsPersonalList');if(!wrap)return;
+  var matches=buildPersonalMacroMeals();
+  window._personalMacroMeals=matches;
+  if(!matches.length){
+    wrap.innerHTML='<div style="font-size:.76rem;color:#78716c;padding:2px 0 14px;">No close matches yet — log a few foods or star some as Favorites (⭐) and this section will build 20/60/20 combinations from your own foods automatically.</div>';
+    return;
+  }
+  var mealOptions=MEALS.map(function(m){return '<option value="'+m+'">'+(MEAL_LABELS[m]||m).replace(/^[^\w]+/,'')+'</option>';}).join('');
+  wrap.innerHTML=matches.map(function(m,idx){
+    var kcal=Math.round(m.kcal);
+    var p=Math.round(m.prot*4/m.kcal*100),c=Math.round(m.carbs*4/m.kcal*100),f=Math.round(m.fat*9/m.kcal*100);
+    var itemsHtml=m.items.map(function(it){return '<li style="margin-bottom:2px;">'+it.name+' — '+(it.servingLabel||'1 serving')+'</li>';}).join('');
+    return '<div style="border:1px solid #bbf7d0;border-radius:9px;padding:10px 11px;margin-bottom:8px;background:#f0fdf4;">'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:4px;">'
+      +'<strong style="font-size:.84rem;color:#0f172a;">⭐ '+m.items.map(function(it){return it.name;}).join(' + ')+'</strong>'
+      +'<span style="font-size:.68rem;color:#64748b;white-space:nowrap;">'+kcal+' kcal</span>'
+      +'</div>'
+      +'<ul style="margin:0 0 6px 18px;padding:0;font-size:.76rem;color:#334155;">'+itemsHtml+'</ul>'
+      +'<div style="font-size:.68rem;color:#15803d;font-weight:700;margin-bottom:7px;">P '+Math.round(m.prot)+'g ('+p+'%) · C '+Math.round(m.carbs)+'g ('+c+'%) · F '+(Math.round(m.fat*10)/10)+'g ('+f+'%)</div>'
+      +'<div style="display:flex;gap:5px;">'
+      +'<select id="mm-personal-meal-'+idx+'" style="flex:1;border:1px solid #ddd;border-radius:6px;padding:5px 4px;font-size:.72rem;">'+mealOptions+'</select>'
+      +'<button type="button" onclick="logPersonalMacroMeal('+idx+')" style="flex:1.4;background:#15803d;color:#fff;border:none;padding:6px;border-radius:6px;font-size:.72rem;font-weight:700;cursor:pointer;">+ Log</button>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+function logPersonalMacroMeal(idx){
+  var m=(window._personalMacroMeals||[])[idx];if(!m)return;
+  var sel=document.getElementById('mm-personal-meal-'+idx);
+  var meal=(sel&&sel.value)||'snack';
+  if(MEALS.indexOf(meal)<0)meal='snack';
+  if(!window._foodLog)window._foodLog=[];
+  m.items.forEach(function(it,i){
+    window._foodLog.push({id:'f'+Date.now()+'_p'+i,meal:meal,name:it.name,cal:it.cal,prot:it.prot,fat:it.fat,carbs:it.carbs,servings:1,source:'macro-meal-personal',servingLabel:it.servingLabel||'1 serving'});
+  });
+  _setMealOpen(meal,true);renderFoodItems();save();
+  document.getElementById('macroMealsModal').style.display='none';
+  if(typeof v26Toast==='function')v26Toast((MEAL_LABELS[meal]||'')+' logged: '+m.items.map(function(it){return it.name;}).join(' + '));
+}
+
 
 
 function servingUnitFromLabel(label){
