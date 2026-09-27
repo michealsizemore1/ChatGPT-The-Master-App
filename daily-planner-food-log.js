@@ -1,4 +1,4 @@
-Page_DownPage_DownPage_DownPage_DownPage_DownPage_DownPage_DownPage_DownPage_DownPage_DownPage_Down// ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
 // FOOD LOG SYSTEM
 // ══════════════════════════════════════════════════════
 if(!window._foodLog)window._foodLog=[];
