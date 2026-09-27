@@ -142,7 +142,7 @@ function formatLeaderValue(athlete,labels){
  return parts.length?parts.join(', '):stats.slice(0,3).join(' · ');
 }
 
-const teams=[
+let teams=[
  {rank:1,name:'Texas',abbr:'TEX',espnId:'251',record:'3–0',prev:1,points:1706,pf:'—',pa:'—',ypg:'—',color:'#bf5700'},
  {rank:2,name:'Georgia',abbr:'UGA',espnId:'61',record:'3–0',prev:2,points:1580,pf:'—',pa:'—',ypg:'—',color:'#ba0c2f'},
  {rank:3,name:'Notre Dame',abbr:'ND',espnId:'87',record:'3–0',prev:3,points:1517,pf:'—',pa:'—',ypg:'—',color:'#0c2340'},
@@ -169,6 +169,9 @@ const teams=[
  {rank:24,name:'Mississippi State',abbr:'MSST',espnId:'344',record:'3–0',prev:null,points:179,pf:'—',pa:'—',ypg:'—',color:'#660000'},
  {rank:25,name:'Houston',abbr:'HOU',espnId:'248',record:'2–1',prev:22,points:127,pf:'—',pa:'—',ypg:'—',color:'#c8102e'}
 ];
+
+const KNOWN_COLORS=Object.fromEntries(teams.map(t=>[t.espnId,t.color]));
+let pollDateUpper='SEPTEMBER 8',pollDateLong='September 8, 2026';
 // Every other FBS team -- i.e. the full 138-team FBS field minus the 25 teams already in the
 // poll above. Used by the "All Teams" tab, shown as a single ranked list continuing after the
 // AP Top 25 (No. 26 onward). The AP poll itself doesn't rank beyond 25, so `rank` here comes
@@ -373,6 +376,30 @@ function filteredTeams(){return teams.filter(t=>t.name.toLowerCase().includes(st
 function filteredTeamsByRank(){return teams.filter(t=>t.name.toLowerCase().includes(state.query.toLowerCase())).sort((a,b)=>a.rank-b.rank)}
 const gameStateOrder={in:0,pre:1,post:2};
 function visibleGames(){return state.liveGames.filter(game=>game.teams.some(team=>rankedIds.has(team.id))).sort((a,b)=>(gameStateOrder[a.state]??3)-(gameStateOrder[b.state]??3)||new Date(a.date)-new Date(b.date))}
+async function loadRankings(){
+ try{
+  const res=await fetch('https://site.api.espn.com/apis/site/v2/sports/football/college-football/rankings',{cache:'no-store'});
+  const data=await res.json();
+  const ap=(data.rankings||[]).find(r=>r.name==='AP Top 25');
+  if(ap&&ap.ranks&&ap.ranks.length){
+   teams=ap.ranks.slice().sort((a,b)=>a.current-b.current).map(r=>({
+    rank:r.current,
+    name:r.team.nickname||r.team.name||r.team.location,
+    abbr:r.team.abbreviation,
+    espnId:String(r.team.id),
+    record:(r.recordSummary||'—').replace('-','–'),
+    prev:r.previous,
+    points:r.points,
+    pf:'—',pa:'—',ypg:'—',
+    color:KNOWN_COLORS[String(r.team.id)]||'#3a3a3a'
+   }));
+   const pd=new Date(ap.date);
+   pollDateUpper=pd.toLocaleDateString('en-US',{month:'long',day:'numeric'}).toUpperCase();
+   pollDateLong=pd.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+   render();
+  }
+ }catch(e){}
+}
 function currentRecords(){const result={};state.weeklyGames.forEach(game=>game.teams.forEach(team=>{if(team.record)result[team.id]=team.record.replace('-','–')}));return result}
 function metricSummary(name){const hint=name.toLowerCase().split(' ')[0];const rows=Object.entries(state.metricValues).map(([abbr,values])=>{const match=Object.entries(values).find(([key])=>key.includes(hint));return match?`${abbr} ${match[1]}`:null}).filter(Boolean).slice(0,3);return rows.length?rows.join(' · '):'Waiting for season statistics'}
 
@@ -650,7 +677,7 @@ function renderScoreStrip(){
  return `<section class="score-strip anchor" id="scores" aria-label="Top 25 scoreboard">${rows}${orphanLiveCenter}</section>`;
 }
 function renderHero(){
- return `<section class="hero"><div><p class="eyebrow">2026 AP TOP 25 POLL · SEPTEMBER 8</p><h1>The pulse of the<br><em>Top 25.</em></h1><p class="lede">The complete AP Top 25, poll points and team snapshots—all in one Saturday dashboard.</p></div></section>`;
+ return `<section class="hero"><div><p class="eyebrow">2026 AP TOP 25 POLL · ${pollDateUpper}</p><h1>The pulse of the<br><em>Top 25.</em></h1><p class="lede">The complete AP Top 25, poll points and team snapshots—all in one Saturday dashboard.</p></div></section>`;
 }
 function renderLiveCenter(){
  if(!state.selectedGameId&&!state.detailsLoading)return '';
@@ -937,7 +964,7 @@ function renderPlayoffs(){
  </section>`;
 }
 function renderFooter(){
- return `<footer><span>TOP 25</span><p>2026 AP Top 25 rankings · Poll released September 8, 2026</p><small>Built for My Life Master App</small></footer>`;
+ return `<footer><span>TOP 25</span><p>2026 AP Top 25 rankings · Poll released ${pollDateLong}</p><small>Built for My Life Master App</small></footer>`;
 }
 // Each tab renders its own self-contained page -- nothing from another tab (in particular,
 // no score content) ever appears alongside it.
@@ -1004,12 +1031,14 @@ loadScores();
 loadAllSchedules();
 loadWeek();
 loadTeamStats();
+loadRankings();
 loadPlayerLeaders();
 setInterval(loadScores,120000);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')loadScores()});
 setInterval(loadWeek,120000);
 setInterval(()=>{if(state.selectedGameId)loadGameDetails()},120000);
 setInterval(loadTeamStats,300000);
+setInterval(loadRankings,1800000);
 setInterval(loadPlayerLeaders,1800000);
 setInterval(livePollTick,90000);
 </script>
