@@ -7,6 +7,99 @@ const MEALS=['breakfast','lunch','dinner','snack','liquids','sports'];
 const MEAL_LABELS={breakfast:'🌅 Breakfast',lunch:'🥗 Lunch',dinner:'🍽️ Dinner',snack:'🍎 Snacks',liquids:'💧 Liquids',sports:'💪 Sports Nutrition'};
 const MEAL_HINTS={breakfast:'Food name',lunch:'Food name',dinner:'Food name',snack:'Snack name',liquids:'Drink name',sports:'Sports fuel / supplement'};
 const SERVING_UNITS=['serving','cup','tablespoon','teaspoon','fluid ounce','ounce','gram','milligram','milliliter','liter','piece','item','slice','scoop','packet','bar','bottle','can','container','handful'];
+// ── Macro-Target Meal Suggestions (20% protein / 60% carbs / 20% fat) ──
+const MACRO_MEALS=[
+  {id:'mm1',mealType:'breakfast',label:'Oats with Egg Whites & Almond Butter',kcal:402,protein:20,carbs:60,fat:9,items:[
+    {name:'Rolled oats (dry)',amount:'89g (~1 cup)',cal:351,prot:15,carbs:59,fat:6.1},
+    {name:'Liquid egg whites',amount:'37g (~2½ tbsp)',cal:18,prot:4,carbs:0.3,fat:0.1},
+    {name:'Almond butter',amount:'5g (~1 tsp)',cal:33,prot:1.1,carbs:1,fat:2.8}
+  ]},
+  {id:'mm2',mealType:'breakfast',label:'Peanut Butter Banana Toast',kcal:422,protein:21,carbs:63,fat:9.4,items:[
+    {name:'Whole wheat bread',amount:'144g (~2½ slices)',cal:355,prot:18.7,carbs:59,fat:4.9},
+    {name:'Peanut butter',amount:'9g (~2 tsp)',cal:57,prot:2.3,carbs:1.8,fat:4.5},
+    {name:'Banana',amount:'10g (a couple thin slices)',cal:10,prot:0.1,carbs:2.3,fat:0}
+  ]},
+  {id:'mm3',mealType:'lunch',label:'Chicken, Rice & Olive Oil Bowl',kcal:550,protein:27,carbs:82,fat:12.3,items:[
+    {name:'Brown rice (cooked)',amount:'351g (~1¾ cups)',cal:395,prot:9.1,carbs:82.5,fat:3.2},
+    {name:'Chicken breast (cooked)',amount:'59g (~2 oz)',cal:92,prot:18.3,carbs:0,fat:2.1},
+    {name:'Olive oil',amount:'7g (~1½ tsp)',cal:63,prot:0,carbs:0,fat:7}
+  ]},
+  {id:'mm4',mealType:'lunch',label:'Turkey, Sweet Potato & Avocado Plate',kcal:550,protein:27,carbs:83,fat:12.2,items:[
+    {name:'Sweet potato (baked)',amount:'368g (~1½ medium)',cal:339,prot:7.4,carbs:76.2,fat:0.6},
+    {name:'Turkey breast (cooked)',amount:'62g (~2 oz)',cal:80,prot:18.6,carbs:0,fat:0.6},
+    {name:'Avocado',amount:'75g (~half a medium)',cal:131,prot:1.5,carbs:6.4,fat:11}
+  ]},
+  {id:'mm5',mealType:'dinner',label:'Salmon, Quinoa & Broccoli',kcal:600,protein:30,carbs:90,fat:13.3,items:[
+    {name:'Quinoa (cooked)',amount:'335g (~1⅔ cups)',cal:402,prot:14.7,carbs:71.4,fat:6.4},
+    {name:'Salmon (cooked)',amount:'44g (~1½ oz)',cal:89,prot:9,carbs:0,fat:5.9},
+    {name:'Broccoli (cooked)',amount:'260g (~2 cups)',cal:109,prot:6.2,carbs:18.7,fat:1}
+  ]},
+  {id:'mm6',mealType:'dinner',label:'Lentil & Rice Bowl',kcal:550,protein:28,carbs:83,fat:12.2,items:[
+    {name:'Brown rice (cooked)',amount:'121g (~0.6 cup)',cal:136,prot:3.1,carbs:28.4,fat:1.1},
+    {name:'Lentils (cooked)',amount:'271g (~1⅓ cups)',cal:324,prot:24.4,carbs:54.2,fat:1.1},
+    {name:'Olive oil',amount:'10g (~2 tsp)',cal:90,prot:0,carbs:0,fat:10}
+  ]},
+  {id:'mm7',mealType:'snack',label:'Apple, Cottage Cheese & Almonds',kcal:223,protein:11,carbs:33,fat:5.1,items:[
+    {name:'Apple',amount:'212g (~1 large)',cal:123,prot:0.6,carbs:29.3,fat:0.4},
+    {name:'Nonfat cottage cheese',amount:'69g (~1/3 cup)',cal:44,prot:8.6,carbs:1.9,fat:0.2},
+    {name:'Almonds',amount:'9g (~7 almonds)',cal:56,prot:1.9,carbs:1.9,fat:4.5}
+  ]},
+  {id:'mm8',mealType:'snack',label:'Blueberries, Cottage Cheese & Walnuts',kcal:218,protein:11,carbs:33,fat:4.7,items:[
+    {name:'Blueberries',amount:'209g (~1⅓ cups)',cal:133,prot:1.5,carbs:30.3,fat:0.6},
+    {name:'Nonfat cottage cheese',amount:'69g (~1/3 cup)',cal:44,prot:8.6,carbs:1.9,fat:0.2},
+    {name:'Walnuts',amount:'6g (~1½ walnuts, chopped)',cal:42,prot:0.9,carbs:0.8,fat:3.9}
+  ]}
+];
+function macroMealPct(m){return {p:Math.round(m.protein*4/m.kcal*100),c:Math.round(m.carbs*4/m.kcal*100),f:Math.round(m.fat*9/m.kcal*100)};}
+function openMacroMealsModal(){
+  var modal=document.getElementById('macroMealsModal');if(!modal)return;
+  modal.style.display='flex';
+  window._macroMealsFilter='all';
+  renderMacroMealsList();
+}
+function filterMacroMeals(type){
+  window._macroMealsFilter=type;
+  document.querySelectorAll('.mm-filter-btn').forEach(function(btn){
+    var active=btn.dataset.mmFilter===type;
+    btn.style.background=active?'#0f766e':'#e9ecef';
+    btn.style.color=active?'#fff':'#555';
+  });
+  renderMacroMealsList();
+}
+function renderMacroMealsList(){
+  var wrap=document.getElementById('macroMealsList');if(!wrap)return;
+  var filter=window._macroMealsFilter||'all';
+  var list=MACRO_MEALS.filter(function(m){return filter==='all'||m.mealType===filter;});
+  wrap.innerHTML=list.map(function(m){
+    var pct=macroMealPct(m);
+    var itemsHtml=m.items.map(function(it){return '<li style="margin-bottom:2px;">'+it.name+' — '+it.amount+'</li>';}).join('');
+    return '<div style="border:1px solid #e2e8f0;border-radius:9px;padding:10px 11px;margin-bottom:8px;background:#f8fafc;">'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:4px;">'
+      +'<strong style="font-size:.84rem;color:#0f172a;">'+(MEAL_LABELS[m.mealType]||'')+' · '+m.label+'</strong>'
+      +'<span style="font-size:.68rem;color:#64748b;white-space:nowrap;">'+m.kcal+' kcal</span>'
+      +'</div>'
+      +'<ul style="margin:0 0 6px 18px;padding:0;font-size:.76rem;color:#334155;">'+itemsHtml+'</ul>'
+      +'<div style="font-size:.68rem;color:#0f766e;font-weight:700;margin-bottom:7px;">P '+m.protein+'g ('+pct.p+'%) · C '+m.carbs+'g ('+pct.c+'%) · F '+m.fat+'g ('+pct.f+'%)</div>'
+      +'<button type="button" onclick="logMacroMeal(\''+m.id+'\')" style="width:100%;background:#16a085;color:#fff;border:none;padding:6px;border-radius:6px;font-size:.72rem;font-weight:700;cursor:pointer;">+ Log to today\'s '+(MEAL_LABELS[m.mealType]||m.mealType)+'</button>'
+      +'</div>';
+  }).join('')||'<div style="font-size:.78rem;color:#78716c;padding:10px 0;">No meals in this category.</div>';
+}
+function logMacroMeal(id){
+  var m=MACRO_MEALS.find(function(x){return x.id===id;});if(!m)return;
+  if(!window._foodLog)window._foodLog=[];
+  m.items.forEach(function(it,i){
+    window._foodLog.push({id:'f'+Date.now()+'_'+i,meal:m.mealType,name:it.name,cal:it.cal,prot:it.prot,fat:it.fat,carbs:it.carbs,servings:1,source:'macro-meal',servingLabel:it.amount});
+  });
+  _setMealOpen(m.mealType,true);renderFoodItems();save();
+  document.getElementById('macroMealsModal').style.display='none';
+  if(typeof v26Toast==='function')v26Toast((MEAL_LABELS[m.mealType]||'')+' logged: '+m.label);
+}
+function applyTodayMacroRatio(prot,carbs,fat){
+  localStorage.setItem(macroRatioStorageKey(dk(today)),JSON.stringify({enabled:true,prot:prot,carbs:carbs,fat:fat}));
+  if(typeof updateMacroTotals==='function')updateMacroTotals();
+  if(typeof v26Toast==='function')v26Toast('Daily Macro Ratio set to '+prot+'/'+carbs+'/'+fat+' for today');
+}
+
 
 function servingUnitFromLabel(label){
   var text=String(label||'').toLowerCase();
