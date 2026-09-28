@@ -2098,6 +2098,11 @@ body{
   <!-- Add/Edit form -->
   <div id="addActivityForm" style="display:none;background:#fff8f0;border:1px solid #ffd5a8;border-radius:10px;padding:14px;margin-bottom:14px;">
     <div style="font-size:0.85rem;font-weight:700;color:#e67e22;margin-bottom:10px;" id="actFormTitle">&#x2795; Add Activity</div>
+    <div style="margin-bottom:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <button type="button" onclick="document.getElementById('actScreenshotInput').click()" id="actScreenshotBtn" style="background:#8e44ad;color:#fff;border:none;padding:7px 14px;border-radius:6px;cursor:pointer;font-size:0.82rem;font-weight:600;">📷 Scan Screenshot</button>
+      <input type="file" id="actScreenshotInput" accept="image/png,image/jpeg,image/webp,image/gif" style="display:none;" onchange="handleActivityScreenshotFile(event)">
+      <span id="actScreenshotStatus" style="font-size:0.78rem;color:#666;"></span>
+    </div>
     <div class="act-form-grid">
       <div><label class="act-label">Date</label><input type="date" id="actDate" class="act-input"></div>
       <div><label class="act-label">Type</label>
@@ -2124,7 +2129,7 @@ body{
       <div><label class="act-label">Run Map / Route Link</label><input type="url" id="actRouteUrl" class="act-input" inputmode="url" placeholder="Garmin, Strava, Google Maps, etc."></div>
       <div><label class="act-label">Source</label>
         <select id="actSource" class="act-input">
-          <option value="manual">Manual</option><option value="garmin">Garmin</option><option value="stryd">Stryd</option>
+          <option value="manual">Manual</option><option value="garmin">Garmin</option><option value="stryd">Stryd</option><option value="screenshot">Screenshot (AI)</option>
         </select>
       </div>
     </div>
