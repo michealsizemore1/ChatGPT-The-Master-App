@@ -296,6 +296,12 @@ function computeActAggregatesFromSplits(splits){
 function fillActivityFormFromScan(parts, statusEl, splits){
   var f=document.getElementById('addActivityForm');
   if(f&&f.style.display==='none'){toggleAddActivity();}
+  var isNewActivity=!editingActivityId;
+  function fillIfBlank(id,val){
+    if(val===''||val==null)return;
+    var el=document.getElementById(id);
+    if(el&&!String(el.value||'').trim())el.value=val;
+  }
   var type=parts[0], title=parts[1], date=parts[2], distance=parts[3], duration=parts[4], pace=parts[5], hr=parts[6], cadence=parts[7], calories=parts[8], elevGain=parts[9];
   if(splits&&splits.length){
     var agg=computeActAggregatesFromSplits(splits);
@@ -308,20 +314,20 @@ function fillActivityFormFromScan(parts, statusEl, splits){
     }
   }
   var VALID_TYPES=['Run','Ride','Walk','Swim','Strength','Rest Day','Other'];
-  if(type&&VALID_TYPES.indexOf(type)!==-1){
+  if(isNewActivity&&type&&VALID_TYPES.indexOf(type)!==-1){
     document.getElementById('actType').value=type;
     if(typeof handleActTypeChange==='function')handleActTypeChange();
   }
-  if(title)document.getElementById('actTitle').value=title;
-  if(date&&/^\d{4}-\d{2}-\d{2}$/.test(date))document.getElementById('actDate').value=date;
-  if(distance&&!isNaN(parseFloat(distance)))document.getElementById('actDistance').value=parseFloat(distance);
-  if(duration)document.getElementById('actDuration').value=duration;
-  if(pace)document.getElementById('actPace').value=pace;
-  if(hr&&!isNaN(parseFloat(hr)))document.getElementById('actHR').value=parseFloat(hr);
-  if(cadence&&!isNaN(parseFloat(cadence)))document.getElementById('actCadence').value=parseFloat(cadence);
-  if(calories&&!isNaN(parseFloat(calories)))document.getElementById('actCalories').value=parseFloat(calories);
-  if(elevGain&&!isNaN(parseFloat(elevGain)))document.getElementById('actElevGain').value=parseFloat(elevGain);
-  document.getElementById('actSource').value='screenshot';
+  fillIfBlank('actTitle',title);
+  if(date&&/^\d{4}-\d{2}-\d{2}$/.test(date))fillIfBlank('actDate',date);
+  if(distance&&!isNaN(parseFloat(distance)))fillIfBlank('actDistance',parseFloat(distance));
+  fillIfBlank('actDuration',duration);
+  fillIfBlank('actPace',pace);
+  if(hr&&!isNaN(parseFloat(hr)))fillIfBlank('actHR',parseFloat(hr));
+  if(cadence&&!isNaN(parseFloat(cadence)))fillIfBlank('actCadence',parseFloat(cadence));
+  if(calories&&!isNaN(parseFloat(calories)))fillIfBlank('actCalories',parseFloat(calories));
+  if(elevGain&&!isNaN(parseFloat(elevGain)))fillIfBlank('actElevGain',parseFloat(elevGain));
+  if(isNewActivity)document.getElementById('actSource').value='screenshot';
   if(splits&&splits.length){
     var MI_W=5, PACE_W=7, ELEV_W=6, HR_W=5;
     var pad=function(s,w,left){s=String(s==null?'':s);return left?(s+Array(Math.max(0,w-s.length+1)).join(' ')):(Array(Math.max(0,w-s.length+1)).join(' ')+s);};
@@ -340,7 +346,9 @@ function fillActivityFormFromScan(parts, statusEl, splits){
   }
   if(statusEl){
     statusEl.style.color='#166534';
-    statusEl.textContent=(splits&&splits.length)?('\u2713 Filled from screenshot \u2014 '+splits.length+' mile splits added to notes, please review before saving.'):'\u2713 Filled from screenshot \u2014 please review before saving.';
+    var splitsNote=(splits&&splits.length)?(splits.length+' mile splits added to notes, '):'';
+    var preservedNote=isNewActivity?'':'existing fields left as-is, ';
+    statusEl.textContent='\u2713 Filled from screenshot \u2014 '+splitsNote+preservedNote+'please review before saving.';
   }
   if(typeof v26Toast==='function')v26Toast('Activity details filled from screenshot \u2014 review and save');
 }
