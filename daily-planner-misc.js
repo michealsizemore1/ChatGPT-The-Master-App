@@ -280,14 +280,15 @@ function fillActivityFormFromScan(parts, statusEl, splits){
   if(elevGain&&!isNaN(parseFloat(elevGain)))document.getElementById('actElevGain').value=parseFloat(elevGain);
   document.getElementById('actSource').value='screenshot';
   if(splits&&splits.length){
+    var MI_W=5, PACE_W=7, ELEV_W=6, HR_W=5;
+    var pad=function(s,w,left){s=String(s==null?'':s);return left?(s+Array(Math.max(0,w-s.length+1)).join(' ')):(Array(Math.max(0,w-s.length+1)).join(' ')+s);};
+    var headerRow=pad('Mi',MI_W,true)+pad('Pace',PACE_W,true)+pad('Elev',ELEV_W,false)+pad('HR',HR_W,false);
     var noteLines=splits.map(function(s){
-      var bits=['Mi '+s.mile+':'];
-      if(s.pace)bits.push(s.pace+'/mi');
-      if(s.elev){var e=parseFloat(s.elev);bits.push((!isNaN(e)&&e>0?'+':'')+s.elev+' ft');}
-      if(s.hr)bits.push('HR '+s.hr);
-      return bits.join(' ');
+      var elevNum=parseFloat(s.elev);
+      var elevDisplay=isNaN(elevNum)?(s.elev||''):((elevNum>0?'+':'')+elevNum);
+      return pad(s.mile,MI_W,true)+pad(s.pace,PACE_W,true)+pad(elevDisplay,ELEV_W,false)+pad(s.hr,HR_W,false);
     });
-    var splitsText='Mile splits:\n'+noteLines.join('\n');
+    var splitsText='Mile splits:\n'+headerRow+'\n'+noteLines.join('\n');
     var notesEl=document.getElementById('actNotes');
     if(notesEl){
       var existing=notesEl.value.trim();
