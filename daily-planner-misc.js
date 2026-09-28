@@ -176,6 +176,186 @@ function toggleAddActivity(){
   setTimeout(()=>document.getElementById('actTitle').focus(),50);
 }
 function cancelAddActivity(){document.getElementById('addActivityForm').style.display='none';editingActivityId=null;}
+function handleActivityScreenshotFile(event){
+  var file=(event.target.files||[])[0];
+  event.target.value='';
+  if(!file)return;
+  var key=journalAIKey();
+  if(!key){alert('Please enter your AI key in Settings first.');return;}
+  var okTypes=['image/png','image/jpeg','image/webp','image/gif'];
+  if(!file.type||okTypes.indexOf(file.type)===-1){
+    alert('Please choose a PNG, JPEG, WEBP, or GIF screenshot.');return;
+  }
+  var statusEl=document.getElementById('actScreenshotStatus');
+  if(statusEl){statusEl.style.color='#666';statusEl.textContent='\u23F3 Reading image...';}
+  var reader=new FileReader();
+  reader.onload=function(){
+    var dataUrl=String(reader.result||'');
+    var comma=dataUrl.indexOf(',');
+    var base64=comma!==-1?dataUrl.slice(comma+1):'';
+    if(!base64){
+      if(statusEl){statusEl.style.color='#e74c3c';statusEl.textContent='Could not read that image.';}
+      return;
+    }
+    analyzeActivityScreenshot(base64, file.type, statusEl);
+  };
+  reader.onerror=function(){
+    if(statusEl){statusEl.style.color='#e74c3c';statusEl.textContent='Could not read that image.';}
+  };
+  reader.readAsDataURL(file);
+}
+
+function analyzeActivityScreenshot(base64, mediaType, statusEl){
+  var key=journalAIKey();
+  if(statusEl){statusEl.style.color='#666';statusEl.textContent='\u23F3 Analyzing screenshot...';}
+  var prompt='This is a screenshot related to a workout/run from an app like Strava, Garmin, Apple Watch, or Nike Run Club.\n'
+    +'It may be an overall summary card, OR a per-mile/per-km SPLITS table (columns like Mi/Km, Pace, Elev, HR).\n'
+    +'Respond with plain text only, no markdown, in exactly this structure:\n'
+    +'Line 1: one pipe-delimited summary line in this exact format:\n'
+    +'TYPE|TITLE|DATE|DISTANCE|DURATION|PACE|HR|CADENCE|CALORIES|ELEVGAIN\n'
+    +'Then, ONLY if the screenshot is a splits table, one additional line per row using this format:\n'
+    +'SPLIT|<mile number as printed, e.g. 1 or 0.1>|<pace MM:SS>|<elevation change, signed feet or 0>|<HR bpm or blank>\n'
+    +'Summary line field rules \u2014 use ONLY a value that is PRINTED directly on the screenshot. Never calculate, total, average, or otherwise derive a summary value yourself (a separate process computes totals from the SPLIT rows when needed) and never guess a date. If a field is not printed as its own value on the screenshot, return "" for it exactly:\n'
+    +'TYPE: one of Run, Ride, Walk, Swim, Strength, Other (best guess from icons/labels; default Run if unclear)\n'
+    +'TITLE: short activity name/title if printed, else ""\n'
+    +'DATE: YYYY-MM-DD only if an actual date is printed on the screenshot itself, else ""\n'
+    +'DISTANCE: number only, in MILES (convert from km by multiplying by 0.621371, round to 2 decimals), only if printed as its own overall total, else ""\n'
+    +'DURATION: total moving/elapsed time as MM:SS or H:MM:SS, only if printed as its own overall total, else ""\n'
+    +'PACE: overall average pace as MM:SS per mile (convert from per-km pace by dividing by 0.621371), only if printed as its own overall total, else ""\n'
+    +'HR: average heart rate in bpm, number only, only if printed as its own overall total, else ""\n'
+    +'CADENCE: average cadence in steps per minute, number only, else ""\n'
+    +'CALORIES: number only, else ""\n'
+    +'ELEVGAIN: elevation gain in FEET (convert from meters by multiplying by 3.28084, round to whole number), only if printed as its own overall total, else ""\n'
+    +'SPLIT row rules: include one SPLIT line per row of the table, in the order shown, using the exact mile/km label as printed (e.g. "1", "0.1"). Omit the SPLIT lines entirely if this is not a splits table.';
+  fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'x-api-key':key,'anthropic-version':'2023-06-01','content-type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:2000,messages:[{role:'user',content:[
+      {type:'image',source:{type:'base64',media_type:mediaType,data:base64}},
+      {type:'text',text:prompt}
+    ]}]})
+  }).then(function(r){return r.json();}).then(function(data){
+    if(data.error){
+      if(statusEl){statusEl.style.color='#e74c3c';statusEl.textContent='AI error: '+(data.error.message||'request failed');}
+      return;
+    }
+    var text=(data.content&&data.content[0]&&data.content[0].text)||'';
+    var lines=text.split('\n').map(function(l){return l.trim();}).filter(function(l){return l;});
+    var summaryLine=lines.filter(function(l){return l.indexOf('|')!==-1&&l.slice(0,6)!=='SPLIT|';})[0];
+    if(!summaryLine){
+      if(statusEl){statusEl.style.color='#e74c3c';statusEl.textContent='Could not read stats from that screenshot.';}
+      return;
+    }
+    var parts=summaryLine.split('|').map(function(p){return p.trim();});
+    while(parts.length<10)parts.push('');
+    var splitLines=lines.filter(function(l){return l.slice(0,6)==='SPLIT|';});
+    var splits=splitLines.map(function(l){
+      var sp=l.split('|').map(function(p){return p.trim();});
+      return {mile:sp[1]||'',pace:sp[2]||'',elev:sp[3]||'',hr:sp[4]||''};
+    });
+    fillActivityFormFromScan(parts, statusEl, splits);
+  }).catch(function(err){
+    if(statusEl){statusEl.style.color='#e74c3c';statusEl.textContent='Could not analyze screenshot: '+err.message;}
+  });
+}
+
+function parseActPaceToSeconds(paceStr){
+  var m=String(paceStr||'').trim().match(/^(\d+):(\d{2})$/);
+  if(!m)return null;
+  return parseInt(m[1],10)*60+parseInt(m[2],10);
+}
+
+function computeActAggregatesFromSplits(splits){
+  if(!splits||!splits.length)return null;
+  var n=splits.length,totalDistance=0,totalSeconds=0,hrSum=0,hrCount=0,elevGainSum=0,anyPace=false;
+  splits.forEach(function(s,idx){
+    var mileLabel=String(s.mile||'').trim();
+    var mileNum=parseFloat(mileLabel);
+    var isLast=idx===n-1;
+    var segDistance=(isLast&&mileLabel.indexOf('.')!==-1&&!isNaN(mileNum)&&mileNum<1)?mileNum:1;
+    totalDistance+=segDistance;
+    var paceSec=parseActPaceToSeconds(s.pace);
+    if(paceSec!=null){totalSeconds+=paceSec*segDistance;anyPace=true;}
+    var hrNum=parseFloat(s.hr);
+    if(!isNaN(hrNum)){hrSum+=hrNum;hrCount++;}
+    var elevNum=parseFloat(s.elev);
+    if(!isNaN(elevNum)&&elevNum>0)elevGainSum+=elevNum;
+  });
+  function fmtMinSec(sec){var m=Math.floor(sec/60),s=sec%60;return m+':'+(s<10?'0':'')+s;}
+  function fmtDurationHMS(sec){var h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60;return h>0?(h+':'+(m<10?'0':'')+m+':'+(s<10?'0':'')+s):fmtMinSec(sec);}
+  var avgPaceSec=(anyPace&&totalDistance>0)?Math.round(totalSeconds/totalDistance):null;
+  return{
+    distance:totalDistance?String(Math.round(totalDistance*100)/100):'',
+    duration:(anyPace&&totalSeconds>0)?fmtDurationHMS(Math.round(totalSeconds)):'',
+    pace:avgPaceSec!=null?fmtMinSec(avgPaceSec):'',
+    hr:hrCount?String(Math.round(hrSum/hrCount)):'',
+    elevGain:elevGainSum?String(Math.round(elevGainSum)):''
+  };
+}
+
+function fillActivityFormFromScan(parts, statusEl, splits){
+  var f=document.getElementById('addActivityForm');
+  if(f&&f.style.display==='none'){toggleAddActivity();}
+  var type=parts[0], title=parts[1], date=parts[2], distance=parts[3], duration=parts[4], pace=parts[5], hr=parts[6], cadence=parts[7], calories=parts[8], elevGain=parts[9];
+  if(splits&&splits.length){
+    var agg=computeActAggregatesFromSplits(splits);
+    if(agg){
+      if(agg.distance)distance=agg.distance;
+      if(agg.duration)duration=agg.duration;
+      if(agg.pace)pace=agg.pace;
+      if(agg.hr)hr=agg.hr;
+      if(agg.elevGain)elevGain=agg.elevGain;
+    }
+  }
+  var VALID_TYPES=['Run','Ride','Walk','Swim','Strength','Rest Day','Other'];
+  if(type&&VALID_TYPES.indexOf(type)!==-1){
+    document.getElementById('actType').value=type;
+    if(typeof handleActTypeChange==='function')handleActTypeChange();
+  }
+  if(title)document.getElementById('actTitle').value=title;
+  if(date&&/^\d{4}-\d{2}-\d{2}$/.test(date))document.getElementById('actDate').value=date;
+  if(distance&&!isNaN(parseFloat(distance)))document.getElementById('actDistance').value=parseFloat(distance);
+  if(duration)document.getElementById('actDuration').value=duration;
+  if(pace)document.getElementById('actPace').value=pace;
+  if(hr&&!isNaN(parseFloat(hr)))document.getElementById('actHR').value=parseFloat(hr);
+  if(cadence&&!isNaN(parseFloat(cadence)))document.getElementById('actCadence').value=parseFloat(cadence);
+  if(calories&&!isNaN(parseFloat(calories)))document.getElementById('actCalories').value=parseFloat(calories);
+  if(elevGain&&!isNaN(parseFloat(elevGain)))document.getElementById('actElevGain').value=parseFloat(elevGain);
+  document.getElementById('actSource').value='screenshot';
+  if(splits&&splits.length){
+    var MI_W=5, PACE_W=7, ELEV_W=6, HR_W=5;
+    var pad=function(s,w,left){s=String(s==null?'':s);return left?(s+Array(Math.max(0,w-s.length+1)).join(' ')):(Array(Math.max(0,w-s.length+1)).join(' ')+s);};
+    var headerRow=pad('Mi',MI_W,true)+pad('Pace',PACE_W,true)+pad('Elev',ELEV_W,false)+pad('HR',HR_W,false);
+    var noteLines=splits.map(function(s){
+      var elevNum=parseFloat(s.elev);
+      var elevDisplay=isNaN(elevNum)?(s.elev||''):((elevNum>0?'+':'')+elevNum);
+      return pad(s.mile,MI_W,true)+pad(s.pace,PACE_W,true)+pad(elevDisplay,ELEV_W,false)+pad(s.hr,HR_W,false);
+    });
+    var splitsText='Mile splits:\n'+headerRow+'\n'+noteLines.join('\n');
+    var notesEl=document.getElementById('actNotes');
+    if(notesEl){
+      var existing=notesEl.value.trim();
+      notesEl.value=existing?existing+'\n\n'+splitsText:splitsText;
+    }
+  }
+  if(statusEl){
+    statusEl.style.color='#166534';
+    statusEl.textContent=(splits&&splits.length)?('\u2713 Filled from screenshot \u2014 '+splits.length+' mile splits added to notes, please review before saving.'):'\u2713 Filled from screenshot \u2014 please review before saving.';
+  }
+  if(typeof v26Toast==='function')v26Toast('Activity details filled from screenshot \u2014 review and save');
+}
+
+function formatActivityNotesHtml(notes){
+  notes=String(notes||'');
+  var marker='Mile splits:';
+  var idx=notes.indexOf(marker);
+  if(idx===-1)return escHtml(notes);
+  var before=notes.slice(0,idx).replace(/\n+$/,'');
+  var splitsBlock=notes.slice(idx);
+  var beforeHtml=before?escHtml(before)+'<br><br>':'';
+  return beforeHtml+'<pre style="font-family:ui-monospace,SFMono-Regular,Consolas,\'Liberation Mono\',Menlo,monospace;font-size:0.76rem;white-space:pre;overflow-x:auto;margin:0;">'+escHtml(splitsBlock)+'</pre>';
+}
+
 function clearActForm(){
   ['actDate','actType','actTitle','actDistance','actDuration','actPace','actPower','actHR','actCadence','actCalories','actElevGain','actTemp','actHumidity','actAQI','actExecScore','actRouteUrl','actNotes','actInjuryReport'].forEach(id=>{
     const e=document.getElementById(id);if(e)e.value='';
@@ -913,7 +1093,7 @@ function renderActivities(){
       +'<div id="actBody_'+a.id+'" style="display:'+bodyDisplay+';">'
       +'<div class="act-stats">'+stats.join('')+'</div>'
       +(a.routeUrl?'<a href="'+escHtml(a.routeUrl)+'" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:5px;margin-top:8px;background:#e0f2fe;border:1px solid #7dd3fc;color:#075985;border-radius:7px;padding:6px 10px;font-size:.76rem;font-weight:800;text-decoration:none;">&#x1F5FA;&#xFE0F; Open Run Map</a>':'')
-      +(a.notes?'<div style="font-size:0.82rem;color:#666;margin-top:8px;white-space:pre-wrap;"><strong style="display:block;color:#475569;margin-bottom:2px;">Notes</strong>'+escHtml(a.notes)+'</div>':'')
+      +(a.notes?'<div style="font-size:0.82rem;color:#666;margin-top:8px;white-space:pre-wrap;"><strong style="display:block;color:#475569;margin-bottom:2px;">Notes</strong>'+formatActivityNotesHtml(a.notes)+'</div>':'')
       +(a.injuryReport?'<div style="font-size:0.82rem;color:#7f1d1d;margin-top:8px;padding:8px 10px;background:#fff7f7;border:1px solid #fecaca;border-radius:7px;white-space:pre-wrap;"><strong style="display:block;color:#b91c1c;margin-bottom:2px;">Injury Report</strong>'+escHtml(a.injuryReport)+'</div>':'')
       +'<div id="noteWrap_'+a.id+'" style="display:none;margin-top:6px;">'
       +'<textarea class="act-note-edit" id="noteTA_'+a.id+'" placeholder="Add a note...">'+escHtml(a.notes||'')+'</textarea>'

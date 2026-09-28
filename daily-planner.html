@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<!-- Build: nutrition label ingredients and aligned nutrition actions -->
+<!-- Build: deterministic split totals + monospace notes display -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-09-22-5">
+<meta name="app-build" content="2026-09-28-4">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#667eea">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,7 +16,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
 (function(){
-  var build='2026-09-22-5',checking=false;
+  var build='2026-09-28-4',checking=false;
   function checkForAppUpdate(){
     if(checking||location.protocol==='file:')return;checking=true;
     fetch(location.pathname+'?update-check='+Date.now(),{cache:'no-store'}).then(function(response){return response.text();}).then(function(html){var match=html.match(/name=["']app-build["']\s+content=["']([^"']+)/i);if(match&&match[1]!==build){location.replace(location.pathname+'?v='+encodeURIComponent(match[1]));}}).catch(function(){}).finally(function(){checking=false;});
@@ -502,7 +502,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;paddi
 .act-load-lbl{font-size:0.62rem;color:#bbb;}
 .zone-badge{display:inline-block;font-size:0.68rem;font-weight:700;padding:1px 6px;border-radius:8px;margin-left:5px;color:white;}
 .z1{background:#5dade2;}.z2{background:#58d68d;}.z3{background:#f4d03f;color:#555;}.z4{background:#e67e22;}.z5{background:#e74c3c;}
-.act-note-edit{width:100%;border:1px solid #ffd5a8;border-radius:5px;padding:5px;font-size:0.82rem;font-family:inherit;resize:vertical;min-height:40px;background:#fffdf8;outline:none;margin-top:6px;}
+.act-note-edit{width:100%;border:1px solid #ffd5a8;border-radius:5px;padding:5px;font-size:0.8rem;font-family:ui-monospace,SFMono-Regular,Consolas,'Liberation Mono',Menlo,monospace;resize:vertical;min-height:40px;background:#fffdf8;outline:none;margin-top:6px;}
 .act-journal-btn{font-size:0.72rem;padding:3px 8px;border-radius:10px;border:none;background:#667eea;color:white;cursor:pointer;white-space:nowrap;}
 .act-note-btn{font-size:0.72rem;padding:3px 8px;border-radius:10px;border:none;background:#f0f0f0;color:#555;cursor:pointer;}
 
@@ -1249,7 +1249,7 @@ body{
 @media(max-width:700px){.h2-header{display:block}.h2-header-actions{justify-content:flex-start;margin-top:10px}.h2-summary-grid{grid-template-columns:repeat(2,1fr)}.h2-form-grid,.h2-insight-grid,.h2-coach-grid{grid-template-columns:1fr}.h2-wide{grid-column:auto}.h2-progress-row{grid-template-columns:1fr}.h2-habit-top,.h2-suggestion{grid-template-columns:1fr}.h2-habit-actions,.h2-suggestion-actions{justify-content:flex-end}.h2-today-control{flex-wrap:wrap}.h2-today-control button{flex:1;min-width:72px}.h2-date-btn{min-width:100px}}
 </style>
 </head>
-<body><script src="home-button.js?v=2026-09-22-5"></script>
+<body><script src="home-button.js?v=2026-09-28-4"></script>
 
 <div class="journal-floating-title" id="journalFloatingTitle" aria-hidden="true">&#x1F9ED; My Life Command Center</div>
 
@@ -2098,6 +2098,11 @@ body{
   <!-- Add/Edit form -->
   <div id="addActivityForm" style="display:none;background:#fff8f0;border:1px solid #ffd5a8;border-radius:10px;padding:14px;margin-bottom:14px;">
     <div style="font-size:0.85rem;font-weight:700;color:#e67e22;margin-bottom:10px;" id="actFormTitle">&#x2795; Add Activity</div>
+    <div style="margin-bottom:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <button type="button" onclick="document.getElementById('actScreenshotInput').click()" id="actScreenshotBtn" style="background:#8e44ad;color:#fff;border:none;padding:7px 14px;border-radius:6px;cursor:pointer;font-size:0.82rem;font-weight:600;">📷 Scan Screenshot</button>
+      <input type="file" id="actScreenshotInput" accept="image/png,image/jpeg,image/webp,image/gif" style="display:none;" onchange="handleActivityScreenshotFile(event)">
+      <span id="actScreenshotStatus" style="font-size:0.78rem;color:#666;"></span>
+    </div>
     <div class="act-form-grid">
       <div><label class="act-label">Date</label><input type="date" id="actDate" class="act-input"></div>
       <div><label class="act-label">Type</label>
@@ -2124,11 +2129,11 @@ body{
       <div><label class="act-label">Run Map / Route Link</label><input type="url" id="actRouteUrl" class="act-input" inputmode="url" placeholder="Garmin, Strava, Google Maps, etc."></div>
       <div><label class="act-label">Source</label>
         <select id="actSource" class="act-input">
-          <option value="manual">Manual</option><option value="garmin">Garmin</option><option value="stryd">Stryd</option>
+          <option value="manual">Manual</option><option value="garmin">Garmin</option><option value="stryd">Stryd</option><option value="screenshot">Screenshot (AI)</option>
         </select>
       </div>
     </div>
-    <div><label class="act-label">Notes</label><textarea id="actNotes" class="act-input" style="height:60px;resize:vertical;font-family:inherit;" placeholder="Any notes..."></textarea></div>
+    <div><label class="act-label">Notes</label><textarea id="actNotes" class="act-input" style="height:90px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Consolas,'Liberation Mono',Menlo,monospace;font-size:0.8rem;" placeholder="Any notes..."></textarea></div>
     <div style="margin-top:9px;"><label class="act-label">Injury Report</label><textarea id="actInjuryReport" class="act-input" style="height:60px;resize:vertical;font-family:inherit;" placeholder="Pain, soreness, location, severity, or changes during the workout..."></textarea></div>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px;">
       <button onclick="cancelAddActivity()" style="background:#f0f0f0;color:#555;border:none;padding:7px 14px;border-radius:6px;cursor:pointer;font-size:0.88rem;">Cancel</button>
@@ -2666,7 +2671,8 @@ body{
     <label title="Take a photo of the Nutrition Facts and ingredients" style="flex:1 1 0;min-width:88px;text-align:center;white-space:nowrap;background:#e67e22;color:#fff;border:none;padding:6px 3px;border-radius:6px;font-size:0.67rem;font-weight:700;cursor:pointer;">&#x1F4F7; Camera<input type="file" id="foodLabelCamera" accept="image/*" capture="environment" style="display:none" onchange="scanFoodLabel(event)"></label>
     <label title="Upload an existing photo or screenshot of Nutrition Facts and ingredients" style="flex:1 1 0;min-width:88px;text-align:center;white-space:nowrap;background:#c2650f;color:#fff;border:none;padding:6px 3px;border-radius:6px;font-size:0.67rem;font-weight:700;cursor:pointer;">&#x1F5BC; Upload<input type="file" id="foodLabelScan" accept="image/*" style="display:none" onchange="scanFoodLabel(event)"></label>
     <button onclick="openBarcodeScanner()" title="Scan a packaged food barcode" style="flex:1 1 0;min-width:88px;white-space:nowrap;background:#0f766e;color:#fff;border:none;padding:6px 3px;border-radius:6px;font-size:0.67rem;font-weight:700;cursor:pointer;">&#x25A5; Barcode</button>
-    <button onclick="openFuelAIModal()" title="Analyze how a day's nutrition affected the next day's run" style="flex:1 1 0;min-width:88px;white-space:nowrap;background:#8e44ad;color:#fff;border:none;padding:6px 3px;border-radius:6px;font-size:0.67rem;font-weight:700;cursor:pointer;">&#x1F9E0; Fuel AI</button>
+    <button onclick="openMacroMealsModal()" title="Healthy meal ideas at 20% protein / 60% carbs / 20% fat" style="flex:1 1 0;min-width:88px;white-space:nowrap;background:#059669;color:#fff;border:none;padding:6px 3px;border-radius:6px;font-size:0.67rem;font-weight:700;cursor:pointer;">🥗 Meal Ideas</button>
+  <button onclick="openFuelAIModal()" title="Analyze how a day's nutrition affected the next day's run" style="flex:1 1 0;min-width:88px;white-space:nowrap;background:#8e44ad;color:#fff;border:none;padding:6px 3px;border-radius:6px;font-size:0.67rem;font-weight:700;cursor:pointer;">&#x1F9E0; Fuel AI</button>
     <button onclick="openCopyDayModal()" style="flex:1 1 0;min-width:88px;white-space:nowrap;background:#16a085;color:#fff;border:none;padding:6px 3px;border-radius:6px;font-size:0.67rem;font-weight:700;cursor:pointer;">&#x1F4C5; Copy Day</button>
   </div>
   <!-- Meal sections -->
@@ -2944,6 +2950,33 @@ body{
   </div>
 </div>
 
+
+  <div id="macroMealsModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:12px;padding:20px;width:92%;max-width:480px;max-height:84vh;overflow-y:auto;box-shadow:0 4px 24px rgba(0,0,0,0.18);">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:4px;">
+        <h3 style="margin:0;font-size:1rem;color:#166534;">🥗 Healthy Meals · 20% Protein / 60% Carbs / 20% Fat</h3>
+        <button onclick="document.getElementById('macroMealsModal').style.display='none'" aria-label="Close" style="background:none;border:none;font-size:1.2rem;color:#64748b;cursor:pointer;line-height:1;">✕</button>
+      </div>
+      <div style="font-size:.72rem;color:#78716c;margin-bottom:10px;line-height:1.4;">Whole-food meals calculated so their calories break down to roughly 20% protein, 60% carbs and 20% fat — a high-carb split. Each has a real gram amount and a rough kitchen measure; small amounts (a teaspoon, a few grams) are normal since they're solved to hit the ratio exactly.</div>
+      <div style="border-top:1px solid #e2e8f0;margin-bottom:10px;padding-top:10px;">
+        <strong style="font-size:.8rem;color:#166534;">⭐ From Your Foods</strong>
+        <div style="font-size:.68rem;color:#78716c;margin:2px 0 8px;line-height:1.35;">Closest 20/60/20 matches built from your Favorites and Healthy 7+ list, in addition to the AI ideas below.</div>
+        <div id="macroMealsPersonalList"></div>
+      </div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;">
+        <button type="button" onclick="filterMacroMeals('all')" class="mm-filter-btn" data-mm-filter="all" style="flex:1 1 0;min-width:60px;background:#0f766e;color:#fff;border:none;padding:5px 4px;border-radius:6px;font-size:.68rem;font-weight:700;cursor:pointer;">All</button>
+        <button type="button" onclick="filterMacroMeals('breakfast')" class="mm-filter-btn" data-mm-filter="breakfast" style="flex:1 1 0;min-width:60px;background:#e9ecef;color:#555;border:none;padding:5px 4px;border-radius:6px;font-size:.68rem;font-weight:700;cursor:pointer;">🌅 Breakfast</button>
+        <button type="button" onclick="filterMacroMeals('lunch')" class="mm-filter-btn" data-mm-filter="lunch" style="flex:1 1 0;min-width:60px;background:#e9ecef;color:#555;border:none;padding:5px 4px;border-radius:6px;font-size:.68rem;font-weight:700;cursor:pointer;">🥗 Lunch</button>
+        <button type="button" onclick="filterMacroMeals('dinner')" class="mm-filter-btn" data-mm-filter="dinner" style="flex:1 1 0;min-width:60px;background:#e9ecef;color:#555;border:none;padding:5px 4px;border-radius:6px;font-size:.68rem;font-weight:700;cursor:pointer;">🍽️ Dinner</button>
+        <button type="button" onclick="filterMacroMeals('snack')" class="mm-filter-btn" data-mm-filter="snack" style="flex:1 1 0;min-width:60px;background:#e9ecef;color:#555;border:none;padding:5px 4px;border-radius:6px;font-size:.68rem;font-weight:700;cursor:pointer;">🍎 Snack</button>
+      </div>
+      <div id="macroMealsList"></div>
+      <div style="border-top:1px solid #f0f0f0;margin-top:10px;padding-top:10px;">
+        <button type="button" onclick="applyTodayMacroRatio(20,60,20)" style="width:100%;background:#0f766e;color:#fff;border:none;padding:8px;border-radius:6px;font-size:.78rem;font-weight:700;cursor:pointer;">🎯 Also set today's Daily Macro Ratio target to 20/60/20</button>
+      </div>
+    </div>
+  </div>
+
 <!-- Barcode Scanner Modal -->
 <div id="barcodeScannerModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.62);z-index:9250;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;" onclick="if(event.target===this)closeBarcodeScanner()">
   <div style="background:#fff;border-radius:14px;padding:18px;max-width:400px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.28);">
@@ -2984,17 +3017,17 @@ body{
     </div>
   </div>
 </div>
-<script src="daily-planner-core.js?v=2026-09-22-5"></script>
-<script src="daily-planner-food-log.js?v=2026-09-22-5"></script>
-<script src="daily-planner-bible.js?v=2026-09-22-5"></script>
-<script src="daily-planner-meditation.js?v=2026-09-22-5"></script>
-<script src="daily-planner-journal-archive.js?v=2026-09-22-5"></script>
-<script src="daily-planner-file-uploads.js?v=2026-09-22-5"></script>
-<script src="daily-planner-shoe-tracker.js?v=2026-09-22-5"></script>
-<script src="daily-planner-misc.js?v=2026-09-22-5"></script>
-<script src="daily-planner-journal-experience.js?v=2026-09-22-5"></script>
-<script src="master-backup-shared.js?v=2026-09-22-5"></script>
-<script src="daily-planner-storage-qol.js?v=2026-09-22-5"></script>
+<script src="daily-planner-core.js?v=2026-09-28-4"></script>
+<script src="daily-planner-food-log.js?v=2026-09-28-4"></script>
+<script src="daily-planner-bible.js?v=2026-09-28-4"></script>
+<script src="daily-planner-meditation.js?v=2026-09-28-4"></script>
+<script src="daily-planner-journal-archive.js?v=2026-09-28-4"></script>
+<script src="daily-planner-file-uploads.js?v=2026-09-28-4"></script>
+<script src="daily-planner-shoe-tracker.js?v=2026-09-28-4"></script>
+<script src="daily-planner-misc.js?v=2026-09-28-4"></script>
+<script src="daily-planner-journal-experience.js?v=2026-09-28-4"></script>
+<script src="master-backup-shared.js?v=2026-09-28-4"></script>
+<script src="daily-planner-storage-qol.js?v=2026-09-28-4"></script>
 <button class="journal-float-top" id="journalFloatTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">&#x2191; Top</button>
 <div id="v26Toast" class="v26-toast" role="status" aria-live="polite"></div>
 </body>
