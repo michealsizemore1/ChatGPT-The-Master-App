@@ -187,7 +187,7 @@ function handleActivityScreenshotFile(event){
     alert('Please choose a PNG, JPEG, WEBP, or GIF screenshot.');return;
   }
   var statusEl=document.getElementById('actScreenshotStatus');
-  if(statusEl){statusEl.style.color='#666';statusEl.textContent='⏳ Reading image...';}
+  if(statusEl){statusEl.style.color='#666';statusEl.textContent='\u23F3 Reading image...';}
   var reader=new FileReader();
   reader.onload=function(){
     var dataUrl=String(reader.result||'');
@@ -207,26 +207,31 @@ function handleActivityScreenshotFile(event){
 
 function analyzeActivityScreenshot(base64, mediaType, statusEl){
   var key=journalAIKey();
-  if(statusEl){statusEl.style.color='#666';statusEl.textContent='⏳ Analyzing screenshot...';}
-  var prompt='This is a screenshot of a workout/run summary from an app like Strava, Garmin, Apple Watch, or Nike Run Club.\n'
-    +'Read every stat visible and return EXACTLY one line in this exact pipe-delimited format, with no extra text, no markdown, no explanation:\n'
+  if(statusEl){statusEl.style.color='#666';statusEl.textContent='\u23F3 Analyzing screenshot...';}
+  var prompt='This is a screenshot related to a workout/run from an app like Strava, Garmin, Apple Watch, or Nike Run Club.\n'
+    +'It may be an overall summary card, OR a per-mile/per-km SPLITS table (columns like Mi/Km, Pace, Elev, HR).\n'
+    +'Respond with plain text only, no markdown, in exactly this structure:\n'
+    +'Line 1: one pipe-delimited summary line in this exact format:\n'
     +'TYPE|TITLE|DATE|DISTANCE|DURATION|PACE|HR|CADENCE|CALORIES|ELEVGAIN\n'
-    +'Field rules:\n'
-    +'TYPE: one of Run, Ride, Walk, Swim, Strength, Other (best guess from the screenshot; default Run if unclear)\n'
+    +'Then, ONLY if the screenshot is a splits table, one additional line per row using this format:\n'
+    +'SPLIT|<mile number, e.g. 1 or 0.1>|<pace MM:SS>|<elevation change, signed feet or 0>|<HR bpm or blank>\n'
+    +'Summary line field rules:\n'
+    +'TYPE: one of Run, Ride, Walk, Swim, Strength, Other (best guess; default Run if unclear)\n'
     +'TITLE: short activity name/title if shown, else ""\n'
     +'DATE: YYYY-MM-DD if a date is visible, else ""\n'
-    +'DISTANCE: number only, in MILES (convert from km by multiplying by 0.621371, round to 2 decimals), else ""\n'
-    +'DURATION: total moving/elapsed time as MM:SS if under an hour or H:MM:SS if an hour or more, else ""\n'
-    +'PACE: average pace as MM:SS per mile (convert from per-km pace by dividing by 0.621371), else ""\n'
-    +'HR: average heart rate in bpm, number only, else ""\n'
+    +'DISTANCE: number only, in MILES (convert from km by multiplying by 0.621371, round to 2 decimals). If this is a splits table with no overall total shown, compute it by summing the mile/km rows (partial last row counts as its fraction), else ""\n'
+    +'DURATION: total moving/elapsed time as MM:SS if under an hour or H:MM:SS if an hour or more. If this is a splits table with no overall total shown, compute it by summing every row\'s time (pace times that row\'s distance), else ""\n'
+    +'PACE: overall average pace as MM:SS per mile (convert from per-km pace by dividing by 0.621371). If a splits table, compute as total time / total distance, else ""\n'
+    +'HR: average heart rate in bpm, number only. If a splits table, compute as the mean of the per-row HR values, else ""\n'
     +'CADENCE: average cadence in steps per minute, number only, else ""\n'
     +'CALORIES: number only, else ""\n'
-    +'ELEVGAIN: elevation gain in FEET (convert from meters by multiplying by 3.28084, round to whole number), else ""\n'
-    +'Use "" for any field that is not visible or not applicable. Do not guess numbers that are not shown.';
+    +'ELEVGAIN: total elevation GAIN only (sum of positive elevation changes) in FEET (convert from meters by multiplying by 3.28084, round to whole number), else ""\n'
+    +'Use "" for any summary field that is not visible, not applicable, and cannot be computed from a splits table. Do not guess numbers that are not shown or computable.\n'
+    +'SPLIT row rules: include one SPLIT line per row of the table, in the order shown, using the exact mile/km label as printed (e.g. "1", "0.1"). Omit the SPLIT lines entirely if this is not a splits table.';
   fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
     headers:{'x-api-key':key,'anthropic-version':'2023-06-01','content-type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
-    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:300,messages:[{role:'user',content:[
+    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:2000,messages:[{role:'user',content:[
       {type:'image',source:{type:'base64',media_type:mediaType,data:base64}},
       {type:'text',text:prompt}
     ]}]})
@@ -236,20 +241,26 @@ function analyzeActivityScreenshot(base64, mediaType, statusEl){
       return;
     }
     var text=(data.content&&data.content[0]&&data.content[0].text)||'';
-    var line=text.split('\n').map(function(l){return l.trim();}).filter(function(l){return l.indexOf('|')!==-1;})[0];
-    if(!line){
+    var lines=text.split('\n').map(function(l){return l.trim();}).filter(function(l){return l;});
+    var summaryLine=lines.filter(function(l){return l.indexOf('|')!==-1&&l.slice(0,6)!=='SPLIT|';})[0];
+    if(!summaryLine){
       if(statusEl){statusEl.style.color='#e74c3c';statusEl.textContent='Could not read stats from that screenshot.';}
       return;
     }
-    var parts=line.split('|').map(function(p){return p.trim();});
+    var parts=summaryLine.split('|').map(function(p){return p.trim();});
     while(parts.length<10)parts.push('');
-    fillActivityFormFromScan(parts, statusEl);
+    var splitLines=lines.filter(function(l){return l.slice(0,6)==='SPLIT|';});
+    var splits=splitLines.map(function(l){
+      var sp=l.split('|').map(function(p){return p.trim();});
+      return {mile:sp[1]||'',pace:sp[2]||'',elev:sp[3]||'',hr:sp[4]||''};
+    });
+    fillActivityFormFromScan(parts, statusEl, splits);
   }).catch(function(err){
     if(statusEl){statusEl.style.color='#e74c3c';statusEl.textContent='Could not analyze screenshot: '+err.message;}
   });
 }
 
-function fillActivityFormFromScan(parts, statusEl){
+function fillActivityFormFromScan(parts, statusEl, splits){
   var f=document.getElementById('addActivityForm');
   if(f&&f.style.display==='none'){toggleAddActivity();}
   var type=parts[0], title=parts[1], date=parts[2], distance=parts[3], duration=parts[4], pace=parts[5], hr=parts[6], cadence=parts[7], calories=parts[8], elevGain=parts[9];
@@ -268,11 +279,26 @@ function fillActivityFormFromScan(parts, statusEl){
   if(calories&&!isNaN(parseFloat(calories)))document.getElementById('actCalories').value=parseFloat(calories);
   if(elevGain&&!isNaN(parseFloat(elevGain)))document.getElementById('actElevGain').value=parseFloat(elevGain);
   document.getElementById('actSource').value='screenshot';
+  if(splits&&splits.length){
+    var noteLines=splits.map(function(s){
+      var bits=['Mi '+s.mile+':'];
+      if(s.pace)bits.push(s.pace+'/mi');
+      if(s.elev){var e=parseFloat(s.elev);bits.push((!isNaN(e)&&e>0?'+':'')+s.elev+' ft');}
+      if(s.hr)bits.push('HR '+s.hr);
+      return bits.join(' ');
+    });
+    var splitsText='Mile splits:\n'+noteLines.join('\n');
+    var notesEl=document.getElementById('actNotes');
+    if(notesEl){
+      var existing=notesEl.value.trim();
+      notesEl.value=existing?existing+'\n\n'+splitsText:splitsText;
+    }
+  }
   if(statusEl){
     statusEl.style.color='#166534';
-    statusEl.textContent='✓ Filled from screenshot — please review before saving.';
+    statusEl.textContent=(splits&&splits.length)?('\u2713 Filled from screenshot \u2014 '+splits.length+' mile splits added to notes, please review before saving.'):'\u2713 Filled from screenshot \u2014 please review before saving.';
   }
-  if(typeof v26Toast==='function')v26Toast('Activity details filled from screenshot — review and save');
+  if(typeof v26Toast==='function')v26Toast('Activity details filled from screenshot \u2014 review and save');
 }
 
 function clearActForm(){
