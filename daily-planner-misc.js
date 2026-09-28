@@ -214,19 +214,18 @@ function analyzeActivityScreenshot(base64, mediaType, statusEl){
     +'Line 1: one pipe-delimited summary line in this exact format:\n'
     +'TYPE|TITLE|DATE|DISTANCE|DURATION|PACE|HR|CADENCE|CALORIES|ELEVGAIN\n'
     +'Then, ONLY if the screenshot is a splits table, one additional line per row using this format:\n'
-    +'SPLIT|<mile number, e.g. 1 or 0.1>|<pace MM:SS>|<elevation change, signed feet or 0>|<HR bpm or blank>\n'
-    +'Summary line field rules:\n'
-    +'TYPE: one of Run, Ride, Walk, Swim, Strength, Other (best guess; default Run if unclear)\n'
-    +'TITLE: short activity name/title if shown, else ""\n'
-    +'DATE: YYYY-MM-DD if a date is visible, else ""\n'
-    +'DISTANCE: number only, in MILES (convert from km by multiplying by 0.621371, round to 2 decimals). If this is a splits table with no overall total shown, compute it by summing the mile/km rows (partial last row counts as its fraction), else ""\n'
-    +'DURATION: total moving/elapsed time as MM:SS if under an hour or H:MM:SS if an hour or more. If this is a splits table with no overall total shown, compute it by summing every row\'s time (pace times that row\'s distance), else ""\n'
-    +'PACE: overall average pace as MM:SS per mile (convert from per-km pace by dividing by 0.621371). If a splits table, compute as total time / total distance, else ""\n'
-    +'HR: average heart rate in bpm, number only. If a splits table, compute as the mean of the per-row HR values, else ""\n'
+    +'SPLIT|<mile number as printed, e.g. 1 or 0.1>|<pace MM:SS>|<elevation change, signed feet or 0>|<HR bpm or blank>\n'
+    +'Summary line field rules \u2014 use ONLY a value that is PRINTED directly on the screenshot. Never calculate, total, average, or otherwise derive a summary value yourself (a separate process computes totals from the SPLIT rows when needed) and never guess a date. If a field is not printed as its own value on the screenshot, return "" for it exactly:\n'
+    +'TYPE: one of Run, Ride, Walk, Swim, Strength, Other (best guess from icons/labels; default Run if unclear)\n'
+    +'TITLE: short activity name/title if printed, else ""\n'
+    +'DATE: YYYY-MM-DD only if an actual date is printed on the screenshot itself, else ""\n'
+    +'DISTANCE: number only, in MILES (convert from km by multiplying by 0.621371, round to 2 decimals), only if printed as its own overall total, else ""\n'
+    +'DURATION: total moving/elapsed time as MM:SS or H:MM:SS, only if printed as its own overall total, else ""\n'
+    +'PACE: overall average pace as MM:SS per mile (convert from per-km pace by dividing by 0.621371), only if printed as its own overall total, else ""\n'
+    +'HR: average heart rate in bpm, number only, only if printed as its own overall total, else ""\n'
     +'CADENCE: average cadence in steps per minute, number only, else ""\n'
     +'CALORIES: number only, else ""\n'
-    +'ELEVGAIN: total elevation GAIN only (sum of positive elevation changes) in FEET (convert from meters by multiplying by 3.28084, round to whole number), else ""\n'
-    +'Use "" for any summary field that is not visible, not applicable, and cannot be computed from a splits table. Do not guess numbers that are not shown or computable.\n'
+    +'ELEVGAIN: elevation gain in FEET (convert from meters by multiplying by 3.28084, round to whole number), only if printed as its own overall total, else ""\n'
     +'SPLIT row rules: include one SPLIT line per row of the table, in the order shown, using the exact mile/km label as printed (e.g. "1", "0.1"). Omit the SPLIT lines entirely if this is not a splits table.';
   fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
@@ -260,10 +259,54 @@ function analyzeActivityScreenshot(base64, mediaType, statusEl){
   });
 }
 
+function parseActPaceToSeconds(paceStr){
+  var m=String(paceStr||'').trim().match(/^(\d+):(\d{2})$/);
+  if(!m)return null;
+  return parseInt(m[1],10)*60+parseInt(m[2],10);
+}
+
+function computeActAggregatesFromSplits(splits){
+  if(!splits||!splits.length)return null;
+  var n=splits.length,totalDistance=0,totalSeconds=0,hrSum=0,hrCount=0,elevGainSum=0,anyPace=false;
+  splits.forEach(function(s,idx){
+    var mileLabel=String(s.mile||'').trim();
+    var mileNum=parseFloat(mileLabel);
+    var isLast=idx===n-1;
+    var segDistance=(isLast&&mileLabel.indexOf('.')!==-1&&!isNaN(mileNum)&&mileNum<1)?mileNum:1;
+    totalDistance+=segDistance;
+    var paceSec=parseActPaceToSeconds(s.pace);
+    if(paceSec!=null){totalSeconds+=paceSec*segDistance;anyPace=true;}
+    var hrNum=parseFloat(s.hr);
+    if(!isNaN(hrNum)){hrSum+=hrNum;hrCount++;}
+    var elevNum=parseFloat(s.elev);
+    if(!isNaN(elevNum)&&elevNum>0)elevGainSum+=elevNum;
+  });
+  function fmtMinSec(sec){var m=Math.floor(sec/60),s=sec%60;return m+':'+(s<10?'0':'')+s;}
+  function fmtDurationHMS(sec){var h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60;return h>0?(h+':'+(m<10?'0':'')+m+':'+(s<10?'0':'')+s):fmtMinSec(sec);}
+  var avgPaceSec=(anyPace&&totalDistance>0)?Math.round(totalSeconds/totalDistance):null;
+  return{
+    distance:totalDistance?String(Math.round(totalDistance*100)/100):'',
+    duration:(anyPace&&totalSeconds>0)?fmtDurationHMS(Math.round(totalSeconds)):'',
+    pace:avgPaceSec!=null?fmtMinSec(avgPaceSec):'',
+    hr:hrCount?String(Math.round(hrSum/hrCount)):'',
+    elevGain:elevGainSum?String(Math.round(elevGainSum)):''
+  };
+}
+
 function fillActivityFormFromScan(parts, statusEl, splits){
   var f=document.getElementById('addActivityForm');
   if(f&&f.style.display==='none'){toggleAddActivity();}
   var type=parts[0], title=parts[1], date=parts[2], distance=parts[3], duration=parts[4], pace=parts[5], hr=parts[6], cadence=parts[7], calories=parts[8], elevGain=parts[9];
+  if(splits&&splits.length){
+    var agg=computeActAggregatesFromSplits(splits);
+    if(agg){
+      if(agg.distance)distance=agg.distance;
+      if(agg.duration)duration=agg.duration;
+      if(agg.pace)pace=agg.pace;
+      if(agg.hr)hr=agg.hr;
+      if(agg.elevGain)elevGain=agg.elevGain;
+    }
+  }
   var VALID_TYPES=['Run','Ride','Walk','Swim','Strength','Rest Day','Other'];
   if(type&&VALID_TYPES.indexOf(type)!==-1){
     document.getElementById('actType').value=type;
@@ -300,6 +343,17 @@ function fillActivityFormFromScan(parts, statusEl, splits){
     statusEl.textContent=(splits&&splits.length)?('\u2713 Filled from screenshot \u2014 '+splits.length+' mile splits added to notes, please review before saving.'):'\u2713 Filled from screenshot \u2014 please review before saving.';
   }
   if(typeof v26Toast==='function')v26Toast('Activity details filled from screenshot \u2014 review and save');
+}
+
+function formatActivityNotesHtml(notes){
+  notes=String(notes||'');
+  var marker='Mile splits:';
+  var idx=notes.indexOf(marker);
+  if(idx===-1)return escHtml(notes);
+  var before=notes.slice(0,idx).replace(/\n+$/,'');
+  var splitsBlock=notes.slice(idx);
+  var beforeHtml=before?escHtml(before)+'<br><br>':'';
+  return beforeHtml+'<pre style="font-family:ui-monospace,SFMono-Regular,Consolas,\'Liberation Mono\',Menlo,monospace;font-size:0.76rem;white-space:pre;overflow-x:auto;margin:0;">'+escHtml(splitsBlock)+'</pre>';
 }
 
 function clearActForm(){
@@ -1039,7 +1093,7 @@ function renderActivities(){
       +'<div id="actBody_'+a.id+'" style="display:'+bodyDisplay+';">'
       +'<div class="act-stats">'+stats.join('')+'</div>'
       +(a.routeUrl?'<a href="'+escHtml(a.routeUrl)+'" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:5px;margin-top:8px;background:#e0f2fe;border:1px solid #7dd3fc;color:#075985;border-radius:7px;padding:6px 10px;font-size:.76rem;font-weight:800;text-decoration:none;">&#x1F5FA;&#xFE0F; Open Run Map</a>':'')
-      +(a.notes?'<div style="font-size:0.82rem;color:#666;margin-top:8px;white-space:pre-wrap;"><strong style="display:block;color:#475569;margin-bottom:2px;">Notes</strong>'+escHtml(a.notes)+'</div>':'')
+      +(a.notes?'<div style="font-size:0.82rem;color:#666;margin-top:8px;white-space:pre-wrap;"><strong style="display:block;color:#475569;margin-bottom:2px;">Notes</strong>'+formatActivityNotesHtml(a.notes)+'</div>':'')
       +(a.injuryReport?'<div style="font-size:0.82rem;color:#7f1d1d;margin-top:8px;padding:8px 10px;background:#fff7f7;border:1px solid #fecaca;border-radius:7px;white-space:pre-wrap;"><strong style="display:block;color:#b91c1c;margin-bottom:2px;">Injury Report</strong>'+escHtml(a.injuryReport)+'</div>':'')
       +'<div id="noteWrap_'+a.id+'" style="display:none;margin-top:6px;">'
       +'<textarea class="act-note-edit" id="noteTA_'+a.id+'" placeholder="Add a note...">'+escHtml(a.notes||'')+'</textarea>'
