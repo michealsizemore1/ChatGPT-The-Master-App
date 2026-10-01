@@ -259,69 +259,11 @@ function analyzeActivityScreenshot(base64, mediaType, statusEl){
   });
 }
 
-function parseActPaceToSeconds(paceStr){
-  var m=String(paceStr||'').trim().match(/^(\d+):(\d{2})$/);
-  if(!m)return null;
-  return parseInt(m[1],10)*60+parseInt(m[2],10);
-}
-
-function computeActAggregatesFromSplits(splits){
-  if(!splits||!splits.length)return null;
-  var n=splits.length,totalDistance=0,totalSeconds=0,hrSum=0,hrCount=0,elevGainSum=0,anyPace=false;
-  splits.forEach(function(s,idx){
-    var mileLabel=String(s.mile||'').trim();
-    var mileNum=parseFloat(mileLabel);
-    var isLast=idx===n-1;
-    var segDistance=(isLast&&mileLabel.indexOf('.')!==-1&&!isNaN(mileNum)&&mileNum<1)?mileNum:1;
-    totalDistance+=segDistance;
-    var paceSec=parseActPaceToSeconds(s.pace);
-    if(paceSec!=null){totalSeconds+=paceSec*segDistance;anyPace=true;}
-    var hrNum=parseFloat(s.hr);
-    if(!isNaN(hrNum)){hrSum+=hrNum;hrCount++;}
-    var elevNum=parseFloat(s.elev);
-    if(!isNaN(elevNum)&&elevNum>0)elevGainSum+=elevNum;
-  });
-  function fmtMinSec(sec){var m=Math.floor(sec/60),s=sec%60;return m+':'+(s<10?'0':'')+s;}
-  function fmtDurationHMS(sec){var h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60;return h>0?(h+':'+(m<10?'0':'')+m+':'+(s<10?'0':'')+s):fmtMinSec(sec);}
-  var avgPaceSec=(anyPace&&totalDistance>0)?Math.round(totalSeconds/totalDistance):null;
-  return{
-    distance:totalDistance?String(Math.round(totalDistance*100)/100):'',
-    duration:(anyPace&&totalSeconds>0)?fmtDurationHMS(Math.round(totalSeconds)):'',
-    pace:avgPaceSec!=null?fmtMinSec(avgPaceSec):'',
-    hr:hrCount?String(Math.round(hrSum/hrCount)):'',
-    elevGain:elevGainSum?String(Math.round(elevGainSum)):''
-  };
-}
-
 function fillActivityFormFromScan(parts, statusEl, splits){
   var f=document.getElementById('addActivityForm');
   if(f&&f.style.display==='none'){toggleAddActivity();}
-  var type=parts[0], title=parts[1], date=parts[2], distance=parts[3], duration=parts[4], pace=parts[5], hr=parts[6], cadence=parts[7], calories=parts[8], elevGain=parts[9];
-  if(splits&&splits.length){
-    var agg=computeActAggregatesFromSplits(splits);
-    if(agg){
-      if(agg.distance)distance=agg.distance;
-      if(agg.duration)duration=agg.duration;
-      if(agg.pace)pace=agg.pace;
-      if(agg.hr)hr=agg.hr;
-      if(agg.elevGain)elevGain=agg.elevGain;
-    }
-  }
-  var VALID_TYPES=['Run','Ride','Walk','Swim','Strength','Rest Day','Other'];
-  if(type&&VALID_TYPES.indexOf(type)!==-1){
-    document.getElementById('actType').value=type;
-    if(typeof handleActTypeChange==='function')handleActTypeChange();
-  }
-  if(title)document.getElementById('actTitle').value=title;
-  if(date&&/^\d{4}-\d{2}-\d{2}$/.test(date))document.getElementById('actDate').value=date;
-  if(distance&&!isNaN(parseFloat(distance)))document.getElementById('actDistance').value=parseFloat(distance);
-  if(duration)document.getElementById('actDuration').value=duration;
-  if(pace)document.getElementById('actPace').value=pace;
-  if(hr&&!isNaN(parseFloat(hr)))document.getElementById('actHR').value=parseFloat(hr);
-  if(cadence&&!isNaN(parseFloat(cadence)))document.getElementById('actCadence').value=parseFloat(cadence);
-  if(calories&&!isNaN(parseFloat(calories)))document.getElementById('actCalories').value=parseFloat(calories);
-  if(elevGain&&!isNaN(parseFloat(elevGain)))document.getElementById('actElevGain').value=parseFloat(elevGain);
-  document.getElementById('actSource').value='screenshot';
+  var notesEl=document.getElementById('actNotes');
+  var addedText='';
   if(splits&&splits.length){
     var MI_W=5, PACE_W=7, ELEV_W=6, HR_W=5;
     var pad=function(s,w,left){s=String(s==null?'':s);return left?(s+Array(Math.max(0,w-s.length+1)).join(' ')):(Array(Math.max(0,w-s.length+1)).join(' ')+s);};
@@ -331,18 +273,36 @@ function fillActivityFormFromScan(parts, statusEl, splits){
       var elevDisplay=isNaN(elevNum)?(s.elev||''):((elevNum>0?'+':'')+elevNum);
       return pad(s.mile,MI_W,true)+pad(s.pace,PACE_W,true)+pad(elevDisplay,ELEV_W,false)+pad(s.hr,HR_W,false);
     });
-    var splitsText='Mile splits:\n'+headerRow+'\n'+noteLines.join('\n');
-    var notesEl=document.getElementById('actNotes');
-    if(notesEl){
-      var existing=notesEl.value.trim();
-      notesEl.value=existing?existing+'\n\n'+splitsText:splitsText;
-    }
+    addedText='Mile splits:\n'+headerRow+'\n'+noteLines.join('\n');
+  } else {
+    var type=parts[0], title=parts[1], date=parts[2], distance=parts[3], duration=parts[4], pace=parts[5], hr=parts[6], cadence=parts[7], calories=parts[8], elevGain=parts[9];
+    var bits=[];
+    if(type)bits.push(type);
+    if(title)bits.push(title);
+    if(date)bits.push(date);
+    if(distance)bits.push(distance+' mi');
+    if(duration)bits.push(duration);
+    if(pace)bits.push(pace+'/mi');
+    if(hr)bits.push('HR '+hr);
+    if(cadence)bits.push('cadence '+cadence);
+    if(calories)bits.push(calories+' cal');
+    if(elevGain)bits.push('+'+elevGain+' ft');
+    if(bits.length)addedText='Scanned screenshot: '+bits.join(', ');
+  }
+  if(addedText&&notesEl){
+    var existing=notesEl.value.trim();
+    notesEl.value=existing?existing+'\n\n'+addedText:addedText;
   }
   if(statusEl){
-    statusEl.style.color='#166534';
-    statusEl.textContent=(splits&&splits.length)?('\u2713 Filled from screenshot \u2014 '+splits.length+' mile splits added to notes, please review before saving.'):'\u2713 Filled from screenshot \u2014 please review before saving.';
+    if(addedText){
+      statusEl.style.color='#166534';
+      statusEl.textContent=(splits&&splits.length)?('\u2713 '+splits.length+' mile splits added to notes \u2014 nothing else was changed.'):'\u2713 Screenshot info added to notes \u2014 nothing else was changed.';
+      if(typeof v26Toast==='function')v26Toast('Screenshot info added to notes');
+    } else {
+      statusEl.style.color='#e74c3c';
+      statusEl.textContent='Could not read any usable info from that screenshot.';
+    }
   }
-  if(typeof v26Toast==='function')v26Toast('Activity details filled from screenshot \u2014 review and save');
 }
 
 function formatActivityNotesHtml(notes){
