@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NHL Faceoff</title>
+<style>
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0}
+button,input,select{font:inherit;color:inherit}
+button{background:none;border:0;padding:0;cursor:pointer;text-align:inherit}
+a{text-decoration:inherit;color:inherit}
+h1,h2,h3,p{margin:0}
+img{max-width:100%;display:block;vertical-align:middle}
+:root{--ink:#0a1f33;--cream:#eef2f6;--paper:#fffefc;--accent:#49c6ea;--line:#d7dee6}
+html{scroll-behavior:smooth}
+body{background:var(--cream);color:var(--ink);font-family:Arial,Helvetica,sans-serif}
+.topbar{height:76px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 max(28px,calc((100vw - 1400px)/2));background:var(--ink);color:#fff;position:sticky;top:0;z-index:20}
+.brand{display:flex;color:#fff;text-decoration:none;align-items:center;gap:11px;font-size:10px;letter-spacing:.13em;line-height:1.15;width:max-content}
+.brand-mark{display:grid;place-items:center;width:39px;height:39px;border:1px solid #ffffff55;border-radius:50%;color:var(--accent);font:700 14px Georgia,serif}
+nav{display:flex;gap:32px;height:100%}
+nav button{background:none;border:0;color:#ffffff99;font-size:13px;font-weight:700;cursor:pointer;position:relative}
+nav button.active,nav button:hover{color:#fff}
+nav button.active:after{content:'';position:absolute;height:3px;background:var(--accent);bottom:0;left:0;right:0}
+.page{max-width:1400px;margin:auto;padding:0 28px}
+.hero{padding:72px 0 62px;border-bottom:1px solid var(--line)}
+.eyebrow{margin:0 0 10px;font-size:10px;letter-spacing:.17em;font-weight:800;color:#5c6b75}
+h1{font:clamp(48px,6.6vw,92px)/.88 Georgia,serif;letter-spacing:-.055em;margin:0}
+h1 em{color:#1f5a73;font-weight:400;font-style:italic}
+.lede{max-width:600px;font:18px/1.6 Georgia,serif;color:#55656f;margin:28px 0 0}
+.score-strip{display:flex;flex-direction:column;gap:10px;background:#07131e;color:#fff;padding:20px max(28px,calc((100vw - 1400px)/2))}
+.score-row-wrap{background:#0c1118;border:1px solid #ffffff1a;border-radius:8px;overflow:hidden}
+.score-row{display:grid;grid-template-columns:1fr auto;column-gap:14px;align-items:center;width:100%;background:transparent;border:0;color:#fff;text-align:left;cursor:pointer;padding:12px 14px}
+.score-row:hover{background:#ffffff0a}
+.score-row.live{box-shadow:inset 3px 0 var(--accent)}
+.sr-teams{display:flex;flex-direction:column;gap:9px;min-width:0}
+.sr-team{display:flex;align-items:center;gap:7px;min-width:0}
+.sr-logo{width:26px;height:26px;object-fit:contain;flex:0 0 26px}
+.sr-logo-fallback{background:#1b2630;border-radius:50%}
+.sr-name{flex:1;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.sr-record{color:#ffffff77;font-size:12px;flex:0 0 auto}
+.sr-score{font:700 18px Georgia,serif;min-width:24px;text-align:right;flex:0 0 auto}
+.sr-situation{text-align:right;color:#ffffffcc;font-size:12px;line-height:1.5;white-space:nowrap;flex:0 0 auto}
+.sr-situation span{display:block}
+.sr-situation span:first-child{font-weight:700;color:#fff;font-size:13px}
+.sr-final{color:#ffffff99;letter-spacing:.05em}
+.sr-network{display:flex;align-items:center;gap:6px;padding:7px 14px;border-top:1px solid #ffffff14;color:#ffffff99;font-size:11px;letter-spacing:.03em}
+.score-row-empty{margin:0;padding:22px;background:#0c1118;border:1px solid #ffffff1a;border-radius:8px;color:#ffffffbb;font-size:13px}
+.overview-panels{display:flex;flex-direction:column;gap:28px;padding:38px 0 60px}
+.content-grid{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(330px,.75fr);gap:28px;padding:38px 0 80px}
+.panel{background:var(--paper);border:1px solid var(--line)}
+.panel-title{min-height:84px;padding:20px 22px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);flex-wrap:wrap;gap:12px}
+.panel-title h2{font:26px Georgia,serif;margin:0}
+.panel-title button{border:0;background:none;color:#4c5d66;font-size:11px;font-weight:700;cursor:pointer}
+.team-controls{display:flex;align-items:center;gap:8px}
+.team-sort{border:1px solid var(--line);background:var(--paper);color:var(--ink);padding:8px 10px;font-size:11px}
+.team-search{border:1px solid var(--line);padding:8px 10px}
+.team-search input{border:0;background:transparent;outline:0}
+@media(max-width:620px){.team-controls{width:100%;display:grid;grid-template-columns:1fr}.team-sort{width:100%;font-size:14px}.team-search{width:100%}.team-search input{width:calc(100% - 24px)}}
+.table-head,.team-row{display:grid;grid-template-columns:42px minmax(180px,1fr) 70px 65px 70px;align-items:center;gap:8px;padding:0 18px}
+.table-head{height:34px;background:#eaeff3;font-size:8px;letter-spacing:.12em;color:#5c6b75}
+.team-row{border:0;border-top:1px solid #e2e7ec;width:100%;min-height:67px;background:transparent;text-align:left;cursor:pointer}
+.team-row:hover,.team-row.selected{background:#eef8fc}
+.team-row>b:first-child{font:20px Georgia,serif}
+.team-row>span,.team-row>strong{font-size:14px}
+.team-name{display:flex;align-items:center;gap:12px;min-width:0}
+.team-name>span:last-child{min-width:0}
+.team-logo{position:relative;flex:0 0 35px;min-width:35px;aspect-ratio:1;border-radius:50%;background:var(--ink)}
+.team-logo>span{font-size:8px;color:#fff;font-weight:800}
+.team-logo>img{position:absolute;inset:3px;width:calc(100% - 6px)!important;height:calc(100% - 6px)!important;object-fit:contain;border-radius:50%}
+.team-name strong{font-size:21px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;overflow-wrap:break-word}
+.team-name small{color:#6a7a83;font-size:11px!important;letter-spacing:.1em;margin-top:3px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.weekly-score{color:#13475c!important;font-size:14px!important;font-weight:800;line-height:1.35;letter-spacing:.04em;margin-top:4px;display:block}
+.standing-ranks{display:grid!important;gap:2px;font-family:Arial,sans-serif!important;font-size:11px!important;line-height:1.1}
+.standing-ranks span,.standing-ranks small{white-space:nowrap}
+.standing-ranks small{color:#5c6b75;font-size:9px!important;font-weight:600}
+.schedule-cta{text-align:right;color:#4c5d66;font-size:12px!important;font-weight:700;letter-spacing:.05em}
+@media(max-width:620px){.table-head,.team-row{grid-template-columns:50px minmax(120px,1fr) 48px 62px!important}.table-head span:nth-child(4),.team-row>strong{display:none!important}.schedule-cta{display:block!important}.team-logo{width:40px;min-width:40px;flex-basis:40px;height:40px}.team-row{padding:10px 10px;min-height:78px}.weekly-score{font-size:13px!important}}
+.division-heading{padding:11px 18px;background:#0a1f33;color:var(--accent);border-top:1px solid #ffffff1f;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.standings-section .division-heading{background:#e4ecf1;color:#3f4e57;border-top:0}
+.team-entry{border-top:1px solid #e2e7ec}
+.team-entry .team-row{border-top:0}
+.schedule-panel{background:#0a1f33;color:#fff;padding:0 20px 16px;box-shadow:inset 0 1px #ffffff14}
+.schedule-head{min-height:48px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #ffffff1f;font-size:10px;letter-spacing:.08em}
+.schedule-head small{color:var(--accent);font-size:8px}
+.season-tabs{display:flex;gap:7px;padding:10px 0;border-bottom:1px solid #ffffff1f}
+.season-tabs button{border:1px solid #ffffff35;background:transparent;color:#fff;padding:7px 10px;font-size:10px;cursor:pointer}
+.season-tabs button.active{background:var(--accent);color:#07131e;border-color:var(--accent)}
+.season-label{display:block;margin-top:4px;color:var(--accent);font-size:8px;font-style:normal;letter-spacing:.1em}
+.schedule-game-wrap{border-bottom:1px solid #ffffff14}
+.schedule-game-wrap .schedule-game{border-bottom:0}
+.schedule-game{width:100%;background:transparent;color:inherit;text-align:left;border:0;cursor:pointer;display:grid;grid-template-columns:64px 1fr 90px;gap:12px;align-items:center;min-height:42px;font-size:11px}
+.schedule-game:hover{background:#ffffff0a}
+.schedule-game time{color:var(--accent);font-weight:700;text-transform:uppercase}
+.schedule-game span{color:#ffffff99}
+.schedule-game span b{color:#fff}
+.schedule-game small{text-align:right;color:#ffffff77}
+.schedule-message{margin:0;padding:20px 0;color:#ffffffaa;font:14px Georgia,serif}
+@media(max-width:760px){.schedule-head{font-size:12px}.schedule-head small{font-size:10px}.schedule-game{font-size:14px;min-height:52px}.schedule-game small{font-size:12px}}
+@media(max-width:620px){.schedule-panel{padding:0 12px 14px}.schedule-game{grid-template-columns:50px 1fr;gap:8px;padding:8px 0}.schedule-game small{grid-column:2;text-align:left}}
+.legacy-game-panel{padding:0 12px 14px;background:#07131e}
+.archive-label{margin:0;padding:12px;color:var(--accent);font-size:9px;letter-spacing:.12em;font-weight:700}
+.team-archive-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.team-archive{border:1px solid #ffffff1f;background:#0a1f33}
+.team-archive>header{display:flex;justify-content:space-between;align-items:center;padding:14px;border-bottom:1px solid #ffffff1f}
+.team-archive>header span{display:flex;flex-direction:column;gap:4px}
+.team-archive>header small{color:var(--accent);font:700 8px Arial,sans-serif;letter-spacing:.12em}
+.team-archive>header b{font:700 15px Georgia,serif}
+.team-archive>header strong{font:700 28px Georgia,serif}
+.team-stat-list{padding:6px 12px}
+.team-stat-list>div,.team-leaders>div{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;min-height:31px;border-bottom:1px solid #ffffff14;font-size:10px}
+.team-stat-list b,.team-leaders b{text-align:right;color:#fff}
+.team-leaders{padding:8px 12px 12px}
+.team-leaders>p{margin:4px 0 8px;color:var(--accent);font-size:9px;letter-spacing:.12em;font-weight:700}
+.team-leaders span{display:flex;flex-direction:column;gap:2px}
+.team-leaders span small{color:#9db2bd;font-size:8px;text-transform:uppercase}
+.leaders-pending{display:block;color:#9db2bd;padding:8px 0}
+@media(max-width:760px){.team-archive-grid{grid-template-columns:1fr}.team-archive>header b{font-size:21px}.team-archive>header strong{font-size:38px}.team-stat-list{padding:8px 14px}.team-stat-list>div,.team-leaders>div{min-height:42px;font-size:14px}.team-leaders{padding:10px 14px 14px}.team-leaders>p{font-size:11px}.team-leaders span small{font-size:9px}}
+@media(max-width:620px){.team-archive>header b{font-size:24px}.team-archive>header strong{font-size:44px}.team-stat-list>div,.team-leaders>div{min-height:46px;font-size:15px}.team-stat-list b,.team-leaders b{font-size:15px}.team-leaders span small{font-size:10px}.schedule-message{font-size:18px;line-height:1.55}}
+.linescore{margin:2px 0 14px;background:#07131e;border:1px solid #ffffff1c;border-radius:4px;overflow:hidden}
+.linescore-row{display:grid;align-items:center;padding:6px 10px;color:#fff;font-size:13px}
+.linescore-row+.linescore-row{border-top:1px solid #ffffff14}
+.linescore-row span{text-align:center}
+.linescore-team{text-align:left!important;font-weight:700}
+.linescore-total{font-weight:700;color:var(--accent)}
+.linescore-head{background:#ffffff0d;padding:5px 10px}
+.linescore-head span{color:#ffffff88;font-size:9px;letter-spacing:.09em}
+@media(max-width:760px){.linescore-row{font-size:15px;padding:8px 10px}.linescore-head span{font-size:10px}}
+.live-strip{margin:0 0 14px;padding:16px 14px 14px;background:#07131e;border:1px solid #ffffff1a;border-radius:8px}
+.ls-scorebar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px}
+.ls-team{display:flex;align-items:center;gap:10px;flex:0 1 auto;min-width:0}
+.ls-team.home{flex-direction:row-reverse}
+.ls-team-logo-col{display:flex;flex-direction:column;align-items:center;gap:5px;flex:0 0 auto}
+.ls-team-logo{width:52px;height:52px;object-fit:contain}
+.ls-team-logo-fallback{width:52px;height:52px;border-radius:50%;background:#1b2630;color:#fff;display:flex;align-items:center;justify-content:center;font:800 19px Georgia,serif}
+.ls-team-score{color:#fff;font:800 46px Georgia,serif;line-height:1}
+.ls-team-sub{color:#ffffffaa;font-size:10px;letter-spacing:.04em;font-weight:700;white-space:nowrap}
+.ls-center{flex:0 0 auto;text-align:center;padding:0 10px;white-space:nowrap}
+.ls-clock{color:#fff;font:700 19px Georgia,serif}
+.ls-period{color:var(--accent);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-top:3px}
+.last-play{margin:10px 0 0;background:#ffffff0d;border:0;color:#fff;padding:10px;font-size:11px;border-radius:4px}
+.scoring-summary{padding:0 0 4px}
+.scoring-period-label{margin:14px 0 4px;color:#8ea4b0;font-size:9px;letter-spacing:.1em;font-weight:700;text-transform:uppercase}
+.scoring-goal{display:grid;grid-template-columns:40px 1fr auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid #ffffff14;font-size:12px}
+.scoring-goal b{color:var(--accent);font-weight:700}
+.scoring-goal span{color:#ffffffcc;line-height:1.4}
+.scoring-goal small{color:#ffffff77;white-space:nowrap}
+@media(max-width:760px){.ls-team-score{font-size:32px}.ls-clock{font-size:16px}.ls-team-logo,.ls-team-logo-fallback{width:40px;height:40px}.ls-team-logo-fallback{font-size:16px}.scoring-goal{font-size:14px}}
+.highlights{padding:0 22px 18px}
+.legacy-game-panel .highlights{padding:0 0 4px}
+.highlights-grid{display:grid;grid-template-columns:1fr;gap:10px}
+.highlight-clip{margin:0;background:#0a1f33;border-radius:4px;overflow:hidden;border:1px solid #ffffff1f}
+.highlight-clip video{width:100%;display:block;max-height:220px;background:#000}
+.highlight-clip figcaption{padding:8px 10px;color:#ffffffcc;font-size:11px;line-height:1.4}
+@media(max-width:760px){.highlight-clip figcaption{font-size:13px}}
+.sidebar{display:flex;flex-direction:column;gap:28px}
+.news .panel-title{min-height:76px}
+.story{display:grid;grid-template-columns:35px 1fr;gap:8px;padding:18px 20px;border-top:1px solid var(--line)}
+.story>b{font:17px Georgia,serif;color:#9aa8b0}
+.story span{display:grid;gap:5px}
+.story small{color:#5f6f78;font-size:8px;letter-spacing:.1em;text-transform:uppercase}
+.story strong{font:14px/1.35 Georgia,serif}
+.metrics-section{margin:0 0 70px}
+.metrics-intro{padding:18px 22px 0;margin:0;color:#55656f;font:15px/1.5 Georgia,serif}
+.metric-tabs{display:flex;gap:6px}
+.metric-tabs button{border:1px solid var(--line);background:transparent;padding:8px 14px;color:#55656f;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;cursor:pointer}
+.metric-tabs button.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+.metrics-grid{display:grid;grid-template-columns:1fr 1fr;padding:14px 22px 22px;column-gap:34px}
+.metric-item{display:grid;grid-template-columns:34px 1fr;gap:13px;padding:17px 0;border-bottom:1px solid var(--line)}
+.metric-item>span{color:#8c9aa3;font:17px Georgia,serif}
+.metric-item h3{margin:0 0 5px;font:17px Georgia,serif}
+.metric-item p{margin:0;color:#5a6a73;font-size:12px;line-height:1.45}
+.metric-feed{display:block;margin-top:8px;color:#1b8aa8;font-size:9px;letter-spacing:.08em;text-transform:uppercase}
+@media(max-width:620px){.metrics-section .panel-title{align-items:flex-start;gap:12px;flex-direction:column}.metrics-grid{grid-template-columns:1fr;padding:10px 14px 18px}.metrics-intro{padding:16px 14px 0}.metric-item{padding:14px 0}.metric-item h3{font-size:19px}.metric-item p{font-size:14px}.metric-feed{font-size:11px}}
+.standings-section{margin:38px 0 0}
+.standings-grid{display:grid;grid-template-columns:1fr 1fr;column-gap:0}
+.conference-block:first-child{border-right:1px solid var(--line)}
+.conference-name{margin:0;padding:14px 18px;background:var(--ink);color:var(--accent);font:12px/1 Arial,sans-serif;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+.standings-row{display:grid;grid-template-columns:42px minmax(0,1fr) 72px;align-items:center;gap:10px;padding:10px 18px;border-top:1px solid #e2e7ec}
+.standings-row .team-name{gap:10px}
+.standings-row .team-name strong{font-size:14px}
+.standings-record{text-align:right;font:14px Georgia,serif;color:#4a5a63}
+@media(max-width:900px){.standings-grid{grid-template-columns:1fr}.conference-block:first-child{border-right:0;border-bottom:1px solid var(--line)}}
+@media(max-width:620px){.standings-row{padding:10px 12px}}
+.playoff-panel{margin:34px 0 70px}
+.playoff-intro{padding:0 22px 22px;margin:0;color:#55656f;font:15px/1.55 Georgia,serif}
+.bracket-round-label{margin:0;padding:0 22px 10px;font-size:10px;letter-spacing:.1em;font-weight:700;color:#55656f;text-transform:uppercase}
+.bracket-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;padding:0 22px 26px;align-items:stretch}
+.bracket-round{display:flex;flex-direction:column}
+.bracket-round-games{display:flex;flex-direction:column;justify-content:space-around;flex:1;gap:14px}
+.bracket-game{border:1px solid var(--line);background:var(--paper);border-radius:4px;overflow:hidden}
+.bracket-team{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.bracket-team:last-child{border-bottom:0}
+.bracket-seed{flex:0 0 24px;height:24px;display:grid;place-items:center;background:var(--ink);color:#fff;border-radius:50%;font:700 11px Arial,sans-serif}
+.bracket-team.tbd .bracket-seed{background:#dde4e9;color:#7c8a92}
+.bracket-team-info{display:grid;gap:2px;min-width:0}
+.bracket-name{font:15px Georgia,serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bracket-team.tbd .bracket-name{color:#8c9aa3;font-style:italic;font-weight:400}
+.bracket-team-info small{color:#55656f;font-size:9px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.conference-bracket{margin:0 0 40px}
+.conference-bracket .conference-name{margin:0 0 18px}
+.cup-final-round{max-width:420px;margin:0 auto;padding:0 22px 34px}
+.cup-final-round .bracket-round-label{padding:0 0 10px;text-align:center}
+@media(max-width:900px){.bracket-grid{grid-template-columns:1fr}}
+@media(max-width:620px){.playoff-intro{padding:0 14px 18px}.bracket-round-label{padding:0 14px 10px}.bracket-grid{padding:0 14px 22px}.cup-final-round{padding:0 14px 26px;max-width:none}}
+.metric-grid{display:grid;grid-template-columns:1fr 1fr}
+.metric-grid>div{padding:18px;border-bottom:1px solid var(--line)}
+.metric-grid>div:nth-child(odd){border-right:1px solid var(--line)}
+.metric-grid small,.metric-grid span{display:block;font-size:8px;letter-spacing:.1em;color:#5a6a73}
+.metric-grid strong{display:block;font:30px Georgia,serif;margin:6px 0}
+footer{border-top:1px solid var(--line);min-height:90px;display:flex;align-items:center;gap:22px;color:#55656f;font-size:10px}
+footer>span{font:700 20px Georgia,serif;color:var(--ink)}
+footer small{margin-left:auto}
+@media(max-width:900px){.topbar{grid-template-columns:1fr auto}.topbar nav{display:none}.content-grid{grid-template-columns:1fr}.sidebar{display:grid;grid-template-columns:1fr 1fr}}
+@media(max-width:620px){.topbar{padding:0 18px}.page{padding:0 18px}.score-strip{padding:16px 14px;gap:8px}.hero{padding:48px 0}.content-grid{padding-top:22px}.sidebar{grid-template-columns:1fr}.panel-title{padding:18px 14px}footer{align-items:flex-start;flex-direction:column;padding:25px 0;gap:7px}footer small{margin-left:0}}
+@media(max-width:900px){.topbar nav{display:flex!important;gap:22px}.topbar .brand{display:none}}
+@media(max-width:620px){.topbar nav{gap:18px}.topbar nav button{font-size:12px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+@media(min-width:621px){body{font-size:16px}.team-name strong{font-size:18px}.team-name small{font-size:10px}.table-head{font-size:10px}.team-row>span,.team-row>strong{font-size:14px}.schedule-game{font-size:13px}.team-stat-list>div,.team-leaders>div{font-size:12px}}
+@media(max-width:620px){body{font-size:16px}.topbar nav button{font-size:14px}.sr-name{font-size:17px}.sr-score{font-size:20px}.sr-situation{font-size:13px}.sr-situation span:first-child{font-size:15px}.sr-record{font-size:13px}.schedule-cta{font-size:14px!important}.standing-ranks{font-size:11px!important}.standing-ranks small{font-size:9px!important}}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script src="home-button.js"></script>
+<script src="version-check.js"></script>
+<script>
+const APP_VERSION='2026-10-03-1';
+checkForNewerAppVersion(APP_VERSION, 'nhlfo');
+
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+const teams=[['BOS','Bruins','1','Atlantic'],['BUF','Sabres','2','Atlantic'],['DET','Red Wings','5','Atlantic'],['FLA','Panthers','26','Atlantic'],['MTL','Canadiens','10','Atlantic'],['OTT','Senators','14','Atlantic'],['TB','Lightning','20','Atlantic'],['TOR','Maple Leafs','21','Atlantic'],['CAR','Hurricanes','7','Metropolitan'],['CBJ','Blue Jackets','29','Metropolitan'],['NJ','Devils','11','Metropolitan'],['NYI','Islanders','12','Metropolitan'],['NYR','Rangers','13','Metropolitan'],['PHI','Flyers','15','Metropolitan'],['PIT','Penguins','16','Metropolitan'],['WSH','Capitals','23','Metropolitan'],['CHI','Blackhawks','4','Central'],['COL','Avalanche','17','Central'],['DAL','Stars','9','Central'],['MIN','Wild','30','Central'],['NSH','Predators','27','Central'],['STL','Blues','19','Central'],['UTAH','Mammoth','129764','Central'],['WPG','Jets','28','Central'],['ANA','Ducks','25','Pacific'],['CGY','Flames','3','Pacific'],['EDM','Oilers','6','Pacific'],['LA','Kings','8','Pacific'],['SJ','Sharks','18','Pacific'],['SEA','Kraken','124292','Pacific'],['VAN','Canucks','22','Pacific'],['VGK','Golden Knights','37','Pacific']].map(([abbr,name,id,division])=>({abbr,name,id,division}));
+const DIVISION_CONFERENCE={Atlantic:'Eastern',Metropolitan:'Eastern',Central:'Western',Pacific:'Western'};
+function conferenceOf(division){return DIVISION_CONFERENCE[division]||division}
+const CURRENT_SEASON=2027;
+const api='https://site.api.espn.com/apis/site/v2/sports/hockey/nhl';
+const mt=(v)=>new Date(v).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZone:'America/Denver'});
+const day=(v)=>new Date(v).toLocaleDateString('en-US',{month:'short',day:'numeric',timeZone:'America/Denver'});
+const teamMetrics=[['Power-play percentage','How often a man-advantage opportunity turns into a goal.'],['Penalty-kill percentage','Survival rate while shorthanded against the opponent’s power play.'],['Goal differential','Goals scored minus goals allowed across the season.'],['Shots per game','Shot-generation volume at even strength and beyond.'],['Faceoff win percentage','Puck possession starting with the opening draw.'],['Scoring offense','Goals scored per game.'],['Scoring defense','Goals allowed per game.'],['Save percentage','Goaltending efficiency on shots faced.'],['Shots against per game','Defensive pressure allowed, shot volume conceded.'],['Penalty minutes per game','Discipline and the cost of time in the box.']];
+const playerMetrics=[['Points','League leaders in goals plus assists.'],['Goals','Pure goal-scoring production.'],['Assists','Playmaking and primary and secondary helpers.'],['Plus/minus','Even-strength goal differential while on the ice.'],['Wins','Goaltender win totals.'],['Save percentage','Goaltending efficiency on shots faced.'],['Goals-against average','Goals allowed per 60 minutes played.'],['Shutouts','Complete games without allowing a goal.'],['Hat tricks','Three-goal games league-wide.'],['Shootout goals','Deciding goals scored in the shootout.']];
+const nhlStories=[['Opening night','Regular-season results and storylines will update as games are completed.'],['Stanley Cup watch','The playoff race tracks every team throughout the season.'],['Goaltender watch','Save percentage and goals-against leaders appear on the Player board.'],['Puck drop','Game times and networks are displayed directly in Mountain Time.'],['Scoring checks','Completed-game scoring is reconciled against the posted final score.'],['Daily access','Every team includes preseason, regular-season and postseason schedules.']];
+
+function readStoredSection(){
+ try{
+  const saved=sessionStorage.getItem('nhlfo-section');
+  return ['Overview','Rankings','Standings','Scores','Playoffs'].includes(saved)?saved:'Overview';
+ }catch(e){return 'Overview'}
+}
+function storeSection(section){
+ try{sessionStorage.setItem('nhlfo-section',section)}catch(e){}
+}
+const state={section:readStoredSection(),games:[],standings:{},open:null,openGame:null,schedules:{},details:{},loading:null,query:'',sort:'rank',metricView:'team',scheduleViewCurrent:'all',selectedGameId:null,gameDetails:null,detailsLoading:false,metricsData:null,metricsLoading:false,playerMetricsData:null,playerMetricsLoading:false};
+function navigate(destination){
+ state.section=destination;storeSection(destination);render();
+ window.scrollTo(0,0);
+}
+
+function gameToday(id){return state.games.find(g=>g.competitions?.[0]?.competitors?.some(x=>String(x.team?.id)===id))}
+// Team records come from the league standings feed (not from today's scoreboard, which --
+// unlike football's one-game-a-week slate -- only covers the handful of teams playing today).
+// rankValue() mirrors the official NHL tiebreak: points percentage first, total points second.
+function rankValue(candidate){
+ const rec=state.standings[candidate.id];
+ if(!rec||!rec.gamesPlayed)return 0;
+ return rec.pointPct*100000+rec.points;
+}
+function recordFor(t){return state.standings[t.id]?.record||'0-0-0'}
+function visibleTeams(){
+ const list=teams.filter(t=>(t.name+t.abbr+t.division).toLowerCase().includes(state.query.toLowerCase()));
+ if(state.sort==='rank')return [...list].sort((a,b)=>rankValue(b)-rankValue(a));
+ if(state.sort==='alphabetical')return [...list].sort((a,b)=>a.name.localeCompare(b.name));
+ if(state.sort==='status')return [...list].sort((a,b)=>({in:0,post:1,pre:2}[gameToday(a.id)?.status?.type?.state]??3)-({in:0,post:1,pre:2}[gameToday(b.id)?.status?.type?.state]??3));
+ if(state.sort==='record')return [...list].sort((a,b)=>rankValue(b)-rankValue(a));
+ return list;
+}
+function standingFor(team){
+ const rank=(pool)=>{const score=rankValue(team);const better=pool.filter(candidate=>rankValue(candidate)>score).length;const tied=pool.filter(candidate=>rankValue(candidate)===score).length>1;return `${tied?'T':''}${better+1}`};
+ return {division:rank(teams.filter(candidate=>candidate.division===team.division)),league:rank(teams)};
+}
+
+async function loadScores(){
+ try{
+  const res=await fetch(`${api}/scoreboard?limit=100`,{cache:'no-store'});
+  const d=await res.json();
+  state.games=d.events||[];
+ }catch{}
+ render();
+}
+async function loadStandings(){
+ try{
+  const res=await fetch('https://site.web.api.espn.com/apis/v2/sports/hockey/nhl/standings',{cache:'no-store'});
+  const d=await res.json();
+  const map={};
+  (d.children||[]).forEach(conf=>{
+   (conf.standings?.entries||[]).forEach(entry=>{
+    const statVal=(name)=>entry.stats?.find(s=>s.name===name)?.value;
+    const wins=statVal('wins')||0,losses=statVal('losses')||0,otLosses=statVal('otLosses')||0,points=statVal('points')||0,gamesPlayed=statVal('gamesPlayed')||0;
+    map[String(entry.team.id)]={wins,losses,otLosses,points,gamesPlayed,record:`${wins}-${losses}-${otLosses}`,pointPct:gamesPlayed?points/(gamesPlayed*2):0};
+   });
+  });
+  state.standings=map;
+ }catch{}
+ render();
+}
+async function teamClick(abbr){
+ if(state.open===abbr){state.open=null;render();return}
+ state.open=abbr;state.scheduleViewCurrent='all';render();
+ if(state.schedules[abbr])return;
+ const t=teams.find(x=>x.abbr===abbr);
+ state.loading=abbr;render();
+ try{
+  const feeds=await Promise.all([1,2,3].map(seasonType=>fetch(`${api}/teams/${encodeURIComponent(t.id)}/schedule?season=${CURRENT_SEASON}&seasontype=${seasonType}&fresh=${Date.now()}`,{cache:'no-store'}).then(r=>r.json()).catch(()=>({events:[]}))));
+  const unique=new Map();
+  feeds.flatMap(d=>d.events||[]).forEach(event=>unique.set(String(event.id),event));
+  const events=[...unique.values()].sort((a,b)=>new Date(a.date).getTime()-new Date(b.date).getTime());
+  state.schedules[abbr]=events.map(e=>{
+   const c=e.competitions?.[0]||{},own=c.competitors?.find(z=>String(z.team?.id)===t.id),opp=c.competitors?.find(z=>String(z.team?.id)!==t.id),gameStatus=c.status||e.status,providerState=gameStatus?.type?.state||'pre',hasScore=(c.competitors||[]).some(z=>Number(z.score?.value??z.score)>0),complete=providerState==='post'||(hasScore&&new Date(e.date).getTime()<Date.now());
+   return {id:String(e.id),date:e.date,opponent:opp?.team?.shortDisplayName||'TBD',venue:own?.homeAway==='away'?'at':'vs',state:complete?'post':providerState,status:complete?(gameStatus?.type?.shortDetail||'Final'):gameStatus?.type?.shortDetail||'Scheduled',network:c.broadcasts?.[0]?.names?.[0]||c.broadcasts?.[0]?.media?.shortName||''};
+  });
+ }finally{state.loading=null;render()}
+}
+function awayHomeTeams(teamsArr){return [teamsArr.find(t=>t.homeAway==='away'),teamsArr.find(t=>t.homeAway==='home')]}
+function teamStatFilter(name){return /shot|hit|takeaway|powerplay|shorthanded|shootout|faceoff|giveaway|penalt/i.test(name)}
+// Skater box-score rows are grouped by position (forwards/defenses), each athlete's stats array
+// lined up against a shared `keys` list -- unlike football's one-leader-per-category shape, hockey
+// needs the top performer picked out of a full roster, so this re-derives points per skater and
+// the best goaltending line per team directly from the raw box score.
+function computeHockeyLeaders(playersBlock){
+ if(!playersBlock)return {skater:null,goalie:null};
+ const cats=playersBlock.statistics||[];
+ const skaterCats=cats.filter(c=>c.name==='forwards'||c.name==='defenses');
+ let bestSkater=null;
+ skaterCats.forEach(cat=>{
+  const gi=cat.keys?.indexOf('goals')??-1,ai=cat.keys?.indexOf('assists')??-1;
+  (cat.athletes||[]).forEach(a=>{
+   const goals=Number(a.stats?.[gi]||0),assists=Number(a.stats?.[ai]||0),points=goals+assists;
+   if(!bestSkater||points>bestSkater.points)bestSkater={name:a.athlete?.displayName||'',goals,assists,points};
+  });
+ });
+ const goalieCat=cats.find(c=>c.name==='goalies');
+ let bestGoalie=null;
+ if(goalieCat){
+  const si=goalieCat.keys?.indexOf('saves')??-1,sai=goalieCat.keys?.indexOf('shotsAgainst')??-1,svi=goalieCat.keys?.indexOf('savePct')??-1;
+  (goalieCat.athletes||[]).forEach(a=>{
+   const saves=Number(a.stats?.[si]||0);
+   if(!bestGoalie||saves>bestGoalie.saves)bestGoalie={name:a.athlete?.displayName||'',saves,shotsAgainst:a.stats?.[sai],savePct:a.stats?.[svi]};
+  });
+ }
+ return {skater:bestSkater,goalie:bestGoalie};
+}
+async function gameClick(g,teamAbbr,force,silent){
+ if(!force&&state.openGame===g.id){state.openGame=null;render();return}
+ state.openGame=g.id;
+ if(g.state==='pre'){render();return}
+ if(g.state==='post'&&state.details[g.id]&&!force){render();return}
+ if(!silent)state.loading=g.id;
+ render();
+ try{
+  const d=await fetch(`${api}/summary?event=${encodeURIComponent(g.id)}&fresh=${Date.now()}`,{cache:'no-store'}).then(r=>r.json());
+  const comp=[...(d.header?.competitions?.[0]?.competitors||[])].sort(a=>a.homeAway==='away'?-1:1);
+  const rows=new Map();
+  (d.boxscore?.teams||[]).forEach(b=>{const i=comp.findIndex(x=>String(x.team?.id)===String(b.team?.id));(b.statistics||[]).filter(s=>teamStatFilter(s.name)).forEach(s=>{const q=rows.get(s.name)||{name:s.label||s.name,away:'—',home:'—'};if(i===0)q.away=s.displayValue||'—';if(i===1)q.home=s.displayValue||'—';rows.set(s.name,q)})});
+  const scoringPlays=(d.plays||[]).filter(p=>p.scoringPlay);
+  const leaders=comp.map((t,i)=>({teamId:String(t.team?.id),...computeHockeyLeaders(d.boxscore?.players?.[i])}));
+  const highlights=(d.videos||[]).slice(0,3).map(v=>({headline:v.headline||v.title||'Game highlights',thumbnail:v.thumbnail||'',src:v.links?.source?.HD?.href||v.links?.source?.full?.href||''})).filter(v=>v.src);
+  const liveMeta=state.games.find(entry=>String(entry.id)===String(g.id));
+  const lastPlayText=liveMeta?.competitions?.[0]?.situation?.lastPlay?.text||d.plays?.at?.(-1)?.text;
+  state.details[g.id]={headline:d.header?.competitions?.[0]?.status?.type?.detail||(g.state==='in'?'In progress':'Final'),teams:comp,stats:[...rows.values()].slice(0,14),scoringPlays,verified:comp.map(t=>scoringPlays.filter(p=>String(p.team?.id)===String(t.team?.id)).length===Number(t.score||0)),leaders,highlights,lastPlay:lastPlayText,statusDetail:liveMeta?.status?.type?.shortDetail||d.header?.competitions?.[0]?.status?.type?.shortDetail};
+ }catch{}
+ if(!silent)state.loading=null;
+ render();
+}
+function livePollTick(){
+ if(!state.openGame)return;
+ let match=null;
+ for(const abbr of Object.keys(state.schedules)){
+  const found=(state.schedules[abbr]||[]).find(g=>g.id===state.openGame);
+  if(found){match={game:found,abbr};break}
+ }
+ if(!match||match.game.state!=='in')return;
+ gameClick(match.game,match.abbr,true,true);
+}
+async function loadGameDetails(){
+ if(!state.selectedGameId){state.gameDetails=null;render();return}
+ state.detailsLoading=true;render();
+ try{
+  const d=await fetch(`${api}/summary?event=${encodeURIComponent(state.selectedGameId)}&fresh=${Date.now()}`,{cache:'no-store'}).then(r=>r.json());
+  const comp=[...(d.header?.competitions?.[0]?.competitors||[])].sort(a=>a.homeAway==='away'?-1:1);
+  const rows=new Map();
+  (d.boxscore?.teams||[]).forEach(b=>{const i=comp.findIndex(x=>String(x.team?.id)===String(b.team?.id));(b.statistics||[]).filter(s=>teamStatFilter(s.name)).forEach(s=>{const q=rows.get(s.name)||{name:s.label||s.name,away:'—',home:'—'};if(i===0)q.away=s.displayValue||'—';if(i===1)q.home=s.displayValue||'—';rows.set(s.name,q)})});
+  const scoringPlays=(d.plays||[]).filter(p=>p.scoringPlay);
+  const leaders=comp.map((t,i)=>({teamId:String(t.team?.id),...computeHockeyLeaders(d.boxscore?.players?.[i])}));
+  const highlights=(d.videos||[]).slice(0,3).map(v=>({headline:v.headline||v.title||'Game highlights',thumbnail:v.thumbnail||'',src:v.links?.source?.HD?.href||v.links?.source?.full?.href||''})).filter(v=>v.src);
+  const liveMeta=state.games.find(entry=>String(entry.id)===String(state.selectedGameId));
+  const lastPlayText=liveMeta?.competitions?.[0]?.situation?.lastPlay?.text||d.plays?.at?.(-1)?.text;
+  state.gameDetails={headline:d.header?.competitions?.[0]?.status?.type?.detail||'',teams:comp,stats:[...rows.values()].slice(0,14),scoringPlays,verified:comp.map(t=>scoringPlays.filter(p=>String(p.team?.id)===String(t.team?.id)).length===Number(t.score||0)),leaders,lastPlay:lastPlayText,highlights,statusDetail:liveMeta?.status?.type?.shortDetail||d.header?.competitions?.[0]?.status?.type?.shortDetail};
+ }catch{state.gameDetails=null}
+ state.detailsLoading=false;render();
+}
+
+function renderTopbar(){
+ const items=['Overview','Rankings','Standings','Scores','Playoffs'];
+ return `<header class="topbar"><button class="brand" data-nav="Overview"><span class="brand-mark">NHL</span><b>NHL FACEOFF</b></button><nav>${items.map(x=>`<button class="${state.section===x?'active':''}" ${state.section===x?'aria-current="page"':''} data-nav="${x}">${x}</button>`).join('')}</nav></header>`;
+}
+function scoreRowSituation(g,st){
+ if(st==='pre'){
+  return `<div class="sr-situation"><span>${esc(mt(g.date))}</span><span>${esc(new Date(g.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',timeZone:'America/Denver'}))}</span></div>`;
+ }
+ if(st==='post')return `<div class="sr-situation"><span class="sr-final">${esc(g.status?.type?.shortDetail||'FINAL')}</span></div>`;
+ return `<div class="sr-situation"><span>${esc(String(g.status?.type?.shortDetail||''))}</span></div>`;
+}
+function scoreRowTeam(t,st){
+ const record=(t.records||[]).find(r=>r.type==='total'||r.name==='overall')?.summary;
+ return `<div class="sr-team">${t.team?.logo?`<img class="espn-logo sr-logo" src="${esc(t.team.logo)}" alt="">`:'<span class="sr-logo sr-logo-fallback"></span>'}<span class="sr-name">${esc(t.team?.shortDisplayName||t.team?.displayName||t.team?.abbreviation||'')}</span>${record?`<span class="sr-record">${esc(record)}</span>`:''}<strong class="sr-score">${st==='pre'?'':esc(t.score)}</strong></div>`;
+}
+function renderScore(g){
+ const c=g.competitions?.[0]||{};
+ const st=g.status?.type?.state;
+ const teamsArr=[...(c.competitors||[])].sort(a=>a.homeAway==='away'?-1:1);
+ const network=c.broadcasts?.[0]?.names?.[0]||'';
+ return `<div class="score-row-wrap"><button class="score-row ${st==='in'?'live':''}" data-score-select="${g.id}"><div class="sr-teams">${teamsArr.map(t=>scoreRowTeam(t,st)).join('')}</div>${scoreRowSituation(g,st)}</button>${network?`<div class="sr-network"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M8 2l4 3 4-3"/></svg>${esc(network)}</div>`:''}</div>`;
+}
+const gameStateOrder={in:0,post:1,pre:2};
+function renderScoreStrip(){
+ const sorted=[...state.games].sort((a,b)=>(gameStateOrder[a.status?.type?.state]??3)-(gameStateOrder[b.status?.type?.state]??3)||new Date(a.date)-new Date(b.date));
+ let liveCenterAttached=false;
+ const rows=sorted.length?sorted.map(g=>{
+  const isSelected=g.id===state.selectedGameId;
+  if(isSelected)liveCenterAttached=true;
+  return renderScore(g)+(isSelected?renderLiveCenter():'');
+ }).join(''):`<p class="score-row-empty">No games are on the ice right now. Scores will appear here once puck drop arrives.</p>`;
+ const orphanLiveCenter=(!liveCenterAttached&&(state.selectedGameId||state.detailsLoading))?renderLiveCenter():'';
+ return `<section class="score-strip" id="scores">${rows}${orphanLiveCenter}</section>`;
+}
+function renderHero(){
+ return `<section class="hero"><p class="eyebrow">ALL 32 TEAMS · LIVE DAILY DATA</p><h1>The whole NHL.<br><em>One dashboard.</em></h1><p class="lede">Scores, schedules, Mountain Time puck drops, networks, team logos, completed-game statistics, scoring summaries, player leaders and highlights.</p></section>`;
+}
+function renderPeriodLabel(i,total){
+ if(i<3)return ['1ST','2ND','3RD'][i];
+ return total-3>1?`OT${i-2}`:'OT';
+}
+function renderLiveCenter(){
+ if(!state.selectedGameId&&!state.detailsLoading)return '';
+ const d=state.gameDetails;
+ const leadersFor=(teamId)=>(d?.leaders??[]).find(l=>l.teamId===String(teamId));
+ const leadersColumn=(t)=>{
+  const l=leadersFor(t.team?.id);
+  const rows=[];
+  if(l?.skater)rows.push(`<div class="live-leader-row"><span><small>SKATER</small>${esc(l.skater.name)}</span><b>${l.skater.points} PTS (${l.skater.goals}G ${l.skater.assists}A)</b></span></div>`);
+  if(l?.goalie)rows.push(`<div class="live-leader-row"><span><small>GOALTENDER</small>${esc(l.goalie.name)}</span><b>${esc(l.goalie.saves)} SV${l.goalie.shotsAgainst?` / ${esc(l.goalie.shotsAgainst)} SA`:''}</b></div>`);
+  const body=rows.length?rows.join(''):'<p class="live-leaders-empty">Player leaders have not been posted by the provider.</p>';
+  return `<div><p class="live-leaders-head">${esc(t.team?.abbreviation)} LEADERS</p>${body}</div>`;
+ };
+ const [lcAwayTeam,lcHomeTeam]=d?awayHomeTeams(d.teams):[null,null];
+ return `<section class="live-center panel" aria-live="polite" style="box-shadow:8px 8px 0 #d2dbe0"><div class="live-center-head panel-title"><div><p class="eyebrow">LIVE GAME CENTER</p><h2>${state.detailsLoading?'Loading game statistics…':esc(d?.headline||'Game details unavailable')}</h2></div><button data-close-live>Close &times;</button></div>${d?`<div style="padding:16px 22px 0">${renderLiveStrip(d,lcAwayTeam,lcHomeTeam)}${renderLinescore(lcAwayTeam,lcHomeTeam)}${d.lastPlay?`<p class="last-play" style="background:#eef6fa;color:#13304a;margin:0 0 14px"><b>LATEST:</b> ${esc(d.lastPlay)}</p>`:''}</div><div class="boxscore" style="padding:8px 22px 20px"><div class="boxscore-head" style="display:grid;grid-template-columns:1fr 90px 90px;color:#5a6a73;font-size:10px;letter-spacing:.1em"><span>TEAM STAT</span><b>${esc(d.teams[0]?.team?.abbreviation)}</b><b>${esc(d.teams[1]?.team?.abbreviation)}</b></div>${d.stats.length?d.stats.map(stat=>`<div style="display:grid;grid-template-columns:1fr 90px 90px;min-height:40px;align-items:center;border-bottom:1px solid #e7e2d8;font-size:14px"><span>${esc(stat.name)}</span><b style="text-align:right">${esc(stat.away)}</b><b style="text-align:right">${esc(stat.home)}</b></div>`).join(''):'<p>Detailed team statistics will populate after the game begins.</p>'}</div><div class="live-leaders" style="padding:6px 22px 22px"><div class="live-leaders-grid" style="display:grid;grid-template-columns:1fr 1fr;column-gap:24px">${d.teams.map(leadersColumn).join('')}</div></div>${renderScoringSummary(d.scoringPlays,d.teams)}${renderHighlights(d.highlights)}`:''}</section>`;
+}
+function renderLiveStrip(d,awayTeam,homeTeam){
+ const logo=(t)=>t?.team?.logo?`<img class="espn-logo ls-team-logo" src="${esc(t.team.logo)}" alt="">`:`<span class="ls-team-logo-fallback">${esc((t?.team?.abbreviation||'?')[0])}</span>`;
+ const teamBlock=(t,align)=>`<div class="ls-team ${align}"><div class="ls-team-logo-col">${logo(t)}<span class="ls-team-sub">${esc((t?.records||[]).find(r=>r.type==='total'||r.name==='overall')?.summary||'')}</span></div><span class="ls-team-score">${esc(t?.score??'—')}</span></div>`;
+ return `<div class="live-strip"><div class="ls-scorebar">${teamBlock(awayTeam,'away')}<div class="ls-center"><div class="ls-clock">${esc(d.statusDetail||d.headline||'')}</div></div>${teamBlock(homeTeam,'home')}</div></div>`;
+}
+function renderTeamRow(t){
+ const g=gameToday(t.id);
+ const standing=standingFor(t);
+ const c=g?.competitions?.[0]||{};
+ const own=c.competitors?.find(x=>String(x.team?.id)===t.id);
+ const opp=c.competitors?.find(x=>String(x.team?.id)!==t.id);
+ const st=g?.status?.type?.state;
+ const network=c.broadcasts?.[0]?.names?.[0]||'TV TBD';
+ const weekly=!g?'NO GAME TODAY':st==='pre'?`TODAY · ${own?.homeAway==='away'?'AT':'VS'} ${opp?.team?.abbreviation} · ${mt(g.date)} MT · ${network}`:`${own?.score}–${opp?.score} ${st==='post'?'FINAL':'LIVE'}`;
+ const expanded=state.open===t.abbr;
+ const scoreCol=g?(st==='pre'?`vs ${esc(opp?.team?.abbreviation||'')}`:`${esc(own?.score)}–${esc(opp?.score)}`):'—';
+ const timeCol=g&&st==='pre'?`${esc(mt(g.date))} MT`:esc(g?.status?.type?.shortDetail||'—');
+ const row=`<button class="team-row" data-team-click="${t.abbr}"><b class="standing-ranks"><small>NHL</small><span>${esc(standing.league)}</span></b><span class="team-name"><i class="team-logo"><span>${esc(t.abbr)}</span><img class="espn-logo" src="https://a.espncdn.com/i/teamlogos/nhl/500/${t.id}.png" alt="${esc(t.name)} logo"></i><span><strong>${esc(t.name)}</strong><small>${esc(t.abbr)} · ${esc(t.division)}</small><small class="weekly-score">${esc(weekly)}</small></span></span><span>${scoreCol}</span><strong>${timeCol}</strong><span class="schedule-cta">${esc(c.broadcasts?.[0]?.names?.[0]||'View')} ${expanded?'↑':'↓'}</span></button>`;
+ const schedule=expanded?renderSchedule(t):'';
+ return `<div class="team-entry">${row}${schedule}</div>`;
+}
+function renderRankingsSection(){
+ const list=visibleTeams();
+ const rows=list.map((t,i)=>{
+  const heading=(state.sort==='division'&&(i===0||list[i-1].division!==t.division))?`<div class="division-heading">${esc(t.division)}</div>`:'';
+  return heading+renderTeamRow(t);
+ }).join('');
+ return `<section class="panel" id="rankings">
+  <div class="panel-title"><div><p class="eyebrow">ALL 32 TEAMS</p><h2>Rankings</h2></div>
+   <div class="team-controls">
+    <select class="team-sort" id="sort-select" aria-label="Sort NHL teams">
+     <option value="rank" ${state.sort==='rank'?'selected':''}>Rank</option>
+     <option value="division" ${state.sort==='division'?'selected':''}>Division</option>
+     <option value="alphabetical" ${state.sort==='alphabetical'?'selected':''}>Alphabetical</option>
+     <option value="record" ${state.sort==='record'?'selected':''}>Record</option>
+     <option value="status" ${state.sort==='status'?'selected':''}>Live/Final first</option>
+    </select>
+    <label class="team-search">&#8981; <input id="team-search-input" value="${esc(state.query)}" placeholder="Search teams"></label>
+   </div>
+  </div>
+  <div class="table-head"><span>#</span><span>TEAM</span><span>TODAY</span><span>TIME</span><span>TV</span></div>
+  ${rows}
+ </section>`;
+}
+function renderScheduleGame(g,t){
+ const preseason=new Date(g.date).getMonth()===8;
+ const isOpen=state.openGame===g.id;
+ return `<div class="schedule-game-wrap"><button class="schedule-game" data-game-id="${g.id}" data-team-abbr="${t.abbr}"><time>${esc(day(g.date))}</time><span>${esc(g.venue)} <b>${esc(g.opponent)}</b><em class="season-label">${preseason?'PRESEASON':'REGULAR SEASON'}</em></span><small>${esc(mt(g.date))} MT · ${esc(g.network||g.status)} ${isOpen?'↑':'↓'}</small></button>${isOpen?renderGameDetailPanel(g):''}</div>`;
+}
+function renderSchedule(t){
+ const games=state.schedules[t.abbr]??[];
+ const loading=state.loading===t.abbr;
+ const view=state.scheduleViewCurrent||'all';
+ const filtered=games.filter(g=>view==='all'||(view==='preseason'?new Date(g.date).getMonth()===8:new Date(g.date).getMonth()!==8));
+ const gamesHtml=filtered.map(g=>renderScheduleGame(g,t)).join('');
+ return `<div class="schedule-panel">
+  <div class="schedule-head"><b>${CURRENT_SEASON-1}-${String(CURRENT_SEASON).slice(2)} SCHEDULE</b><small>${loading?'LOADING…':`${games.length} GAMES`}</small></div>
+  <div class="season-tabs">
+   <button class="${view==='all'?'active':''}" data-schedule-view="all">All</button>
+   <button class="${view==='preseason'?'active':''}" data-schedule-view="preseason">Preseason</button>
+   <button class="${view==='regular'?'active':''}" data-schedule-view="regular">Regular season</button>
+  </div>
+  ${gamesHtml}
+ </div>`;
+}
+function renderGameDetailPanel(g){
+ if(g.state==='pre'){
+  return `<div class="legacy-game-panel"><p class="schedule-message"><b>${esc(g.status)}</b> · ${esc(mt(g.date))} MT${g.network?` · ${esc(g.network)}`:''}<br>Game statistics will appear after completion.</p></div>`;
+ }
+ if(state.loading===g.id){
+  return `<div class="legacy-game-panel"><p class="schedule-message">${g.state==='in'?'Loading live game statistics…':'Loading completed-game statistics…'}</p></div>`;
+ }
+ const d=state.details[g.id];
+ if(!d){
+  return `<div class="legacy-game-panel"><p class="schedule-message">${g.state==='in'?'Live statistics have not been posted yet.':'Statistics are not available yet.'}</p></div>`;
+ }
+ return `<div class="legacy-game-panel">${renderArchive(d,g)}</div>`;
+}
+function renderLinescore(awayTeam,homeTeam){
+ const extract=(team)=>(team?.linescores??[]).map(l=>String(l?.displayValue??l?.value??l??'-'));
+ const awayScores=extract(awayTeam);
+ const homeScores=extract(homeTeam);
+ const periods=Math.max(awayScores.length,homeScores.length);
+ if(!periods)return '';
+ const cols=`56px repeat(${periods},1fr) 46px`;
+ const row=(team,scores)=>`<div class="linescore-row" style="grid-template-columns:${cols}"><span class="linescore-team">${esc(team?.team?.abbreviation||'')}</span>${Array.from({length:periods},(_,i)=>`<span>${esc(scores[i]??'-')}</span>`).join('')}<span class="linescore-total">${esc(team?.score??'-')}</span></div>`;
+ const head=`<div class="linescore-row linescore-head" style="grid-template-columns:${cols}"><span></span>${Array.from({length:periods},(_,i)=>`<span>${renderPeriodLabel(i,periods)}</span>`).join('')}<span>T</span></div>`;
+ return `<div class="linescore">${head}${row(awayTeam,awayScores)}${row(homeTeam,homeScores)}</div>`;
+}
+function renderScoringSummary(scoringPlays,teamsArr){
+ if(!scoringPlays||!scoringPlays.length)return '';
+ const abbrFor=(teamId)=>teamsArr.find(t=>String(t.team?.id)===String(teamId))?.team?.abbreviation||'';
+ const byPeriod=new Map();
+ scoringPlays.forEach(p=>{
+  const period=p.period?.number||1;
+  if(!byPeriod.has(period))byPeriod.set(period,[]);
+  byPeriod.get(period).push(p);
+ });
+ const periodsHtml=[...byPeriod.entries()].map(([period,plays])=>`<p class="scoring-period-label">${esc(renderPeriodLabel(period-1,Math.max(period,3)))} PERIOD</p>${plays.map(p=>`<div class="scoring-goal"><b>${esc(abbrFor(p.team?.id))}</b><span>${esc(p.text||'')}</span><small>${esc(p.clock?.displayValue||'')}</small></div>`).join('')}`).join('');
+ return `<div class="scoring-summary" style="padding:0 22px 18px"><p class="archive-label" style="padding:0 0 8px">SCORING SUMMARY</p>${periodsHtml}</div>`;
+}
+function renderArchive(d,g){
+ const [arcAwayTeam,arcHomeTeam]=awayHomeTeams(d.teams);
+ const teamArchives=d.teams.map((t,n)=>{
+  const stats=d.stats.map(s=>`<div><span>${esc(s.name)}</span><b>${n?esc(s.home):esc(s.away)}</b></div>`).join('');
+  const checkRow=`<div><span>Scoring check</span><b>${g.state==='in'?'● Live — game in progress':(d.verified[n]?'✓ Matches':'⚠ Review')}</b></div>`;
+  const l=d.leaders.find(x=>x.teamId===String(t.team?.id));
+  const leaderRows=[];
+  if(l?.skater)leaderRows.push(`<div><span><small>TOP SKATER</small>${esc(l.skater.name)}</span><b>${l.skater.points} PTS</b></div>`);
+  if(l?.goalie)leaderRows.push(`<div><span><small>GOALTENDER</small>${esc(l.goalie.name)}</span><b>${esc(l.goalie.saves)} SV</b></div>`);
+  const leadersHtml=leaderRows.length?leaderRows.join(''):'<small class="leaders-pending">Player leaders have not been posted by the provider.</small>';
+  return `<section class="team-archive"><header><span><small>${t.homeAway==='home'?'HOME TEAM':'AWAY TEAM'}</small><b>${esc(t.team?.displayName)}</b></span><strong>${esc(t.score)}</strong></header><div class="team-stat-list">${stats}${checkRow}</div><div class="team-leaders"><p>PLAYER LEADERS</p>${leadersHtml}</div></section>`;
+ }).join('');
+ const lastPlay=d.lastPlay?`<p class="last-play" style="background:#eef6fa;color:#13304a;margin:10px 0 0"><b>LAST PLAY:</b> ${esc(d.lastPlay)}</p>`:'';
+ return `${renderLinescore(arcAwayTeam,arcHomeTeam)}<p class="archive-label">${g.state==='in'?'LIVE STATS':'GAME ARCHIVE'} · ${esc(d.headline)}</p><div class="team-archive-grid">${teamArchives}</div>${renderScoringSummary(d.scoringPlays,d.teams)}${renderHighlights(d.highlights)}${lastPlay}`;
+}
+function renderHighlights(highlights){
+ if(!highlights||!highlights.length)return '';
+ return `<div class="highlights"><p class="archive-label">GAME HIGHLIGHTS</p><div class="highlights-grid">${highlights.map(item=>`<figure class="highlight-clip"><video controls preload="metadata" playsinline ${item.thumbnail?`poster="${esc(item.thumbnail)}"`:''}><source src="${esc(item.src)}" type="video/mp4"></video><figcaption>${esc(item.headline)}</figcaption></figure>`).join('')}</div></div>`;
+}
+const teamMetricFields=['powerPlayPct','penaltyKillPct','goalDiff','shotsPerGame','faceoffPct','scoringOff','scoringDef','savePct','shotsAgainstPerGame','penaltyMinutes'];
+function formatMetricValue(field,value){
+ if(value==null||!Number.isFinite(value))return null;
+ if(field==='powerPlayPct'||field==='penaltyKillPct'||field==='faceoffPct')return `${value.toFixed(1)}%`;
+ if(field==='goalDiff')return value>0?`+${value}`:`${value}`;
+ if(field==='shotsPerGame'||field==='shotsAgainstPerGame')return `${value.toFixed(1)} SOG/GM`;
+ if(field==='scoringOff'||field==='scoringDef')return `${value.toFixed(2)} GPG`;
+ if(field==='savePct')return value.toFixed(3).replace(/^0/,'');
+ if(field==='penaltyMinutes')return `${value.toFixed(1)}/GM`;
+ return String(value);
+}
+async function loadEssentialMetrics(){
+ if(state.metricsLoading)return;
+ state.metricsLoading=true;
+ render();
+ try{
+  const rows=await Promise.all(teams.map(async t=>{
+   try{
+    const [statsRes,teamRes]=await Promise.all([fetch(`${api}/teams/${encodeURIComponent(t.id)}/statistics?season=${CURRENT_SEASON}`,{cache:'no-store'}).then(r=>r.json()),fetch(`${api}/teams/${encodeURIComponent(t.id)}`,{cache:'no-store'}).then(r=>r.json())]);
+    const cats=statsRes.results?.stats?.categories||[];
+    const stat=(cat,name)=>cats.find(c=>c.name===cat)?.stats?.find(s=>s.name===name);
+    const gamesPlayed=Number(stat('general','games')?.value||0);
+    if(!gamesPlayed)return null;
+    const goalsFor=Number(stat('offensive','goals')?.value||0);
+    const goalsAgainstTotal=Number(stat('defensive','goalsAgainst')?.value||0);
+    const recordTotal=(teamRes.team?.record?.items||[]).find(x=>x.type==='total');
+    const recStat=(name)=>recordTotal?.stats?.find(s=>s.name===name)?.value;
+    return{abbr:t.abbr,name:t.name,powerPlayPct:Number(recStat('powerPlayPct')),penaltyKillPct:Number(recStat('penaltyKillPct')),goalDiff:goalsFor-goalsAgainstTotal,shotsPerGame:Number(stat('offensive','shotsTotal')?.perGameValue),faceoffPct:Number(stat('offensive','faceoffPercent')?.value),scoringOff:Number(recStat('avgPointsFor')),scoringDef:Number(recStat('avgPointsAgainst')),savePct:Number(stat('defensive','savePct')?.value),shotsAgainstPerGame:Number(stat('defensive','shotsAgainst')?.perGameValue),penaltyMinutes:Number(stat('penalties','penaltyMinutes')?.perGameValue)};
+   }catch(e){return null}
+  }));
+  const valid=rows.filter(Boolean);
+  const lowerIsBetter=new Set(['scoringDef','shotsAgainstPerGame','penaltyMinutes']);
+  const leaders={};
+  teamMetricFields.forEach(field=>{
+   const ranked=valid.filter(r=>Number.isFinite(r[field]));
+   if(!ranked.length){leaders[field]=null;return}
+   const best=ranked.reduce((a,b)=>(lowerIsBetter.has(field)?b[field]<a[field]:b[field]>a[field])?b:a);
+   leaders[field]={abbr:best.abbr,name:best.name,value:best[field]};
+  });
+  state.metricsData=leaders;
+ }catch(e){}
+ finally{state.metricsLoading=false;render()}
+}
+const playerMetricFields=['points','goals','assists','plusMinus','wins','savePct','avgGoalsAgainst','shutouts',null,null];
+function formatPlayerMetricValue(field,displayValue){
+ if(displayValue==null)return null;
+ const suffix={points:'PTS',goals:'G',assists:'A',plusMinus:'',wins:'W',savePct:'',avgGoalsAgainst:'GAA',shutouts:'SO'}[field]||'';
+ return suffix?`${displayValue} ${suffix}`:String(displayValue);
+}
+async function loadPlayerLeaders(){
+ if(state.playerMetricsLoading)return;
+ state.playerMetricsLoading=true;
+ render();
+ try{
+  const res=await fetch(`https://sports.core.api.espn.com/v2/sports/hockey/leagues/nhl/seasons/${CURRENT_SEASON}/types/2/leaders`,{cache:'no-store'});
+  const data=await res.json();
+  const cats=data.categories||[];
+  const fields=[...new Set(playerMetricFields.filter(Boolean))];
+  const leaders={};
+  await Promise.all(fields.map(async field=>{
+   try{
+    const cat=cats.find(c=>c.name===field);
+    const top=cat?.leaders?.[0];
+    if(!top){leaders[field]=null;return}
+    const [athlete,team]=await Promise.all([
+     fetch(top.athlete.$ref.replace('http://','https://'),{cache:'no-store'}).then(r=>r.json()).catch(()=>null),
+     fetch(top.team.$ref.replace('http://','https://'),{cache:'no-store'}).then(r=>r.json()).catch(()=>null)
+    ]);
+    leaders[field]={name:athlete&&athlete.displayName||'',abbr:team&&team.abbreviation||'',displayValue:top.displayValue};
+   }catch(e){leaders[field]=null}
+  }));
+  state.playerMetricsData=leaders;
+ }catch(e){}
+ finally{state.playerMetricsLoading=false;render()}
+}
+function renderMetrics(){
+ const list=state.metricView==='team'?teamMetrics:playerMetrics;
+ const items=list.map((m,i)=>{
+  let feed='Waiting for season statistics';
+  if(state.metricView==='team'){
+   const field=teamMetricFields[i];
+   const leader=state.metricsData?.[field];
+   if(leader){
+    const display=formatMetricValue(field,leader.value);
+    feed=display?(leader.abbr+' '+leader.name+' — '+display):'Waiting for season statistics';
+   }else if(state.metricsLoading){
+    feed='Loading live stats…';
+   }
+  }else if(state.metricView==='player'){
+   const field=playerMetricFields[i];
+   const leader=field?state.playerMetricsData?.[field]:null;
+   if(leader){
+    const display=formatPlayerMetricValue(field,leader.displayValue);
+    feed=display?(leader.abbr+' '+leader.name+' — '+display):'Waiting for season statistics';
+   }else if(state.playerMetricsLoading){
+    feed='Loading live stats…';
+   }
+  }
+  return `<article class="metric-item"><span>${String(i+1).padStart(2,'0')}</span><div><h3>${esc(m[0])}</h3><p>${esc(m[1])}</p><small class="metric-feed">${esc(feed)}</small></div></article>`;
+ }).join('');
+ return `<section class="panel metrics-section" id="metrics">
+  <div class="panel-title"><div><p class="eyebrow">THE STAT BOARD</p><h2>Essential metrics</h2></div><div class="metric-tabs"><button class="${state.metricView==='team'?'active':''}" data-metric-view="team">Team</button><button class="${state.metricView==='player'?'active':''}" data-metric-view="player">Player</button></div></div>
+  <p class="metrics-intro">Live season values refresh automatically as games are completed. A dash means the provider has not posted that metric yet.</p>
+  <div class="metrics-grid">${items}</div>
+ </section>`;
+}
+function renderStandings(){
+ const blocks=['Eastern','Western'].map(conf=>{
+  const confTeams=teams.filter(t=>conferenceOf(t.division)===conf);
+  const divisions=[...new Set(confTeams.map(t=>t.division))];
+  const divisionBlocks=divisions.map(div=>{
+   const rows=confTeams.filter(t=>t.division===div)
+    .map(t=>({t,standing:standingFor(t)}))
+    .sort((a,b)=>parseInt(a.standing.division.replace('T',''))-parseInt(b.standing.division.replace('T','')))
+    .map(({t,standing})=>`<div class="standings-row"><b class="standing-ranks"><small>${esc(div)}</small><span>${esc(standing.division)}</span></b><span class="team-name"><i class="team-logo"><span>${esc(t.abbr)}</span><img class="espn-logo" src="https://a.espncdn.com/i/teamlogos/nhl/500/${t.id}.png" alt="${esc(t.name)} logo"></i><strong>${esc(t.name)}</strong></span><span class="standings-record">${esc(recordFor(t))}</span></div>`).join('');
+   return `<div class="division-heading">${esc(div)}</div>${rows}`;
+  }).join('');
+  return `<div class="conference-block"><h3 class="conference-name">${conf} Conference</h3>${divisionBlocks}</div>`;
+ }).join('');
+ return `<section class="panel standings-section" id="standings">
+  <div class="panel-title"><div><p class="eyebrow">${CURRENT_SEASON-1}-${String(CURRENT_SEASON).slice(2)} SEASON</p><h2>Standings</h2></div></div>
+  <div class="standings-grid">${blocks}</div>
+ </section>`;
+}
+function renderNews(){
+ return `<section class="panel news" id="news"><div class="panel-title"><div><p class="eyebrow">RINK NOTES</p><h2>Top stories</h2></div></div>${nhlStories.map((s,i)=>`<article class="story"><b>${String(i+1).padStart(2,'0')}</b><span><small>${esc(s[0])}</small><strong>${esc(s[1])}</strong></span></article>`).join('')}</section>`;
+}
+// Real 16-team Stanley Cup field: each conference sends the top three teams in each of its two
+// divisions (seeded 1-3 by points) plus the next two best remaining teams in the conference as
+// wild cards. The division winner with the better overall record draws the weaker wild card in
+// Round 1, per the NHL's actual bracket rule. Round 1 stays within each division group through
+// Round 2 (Second Round), then the two group winners meet in the Conference Final.
+function computeNhlPlayoffField(){
+ const seedConference=(conf)=>{
+  const confTeams=teams.filter(t=>conferenceOf(t.division)===conf);
+  const divisions=[...new Set(confTeams.map(t=>t.division))];
+  const topThree=(div)=>[...confTeams.filter(t=>t.division===div)].sort((a,b)=>rankValue(b)-rankValue(a)).slice(0,3);
+  const [divA,divB]=divisions;
+  const aTop=topThree(divA),bTop=topThree(divB);
+  const topIds=new Set([...aTop,...bTop].filter(Boolean).map(t=>t.id));
+  const wildcards=confTeams.filter(t=>!topIds.has(t.id)).sort((a,b)=>rankValue(b)-rankValue(a)).slice(0,2);
+  const [wc1,wc2]=wildcards;
+  const aBetter=aTop[0]&&bTop[0]?rankValue(aTop[0])>=rankValue(bTop[0]):true;
+  return {
+   groupA:{division:divA,seeds:aTop,opponent:aBetter?wc2:wc1},
+   groupB:{division:divB,seeds:bTop,opponent:aBetter?wc1:wc2}
+  };
+ };
+ return {Eastern:seedConference('Eastern'),Western:seedConference('Western')};
+}
+function bracketTeamChip(team,opts={}){
+ if(!team)return `<div class="bracket-team tbd"><span class="bracket-seed">–</span><span class="bracket-team-info"><strong class="bracket-name">TBD</strong><small>${esc(opts.tbdLabel||'')}</small></span></div>`;
+ return `<div class="bracket-team"><span class="bracket-seed">${opts.seed}</span><span class="bracket-team-info"><strong class="bracket-name">${esc(team.name)}</strong><small>${esc(opts.sub||'')}</small></span></div>`;
+}
+function playoffGroupHtml(group){
+ if(!group.seeds.length)return {round1:'',round2:''};
+ const divLabel=`${esc(group.division).toUpperCase()}`;
+ const round1=`<div class="bracket-game">${bracketTeamChip(group.seeds[0],{seed:1,sub:`${divLabel} CHAMPION`})}${bracketTeamChip(group.opponent,{seed:group.opponent?'WC':'',sub:'WILD CARD'})}</div><div class="bracket-game">${bracketTeamChip(group.seeds[1],{seed:2,sub:divLabel})}${bracketTeamChip(group.seeds[2],{seed:3,sub:divLabel})}</div>`;
+ const round2=`<div class="bracket-game">${bracketTeamChip(null,{tbdLabel:'Winner, First Round'})}${bracketTeamChip(null,{tbdLabel:'Winner, First Round'})}</div>`;
+ return {round1,round2};
+}
+function conferenceBracketHtml(conf,field){
+ const a=playoffGroupHtml(field.groupA);
+ const b=playoffGroupHtml(field.groupB);
+ const confFinal=`<div class="bracket-game">${bracketTeamChip(null,{tbdLabel:'Winner, Second Round'})}${bracketTeamChip(null,{tbdLabel:'Winner, Second Round'})}</div>`;
+ return `<div class="conference-bracket">
+  <h3 class="conference-name">${esc(conf)} Conference</h3>
+  <div class="bracket-grid">
+   <div class="bracket-round"><p class="bracket-round-label">First Round</p><div class="bracket-round-games">${a.round1}${b.round1}</div></div>
+   <div class="bracket-round"><p class="bracket-round-label">Second Round</p><div class="bracket-round-games">${a.round2}${b.round2}</div></div>
+   <div class="bracket-round"><p class="bracket-round-label">Conference Final</p><div class="bracket-round-games">${confFinal}</div></div>
+  </div>
+ </div>`;
+}
+function renderPlayoff(){
+ const field=computeNhlPlayoffField();
+ return `<section class="panel playoff-panel" id="playoffs">
+  <div class="panel-title"><div><p class="eyebrow">16-TEAM FIELD · PROJECTED FROM CURRENT STANDINGS</p><h2>Stanley Cup Playoffs</h2></div></div>
+  <p class="playoff-intro">Each conference sends the top three teams in each of its two divisions plus the next two teams by points as wild cards, seeded within their group. The division winner with the better overall record faces the weaker wild card in the First Round, per the NHL's bracket rules — no byes, four rounds to the Stanley Cup Final.</p>
+  ${conferenceBracketHtml('Eastern',field.Eastern)}
+  ${conferenceBracketHtml('Western',field.Western)}
+  <div class="cup-final-round">
+   <p class="bracket-round-label">Stanley Cup Final</p>
+   <div class="bracket-game">${bracketTeamChip(null,{tbdLabel:'Eastern Conference Champion'})}${bracketTeamChip(null,{tbdLabel:'Western Conference Champion'})}</div>
+  </div>
+ </section>`;
+}
+function renderFooter(){
+ return `<footer><span>NHL</span><p>All displayed times are Mountain Time.</p><small>My Life Master App</small></footer>`;
+}
+function renderOverviewPage(){
+ return `<div class="page" id="top">${renderHero()}<div class="overview-panels">${renderNews()}${renderMetrics()}</div>${renderFooter()}</div>`;
+}
+function renderRankingsPage(){
+ return `<div class="page">${renderRankingsSection()}${renderFooter()}</div>`;
+}
+function renderStandingsPage(){
+ return `<div class="page">${renderStandings()}${renderFooter()}</div>`;
+}
+function renderScoresPage(){
+ return `${renderScoreStrip()}<div class="page">${renderFooter()}</div>`;
+}
+function renderPlayoffsPage(){
+ return `<div class="page">${renderPlayoff()}${renderFooter()}</div>`;
+}
+function render(){
+ const pages={Overview:renderOverviewPage,Rankings:renderRankingsPage,Standings:renderStandingsPage,Scores:renderScoresPage,Playoffs:renderPlayoffsPage};
+ const page=pages[state.section]||renderOverviewPage;
+ document.getElementById('app').innerHTML=`${renderTopbar()}${page()}`;
+}
+
+document.getElementById('app').addEventListener('click',e=>{
+ const navEl=e.target.closest('[data-nav]');
+ if(navEl){navigate(navEl.dataset.nav);return}
+ const closeLiveBtn=e.target.closest('[data-close-live]');
+ if(closeLiveBtn){state.selectedGameId=null;state.gameDetails=null;render();return}
+ const scoreSelectBtn=e.target.closest('[data-score-select]');
+ if(scoreSelectBtn){state.selectedGameId=scoreSelectBtn.dataset.scoreSelect;loadGameDetails();requestAnimationFrame(()=>requestAnimationFrame(()=>document.querySelector('.live-center')?.scrollIntoView({behavior:'smooth',block:'start'})));return}
+ const teamBtn=e.target.closest('[data-team-click]');
+ if(teamBtn){teamClick(teamBtn.dataset.teamClick);return}
+ const scheduleViewBtn=e.target.closest('[data-schedule-view]');
+ if(scheduleViewBtn){state.scheduleViewCurrent=scheduleViewBtn.dataset.scheduleView;render();return}
+ const gameBtn=e.target.closest('[data-game-id]');
+ if(gameBtn){
+  const abbr=gameBtn.dataset.teamAbbr;
+  const game=(state.schedules[abbr]||[]).find(g=>g.id===gameBtn.dataset.gameId);
+  if(game)gameClick(game,abbr);
+  return;
+ }
+ const metricBtn=e.target.closest('[data-metric-view]');
+ if(metricBtn){state.metricView=metricBtn.dataset.metricView;render();return}
+});
+document.getElementById('app').addEventListener('input',e=>{
+ if(e.target.id==='team-search-input'){
+  const pos=e.target.selectionStart;
+  state.query=e.target.value;
+  render();
+  const el=document.getElementById('team-search-input');
+  if(el){el.focus();try{el.setSelectionRange(pos,pos)}catch(err){}}
+ }
+});
+document.getElementById('app').addEventListener('change',e=>{
+ if(e.target.id==='sort-select'){state.sort=e.target.value;render()}
+});
+document.addEventListener('error',e=>{
+ if(e.target&&e.target.classList&&(e.target.classList.contains('espn-logo')||e.target.classList.contains('player-headshot')))e.target.style.display='none';
+},true);
+
+render();
+loadScores();
+loadStandings();
+loadEssentialMetrics();
+loadPlayerLeaders();
+setInterval(loadScores,120000);
+setInterval(livePollTick,90000);
+setInterval(loadStandings,300000);
+setInterval(()=>{if(state.selectedGameId)loadGameDetails()},120000);
+setInterval(loadEssentialMetrics,1800000);
+setInterval(loadPlayerLeaders,1800000);
+</script>
+</body>
+</html>
