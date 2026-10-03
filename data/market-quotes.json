@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-02T22:12:07+00:00",
+  "updatedAt": "2026-10-03T01:12:24+00:00",
   "source": "Yahoo Finance public chart data",
   "quotes": {
     "SCHD": {
@@ -123,12 +123,12 @@
       "currency": "USD"
     },
     "BTC-USD": {
-      "price": 84463.29,
-      "prev": 84849.93,
-      "change": -386.64,
-      "changesPercentage": -0.4557,
-      "volume": 46142742528,
-      "avgVolume": 37170896088,
+      "price": 84677.81,
+      "prev": 84506.336,
+      "change": 171.474,
+      "changesPercentage": 0.2029,
+      "volume": 45949554688,
+      "avgVolume": 35768065981,
       "yearHigh": 126198.07,
       "yearLow": 57747.766,
       "marketState": "",
@@ -221,12 +221,12 @@
       "currency": "USD"
     },
     "BTC=F": {
-      "price": 84820.0,
+      "price": 84905.0,
       "prev": 84590.0,
-      "change": 230.0,
-      "changesPercentage": 0.2719,
-      "volume": 2,
-      "avgVolume": 6489,
+      "change": 315.0,
+      "changesPercentage": 0.3724,
+      "volume": 20,
+      "avgVolume": 5413,
       "yearHigh": 127240.0,
       "yearLow": 57850.0,
       "marketState": "",
@@ -262,16 +262,16 @@
   "news": [
     "A calm index, a restless market - Chase Bank",
     "Stock Market Rallies on Friday, Oct. 2, 2026 - stl.news",
+    "Reaction roundup: Experts, analysts weigh in on September jobs report - Investing.com",
     "The U.S. Economy Added 29,000 Jobs in September, Far Fewer Than Expected. Here's Why That's Good News for the Stock Market Right Now. - The Motley Fool",
-    "Traders now see little chance of a Fed rate hike in October after weak jobs report - CNBC",
-    "VIEW Soft September jobs report sends markets higher - Reuters",
-    "Market Movers blog: Government bond yields at highest points in more than 20 years - investmentweek.co.uk",
-    "U.S. economy adds fewer jobs than expected as unemployment rate ticks higher - Investing.com",
+    "Market Movers blog: Government bond yields at highest points in more than 20 years - Investment Week",
+    "Outlook for Next Week: Fed Minutes and Services PMI Take Center Stage - Moomoo",
     "4 Key Questions for Investors to Ask at the Start of Q4 - Morningstar",
-    "If Consumers Are So Down on the Economy, Why Are They Spending So Freely? -- Barrons.com - Moomoo",
     "U.S. stocks rise near their record after the latest jobs report eases worries about inflation - BNN Bloomberg",
-    "Navigating geoeconomic risk in the US stock market - CEPR",
-    "Goodbye, rate hike: Why stocks are soaring after a dismal jobs report - Business Insider"
+    "Why Stocks Could Defy Higher Rates & Keep Rallying: ETFs to Watch - TradingView",
+    "Stocks Gain and Dollar Falls After Softer US Jobs Data - Global Banking & Finance Review",
+    "Traders now see little chance of a Fed rate hike in October after weak jobs report - CNBC",
+    "U.S. economy adds fewer jobs than expected as unemployment rate ticks higher - Investing.com"
   ],
   "economy": [
     "CPI 2026-07 | 3.5% YoY",
@@ -285,7 +285,7 @@
     "DXY  101.92 \u25bc0.17%",
     "Gold  $4,172.10 \u25bc0.72%",
     "WTI  $91.26 \u25bc1.73%",
-    "Bitcoin  $84,463 \u25bc0.46%",
+    "Bitcoin  $84,678 \u25b20.20%",
     "EUR/USD  1.1257 \u25b20.11%",
     "USD/JPY  157.83 \u25bc0.14%",
     "VIX  15.31 \u25bc6.59%",
