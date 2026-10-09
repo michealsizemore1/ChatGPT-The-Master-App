@@ -779,6 +779,7 @@ function load(){
     }
   }
   renderFoodItems();
+  try{renderGusisPicker();}catch(e){console.error('renderGusisPicker:',e);}
   try{renderStreaks();}catch(e){console.error('renderStreaks:',e);}
   // Restore nutrition card state
   (function(){

@@ -196,7 +196,7 @@ function applyFoodServingUnit(id,unit){
 }
 
 // Micronutrient fields tracked per food item, in addition to cal/prot/fat/carbs
-const MICRO_FIELDS=['fiber','sugar','sodium','vitA','vitC','vitD','calcium','iron','potassium'];
+const MICRO_FIELDS=['fiber','sugar','sodium','vitA','vitC','vitD','calcium','iron','potassium','caffeine'];
 const MICRO_META={
   fiber:{label:'Fiber',unit:'g',icon:'🌾',elId:'totFiber'},
   sugar:{label:'Sugar',unit:'g',icon:'🍬',elId:'totSugar'},
@@ -206,9 +206,186 @@ const MICRO_META={
   vitD:{label:'Vit D',unit:'mcg',icon:'☀️',elId:'totVitD'},
   calcium:{label:'Calcium',unit:'mg',icon:'🦴',elId:'totCalcium'},
   iron:{label:'Iron',unit:'mg',icon:'🩸',elId:'totIron'},
-  potassium:{label:'Potassium',unit:'mg',icon:'🍌',elId:'totPotassium'}
+  potassium:{label:'Potassium',unit:'mg',icon:'🍌',elId:'totPotassium'},
+  caffeine:{label:'Caffeine',unit:'mg',icon:'☕',elId:'totCaffeine'}
 };
 
+// Quick-add product database for the Sports Nutrition section: full current
+// GU Energy and SiS (Science in Sport) product lines (gels, chews, bars,
+// drink mixes/electrolyte tabs, recovery drinks). Values are per labeled
+// serving, compiled from brand sites and cross-checked retailer/nutrition-
+// database listings; treat as close approximations rather than exact lab
+// values where brands don't publish a full panel (e.g. some potassium figures).
+const GUSIS_PRODUCTS=[
+  {brand:'GU',line:'GU Energy Gel',flavor:'Sour Peach',serving:'1 packet (32g)',cal:100,carbs:22,prot:0,fat:0,sodium:100,potassium:20,caffeine:0},
+  {brand:'GU',line:'GU Energy Gel',flavor:'Chocolate Outrage',serving:'1 packet (32g)',cal:100,carbs:22,prot:0,fat:0,sodium:100,potassium:20,caffeine:20},
+  {brand:'GU',line:'GU Energy Gel',flavor:'Tri-Berry',serving:'1 packet (32g)',cal:100,carbs:22,prot:0,fat:0,sodium:100,potassium:20,caffeine:20},
+  {brand:'GU',line:'GU Energy Gel',flavor:'Vanilla Bean',serving:'1 packet (32g)',cal:100,carbs:22,prot:0,fat:0,sodium:125,potassium:14,caffeine:0},
+  {brand:'GU',line:'GU Energy Gel',flavor:'Strawberry Banana',serving:'1 packet (32g)',cal:100,carbs:23,prot:0,fat:0,sodium:55,potassium:30,caffeine:0},
+  {brand:'GU',line:'GU Energy Gel',flavor:'Cola Me Happy',serving:'1 packet (32g)',cal:100,carbs:22,prot:0,fat:0,sodium:100,potassium:20,caffeine:40},
+  {brand:'GU',line:'GU Energy Gel',flavor:'Salted Caramel',serving:'1 packet (32g)',cal:100,carbs:22,prot:0,fat:0,sodium:125,potassium:20,caffeine:20},
+  {brand:'GU',line:'GU Energy Gel',flavor:'Pumpkin Spice',serving:'1 packet (32g)',cal:100,carbs:22,prot:0,fat:0,sodium:100,potassium:20,caffeine:0},
+  {brand:'GU',line:'GU Energy Gel',flavor:'Birthday Cake',serving:'1 packet (32g)',cal:100,carbs:22,prot:0,fat:0,sodium:100,potassium:20,caffeine:0},
+  {brand:'GU',line:'GU Energy Gel',flavor:'Campfire S\'mores',serving:'1 packet (32g)',cal:100,carbs:22,prot:0,fat:0,sodium:100,potassium:20,caffeine:0},
+  {brand:'GU',line:'GU Energy Gel',flavor:'Jet Blackberry',serving:'1 packet (32g)',cal:100,carbs:22,prot:0,fat:0,sodium:100,potassium:20,caffeine:40},
+  {brand:'GU',line:'GU Energy Gel',flavor:'Lemon Sublime',serving:'1 packet (32g)',cal:100,carbs:22,prot:0,fat:0,sodium:100,potassium:20,caffeine:0},
+  {brand:'GU',line:'GU Energy Gel',flavor:'Salted Watermelon',serving:'1 packet (32g)',cal:100,carbs:22,prot:0,fat:0,sodium:125,potassium:35,caffeine:20},
+  {brand:'GU',line:'GU Energy Gel',flavor:'Mandarin Orange',serving:'1 packet (32g)',cal:100,carbs:22,prot:0,fat:0,sodium:100,potassium:20,caffeine:20},
+  {brand:'GU',line:'GU Energy Gel',flavor:'Espresso Love',serving:'1 packet (32g)',cal:100,carbs:22,prot:0,fat:0,sodium:100,potassium:20,caffeine:40},
+  {brand:'GU',line:'GU Energy Gel',flavor:'Caramel Macchiato',serving:'1 packet (32g)',cal:100,carbs:22,prot:0,fat:0,sodium:100,potassium:20,caffeine:40},
+  {brand:'GU',line:'GU Energy Gel',flavor:'Raspberry Lemonade',serving:'1 packet (32g)',cal:100,carbs:22,prot:0,fat:0,sodium:100,potassium:20,caffeine:0},
+  {brand:'GU',line:'GU Roctane Energy Gel',flavor:'Cold Brew Coffee',serving:'1 packet (32g)',cal:100,carbs:21,prot:0,fat:0,sodium:125,potassium:20,caffeine:70},
+  {brand:'GU',line:'GU Roctane Energy Gel',flavor:'Blueberry Pomegranate',serving:'1 packet (32g)',cal:100,carbs:25,prot:0,fat:0,sodium:125,potassium:55,caffeine:35},
+  {brand:'GU',line:'GU Roctane Energy Gel',flavor:'Chocolate Coconut',serving:'1 packet (32g)',cal:100,carbs:21,prot:0,fat:0,sodium:125,potassium:20,caffeine:35},
+  {brand:'GU',line:'GU Roctane Energy Gel',flavor:'Vanilla Orange',serving:'1 packet (32g)',cal:100,carbs:21,prot:0,fat:0,sodium:125,potassium:20,caffeine:35},
+  {brand:'GU',line:'GU Roctane Energy Gel',flavor:'Pineapple',serving:'1 packet (32g)',cal:100,carbs:21,prot:0,fat:0,sodium:125,potassium:20,caffeine:0},
+  {brand:'GU',line:'GU Roctane Energy Gel',flavor:'Cherry Lime',serving:'1 packet (32g)',cal:100,carbs:21,prot:0,fat:0,sodium:125,potassium:20,caffeine:35},
+  {brand:'GU',line:'GU Roctane Energy Gel',flavor:'Strawberry Kiwi',serving:'1 packet (32g)',cal:100,carbs:21,prot:0,fat:0,sodium:125,potassium:18,caffeine:0},
+  {brand:'GU',line:'GU Roctane Energy Gel',flavor:'Lemonade',serving:'1 packet (32g)',cal:100,carbs:21,prot:0,fat:0,sodium:190,potassium:20,caffeine:0},
+  {brand:'GU',line:'GU Roctane Energy Gel',flavor:'Sea Salt Chocolate',serving:'1 packet (32g)',cal:100,carbs:19,prot:0,fat:2,sodium:180,potassium:20,caffeine:35},
+  {brand:'GU',line:'GU Roctane Energy Gel',flavor:'Salted Lime',serving:'1 packet (32g)',cal:100,carbs:21,prot:0,fat:0,sodium:190,potassium:20,caffeine:35},
+  {brand:'GU',line:'GU Energy Chews',flavor:'Fruit Punch',serving:'1 serving (30g, 8 chews)',cal:90,carbs:22,prot:0,fat:0,sodium:40,potassium:10,caffeine:0},
+  {brand:'GU',line:'GU Energy Chews',flavor:'Rainbow Fruit Mix',serving:'1 serving (30g, 8 chews)',cal:90,carbs:22,prot:0,fat:0,sodium:40,potassium:10,caffeine:0},
+  {brand:'GU',line:'GU Energy Chews',flavor:'Orange',serving:'1 serving (30g, 8 chews)',cal:90,carbs:22,prot:0,fat:0,sodium:40,potassium:10,caffeine:0},
+  {brand:'GU',line:'GU Energy Chews',flavor:'Strawberry',serving:'1 serving (30g, 8 chews)',cal:90,carbs:22,prot:0,fat:0,sodium:40,potassium:10,caffeine:20},
+  {brand:'GU',line:'GU Energy Chews',flavor:'Blueberry Pomegranate',serving:'1 serving (30g, 8 chews)',cal:90,carbs:22,prot:0,fat:0,sodium:40,potassium:10,caffeine:0},
+  {brand:'GU',line:'GU Energy Chews',flavor:'Watermelon',serving:'1 serving (30g, 8 chews)',cal:90,carbs:22,prot:0,fat:0,sodium:40,potassium:10,caffeine:0},
+  {brand:'GU',line:'GU Energy Chews',flavor:'Salted Lime',serving:'1 serving (30g, 8 chews)',cal:90,carbs:22,prot:0,fat:0,sodium:125,potassium:10,caffeine:0},
+  {brand:'GU',line:'GU Energy Chews',flavor:'Lemonade',serving:'1 serving (30g, 8 chews)',cal:90,carbs:22,prot:0,fat:0,sodium:40,potassium:10,caffeine:0},
+  {brand:'GU',line:'GU Hydration Drink Tabs',flavor:'Strawberry Lemonade',serving:'1 tab in 16oz water',cal:10,carbs:3,prot:0,fat:0,sodium:320,potassium:55,caffeine:0},
+  {brand:'GU',line:'GU Hydration Drink Tabs',flavor:'Strawberry Hibiscus',serving:'1 tab in 16oz water',cal:10,carbs:3,prot:0,fat:0,sodium:320,potassium:55,caffeine:20},
+  {brand:'GU',line:'GU Hydration Drink Tabs',flavor:'Tropical Citrus',serving:'1 tab in 16oz water',cal:10,carbs:3,prot:0,fat:0,sodium:320,potassium:55,caffeine:0},
+  {brand:'GU',line:'GU Hydration Drink Tabs',flavor:'Orange',serving:'1 tab in 16oz water',cal:10,carbs:3,prot:0,fat:0,sodium:320,potassium:55,caffeine:0},
+  {brand:'GU',line:'GU Hydration Drink Tabs',flavor:'Tri-Berry',serving:'1 tab in 16oz water',cal:10,carbs:3,prot:0,fat:0,sodium:320,potassium:55,caffeine:0},
+  {brand:'GU',line:'GU Hydration Drink Tabs',flavor:'Lemon Lime',serving:'1 tab in 16oz water',cal:10,carbs:3,prot:0,fat:0,sodium:320,potassium:55,caffeine:0},
+  {brand:'GU',line:'GU Roctane Energy & Hydration Drink Mix',flavor:'Lemon Berry',serving:'2 scoops (65g)',cal:250,carbs:60,prot:0,fat:0,sodium:320,potassium:80,caffeine:35},
+  {brand:'GU',line:'GU Roctane Energy & Hydration Drink Mix',flavor:'Summit Tea',serving:'2 scoops (65g)',cal:250,carbs:60,prot:0,fat:0,sodium:320,potassium:80,caffeine:35},
+  {brand:'GU',line:'GU Roctane Energy & Hydration Drink Mix',flavor:'Tropical Fruit',serving:'2 scoops (65g)',cal:250,carbs:60,prot:0,fat:0,sodium:320,potassium:80,caffeine:35},
+  {brand:'GU',line:'GU Roctane Energy & Hydration Drink Mix',flavor:'Grape',serving:'2 scoops (65g)',cal:250,carbs:60,prot:0,fat:0,sodium:320,potassium:80,caffeine:0},
+  {brand:'GU',line:'GU Roctane Energy & Hydration Drink Mix',flavor:'Strawberry Hibiscus',serving:'2 scoops (65g)',cal:250,carbs:60,prot:0,fat:0,sodium:320,potassium:80,caffeine:0},
+  {brand:'GU',line:'GU Roctane Electrolyte Capsules',flavor:'Unflavored',serving:'1 capsule',cal:0,carbs:0,prot:0,fat:0,sodium:140,potassium:0,caffeine:0},
+  {brand:'GU',line:'GU Energy Waffle',flavor:'Maple Cinnamon',serving:'1 waffle (~30g)',cal:150,carbs:22,prot:0,fat:0,sodium:100,potassium:20,caffeine:0},
+  {brand:'GU',line:'GU Energy Waffle',flavor:'Campfire S\'mores',serving:'1 waffle (~30g)',cal:150,carbs:22,prot:0,fat:0,sodium:100,potassium:20,caffeine:0},
+  {brand:'GU',line:'GU Energy Waffle',flavor:'Coconut',serving:'1 waffle (~30g)',cal:150,carbs:22,prot:0,fat:0,sodium:100,potassium:20,caffeine:0},
+  {brand:'GU',line:'GU Energy Waffle',flavor:'Coffee Caramel',serving:'1 waffle (~30g)',cal:150,carbs:22,prot:0,fat:0,sodium:100,potassium:20,caffeine:20},
+  {brand:'GU',line:'GU Energy Waffle',flavor:'Salted Caramel',serving:'1 waffle (~30g)',cal:150,carbs:22,prot:0,fat:0,sodium:150,potassium:20,caffeine:0},
+  {brand:'GU',line:'GU Energy Waffle',flavor:'Wild Berries',serving:'1 waffle (~30g)',cal:150,carbs:22,prot:0,fat:0,sodium:100,potassium:20,caffeine:0},
+  {brand:'GU',line:'GU Energy Waffle',flavor:'Salted Chocolate',serving:'1 waffle (~30g)',cal:150,carbs:22,prot:0,fat:0,sodium:150,potassium:20,caffeine:0},
+  {brand:'SiS',line:'SiS GO Isotonic Energy Gel',flavor:'Apple',serving:'1 gel (60ml/69g)',cal:87,carbs:22,prot:0,fat:0,sodium:4,potassium:0,caffeine:0},
+  {brand:'SiS',line:'SiS GO Isotonic Energy Gel',flavor:'Blackcurrant',serving:'1 gel (60ml/69g)',cal:87,carbs:22,prot:0,fat:0,sodium:4,potassium:0,caffeine:0},
+  {brand:'SiS',line:'SiS GO Isotonic Energy Gel',flavor:'Lemon & Lime',serving:'1 gel (60ml/69g)',cal:87,carbs:22,prot:0,fat:0,sodium:4,potassium:0,caffeine:0},
+  {brand:'SiS',line:'SiS GO Isotonic Energy Gel',flavor:'Orange',serving:'1 gel (60ml/69g)',cal:87,carbs:22,prot:0,fat:0,sodium:4,potassium:0,caffeine:0},
+  {brand:'SiS',line:'SiS GO Isotonic Energy Gel',flavor:'Pineapple',serving:'1 gel (60ml/69g)',cal:87,carbs:22,prot:0,fat:0,sodium:4,potassium:0,caffeine:0},
+  {brand:'SiS',line:'SiS GO Isotonic Energy Gel',flavor:'Pink Grapefruit',serving:'1 gel (60ml/69g)',cal:87,carbs:22,prot:0,fat:0,sodium:4,potassium:0,caffeine:0},
+  {brand:'SiS',line:'SiS GO Isotonic Energy Gel',flavor:'Tropical',serving:'1 gel (60ml/69g)',cal:87,carbs:22,prot:0,fat:0,sodium:4,potassium:0,caffeine:0},
+  {brand:'SiS',line:'SiS GO Energy + Electrolyte Gel',flavor:'Lemon & Mint',serving:'1 gel (60ml/69g)',cal:87,carbs:22,prot:0,fat:0,sodium:118,potassium:10,caffeine:0},
+  {brand:'SiS',line:'SiS GO Energy + Electrolyte Gel',flavor:'Raspberry',serving:'1 gel (60ml/69g)',cal:87,carbs:22,prot:0,fat:0,sodium:118,potassium:10,caffeine:0},
+  {brand:'SiS',line:'SiS GO Energy + Electrolyte Gel',flavor:'Salted Caramel',serving:'1 gel (60ml/69g)',cal:87,carbs:22,prot:0,fat:0,sodium:118,potassium:10,caffeine:0},
+  {brand:'SiS',line:'SiS GO Energy + Caffeine Gel',flavor:'Berry (75mg)',serving:'1 gel (60ml/69g)',cal:90,carbs:22,prot:0,fat:0,sodium:10,potassium:0,caffeine:75},
+  {brand:'SiS',line:'SiS GO Energy + Caffeine Gel',flavor:'Cola (75mg)',serving:'1 gel (60ml/69g)',cal:85,carbs:21,prot:0,fat:0,sodium:10,potassium:0,caffeine:75},
+  {brand:'SiS',line:'SiS GO Energy + Caffeine Gel',flavor:'Double Espresso (150mg Turbo)',serving:'1 gel (60ml/69g)',cal:87,carbs:22,prot:0,fat:0,sodium:10,potassium:0,caffeine:150},
+  {brand:'SiS',line:'SiS Beta Fuel Gel',flavor:'Orange',serving:'1 gel (60ml/86g)',cal:158,carbs:40,prot:0,fat:0,sodium:12,potassium:0,caffeine:0},
+  {brand:'SiS',line:'SiS Beta Fuel Gel',flavor:'Strawberry & Lime',serving:'1 gel (60ml/86g)',cal:158,carbs:40,prot:0,fat:0,sodium:12,potassium:0,caffeine:0},
+  {brand:'SiS',line:'SiS Beta Fuel Gel',flavor:'Neutral',serving:'1 gel (60ml/86g)',cal:158,carbs:40,prot:0,fat:0,sodium:12,potassium:0,caffeine:0},
+  {brand:'SiS',line:'SiS Beta Fuel Gel + Electrolyte',flavor:'Raspberry & Lemon',serving:'1 gel (60ml/86g)',cal:158,carbs:40,prot:0,fat:0,sodium:200,potassium:0,caffeine:0},
+  {brand:'SiS',line:'SiS Beta Fuel Gel + Caffeine',flavor:'Apple (200mg)',serving:'1 gel (60ml/86g)',cal:158,carbs:40,prot:0,fat:0,sodium:12,potassium:0,caffeine:200},
+  {brand:'SiS',line:'SiS Beta Fuel Gel + Caffeine',flavor:'Lemon & Lime (200mg)',serving:'1 gel (60ml/86g)',cal:158,carbs:40,prot:0,fat:0,sodium:12,potassium:0,caffeine:200},
+  {brand:'SiS',line:'SiS GO Energy Bar',flavor:'Apple & Blackcurrant',serving:'1 bar (40g)',cal:139,carbs:26,prot:4.5,fat:2,sodium:0,potassium:0,caffeine:0},
+  {brand:'SiS',line:'SiS GO Energy Bar',flavor:'Banana Fudge',serving:'1 bar (40g)',cal:139,carbs:26,prot:4.5,fat:2,sodium:0,potassium:121,caffeine:0},
+  {brand:'SiS',line:'SiS GO Energy Bar',flavor:'Blueberry',serving:'1 bar (40g)',cal:139,carbs:26,prot:4.5,fat:2,sodium:0,potassium:0,caffeine:0},
+  {brand:'SiS',line:'SiS GO Energy Bar',flavor:'Chocolate Fudge',serving:'1 bar (40g)',cal:139,carbs:26,prot:4.5,fat:2,sodium:0,potassium:0,caffeine:0},
+  {brand:'SiS',line:'SiS GO Energy Bar',flavor:'Lemon',serving:'1 bar (40g)',cal:139,carbs:26,prot:4.5,fat:2,sodium:0,potassium:0,caffeine:0},
+  {brand:'SiS',line:'SiS GO Energy Bar',flavor:'Orange',serving:'1 bar (40g)',cal:139,carbs:26,prot:4.5,fat:2,sodium:0,potassium:0,caffeine:0},
+  {brand:'SiS',line:'SiS GO Energy Bar',flavor:'Red Berry',serving:'1 bar (40g)',cal:139,carbs:26,prot:4.5,fat:2,sodium:0,potassium:0,caffeine:0},
+  {brand:'SiS',line:'SiS GO Energy Bar',flavor:'Strawberry',serving:'1 bar (40g)',cal:139,carbs:26,prot:4.5,fat:2,sodium:0,potassium:0,caffeine:0},
+  {brand:'SiS',line:'SiS Beta Fuel Bar',flavor:'Orange',serving:'1 bar (60g)',cal:186,carbs:45,prot:0,fat:0,sodium:44,potassium:0,caffeine:0},
+  {brand:'SiS',line:'SiS Beta Fuel Bar',flavor:'Lemon',serving:'1 bar (60g)',cal:186,carbs:45,prot:0,fat:0,sodium:44,potassium:0,caffeine:0},
+  {brand:'SiS',line:'SiS GO Electrolyte Hydro Tablets',flavor:'Berry',serving:'1 tab in 500ml water',cal:9,carbs:1,prot:0,fat:0,sodium:330,potassium:62,caffeine:0},
+  {brand:'SiS',line:'SiS GO Electrolyte Hydro Tablets',flavor:'Lemon',serving:'1 tab in 500ml water',cal:9,carbs:1,prot:0,fat:0,sodium:330,potassium:62,caffeine:0},
+  {brand:'SiS',line:'SiS GO Electrolyte Hydro Tablets',flavor:'Mixed',serving:'1 tab in 500ml water',cal:9,carbs:1,prot:0,fat:0,sodium:330,potassium:62,caffeine:0},
+  {brand:'SiS',line:'SiS GO Electrolyte Hydro Tablets',flavor:'Pineapple & Mango',serving:'1 tab in 500ml water',cal:9,carbs:1,prot:0,fat:0,sodium:330,potassium:62,caffeine:0},
+  {brand:'SiS',line:'SiS GO Electrolyte Hydro Tablets',flavor:'Pink Grapefruit',serving:'1 tab in 500ml water',cal:9,carbs:1,prot:0,fat:0,sodium:330,potassium:62,caffeine:0},
+  {brand:'SiS',line:'SiS GO Electrolyte Hydro Tablets',flavor:'Strawberry & Lime',serving:'1 tab in 500ml water',cal:8,carbs:1,prot:0,fat:0,sodium:332,potassium:62,caffeine:0},
+  {brand:'SiS',line:'SiS GO Electrolyte Hydro Tablets',flavor:'Cola + Caffeine (75mg)',serving:'1 tab in 500ml water',cal:7,carbs:1,prot:0,fat:0,sodium:346,potassium:0,caffeine:75},
+  {brand:'SiS',line:'SiS GO Electrolyte Drink Powder',flavor:'Orange',serving:'2 scoops (40g)',cal:146,carbs:36,prot:0,fat:0,sodium:200,potassium:60,caffeine:0},
+  {brand:'SiS',line:'SiS GO Electrolyte Drink Powder',flavor:'Lemon',serving:'2 scoops (40g)',cal:146,carbs:36,prot:0,fat:0,sodium:200,potassium:60,caffeine:0},
+  {brand:'SiS',line:'SiS GO Electrolyte Drink Powder',flavor:'Blackcurrant',serving:'2 scoops (40g)',cal:146,carbs:36,prot:0,fat:0,sodium:200,potassium:60,caffeine:0},
+  {brand:'SiS',line:'SiS GO Energy Drink Powder',flavor:'Orange',serving:'3 scoops (50g)',cal:189,carbs:47,prot:0,fat:0,sodium:0,potassium:0,caffeine:0},
+  {brand:'SiS',line:'SiS GO Energy Drink Powder',flavor:'Lemon',serving:'3 scoops (50g)',cal:189,carbs:47,prot:0,fat:0,sodium:0,potassium:0,caffeine:0},
+  {brand:'SiS',line:'SiS GO Energy Drink Powder',flavor:'Blackcurrant',serving:'3 scoops (50g)',cal:189,carbs:47,prot:0,fat:0,sodium:0,potassium:0,caffeine:0},
+  {brand:'SiS',line:'SiS REGO Rapid Recovery',flavor:'Chocolate',serving:'1 scoop (50g)',cal:180,carbs:22,prot:20,fat:1.1,sodium:400,potassium:2,caffeine:0},
+  {brand:'SiS',line:'SiS REGO Rapid Recovery',flavor:'Vanilla',serving:'1 scoop (50g)',cal:180,carbs:22,prot:20,fat:1.1,sodium:400,potassium:2,caffeine:0},
+  {brand:'SiS',line:'SiS REGO Rapid Recovery',flavor:'Strawberry',serving:'1 scoop (50g)',cal:180,carbs:22,prot:20,fat:1.1,sodium:400,potassium:2,caffeine:0},
+  {brand:'SiS',line:'SiS REGO Rapid Recovery',flavor:'Banana',serving:'1 scoop (50g)',cal:180,carbs:22,prot:20,fat:1.1,sodium:400,potassium:2,caffeine:0}
+];
+
+function gusisLinesFor(brand){
+  var seen={},out=[];
+  GUSIS_PRODUCTS.forEach(function(p){
+    if(brand&&p.brand!==brand)return;
+    if(!seen[p.line]){seen[p.line]=true;out.push(p.line);}
+  });
+  return out;
+}
+function populateGusisCategoryFilter(){
+  var catSel=document.getElementById('gusisCategoryFilter');
+  if(!catSel)return;
+  var brand=(document.getElementById('gusisBrandFilter')||{}).value||'';
+  var cur=catSel.value;
+  var lines=gusisLinesFor(brand);
+  catSel.innerHTML='<option value="">All Types</option>'+lines.map(function(l){return '<option value="'+l+'">'+l+'</option>';}).join('');
+  if(lines.indexOf(cur)!==-1)catSel.value=cur;
+}
+function renderGusisPicker(){
+  populateGusisCategoryFilter();
+  var brand=(document.getElementById('gusisBrandFilter')||{}).value||'';
+  var cat=(document.getElementById('gusisCategoryFilter')||{}).value||'';
+  var sel=document.getElementById('gusisProductSelect');
+  if(!sel)return;
+  var opts=[],validIdx={};
+  GUSIS_PRODUCTS.forEach(function(p,idx){
+    if(brand&&p.brand!==brand)return;
+    if(cat&&p.line!==cat)return;
+    var caf=p.caffeine?' · '+p.caffeine+'mg caf':'';
+    validIdx[idx]=true;
+    opts.push('<option value="'+idx+'">'+escHtml(p.flavor)+' ('+p.cal+' cal, '+p.carbs+'g carb'+caf+')</option>');
+  });
+  var curVal=sel.value;
+  sel.innerHTML=opts.length?opts.join(''):'<option value="">No products match</option>';
+  if(validIdx[curVal])sel.value=curVal;
+  gusisUpdatePreview();
+}
+function gusisUpdatePreview(){
+  var sel=document.getElementById('gusisProductSelect'),prev=document.getElementById('gusisPreview');
+  if(!sel||!prev)return;
+  var p=GUSIS_PRODUCTS[parseInt(sel.value,10)];
+  if(!p){prev.textContent='';return;}
+  var bits=[p.serving,p.cal+' cal',p.carbs+'g carb'];
+  if(p.sodium)bits.push(p.sodium+'mg sodium');
+  if(p.potassium)bits.push(p.potassium+'mg potassium');
+  if(p.caffeine)bits.push(p.caffeine+'mg caffeine');
+  if(p.prot)bits.push(p.prot+'g protein');
+  prev.textContent=bits.join(' · ');
+}
+function gusisQuickAdd(){
+  var sel=document.getElementById('gusisProductSelect');
+  if(!sel||sel.value==='')return;
+  var p=GUSIS_PRODUCTS[parseInt(sel.value,10)];
+  if(!p)return;
+  var item={
+    id:'f'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+    meal:'sports',name:p.line+' – '+p.flavor,servingLabel:p.serving,servings:1,
+    cal:p.cal||null,prot:p.prot||null,fat:p.fat||null,carbs:p.carbs||null
+  };
+  MICRO_FIELDS.forEach(function(f){item[f]=(p[f]!==undefined&&p[f]!==null&&p[f]!==0)?p[f]:null;});
+  if(!window._foodLog)window._foodLog=[];
+  window._foodLog.push(item);
+  _setMealOpen('sports',true);
+  renderFoodItems();save();
+  if(typeof v26Toast==='function')v26Toast('Added '+item.name+' to Sports Nutrition');
+  var flash=document.getElementById('gusisAddFlash');
+  if(flash){flash.textContent='✓ Added '+p.flavor+' to Sports Nutrition';flash.style.display='block';setTimeout(function(){flash.style.display='none';},2500);}
+}
 
 function _mkMacroCell(labelTxt, field, val, highlight, itemId){
   var lbl=document.createElement('label');
