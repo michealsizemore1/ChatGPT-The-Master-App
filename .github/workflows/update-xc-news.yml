@@ -1,0 +1,35 @@
+name: Update XC news
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Sundays at 17:00 UTC (after the weekend's meets have been covered).
+    - cron: "0 17 * * 0"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: xc-news
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the app
+        uses: actions/checkout@v5
+
+      - name: Refresh XC news
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          python3 scripts/update_xc_news.py
+          if git diff --quiet -- data/xc-news.json; then
+            echo "XC news is unchanged."
+          else
+            git add data/xc-news.json
+            git commit -m "Update XC news"
+            git pull --rebase origin main
+            git push
+          fi
