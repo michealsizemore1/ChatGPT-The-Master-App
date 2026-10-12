@@ -2722,6 +2722,21 @@ body{
         <span>💪 Sports Nutrition</span><div class="meal-right"><span class="meal-subtotal" id="st-sports" style="font-size:0.75rem;color:#888;"></span><button onclick="event.stopPropagation();saveMealFromSection('sports')" class="meal-action-btn" title="Save meal" aria-label="Save sports nutrition meal">&#x1F4BE;</button><button onclick="event.stopPropagation();addFoodItem('sports')" class="meal-add-btn" style="background:#27ae60;">+ Add</button><span class="meal-chevron" id="chev-sports">▸</span></div>
       </div>
       <div class="meal-body" id="mb-sports" style="display:none;"><div id="foodList-sports"></div>
+        <div style="padding:8px;margin:4px 8px 0;background:#eafaf0;border:1px solid #bbe8cc;border-radius:7px;">
+          <div style="font-size:0.78rem;font-weight:800;color:#1a7a40;margin-bottom:6px;">&#x26A1; GU / SiS Quick Add</div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:5px;">
+            <select id="gusisBrandFilter" onchange="renderGusisPicker()" style="flex:1;min-width:90px;border:1px solid #9fd8b3;border-radius:5px;padding:5px 6px;font-size:0.78rem;background:#fff;">
+              <option value="">All Brands</option>
+              <option value="GU">GU Energy</option>
+              <option value="SiS">SiS</option>
+            </select>
+            <select id="gusisCategoryFilter" onchange="renderGusisPicker()" style="flex:1;min-width:110px;border:1px solid #9fd8b3;border-radius:5px;padding:5px 6px;font-size:0.78rem;background:#fff;"><option value="">All Types</option></select>
+          </div>
+          <select id="gusisProductSelect" onchange="gusisUpdatePreview()" style="width:100%;border:1px solid #9fd8b3;border-radius:5px;padding:6px 7px;font-size:0.8rem;background:#fff;margin-bottom:5px;box-sizing:border-box;"></select>
+          <div id="gusisPreview" style="font-size:0.7rem;color:#2f7d50;margin-bottom:6px;min-height:1em;"></div>
+          <button type="button" onclick="gusisQuickAdd()" style="width:100%;background:#27ae60;color:#fff;border:none;border-radius:6px;padding:7px;font-size:0.8rem;font-weight:700;cursor:pointer;">+ Add to Sports Nutrition</button>
+          <div id="gusisAddFlash" style="display:none;margin-top:5px;color:#16a34a;font-size:0.78rem;font-weight:700;"></div>
+        </div>
         <div style="padding:6px 8px 8px;"><textarea id="mnotes-sports" rows="1" placeholder="Sports nutrition notes..." oninput="save()" style="width:100%;border:1px solid #e9ecef;border-radius:5px;padding:4px 8px;font-size:0.78rem;resize:vertical;font-family:inherit;box-sizing:border-box;background:#fafafa;color:#555;"></textarea><div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;"><button onclick="openCopyMealToDate('sports')" class="meal-action-btn">&#x1F4C5; Copy to Date</button></div></div>
       </div>
     </div>
@@ -2818,6 +2833,7 @@ body{
       <span>&#x1F955; <strong id="totVitA">0</strong>mcg vit A</span>
       <span>&#x1F34A; <strong id="totVitC">0</strong>mg vit C</span>
       <span>&#x1F34C; <strong id="totPotassium">0</strong>mg potassium</span>
+      <span>&#x2615; <strong id="totCaffeine">0</strong>mg caffeine</span>
       </div>
       <div style="font-size:.62rem;color:#94a3b8;margin-top:5px;line-height:1.35;">These totals are only as complete as the nutrition information available for each logged food.</div>
     </details>

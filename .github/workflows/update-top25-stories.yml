@@ -1,0 +1,35 @@
+name: Update Top 25 stories
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Sundays at 18:00 UTC (after Saturday's slate wraps and the new AP poll drops).
+    - cron: "0 18 * * 0"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: top25-stories
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the app
+        uses: actions/checkout@v5
+
+      - name: Refresh Top stories
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          python3 scripts/update_top25_stories.py
+          if git diff --quiet -- data/top25-stories.json; then
+            echo "Top stories are unchanged."
+          else
+            git add data/top25-stories.json
+            git commit -m "Update Top 25 stories"
+            git pull --rebase origin main
+            git push
+          fi

@@ -324,7 +324,7 @@ function renderScore(g){
  const network=c.broadcasts?.[0]?.names?.[0]||'';
  return `<div class="score-row-wrap"><button class="score-row ${st==='in'?'live':''}" data-score-select="${g.id}"><div class="sr-teams">${teams.map(t=>scoreRowTeam(c,st,t)).join('')}</div>${scoreRowSituation(g,c,st)}</button>${network?`<div class="sr-network"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M8 2l4 3 4-3"/></svg>${esc(network)}</div>`:''}</div>`;
 }
-const gameStateOrder={in:0,post:1,pre:2};
+const gameStateOrder={in:0,pre:1,post:2};
 function renderScoreStrip(){
  const sorted=[...state.games].sort((a,b)=>(gameStateOrder[a.status?.type?.state]??3)-(gameStateOrder[b.status?.type?.state]??3)||new Date(a.date)-new Date(b.date));
  let liveCenterAttached=false;

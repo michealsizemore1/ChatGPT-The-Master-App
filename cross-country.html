@@ -203,7 +203,7 @@ html{font-size:16px}
   <section id="newsView" class="hide">
     <div class="hero">
       <div class="eyebrow">NCAA cross country</div>
-      <div class="hero-row"><h1>News</h1><div class="stamp">CHECKED <b>8 SEP 2026</b></div></div>
+      <div class="hero-row"><h1>News</h1><div class="stamp">CHECKED <b id="newsCheckedDate">8 SEP 2026</b></div></div>
       <p class="source">Tap a headline to read it at the source.</p>
     </div>
     <div class="section-card">
@@ -307,8 +307,11 @@ function renderRecords(){
 }
 
 // -------- News --------
-// [ISO date, headline, source, url, summary]. Checked 20 September 2026.
-const NEWS=[
+// [ISO date, headline, source, url, summary]. Fallback shown only until
+// data/xc-news.json loads (or if it fails to load) — the live list is
+// fetched by loadNews() below and refreshed weekly by
+// .github/workflows/update-xc-news.yml.
+let NEWS=[
  ['2026-09-19','BYU men win loaded John McNichols Invitational; Northern Arizona and Stanford take women’s team titles','BYU Athletics','https://byucougars.com/news/2026/09/19/kitchen-leads-byu-to-win-in-john-mcnichols-invitational','Tayvon Kitchen’s 3rd-place run led BYU past a 20-team field that included five other ranked programs; Northern Arizona (61 pts) and Stanford (18 pts) won separate women’s races at the same Indiana State meet.'],
  ['2026-09-18','Iowa State men roll to Roy Griak Invitational title with five scorers in the top 10','Iowa State Athletics','https://cyclones.com/news/2026/9/18/cross-country-five-men-finish-in-top-10-to-secure-griak-invitational-team-title','The Cyclones won with 24 points while resting some top runners, a depth statement early in the season.'],
  ['2026-09-05','Oklahoma State sweeps home-opening Cowboy Preview','Oklahoma Athletics','https://soonersports.com/news/2026/9/5/cross-country-sooners-take-second-at-cowboy-jamboree','Preseason No. 1 Oklahoma State topped both races in Stillwater; in-state rival Oklahoma was runner-up in each.'],
@@ -322,8 +325,24 @@ function renderNews(){
     return '<article class="story"><div class="newsdate">'+esc(dt.d)+'<small>'+esc(dt.y)+'</small></div><div>'
       +'<h3><a href="'+esc(row[3])+'" target="_blank" rel="noopener">'+esc(row[1])+'</a></h3>'
       +'<div class="where">'+esc(row[2])+'</div>'
-      +'<div class="detail">'+esc(row[4])+'</div></div></article>';
+      +(row[4]?'<div class="detail">'+esc(row[4])+'</div>':'')+'</div></article>';
   }).join('');
+}
+async function loadNews(){
+  try{
+    const res=await fetch('data/xc-news.json?v='+Date.now(),{cache:'no-store'});
+    if(!res.ok)throw new Error('News unavailable');
+    const data=await res.json();
+    if(Array.isArray(data.items)&&data.items.length){
+      NEWS=data.items;
+      const checked=$('#newsCheckedDate');
+      if(checked&&data.updatedAt){
+        const d=new Date(data.updatedAt);
+        checked.textContent=d.getDate()+' '+NEWS_MONTHS[d.getMonth()].toUpperCase()+' '+d.getFullYear();
+      }
+      renderNews();
+    }
+  }catch(e){}
 }
 
 
@@ -433,6 +452,7 @@ let startTab='rankings';
 try{const saved=localStorage.getItem('xc-tab');if(TABS.indexOf(saved)>-1)startTab=saved;}catch(e){}
 showTab(startTab);
 renderRankings();renderMeets();renderRecords();renderNews();renderConferences();
+loadNews();
 </script>
 </body>
 </html>
