@@ -240,9 +240,9 @@ html{font-size:14px}
 
   <section id="entriesView" class="hide">
     <div class="hero">
-      <div class="eyebrow">Bank of America Chicago Marathon &middot; Oct 11 &middot; Elite fields set</div>
-      <div class="hero-row"><h1>Entries</h1><div class="stamp">STARTS <b>11 OCT 2026</b></div></div>
-      <p class="source">Chicago&rsquo;s professional field was confirmed Jul 23 and reconfirmed with race-day timing Sep 23 &mdash; 72 runners across the two lists. Defending champion Jacob Kiplimo (2:00:28) headlines one of the deepest men&rsquo;s fields in race history against Amos Kipruto and Charles Hicks; defending champion Hawi Feysa faces Brigid Kosgei and Sharon Lokedi in the women&rsquo;s race. Race day is Sunday Oct 11, with the professional start at 7:30 AM CDT (6:30 AM MDT); wheelchair racers go off at 7:20 AM CDT. Results land at <a href="https://www.chicagomarathon.com/runners/race-results/" target="_blank" rel="noopener">chicagomarathon.com</a>.</p>
+      <div class="eyebrow">Bank of America Chicago Marathon &middot; Oct 11 &middot; Final results</div>
+      <div class="hero-row"><h1>Entries</h1><div class="stamp">RESULTS <b>11 OCT 2026</b></div></div>
+      <p class="source">Amos Kipruto ran away from a loaded field to win in a personal-best 2:01:09, with defending champion Jacob Kiplimo fading to 4th (2:04:18) behind Tadese Takele Bikila (2:02:56) and Milkesa Mengesha (2:03:46). Hawi Feysa defended her title in 2:13:33, holding off Sharon Lokedi (2:14:07) and Brigid Kosgei (2:14:55). Full results and wheelchair times &mdash; Catherine Debrunner&rsquo;s 1:33:16 world record among them &mdash; are at <a href="https://www.chicagomarathon.com/runners/race-results/" target="_blank" rel="noopener">chicagomarathon.com</a>.</p>
     </div>
     <div class="panel">
       <div class="controls">
@@ -250,13 +250,13 @@ html{font-size:14px}
         <div class="chips" id="entriesChips" role="tablist" aria-label="Event"></div>
       </div>
       <div class="event-note" id="entriesNote"></div>
-      <div class="list-head"><span>&nbsp;</span><span>Athlete</span><span>SB / PB &middot; rank</span></div>
+      <div class="list-head"><span>&nbsp;</span><span>Athlete</span><span>Result / PB</span></div>
       <div id="entriesList"></div>
     </div>
     <div class="section-card" style="margin-top:18px">
       <div class="eyebrow">Grant Park &middot; Oct 11</div>
       <h2>Meet timetable</h2>
-      <p class="note">The professional start, men and women together, plus the wheelchair, handcycle and mass-participation waves. Mountain Time first, Chicago local time underneath. Broadcast coverage begins around 6:00 AM MDT on Peacock and NBC 5 Chicago.</p>
+      <p class="note">The professional start, men and women together, plus the wheelchair, handcycle and mass-participation waves, as run on race day. Mountain Time first, Chicago local time underneath. Replays aired on Peacock and NBC 5 Chicago.</p>
       <div class="tt-head">
         <div class="seg" id="ttDays" role="tablist" aria-label="Day"></div>
         <span class="sortlabel">Show</span>
@@ -311,7 +311,7 @@ html{font-size:14px}
 
 <script src="version-check.js"></script>
 <script>
-const APP_VERSION='2026-10-08-1';
+const APP_VERSION='2026-10-12-1';
 checkForNewerAppVersion(APP_VERSION, 'tf');
 
 // [name, country, ranking score, 2026 season best]  "rd" marks a road time used where there is no track mark.
@@ -381,8 +381,8 @@ const ULTRA={
   '100M':[['Katie Schide','USA',830,'23-34'],['Jennifer Lichter','USA',830,'23-34'],['Courtney Dauwalter','USA',828,'40-44'],['Riley Brady','USA',817,'23-34'],['Antonina Iushina','RUS',816,'23-34'],['Tara Dower','USA',812,'23-34'],['Marianne Hogan','CAN',809,'35-39'],['Fuzhao Xiang','CHN',806,'23-34'],['Caitlin Fielder','NZL',805,'23-34'],["Blandine L'Hirondel",'FRA',803,'35-39']]
  }
 };
-// Chicago Marathon elite entry lists, professional field confirmed 23 Jul 2026; race-day timing confirmed 23 Sep 2026.
-// [name, country, entry mark used as both SB and PB, personal best, world rank (blank; not published for this field)]
+// Chicago Marathon final results (men and women); race run 11 Oct 2026.
+// [name, country, finish time, personal best entering the race, world rank (blank; not meaningful for results)]
 const ENTRY_EVENTS=['Marathon'];
 // Elite start only; men and women start together. Chicago sits on CDT (UTC-5), one hour ahead of Denver's MDT (UTC-6) for these dates.
 const TIMETABLE=[
@@ -465,21 +465,21 @@ const ENTRY_WHEN=(()=>{const out={men:{},women:{}};
  return out})();
 const ENTRIES={
  men:{
-  'Marathon':[['Jacob Kiplimo','UGA','2:00:28','2:00:28',''],['Amos Kipruto','KEN','2:01:39','2:01:39',''],['Milkesa Mengesha','ETH','2:03:17','2:03:17',''],['Tadese Takele Bikila','ETH','2:03:23','2:03:23',''],['Bashir Abdi','BEL','2:03:36','2:03:36',''],['Daniel Mateiko','KEN','2:03:44','2:03:44',''],['Asrar Hiyrden','ETH','2:03:59','2:03:59',''],['Charles Hicks','USA','2:04:35','2:04:35',''],['Suguru Osako','JPN','2:04:55','2:04:55',''],['Mohamed Reda El Aaraby','MAR','2:05:18','2:05:18',''],['Clayton Young','USA','2:05:41','2:05:41',''],['Sondre Moen','NOR','2:05:48','2:05:48',''],['Vincent Mauri','USA','2:05:54','2:05:54',''],['Yemane Haileselassie','ERI','2:06:06','2:06:06',''],['Galen Rupp','USA','2:06:07','2:06:07',''],['Akira Akasaki','JPN','2:06:15','2:06:15',''],['Boki Diriba','ETH','2:06:26','2:06:26',''],['Hendrik Pfeiffer','GER','2:06:34','2:06:34',''],['Abbabiya Simbassa','USA','2:06:53','2:06:53',''],['Tsegay Weldibanos','ERI','2:07:35','2:07:35',''],['Haftu Knight','USA','2:07:38','2:07:38',''],['Patrick Tiernan','AUS','2:07:45','2:07:45',''],['Kiyoshi Koga','JPN','2:07:46','2:07:46',''],['Matt Richtman','USA','2:07:56','2:07:56',''],['CJ Albertson','USA','2:08:17','2:08:17',''],['Daniel Mesfun','USA','2:08:24','2:08:24',''],['Alex Maier','USA','2:08:33','2:08:33',''],['Murphy Smith','USA','2:08:58','2:08:58',''],['Jorge Castelblanco','PAN','2:09:24','2:09:24',''],['Thomas Nobbs','CAN','2:09:25','2:09:25',''],['Nadeel Wildschutt','RSA','2:09:40','2:09:40',''],['Jorge Luis Cruz','MEX','2:09:43','2:09:43',''],['Brian Shrader','USA','2:09:46','2:09:46',''],['Reed Fischer','USA','2:09:47','2:09:47',''],['Ryan Johnson','USA','2:10:20','2:10:20',''],['Tesfu Tewelde','ERI','2:10:21','2:10:21',''],['Thomas Fafard','CAN','2:10:29','2:10:29',''],['Nathan Martin','USA','2:10:45','2:10:45',''],['Chris Maxon','USA','2:10:55','2:10:55',''],['Benjamin Flanagan','CAN','2:15:39','2:15:39',''],['Ben Rosa','USA','','',''],['Frank Lara','USA','','',''],['Brian Kibor','KEN','Debut','Debut',''],['Cole Sprout','USA','Debut','Debut',''],['Tomoki Ota','JPN','Debut','Debut',''],['Kieran Tuntivate','THA','Debut','Debut',''],['Adriaan Wildschutt','RSA','Debut','Debut','']]
+  'Marathon':[['Amos Kipruto','KEN','2:01:09','2:01:39',''],['Tadese Takele Bikila','ETH','2:02:56','2:03:23',''],['Milkesa Mengesha','ETH','2:03:46','2:03:17',''],['Jacob Kiplimo','UGA','2:04:18','2:00:28',''],['Boki Diriba','ETH','2:05:01','2:06:26',''],['Daniel Mateiko','KEN','2:05:23','2:03:44',''],['Clayton Young','USA','2:05:23','2:05:41',''],['Charles Hicks','USA','2:05:35','2:04:35',''],['Akira Akasaki','JPN','2:05:48','2:06:15',''],['Vincent Mauri','USA','2:06:46','2:05:54','']]
  },
  women:{
-  'Marathon':[['Brigid Kosgei','KEN','2:14:04','2:14:04',''],['Hawi Feysa','ETH','2:14:57','2:14:57',''],['Sutume Kebede','ETH','2:15:55','2:15:55',''],['Megertu Alemu','ETH','2:16:34','2:16:34',''],['Brillian Kipkoech','KEN','2:17:05','2:17:05',''],['Sharon Lokedi','KEN','2:17:22','2:17:22',''],['Degitu Azimeraw','ETH','2:17:58','2:17:58',''],['Loice Chemnung','KEN','2:18:24','2:18:24',''],['Joan Kilimo','KEN','2:18:40','2:18:40',''],['Magdalyne Masai','KEN','2:18:58','2:18:58',''],['Fantu Worku','ETH','2:19:08','2:19:08',''],['Mary Ngugi Cooper','KEN','2:19:26','2:19:26',''],['Sara Hall','USA','2:20:32','2:20:32',''],['Yuka Akasaki','JPN','2:21:33','2:21:33',''],['Susanna Sullivan','USA','2:21:56','2:21:56',''],['Des Linden','USA','2:22:38','2:22:38',''],['Isobel Batt-Doyle','AUS','2:22:59','2:22:59',''],['Sara Vaughn','USA','2:23:24','2:23:24',''],['Natosha Rogers','USA','2:23:28','2:23:28',''],['Molly Born','USA','2:24:10','2:24:10',''],['Dakotah Popehn','USA','2:24:20','2:24:20',''],['Gabriella Rooker','USA','2:24:29','2:24:29',''],['Elena Hayday','USA','2:24:45','2:24:45',''],['Jess Warner-Judd','GBR','2:24:45','2:24:45',''],['Kristine Eikrem Engeset','NOR','2:28:57','2:28:57',''],['Amanda Mosborg','USA','2:32:01','2:32:01',''],['Alexandra Aldana','COL','2:40:41','2:40:41',''],['Lexie Thompson','USA','','',''],['Laura Galvan','MEX','Debut','Debut',''],['Emma Grace Hurley','USA','Debut','Debut',''],['Amy-Eloise Neale','GBR','Debut','Debut','']]
+  'Marathon':[['Hawi Feysa','ETH','2:13:33','2:14:57',''],['Sharon Lokedi','KEN','2:14:07','2:17:22',''],['Brigid Kosgei','KEN','2:14:55','2:14:04',''],['Mary Ngugi Cooper','KEN','2:17:23','2:19:26',''],['Joan Kilimo','KEN','2:18:38','2:18:40',''],['Isobel Batt-Doyle','AUS','2:20:38','2:22:59',''],['Emma Grace Hurley','USA','2:20:47','Debut',''],['Degitu Azimeraw','ETH','2:21:00','2:17:58',''],['Magdalyne Masai','KEN','2:21:11','2:18:58',''],['Loice Chemnung','KEN','2:21:19','2:18:24','']]
  }
 };
 const ENTRIES_PENDING=[
  ['New York City Marathon','Nov 1','Professional field announced Aug 19 (Obiri, Hassan, Kipruto, Mantz headline); full start list and timetable to follow closer to race day.']
 ];
 const UPCOMING=[
- {d:'Oct 11',y:'2026',name:'Chicago Marathon',where:'Chicago, USA',detail:'Defending champion Jacob Kiplimo (2:00:28) headlines one of the deepest men’s fields in race history against Amos Kipruto and Charles Hicks; defending champion Hawi Feysa faces Brigid Kosgei and Sharon Lokedi in a stacked women’s race.',watch:'Peacock and NBC Chicago &middot; 6:00 AM MDT',tag:'Marathon major',cls:'major',links:[['Official site','https://www.chicagomarathon.com/'],['Deepest field in race history','https://www.nbcchicago.com/news/sports/chicago-marathon/2026-chicago-marathon-elite-lineup-one-of-the-deepest-fields-in-race-history/3965200/'],['Race-day schedule','https://www.nbcchicago.com/news/sports/chicago-marathon/what-time-does-the-2026-chicago-marathon-start-see-the-full-race-day-schedule/3993138/']]},
  {d:'Nov 1',y:'2026',name:'New York City Marathon',where:'New York, USA',detail:'Defending champions Hellen Obiri and Benson Kipruto headline against Sifan Hassan and American record holder Conner Mantz. Five boroughs and the largest field in the sport; clocks go back the same morning, so the start lands at 6:00 AM once Mountain Time returns to standard.',watch:'ESPN2 and ABC &middot; 6:00 AM MST',tag:'Marathon major',cls:'major',links:[['Official site','https://www.nyrr.org/tcsnycmarathon'],['Professional field announced','https://citiusmag.com/articles/new-york-city-marathon-2026-professional-elite-field-obiri-kipruto-hassan-mantz-talbi-mcclain-kelati']]},
  {d:'Dec 6',y:'2026',name:'Shanghai Marathon',where:'Shanghai, China',detail:'A candidate race under assessment to join the majors in 2027.',watch:'Broadcast details not yet announced',tag:'Candidate major',cls:'',links:[['Race details & schedule','https://www.watchathletics.com/schedule/watchlive/11238'],['Bid to join the World Marathon Majors','https://marathonhandbook.com/shanghai-marathon-is-one-race-away-from-joining-the-worlds-most-exclusive-running-club/']]},
  {d:'Dec 6',y:'2026',name:'Valencia Marathon',where:'Valencia, Spain',detail:'One of the fastest courses in the world — Agnes Ngetich’s half marathon and 10km world bests have both come on these roads.',watch:'Broadcast details not yet announced',tag:'Elite race',cls:'',links:[['Official site','https://www.valenciaciudaddelrunning.com/en/marathon/'],['Kejelcha and Tesfay lead elite lineup','https://www.valenciaciudaddelrunning.com/en/kejelcha-tesfay-lead-elite-lineup-big-ambitions-valencia-marathon-2026/']]},
- {d:'Mar 7',y:'2027',name:'Tokyo Marathon',where:'Tokyo, Japan',detail:'The newest of the six World Marathon Majors and the first big race of the 2027 season.',watch:'Broadcast details not yet announced',tag:'Marathon major',cls:'major',links:[['Official site','https://www.marathon.tokyo/en/'],['Prize money raised, field expanded for 2027','https://marathonhandbook.com/tokyo-marathon-pushes-champion-prize-to-170000-and-expands-field-to-40000-for-2027/']]}
+ {d:'Mar 7',y:'2027',name:'Tokyo Marathon',where:'Tokyo, Japan',detail:'The newest of the six World Marathon Majors and the first big race of the 2027 season.',watch:'Broadcast details not yet announced',tag:'Marathon major',cls:'major',links:[['Official site','https://www.marathon.tokyo/en/'],['Prize money raised, field expanded for 2027','https://marathonhandbook.com/tokyo-marathon-pushes-champion-prize-to-170000-and-expands-field-to-40000-for-2027/']]},
+ {d:'Apr 19',y:'2027',name:'Boston Marathon',where:'Boston, USA',detail:'The 131st running of the oldest annual marathon, on Patriots’ Day weekend.',watch:'Broadcast details not yet announced',tag:'Marathon major',cls:'major',links:[['Official site','https://www.baa.org/races/boston-marathon']]}
 ];
 const DL_SEASON=[
  ['May 16','Keqiao / Shanghai','China'],['May 23','Xiamen','China'],['May 31','Rabat','Morocco'],
@@ -491,33 +491,31 @@ const DL_SEASON=[
 
 // Section news. [ISO date, headline, publisher, url, one-line summary]
 // Checked 8 October 2026; the twice-weekly refresh replaces these.
-const NEWS_CHECKED='2026-10-08';
+const NEWS_CHECKED='2026-10-12';
 const NEWS={
  track:[
+  ['2026-10-12','Wanda Diamond League publishes 2027 calendar','Diamond League','https://www.diamondleague.com/wanda-diamond-league-publishes-2027-calendar/','The 2027 season opens in Doha on 7 May and closes with a two-day final in Zurich on 25–26 August, with Shanghai/Keqiao, Xiamen, Rome, Rabat, Oslo, Stockholm, Paris, Eugene, Monaco, Lausanne, London, Silesia and Brussels filling out the 15-meeting calendar.'],
   ['2026-10-06','Nominees announced for World Athlete of the Year 2026','World Athletics','https://worldathletics.org/awards/news/nominees-announced-world-athlete-of-the-year-2026','World Athletics named 10 women and 10 men as finalists for its 2026 Athlete of the Year awards, including Mondo Duplantis, Josh Kerr, Tigst Assefa and Agnes Ngetich, with winners revealed in Monaco on 29 November.'],
-  ['2026-10-05','WTW: Jakob Doubles in October, Aidan Troutner & Emily Venters Dominate US 10K, & Why Winning World Juniors Doesn’t Matter','LetsRun.com','https://www.letsrun.com/news/2026/10/wtw-jakob-doubles-in-october-aidan-troutner-emily-venters-dominate-us-10k-why-winning-world-juniors-doesnt-matter/','Jakob Ingebrigtsen swept the 1500m (3:40.7) and 5000m (13:26) at his own RunFest Norway in Sandnes, Mondo Duplantis announced he will skip the winter season, and Cam Myers was confirmed as the 2026 Diamond League champion.'],
-  ['2026-09-30','Ehammer and Kälin complete historic Swiss double in World Athletics Combined Events Tour','World Athletics','https://worldathletics.org/news/press-releases/ehammer-kalin-combined-events-tour-2026-winners','Simon Ehammer and Annik Kälin topped the 2026 Combined Events Tour, the first time Swiss athletes have won either standing since the tour began in 1998.'],
-  ['2026-09-29','Zhang’s monster hammer throw and Yavi’s distance treble cap the Asian Games in Nagoya','World Athletics','https://worldathletics.org/news/report/zhang-yavi-pathirage-asian-games-2026-nagoya','Zhang Jiale won the hammer with a Games record 78.27m, Winfred Yavi completed a distance double by adding the 5000m to her steeplechase gold, and Rumesh Pathirage took the javelin at 88.55m.']
+  ['2026-10-05','WTW: Jakob Doubles in October, Aidan Troutner & Emily Venters Dominate US 10K, & Why Winning World Juniors Doesn’t Matter','LetsRun.com','https://www.letsrun.com/news/2026/10/wtw-jakob-doubles-in-october-aidan-troutner-emily-venters-dominate-us-10k-why-winning-world-juniors-doesnt-matter/','Jakob Ingebrigtsen swept the 1500m (3:40.7) and 5000m (13:26) at his own RunFest Norway in Sandnes, Mondo Duplantis announced he will skip the winter season, and Cam Myers was confirmed as the 2026 Diamond League champion.']
  ],
  road:[
+  ['2026-10-11','Kipruto and Feysa claim second Majors titles in Chicago','World Marathon Majors','https://www.worldmarathonmajors.com/content-hub/kipruto-and-feysa-claim-second-majors-titles','Amos Kipruto ran a personal-best 2:01:09 and Hawi Feysa defended her title in 2:13:33 at the Bank of America Chicago Marathon, where Catherine Debrunner also set a wheelchair world record.'],
+  ['2026-10-11','Kipchoge wins Melbourne Marathon in a course record at 41','Watch Athletics','https://www.watchathletics.com/article/13846/eliud-kipchoge-wins-melbourne-marathon-in-course-record-of-2-09-10','Eliud Kipchoge won the third stop of his seven-continent World Tour in 2:09:10, with Camille French taking the women’s race in 2:28:25.'],
   ['2026-10-04','Jepkosgei smashes Cardiff Half Marathon course record as Kenya complete double','Athletics Weekly','https://athleticsweekly.com/news/jepkosgei-smashes-cardiff-half-marathon-course-record-as-kenya-complete-double-1040013434/','Joyciline Jepkosgei ran 65:40 to take the course record and Gideon Kiprotich won the men’s race in 59:34.'],
-  ['2026-09-27','Adola regains his Berlin crown as Assefa’s world-record bid fades late','LetsRun.com','https://www.letsrun.com/news/2026/09/2026-berlin-marathon-results-guye-adola-20250-and-tigst-assefa-21104-win/','Guye Adola won in 2:02:50 in a field missing late scratch Kenenisa Bekele; Tigst Assefa held on for 2:11:04 after cramping in the closing kilometres.'],
-  ['2026-09-27','McColgan wins a record fourth Vitality London 10,000 title','Athletics Weekly','https://athleticsweekly.com/news/eilish-mccolgan-claims-record-fourth-london-10000-title-1040013343/','McColgan ran 31:50 to become the event’s most successful woman; Kadar Omar Abdullahi won the men’s race in 29:20.'],
-  ['2026-09-20','Ngetich breaks the women-only half marathon world record as Copenhagen closes','World Athletics','https://worldathletics.org/en/competitions/world-athletics-road-running-championships/copenhagen26/news/report/road-running-copenhagen-26-women-half-marathon','Agnes Ngetich ran 1:05:15 to take one second off Peres Jepchirchir’s 2020 mark; Andreas Almgren won the men’s race in a European record 58:06.']
+  ['2026-09-27','Adola regains his Berlin crown as Assefa’s world-record bid fades late','LetsRun.com','https://www.letsrun.com/news/2026/09/2026-berlin-marathon-results-guye-adola-20250-and-tigst-assefa-21104-win/','Guye Adola won in 2:02:50 in a field missing late scratch Kenenisa Bekele; Tigst Assefa held on for 2:11:04 after cramping in the closing kilometres.']
  ],
  ultra:[
+  ['2026-10-12','Engelhard sweeps both races as the Mountain Running World Cup wraps in Québec','iRunFar','https://www.irunfar.com/this-week-in-running-october-12-2026','Nina Engelhard won both the uphill and up-and-down races at the Défi des Couleurs finale, while Philemon Kiriago and Meikael Beaudoin-Rousseau took the men’s up-and-down and uphill titles.'],
   ['2026-10-05','Dalton smashes the Perpetua Coast 50k course record at the USATF trail championships','iRunFar','https://www.irunfar.com/this-week-in-running-october-5-2026','Anna Dalton won the USATF 50km Trail Championships in Yachats, Oregon in 4:29, nine minutes inside the old course record, with Dylan Flewelling taking the men’s title in 3:50.'],
-  ['2026-09-28','Bódis breaks the Spartathlon course record as Johnson smashes the Bear 100 women’s mark','iRunFar','https://www.irunfar.com/this-week-in-running-september-28-2026','Tamás Bódis covered the 153-mile Spartathlon in 19:40, and Kristin Johnson took more than 90 minutes off the Bear 100 women’s course record with an 18:50 finish in Utah.'],
-  ['2026-09-25','Dunand-Pallaz shatters the GR20 fastest known time in Corsica','iRunFar','https://www.irunfar.com/aurelien-dunand-pallaz-gr20-fkt-corsica-2026','Aurélien Dunand-Pallaz covered the 166km route in 27:29, breaking François D’Haene’s 29:46:20 record by more than two hours.']
+  ['2026-09-28','Bódis breaks the Spartathlon course record as Johnson smashes the Bear 100 women’s mark','iRunFar','https://www.irunfar.com/this-week-in-running-september-28-2026','Tamás Bódis covered the 153-mile Spartathlon in 19:40, and Kristin Johnson took more than 90 minutes off the Bear 100 women’s course record with an 18:50 finish in Utah.']
  ],
  entries:[
-  ['2026-10-08','Treadmill Heroes, a Torn Hamstring, & an AR Chase: Is This The Wildest US Men’s Marathon Field in Decades?','LetsRun.com','https://www.letsrun.com/news/2026/10/treadmill-heroes-a-torn-hamstring-an-ar-chase-is-this-the-wildest-us-mens-marathon-field-in-decades/','Clayton Young will race Chicago on a torn hamstring while Vinny Mauri’s viral buildup and Charles Hicks’ American-record ambitions make the men’s field one of the wildest in decades, per LetsRun.'],
-  ['2026-10-05','Chicago Marathon Preview: Mauri, Kiplimo, Kosgei & Lokedi','LetsRun.com','https://www.letsrun.com/news/2026/10/chicago-marathon-preview-vinny-mauri-mania-american-marathon-debate-a-loaded-womens-race/','LetsRun previews Sunday’s race, weighing Vinny Mauri’s American-record bid and Jacob Kiplimo’s title defense against a women’s field led by Brigid Kosgei and Sharon Lokedi, with weather also a factor.'],
-  ['2026-10-03','Chicago Marathon 2026 final elite fields published','Watch Athletics','https://www.watchathletics.com/article/13841/chicago-marathon-2026-final-elite-fields-published','The final field confirms Alex Masai, Zach Panning and Jacob Thomson out; Bashir Abdi, Sondre Moen and six other men plus Sara Vaughn and Lexie Thompson join the start list.'],
-  ['2026-10-02','What can Vinny Mauri do in Chicago?','LetsRun.com','https://www.letsrun.com/news/2026/10/after-one-of-the-most-insane-marathon-buildups-ever-how-fast-can-strava-legend-vinny-mauri-run-at-the-chicago-marathon/','The 2:05 debutant’s viral Planet Fitness treadmill long runs have LetsRun asking whether he can threaten the American record on Oct 11.']
+  ['2026-10-11','Kipruto and Feysa claim second Majors titles','World Marathon Majors','https://www.worldmarathonmajors.com/content-hub/kipruto-and-feysa-claim-second-majors-titles','Amos Kipruto broke clear for a personal-best 2:01:09 and Hawi Feysa repeated as champion in 2:13:33, while Jacob Kiplimo and Brigid Kosgei settled for 4th and 3rd.'],
+  ['2026-10-11','Results: Chicago Marathon 2026','Watch Athletics','https://www.watchathletics.com/article/13845/results-chicago-marathon-2026','Full results show Tadese Takele Bikila and Milkesa Mengesha completing the men’s podium behind Kipruto, and debutant Emma Grace Hurley running the fastest first marathon ever by an American woman to finish 7th.'],
+  ['2026-10-08','Treadmill Heroes, a Torn Hamstring, & an AR Chase: Is This The Wildest US Men’s Marathon Field in Decades?','LetsRun.com','https://www.letsrun.com/news/2026/10/treadmill-heroes-a-torn-hamstring-an-ar-chase-is-this-the-wildest-us-mens-marathon-field-in-decades/','Clayton Young raced on a torn hamstring while Vinny Mauri’s viral buildup and Charles Hicks’ American-record ambitions made the men’s field one of the wildest in decades, per LetsRun.']
  ],
  calendar:[
-  ['2026-09-27','Berlin opens the fall marathon majors as Chicago and New York follow','LetsRun.com','https://www.letsrun.com/news/2026/09/2026-berlin-marathon-results-guye-adola-20250-and-tigst-assefa-21104-win/','Guye Adola and Tigst Assefa won in Berlin; Chicago (Oct 11) and New York (Nov 1) close out the fall season with fields now finalized for both.'],
+  ['2026-10-11','Kipruto and Feysa claim second Majors titles as Chicago wraps a loaded fall weekend','World Marathon Majors','https://www.worldmarathonmajors.com/content-hub/kipruto-and-feysa-claim-second-majors-titles','Chicago’s results — and Kipchoge’s course record in Melbourne the same day — leave New York, on Nov 1, as the year’s last major.'],
   ['2026-09-20','Ngetich’s world record caps the World Road Running Championships in Copenhagen','Al Jazeera','https://www.aljazeera.com/sports/2026/9/20/kenyas-ngetich-breaks-women-only-half-marathon-world-record-by-a-second','Kenya swept the mile, 5km and half marathon golds across the two-day championships.'],
   ['2026-06-10','Cape Town Marathon confirmed as the 8th Abbott World Marathon Major','Abbott','https://www.abbott.com/en-us/corpnewsroom/nutrition-health-and-wellness/cape-town-marathon-is-the-8-abbott-world-marathon-major','The Sanlam Cape Town Marathon completed its second year of candidacy to join the series, with its first race as a major scheduled for 23 May 2027.']
  ]
@@ -526,7 +524,7 @@ const NEWS={
 // World records. [event, mark, athlete, country, venue, date, note]
 // Track and road from the World Athletics world-record tables; ultra from the IAU record lists.
 // Both read 8 October 2026.
-const RECORDS_CHECKED='2026-10-08';
+const RECORDS_CHECKED='2026-10-12';
 const RECORDS={
  track:{
   men:[
@@ -607,7 +605,7 @@ const RECORD_SOURCE={
 
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-const state={track:{gender:'men',key:'100m',sort:'points'},road:{gender:'men',key:'10km – Half marathon',sort:'points'},ultra:{gender:'men',key:'50K',sort:'points'},entries:{gender:'men',key:'Marathon',sort:'points'}};
+const state={track:{gender:'men',key:'100m',sort:'points'},road:{gender:'men',key:'10km – Half marathon',sort:'points'},ultra:{gender:'men',key:'50K',sort:'points'},entries:{gender:'men',key:'Marathon',sort:'time'}};
 // Times come in several shapes: 9.82, 1:41.76, 12:47.62, 1:59:30, and road marks like '26:55 rd'.
 function timeSeconds(v){if(!v)return Infinity;const m=String(v).match(/[0-9]+(?::[0-9]+)*(?:\.[0-9]+)?/);if(!m)return Infinity;const parts=m[0].split(':').map(Number);if(parts.some(n=>!Number.isFinite(n)))return Infinity;return parts.reduce((a,b)=>a*60+b,0)}
 
@@ -634,7 +632,7 @@ function renderBoard(section,data,keys,notes){
 function renderEntries(){
   const s=state.entries, list=(ENTRIES[s.gender]||{})[s.key]||[];
   $('#entriesChips').innerHTML=ENTRY_EVENTS.map(k=>`<button role="tab" aria-selected="${k===s.key}" class="${k===s.key?'active':''}" data-key="${esc(k)}">${esc(k)}</button>`).join('');
-  $('#entriesNote').textContent=`${list.length} entered \u00b7 ${(ENTRY_WHEN[s.gender]||{})[s.key]||''} \u00b7 sorted by ${s.sort==='time'?'season best':'world ranking'}`;
+  $('#entriesNote').textContent=`${list.length} finished \u00b7 ${(ENTRY_WHEN[s.gender]||{})[s.key]||''} \u00b7 sorted by ${s.sort==='time'?'finish time':'world ranking'}`;
   const ordered=list.slice().sort((a,b)=>s.sort==='time'
     ? timeSeconds(a[2])-timeSeconds(b[2])
     : (Number(a[4]||9999)-Number(b[4]||9999)));
