@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-09-28-6">
+<meta name="app-build" content="2026-10-14-1">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#667eea">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,7 +16,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
 (function(){
-  var build='2026-09-28-6',checking=false;
+  var build='2026-10-14-1',checking=false;
   function checkForAppUpdate(){
     if(checking||location.protocol==='file:')return;checking=true;
     fetch(location.pathname+'?update-check='+Date.now(),{cache:'no-store'}).then(function(response){return response.text();}).then(function(html){var match=html.match(/name=["']app-build["']\s+content=["']([^"']+)/i);if(match&&match[1]!==build){location.replace(location.pathname+'?v='+encodeURIComponent(match[1]));}}).catch(function(){}).finally(function(){checking=false;});
@@ -278,7 +278,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;paddi
 .act-stat{font-size:0.82rem;color:#555;white-space:nowrap;}
 .act-stat strong{color:#2c3e50;}
 .act-badge{display:inline-block;font-size:0.7rem;font-weight:700;padding:2px 7px;border-radius:10px;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em;}
-.act-badge.garmin{background:#00b2e3;color:white;}.act-badge.stryd{background:#ff6b35;color:white;}.act-badge.manual{background:#95a5a6;color:white;}
+.act-badge.garmin{background:#00b2e3;color:white;}.act-badge.stryd{background:#ff6b35;color:white;}.act-badge.manual{background:#95a5a6;color:white;}.act-badge.strava{background:#fc4c02;color:white;}
 .act-import-info{background:#fff8f0;border:1px solid #ffd5a8;border-radius:8px;padding:12px;font-size:0.83rem;color:#7d4800;margin-bottom:14px;line-height:1.6;}
 .act-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
 @media(max-width:500px){.act-form-grid{grid-template-columns:1fr;}}
@@ -1249,7 +1249,7 @@ body{
 @media(max-width:700px){.h2-header{display:block}.h2-header-actions{justify-content:flex-start;margin-top:10px}.h2-summary-grid{grid-template-columns:repeat(2,1fr)}.h2-form-grid,.h2-insight-grid,.h2-coach-grid{grid-template-columns:1fr}.h2-wide{grid-column:auto}.h2-progress-row{grid-template-columns:1fr}.h2-habit-top,.h2-suggestion{grid-template-columns:1fr}.h2-habit-actions,.h2-suggestion-actions{justify-content:flex-end}.h2-today-control{flex-wrap:wrap}.h2-today-control button{flex:1;min-width:72px}.h2-date-btn{min-width:100px}}
 </style>
 </head>
-<body><script src="home-button.js?v=2026-09-28-6"></script>
+<body><script src="home-button.js?v=2026-10-14-1"></script>
 
 <div class="journal-floating-title" id="journalFloatingTitle" aria-hidden="true">&#x1F9ED; My Life Command Center</div>
 
@@ -1942,6 +1942,13 @@ body{
         <div><span>Critical power</span><strong><input type="number" class="tile-cp-input" id="cpInput" placeholder="280" min="1" inputmode="numeric" oninput="saveCPAndRender()" title="Editable Critical Power in watts, used for power-zone colors"> W</strong></div>
         <div><span>Max heart rate</span><strong><input type="number" class="tile-cp-input" id="hrMaxInput" placeholder="174" min="1" inputmode="numeric" oninput="saveMaxHRAndRender()" title="Editable Max Heart Rate in bpm, used for Garmin heart-rate-zone colors"> bpm</strong></div>
       </div>
+      <div style="display:flex;align-items:center;gap:4px;justify-content:center;font-size:0.68rem;color:#888;margin-top:8px;">
+        <span>Goal:</span><input type="number" id="actGoal_week" class="tile-cp-input" style="width:48px;" placeholder="20" min="0" oninput="saveActGoalAndRender('week')"> mi/wk
+      </div>
+      <div id="actGoalBarWrap_week" style="display:none;margin-top:4px;">
+        <div style="background:#e8e8e8;border-radius:6px;height:6px;overflow:hidden;"><div id="actGoalBar_week" style="height:100%;width:0%;background:#e67e22;border-radius:6px;transition:width .3s;"></div></div>
+        <div id="actGoalLbl_week" style="font-size:0.64rem;color:#999;margin-top:2px;"></div>
+      </div>
     </div>
     <div style="flex:1;min-width:120px;background:linear-gradient(135deg,#eaf3fb,#d6eaf8);border:1px solid #a9cce3;border-radius:10px;padding:10px 12px;text-align:center;">
       <div style="font-size:0.72rem;font-weight:700;color:#1a5276;text-transform:uppercase;letter-spacing:.04em;">Last Week</div>
@@ -1962,6 +1969,13 @@ body{
         <div><span>Avg power</span><strong id="wattsMTD">—</strong></div>
         <div><span>Exercise time</span><strong id="timeMTD">—</strong></div>
       </div>
+      <div style="display:flex;align-items:center;gap:4px;justify-content:center;font-size:0.68rem;color:#888;margin-top:8px;">
+        <span>Goal:</span><input type="number" id="actGoal_month" class="tile-cp-input" style="width:48px;" placeholder="80" min="0" oninput="saveActGoalAndRender('month')"> mi/mo
+      </div>
+      <div id="actGoalBarWrap_month" style="display:none;margin-top:4px;">
+        <div style="background:#e8e8e8;border-radius:6px;height:6px;overflow:hidden;"><div id="actGoalBar_month" style="height:100%;width:0%;background:#e67e22;border-radius:6px;transition:width .3s;"></div></div>
+        <div id="actGoalLbl_month" style="font-size:0.64rem;color:#999;margin-top:2px;"></div>
+      </div>
     </div>
     <div style="flex:1;min-width:120px;background:linear-gradient(135deg,#f5eef8,#e8daef);border:1px solid #c39bd3;border-radius:10px;padding:10px 12px;text-align:center;">
       <div style="font-size:0.72rem;font-weight:700;color:#6c3483;text-transform:uppercase;letter-spacing:.04em;">Year to Date</div>
@@ -1971,6 +1985,13 @@ body{
         <div><span>Avg pace</span><strong id="paceYTD">—</strong></div>
         <div><span>Avg power</span><strong id="wattsYTD">—</strong></div>
         <div><span>Exercise time</span><strong id="timeYTD">—</strong></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:4px;justify-content:center;font-size:0.68rem;color:#888;margin-top:8px;">
+        <span>Goal:</span><input type="number" id="actGoal_year" class="tile-cp-input" style="width:52px;" placeholder="1000" min="0" oninput="saveActGoalAndRender('year')"> mi/yr
+      </div>
+      <div id="actGoalBarWrap_year" style="display:none;margin-top:4px;">
+        <div style="background:#e8e8e8;border-radius:6px;height:6px;overflow:hidden;"><div id="actGoalBar_year" style="height:100%;width:0%;background:#e67e22;border-radius:6px;transition:width .3s;"></div></div>
+        <div id="actGoalLbl_year" style="font-size:0.64rem;color:#999;margin-top:2px;"></div>
       </div>
     </div>
   </div>
@@ -2086,6 +2107,7 @@ body{
         <div class="act-import-options">
           <label class="lib-add-btn" style="background:#00b2e3;cursor:pointer;" title="Import Garmin Connect CSV">Garmin CSV<input type="file" accept=".csv" style="display:none" onchange="importActivities(event,'garmin');this.closest('details').removeAttribute('open')"></label>
           <label class="lib-add-btn" style="background:#ff6b35;cursor:pointer;" title="Import Stryd CSV">Stryd CSV<input type="file" accept=".csv" style="display:none" onchange="importActivities(event,'stryd');this.closest('details').removeAttribute('open')"></label>
+          <label class="lib-add-btn" style="background:#fc4c02;cursor:pointer;" title="Import Strava bulk-export CSV (activities.csv)">Strava CSV<input type="file" accept=".csv" style="display:none" onchange="importActivities(event,'strava');this.closest('details').removeAttribute('open')"></label>
         </div>
       </details>
       <button class="lib-add-btn" style="background:#27ae60;" onclick="exportActivities()">&#x1F4BE; Export</button>
@@ -2129,7 +2151,7 @@ body{
       <div><label class="act-label">Run Map / Route Link</label><input type="url" id="actRouteUrl" class="act-input" inputmode="url" placeholder="Garmin, Strava, Google Maps, etc."></div>
       <div><label class="act-label">Source</label>
         <select id="actSource" class="act-input">
-          <option value="manual">Manual</option><option value="garmin">Garmin</option><option value="stryd">Stryd</option><option value="screenshot">Screenshot (AI)</option>
+          <option value="manual">Manual</option><option value="garmin">Garmin</option><option value="stryd">Stryd</option><option value="strava">Strava</option><option value="screenshot">Screenshot (AI)</option>
         </select>
       </div>
     </div>
@@ -2149,6 +2171,37 @@ body{
     <div class="sb-item"><div class="sb-val" id="sbAvgPower">—</div><div class="sb-lbl">Avg Power</div></div>
     <div class="sb-item"><div class="sb-val" id="sbCal">—</div><div class="sb-lbl">Calories</div></div>
     <div class="sb-item"><div class="sb-val" id="sbCount">—</div><div class="sb-lbl">Activities</div></div>
+  </div>
+
+  <!-- Streak + Weekly Load -->
+  <div class="act-streak-row">
+    <span class="act-streak-chip" id="actStreakChip" style="display:none;"></span>
+  </div>
+  <div class="act-load-bar" id="actLoadBar"></div>
+
+  <!-- Training Load Ratio (ACWR) -->
+  <div id="actACWRCard" style="display:none;background:white;border:1px solid #e9ecef;border-radius:10px;padding:12px 14px;margin:12px 0;"></div>
+
+  <!-- Personal Records -->
+  <div id="actPRSection" style="display:none;margin-top:4px;">
+    <div class="act-section-toggle" onclick="togglePRs()"><span id="prArrow">&#x25B6;</span> &#x1F3C6; Personal Records</div>
+    <div class="act-pr-grid" id="actPRGrid" style="display:none;"></div>
+  </div>
+
+  <!-- Race Predictor -->
+  <div id="actRacePredictCard" style="display:none;background:white;border:1px solid #e9ecef;border-radius:10px;padding:12px 14px;margin-bottom:14px;"></div>
+
+  <!-- 26-Week Volume Chart -->
+  <div class="act-chart-wrap">
+    <div class="act-chart-title">
+      <span>&#x1F4CA; 26-Week Volume</span>
+      <div class="act-chart-toggle">
+        <button id="chartMiBtn" class="active" onclick="setChartMode('miles')">Miles</button>
+        <button id="chartPwBtn" onclick="setChartMode('power')">Power</button>
+      </div>
+    </div>
+    <div style="display:flex;align-items:flex-end;height:100px;gap:2px;" id="actChartBars"></div>
+    <div style="display:flex;gap:2px;margin-top:4px;" id="actChartLabels"></div>
   </div>
 
   <!-- CP / Power Zones setting -->
@@ -2173,6 +2226,7 @@ body{
       <option value="all">All Sources</option>
       <option value="garmin">Garmin</option>
       <option value="stryd">Stryd</option>
+      <option value="strava">Strava</option>
       <option value="manual">Manual</option>
     </select>
     <select id="actSort" onchange="renderActivities()">
@@ -3033,17 +3087,17 @@ body{
     </div>
   </div>
 </div>
-<script src="daily-planner-core.js?v=2026-09-28-6"></script>
-<script src="daily-planner-food-log.js?v=2026-09-28-6"></script>
-<script src="daily-planner-bible.js?v=2026-09-28-6"></script>
-<script src="daily-planner-meditation.js?v=2026-09-28-6"></script>
-<script src="daily-planner-journal-archive.js?v=2026-09-28-6"></script>
-<script src="daily-planner-file-uploads.js?v=2026-09-28-6"></script>
-<script src="daily-planner-shoe-tracker.js?v=2026-09-28-6"></script>
-<script src="daily-planner-misc.js?v=2026-09-28-6"></script>
-<script src="daily-planner-journal-experience.js?v=2026-09-28-6"></script>
-<script src="master-backup-shared.js?v=2026-09-28-6"></script>
-<script src="daily-planner-storage-qol.js?v=2026-09-28-6"></script>
+<script src="daily-planner-core.js?v=2026-10-14-1"></script>
+<script src="daily-planner-food-log.js?v=2026-10-14-1"></script>
+<script src="daily-planner-bible.js?v=2026-10-14-1"></script>
+<script src="daily-planner-meditation.js?v=2026-10-14-1"></script>
+<script src="daily-planner-journal-archive.js?v=2026-10-14-1"></script>
+<script src="daily-planner-file-uploads.js?v=2026-10-14-1"></script>
+<script src="daily-planner-shoe-tracker.js?v=2026-10-14-1"></script>
+<script src="daily-planner-misc.js?v=2026-10-14-1"></script>
+<script src="daily-planner-journal-experience.js?v=2026-10-14-1"></script>
+<script src="master-backup-shared.js?v=2026-10-14-1"></script>
+<script src="daily-planner-storage-qol.js?v=2026-10-14-1"></script>
 <button class="journal-float-top" id="journalFloatTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">&#x2191; Top</button>
 <div id="v26Toast" class="v26-toast" role="status" aria-live="polite"></div>
 </body>
