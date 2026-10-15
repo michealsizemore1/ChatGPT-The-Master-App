@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-10-14-1">
+<meta name="app-build" content="2026-10-14-2">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#667eea">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,7 +16,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
 (function(){
-  var build='2026-10-14-1',checking=false;
+  var build='2026-10-14-2',checking=false;
   function checkForAppUpdate(){
     if(checking||location.protocol==='file:')return;checking=true;
     fetch(location.pathname+'?update-check='+Date.now(),{cache:'no-store'}).then(function(response){return response.text();}).then(function(html){var match=html.match(/name=["']app-build["']\s+content=["']([^"']+)/i);if(match&&match[1]!==build){location.replace(location.pathname+'?v='+encodeURIComponent(match[1]));}}).catch(function(){}).finally(function(){checking=false;});
@@ -278,7 +278,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;paddi
 .act-stat{font-size:0.82rem;color:#555;white-space:nowrap;}
 .act-stat strong{color:#2c3e50;}
 .act-badge{display:inline-block;font-size:0.7rem;font-weight:700;padding:2px 7px;border-radius:10px;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em;}
-.act-badge.garmin{background:#00b2e3;color:white;}.act-badge.stryd{background:#ff6b35;color:white;}.act-badge.manual{background:#95a5a6;color:white;}.act-badge.strava{background:#fc4c02;color:white;}
+.act-badge.garmin{background:#00b2e3;color:white;}.act-badge.stryd{background:#ff6b35;color:white;}.act-badge.manual{background:#95a5a6;color:white;}.act-badge.strava{background:#fc4c02;color:white;}.act-badge.gear2{background:#16a085;color:white;}
 .act-import-info{background:#fff8f0;border:1px solid #ffd5a8;border-radius:8px;padding:12px;font-size:0.83rem;color:#7d4800;margin-bottom:14px;line-height:1.6;}
 .act-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
 @media(max-width:500px){.act-form-grid{grid-template-columns:1fr;}}
@@ -1249,7 +1249,7 @@ body{
 @media(max-width:700px){.h2-header{display:block}.h2-header-actions{justify-content:flex-start;margin-top:10px}.h2-summary-grid{grid-template-columns:repeat(2,1fr)}.h2-form-grid,.h2-insight-grid,.h2-coach-grid{grid-template-columns:1fr}.h2-wide{grid-column:auto}.h2-progress-row{grid-template-columns:1fr}.h2-habit-top,.h2-suggestion{grid-template-columns:1fr}.h2-habit-actions,.h2-suggestion-actions{justify-content:flex-end}.h2-today-control{flex-wrap:wrap}.h2-today-control button{flex:1;min-width:72px}.h2-date-btn{min-width:100px}}
 </style>
 </head>
-<body><script src="home-button.js?v=2026-10-14-1"></script>
+<body><script src="home-button.js?v=2026-10-14-2"></script>
 
 <div class="journal-floating-title" id="journalFloatingTitle" aria-hidden="true">&#x1F9ED; My Life Command Center</div>
 
@@ -2125,6 +2125,11 @@ body{
       <input type="file" id="actScreenshotInput" accept="image/png,image/jpeg,image/webp,image/gif" style="display:none;" onchange="handleActivityScreenshotFile(event)">
       <span id="actScreenshotStatus" style="font-size:0.78rem;color:#666;"></span>
     </div>
+    <div style="display:flex;align-items:center;gap:6px;font-size:0.76rem;color:#888;margin-bottom:10px;flex-wrap:wrap;">
+      <span>&#x2696;&#xFE0F; Your weight:</span>
+      <input type="number" id="actUserWeight" class="act-input" style="width:60px;display:inline-block;" placeholder="160" min="50" max="500" oninput="localStorage.setItem('act_weight_lbs',this.value||'');updateActCaloriesPlaceholder();">
+      <span>lbs — used only to auto-estimate Calories when you leave that field blank</span>
+    </div>
     <div class="act-form-grid">
       <div><label class="act-label">Date</label><input type="date" id="actDate" class="act-input"></div>
       <div><label class="act-label">Type</label>
@@ -2136,14 +2141,14 @@ body{
         </select>
       </div>
       <div><label class="act-label">Title / Name</label><input type="text" id="actTitle" class="act-input" placeholder="e.g. Morning Run"></div>
-      <div><label class="act-label">Distance (miles)</label><input type="number" id="actDistance" class="act-input" placeholder="0.0" step="0.01"></div>
-      <div><label class="act-label">Time (MM:SS, H:MM:SS, or minutes)</label><input type="text" id="actDuration" class="act-input" placeholder="32:15 or 1:32:15 or 32 min" title="Enter MM:SS for under an hour, H:MM:SS for over an hour, or a plain number of minutes"></div>
+      <div><label class="act-label">Distance (miles)</label><input type="number" id="actDistance" class="act-input" placeholder="0.0" step="0.01" oninput="updateActCaloriesPlaceholder()"></div>
+      <div><label class="act-label">Time (MM:SS, H:MM:SS, or minutes)</label><input type="text" id="actDuration" class="act-input" placeholder="32:15 or 1:32:15 or 32 min" title="Enter MM:SS for under an hour, H:MM:SS for over an hour, or a plain number of minutes" oninput="updateActCaloriesPlaceholder()"></div>
       <div><label class="act-label">Avg Pace (MM:SS/mi)</label><input type="text" id="actPace" class="act-input" placeholder="8:30"></div>
-      <div><label class="act-label">Avg Power (W)</label><input type="number" id="actPower" class="act-input" placeholder="0"></div>
+      <div><label class="act-label">Avg Power (W)</label><input type="number" id="actPower" class="act-input" placeholder="0" oninput="updateActCaloriesPlaceholder()"></div>
       <div><label class="act-label">Avg HR (bpm)</label><input type="number" id="actHR" class="act-input" placeholder="0"></div>
       <div><label class="act-label">Cadence (spm)</label><input type="number" id="actCadence" class="act-input" placeholder="0"></div>
-      <div><label class="act-label">Calories</label><input type="number" id="actCalories" class="act-input" placeholder="0"></div>
-      <div><label class="act-label">Elev Gain (ft)</label><input type="number" id="actElevGain" class="act-input" placeholder="0"></div>
+      <div><label class="act-label">Calories</label><input type="number" id="actCalories" class="act-input" placeholder="0" oninput="updateActCaloriesPlaceholder()" title="Leave blank to auto-estimate from distance/duration/power"></div>
+      <div><label class="act-label">Elev Gain (ft)</label><input type="number" id="actElevGain" class="act-input" placeholder="0" oninput="updateActCaloriesPlaceholder()"></div>
       <div><label class="act-label">Temp (°F)</label><input type="number" id="actTemp" class="act-input" placeholder="e.g. 68"></div>
       <div><label class="act-label">Humidity (%)</label><input type="number" id="actHumidity" class="act-input" placeholder="e.g. 55" min="0" max="100" step="1" inputmode="numeric" title="Enter the relative humidity during the activity (0–100%)"></div>
       <div><label class="act-label">AQI (Air Quality)</label><input type="number" id="actAQI" class="act-input" placeholder="e.g. 42" min="0" max="500" title="Enter the Air Quality Index during the workout (0–500)"></div>
@@ -2151,10 +2156,11 @@ body{
       <div><label class="act-label">Run Map / Route Link</label><input type="url" id="actRouteUrl" class="act-input" inputmode="url" placeholder="Garmin, Strava, Google Maps, etc."></div>
       <div><label class="act-label">Source</label>
         <select id="actSource" class="act-input">
-          <option value="manual">Manual</option><option value="garmin">Garmin</option><option value="stryd">Stryd</option><option value="strava">Strava</option><option value="screenshot">Screenshot (AI)</option>
+          <option value="manual">Manual</option><option value="garmin">Garmin</option><option value="stryd">Stryd</option><option value="strava">Strava</option><option value="gear2">Gear Tracker II</option><option value="screenshot">Screenshot (AI)</option>
         </select>
       </div>
     </div>
+    <script>document.getElementById('actUserWeight').value=localStorage.getItem('act_weight_lbs')||'';</script>
     <div><label class="act-label">Notes</label><textarea id="actNotes" class="act-input" style="height:90px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Consolas,'Liberation Mono',Menlo,monospace;font-size:0.8rem;" placeholder="Any notes..."></textarea></div>
     <div style="margin-top:9px;"><label class="act-label">Injury Report</label><textarea id="actInjuryReport" class="act-input" style="height:60px;resize:vertical;font-family:inherit;" placeholder="Pain, soreness, location, severity, or changes during the workout..."></textarea></div>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px;">
@@ -2227,6 +2233,7 @@ body{
       <option value="garmin">Garmin</option>
       <option value="stryd">Stryd</option>
       <option value="strava">Strava</option>
+      <option value="gear2">Gear Tracker II</option>
       <option value="manual">Manual</option>
     </select>
     <select id="actSort" onchange="renderActivities()">
@@ -3087,17 +3094,17 @@ body{
     </div>
   </div>
 </div>
-<script src="daily-planner-core.js?v=2026-10-14-1"></script>
-<script src="daily-planner-food-log.js?v=2026-10-14-1"></script>
-<script src="daily-planner-bible.js?v=2026-10-14-1"></script>
-<script src="daily-planner-meditation.js?v=2026-10-14-1"></script>
-<script src="daily-planner-journal-archive.js?v=2026-10-14-1"></script>
-<script src="daily-planner-file-uploads.js?v=2026-10-14-1"></script>
-<script src="daily-planner-shoe-tracker.js?v=2026-10-14-1"></script>
-<script src="daily-planner-misc.js?v=2026-10-14-1"></script>
-<script src="daily-planner-journal-experience.js?v=2026-10-14-1"></script>
-<script src="master-backup-shared.js?v=2026-10-14-1"></script>
-<script src="daily-planner-storage-qol.js?v=2026-10-14-1"></script>
+<script src="daily-planner-core.js?v=2026-10-14-2"></script>
+<script src="daily-planner-food-log.js?v=2026-10-14-2"></script>
+<script src="daily-planner-bible.js?v=2026-10-14-2"></script>
+<script src="daily-planner-meditation.js?v=2026-10-14-2"></script>
+<script src="daily-planner-journal-archive.js?v=2026-10-14-2"></script>
+<script src="daily-planner-file-uploads.js?v=2026-10-14-2"></script>
+<script src="daily-planner-shoe-tracker.js?v=2026-10-14-2"></script>
+<script src="daily-planner-misc.js?v=2026-10-14-2"></script>
+<script src="daily-planner-journal-experience.js?v=2026-10-14-2"></script>
+<script src="master-backup-shared.js?v=2026-10-14-2"></script>
+<script src="daily-planner-storage-qol.js?v=2026-10-14-2"></script>
 <button class="journal-float-top" id="journalFloatTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">&#x2191; Top</button>
 <div id="v26Toast" class="v26-toast" role="status" aria-live="polite"></div>
 </body>

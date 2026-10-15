@@ -324,6 +324,72 @@ function clearActForm(){
   document.getElementById('actType').value='Run';
   handleActTypeChange();
 }
+
+// ── Automatic calorie estimate ──────────────────────────────────────────────
+// Estimates calories burned from distance/duration/power (and elevation, for
+// running/walking grade) using standard ACSM metabolic equations and a
+// power-based cycling formula, so Calories can be left blank and filled in
+// without typing it by hand. Needs a one-time body weight (stored locally,
+// never sent anywhere) to convert METs into kcal; falls back to 160 lbs if
+// that hasn't been set. This is an estimate, not a medical-grade measurement.
+function parseDurationSecLoose(s){
+  s=(s||'').trim();if(!s)return 0;
+  var m=s.match(/^(\d+):(\d{1,2}):(\d{1,2})$/);if(m)return(+m[1])*3600+(+m[2])*60+(+m[3]);
+  m=s.match(/^(\d+):(\d{1,2})$/);if(m)return(+m[1])*60+(+m[2]);
+  m=s.match(/^(\d+(?:\.\d+)?)\s*(?:min|minutes?|m)$/i);if(m)return Math.round(parseFloat(m[1])*60);
+  var n=parseFloat(s);return(isNaN(n)||n<=0)?0:Math.round(n*60);
+}
+function getActWeightKg(){
+  var lbs=parseFloat(localStorage.getItem('act_weight_lbs'))||160;
+  return lbs*0.453592;
+}
+function estimateCalories(a){
+  var durSec=parseDurationSecLoose(a.duration);
+  var hours=durSec/3600;
+  if(!hours)return 0;
+  var type=a.type||'Run';
+  if(type==='Rest Day')return 0;
+  var weightKg=getActWeightKg();
+  var distMi=parseFloat(a.distance)||0;
+  var speedMph=distMi>0?distMi/hours:0;
+  var met=5;
+  if(type==='Run'||type==='Walk'){
+    var speedMmin=speedMph*26.8224;
+    var distM=distMi*1609.34,elevM=(parseFloat(a.elevGain)||0)*0.3048;
+    var grade=distM>0?elevM/distM:0;
+    if(speedMmin>0){
+      var vo2=type==='Run'?(0.2*speedMmin+0.9*speedMmin*grade+3.5):(0.1*speedMmin+1.8*speedMmin*grade+3.5);
+      met=vo2/3.5;
+    }else{
+      met=type==='Run'?8:3.5;
+    }
+  }else if(type==='Ride'){
+    var power=parseFloat(a.power)||0;
+    if(power>0){
+      // ~3.6 kcal of metabolic cost per watt-hour of mechanical output (~24% gross cycling efficiency)
+      return Math.round(power*hours*3.6);
+    }
+    met=speedMph>0?(speedMph<10?4:speedMph<14?6:speedMph<16?8:speedMph<20?10:12):8;
+  }else if(type==='Swim'){
+    met=7;
+  }else if(type==='Strength'){
+    met=5;
+  }
+  return Math.max(0,Math.round(met*weightKg*hours));
+}
+function updateActCaloriesPlaceholder(){
+  var calEl=document.getElementById('actCalories');if(!calEl)return;
+  var typeNow=document.getElementById('actType').value;
+  if(typeNow==='Rest Day'){calEl.placeholder='0';return;}
+  var est=estimateCalories({
+    type:typeNow,
+    distance:parseFloat(document.getElementById('actDistance').value)||0,
+    duration:(document.getElementById('actDuration').value||'').trim(),
+    power:parseFloat(document.getElementById('actPower').value)||0,
+    elevGain:parseFloat(document.getElementById('actElevGain').value)||0
+  });
+  calEl.placeholder=est>0?('~'+est+' (auto)'):'0';
+}
 var ACT_REST_DAY_FIELDS=['actTitle','actDistance','actDuration','actPace','actPower','actHR','actCadence','actCalories','actElevGain','actTemp','actHumidity','actAQI','actExecScore','actRouteUrl','actNotes','actInjuryReport'];
 function handleActTypeChange(){
   var typeEl=document.getElementById('actType');if(!typeEl)return;
@@ -335,6 +401,7 @@ function handleActTypeChange(){
   });
   var sourceEl=document.getElementById('actSource');
   if(sourceEl){sourceEl.disabled=isRestDay;if(isRestDay)sourceEl.value='manual';}
+  updateActCaloriesPlaceholder();
 }
 function getActFormValues(){
   return{
@@ -347,7 +414,18 @@ function getActFormValues(){
     power:parseFloat(document.getElementById('actPower').value)||0,
     heartRate:parseFloat(document.getElementById('actHR').value)||0,
     cadence:parseFloat(document.getElementById('actCadence').value)||0,
-    calories:parseFloat(document.getElementById('actCalories').value)||0,
+    calories:(function(){
+      var raw=(document.getElementById('actCalories').value||'').trim();
+      if(raw!=='')return parseFloat(raw)||0;
+      var typeNow=document.getElementById('actType').value;
+      return estimateCalories({
+        type:typeNow,
+        distance:parseFloat(document.getElementById('actDistance').value)||0,
+        duration:(document.getElementById('actDuration').value||'').trim(),
+        power:parseFloat(document.getElementById('actPower').value)||0,
+        elevGain:parseFloat(document.getElementById('actElevGain').value)||0
+      });
+    })(),
     elevGain:parseFloat(document.getElementById('actElevGain').value)||0,
     notes:(document.getElementById('actNotes').value||'').trim(),
     injuryReport:(document.getElementById('actInjuryReport').value||'').trim(),
@@ -381,11 +459,16 @@ function saveActivity(){
   try{cancelAddActivity();}catch(err){console.error('cancelAddActivity error:',err);}
   try{renderActivities();}catch(err){console.error('renderActivities error:',err);if(typeof v26Toast==='function')v26Toast('Activity saved, but the list view had a display error.');}
 }
+function actSourceLabel(s){
+  var map={manual:'Manual',garmin:'Garmin',stryd:'Stryd',strava:'Strava',gear2:'Gear Tracker II',screenshot:'Screenshot'};
+  s=(s||'manual').toLowerCase();
+  return map[s]||(s.charAt(0).toUpperCase()+s.slice(1));
+}
 function cycleActSource(id){
   var acts=getActivities();
   var act=acts.find(function(a){return a.id===id;});
   if(!act)return;
-  var sources=['manual','garmin','stryd','strava'];
+  var sources=['manual','garmin','stryd','strava','gear2'];
   var cur=(act.source||'manual').toLowerCase();
   var next=sources[(sources.indexOf(cur)+1)%sources.length];
   act.source=next;
@@ -426,6 +509,7 @@ function editActivity(id){
   document.getElementById('actInjuryReport').value=act.injuryReport||'';
   document.getElementById('actSource').value=act.source||'manual';
   handleActTypeChange();
+  updateActCaloriesPlaceholder();
   f.style.display='block';
   setTimeout(function(){f.scrollIntoView({behavior:'smooth',block:'start'});},50);
 }
@@ -1109,14 +1193,15 @@ function renderActivities(){
   calcStatsBar(filtered);calcStreakAndLoad(acts);calcPRs(acts);calcACWR(acts);calcRacePredictor(acts);
 
   // Source breakdown
-  var gCnt=0,sCnt=0,mCnt=0,stCnt=0;
-  acts.forEach(function(a){var src=(a.source||'manual').toLowerCase();if(src==='garmin')gCnt++;else if(src==='stryd')sCnt++;else if(src==='strava')stCnt++;else mCnt++;});
+  var gCnt=0,sCnt=0,mCnt=0,stCnt=0,g2Cnt=0;
+  acts.forEach(function(a){var src=(a.source||'manual').toLowerCase();if(src==='garmin')gCnt++;else if(src==='stryd')sCnt++;else if(src==='strava')stCnt++;else if(src==='gear2')g2Cnt++;else mCnt++;});
   var cntEl=document.getElementById('actCount');
   if(cntEl&&acts.length){
     cntEl.innerHTML=acts.length+' activit'+(acts.length!==1?'ies':'y')
       +(gCnt?' <span style="background:#00b2e3;color:#fff;border-radius:4px;padding:1px 5px;font-size:0.68rem;font-weight:700;">G:'+gCnt+'</span>':'')
       +(stCnt?' <span style="background:#fc4c02;color:#fff;border-radius:4px;padding:1px 5px;font-size:0.68rem;font-weight:700;">St:'+stCnt+'</span>':'')
       +(sCnt?' <span style="background:#ff6b35;color:#fff;border-radius:4px;padding:1px 5px;font-size:0.68rem;font-weight:700;">S:'+sCnt+'</span>':'')
+      +(g2Cnt?' <span style="background:#16a085;color:#fff;border-radius:4px;padding:1px 5px;font-size:0.68rem;font-weight:700;">G2:'+g2Cnt+'</span>':'')
       +(mCnt?' <span style="background:#888;color:#fff;border-radius:4px;padding:1px 5px;font-size:0.68rem;font-weight:700;">M:'+mCnt+'</span>':'');
   }
 
@@ -1186,7 +1271,7 @@ function renderActivities(){
       +'<div style="display:flex;justify-content:space-between;align-items:center;gap:6px;cursor:pointer;" onclick="toggleActCard('+a.id+')">'
       +compareBox
       +'<div style="flex:1;min-width:0;">'
-      +'<span class="act-badge '+(a.source||'manual')+'" onclick="event.stopPropagation();cycleActSource('+a.id+')" title="Click to change source" style="cursor:pointer;">'+(a.source||'manual')+'</span>'
+      +'<span class="act-badge '+(a.source||'manual')+'" onclick="event.stopPropagation();cycleActSource('+a.id+')" title="Click to change source" style="cursor:pointer;">'+actSourceLabel(a.source)+'</span>'
       +' <span style="font-size:0.75rem;font-weight:700;color:'+tc+';text-transform:uppercase;">'+escHtml(a.type||'')+'</span>'
       +'<div class="act-title">'+escHtml(a.title||'Activity')+'</div>'
       +dateHtml
@@ -1210,7 +1295,7 @@ function renderActivities(){
       +'</div>'
       +'<div style="display:flex;align-items:center;gap:5px;margin-top:8px;flex-wrap:wrap;">'
       +'<span style="font-size:0.72rem;color:#888;font-weight:600;">Source:</span>'
-      +['manual','garmin','stryd','strava'].map(function(s){var cur=(a.source||'manual')===s;return'<button onclick="event.stopPropagation();setActSource('+a.id+',\''+s+'\')" style="font-size:0.72rem;padding:3px 9px;border-radius:10px;border:1px solid '+(cur?'#667eea':'#ddd')+';background:'+(cur?'#667eea':'#fff')+';color:'+(cur?'#fff':'#888')+';cursor:pointer;font-weight:'+(cur?'700':'400')+';">'+s.charAt(0).toUpperCase()+s.slice(1)+'</button>';}).join('')
+      +['manual','garmin','stryd','strava','gear2'].map(function(s){var cur=(a.source||'manual')===s;return'<button onclick="event.stopPropagation();setActSource('+a.id+',\''+s+'\')" style="font-size:0.72rem;padding:3px 9px;border-radius:10px;border:1px solid '+(cur?'#667eea':'#ddd')+';background:'+(cur?'#667eea':'#fff')+';color:'+(cur?'#fff':'#888')+';cursor:pointer;font-weight:'+(cur?'700':'400')+';">'+actSourceLabel(s)+'</button>';}).join('')
       +'</div>'
       +'<div style="display:flex;gap:4px;margin-top:6px;">'
       +journalBtn
