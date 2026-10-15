@@ -872,6 +872,16 @@ function calcACWR(acts){
 // ── Race time predictor ─────────────────────────────────────────────────────
 // Projects 5K/10K/Half/Marathon times from the fastest logged pace using the
 // Riegel formula (T2 = T1 * (D2/D1)^1.06). An estimate, not a guarantee.
+// Ultra distances (50K/50mi/100K/100mi) reuse the same Riegel extrapolation
+// for a flat-course baseline, then add a rough elevation-adjusted time next
+// to it. Riegel was validated up to roughly marathon distance -- stretched
+// out to 100 miles it has no way to account for fatigue, fueling, sleep
+// deprivation, or terrain over that many hours, and terrain in particular
+// is what actually dominates ultra finish times. The elevation adjustment
+// is a widely used ultrarunning rule-of-thumb (not a physics/GAP model):
+// roughly 10 extra minutes per 1,000 ft of climbing on easy-to-moderate
+// trail grades, applied here for up to 5,000 ft of gain per the user's
+// request. Both ultra numbers are rough ballparks, flagged as such below.
 function calcRacePredictor(acts){
   var wrap=document.getElementById('actRacePredictCard');
   if(!wrap)return;
@@ -890,6 +900,9 @@ function calcRacePredictor(acts){
   var baseTimeSec=bestPaceSec*baseDistance;
   if(!baseDistance||!baseTimeSec){wrap.style.display='none';return;}
   var targets=[{label:'5K',mi:3.10686},{label:'10K',mi:6.21371},{label:'Half',mi:13.1094},{label:'Marathon',mi:26.2188}];
+  var ultraTargets=[{label:'50K',mi:31.0686},{label:'50 Mile',mi:50},{label:'100K',mi:62.1371},{label:'100 Mile',mi:100}];
+  var ULTRA_ELEV_FT=5000,ULTRA_MIN_PER_1000FT=10;
+  var elevationPenaltySec=(ULTRA_ELEV_FT/1000)*ULTRA_MIN_PER_1000FT*60;
   function fmtClock(sec){
     sec=Math.round(sec);
     var h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60;
@@ -899,10 +912,18 @@ function calcRacePredictor(acts){
     var predictedSec=baseTimeSec*Math.pow(t.mi/baseDistance,1.06);
     return '<div class="act-pr-card"><div class="pr-val">'+fmtClock(predictedSec)+'</div><div class="pr-lbl">'+t.label+'</div></div>';
   }).join('');
+  var ultraCards=ultraTargets.map(function(t){
+    var predictedSec=baseTimeSec*Math.pow(t.mi/baseDistance,1.06);
+    var adjustedSec=predictedSec+elevationPenaltySec;
+    return '<div class="act-pr-card"><div class="pr-val">'+fmtClock(predictedSec)+'</div><div class="pr-lbl">'+t.label+'</div><div class="pr-adj">+5,000ft: '+fmtClock(adjustedSec)+'</div></div>';
+  }).join('');
   wrap.style.display='block';
   wrap.innerHTML='<div style="font-size:0.78rem;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.03em;margin-bottom:8px;">\u{1F3C1} Estimated Race Times</div>'
     +'<div class="act-pr-grid">'+cards+'</div>'
-    +'<div style="font-size:0.7rem;color:#aaa;margin-top:6px;">Projected with the Riegel formula from your fastest logged pace in the last 60 days ('+escHtml(best.pace)+'/mi over '+baseDistance.toFixed(1)+' mi'+(best.date?' on '+escHtml(best.date):'')+'). An estimate, not a guarantee — actual race-day performance depends on training, terrain, and conditions.</div>';
+    +'<div style="font-size:0.7rem;color:#aaa;margin:2px 0 12px;">Projected with the Riegel formula from your fastest logged pace in the last 60 days ('+escHtml(best.pace)+'/mi over '+baseDistance.toFixed(1)+' mi'+(best.date?' on '+escHtml(best.date):'')+'). An estimate, not a guarantee — actual race-day performance depends on training, terrain, and conditions.</div>'
+    +'<div style="font-size:0.78rem;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.03em;margin-bottom:8px;">\u{1F3D4}️ Ultra Distances</div>'
+    +'<div class="act-pr-grid">'+ultraCards+'</div>'
+    +'<div style="font-size:0.7rem;color:#aaa;margin-top:6px;">The top number is the same flat Riegel projection stretched out to ultra distance — Riegel is only validated up to about marathon length, so at 50K and beyond it tends to run optimistic since it cannot model fatigue, fueling, sleep, or terrain over many hours. The "+5,000ft" line adds a rough allowance for up to 5,000 ft of total climbing, at roughly 10 extra minutes per 1,000 ft of gain on easy-to-moderate trail grades — a rule of thumb, not a course-specific model. Treat both ultra numbers as rough ballparks, not predictions.</div>';
 }
 
 function calcStreakAndLoad(acts){
@@ -1931,47 +1952,6 @@ function renderGoals(){
       <div class="goal-bar-bg"><div class="goal-bar-fill" style="width:${pct}%;background:${reached?'#27ae60':'#667eea'};"></div></div>
     </div>`;
   }).join('');
-}
-// ── Auto-fill Weekly Wins ─────────────────────────────────────────────────────
-function autoFillWins(){
-  const ws=wkStart(revOff2);
-  const we=new Date(ws);we.setDate(ws.getDate()+6);
-  const runs=uniqueRunActivities(ws,we);let miles=runs.reduce(function(total,run){return total+(parseFloat(run.distance)||0);},0),runTime=runs.reduce(function(total,run){return total+parseTimedMins(run.duration);},0),bibleD=0,prayerD=0,audioMin=0,steps=0,logged=0;
-  let bpReadings=[];
-  for(let i=0;i<7;i++){
-    const d=new Date(ws);d.setDate(ws.getDate()+i);
-    const r=localStorage.getItem('planner_'+dk(d));if(!r)continue;
-    logged++;const dd=JSON.parse(r);
-    steps+=parseFloat(dd.exSteps)||0;
-    audioMin+=journalAudiobookMinutesForDate(dk(d),dd);
-    if(dd.spBibleAudio==='green')bibleD++;
-    if(dd.spAIPrayer==='green')prayerD++;
-    const bp=parseBP(dd.wBPVal);if(bp.sys)bpReadings.push(bp);
-  }
-  const fmtMins=m=>m>=60?Math.floor(m/60)+'h '+(m%60?m%60+'m':''):m+'m';
-  const lines=[];
-  const wLabel=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' – '+we.toLocaleDateString('en-US',{month:'short',day:'numeric'});
-  lines.push('Week of '+wLabel+' ('+logged+'/7 days logged)');
-  lines.push('');
-  lines.push('🏃 FITNESS');
-  if(miles>0)lines.push('  • '+miles.toFixed(1)+' miles'+(runTime>0?' in '+fmtMins(runTime):''));
-  if(steps>0)lines.push('  • '+Math.round(steps).toLocaleString()+' total steps');
-  lines.push('  • Runs: '+runs.length);
-  lines.push('');
-  lines.push('📖 SPIRITUALITY');
-  lines.push('  • Bible: '+bibleD+'/7 days');
-  lines.push('  • Prayer: '+prayerD+'/7 days');
-  lines.push('');
-  lines.push('📈 GROWTH');
-  if(audioMin>0)lines.push('  • Audiobook: '+fmtMins(audioMin));
-  if(bpReadings.length>0){
-    const avgSys=Math.round(bpReadings.reduce((s,b)=>s+b.sys,0)/bpReadings.length);
-    const avgDia=Math.round(bpReadings.reduce((s,b)=>s+b.dia,0)/bpReadings.length);
-    lines.push('');lines.push('❤️ WELLNESS');
-    lines.push('  • Avg BP: '+avgSys+'/'+avgDia+' mmHg ('+bpReadings.length+' readings)');
-  }
-  const el=document.getElementById('revWins');
-  if(el){el.value=lines.join('\n');el.dispatchEvent(new Event('input'));}
 }
 // ── Persistent Training Plan ─────────────────────────────────────────────────
 /* Tab Section Notes */
