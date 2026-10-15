@@ -873,15 +873,39 @@ function calcACWR(acts){
 // Projects 5K/10K/Half/Marathon times from the fastest logged pace using the
 // Riegel formula (T2 = T1 * (D2/D1)^1.06). An estimate, not a guarantee.
 // Ultra distances (50K/50mi/100K/100mi) reuse the same Riegel extrapolation
-// for a flat-course baseline, then add a rough elevation-adjusted time next
-// to it. Riegel was validated up to roughly marathon distance -- stretched
-// out to 100 miles it has no way to account for fatigue, fueling, sleep
-// deprivation, or terrain over that many hours, and terrain in particular
-// is what actually dominates ultra finish times. The elevation adjustment
-// is a widely used ultrarunning rule-of-thumb (not a physics/GAP model):
-// roughly 10 extra minutes per 1,000 ft of climbing on easy-to-moderate
-// trail grades, applied here for up to 5,000 ft of gain per the user's
-// request. Both ultra numbers are rough ballparks, flagged as such below.
+// for a flat-course baseline ("Riegel" number), then layer on two separate,
+// better-sourced corrections for an "Adjusted" number instead of a single
+// flat elevation penalty:
+//   1. A distance-tiered fatigue/fueling allowance. Riegel was validated
+//      only to roughly marathon distance and has no way to model fatigue,
+//      fueling, or sleep deprivation over many hours, so real ultra finish
+//      times run slower than a naive extrapolation by a margin that grows
+//      with distance. There's no single validated constant for this, but
+//      aggregate ultrarunning data gives a reasonable range to anchor on:
+//      RunRepeat's analysis of ~15M race results found average pace in
+//      races over 50mi running ~14% slower than under-50mi races, and a
+//      100K study (Lambert et al. 2004) found real-world fade of ~15% for
+//      front-pack finishers up to ~25-40% for mid/back-of-pack finishers
+//      over the full distance. The per-distance percentages below are an
+//      engineering estimate informed by that range, not a precise formula.
+//   2. A terrain cost from running economy research instead of a flat
+//      "10 min per 1,000 ft" rule-of-thumb. Minetti et al. (2002, J Appl
+//      Physiol) fit a 5th-order polynomial for the energy cost of running
+//      at a given gradient, Cr(i) in J/kg/m for grade fraction i, validated
+//      for |i| <= 0.45. Cr(i)/Cr(0) gives a grade-adjusted-pace (GAP) cost
+//      multiplier that scales non-linearly with steepness -- a 15% grade
+//      costs far more than 3x a 5% grade, which a flat per-1,000ft number
+//      can't express. Without a real elevation profile, the user's 5,000 ft
+//      of climbing is assumed to be spread evenly over the first half of
+//      the distance and mirrored on the way down (a reasonable default for
+//      an out-and-back or loop course); the resulting average grade is fed
+//      through Cr() for the climbing half and its mirror for the descending
+//      half, and averaged into one cost multiplier applied to the whole
+//      fatigue-adjusted time. This is still a model, not a course-specific
+//      prediction -- Minetti's data is from controlled, even-surface
+//      conditions, so technical trail footing can cost more than grade
+//      alone predicts. Both the Riegel and Adjusted ultra numbers are
+//      rough ballparks, flagged as such in the footnote below.
 function calcRacePredictor(acts){
   var wrap=document.getElementById('actRacePredictCard');
   if(!wrap)return;
@@ -900,9 +924,23 @@ function calcRacePredictor(acts){
   var baseTimeSec=bestPaceSec*baseDistance;
   if(!baseDistance||!baseTimeSec){wrap.style.display='none';return;}
   var targets=[{label:'5K',mi:3.10686},{label:'10K',mi:6.21371},{label:'Half',mi:13.1094},{label:'Marathon',mi:26.2188}];
-  var ultraTargets=[{label:'50K',mi:31.0686},{label:'50 Mile',mi:50},{label:'100K',mi:62.1371},{label:'100 Mile',mi:100}];
-  var ULTRA_ELEV_FT=5000,ULTRA_MIN_PER_1000FT=10;
-  var elevationPenaltySec=(ULTRA_ELEV_FT/1000)*ULTRA_MIN_PER_1000FT*60;
+  // fadePct: engineering-estimate fatigue/fueling allowance on top of Riegel,
+  // growing with distance (see comment block above for sourcing).
+  var ultraTargets=[
+    {label:'50K',mi:31.0686,fadePct:0.08},
+    {label:'50 Mile',mi:50,fadePct:0.15},
+    {label:'100K',mi:62.1371,fadePct:0.22},
+    {label:'100 Mile',mi:100,fadePct:0.30}
+  ];
+  var ULTRA_ELEV_FT=5000;
+  var ELEV_M=ULTRA_ELEV_FT*0.3048;
+  var MI_TO_M=1609.344;
+  // Minetti et al. 2002 polynomial: energy cost of running (J/kg/m) at
+  // grade fraction i (uphill positive), valid for |i|<=0.45.
+  function minettiCr(i){
+    return 155.4*Math.pow(i,5)-30.4*Math.pow(i,4)-43.3*Math.pow(i,3)+46.3*Math.pow(i,2)+19.5*i+3.6;
+  }
+  var CR_FLAT=minettiCr(0);
   function fmtClock(sec){
     sec=Math.round(sec);
     var h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60;
@@ -914,8 +952,14 @@ function calcRacePredictor(acts){
   }).join('');
   var ultraCards=ultraTargets.map(function(t){
     var predictedSec=baseTimeSec*Math.pow(t.mi/baseDistance,1.06);
-    var adjustedSec=predictedSec+elevationPenaltySec;
-    return '<div class="act-pr-card"><div class="pr-val">'+fmtClock(predictedSec)+'</div><div class="pr-lbl">'+t.label+'</div><div class="pr-adj">+5,000ft: '+fmtClock(adjustedSec)+'</div></div>';
+    var fadeAdjustedSec=predictedSec*(1+t.fadePct);
+    var distM=t.mi*MI_TO_M;
+    var avgGrade=Math.min(ELEV_M/(distM/2),0.45);
+    var costUp=minettiCr(avgGrade)/CR_FLAT;
+    var costDown=minettiCr(-avgGrade)/CR_FLAT;
+    var elevFactor=(costUp+costDown)/2;
+    var adjustedSec=fadeAdjustedSec*elevFactor;
+    return '<div class="act-pr-card"><div class="pr-val">'+fmtClock(predictedSec)+'</div><div class="pr-lbl">'+t.label+'</div><div class="pr-adj">Adjusted: '+fmtClock(adjustedSec)+'</div></div>';
   }).join('');
   wrap.style.display='block';
   wrap.innerHTML='<div style="font-size:0.78rem;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.03em;margin-bottom:8px;">\u{1F3C1} Estimated Race Times</div>'
@@ -923,7 +967,7 @@ function calcRacePredictor(acts){
     +'<div style="font-size:0.7rem;color:#aaa;margin:2px 0 12px;">Projected with the Riegel formula from your fastest logged pace in the last 60 days ('+escHtml(best.pace)+'/mi over '+baseDistance.toFixed(1)+' mi'+(best.date?' on '+escHtml(best.date):'')+'). An estimate, not a guarantee — actual race-day performance depends on training, terrain, and conditions.</div>'
     +'<div style="font-size:0.78rem;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.03em;margin-bottom:8px;">\u{1F3D4}️ Ultra Distances</div>'
     +'<div class="act-pr-grid">'+ultraCards+'</div>'
-    +'<div style="font-size:0.7rem;color:#aaa;margin-top:6px;">The top number is the same flat Riegel projection stretched out to ultra distance — Riegel is only validated up to about marathon length, so at 50K and beyond it tends to run optimistic since it cannot model fatigue, fueling, sleep, or terrain over many hours. The "+5,000ft" line adds a rough allowance for up to 5,000 ft of total climbing, at roughly 10 extra minutes per 1,000 ft of gain on easy-to-moderate trail grades — a rule of thumb, not a course-specific model. Treat both ultra numbers as rough ballparks, not predictions.</div>';
+    +'<div style="font-size:0.7rem;color:#aaa;margin-top:6px;">The top number is the same flat Riegel projection stretched out to ultra distance — Riegel is only validated up to about marathon length, so by itself it tends to run optimistic at 50K and beyond. "Adjusted" layers on two corrections: a distance-based fatigue/fueling allowance (+8% at 50K, +15% at 50mi, +22% at 100K, +30% at 100mi — rough estimates from aggregate ultrarunning race data, not a validated constant), and a terrain cost from the Minetti running-economy equation, applied to this distance’s average grade assuming your 5,000 ft of climbing is spread over half the distance and mirrored on the way down. Both numbers are ballparks, not predictions.</div>';
 }
 
 function calcStreakAndLoad(acts){
