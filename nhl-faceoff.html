@@ -600,7 +600,18 @@ async function loadEssentialMetrics(){
  try{
   const rows=await Promise.all(teams.map(async t=>{
    try{
-    const [statsRes,teamRes]=await Promise.all([fetch(`${api}/teams/${encodeURIComponent(t.id)}/statistics?season=${CURRENT_SEASON}`,{cache:'no-store'}).then(r=>r.json()),fetch(`${api}/teams/${encodeURIComponent(t.id)}`,{cache:'no-store'}).then(r=>r.json())]);
+    // The bare `/teams/{id}` path (no sub-path, no query string, no trailing
+    // slash) currently fails outright at ESPN's edge for every team -- a
+    // plain fetch() throws "Failed to fetch" with no HTTP status at all,
+    // confirmed by testing it directly against several team ids. Adding a
+    // trailing slash makes the identical request succeed (200, full body)
+    // every time. Since this one fetch feeds every team's record stats
+    // (power play %, penalty kill %, scoring off/def) and sits in the same
+    // Promise.all as the (working) statistics call, its failure took the
+    // whole per-team try/catch down with it -- which is why every Essential
+    // Metrics field showed "Waiting for season statistics" for every team,
+    // not just these four fields.
+    const [statsRes,teamRes]=await Promise.all([fetch(`${api}/teams/${encodeURIComponent(t.id)}/statistics?season=${CURRENT_SEASON}`,{cache:'no-store'}).then(r=>r.json()),fetch(`${api}/teams/${encodeURIComponent(t.id)}/`,{cache:'no-store'}).then(r=>r.json())]);
     const cats=statsRes.results?.stats?.categories||[];
     const stat=(cat,name)=>cats.find(c=>c.name===cat)?.stats?.find(s=>s.name===name);
     const gamesPlayed=Number(stat('general','games')?.value||0);
