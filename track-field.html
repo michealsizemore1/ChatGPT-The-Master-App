@@ -311,7 +311,7 @@ html{font-size:14px}
 
 <script src="version-check.js"></script>
 <script>
-const APP_VERSION='2026-10-12-1';
+const APP_VERSION='2026-10-15-1';
 checkForNewerAppVersion(APP_VERSION, 'tf');
 
 // [name, country, ranking score, 2026 season best]  "rd" marks a road time used where there is no track mark.
@@ -472,10 +472,10 @@ const ENTRIES={
  }
 };
 const ENTRIES_PENDING=[
- ['New York City Marathon','Nov 1','Professional field announced Aug 19 (Obiri, Hassan, Kipruto, Mantz headline); full start list and timetable to follow closer to race day.']
+ ['New York City Marathon','Nov 1','Professional field set Aug 19 (Obiri and Kipruto defend); Sifan Hassan and Fiona O’Keeffe withdrew 14 Oct with illness and injury, leaving Mantz, Talbi and debutant Weini Kelati to headline the US contingent. Full start list with marks and the race-day timetable still to come — NYRR had not yet confirmed 2026 pro/wheelchair start times as of 15 Oct.']
 ];
 const UPCOMING=[
- {d:'Nov 1',y:'2026',name:'New York City Marathon',where:'New York, USA',detail:'Defending champions Hellen Obiri and Benson Kipruto headline against Sifan Hassan and American record holder Conner Mantz. Five boroughs and the largest field in the sport; clocks go back the same morning, so the start lands at 6:00 AM once Mountain Time returns to standard.',watch:'ESPN2 and ABC &middot; 6:00 AM MST',tag:'Marathon major',cls:'major',links:[['Official site','https://www.nyrr.org/tcsnycmarathon'],['Professional field announced','https://citiusmag.com/articles/new-york-city-marathon-2026-professional-elite-field-obiri-kipruto-hassan-mantz-talbi-mcclain-kelati']]},
+ {d:'Nov 1',y:'2026',name:'New York City Marathon',where:'New York, USA',detail:'Defending champions Hellen Obiri and Benson Kipruto headline after Sifan Hassan withdrew 14 Oct with an illness; American record holder Conner Mantz and Zouhair Talbi lead the US charge, and Weini Kelati makes her marathon debut. Five boroughs and the largest field in the sport; clocks go back the same morning, so the start lands at 6:00 AM once Mountain Time returns to standard.',watch:'ESPN2 and ABC &middot; 6:00 AM MST',tag:'Marathon major',cls:'major',links:[['Official site','https://www.nyrr.org/tcsnycmarathon'],['Professional field announced','https://citiusmag.com/articles/new-york-city-marathon-2026-professional-elite-field-obiri-kipruto-hassan-mantz-talbi-mcclain-kelati']]},
  {d:'Dec 6',y:'2026',name:'Shanghai Marathon',where:'Shanghai, China',detail:'A candidate race under assessment to join the majors in 2027.',watch:'Broadcast details not yet announced',tag:'Candidate major',cls:'',links:[['Race details & schedule','https://www.watchathletics.com/schedule/watchlive/11238'],['Bid to join the World Marathon Majors','https://marathonhandbook.com/shanghai-marathon-is-one-race-away-from-joining-the-worlds-most-exclusive-running-club/']]},
  {d:'Dec 6',y:'2026',name:'Valencia Marathon',where:'Valencia, Spain',detail:'One of the fastest courses in the world — Agnes Ngetich’s half marathon and 10km world bests have both come on these roads.',watch:'Broadcast details not yet announced',tag:'Elite race',cls:'',links:[['Official site','https://www.valenciaciudaddelrunning.com/en/marathon/'],['Kejelcha and Tesfay lead elite lineup','https://www.valenciaciudaddelrunning.com/en/kejelcha-tesfay-lead-elite-lineup-big-ambitions-valencia-marathon-2026/']]},
  {d:'Mar 7',y:'2027',name:'Tokyo Marathon',where:'Tokyo, Japan',detail:'The newest of the six World Marathon Majors and the first big race of the 2027 season.',watch:'Broadcast details not yet announced',tag:'Marathon major',cls:'major',links:[['Official site','https://www.marathon.tokyo/en/'],['Prize money raised, field expanded for 2027','https://marathonhandbook.com/tokyo-marathon-pushes-champion-prize-to-170000-and-expands-field-to-40000-for-2027/']]},
@@ -490,19 +490,19 @@ const DL_SEASON=[
 ];
 
 // Section news. [ISO date, headline, publisher, url, one-line summary]
-// Checked 8 October 2026; the twice-weekly refresh replaces these.
-const NEWS_CHECKED='2026-10-12';
+// Checked 15 October 2026; the twice-weekly refresh replaces these.
+const NEWS_CHECKED='2026-10-15';
 const NEWS={
  track:[
+  ['2026-10-15','Diamond League season review revisits Wanyonyi’s and Kerr’s world records','Diamond League','https://www.diamondleague.com/part-iv-first-world-records-fall-in-monaco-and-london/','Part four of the 2026 season retrospective recaps Emmanuel Wanyonyi’s and Josh Kerr’s world records from the Eugene, Monaco and London stops in July.'],
   ['2026-10-12','Wanda Diamond League publishes 2027 calendar','Diamond League','https://www.diamondleague.com/wanda-diamond-league-publishes-2027-calendar/','The 2027 season opens in Doha on 7 May and closes with a two-day final in Zurich on 25–26 August, with Shanghai/Keqiao, Xiamen, Rome, Rabat, Oslo, Stockholm, Paris, Eugene, Monaco, Lausanne, London, Silesia and Brussels filling out the 15-meeting calendar.'],
-  ['2026-10-06','Nominees announced for World Athlete of the Year 2026','World Athletics','https://worldathletics.org/awards/news/nominees-announced-world-athlete-of-the-year-2026','World Athletics named 10 women and 10 men as finalists for its 2026 Athlete of the Year awards, including Mondo Duplantis, Josh Kerr, Tigst Assefa and Agnes Ngetich, with winners revealed in Monaco on 29 November.'],
-  ['2026-10-05','WTW: Jakob Doubles in October, Aidan Troutner & Emily Venters Dominate US 10K, & Why Winning World Juniors Doesn’t Matter','LetsRun.com','https://www.letsrun.com/news/2026/10/wtw-jakob-doubles-in-october-aidan-troutner-emily-venters-dominate-us-10k-why-winning-world-juniors-doesnt-matter/','Jakob Ingebrigtsen swept the 1500m (3:40.7) and 5000m (13:26) at his own RunFest Norway in Sandnes, Mondo Duplantis announced he will skip the winter season, and Cam Myers was confirmed as the 2026 Diamond League champion.']
+  ['2026-10-06','Nominees announced for World Athlete of the Year 2026','World Athletics','https://worldathletics.org/awards/news/nominees-announced-world-athlete-of-the-year-2026','World Athletics named 10 women and 10 men as finalists for its 2026 Athlete of the Year awards, including Mondo Duplantis, Josh Kerr, Tigst Assefa and Agnes Ngetich, with winners revealed in Monaco on 29 November.']
  ],
  road:[
+  ['2026-10-14','Galen Rupp breaks American masters marathon record in Chicago','LetsRun.com','https://www.letsrun.com/news/2026/10/galen-rupp-isnt-done-inside-his-rebuilt-stride-a-20655-masters-record-and-the-path-to-la-2028/','Rupp, 40, ran 2:06:55 for 11th place at Chicago to smash Elkanah Kibet’s American masters record, a sign of life after several lean years and a possible path to a fifth Olympic team in 2028.'],
   ['2026-10-11','Kipruto and Feysa claim second Majors titles in Chicago','World Marathon Majors','https://www.worldmarathonmajors.com/content-hub/kipruto-and-feysa-claim-second-majors-titles','Amos Kipruto ran a personal-best 2:01:09 and Hawi Feysa defended her title in 2:13:33 at the Bank of America Chicago Marathon, where Catherine Debrunner also set a wheelchair world record.'],
   ['2026-10-11','Kipchoge wins Melbourne Marathon in a course record at 41','Watch Athletics','https://www.watchathletics.com/article/13846/eliud-kipchoge-wins-melbourne-marathon-in-course-record-of-2-09-10','Eliud Kipchoge won the third stop of his seven-continent World Tour in 2:09:10, with Camille French taking the women’s race in 2:28:25.'],
-  ['2026-10-04','Jepkosgei smashes Cardiff Half Marathon course record as Kenya complete double','Athletics Weekly','https://athleticsweekly.com/news/jepkosgei-smashes-cardiff-half-marathon-course-record-as-kenya-complete-double-1040013434/','Joyciline Jepkosgei ran 65:40 to take the course record and Gideon Kiprotich won the men’s race in 59:34.'],
-  ['2026-09-27','Adola regains his Berlin crown as Assefa’s world-record bid fades late','LetsRun.com','https://www.letsrun.com/news/2026/09/2026-berlin-marathon-results-guye-adola-20250-and-tigst-assefa-21104-win/','Guye Adola won in 2:02:50 in a field missing late scratch Kenenisa Bekele; Tigst Assefa held on for 2:11:04 after cramping in the closing kilometres.']
+  ['2026-10-04','Jepkosgei smashes Cardiff Half Marathon course record as Kenya complete double','Athletics Weekly','https://athleticsweekly.com/news/jepkosgei-smashes-cardiff-half-marathon-course-record-as-kenya-complete-double-1040013434/','Joyciline Jepkosgei ran 65:40 to take the course record and Gideon Kiprotich won the men’s race in 59:34.']
  ],
  ultra:[
   ['2026-10-12','Engelhard sweeps both races as the Mountain Running World Cup wraps in Québec','iRunFar','https://www.irunfar.com/this-week-in-running-october-12-2026','Nina Engelhard won both the uphill and up-and-down races at the Défi des Couleurs finale, while Philemon Kiriago and Meikael Beaudoin-Rousseau took the men’s up-and-down and uphill titles.'],
@@ -510,14 +510,14 @@ const NEWS={
   ['2026-09-28','Bódis breaks the Spartathlon course record as Johnson smashes the Bear 100 women’s mark','iRunFar','https://www.irunfar.com/this-week-in-running-september-28-2026','Tamás Bódis covered the 153-mile Spartathlon in 19:40, and Kristin Johnson took more than 90 minutes off the Bear 100 women’s course record with an 18:50 finish in Utah.']
  ],
  entries:[
+  ['2026-10-14','Galen Rupp breaks American masters marathon record in Chicago','LetsRun.com','https://www.letsrun.com/news/2026/10/galen-rupp-isnt-done-inside-his-rebuilt-stride-a-20655-masters-record-and-the-path-to-la-2028/','Rupp, who finished 11th in this field in 2:06:55, broke Elkanah Kibet’s American masters record at 40 years old — his fastest marathon in five years.'],
   ['2026-10-11','Kipruto and Feysa claim second Majors titles','World Marathon Majors','https://www.worldmarathonmajors.com/content-hub/kipruto-and-feysa-claim-second-majors-titles','Amos Kipruto broke clear for a personal-best 2:01:09 and Hawi Feysa repeated as champion in 2:13:33, while Jacob Kiplimo and Brigid Kosgei settled for 4th and 3rd.'],
-  ['2026-10-11','Results: Chicago Marathon 2026','Watch Athletics','https://www.watchathletics.com/article/13845/results-chicago-marathon-2026','Full results show Tadese Takele Bikila and Milkesa Mengesha completing the men’s podium behind Kipruto, and debutant Emma Grace Hurley running the fastest first marathon ever by an American woman to finish 7th.'],
-  ['2026-10-08','Treadmill Heroes, a Torn Hamstring, & an AR Chase: Is This The Wildest US Men’s Marathon Field in Decades?','LetsRun.com','https://www.letsrun.com/news/2026/10/treadmill-heroes-a-torn-hamstring-an-ar-chase-is-this-the-wildest-us-mens-marathon-field-in-decades/','Clayton Young raced on a torn hamstring while Vinny Mauri’s viral buildup and Charles Hicks’ American-record ambitions made the men’s field one of the wildest in decades, per LetsRun.']
+  ['2026-10-11','Results: Chicago Marathon 2026','Watch Athletics','https://www.watchathletics.com/article/13845/results-chicago-marathon-2026','Full results show Tadese Takele Bikila and Milkesa Mengesha completing the men’s podium behind Kipruto, and debutant Emma Grace Hurley running the fastest first marathon ever by an American woman to finish 7th.']
  ],
  calendar:[
+  ['2026-10-14','Hassan and O’Keeffe withdraw from New York City Marathon','Canadian Running Magazine','https://runningmagazine.ca/the-scene/olympic-champion-sifan-hassan-withdraws-from-tcs-new-york-city-marathon/','Olympic champion Sifan Hassan is out with an illness that disrupted training, and American Fiona O’Keeffe has also scratched with injury, trimming the field for the Nov 1 finale to the Marathon Majors season.'],
   ['2026-10-11','Kipruto and Feysa claim second Majors titles as Chicago wraps a loaded fall weekend','World Marathon Majors','https://www.worldmarathonmajors.com/content-hub/kipruto-and-feysa-claim-second-majors-titles','Chicago’s results — and Kipchoge’s course record in Melbourne the same day — leave New York, on Nov 1, as the year’s last major.'],
-  ['2026-09-20','Ngetich’s world record caps the World Road Running Championships in Copenhagen','Al Jazeera','https://www.aljazeera.com/sports/2026/9/20/kenyas-ngetich-breaks-women-only-half-marathon-world-record-by-a-second','Kenya swept the mile, 5km and half marathon golds across the two-day championships.'],
-  ['2026-06-10','Cape Town Marathon confirmed as the 8th Abbott World Marathon Major','Abbott','https://www.abbott.com/en-us/corpnewsroom/nutrition-health-and-wellness/cape-town-marathon-is-the-8-abbott-world-marathon-major','The Sanlam Cape Town Marathon completed its second year of candidacy to join the series, with its first race as a major scheduled for 23 May 2027.']
+  ['2026-09-20','Ngetich’s world record caps the World Road Running Championships in Copenhagen','Al Jazeera','https://www.aljazeera.com/sports/2026/9/20/kenyas-ngetich-breaks-women-only-half-marathon-world-record-by-a-second','Kenya swept the mile, 5km and half marathon golds across the two-day championships.']
  ]
 };
 
