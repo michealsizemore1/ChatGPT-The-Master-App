@@ -279,94 +279,6 @@ function bibleSpeechPauseResume(){if(!bibleSpeechSupported()||!window.speechSynt
 function bibleSpeechStop(finished){if(bibleSpeechSupported())window.speechSynthesis.cancel();if(_bibleSpeechKeepAlive){clearInterval(_bibleSpeechKeepAlive);_bibleSpeechKeepAlive=null;}_bibleSpeechUtterance=null;_bibleSpeechToken++;_bibleSpeechChunks=[];_bibleSpeechIndex=0;_bibleSpeechPaused=false;bibleSpeechSetState('idle');if(!finished){var status=document.getElementById('bibleSpeechStatus');if(status)status.textContent='Stopped';}}
 if(bibleSpeechSupported()){window.speechSynthesis.onvoiceschanged=bibleSpeechPopulateVoices;}
 
-/* --- Bible tab: Listen button on each AI response card (Scripture Focus,
-   Worship, AI Prayer). Shares the browser's speechSynthesis engine with the
-   One Year Bible reader above -- starting one stops the other -- but keeps
-   its own lightweight state so any card's Listen button can drive it. --- */
-var _cardSpeech={token:0,chunks:[],idx:0,activeBtn:null,keepAlive:null};
-function cardSpeechStripSymbols(text){
-  return(text||'')
-    .replace(/\[([^\]]+)\]\([^)]*\)/g,'$1')
-    .replace(/[*_~`#>|\[\]]+/g,'')
-    .replace(/\s+/g,' ')
-    .trim();
-}
-function cardSpeechText(resultId){
-  var el=document.getElementById(resultId);if(!el)return'';
-  return cardSpeechStripSymbols(el.innerText||el.textContent||'');
-}
-function speechPauseFor(text){
-  var t=(text||'').trim(),last=t.charAt(t.length-1);
-  if(last==='.'||last==='!'||last==='?')return 420;
-  if(last===';'||last===':')return 300;
-  if(last===','||last==='\u2014'||last==='-')return 220;
-  return 90;
-}
-function speechSplitClauses(sentence){
-  return sentence.replace(/([,;:]|\u2014)\s+/g,'$1\n').split(/\n+/).map(function(s){return s.trim();}).filter(Boolean);
-}
-function cardSpeechMakeChunks(text){
-  var sentences=text.replace(/([.!?])\s+/g,'$1\n').split(/\n+/),chunks=[];
-  sentences.forEach(function(sentence){
-    sentence=sentence.trim();if(!sentence)return;
-    var pieces=sentence.length>70?speechSplitClauses(sentence):[sentence];
-    pieces.forEach(function(piece){
-      if(piece.length<=160){chunks.push(piece);return;}
-      var words=piece.split(/\s+/),current='';
-      words.forEach(function(word){if((current+' '+word).trim().length>160&&current){chunks.push(current);current=word;}else current+=(current?' ':'')+word;});
-      if(current)chunks.push(current);
-    });
-  });
-  return chunks;
-}
-function cardSpeechPickVoice(){
-  if(!bibleSpeechSupported())return null;
-  var voices=window.speechSynthesis.getVoices()||[],saved='';try{saved=localStorage.getItem('bible_speech_voice')||'';}catch(ignore){}
-  return speechPickBestVoice(voices,saved);
-}
-function cardSpeechSetBtn(btnId,state){
-  var btn=document.getElementById(btnId);if(!btn)return;
-  btn.innerHTML=state==='speaking'?'&#x23F9; Stop':'&#x1F50A; Listen';
-}
-function cardSpeechStop(finished){
-  if(bibleSpeechSupported())window.speechSynthesis.cancel();
-  if(_cardSpeech.keepAlive){clearInterval(_cardSpeech.keepAlive);_cardSpeech.keepAlive=null;}
-  _cardSpeech.token++;_cardSpeech.chunks=[];_cardSpeech.idx=0;
-  if(_cardSpeech.activeBtn)cardSpeechSetBtn(_cardSpeech.activeBtn,'idle');
-  _cardSpeech.activeBtn=null;
-}
-function cardSpeechSpeakNext(token,btnId){
-  if(token!==_cardSpeech.token)return;
-  if(_cardSpeech.idx>=_cardSpeech.chunks.length){cardSpeechStop(true);return;}
-  var utterance=new SpeechSynthesisUtterance(_cardSpeech.chunks[_cardSpeech.idx]),voice=cardSpeechPickVoice();
-  if(voice){utterance.voice=voice;utterance.lang=voice.lang;}else{utterance.lang='en-US';}
-  var savedRate=1;try{savedRate=parseFloat(localStorage.getItem('bible_speech_rate'))||1;}catch(ignore){}
-  utterance.rate=savedRate;utterance.pitch=1;utterance.volume=1;
-  var started=false;
-  utterance.onstart=function(){started=true;};
-  utterance.onend=function(){if(token!==_cardSpeech.token)return;started=true;var pause=speechPauseFor(_cardSpeech.chunks[_cardSpeech.idx]);_cardSpeech.idx++;setTimeout(function(){cardSpeechSpeakNext(token,btnId);},pause);};
-  utterance.onerror=function(e){started=true;if(e.error==='canceled'||e.error==='interrupted')return;cardSpeechStop(true);};
-  try{window.speechSynthesis.resume();window.speechSynthesis.speak(utterance);}catch(e){cardSpeechStop(true);return;}
-  setTimeout(function(){
-    if(token!==_cardSpeech.token)return;
-    if(!started&&!window.speechSynthesis.speaking&&!window.speechSynthesis.pending){
-      cardSpeechStop(true);
-      bibleSpeechNoVoiceWarning();
-    }
-  },2500);
-}
-function toggleCardSpeech(resultId,btnId){
-  if(!bibleSpeechSupported()){alert('Text-to-speech is not available in this browser.');return;}
-  if(_cardSpeech.activeBtn===btnId){cardSpeechStop();return;}
-  var text=cardSpeechText(resultId);
-  if(!text){alert('Nothing to listen to yet -- generate a response first.');return;}
-  if(_cardSpeech.activeBtn)cardSpeechStop();
-  if(window.speechSynthesis.speaking||window.speechSynthesis.pending)window.speechSynthesis.cancel();
-  _cardSpeech.token++;var token=_cardSpeech.token;
-  _cardSpeech.chunks=cardSpeechMakeChunks(text);_cardSpeech.idx=0;_cardSpeech.activeBtn=btnId;
-  cardSpeechSetBtn(btnId,'speaking');
-  setTimeout(function(){cardSpeechSpeakNext(token,btnId);},80);
-}
 function audibleSummarize(){
   var passages=(document.getElementById('audiblePassages')||{}).value||'';
   var day=(document.getElementById('audibleChapter')||{}).value||'';
@@ -519,6 +431,14 @@ async function hydrateActivitiesStorage(){
   // for things like "is there a run today" — same stale-empty-list race as Habits above, so
   // re-render it too once the real activities are in memory.
   try{if(typeof renderJournalHome==='function')renderJournalHome();}catch(ignoreHome){}
+  // The Daily Miles chart (renderMilesChart, via renderActivitySectionCharts) reads
+  // getActivities() too, and has the exact same stale-empty-list race: if the Activities
+  // tab is opened (or was already open) before this hydration finishes, the chart renders
+  // against a temporarily-empty list and shows "No mileage logged in the last 60 days" —
+  // then never redraws, because nothing else triggers it again. Re-render it now so it
+  // self-corrects just like Habits/My Schedule above, instead of staying wrong until the
+  // next unrelated tab switch.
+  try{if(typeof renderActivitySectionCharts==='function')renderActivitySectionCharts();}catch(ignoreMiles){}
   return merged;
 }
 async function hydrateBibleReadingArchiveStorage(){

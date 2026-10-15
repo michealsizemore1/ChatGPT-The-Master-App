@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+<meta name="theme-color" content="#ff6b00">
+<script src="theme-switcher.js"></script>
 <title>My Life Master App</title>
 <style>
   :root{
@@ -13,6 +15,36 @@
     --muted:#666b73;
     --accent:#2f6fed;
     --accent-ink:#0d2f80;
+    --brand:#5b5bd6;
+    --brand2:#7c3aed;
+    --ink-rgb:23,32,51;
+    --brand-rgb:91,91,214;
+    --brand2-rgb:124,58,237;
+    --grad-start:#11141c;
+  }
+  html[data-theme="halloween"]{
+    --brand:#3b0764;
+    --brand2:#ff6b00;
+    --ink-rgb:26,10,46;
+    --brand-rgb:59,7,100;
+    --brand2-rgb:255,107,0;
+    --grad-start:#0d0618;
+  }
+  html[data-theme="thanksgiving"]{
+    --brand:#7c2d12;
+    --brand2:#d97706;
+    --ink-rgb:46,26,15;
+    --brand-rgb:124,45,18;
+    --brand2-rgb:217,119,6;
+    --grad-start:#1f0f06;
+  }
+  html[data-theme="christmas"]{
+    --brand:#165b33;
+    --brand2:#c21807;
+    --ink-rgb:11,46,26;
+    --brand-rgb:22,91,51;
+    --brand2-rgb:194,24,7;
+    --grad-start:#05140c;
   }
   *{box-sizing:border-box}
   html{overflow-x:hidden}
@@ -25,10 +57,18 @@
     line-height:1.5;
   }
   header{
-    background:var(--ink);
+    background:
+      radial-gradient(circle at 8% 20%,rgba(var(--brand2-rgb),.20) 0 2px,transparent 3px),
+      radial-gradient(circle at 16% 60%,rgba(var(--brand2-rgb),.16) 0 2px,transparent 3px),
+      linear-gradient(120deg,var(--grad-start) 0%,var(--brand) 58%,var(--brand2) 100%);
+    box-shadow:inset 0 -3px 0 var(--brand2),inset 0 -6px 0 var(--ink);
     color:#fff;
     padding:46px 6vw 40px;
   }
+  .theme-switcher-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:18px;}
+  .theme-btn{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.42);color:#fff;border-radius:999px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;transition:background .15s ease,border-color .15s ease,box-shadow .15s ease;}
+  .theme-btn:hover{background:rgba(255,255,255,.28);}
+  .theme-btn.active{background:var(--brand2);border-color:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.35);}
   header .eyebrow{
     font-size:11px;
     letter-spacing:.14em;
@@ -180,10 +220,16 @@
 <body>
 
 <header>
-  <div class="eyebrow">Personal Tools</div>
+  <div class="eyebrow"><span data-theme-emoji>&#x1F383;</span> Personal Tools</div>
   <h1>My Life Master App</h1>
   <p>One place for daily planning, budgeting, retirement, family protection, personal growth, and your eBay resale business. Use the small &#8962; button in the bottom-left corner of any tool to return here.</p>
   <div class="updated">Last updated September 13, 2026</div>
+  <div class="theme-switcher-row" role="group" aria-label="App theme">
+    <button type="button" class="theme-btn" data-theme-choice="original" onclick="setAppTheme('original')" title="Original theme">&#x1F9ED; Original</button>
+    <button type="button" class="theme-btn" data-theme-choice="halloween" onclick="setAppTheme('halloween')" title="Halloween theme">&#x1F383; Halloween</button>
+    <button type="button" class="theme-btn" data-theme-choice="thanksgiving" onclick="setAppTheme('thanksgiving')" title="Thanksgiving theme">&#x1F983; Thanksgiving</button>
+    <button type="button" class="theme-btn" data-theme-choice="christmas" onclick="setAppTheme('christmas')" title="Christmas theme">&#x1F384; Christmas</button>
+  </div>
 </header>
 
 <main>

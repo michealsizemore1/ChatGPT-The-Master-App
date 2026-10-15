@@ -1898,9 +1898,9 @@ function bpReportBounds(){
   else if(period==='yearly'){start=new Date(anchor.getFullYear(),0,1);end=new Date(anchor.getFullYear(),11,31);}
   return{start:start,end:end};
 }
-function renderBPReport(){
+function renderBPReport(manual){
   var out=document.getElementById('bpReportTable');if(!out)return;
-  var bounds=bpReportBounds();if(bounds.start>bounds.end){out.innerHTML='<div style="color:#b42318;font-size:.82rem;">The start date must be before the end date.</div>';return;}
+  var bounds=bpReportBounds();if(bounds.start>bounds.end){out.innerHTML='<div style="color:#b42318;font-size:.82rem;">The start date must be before the end date.</div>';if(manual)bpReportFlashGenerate();return;}
   var rows=[];
   for(var d=new Date(bounds.start);d<=bounds.end;d.setDate(d.getDate()+1)){
     var raw=localStorage.getItem('planner_'+dk(d));if(!raw)continue;
@@ -1908,11 +1908,26 @@ function renderBPReport(){
     var bp=parseBP(data.wBPVal),pulse=parseFloat(data.wPulseVal)||0;if(bp.sys||pulse)rows.push({date:new Date(d),sys:bp.sys,dia:bp.dia,pulse:pulse});
   }
   var print=document.getElementById('bpPrintBtn');
-  if(!rows.length){out.innerHTML='<div style="background:#f8fafc;border:1px solid #e4e7ec;border-radius:8px;padding:12px;font-size:.82rem;color:#667085;">No blood-pressure or pulse readings were logged for this period.</div>';if(print)print.style.display='none';return;}
+  if(!rows.length){out.innerHTML='<div style="background:#f8fafc;border:1px solid #e4e7ec;border-radius:8px;padding:12px;font-size:.82rem;color:#667085;">No blood-pressure or pulse readings were logged for this period.</div>';if(print)print.style.display='none';if(manual)bpReportFlashGenerate();return;}
   var bpRows=rows.filter(function(r){return r.sys&&r.dia;}),pulseRows=rows.filter(function(r){return r.pulse;});
   var avg=function(arr,key){return arr.length?Math.round(arr.reduce(function(s,r){return s+r[key];},0)/arr.length):0;};
   out.innerHTML='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;"><div class="review-stat"><strong>'+avg(bpRows,'sys')+'/'+avg(bpRows,'dia')+'</strong>Average BP</div><div class="review-stat"><strong>'+(avg(pulseRows,'pulse')||'—')+'</strong>Average Pulse</div><div class="review-stat"><strong>'+rows.length+'</strong>Readings</div></div><div style="overflow-x:auto;"><table class="summary-table" style="display:table;margin-bottom:0;"><thead><tr><th>Date</th><th>Systolic</th><th>Diastolic</th><th>Pulse</th></tr></thead><tbody>'+rows.map(function(r){return'<tr><td>'+r.date.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+'</td><td>'+(r.sys||'—')+'</td><td>'+(r.dia||'—')+'</td><td>'+(r.pulse||'—')+'</td></tr>';}).join('')+'</tbody></table></div>';
   if(print)print.style.display='block';
+  if(manual)bpReportFlashGenerate();
+}
+// "Generate Report" already re-renders live on every View By / date change via onchange,
+// so clicking the button when nothing changed produces an identical table with no visible
+// difference -- which reads as "the button does nothing" even though it ran correctly.
+// Give the explicit click its own feedback: scroll the (possibly off-screen) result into
+// view and flash the button label, so every click is visibly confirmed.
+function bpReportFlashGenerate(){
+  var out=document.getElementById('bpReportTable');
+  if(out&&out.scrollIntoView)out.scrollIntoView({behavior:'smooth',block:'nearest'});
+  var btn=document.getElementById('bpGenerateBtn');if(!btn)return;
+  if(!btn.getAttribute('data-label'))btn.setAttribute('data-label',btn.textContent);
+  btn.textContent='✓ Report Updated';
+  clearTimeout(btn._bpFlashTimer);
+  btn._bpFlashTimer=setTimeout(function(){btn.textContent=btn.getAttribute('data-label');},1100);
 }
 function printBPReport(){
   var content=(document.getElementById('bpReportTable')||{}).innerHTML;if(!content)return;
@@ -2000,7 +2015,7 @@ function renderMilesChart(){
   }
   const withMiles=entries.filter(e=>e.val>0);
   wrap.style.display='block';
-  if(withMiles.length<2){
+  if(withMiles.length<1){
     const c=document.getElementById('milesChart');if(c){const ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);}
     const avg=document.getElementById('milesChartAvg');if(avg)avg.textContent='No mileage logged in the last 60 days. Log a run on the Activities tab to see it here.';
     return;

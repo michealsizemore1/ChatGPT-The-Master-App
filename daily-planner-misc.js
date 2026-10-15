@@ -324,6 +324,72 @@ function clearActForm(){
   document.getElementById('actType').value='Run';
   handleActTypeChange();
 }
+
+// ── Automatic calorie estimate ──────────────────────────────────────────────
+// Estimates calories burned from distance/duration/power (and elevation, for
+// running/walking grade) using standard ACSM metabolic equations and a
+// power-based cycling formula, so Calories can be left blank and filled in
+// without typing it by hand. Needs a one-time body weight (stored locally,
+// never sent anywhere) to convert METs into kcal; falls back to 160 lbs if
+// that hasn't been set. This is an estimate, not a medical-grade measurement.
+function parseDurationSecLoose(s){
+  s=(s||'').trim();if(!s)return 0;
+  var m=s.match(/^(\d+):(\d{1,2}):(\d{1,2})$/);if(m)return(+m[1])*3600+(+m[2])*60+(+m[3]);
+  m=s.match(/^(\d+):(\d{1,2})$/);if(m)return(+m[1])*60+(+m[2]);
+  m=s.match(/^(\d+(?:\.\d+)?)\s*(?:min|minutes?|m)$/i);if(m)return Math.round(parseFloat(m[1])*60);
+  var n=parseFloat(s);return(isNaN(n)||n<=0)?0:Math.round(n*60);
+}
+function getActWeightKg(){
+  var lbs=parseFloat(localStorage.getItem('act_weight_lbs'))||160;
+  return lbs*0.453592;
+}
+function estimateCalories(a){
+  var durSec=parseDurationSecLoose(a.duration);
+  var hours=durSec/3600;
+  if(!hours)return 0;
+  var type=a.type||'Run';
+  if(type==='Rest Day')return 0;
+  var weightKg=getActWeightKg();
+  var distMi=parseFloat(a.distance)||0;
+  var speedMph=distMi>0?distMi/hours:0;
+  var met=5;
+  if(type==='Run'||type==='Walk'){
+    var speedMmin=speedMph*26.8224;
+    var distM=distMi*1609.34,elevM=(parseFloat(a.elevGain)||0)*0.3048;
+    var grade=distM>0?elevM/distM:0;
+    if(speedMmin>0){
+      var vo2=type==='Run'?(0.2*speedMmin+0.9*speedMmin*grade+3.5):(0.1*speedMmin+1.8*speedMmin*grade+3.5);
+      met=vo2/3.5;
+    }else{
+      met=type==='Run'?8:3.5;
+    }
+  }else if(type==='Ride'){
+    var power=parseFloat(a.power)||0;
+    if(power>0){
+      // ~3.6 kcal of metabolic cost per watt-hour of mechanical output (~24% gross cycling efficiency)
+      return Math.round(power*hours*3.6);
+    }
+    met=speedMph>0?(speedMph<10?4:speedMph<14?6:speedMph<16?8:speedMph<20?10:12):8;
+  }else if(type==='Swim'){
+    met=7;
+  }else if(type==='Strength'){
+    met=5;
+  }
+  return Math.max(0,Math.round(met*weightKg*hours));
+}
+function updateActCaloriesPlaceholder(){
+  var calEl=document.getElementById('actCalories');if(!calEl)return;
+  var typeNow=document.getElementById('actType').value;
+  if(typeNow==='Rest Day'){calEl.placeholder='0';return;}
+  var est=estimateCalories({
+    type:typeNow,
+    distance:parseFloat(document.getElementById('actDistance').value)||0,
+    duration:(document.getElementById('actDuration').value||'').trim(),
+    power:parseFloat(document.getElementById('actPower').value)||0,
+    elevGain:parseFloat(document.getElementById('actElevGain').value)||0
+  });
+  calEl.placeholder=est>0?('~'+est+' (auto)'):'0';
+}
 var ACT_REST_DAY_FIELDS=['actTitle','actDistance','actDuration','actPace','actPower','actHR','actCadence','actCalories','actElevGain','actTemp','actHumidity','actAQI','actExecScore','actRouteUrl','actNotes','actInjuryReport'];
 function handleActTypeChange(){
   var typeEl=document.getElementById('actType');if(!typeEl)return;
@@ -335,6 +401,7 @@ function handleActTypeChange(){
   });
   var sourceEl=document.getElementById('actSource');
   if(sourceEl){sourceEl.disabled=isRestDay;if(isRestDay)sourceEl.value='manual';}
+  updateActCaloriesPlaceholder();
 }
 function getActFormValues(){
   return{
@@ -347,7 +414,18 @@ function getActFormValues(){
     power:parseFloat(document.getElementById('actPower').value)||0,
     heartRate:parseFloat(document.getElementById('actHR').value)||0,
     cadence:parseFloat(document.getElementById('actCadence').value)||0,
-    calories:parseFloat(document.getElementById('actCalories').value)||0,
+    calories:(function(){
+      var raw=(document.getElementById('actCalories').value||'').trim();
+      if(raw!=='')return parseFloat(raw)||0;
+      var typeNow=document.getElementById('actType').value;
+      return estimateCalories({
+        type:typeNow,
+        distance:parseFloat(document.getElementById('actDistance').value)||0,
+        duration:(document.getElementById('actDuration').value||'').trim(),
+        power:parseFloat(document.getElementById('actPower').value)||0,
+        elevGain:parseFloat(document.getElementById('actElevGain').value)||0
+      });
+    })(),
     elevGain:parseFloat(document.getElementById('actElevGain').value)||0,
     notes:(document.getElementById('actNotes').value||'').trim(),
     injuryReport:(document.getElementById('actInjuryReport').value||'').trim(),
@@ -381,11 +459,16 @@ function saveActivity(){
   try{cancelAddActivity();}catch(err){console.error('cancelAddActivity error:',err);}
   try{renderActivities();}catch(err){console.error('renderActivities error:',err);if(typeof v26Toast==='function')v26Toast('Activity saved, but the list view had a display error.');}
 }
+function actSourceLabel(s){
+  var map={manual:'Manual',garmin:'Garmin',stryd:'Stryd',strava:'Strava',gear2:'Gear Tracker II',screenshot:'Screenshot'};
+  s=(s||'manual').toLowerCase();
+  return map[s]||(s.charAt(0).toUpperCase()+s.slice(1));
+}
 function cycleActSource(id){
   var acts=getActivities();
   var act=acts.find(function(a){return a.id===id;});
   if(!act)return;
-  var sources=['manual','garmin','stryd'];
+  var sources=['manual','garmin','stryd','strava','gear2'];
   var cur=(act.source||'manual').toLowerCase();
   var next=sources[(sources.indexOf(cur)+1)%sources.length];
   act.source=next;
@@ -426,6 +509,7 @@ function editActivity(id){
   document.getElementById('actInjuryReport').value=act.injuryReport||'';
   document.getElementById('actSource').value=act.source||'manual';
   handleActTypeChange();
+  updateActCaloriesPlaceholder();
   f.style.display='block';
   setTimeout(function(){f.scrollIntoView({behavior:'smooth',block:'start'});},50);
 }
@@ -446,9 +530,10 @@ function importActivities(ev,hint){
       const rows=parseCSV(text);
       if(rows.length<2){alert('No data rows found in CSV.');ev.target.value='';return;}
       const headers=rows[0].map(h=>h.trim());
-      const isGarmin=headers.some(h=>/Activity Type/i.test(h));
-      const isStryd=headers.some(h=>/Avg Power.*W/i.test(h))||headers.some(h=>/distance.*m/i.test(h));
-      const source=hint||(isGarmin?'garmin':isStryd?'stryd':'manual');
+      const isStrava=headers.some(h=>/^Activity ID$/i.test(h.trim()))||headers.some(h=>/Moving Time/i.test(h));
+      const isGarmin=!isStrava&&headers.some(h=>/Activity Type/i.test(h));
+      const isStryd=!isStrava&&(headers.some(h=>/Avg Power.*W/i.test(h))||headers.some(h=>/distance.*m/i.test(h)));
+      const source=hint||(isStrava?'strava':isGarmin?'garmin':isStryd?'stryd':'manual');
       const parsed=rows.slice(1).map(row=>{
         const r={};headers.forEach((h,i)=>r[h]=row[i]||'');
         return mapActivity(r,source,headers);
@@ -535,6 +620,30 @@ function mapActivity(r,source,headers){
     calories=parseFloat((g('Calories')||'').replace(/,/g,''))||0;
     const elevRaw=parseFloat((g('Elev Gain','Elevation Gain')||'').replace(/,/g,''))||0;
     elevGain=elevRaw>0?(elevRaw<500?Math.round(elevRaw*3.28084):Math.round(elevRaw)):0;
+  }else if(source==='strava'){
+    // Strava's bulk-export "activities.csv" reports distance/elevation in
+    // meters and times in seconds, and repeats several column names in a
+    // later per-type block — g()'s first-match-wins search picks up the
+    // earlier, top-level summary columns rather than those duplicates.
+    const rawDate=g('Activity Date')||'';
+    const isoMatch=rawDate.match(/^\d{4}-\d{2}-\d{2}/);
+    if(isoMatch)date=isoMatch[0];
+    else{const dt=new Date(rawDate);date=rawDate&&!isNaN(dt.getTime())?(dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0')):parseActivityDate(rawDate);}
+    title=g('Activity Name')||'Strava Activity';
+    const rawType=(g('Activity Type')||'Run').toLowerCase();
+    const stravaTypeMap={'run':'Run','trail run':'Run','virtual run':'Run','treadmill':'Run','ride':'Ride','virtual ride':'Ride','mountain bike ride':'Ride','gravel ride':'Ride','e-bike ride':'Ride','ebike ride':'Ride','handcycle':'Ride','velomobile':'Ride','walk':'Walk','hike':'Walk','swim':'Swim','weight training':'Strength','workout':'Strength','yoga':'Strength','crossfit':'Strength'};
+    type=stravaTypeMap[rawType]||'Other';
+    const distM=parseFloat(g('Distance'))||0;
+    distance=distM>0?Math.round((distM/1609.34)*100)/100:0;
+    const movingSecs=parseFloat(g('Moving Time'))||parseFloat(g('Elapsed Time'))||0;
+    duration=movingSecs>0?(function(){const h=Math.floor(movingSecs/3600),m=Math.floor((movingSecs%3600)/60),s=Math.round(movingSecs%60);return(h?h+':':'')+(h?String(m).padStart(2,'0'):m)+':'+String(s).padStart(2,'0');})():'';
+    if(distance>0&&movingSecs>0){const paceSecs=movingSecs/distance;const pm=Math.floor(paceSecs/60),ps=Math.round(paceSecs%60);pace=pm+':'+(ps<10?'0':'')+ps;}
+    power=parseFloat(g('Average Watts'))||0;
+    heartRate=parseFloat(g('Average Heart Rate'))||0;
+    cadence=parseFloat(g('Average Cadence'))||0;
+    calories=parseFloat((g('Calories')||'').replace(/,/g,''))||0;
+    const elevM=parseFloat(g('Elevation Gain'))||0;
+    elevGain=elevM>0?Math.round(elevM*3.28084):0;
   }else{
     date=parseActivityDate(g('Date')||'');
     title=g('Title','Name','Activity')||'Activity';
@@ -571,6 +680,64 @@ function getCP(){return parseFloat(localStorage.getItem('cp_value'))||0;}
 function powerZone(p,cp){if(!cp||!p)return null;const r=p/cp;if(r<0.55)return{z:'Z1',cls:'z1'};if(r<0.75)return{z:'Z2',cls:'z2'};if(r<0.90)return{z:'Z3',cls:'z3'};if(r<1.05)return{z:'Z4',cls:'z4'};return{z:'Z5',cls:'z5'};}
 function saveMaxHRAndRender(){const v=document.getElementById('hrMaxInput').value;localStorage.setItem('max_hr_value',v||'');renderActivities();}
 function getMaxHR(){const stored=parseFloat(localStorage.getItem('max_hr_value'));return stored>0?stored:174;}
+
+// ── Mileage goals (weekly / monthly / yearly) ───────────────────────────────
+// The weekly miles goal is shared between the Activities "This Week" card
+// (act_goal_week_mi) and the Weekly tab's "Weekly Goals" panel
+// (weekly_goals.Miles), which used to be two independent numbers that could
+// silently drift apart. syncWeeklyMilesGoal() keeps both storage keys and
+// both on-screen inputs in lockstep whenever either one is edited.
+function syncWeeklyMilesGoal(val){
+  var num=parseFloat(val)||0;
+  var g=JSON.parse(localStorage.getItem('weekly_goals')||'{}');
+  if(num>0)g.Miles=num;else delete g.Miles;
+  localStorage.setItem('weekly_goals',JSON.stringify(g));
+  var actEl=document.getElementById('actGoal_week');if(actEl)actEl.value=num>0?String(num):'';
+  var gEl=document.getElementById('gMiles');if(gEl)gEl.value=num>0?String(num):'';
+  if(typeof renderGoals==='function')renderGoals();
+}
+// One-time-per-load reconciliation for anyone who already had two different
+// values saved before these were linked: the Activities card's value wins
+// (matching what's shown there), so both places agree immediately.
+function reconcileWeeklyMilesGoal(){
+  var actVal=localStorage.getItem('act_goal_week_mi');
+  var g=JSON.parse(localStorage.getItem('weekly_goals')||'{}');
+  if(actVal){
+    if((parseFloat(g.Miles)||0)!==(parseFloat(actVal)||0))syncWeeklyMilesGoal(actVal);
+  }else if(g.Miles){
+    localStorage.setItem('act_goal_week_mi',String(g.Miles));
+  }
+}
+window.addEventListener('load',function(){reconcileWeeklyMilesGoal();});
+function getActGoal(period){
+  if(period==='week'){
+    var ownVal=localStorage.getItem('act_goal_week_mi');
+    if(ownVal)return parseFloat(ownVal)||0;
+    var g=JSON.parse(localStorage.getItem('weekly_goals')||'{}');
+    return parseFloat(g.Miles)||0;
+  }
+  return parseFloat(localStorage.getItem('act_goal_'+period+'_mi'))||0;
+}
+function saveActGoalAndRender(period){
+  var el=document.getElementById('actGoal_'+period);
+  if(!el)return;
+  localStorage.setItem('act_goal_'+period+'_mi',el.value||'');
+  if(period==='week')syncWeeklyMilesGoal(el.value);
+  renderMileageSummary();
+}
+function renderGoalBar(period,actualMi){
+  var barWrap=document.getElementById('actGoalBarWrap_'+period);
+  var bar=document.getElementById('actGoalBar_'+period);
+  var lbl=document.getElementById('actGoalLbl_'+period);
+  if(!barWrap||!bar||!lbl)return;
+  var goal=getActGoal(period);
+  if(!goal){barWrap.style.display='none';return;}
+  barWrap.style.display='block';
+  var pct=Math.min(100,Math.round((actualMi/goal)*100));
+  bar.style.width=pct+'%';
+  bar.style.background=pct>=100?'#27ae60':'#e67e22';
+  lbl.textContent=actualMi.toFixed(1)+' / '+goal+' mi ('+pct+'%)';
+}
 // Garmin's standard 5-zone heart-rate model, as a percentage of max heart rate:
 // Z1 50-60%, Z2 60-70%, Z3 70-80%, Z4 80-90%, Z5 90-100%+. Below 50% is untracked (resting/warm-up).
 // Karvonen (heart-rate-reserve) training zones from the user's updated calculator results:
@@ -656,6 +823,151 @@ function togglePRs(){
   const grid=document.getElementById('actPRGrid');const arr=document.getElementById('prArrow');
   if(!grid)return;const open=grid.style.display!=='none';
   grid.style.display=open?'none':'grid';if(arr)arr.textContent=open?'▶':'▼';
+}
+
+// ── Training load ratio (ACWR) ──────────────────────────────────────────────
+// Acute:chronic workload ratio: last 7 days' average daily mileage versus the
+// last 28 days' average. 0.8-1.3 is generally considered a sustainable build;
+// ramping past ~1.5 is linked in sports-science research to higher injury
+// risk (the classic "too much too soon" pattern). This is an estimate from
+// logged mileage only, not a medical assessment.
+function calcACWR(acts){
+  var wrap=document.getElementById('actACWRCard');
+  if(!wrap)return;
+  var now=new Date();
+  var todayEp=epDay(localDateStr(now));
+  var daily={};
+  acts.forEach(function(a){
+    if(!a.date||typeof a.date!=='string')return;
+    var mi=parseFloat(a.distance)||0;if(!mi)return;
+    daily[a.date]=(daily[a.date]||0)+mi;
+  });
+  function milesInLastNDays(n){
+    var total=0;
+    for(var i=0;i<n;i++){
+      var d=new Date((todayEp-i)*86400000);
+      var key=d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')+'-'+String(d.getUTCDate()).padStart(2,'0');
+      total+=daily[key]||0;
+    }
+    return total;
+  }
+  var acuteAvg=milesInLastNDays(7)/7;
+  var chronicAvg=milesInLastNDays(28)/28;
+  if(chronicAvg<=0){wrap.style.display='none';return;}
+  var ratio=acuteAvg/chronicAvg;
+  var color,label;
+  if(ratio<0.8){color='#5dade2';label='Low load (easing back)';}
+  else if(ratio<=1.3){color='#27ae60';label='Sweet spot';}
+  else if(ratio<=1.5){color='#f39c12';label='Elevated — watch for soreness';}
+  else{color='#e74c3c';label='High — classic "too much too soon" range';}
+  wrap.style.display='block';
+  wrap.innerHTML='<div style="font-size:0.78rem;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.03em;margin-bottom:4px;">⚡ Training Load Ratio (ACWR)</div>'
+    +'<div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;">'
+    +'<span style="font-size:1.4rem;font-weight:800;color:'+color+';">'+ratio.toFixed(2)+'</span>'
+    +'<span style="font-size:0.82rem;font-weight:700;color:'+color+';">'+label+'</span>'
+    +'</div>'
+    +'<div style="font-size:0.72rem;color:#999;margin-top:4px;">Last 7 days’ daily average ('+acuteAvg.toFixed(1)+' mi/day) vs. last 28 days’ ('+chronicAvg.toFixed(1)+' mi/day). An estimate from your logged mileage — not a medical assessment.</div>';
+}
+
+// ── Race time predictor ─────────────────────────────────────────────────────
+// Projects 5K/10K/Half/Marathon times from the fastest logged pace using the
+// Riegel formula (T2 = T1 * (D2/D1)^1.06). An estimate, not a guarantee.
+// Ultra distances (50K/50mi/100K/100mi) reuse the same Riegel extrapolation
+// for a flat-course baseline ("Riegel" number), then layer on two separate,
+// better-sourced corrections for an "Adjusted" number instead of a single
+// flat elevation penalty:
+//   1. A distance-tiered fatigue/fueling allowance. Riegel was validated
+//      only to roughly marathon distance and has no way to model fatigue,
+//      fueling, or sleep deprivation over many hours, so real ultra finish
+//      times run slower than a naive extrapolation by a margin that grows
+//      with distance. There's no single validated constant for this, but
+//      aggregate ultrarunning data gives a reasonable range to anchor on:
+//      RunRepeat's analysis of ~15M race results found average pace in
+//      races over 50mi running ~14% slower than under-50mi races, and a
+//      100K study (Lambert et al. 2004) found real-world fade of ~15% for
+//      front-pack finishers up to ~25-40% for mid/back-of-pack finishers
+//      over the full distance. The per-distance percentages below are an
+//      engineering estimate informed by that range, not a precise formula.
+//   2. A terrain cost from running economy research instead of a flat
+//      "10 min per 1,000 ft" rule-of-thumb. Minetti et al. (2002, J Appl
+//      Physiol) fit a 5th-order polynomial for the energy cost of running
+//      at a given gradient, Cr(i) in J/kg/m for grade fraction i, validated
+//      for |i| <= 0.45. Cr(i)/Cr(0) gives a grade-adjusted-pace (GAP) cost
+//      multiplier that scales non-linearly with steepness -- a 15% grade
+//      costs far more than 3x a 5% grade, which a flat per-1,000ft number
+//      can't express. Without a real elevation profile, the user's 5,000 ft
+//      of climbing is assumed to be spread evenly over the first half of
+//      the distance and mirrored on the way down (a reasonable default for
+//      an out-and-back or loop course); the resulting average grade is fed
+//      through Cr() for the climbing half and its mirror for the descending
+//      half, and averaged into one cost multiplier applied to the whole
+//      fatigue-adjusted time. This is still a model, not a course-specific
+//      prediction -- Minetti's data is from controlled, even-surface
+//      conditions, so technical trail footing can cost more than grade
+//      alone predicts. Both the Riegel and Adjusted ultra numbers are
+//      rough ballparks, flagged as such in the footnote below.
+function calcRacePredictor(acts){
+  var wrap=document.getElementById('actRacePredictCard');
+  if(!wrap)return;
+  // Only consider runs from the last 60 days, so the projection reflects
+  // current fitness rather than a fast pace from months ago.
+  var todayEp=epDay(localDateStr(new Date()));
+  var recentActs=acts.filter(function(a){return a.date&&(todayEp-epDay(a.date))<=59&&(todayEp-epDay(a.date))>=0;});
+  var best=null,bestPaceSec=0;
+  recentActs.forEach(function(a){
+    var p=parsePace(a.pace);
+    var mi=parseFloat(a.distance)||0;
+    if(p>0&&mi>=1&&(!best||p<bestPaceSec)){best=a;bestPaceSec=p;}
+  });
+  if(!best){wrap.style.display='none';return;}
+  var baseDistance=parseFloat(best.distance)||0;
+  var baseTimeSec=bestPaceSec*baseDistance;
+  if(!baseDistance||!baseTimeSec){wrap.style.display='none';return;}
+  var targets=[{label:'5K',mi:3.10686},{label:'10K',mi:6.21371},{label:'Half',mi:13.1094},{label:'Marathon',mi:26.2188}];
+  // fadePct: engineering-estimate fatigue/fueling allowance on top of Riegel,
+  // growing with distance (see comment block above for sourcing).
+  var ultraTargets=[
+    {label:'50K',mi:31.0686,fadePct:0.08},
+    {label:'50 Mile',mi:50,fadePct:0.15},
+    {label:'100K',mi:62.1371,fadePct:0.22},
+    {label:'100 Mile',mi:100,fadePct:0.30}
+  ];
+  var ULTRA_ELEV_FT=5000;
+  var ELEV_M=ULTRA_ELEV_FT*0.3048;
+  var MI_TO_M=1609.344;
+  // Minetti et al. 2002 polynomial: energy cost of running (J/kg/m) at
+  // grade fraction i (uphill positive), valid for |i|<=0.45.
+  function minettiCr(i){
+    return 155.4*Math.pow(i,5)-30.4*Math.pow(i,4)-43.3*Math.pow(i,3)+46.3*Math.pow(i,2)+19.5*i+3.6;
+  }
+  var CR_FLAT=minettiCr(0);
+  function fmtClock(sec){
+    sec=Math.round(sec);
+    var h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60;
+    return(h>0?h+':':'')+(h>0?String(m).padStart(2,'0'):m)+':'+String(s).padStart(2,'0');
+  }
+  var cards=targets.map(function(t){
+    var predictedSec=baseTimeSec*Math.pow(t.mi/baseDistance,1.06);
+    return '<div class="act-pr-card"><div class="pr-val">'+fmtClock(predictedSec)+'</div><div class="pr-lbl">'+t.label+'</div></div>';
+  }).join('');
+  var ultraCards=ultraTargets.map(function(t){
+    var predictedSec=baseTimeSec*Math.pow(t.mi/baseDistance,1.06);
+    var fadeAdjustedSec=predictedSec*(1+t.fadePct);
+    var distM=t.mi*MI_TO_M;
+    var avgGrade=Math.min(ELEV_M/(distM/2),0.45);
+    var costUp=minettiCr(avgGrade)/CR_FLAT;
+    var costDown=minettiCr(-avgGrade)/CR_FLAT;
+    var elevFactor=(costUp+costDown)/2;
+    var adjustedSec=fadeAdjustedSec*elevFactor;
+    return '<div class="act-pr-card"><div class="pr-val">'+fmtClock(predictedSec)+'</div><div class="pr-lbl">'+t.label+'</div><div class="pr-adj">Adjusted: '+fmtClock(adjustedSec)+'</div></div>';
+  }).join('');
+  wrap.style.display='block';
+  wrap.innerHTML='<div style="font-size:0.78rem;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.03em;margin-bottom:8px;">\u{1F3C1} Estimated Race Times</div>'
+    +'<div class="act-pr-grid">'+cards+'</div>'
+    +'<div style="font-size:0.7rem;color:#aaa;margin:2px 0 12px;">Projected with the Riegel formula from your fastest logged pace in the last 60 days ('+escHtml(best.pace)+'/mi over '+baseDistance.toFixed(1)+' mi'+(best.date?' on '+escHtml(best.date):'')+'). An estimate, not a guarantee — actual race-day performance depends on training, terrain, and conditions.</div>'
+    +'<div style="font-size:0.78rem;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.03em;margin-bottom:8px;">\u{1F3D4}️ Ultra Distances</div>'
+    +'<div class="act-pr-grid">'+ultraCards+'</div>'
+    +'<div style="font-size:0.7rem;color:#aaa;margin-top:6px;">The top number is the same flat Riegel projection stretched out to ultra distance — Riegel is only validated up to about marathon length, so by itself it tends to run optimistic at 50K and beyond. "Adjusted" layers on two corrections: a distance-based fatigue/fueling allowance (+8% at 50K, +15% at 50mi, +22% at 100K, +30% at 100mi — rough estimates from aggregate ultrarunning race data, not a validated constant), and a terrain cost from the Minetti running-economy equation, applied to this distance’s average grade assuming your 5,000 ft of climbing is spread over half the distance and mirrored on the way down. Both numbers are ballparks, not predictions.</div>';
 }
 
 function calcStreakAndLoad(acts){
@@ -818,6 +1130,17 @@ function renderMileageSummary(){
   const fmt=v=>v>0?v.toFixed(1):'0.0';
   const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=fmt(v);};
   set('mileThisWeek',thisWeek);set('mileLastWeek',lastWeek);set('mileMTD',mtd);set('mileYTD',ytd);
+  ['week','month','year'].forEach(function(period){
+    var el=document.getElementById('actGoal_'+period);
+    if(el&&!el.value){
+      var stored=localStorage.getItem('act_goal_'+period+'_mi');
+      if(!stored&&period==='week'){var wg=JSON.parse(localStorage.getItem('weekly_goals')||'{}');if(wg.Miles)stored=String(wg.Miles);}
+      if(stored)el.value=stored;
+    }
+  });
+  renderGoalBar('week',thisWeek);
+  renderGoalBar('month',mtd);
+  renderGoalBar('year',ytd);
   Object.keys(periodStats).forEach(function(suffix){
     const stat=periodStats[suffix];
     const paceEl=document.getElementById('pace'+suffix);
@@ -976,16 +1299,18 @@ function renderActivities(){
     return(b.date||'').localeCompare(a.date||'');
   });
 
-  calcStatsBar(filtered);calcStreakAndLoad(acts);
+  calcStatsBar(filtered);calcStreakAndLoad(acts);calcPRs(acts);calcACWR(acts);calcRacePredictor(acts);
 
   // Source breakdown
-  var gCnt=0,sCnt=0,mCnt=0;
-  acts.forEach(function(a){var src=(a.source||'manual').toLowerCase();if(src==='garmin')gCnt++;else if(src==='stryd')sCnt++;else mCnt++;});
+  var gCnt=0,sCnt=0,mCnt=0,stCnt=0,g2Cnt=0;
+  acts.forEach(function(a){var src=(a.source||'manual').toLowerCase();if(src==='garmin')gCnt++;else if(src==='stryd')sCnt++;else if(src==='strava')stCnt++;else if(src==='gear2')g2Cnt++;else mCnt++;});
   var cntEl=document.getElementById('actCount');
   if(cntEl&&acts.length){
     cntEl.innerHTML=acts.length+' activit'+(acts.length!==1?'ies':'y')
       +(gCnt?' <span style="background:#00b2e3;color:#fff;border-radius:4px;padding:1px 5px;font-size:0.68rem;font-weight:700;">G:'+gCnt+'</span>':'')
+      +(stCnt?' <span style="background:#fc4c02;color:#fff;border-radius:4px;padding:1px 5px;font-size:0.68rem;font-weight:700;">St:'+stCnt+'</span>':'')
       +(sCnt?' <span style="background:#ff6b35;color:#fff;border-radius:4px;padding:1px 5px;font-size:0.68rem;font-weight:700;">S:'+sCnt+'</span>':'')
+      +(g2Cnt?' <span style="background:#16a085;color:#fff;border-radius:4px;padding:1px 5px;font-size:0.68rem;font-weight:700;">G2:'+g2Cnt+'</span>':'')
       +(mCnt?' <span style="background:#888;color:#fff;border-radius:4px;padding:1px 5px;font-size:0.68rem;font-weight:700;">M:'+mCnt+'</span>':'');
   }
 
@@ -1025,6 +1350,21 @@ function renderActivities(){
     if(a.cadence)stats.push('<span class="act-stat">&#x1F9B5; <strong>'+a.cadence+'</strong> spm</span>');
     if(a.calories)stats.push('<span class="act-stat">&#x1F525; <strong>'+a.calories+'</strong> cal</span>');
     if(a.elevGain)stats.push('<span class="act-stat">&#x26F0; <strong>'+a.elevGain+'</strong> ft</span>');
+    if(a.elevGain&&a.distance){
+      var ftPerMi=a.elevGain/a.distance;
+      stats.push('<span class="act-stat" title="Elevation gain per mile">&#x26F0; <strong>'+Math.round(ftPerMi)+'</strong> ft/mi</span>');
+      var gapBaseSec=parsePace(a.pace);
+      if(gapBaseSec>0){
+        // Rough estimate (~12 sec/mile per 1% average grade) of a flat-
+        // equivalent pace -- not Strava's proprietary Grade Adjusted Pace
+        // model, and based on whole-activity average grade rather than a
+        // real elevation profile, since that's all this app has to work with.
+        var avgGradePct=(a.elevGain/(a.distance*5280))*100;
+        var gapSec=gapBaseSec+avgGradePct*12;
+        var gm=Math.floor(gapSec/60),gs=Math.round(gapSec%60);
+        stats.push('<span class="act-stat" title="Estimated flat-equivalent pace based on this run’s average grade">&#x2248;GAP <strong>'+gm+':'+(gs<10?'0':'')+gs+'</strong>/mi</span>');
+      }
+    }
     if(a.temp)stats.push('<span class="act-stat">&#x1F321;&#xFE0F; <strong>'+a.temp+'</strong>°F</span>');
     if(a.humidity)stats.push('<span class="act-stat">&#x1F4A7; Humidity <strong>'+a.humidity+'</strong>%</span>');
     if(a.aqi)stats.push('<span class="act-stat">&#x1F32C;&#xFE0F; AQI <strong>'+a.aqi+'</strong></span>');
@@ -1040,7 +1380,7 @@ function renderActivities(){
       +'<div style="display:flex;justify-content:space-between;align-items:center;gap:6px;cursor:pointer;" onclick="toggleActCard('+a.id+')">'
       +compareBox
       +'<div style="flex:1;min-width:0;">'
-      +'<span class="act-badge '+(a.source||'manual')+'" onclick="event.stopPropagation();cycleActSource('+a.id+')" title="Click to change source" style="cursor:pointer;">'+(a.source||'manual')+'</span>'
+      +'<span class="act-badge '+(a.source||'manual')+'" onclick="event.stopPropagation();cycleActSource('+a.id+')" title="Click to change source" style="cursor:pointer;">'+actSourceLabel(a.source)+'</span>'
       +' <span style="font-size:0.75rem;font-weight:700;color:'+tc+';text-transform:uppercase;">'+escHtml(a.type||'')+'</span>'
       +'<div class="act-title">'+escHtml(a.title||'Activity')+'</div>'
       +dateHtml
@@ -1064,7 +1404,7 @@ function renderActivities(){
       +'</div>'
       +'<div style="display:flex;align-items:center;gap:5px;margin-top:8px;flex-wrap:wrap;">'
       +'<span style="font-size:0.72rem;color:#888;font-weight:600;">Source:</span>'
-      +['manual','garmin','stryd'].map(function(s){var cur=(a.source||'manual')===s;return'<button onclick="event.stopPropagation();setActSource('+a.id+',\''+s+'\')" style="font-size:0.72rem;padding:3px 9px;border-radius:10px;border:1px solid '+(cur?'#667eea':'#ddd')+';background:'+(cur?'#667eea':'#fff')+';color:'+(cur?'#fff':'#888')+';cursor:pointer;font-weight:'+(cur?'700':'400')+';">'+s.charAt(0).toUpperCase()+s.slice(1)+'</button>';}).join('')
+      +['manual','garmin','stryd','strava','gear2'].map(function(s){var cur=(a.source||'manual')===s;return'<button onclick="event.stopPropagation();setActSource('+a.id+',\''+s+'\')" style="font-size:0.72rem;padding:3px 9px;border-radius:10px;border:1px solid '+(cur?'#667eea':'#ddd')+';background:'+(cur?'#667eea':'#fff')+';color:'+(cur?'#fff':'#888')+';cursor:pointer;font-weight:'+(cur?'700':'400')+';">'+actSourceLabel(s)+'</button>';}).join('')
       +'</div>'
       +'<div style="display:flex;gap:4px;margin-top:6px;">'
       +journalBtn
@@ -1600,6 +1940,7 @@ function migrateActivityDates(){
 // ── Weekly Goal Targets ───────────────────────────────────────────────────────
 function loadGoalSettings(){
   const g=JSON.parse(localStorage.getItem('weekly_goals')||'{}');
+  if(!g.Miles){const am=localStorage.getItem('act_goal_week_mi');if(am)g.Miles=parseFloat(am)||0;}
   ['Miles','Fin','Bible','Prayer','Exercise','Audible'].forEach(k=>{
     const el=document.getElementById('g'+k);if(el&&g[k])el.value=g[k];
   });
@@ -1610,8 +1951,13 @@ function saveGoals(){
     const el=document.getElementById('g'+k);if(el&&el.value)g[k]=parseFloat(el.value)||0;
   });
   localStorage.setItem('weekly_goals',JSON.stringify(g));
+  // Miles is shared with the Activities tab's "This Week" goal field -- keep
+  // that card's storage and input in sync with what was just saved here.
+  localStorage.setItem('act_goal_week_mi',g.Miles?String(g.Miles):'');
+  const actEl=document.getElementById('actGoal_week');if(actEl)actEl.value=g.Miles?String(g.Miles):'';
   document.getElementById('goalsSettings').style.display='none';
   renderGoals();
+  if(typeof renderMileageSummary==='function')renderMileageSummary();
 }
 function toggleGoalsSettings(){
   const s=document.getElementById('goalsSettings');
@@ -1650,47 +1996,6 @@ function renderGoals(){
       <div class="goal-bar-bg"><div class="goal-bar-fill" style="width:${pct}%;background:${reached?'#27ae60':'#667eea'};"></div></div>
     </div>`;
   }).join('');
-}
-// ── Auto-fill Weekly Wins ─────────────────────────────────────────────────────
-function autoFillWins(){
-  const ws=wkStart(revOff2);
-  const we=new Date(ws);we.setDate(ws.getDate()+6);
-  const runs=uniqueRunActivities(ws,we);let miles=runs.reduce(function(total,run){return total+(parseFloat(run.distance)||0);},0),runTime=runs.reduce(function(total,run){return total+parseTimedMins(run.duration);},0),bibleD=0,prayerD=0,audioMin=0,steps=0,logged=0;
-  let bpReadings=[];
-  for(let i=0;i<7;i++){
-    const d=new Date(ws);d.setDate(ws.getDate()+i);
-    const r=localStorage.getItem('planner_'+dk(d));if(!r)continue;
-    logged++;const dd=JSON.parse(r);
-    steps+=parseFloat(dd.exSteps)||0;
-    audioMin+=journalAudiobookMinutesForDate(dk(d),dd);
-    if(dd.spBibleAudio==='green')bibleD++;
-    if(dd.spAIPrayer==='green')prayerD++;
-    const bp=parseBP(dd.wBPVal);if(bp.sys)bpReadings.push(bp);
-  }
-  const fmtMins=m=>m>=60?Math.floor(m/60)+'h '+(m%60?m%60+'m':''):m+'m';
-  const lines=[];
-  const wLabel=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' – '+we.toLocaleDateString('en-US',{month:'short',day:'numeric'});
-  lines.push('Week of '+wLabel+' ('+logged+'/7 days logged)');
-  lines.push('');
-  lines.push('🏃 FITNESS');
-  if(miles>0)lines.push('  • '+miles.toFixed(1)+' miles'+(runTime>0?' in '+fmtMins(runTime):''));
-  if(steps>0)lines.push('  • '+Math.round(steps).toLocaleString()+' total steps');
-  lines.push('  • Runs: '+runs.length);
-  lines.push('');
-  lines.push('📖 SPIRITUALITY');
-  lines.push('  • Bible: '+bibleD+'/7 days');
-  lines.push('  • Prayer: '+prayerD+'/7 days');
-  lines.push('');
-  lines.push('📈 GROWTH');
-  if(audioMin>0)lines.push('  • Audiobook: '+fmtMins(audioMin));
-  if(bpReadings.length>0){
-    const avgSys=Math.round(bpReadings.reduce((s,b)=>s+b.sys,0)/bpReadings.length);
-    const avgDia=Math.round(bpReadings.reduce((s,b)=>s+b.dia,0)/bpReadings.length);
-    lines.push('');lines.push('❤️ WELLNESS');
-    lines.push('  • Avg BP: '+avgSys+'/'+avgDia+' mmHg ('+bpReadings.length+' readings)');
-  }
-  const el=document.getElementById('revWins');
-  if(el){el.value=lines.join('\n');el.dispatchEvent(new Event('input'));}
 }
 // ── Persistent Training Plan ─────────────────────────────────────────────────
 /* Tab Section Notes */

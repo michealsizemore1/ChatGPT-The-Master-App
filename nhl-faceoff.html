@@ -49,7 +49,13 @@ h1 em{color:#1f5a73;font-weight:400;font-style:italic}
 .score-row-empty{margin:0;padding:22px;background:#0c1118;border:1px solid #ffffff1a;border-radius:8px;color:#ffffffbb;font-size:13px}
 .overview-panels{display:flex;flex-direction:column;gap:28px;padding:38px 0 60px}
 .content-grid{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(330px,.75fr);gap:28px;padding:38px 0 80px}
-.panel{background:var(--paper);border:1px solid var(--line)}
+/* Panels sit on a light "paper" background, but the Scores tab nests the
+   Live Game Center panel inside .score-strip, which sets color:#fff for its
+   own dark backdrop. Without its own color, a panel inherits that white text
+   -- invisible against its light background -- which is why the box-score
+   stat rows, headline and player-leaders text in the Live Game Center never
+   appeared to "update": the numbers were there, just white-on-white. */
+.panel{background:var(--paper);border:1px solid var(--line);color:var(--ink)}
 .panel-title{min-height:84px;padding:20px 22px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);flex-wrap:wrap;gap:12px}
 .panel-title h2{font:26px Georgia,serif;margin:0}
 .panel-title button{border:0;background:none;color:#4c5d66;font-size:11px;font-weight:700;cursor:pointer}
@@ -594,7 +600,18 @@ async function loadEssentialMetrics(){
  try{
   const rows=await Promise.all(teams.map(async t=>{
    try{
-    const [statsRes,teamRes]=await Promise.all([fetch(`${api}/teams/${encodeURIComponent(t.id)}/statistics?season=${CURRENT_SEASON}`,{cache:'no-store'}).then(r=>r.json()),fetch(`${api}/teams/${encodeURIComponent(t.id)}`,{cache:'no-store'}).then(r=>r.json())]);
+    // The bare `/teams/{id}` path (no sub-path, no query string, no trailing
+    // slash) currently fails outright at ESPN's edge for every team -- a
+    // plain fetch() throws "Failed to fetch" with no HTTP status at all,
+    // confirmed by testing it directly against several team ids. Adding a
+    // trailing slash makes the identical request succeed (200, full body)
+    // every time. Since this one fetch feeds every team's record stats
+    // (power play %, penalty kill %, scoring off/def) and sits in the same
+    // Promise.all as the (working) statistics call, its failure took the
+    // whole per-team try/catch down with it -- which is why every Essential
+    // Metrics field showed "Waiting for season statistics" for every team,
+    // not just these four fields.
+    const [statsRes,teamRes]=await Promise.all([fetch(`${api}/teams/${encodeURIComponent(t.id)}/statistics?season=${CURRENT_SEASON}`,{cache:'no-store'}).then(r=>r.json()),fetch(`${api}/teams/${encodeURIComponent(t.id)}/`,{cache:'no-store'}).then(r=>r.json())]);
     const cats=statsRes.results?.stats?.categories||[];
     const stat=(cat,name)=>cats.find(c=>c.name===cat)?.stats?.find(s=>s.name===name);
     const gamesPlayed=Number(stat('general','games')?.value||0);
