@@ -2000,7 +2000,7 @@ function renderMilesChart(){
   }
   const withMiles=entries.filter(e=>e.val>0);
   wrap.style.display='block';
-  if(withMiles.length<2){
+  if(withMiles.length<1){
     const c=document.getElementById('milesChart');if(c){const ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);}
     const avg=document.getElementById('milesChartAvg');if(avg)avg.textContent='No mileage logged in the last 60 days. Log a run on the Activities tab to see it here.';
     return;
