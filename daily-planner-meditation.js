@@ -519,6 +519,14 @@ async function hydrateActivitiesStorage(){
   // for things like "is there a run today" — same stale-empty-list race as Habits above, so
   // re-render it too once the real activities are in memory.
   try{if(typeof renderJournalHome==='function')renderJournalHome();}catch(ignoreHome){}
+  // The Daily Miles chart (renderMilesChart, via renderActivitySectionCharts) reads
+  // getActivities() too, and has the exact same stale-empty-list race: if the Activities
+  // tab is opened (or was already open) before this hydration finishes, the chart renders
+  // against a temporarily-empty list and shows "No mileage logged in the last 60 days" —
+  // then never redraws, because nothing else triggers it again. Re-render it now so it
+  // self-corrects just like Habits/My Schedule above, instead of staying wrong until the
+  // next unrelated tab switch.
+  try{if(typeof renderActivitySectionCharts==='function')renderActivitySectionCharts();}catch(ignoreMiles){}
   return merged;
 }
 async function hydrateBibleReadingArchiveStorage(){
