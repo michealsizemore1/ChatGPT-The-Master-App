@@ -871,6 +871,128 @@ function renderCardioDriftChart(){
   }
 }
 
+// ── Heat Acclimation: Garmin Enduro/Fenix-style heat-load estimate (Activities tab) ──
+// Approximates the Heat Acclimation status found on higher-end Garmin watches using
+// logged temperature + duration instead of a core-temperature sensor. Each qualifying
+// activity adds a heat stimulus scaled by how hot it was and how long it lasted, and
+// that accumulated load decays a few percent every day without further heat exposure
+// -- roughly matching published heat-acclimation decay research (about three-quarters
+// of the adaptation is lost after a week fully away from heat).
+var HA_DECAY_PER_DAY=0.96;   // ~4% of accumulated heat load lost per day without a heat session
+var HA_TEMP_FLOOR=70;        // \u00b0F at/below this, an activity contributes no heat stimulus
+var HA_TEMP_CEIL=95;         // \u00b0F at/above this, an activity contributes full heat stimulus
+var HA_SATURATION=6;         // heat-load units at which the percentage is roughly 95% saturated
+function haHeatFactor(tempF){
+  if(tempF<=HA_TEMP_FLOOR)return 0;
+  if(tempF>=HA_TEMP_CEIL)return 1;
+  return (tempF-HA_TEMP_FLOOR)/(HA_TEMP_CEIL-HA_TEMP_FLOOR);
+}
+function haStatusInfo(pct){
+  if(pct<20)return{label:'Not Acclimated',color:'#dc2626'};
+  if(pct<45)return{label:'Minimally Acclimated',color:'#f97316'};
+  if(pct<70)return{label:'Acclimatizing',color:'#ca8a04'};
+  if(pct<90)return{label:'Mostly Acclimated',color:'#65a30d'};
+  return{label:'Well Acclimated',color:'#16a34a'};
+}
+function haLoadToPercent(load){
+  return Math.max(0,Math.min(100,Math.round(100*(1-Math.exp(-load/HA_SATURATION)))));
+}
+// Builds a day-by-day heat-load series ending on throughDateStr (YYYY-MM-DD), going
+// back daysBack days, by applying HA_DECAY_PER_DAY each day and adding that day's
+// qualifying activity stimulus (temperature-scaled, duration-weighted, capped per
+// session so one very long hot session can't saturate the whole estimate at once).
+function haComputeLoadSeries(acts,throughDateStr,daysBack){
+  var byDate={};
+  acts.forEach(function(a){
+    var t=parseFloat(a.temp);
+    if(a.type==='Rest Day'||!a.date||isNaN(t))return;
+    var hrs=parseMins(a.duration)/60;
+    if(!(hrs>0))return;
+    var stim=haHeatFactor(t)*Math.min(hrs,3);
+    if(stim<=0)return;
+    byDate[a.date]=(byDate[a.date]||0)+stim;
+  });
+  var through=new Date(throughDateStr+'T00:00:00');
+  var series=[],load=0;
+  for(var i=daysBack-1;i>=0;i--){
+    var d=new Date(through);d.setDate(through.getDate()-i);
+    var key=dk(d);
+    load=load*HA_DECAY_PER_DAY+(byDate[key]||0);
+    series.push({date:key,load:load});
+  }
+  return series;
+}
+function toggleHeatAcclimation(){
+  var sec=document.getElementById('haSection');var arr=document.getElementById('haArrow');
+  if(!sec)return;
+  var opening=sec.style.display==='none';
+  sec.style.display=opening?'block':'none';
+  if(arr)arr.innerHTML=opening?'&#x25BC;':'&#x25B6;';
+  var toggle=sec.previousElementSibling;
+  if(toggle)toggle.setAttribute('aria-expanded',opening?'true':'false');
+  if(opening)renderHeatAcclimationChart();
+}
+function renderHeatAcclimationChart(){
+  var canvas=document.getElementById('haChart');
+  var percentEl=document.getElementById('haPercent');
+  var statusEl=document.getElementById('haStatusLabel');
+  var markerEl=document.getElementById('haMarker');
+  var trackEl=document.getElementById('haTrack');
+  var summaryEl=document.getElementById('haSummary');
+  if(!canvas)return;
+  if(typeof Chart==='undefined'){
+    canvas.parentNode.innerHTML='<div style="color:#aaa;text-align:center;padding:16px 0;">Chart library did not load. Check your connection and refresh.</div>';
+    return;
+  }
+  var acts=getActivities();
+  var hasAnyHeatSource=acts.some(function(a){var t=parseFloat(a.temp);return a.type!=='Rest Day'&&!isNaN(t)&&a.date&&parseMins(a.duration)>0;});
+  if(!hasAnyHeatSource){
+    if(percentEl)percentEl.textContent='\u2014';
+    if(statusEl){statusEl.textContent='No data yet';statusEl.style.color='#7d4800';}
+    if(markerEl)markerEl.style.left='0%';
+    if(trackEl)trackEl.setAttribute('aria-valuenow','0');
+    if(summaryEl)summaryEl.textContent='Log a few activities with temperature and duration to see your heat acclimation estimate.';
+    if(charts.haChart){charts.haChart.destroy();delete charts.haChart;}
+    return;
+  }
+  var todayKey=dk(new Date());
+  var DAYS_BACK=30;
+  var series=haComputeLoadSeries(acts,todayKey,DAYS_BACK);
+  var currentLoad=series[series.length-1].load;
+  var pct=haLoadToPercent(currentLoad);
+  var status=haStatusInfo(pct);
+  if(percentEl){percentEl.textContent=pct+'%';percentEl.style.color=status.color;}
+  if(statusEl){statusEl.textContent=status.label;statusEl.style.color=status.color;}
+  if(markerEl)markerEl.style.left=pct+'%';
+  if(trackEl)trackEl.setAttribute('aria-valuenow',String(pct));
+  var heatActs=acts.filter(function(a){var t=parseFloat(a.temp);return a.type!=='Rest Day'&&!isNaN(t)&&t>HA_TEMP_FLOOR&&a.date&&parseMins(a.duration)>0;}).sort(function(a,b){return String(b.date).localeCompare(String(a.date));});
+  var lastHeatDate=heatActs.length?heatActs[0].date:null;
+  var daysSince=lastHeatDate?Math.round((new Date(todayKey+'T00:00:00')-new Date(lastHeatDate+'T00:00:00'))/86400000):null;
+  var cutoff14=new Date(todayKey+'T00:00:00');cutoff14.setDate(cutoff14.getDate()-14);
+  var sessions14=heatActs.filter(function(a){return new Date(a.date+'T00:00:00')>=cutoff14;}).length;
+  if(summaryEl){
+    var bits=[];
+    bits.push(sessions14+' session'+(sessions14===1?'':'s')+' over '+HA_TEMP_FLOOR+'\u00b0F in the last 14 days');
+    bits.push(daysSince==null?'no heat sessions logged yet':('last one '+(daysSince===0?'today':daysSince===1?'1 day ago':daysSince+' days ago')));
+    summaryEl.innerHTML=bits.join(' \u2022 ');
+  }
+  if(charts.haChart){charts.haChart.destroy();delete charts.haChart;}
+  var labels=series.map(function(s){var d=new Date(s.date+'T00:00:00');return (d.getMonth()+1)+'/'+d.getDate();});
+  var pcts=series.map(function(s){return haLoadToPercent(s.load);});
+  charts.haChart=new Chart(canvas.getContext('2d'),{
+    type:'line',
+    data:{labels:labels,datasets:[{label:'Heat Acclimation %',data:pcts,borderColor:'#e67e22',backgroundColor:'#e67e2222',tension:0.3,fill:true,pointRadius:0,borderWidth:2}]},
+    options:{
+      responsive:true,maintainAspectRatio:false,animation:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return 'Heat Acclimation: '+ctx.parsed.y+'%';}}}},
+      scales:{
+        x:{grid:{display:false},ticks:{maxTicksLimit:6,color:'#888',font:{size:10}}},
+        y:{min:0,max:100,ticks:{stepSize:25,color:'#888',font:{size:10}},grid:{color:'rgba(148,163,184,.18)'}}
+      }
+    }
+  });
+}
+
 function goToActivityDate(dateStr){
   const target=new Date(dateStr+'T00:00:00');
   today.setFullYear(target.getFullYear(),target.getMonth(),target.getDate());

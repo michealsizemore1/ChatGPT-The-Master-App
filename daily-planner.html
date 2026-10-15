@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-10-15-8">
+<meta name="app-build" content="2026-10-15-9">
 <script src="theme-switcher.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#ff6b00">
@@ -2249,6 +2249,25 @@ body{
     </div>
   </div>
 
+  <!-- Heat Acclimation: Garmin Enduro/Fenix-style heat-load estimate -->
+  <div style="margin-bottom:14px;">
+    <div class="act-section-toggle" onclick="toggleHeatAcclimation()" role="button" tabindex="0" aria-expanded="false" aria-controls="haSection" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleHeatAcclimation();}"><span id="haArrow">&#x25B6;</span> &#x1F321;&#xFE0F;&#x1F4A7; Heat Acclimation</div>
+    <div id="haSection" style="display:none;background:#fff8f0;border:1px solid #ffd5a8;border-radius:10px;padding:14px;">
+      <div style="font-size:0.78rem;color:#888;margin-bottom:12px;line-height:1.4;">Estimated from the temperature and duration you log on each activity &mdash; similar to the Heat Acclimation status on higher-end Garmin watches (Enduro, Fenix, Epix), but built from your logged data rather than a core-temperature sensor. It builds up with repeated time spent training in the heat and fades within a couple of weeks without it.</div>
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:10px;">
+        <div id="haPercent" style="font-size:2.1rem;font-weight:800;color:#c2410c;min-width:64px;">&mdash;</div>
+        <div style="flex:1;min-width:160px;">
+          <div id="haStatusLabel" style="font-size:0.88rem;font-weight:700;color:#7d4800;margin-bottom:4px;">&mdash;</div>
+          <div style="height:11px;position:relative;border-radius:999px;background:linear-gradient(90deg,#dc2626 0%,#f97316 25%,#facc15 50%,#84cc16 75%,#16a34a 100%);box-shadow:inset 0 0 0 1px rgba(15,23,42,.12);" role="meter" aria-label="Heat acclimation percentage" aria-valuemin="0" aria-valuemax="100" id="haTrack">
+            <span id="haMarker" style="position:absolute;top:50%;left:0%;width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #0f172a;box-sizing:border-box;transform:translate(-50%,-50%);box-shadow:0 1px 3px rgba(15,23,42,.35);"></span>
+          </div>
+        </div>
+      </div>
+      <div style="height:160px;"><canvas id="haChart"></canvas></div>
+      <div id="haSummary" style="margin-top:10px;font-size:0.8rem;color:#7d4800;text-align:center;line-height:1.4;"></div>
+    </div>
+  </div>
+
   <!-- Filters -->
   <div class="act-search-row">
     <input type="text" id="actSearch" placeholder="&#x1F50D; Search activities..." oninput="renderActivities()">
@@ -3133,7 +3152,7 @@ body{
 <script src="daily-planner-journal-archive.js?v=2026-10-15-6"></script>
 <script src="daily-planner-file-uploads.js?v=2026-10-15-6"></script>
 <script src="daily-planner-shoe-tracker.js?v=2026-10-15-6"></script>
-<script src="daily-planner-misc.js?v=2026-10-15-9"></script>
+<script src="daily-planner-misc.js?v=2026-10-15-10"></script>
 <script src="daily-planner-journal-experience.js?v=2026-10-15-7"></script>
 <script src="master-backup-shared.js?v=2026-10-15-6"></script>
 <script src="daily-planner-storage-qol.js?v=2026-10-15-6"></script>
