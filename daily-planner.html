@@ -1931,103 +1931,68 @@ body{
     </div>
   </div>
   <!-- Mileage Summary -->
-  <style>
-    /* Hand-drawn sketchbook skin for the Activities mileage summary cards */
-    #mileageSummaryBar{font-family:'Segoe Print','Bradley Hand','Comic Sans MS',cursive;}
-    .ms-card{
-      flex:1;min-width:132px;position:relative;text-align:center;
-      padding:11px 12px 12px;
-      background-color:#fffdf6;
-      background-image:
-        repeating-linear-gradient(0deg,transparent,transparent 11px,rgba(30,20,10,.06) 12px),
-        repeating-linear-gradient(90deg,transparent,transparent 11px,rgba(30,20,10,.06) 12px);
-      border:2px solid var(--ms-ink);
-      border-radius:14px 9px 15px 10px/10px 15px 9px 14px;
-      box-shadow:2px 2px 0 rgba(0,0,0,.08),inset 0 0 14px rgba(0,0,0,.05);
-    }
-    .ms-card:nth-child(1){transform:rotate(-0.6deg);--ms-ink:#1e8449;--ms-accent:rgba(143,227,160,.8);}
-    .ms-card:nth-child(2){transform:rotate(0.5deg);--ms-ink:#1a5276;--ms-accent:rgba(169,204,227,.8);}
-    .ms-card:nth-child(3){transform:rotate(-0.4deg);--ms-ink:#d35400;--ms-accent:rgba(255,196,120,.85);}
-    .ms-card:nth-child(4){transform:rotate(0.6deg);--ms-ink:#6c3483;--ms-accent:rgba(195,155,211,.8);}
-    .ms-tag{
-      display:inline-block;background:var(--ms-ink);color:#fff;font-size:.68rem;font-weight:700;
-      letter-spacing:.03em;text-transform:uppercase;padding:2px 10px;border-radius:3px;
-      transform:rotate(-1deg);box-shadow:1px 1px 0 rgba(0,0,0,.15);margin-bottom:6px;
-    }
-    .ms-value{font-size:1.7rem;font-weight:400;line-height:1;margin-top:2px;color:var(--ms-ink);}
-    .ms-unit{font-size:.72rem;color:#8a8498;margin-top:1px;}
-    .ms-details{border-top:1.5px dashed var(--ms-ink);margin-top:8px;padding-top:7px;display:grid;gap:4px;}
-    .ms-details div{display:flex;justify-content:space-between;gap:8px;font-size:.76rem;color:#55506a;}
-    .ms-details strong{font-weight:700;background:var(--ms-accent);mix-blend-mode:multiply;border-radius:3px;padding:0 5px;color:#1f2340;}
-    .ms-cp-input{width:46px;border:1.5px solid var(--ms-ink);border-radius:5px;padding:1px 4px;text-align:right;font-size:.76rem;font-weight:700;color:#1f2340;background:rgba(255,255,255,.88);outline:none;font-family:inherit;mix-blend-mode:normal;}
-    .ms-cp-input:focus{box-shadow:0 0 0 2px var(--ms-accent);}
-    .ms-goal-row{display:flex;align-items:center;gap:4px;justify-content:center;font-size:.74rem;color:#7a7488;margin-top:8px;}
-    .ms-goal-input{width:54px;border:1.5px solid var(--ms-ink);border-radius:5px;padding:1px 4px;text-align:center;font-size:.76rem;font-weight:700;color:#1f2340;background:rgba(255,255,255,.88);outline:none;font-family:inherit;}
-    .ms-goal-track{background:rgba(255,255,255,.75);border:1.5px solid var(--ms-ink);border-radius:7px;height:8px;overflow:hidden;margin-top:5px;}
-    .ms-goal-lbl{font-size:.68rem;color:#8a8498;margin-top:3px;}
-  </style>
-  <div id="mileageSummaryBar" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
-    <div class="ms-card">
-      <div class="ms-tag">&#x1F3C3; This Week</div>
-      <div id="mileThisWeek" class="ms-value">—</div>
-      <div class="ms-unit">miles</div>
-      <div class="ms-details">
+  <div id="mileageSummaryBar" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+    <div style="flex:1;min-width:120px;background:linear-gradient(135deg,#e8f8f0,#d5f5e3);border:1px solid #a9dfbf;border-radius:10px;padding:10px 12px;text-align:center;">
+      <div style="font-size:0.72rem;font-weight:700;color:#1e8449;text-transform:uppercase;letter-spacing:.04em;">This Week</div>
+      <div id="mileThisWeek" style="font-size:1.3rem;font-weight:700;color:#1a5276;">—</div>
+      <div style="font-size:0.7rem;color:#888;">miles</div>
+      <div class="activity-period-details">
         <div><span>Avg pace</span><strong id="paceThisWeek">—</strong></div>
         <div><span>Avg power</span><strong id="wattsThisWeek">—</strong></div>
         <div><span>Exercise time</span><strong id="timeThisWeek">—</strong></div>
-        <div><span>Critical power</span><strong><input type="number" class="ms-cp-input" id="cpInput" placeholder="280" min="1" inputmode="numeric" oninput="saveCPAndRender()" title="Editable Critical Power in watts, used for power-zone colors"> W</strong></div>
-        <div><span>Max heart rate</span><strong><input type="number" class="ms-cp-input" id="hrMaxInput" placeholder="174" min="1" inputmode="numeric" oninput="saveMaxHRAndRender()" title="Editable Max Heart Rate in bpm, used for Garmin heart-rate-zone colors"> bpm</strong></div>
+        <div><span>Critical power</span><strong><input type="number" class="tile-cp-input" id="cpInput" placeholder="280" min="1" inputmode="numeric" oninput="saveCPAndRender()" title="Editable Critical Power in watts, used for power-zone colors"> W</strong></div>
+        <div><span>Max heart rate</span><strong><input type="number" class="tile-cp-input" id="hrMaxInput" placeholder="174" min="1" inputmode="numeric" oninput="saveMaxHRAndRender()" title="Editable Max Heart Rate in bpm, used for Garmin heart-rate-zone colors"> bpm</strong></div>
       </div>
-      <div class="ms-goal-row">
-        <span>Goal:</span><input type="number" id="actGoal_week" class="ms-goal-input" placeholder="20" min="0" oninput="saveActGoalAndRender('week')"> mi/wk
+      <div style="display:flex;align-items:center;gap:4px;justify-content:center;font-size:0.68rem;color:#888;margin-top:8px;">
+        <span>Goal:</span><input type="number" id="actGoal_week" class="tile-cp-input" style="width:48px;" placeholder="20" min="0" oninput="saveActGoalAndRender('week')"> mi/wk
       </div>
       <div id="actGoalBarWrap_week" style="display:none;margin-top:4px;">
-        <div class="ms-goal-track"><div id="actGoalBar_week" style="height:100%;width:0%;background:#e67e22;border-radius:6px;transition:width .3s;"></div></div>
-        <div id="actGoalLbl_week" class="ms-goal-lbl"></div>
+        <div style="background:#e8e8e8;border-radius:6px;height:6px;overflow:hidden;"><div id="actGoalBar_week" style="height:100%;width:0%;background:#e67e22;border-radius:6px;transition:width .3s;"></div></div>
+        <div id="actGoalLbl_week" style="font-size:0.64rem;color:#999;margin-top:2px;"></div>
       </div>
     </div>
-    <div class="ms-card">
-      <div class="ms-tag">&#x1F4C5; Last Week</div>
-      <div id="mileLastWeek" class="ms-value">—</div>
-      <div class="ms-unit">miles</div>
-      <div class="ms-details">
+    <div style="flex:1;min-width:120px;background:linear-gradient(135deg,#eaf3fb,#d6eaf8);border:1px solid #a9cce3;border-radius:10px;padding:10px 12px;text-align:center;">
+      <div style="font-size:0.72rem;font-weight:700;color:#1a5276;text-transform:uppercase;letter-spacing:.04em;">Last Week</div>
+      <div id="mileLastWeek" style="font-size:1.3rem;font-weight:700;color:#1a5276;">—</div>
+      <div style="font-size:0.7rem;color:#888;">miles</div>
+      <div class="activity-period-details">
         <div><span>Avg pace</span><strong id="paceLastWeek">—</strong></div>
         <div><span>Avg power</span><strong id="wattsLastWeek">—</strong></div>
         <div><span>Exercise time</span><strong id="timeLastWeek">—</strong></div>
       </div>
     </div>
-    <div class="ms-card">
-      <div class="ms-tag">&#x1F4C8; Month to Date</div>
-      <div id="mileMTD" class="ms-value">—</div>
-      <div class="ms-unit">miles</div>
-      <div class="ms-details">
+    <div style="flex:1;min-width:120px;background:linear-gradient(135deg,#fef9e7,#fdebd0);border:1px solid #f0c080;border-radius:10px;padding:10px 12px;text-align:center;">
+      <div style="font-size:0.72rem;font-weight:700;color:#d35400;text-transform:uppercase;letter-spacing:.04em;">Month to Date</div>
+      <div id="mileMTD" style="font-size:1.3rem;font-weight:700;color:#1a5276;">—</div>
+      <div style="font-size:0.7rem;color:#888;">miles</div>
+      <div class="activity-period-details">
         <div><span>Avg pace</span><strong id="paceMTD">—</strong></div>
         <div><span>Avg power</span><strong id="wattsMTD">—</strong></div>
         <div><span>Exercise time</span><strong id="timeMTD">—</strong></div>
       </div>
-      <div class="ms-goal-row">
-        <span>Goal:</span><input type="number" id="actGoal_month" class="ms-goal-input" placeholder="80" min="0" oninput="saveActGoalAndRender('month')"> mi/mo
+      <div style="display:flex;align-items:center;gap:4px;justify-content:center;font-size:0.68rem;color:#888;margin-top:8px;">
+        <span>Goal:</span><input type="number" id="actGoal_month" class="tile-cp-input" style="width:48px;" placeholder="80" min="0" oninput="saveActGoalAndRender('month')"> mi/mo
       </div>
       <div id="actGoalBarWrap_month" style="display:none;margin-top:4px;">
-        <div class="ms-goal-track"><div id="actGoalBar_month" style="height:100%;width:0%;background:#e67e22;border-radius:6px;transition:width .3s;"></div></div>
-        <div id="actGoalLbl_month" class="ms-goal-lbl"></div>
+        <div style="background:#e8e8e8;border-radius:6px;height:6px;overflow:hidden;"><div id="actGoalBar_month" style="height:100%;width:0%;background:#e67e22;border-radius:6px;transition:width .3s;"></div></div>
+        <div id="actGoalLbl_month" style="font-size:0.64rem;color:#999;margin-top:2px;"></div>
       </div>
     </div>
-    <div class="ms-card">
-      <div class="ms-tag">&#x1F3C6; Year to Date</div>
-      <div id="mileYTD" class="ms-value">—</div>
-      <div class="ms-unit">miles</div>
-      <div class="ms-details">
+    <div style="flex:1;min-width:120px;background:linear-gradient(135deg,#f5eef8,#e8daef);border:1px solid #c39bd3;border-radius:10px;padding:10px 12px;text-align:center;">
+      <div style="font-size:0.72rem;font-weight:700;color:#6c3483;text-transform:uppercase;letter-spacing:.04em;">Year to Date</div>
+      <div id="mileYTD" style="font-size:1.3rem;font-weight:700;color:#1a5276;">—</div>
+      <div style="font-size:0.7rem;color:#888;">miles</div>
+      <div class="activity-period-details">
         <div><span>Avg pace</span><strong id="paceYTD">—</strong></div>
         <div><span>Avg power</span><strong id="wattsYTD">—</strong></div>
         <div><span>Exercise time</span><strong id="timeYTD">—</strong></div>
       </div>
-      <div class="ms-goal-row">
-        <span>Goal:</span><input type="number" id="actGoal_year" class="ms-goal-input" placeholder="1000" min="0" oninput="saveActGoalAndRender('year')"> mi/yr
+      <div style="display:flex;align-items:center;gap:4px;justify-content:center;font-size:0.68rem;color:#888;margin-top:8px;">
+        <span>Goal:</span><input type="number" id="actGoal_year" class="tile-cp-input" style="width:52px;" placeholder="1000" min="0" oninput="saveActGoalAndRender('year')"> mi/yr
       </div>
       <div id="actGoalBarWrap_year" style="display:none;margin-top:4px;">
-        <div class="ms-goal-track"><div id="actGoalBar_year" style="height:100%;width:0%;background:#e67e22;border-radius:6px;transition:width .3s;"></div></div>
-        <div id="actGoalLbl_year" class="ms-goal-lbl"></div>
+        <div style="background:#e8e8e8;border-radius:6px;height:6px;overflow:hidden;"><div id="actGoalBar_year" style="height:100%;width:0%;background:#e67e22;border-radius:6px;transition:width .3s;"></div></div>
+        <div id="actGoalLbl_year" style="font-size:0.64rem;color:#999;margin-top:2px;"></div>
       </div>
     </div>
   </div>
