@@ -839,8 +839,12 @@ function calcACWR(acts){
 function calcRacePredictor(acts){
   var wrap=document.getElementById('actRacePredictCard');
   if(!wrap)return;
+  // Only consider runs from the last 60 days, so the projection reflects
+  // current fitness rather than a fast pace from months ago.
+  var todayEp=epDay(localDateStr(new Date()));
+  var recentActs=acts.filter(function(a){return a.date&&(todayEp-epDay(a.date))<=59&&(todayEp-epDay(a.date))>=0;});
   var best=null,bestPaceSec=0;
-  acts.forEach(function(a){
+  recentActs.forEach(function(a){
     var p=parsePace(a.pace);
     var mi=parseFloat(a.distance)||0;
     if(p>0&&mi>=1&&(!best||p<bestPaceSec)){best=a;bestPaceSec=p;}
@@ -862,7 +866,7 @@ function calcRacePredictor(acts){
   wrap.style.display='block';
   wrap.innerHTML='<div style="font-size:0.78rem;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.03em;margin-bottom:8px;">\u{1F3C1} Estimated Race Times</div>'
     +'<div class="act-pr-grid">'+cards+'</div>'
-    +'<div style="font-size:0.7rem;color:#aaa;margin-top:6px;">Projected with the Riegel formula from your fastest logged pace ('+escHtml(best.pace)+'/mi over '+baseDistance.toFixed(1)+' mi'+(best.date?' on '+escHtml(best.date):'')+'). An estimate, not a guarantee — actual race-day performance depends on training, terrain, and conditions.</div>';
+    +'<div style="font-size:0.7rem;color:#aaa;margin-top:6px;">Projected with the Riegel formula from your fastest logged pace in the last 60 days ('+escHtml(best.pace)+'/mi over '+baseDistance.toFixed(1)+' mi'+(best.date?' on '+escHtml(best.date):'')+'). An estimate, not a guarantee — actual race-day performance depends on training, terrain, and conditions.</div>';
 }
 
 function calcStreakAndLoad(acts){
