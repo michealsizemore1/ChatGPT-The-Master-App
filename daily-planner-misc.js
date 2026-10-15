@@ -682,11 +682,47 @@ function saveMaxHRAndRender(){const v=document.getElementById('hrMaxInput').valu
 function getMaxHR(){const stored=parseFloat(localStorage.getItem('max_hr_value'));return stored>0?stored:174;}
 
 // ── Mileage goals (weekly / monthly / yearly) ───────────────────────────────
-function getActGoal(period){return parseFloat(localStorage.getItem('act_goal_'+period+'_mi'))||0;}
+// The weekly miles goal is shared between the Activities "This Week" card
+// (act_goal_week_mi) and the Weekly tab's "Weekly Goals" panel
+// (weekly_goals.Miles), which used to be two independent numbers that could
+// silently drift apart. syncWeeklyMilesGoal() keeps both storage keys and
+// both on-screen inputs in lockstep whenever either one is edited.
+function syncWeeklyMilesGoal(val){
+  var num=parseFloat(val)||0;
+  var g=JSON.parse(localStorage.getItem('weekly_goals')||'{}');
+  if(num>0)g.Miles=num;else delete g.Miles;
+  localStorage.setItem('weekly_goals',JSON.stringify(g));
+  var actEl=document.getElementById('actGoal_week');if(actEl)actEl.value=num>0?String(num):'';
+  var gEl=document.getElementById('gMiles');if(gEl)gEl.value=num>0?String(num):'';
+  if(typeof renderGoals==='function')renderGoals();
+}
+// One-time-per-load reconciliation for anyone who already had two different
+// values saved before these were linked: the Activities card's value wins
+// (matching what's shown there), so both places agree immediately.
+function reconcileWeeklyMilesGoal(){
+  var actVal=localStorage.getItem('act_goal_week_mi');
+  var g=JSON.parse(localStorage.getItem('weekly_goals')||'{}');
+  if(actVal){
+    if((parseFloat(g.Miles)||0)!==(parseFloat(actVal)||0))syncWeeklyMilesGoal(actVal);
+  }else if(g.Miles){
+    localStorage.setItem('act_goal_week_mi',String(g.Miles));
+  }
+}
+window.addEventListener('load',function(){reconcileWeeklyMilesGoal();});
+function getActGoal(period){
+  if(period==='week'){
+    var ownVal=localStorage.getItem('act_goal_week_mi');
+    if(ownVal)return parseFloat(ownVal)||0;
+    var g=JSON.parse(localStorage.getItem('weekly_goals')||'{}');
+    return parseFloat(g.Miles)||0;
+  }
+  return parseFloat(localStorage.getItem('act_goal_'+period+'_mi'))||0;
+}
 function saveActGoalAndRender(period){
   var el=document.getElementById('actGoal_'+period);
   if(!el)return;
   localStorage.setItem('act_goal_'+period+'_mi',el.value||'');
+  if(period==='week')syncWeeklyMilesGoal(el.value);
   renderMileageSummary();
 }
 function renderGoalBar(period,actualMi){
@@ -1031,7 +1067,11 @@ function renderMileageSummary(){
   set('mileThisWeek',thisWeek);set('mileLastWeek',lastWeek);set('mileMTD',mtd);set('mileYTD',ytd);
   ['week','month','year'].forEach(function(period){
     var el=document.getElementById('actGoal_'+period);
-    if(el&&!el.value){var stored=localStorage.getItem('act_goal_'+period+'_mi');if(stored)el.value=stored;}
+    if(el&&!el.value){
+      var stored=localStorage.getItem('act_goal_'+period+'_mi');
+      if(!stored&&period==='week'){var wg=JSON.parse(localStorage.getItem('weekly_goals')||'{}');if(wg.Miles)stored=String(wg.Miles);}
+      if(stored)el.value=stored;
+    }
   });
   renderGoalBar('week',thisWeek);
   renderGoalBar('month',mtd);
@@ -1835,6 +1875,7 @@ function migrateActivityDates(){
 // ── Weekly Goal Targets ───────────────────────────────────────────────────────
 function loadGoalSettings(){
   const g=JSON.parse(localStorage.getItem('weekly_goals')||'{}');
+  if(!g.Miles){const am=localStorage.getItem('act_goal_week_mi');if(am)g.Miles=parseFloat(am)||0;}
   ['Miles','Fin','Bible','Prayer','Exercise','Audible'].forEach(k=>{
     const el=document.getElementById('g'+k);if(el&&g[k])el.value=g[k];
   });
@@ -1845,8 +1886,13 @@ function saveGoals(){
     const el=document.getElementById('g'+k);if(el&&el.value)g[k]=parseFloat(el.value)||0;
   });
   localStorage.setItem('weekly_goals',JSON.stringify(g));
+  // Miles is shared with the Activities tab's "This Week" goal field -- keep
+  // that card's storage and input in sync with what was just saved here.
+  localStorage.setItem('act_goal_week_mi',g.Miles?String(g.Miles):'');
+  const actEl=document.getElementById('actGoal_week');if(actEl)actEl.value=g.Miles?String(g.Miles):'';
   document.getElementById('goalsSettings').style.display='none';
   renderGoals();
+  if(typeof renderMileageSummary==='function')renderMileageSummary();
 }
 function toggleGoalsSettings(){
   const s=document.getElementById('goalsSettings');
