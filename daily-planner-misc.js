@@ -748,6 +748,129 @@ function renderGoalBar(period,actualMi){
 // recomputing here would need a separate resting-HR input this app doesn't currently collect.
 function hrZone(hr){if(!hr)return null;if(hr<113)return null;if(hr<125)return{z:'Z1',cls:'z1'};if(hr<138)return{z:'Z2',cls:'z2'};if(hr<151)return{z:'Z3',cls:'z3'};if(hr<163)return{z:'Z4',cls:'z4'};return{z:'Z5',cls:'z5'};}
 
+// ── Cardiovascular Drift: Heart Rate Elevation in the Heat (Activities tab) ──
+// Uses the same zone boundaries as hrZone() above, so this chart always reflects
+// whatever heart-rate training zones are set there.
+var CVD_ZONES=[
+  {z:'Z1',cls:'z1',color:'#5dade2',lo:113,hi:124},
+  {z:'Z2',cls:'z2',color:'#58d68d',lo:125,hi:137},
+  {z:'Z3',cls:'z3',color:'#f4d03f',lo:138,hi:150},
+  {z:'Z4',cls:'z4',color:'#e67e22',lo:151,hi:162},
+  {z:'Z5',cls:'z5',color:'#e74c3c',lo:163,hi:220}
+];
+var CVD_BUCKETS=[
+  {label:'<60\u00b0F',lo:-Infinity,hi:59},
+  {label:'60-69\u00b0F',lo:60,hi:69},
+  {label:'70-79\u00b0F',lo:70,hi:79},
+  {label:'80-89\u00b0F',lo:80,hi:89},
+  {label:'90\u00b0F+',lo:90,hi:Infinity}
+];
+function toggleCardioDrift(){
+  var sec=document.getElementById('cvdSection');var arr=document.getElementById('cvdArrow');
+  if(!sec)return;
+  var opening=sec.style.display==='none';
+  sec.style.display=opening?'block':'none';
+  if(arr)arr.innerHTML=opening?'&#x25BC;':'&#x25B6;';
+  var toggle=sec.previousElementSibling;
+  if(toggle)toggle.setAttribute('aria-expanded',opening?'true':'false');
+  if(opening)renderCardioDriftChart();
+}
+function renderCardioDriftChart(){
+  var canvas=document.getElementById('cvdChart');
+  var legendEl=document.getElementById('cvdZoneLegend');
+  var insightEl=document.getElementById('cvdInsight');
+  if(!canvas)return;
+  if(legendEl){
+    legendEl.innerHTML=CVD_ZONES.map(function(zi){
+      return '<span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:9px;height:9px;border-radius:2px;background:'+zi.color+';display:inline-block;"></span>'+zi.z+' \u2022 '+zi.lo+(zi.hi<220?('\u2013'+zi.hi):'+')+' bpm</span>';
+    }).join('');
+  }
+  if(typeof Chart==='undefined'){
+    canvas.parentNode.innerHTML='<div style="color:#aaa;text-align:center;padding:16px 0;">Chart library did not load. Check your connection and refresh.</div>';
+    return;
+  }
+  var acts=getActivities().filter(function(a){
+    var t=parseFloat(a.temp);
+    return a.type!=='Rest Day'&&(parseFloat(a.heartRate)||0)>0&&a.temp!==''&&a.temp!=null&&!isNaN(t);
+  });
+  if(acts.length<3){
+    if(charts.cvdChart){charts.cvdChart.destroy();delete charts.cvdChart;}
+    if(insightEl)insightEl.textContent='Log at least 3 activities with temperature and heart rate to see your heat drift here.';
+    return;
+  }
+  var buckets=CVD_BUCKETS.map(function(b){return{label:b.label,lo:b.lo,hi:b.hi,sum:0,count:0};});
+  acts.forEach(function(a){
+    var t=parseFloat(a.temp),hr=parseFloat(a.heartRate);
+    var b=buckets.filter(function(bk){return t>=bk.lo&&t<=bk.hi;})[0];
+    if(b){b.sum+=hr;b.count++;}
+  });
+  var used=buckets.filter(function(b){return b.count>0;});
+  var labels=used.map(function(b){return b.label;});
+  var avgHRs=used.map(function(b){return Math.round(b.sum/b.count);});
+  var counts=used.map(function(b){return b.count;});
+  var barColors=avgHRs.map(function(hr){
+    var zi=hrZone(hr);
+    if(!zi)return'#b0b8c1';
+    var match=CVD_ZONES.filter(function(z){return z.z===zi.z;})[0];
+    return match?match.color:'#b0b8c1';
+  });
+  var allHRs=acts.map(function(a){return parseFloat(a.heartRate);}).concat(avgHRs);
+  var yMin=Math.max(60,Math.floor((Math.min.apply(null,allHRs)-10)/5)*5);
+  var yMax=Math.ceil((Math.max.apply(null,allHRs)+10)/5)*5;
+  if(charts.cvdChart){charts.cvdChart.destroy();delete charts.cvdChart;}
+  var cvdZoneBandPlugin={
+    id:'cvdZoneBands',
+    beforeDatasetsDraw:function(chart){
+      var yScale=chart.scales.y,area=chart.chartArea,ctx=chart.ctx;
+      if(!yScale||!area)return;
+      ctx.save();
+      CVD_ZONES.forEach(function(zi){
+        if(zi.hi<yMin||zi.lo>yMax)return;
+        var top=yScale.getPixelForValue(Math.min(zi.hi,yMax));
+        var bottom=yScale.getPixelForValue(Math.max(zi.lo,yMin));
+        if(bottom<=top)return;
+        ctx.fillStyle=zi.color+'22';
+        ctx.fillRect(area.left,top,area.right-area.left,bottom-top);
+      });
+      ctx.restore();
+    }
+  };
+  charts.cvdChart=new Chart(canvas.getContext('2d'),{
+    type:'bar',
+    data:{labels:labels,datasets:[{label:'Avg Heart Rate',data:avgHRs,backgroundColor:barColors,borderRadius:5,borderWidth:0,barPercentage:0.6}]},
+    options:{
+      responsive:true,maintainAspectRatio:false,animation:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:function(ctx){
+          var i=ctx.dataIndex,z=hrZone(avgHRs[i]);
+          return 'Avg HR: '+avgHRs[i]+' bpm'+(z?' ('+z.z+')':'')+' \u2022 '+counts[i]+' activit'+(counts[i]===1?'y':'ies');
+        }}}
+      },
+      scales:{
+        x:{grid:{display:false},title:{display:true,text:'Temperature',color:'#7d4800',font:{size:11,weight:'600'}}},
+        y:{min:yMin,max:yMax,title:{display:true,text:'Avg Heart Rate (bpm)',color:'#7d4800',font:{size:11,weight:'600'}},ticks:{stepSize:10},grid:{color:'rgba(148,163,184,.18)'}}
+      }
+    },
+    plugins:[cvdZoneBandPlugin]
+  });
+  var hotActs=acts.filter(function(a){return parseFloat(a.temp)>=80&&a.date;}).sort(function(a,b){return String(a.date).localeCompare(String(b.date));});
+  if(insightEl){
+    if(hotActs.length>=4){
+      var half=Math.floor(hotActs.length/2);
+      var avg=function(list){return list.reduce(function(s,a){return s+parseFloat(a.heartRate);},0)/list.length;};
+      var earlyAvg=avg(hotActs.slice(0,half)),recentAvg=avg(hotActs.slice(half));
+      var delta=Math.round(recentAvg-earlyAvg);
+      insightEl.innerHTML='In 80\u00b0F+ conditions, your average heart rate is now <strong>'
+        +(delta===0?'about the same as':(Math.abs(delta)+' bpm '+(delta>0?'higher':'lower')+' than'))
+        +'</strong> your earliest logged hot-weather activities ('+Math.round(earlyAvg)+' \u2192 '+Math.round(recentAvg)+' bpm across '+hotActs.length+' runs).'
+        +(delta>2?' That upward drift can be a sign of heat strain \u2014 consider more fluids, slower paces in the heat, or extra recovery.':delta<-2?' That\u2019s a good sign of heat acclimation.':'');
+    } else {
+      insightEl.textContent='Log a few more 80\u00b0F+ activities with heart rate to see your heat-drift trend over time.';
+    }
+  }
+}
+
 function goToActivityDate(dateStr){
   const target=new Date(dateStr+'T00:00:00');
   today.setFullYear(target.getFullYear(),target.getMonth(),target.getDate());

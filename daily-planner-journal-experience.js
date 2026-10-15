@@ -425,7 +425,6 @@ function renderJournalSchedule(){
     // planning aid and should not keep an entered meal gray earlier in the day.
     return mealLogged(meal);
   }
-  var reflected=['jAccomplish','jImprov','jGratitude','jNotes'].some(function(key){return String(d[key]||'').trim();});
   var wellnessKeys=['wBP','wMeds','wWght','wSleep'],wellnessRecorded=journalLinkedGreenCount(wellnessKeys,d);
   var faithKeys=['spDailyBread','spBibleAudio','spWorship','spAIPrayer'],faithDone=journalLinkedGreenCount(faithKeys,d);
   var loggedRun=(getActivities()||[]).some(function(activity){return activity&&activity.date===dateKey&&/run/i.test([activity.type,activity.title].filter(Boolean).join(' '));});
@@ -451,7 +450,6 @@ function renderJournalSchedule(){
     {time:'12:00 PM',mins:720,label:'Lunch',detail:'Midday meal and hydration',done:mealComplete('lunch',720),tab:'nutrition'},
     {time:'5:30 PM',mins:1050,label:'Dinner',detail:'Evening meal and nutrition update',done:mealComplete('dinner',1050),tab:'nutrition'},
     {time:journalMinsToClock(trainingStartMins),mins:trainingStartMins,label:restDay?'Rest day — no training scheduled':'Today’s training',detail:restDay?'Automatically complete because no workout is scheduled':training,done:activityDone,tab:'activities'},
-    {time:'8:00 PM',mins:1200,label:'Journal accomplishments and gratitude',detail:'Capture the day while it is fresh',done:reflected,tab:'daily'},
     {time:'8:30 PM',mins:1230,label:'Prepare priorities for tomorrow',detail:'Close the day intentionally',done:localStorage.getItem('schedule_eveningPlanning_'+dateKey)==='1'||!!d.prepJournalCheck,tab:'daily',manual:'eveningPlanning'}
   ].filter(function(item){return !item.skip;});
   // Growth habits are placed directly onto My Schedule on the days selected in Habits. A manually
