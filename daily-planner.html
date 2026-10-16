@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-10-15-11">
+<meta name="app-build" content="2026-10-15-12">
 <script src="theme-switcher.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#ff6b00">
@@ -275,9 +275,12 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;paddi
 .act-card.run{border-left-color:#e67e22;}.act-card.ride{border-left-color:#8e44ad;}.act-card.walk{border-left-color:#27ae60;}.act-card.swim{border-left-color:#2980b9;}.act-card.other{border-left-color:#95a5a6;}
 .act-title{font-weight:700;font-size:0.97rem;color:#2c3e50;margin-bottom:3px;}
 .act-date{font-size:0.78rem;color:#888;margin-bottom:8px;}
-.act-stats{display:flex;flex-wrap:wrap;gap:6px 14px;}
-.act-stat{font-size:0.82rem;color:#555;white-space:nowrap;}
+.act-stats{display:flex;flex-direction:column;gap:8px;}
+.act-stats-row{display:flex;flex-wrap:wrap;gap:6px 8px;}
+.act-stats-row.act-stats-conditions{padding-top:8px;border-top:1px dashed #eceef1;}
+.act-stat{font-size:0.8rem;color:#555;white-space:nowrap;background:#f6f7f9;border:1px solid #ebedf0;border-radius:7px;padding:3px 9px;display:inline-flex;align-items:center;gap:3px;}
 .act-stat strong{color:#2c3e50;}
+.act-stats-row.act-stats-conditions .act-stat{background:#fffaf2;border-color:#ffe9c7;}
 .act-badge{display:inline-block;font-size:0.7rem;font-weight:700;padding:2px 7px;border-radius:10px;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em;}
 .act-badge.garmin{background:#00b2e3;color:white;}.act-badge.stryd{background:#ff6b35;color:white;}.act-badge.manual{background:#95a5a6;color:white;}.act-badge.strava{background:#fc4c02;color:white;}.act-badge.gear2{background:#16a085;color:white;}
 .act-import-info{background:#fff8f0;border:1px solid #ffd5a8;border-radius:8px;padding:12px;font-size:0.83rem;color:#7d4800;margin-bottom:14px;line-height:1.6;}
@@ -3152,7 +3155,7 @@ body{
 <script src="daily-planner-journal-archive.js?v=2026-10-15-6"></script>
 <script src="daily-planner-file-uploads.js?v=2026-10-15-6"></script>
 <script src="daily-planner-shoe-tracker.js?v=2026-10-15-6"></script>
-<script src="daily-planner-misc.js?v=2026-10-15-12"></script>
+<script src="daily-planner-misc.js?v=2026-10-15-13"></script>
 <script src="daily-planner-journal-experience.js?v=2026-10-15-7"></script>
 <script src="master-backup-shared.js?v=2026-10-15-6"></script>
 <script src="daily-planner-storage-qol.js?v=2026-10-15-6"></script>

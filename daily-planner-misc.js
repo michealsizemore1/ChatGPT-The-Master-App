@@ -1633,18 +1633,23 @@ function renderActivities(){
   }
 
   function buildCard(a,tc,showDate,inGroup){
-    var stats=[];
-    if(a.distance)stats.push('<span class="act-stat">&#x1F4CF; <strong>'+a.distance+'</strong> mi</span>');
-    if(a.duration)stats.push('<span class="act-stat">&#x23F1; <strong>'+fmtDuration(a.duration)+'</strong></span>');
-    if(a.pace)stats.push('<span class="act-stat">&#x1F3C3; <strong>'+a.pace+'</strong>/mi</span>');
-    if(a.power){var zone=powerZone(a.power,cp);var zb=zone?'<span class="zone-badge '+zone.cls+'">'+zone.z+'</span>':'';stats.push('<span class="act-stat">&#x26A1; <strong>'+a.power+'</strong>W'+zb+'</span>');}
-    if(a.heartRate){var hzone=hrZone(a.heartRate,maxHR);var hzb=hzone?'<span class="zone-badge '+hzone.cls+'">'+hzone.z+'</span>':'';stats.push('<span class="act-stat">&#x2764; <strong>'+a.heartRate+'</strong> bpm'+hzb+'</span>');}
-    if(a.cadence)stats.push('<span class="act-stat">&#x1F9B5; <strong>'+a.cadence+'</strong> spm</span>');
-    if(a.calories)stats.push('<span class="act-stat">&#x1F525; <strong>'+a.calories+'</strong> cal</span>');
-    if(a.elevGain)stats.push('<span class="act-stat">&#x26F0; <strong>'+a.elevGain+'</strong> ft</span>');
+    // Stats are split into two visually distinct rows -- core performance
+    // numbers (pace, power, HR, etc.) on top, and day-level conditions /
+    // recovery context (weather, heat acclimation, sleep) below a divider --
+    // so the card reads as organized groups instead of one long wrapped line.
+    var perfStats=[];
+    var condStats=[];
+    if(a.distance)perfStats.push('<span class="act-stat">&#x1F4CF; <strong>'+a.distance+'</strong> mi</span>');
+    if(a.duration)perfStats.push('<span class="act-stat">&#x23F1; <strong>'+fmtDuration(a.duration)+'</strong></span>');
+    if(a.pace)perfStats.push('<span class="act-stat">&#x1F3C3; <strong>'+a.pace+'</strong>/mi</span>');
+    if(a.power){var zone=powerZone(a.power,cp);var zb=zone?'<span class="zone-badge '+zone.cls+'">'+zone.z+'</span>':'';perfStats.push('<span class="act-stat">&#x26A1; <strong>'+a.power+'</strong>W'+zb+'</span>');}
+    if(a.heartRate){var hzone=hrZone(a.heartRate,maxHR);var hzb=hzone?'<span class="zone-badge '+hzone.cls+'">'+hzone.z+'</span>':'';perfStats.push('<span class="act-stat">&#x2764; <strong>'+a.heartRate+'</strong> bpm'+hzb+'</span>');}
+    if(a.cadence)perfStats.push('<span class="act-stat">&#x1F9B5; <strong>'+a.cadence+'</strong> spm</span>');
+    if(a.calories)perfStats.push('<span class="act-stat">&#x1F525; <strong>'+a.calories+'</strong> cal</span>');
+    if(a.elevGain)perfStats.push('<span class="act-stat">&#x26F0; <strong>'+a.elevGain+'</strong> ft</span>');
     if(a.elevGain&&a.distance){
       var ftPerMi=a.elevGain/a.distance;
-      stats.push('<span class="act-stat" title="Elevation gain per mile">&#x26F0; <strong>'+Math.round(ftPerMi)+'</strong> ft/mi</span>');
+      perfStats.push('<span class="act-stat" title="Elevation gain per mile">&#x26F0; <strong>'+Math.round(ftPerMi)+'</strong> ft/mi</span>');
       var gapBaseSec=parsePace(a.pace);
       if(gapBaseSec>0){
         // Rough estimate (~12 sec/mile per 1% average grade) of a flat-
@@ -1654,15 +1659,15 @@ function renderActivities(){
         var avgGradePct=(a.elevGain/(a.distance*5280))*100;
         var gapSec=gapBaseSec+avgGradePct*12;
         var gm=Math.floor(gapSec/60),gs=Math.round(gapSec%60);
-        stats.push('<span class="act-stat" title="Estimated flat-equivalent pace based on this run’s average grade">&#x2248;GAP <strong>'+gm+':'+(gs<10?'0':'')+gs+'</strong>/mi</span>');
+        perfStats.push('<span class="act-stat" title="Estimated flat-equivalent pace based on this run’s average grade">&#x2248;GAP <strong>'+gm+':'+(gs<10?'0':'')+gs+'</strong>/mi</span>');
       }
     }
-    if(a.temp)stats.push('<span class="act-stat">&#x1F321;&#xFE0F; <strong>'+a.temp+'</strong>°F</span>');
-    if(a.humidity)stats.push('<span class="act-stat">&#x1F4A7; Humidity <strong>'+a.humidity+'</strong>%</span>');
-    if(a.aqi)stats.push('<span class="act-stat">&#x1F32C;&#xFE0F; AQI <strong>'+a.aqi+'</strong></span>');
+    if(a.temp)condStats.push('<span class="act-stat">&#x1F321;&#xFE0F; <strong>'+a.temp+'</strong>°F</span>');
+    if(a.humidity)condStats.push('<span class="act-stat">&#x1F4A7; Humidity <strong>'+a.humidity+'</strong>%</span>');
+    if(a.aqi)condStats.push('<span class="act-stat">&#x1F32C;&#xFE0F; AQI <strong>'+a.aqi+'</strong></span>');
     if(a.date&&haPctMap.byDate[a.date]!==undefined){
       var haPct=haPctMap.byDate[a.date];var haInfo=haStatusInfo(haPct);
-      stats.push('<span class="act-stat" title="Estimated heat acclimation on this date: '+haInfo.label+'">&#x1F321;&#xFE0F;&#x1F4A7; Heat Accl. <strong style="color:'+haInfo.color+';">'+haPct+'%</strong></span>');
+      condStats.push('<span class="act-stat" title="Estimated heat acclimation on this date: '+haInfo.label+'">&#x1F321;&#xFE0F;&#x1F4A7; Heat Accl. <strong style="color:'+haInfo.color+';">'+haPct+'%</strong></span>');
     }
     if(a.date){
       var sleepInfo=getSleepInfo(a.date);
@@ -1673,10 +1678,10 @@ function renderActivities(){
           var sColor=sleepInfo.score>=85?'#16a34a':sleepInfo.score>=70?'#65a30d':sleepInfo.score>=50?'#f97316':'#dc2626';
           sParts.push('<strong style="color:'+sColor+';">'+Math.round(sleepInfo.score)+'</strong> score');
         }
-        stats.push('<span class="act-stat" title="Sleep logged for this date">&#x1F634; '+sParts.join(' &middot; ')+'</span>');
+        condStats.push('<span class="act-stat" title="Sleep logged for this date">&#x1F634; '+sParts.join(' &middot; ')+'</span>');
       }
     }
-    if(a.execScore)stats.push('<span class="act-stat">&#x1F3AF; <strong>'+a.execScore+'</strong>/100</span>');
+    if(a.execScore)condStats.push('<span class="act-stat">&#x1F3AF; <strong>'+a.execScore+'</strong>/100</span>');
     var collapsed=actCollapsed.has(a.id);
     var chevron=collapsed?'&#x25B6;':'&#x25BC;';
     var bodyDisplay=collapsed?'none':'block';
@@ -1699,7 +1704,7 @@ function renderActivities(){
       +'</div>'
       +'</div>'
       +'<div id="actBody_'+a.id+'" style="display:'+bodyDisplay+';">'
-      +'<div class="act-stats">'+stats.join('')+'</div>'
+      +'<div class="act-stats">'+(perfStats.length?'<div class="act-stats-row">'+perfStats.join('')+'</div>':'')+(condStats.length?'<div class="act-stats-row act-stats-conditions">'+condStats.join('')+'</div>':'')+'</div>'
       +(a.routeUrl?'<a href="'+escHtml(a.routeUrl)+'" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:5px;margin-top:8px;background:#e0f2fe;border:1px solid #7dd3fc;color:#075985;border-radius:7px;padding:6px 10px;font-size:.76rem;font-weight:800;text-decoration:none;">&#x1F5FA;&#xFE0F; Open Run Map</a>':'')
       +(a.notes?'<div style="font-size:0.82rem;color:#666;margin-top:8px;white-space:pre-wrap;"><strong style="display:block;color:#475569;margin-bottom:2px;">Notes</strong>'+formatActivityNotesHtml(a.notes)+'</div>':'')
       +(a.injuryReport?'<div style="font-size:0.82rem;color:#7f1d1d;margin-top:8px;padding:8px 10px;background:#fff7f7;border:1px solid #fecaca;border-radius:7px;white-space:pre-wrap;"><strong style="display:block;color:#b91c1c;margin-bottom:2px;">Injury Report</strong>'+escHtml(a.injuryReport)+'</div>':'')
