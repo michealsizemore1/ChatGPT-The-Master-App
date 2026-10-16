@@ -671,6 +671,134 @@ function exportActivities(){
   a.href=URL.createObjectURL(new Blob([csvRows.join('\n')],{type:'text/csv'}));
   a.download='activities_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
 }
+function printActivities(){
+  const acts=getActivities();
+  if(!acts.length){alert('No activities to print.');return;}
+  const cp=getCP();
+  const filterType=(document.getElementById('actFilterType')||{}).value||'';
+  const rawSrc=(document.getElementById('actFilterSource')||{}).value;
+  const filterSource=(rawSrc===undefined||rawSrc===''||rawSrc==='all')?'all':rawSrc.toLowerCase();
+  const search=((document.getElementById('actSearch')||{}).value||'').toLowerCase();
+  const dateFrom=(document.getElementById('actDateFrom')||{}).value||'';
+  const dateTo=(document.getElementById('actDateTo')||{}).value||'';
+
+  var filtered=acts.filter(function(a){
+    if(filterType){var at=(a.type||'').toLowerCase();var ft=filterType.toLowerCase();var runTypes=['run','running','trail run','trail running','treadmill','treadmill running','track running','road running','virtual run'];var isRunFilter=ft==='run';var actIsRun=runTypes.some(function(r){return at===r||at.includes('run');});if(isRunFilter?!actIsRun:at!==ft)return false;}
+    if(filterSource!=='all'){var actSrc=(a.source||'manual').toLowerCase();if(actSrc!==filterSource)return false;}
+    if(search&&!((a.title||'').toLowerCase().includes(search)||(a.date||'').includes(search)||(a.type||'').toLowerCase().includes(search)))return false;
+    if(dateFrom&&a.date&&a.date<dateFrom)return false;
+    if(dateTo&&a.date&&a.date>dateTo)return false;
+    return true;
+  });
+  if(!filtered.length){alert('No activities match your current filters.');return;}
+
+  // Chronological order reads best for an AI building a training plan from history
+  var chronological=filtered.slice().sort(function(a,b){return(a.date||'').localeCompare(b.date||'');});
+
+  var totalMiles=0;
+  chronological.forEach(function(a){totalMiles+=parseFloat(a.distance)||0;});
+  var firstDate=chronological[0].date||'',lastDate=chronological[chronological.length-1].date||'';
+  var weekSpan=1;
+  if(firstDate&&lastDate){
+    var d1=new Date(firstDate+'T00:00:00'),d2=new Date(lastDate+'T00:00:00');
+    weekSpan=Math.max(1,Math.round((d2-d1)/(7*86400000))+1);
+  }
+
+  function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function fmtDate(ds){
+    if(!ds)return'';
+    var d=new Date(ds+'T00:00:00');
+    return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+  }
+  function perfParts(a){
+    var perf=[];
+    if(a.distance)perf.push(a.distance+' mi');
+    if(a.duration)perf.push(fmtDuration(a.duration));
+    if(a.pace)perf.push(a.pace+'/mi pace');
+    if(a.power){var pz=powerZone(a.power,cp);perf.push(a.power+'W'+(pz?' ('+pz.z+')':''));}
+    if(a.heartRate){var hz=hrZone(a.heartRate);perf.push(a.heartRate+' bpm'+(hz?' ('+hz.z+')':''));}
+    if(a.cadence)perf.push(a.cadence+' spm');
+    if(a.calories)perf.push(a.calories+' cal');
+    if(a.elevGain)perf.push(a.elevGain+' ft gain'+(a.distance?' ('+Math.round(a.elevGain/a.distance)+' ft/mi)':''));
+    return perf;
+  }
+  function condParts(a){
+    var cond=[];
+    if(a.temp)cond.push(a.temp+'°F');
+    if(a.humidity)cond.push(a.humidity+'% humidity');
+    if(a.aqi)cond.push('AQI '+a.aqi);
+    if(a.temp&&a.pace){
+      var hh=heatHumidityImpact(a.temp,a.humidity,parsePace(a.pace));
+      if(hh&&hh.pctSlower>=0.5)cond.push('est. heat/humidity impact +'+hh.pctSlower.toFixed(1)+'% ('+Math.round(hh.secSlower)+'s/mi)');
+    }
+    return cond;
+  }
+
+  var summaryLine1='Range: '+(firstDate?fmtDate(firstDate):'—')+' to '+(lastDate?fmtDate(lastDate):'—')+' ('+weekSpan+' week'+(weekSpan!==1?'s':'')+')';
+  var summaryLine2='Activities: '+chronological.length+' | Total distance: '+totalMiles.toFixed(1)+' mi | Avg/week: '+(totalMiles/weekSpan).toFixed(1)+' mi';
+
+  var textLines=['TRAINING LOG EXPORT','Generated: '+new Date().toLocaleString(),summaryLine1,summaryLine2,''];
+  chronological.forEach(function(a){
+    textLines.push(fmtDate(a.date)+' — '+(a.title||'Activity')+' ('+(a.type||'')+')');
+    var perf=perfParts(a);
+    if(perf.length)textLines.push('  '+perf.join(' | '));
+    var cond=condParts(a);
+    if(cond.length)textLines.push('  Conditions: '+cond.join(' | '));
+    if(a.notes)textLines.push('  Notes: '+String(a.notes).replace(/\n+/g,' '));
+    textLines.push('');
+  });
+  var plainText=textLines.join('\n');
+
+  var rowsHtml=chronological.map(function(a){
+    var perf=perfParts(a),cond=condParts(a);
+    return '<div class="pa-entry">'
+      +'<div class="pa-head">'+esc(fmtDate(a.date))+' &mdash; '+esc(a.title||'Activity')+' <span class="pa-type">('+esc(a.type||'')+')</span></div>'
+      +(perf.length?'<div class="pa-line">'+esc(perf.join('  |  '))+'</div>':'')
+      +(cond.length?'<div class="pa-line pa-cond">'+esc(cond.join('  |  '))+'</div>':'')
+      +(a.notes?'<div class="pa-notes">'+esc(a.notes)+'</div>':'')
+      +'</div>';
+  }).join('');
+
+  var w=window.open('','_blank');
+  if(!w){alert('Please allow pop-ups to open the print view.');return;}
+  w.document.open();
+  w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>Training Log Export</title><style>'
+    +'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;max-width:780px;margin:24px auto;padding:0 16px;color:#222;line-height:1.5;}'
+    +'h1{font-size:1.3rem;margin-bottom:2px;}'
+    +'.pa-meta{color:#555;font-size:0.9rem;margin-bottom:18px;}'
+    +'.pa-toolbar{margin-bottom:20px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}'
+    +'.pa-toolbar button{font-size:0.85rem;padding:8px 16px;border-radius:6px;border:none;cursor:pointer;font-weight:600;}'
+    +'.pa-print-btn{background:#e67e22;color:#fff;}'
+    +'.pa-copy-btn{background:#27ae60;color:#fff;}'
+    +'.pa-entry{border-bottom:1px solid #eee;padding:10px 0;break-inside:avoid;page-break-inside:avoid;}'
+    +'.pa-head{font-weight:700;font-size:0.95rem;}'
+    +'.pa-type{font-weight:400;color:#888;}'
+    +'.pa-line{font-size:0.85rem;color:#333;margin-top:3px;}'
+    +'.pa-cond{color:#777;}'
+    +'.pa-notes{font-size:0.83rem;color:#555;margin-top:4px;white-space:pre-wrap;}'
+    +'#pa-copied{color:#27ae60;font-size:0.85rem;font-weight:600;}'
+    +'@media print{.pa-toolbar{display:none;}}'
+    +'</style></head><body>'
+    +'<div class="pa-toolbar">'
+    +'<button class="pa-print-btn" onclick="window.print()">🖨️ Print / Save as PDF</button>'
+    +'<button class="pa-copy-btn" id="pa-copy-btn">📋 Copy as Text (for AI)</button>'
+    +'<span id="pa-copied" style="display:none;">Copied!</span>'
+    +'</div>'
+    +'<h1>Training Log Export</h1>'
+    +'<div class="pa-meta">'+esc(summaryLine1)+'<br>'+esc(summaryLine2)+'</div>'
+    +rowsHtml
+    +'<textarea id="pa-plaintext" style="position:absolute;left:-9999px;top:-9999px;">'+esc(plainText)+'</textarea>'
+    +'<script>'
+    +'document.getElementById("pa-copy-btn").addEventListener("click",function(){'
+    +'var ta=document.getElementById("pa-plaintext");'
+    +'function fallback(){ta.style.position="fixed";ta.style.left="0";ta.style.top="0";ta.focus();ta.select();try{document.execCommand("copy");}catch(e){}ta.style.position="absolute";ta.style.left="-9999px";ta.style.top="-9999px";}'
+    +'if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(ta.value).catch(fallback);}else{fallback();}'
+    +'var msg=document.getElementById("pa-copied");msg.style.display="inline";setTimeout(function(){msg.style.display="none";},1800);'
+    +'});'
+    +'<\/script>'
+    +'</body></html>');
+  w.document.close();
+}
 
 // ── Activities: enhancements ────────────────────────────────────────────────
 let actChartMode='miles';
