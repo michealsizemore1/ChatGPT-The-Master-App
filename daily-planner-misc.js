@@ -2515,12 +2515,33 @@ function buildUploadedTrainingSchedule(text,startDate,weeks){
   }
   return{schedule:schedule,mode:'weekly'};
 }
+// Extracts the text layer from a PDF using pdf.js (loaded in daily-planner.html).
+// Only works for PDFs that have real selectable text -- a scanned/photographed
+// page with no text layer will come back empty, which is surfaced to the user
+// as an error asking them to use a .txt file instead.
+async function extractPdfText(file){
+  if(typeof pdfjsLib==='undefined')throw new Error('PDF support did not load (check your connection)');
+  if(!pdfjsLib.GlobalWorkerOptions.workerSrc){
+    pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.7.107/pdf.worker.min.js';
+  }
+  const buf=await file.arrayBuffer();
+  const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+  let text='';
+  for(let i=1;i<=pdf.numPages;i++){
+    const page=await pdf.getPage(i);
+    const content=await page.getTextContent();
+    const pageText=content.items.map(function(it){return it.str;}).join(' ');
+    text+=(text?'\n\n':'')+pageText;
+  }
+  return text.trim();
+}
 function uploadPlanFromFile(evt){
   const file=evt.target.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=e=>{
-    const text=(e.target.result||'').trim();
-    if(!text){alert('The selected text file is empty.');evt.target.value='';return;}
+  const isPdf=file.type==='application/pdf'||/\.pdf$/i.test(file.name);
+  const status=document.getElementById('tpUploadStatus');
+  function processPlanText(text){
+    text=(text||'').trim();
+    if(!text){alert(isPdf?'No readable text was found in that PDF. If it\'s a scanned image, please save it as a .txt file instead.':'The selected text file is empty.');evt.target.value='';return;}
     const weekMatches=Array.from(text.matchAll(/\bweek\s+(\d{1,2})\b/gi)).map(m=>parseInt(m[1],10)).filter(n=>n>0&&n<=52);
     const weeks=weekMatches.length?Math.max.apply(null,weekMatches):0;
     const startInput=document.getElementById('tpUploadStartDate');
@@ -2528,11 +2549,10 @@ function uploadPlanFromFile(evt){
     const structured=buildUploadedTrainingSchedule(text,planStartDate,weeks);
     const datedKeys=Object.keys(structured.schedule);
     const effectiveStart=structured.mode==='dated'&&datedKeys.length?datedKeys.sort()[0]:planStartDate;
-    const metaStr='Uploaded text plan'+(weeks?' • '+weeks+' weeks':'');
+    const metaStr=(isPdf?'Uploaded PDF plan':'Uploaded text plan')+(weeks?' • '+weeks+' weeks':'');
     const planObj={text,dist:'',weeks,raceDate:'',startDate:effectiveStart,schedule:structured.schedule,scheduleMode:structured.mode,scheduleVersion:3,meta:metaStr,createdAt:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})};
     const upcomingCb=document.getElementById('tpSaveAsUpcoming');
     const saveAsUpcoming=!!(upcomingCb&&upcomingCb.checked);
-    const status=document.getElementById('tpUploadStatus');
     if(saveAsUpcoming){
       localStorage.setItem('upcoming_training_plan',JSON.stringify(planObj));
       loadUpcomingPlan();
@@ -2556,7 +2576,19 @@ function uploadPlanFromFile(evt){
     loadCurrentPlan();
     alert('Training plan loaded from '+file.name+'.');
     evt.target.value='';
-  };
+  }
+  if(isPdf){
+    if(status)status.textContent='Reading PDF\u2026';
+    extractPdfText(file).then(processPlanText).catch(function(err){
+      alert('Could not read that PDF: '+(err&&err.message?err.message:err)+'. Try saving it as a .txt file instead.');
+      if(status)status.textContent='';
+      evt.target.value='';
+    });
+    return;
+  }
+  const reader=new FileReader();
+  reader.onload=e=>{processPlanText(e.target.result);};
+  reader.onerror=()=>{alert('The selected file could not be read.');evt.target.value='';};
   reader.readAsText(file);
 }
 function toggleAIGenPanel(){
