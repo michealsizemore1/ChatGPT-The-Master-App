@@ -2310,10 +2310,27 @@ function toggleActivitiesLog(){
   var toggle=section?section.previousElementSibling:null;
   if(!section)return;
   var opening=section.style.display==='none';
+  // This section can swing from empty to hundreds of activity cards plus
+  // charts in one tap, and some mobile browsers mis-fire their scroll-anchoring
+  // heuristic on a layout change that large, jumping the viewport away from
+  // the toggle the user just tapped. Re-anchor the scroll position to the
+  // toggle itself immediately, next frame, and shortly after (to also cover
+  // Chart.js resizing its canvases a beat later), so the tap keeps its place.
+  var anchorTop=toggle?toggle.getBoundingClientRect().top:null;
   section.style.display=opening?'block':'none';
   if(arrow)arrow.innerHTML=opening?'&#x25BC;':'&#x25B6;';
   if(toggle)toggle.setAttribute('aria-expanded',opening?'true':'false');
   if(opening)renderActivities();
+  if(toggle&&anchorTop!==null){
+    var restoreScroll=function(){
+      var newTop=toggle.getBoundingClientRect().top;
+      var delta=newTop-anchorTop;
+      if(Math.abs(delta)>1)window.scrollBy(0,delta);
+    };
+    restoreScroll();
+    requestAnimationFrame(restoreScroll);
+    setTimeout(restoreScroll,120);
+  }
 }
 function resetActivityAdvancedPanels(){
   var metrics=document.getElementById('runMetricsPanel');
