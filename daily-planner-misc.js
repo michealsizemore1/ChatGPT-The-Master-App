@@ -2040,6 +2040,7 @@ function renderActivePlan(){loadCurrentPlan();}
 function loadCurrentPlan(){
   var sec=document.getElementById('tpPersistSection');
   var archSec=document.getElementById('tpArchiveSection');
+  loadUpcomingPlan();
   var raw=localStorage.getItem('current_training_plan');
   if(!raw||!sec){if(sec)sec.style.display='none';return;}
   var plan;try{plan=JSON.parse(raw);}catch(e){sec.style.display='none';return;}
@@ -2090,6 +2091,65 @@ function deletePlan(){
   localStorage.removeItem('current_training_plan');
   var sec=document.getElementById('tpPersistSection');
   if(sec)sec.style.display='none';
+}
+function fmtPlanDate(ds){
+  if(!ds)return'\u2014';
+  var d=new Date(ds+'T00:00:00');
+  if(isNaN(d.getTime()))return ds;
+  return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+}
+// A second, "upcoming" plan saved alongside the active one -- e.g. an ultra plan
+// queued up to start once the current marathon plan's race day has passed.
+// Kept in its own localStorage slot so it never overwrites current_training_plan
+// until the person explicitly promotes it with makeUpcomingPlanActive().
+function loadUpcomingPlan(){
+  var sec=document.getElementById('tpUpcomingSection');
+  if(!sec)return;
+  var raw=localStorage.getItem('upcoming_training_plan');
+  if(!raw){sec.style.display='none';return;}
+  var plan;try{plan=JSON.parse(raw);}catch(e){sec.style.display='none';return;}
+  sec.style.display='block';
+  var meta=document.getElementById('tpUpcomingMeta');
+  if(meta){
+    var parts=[];
+    if(plan.type)parts.push(plan.type);
+    if(plan.weeks)parts.push(plan.weeks+'-week plan');
+    parts.push('Starts '+fmtPlanDate(plan.startDate));
+    if(plan.createdAt)parts.push('Saved '+plan.createdAt);
+    meta.textContent=parts.join(' \u2022 ');
+  }
+  var body=document.getElementById('tpUpcomingBody');
+  if(body)body.textContent=plan.text||'(No plan text)';
+}
+function makeUpcomingPlanActive(){
+  var raw=localStorage.getItem('upcoming_training_plan');
+  if(!raw){alert('No upcoming plan saved.');return;}
+  var plan;try{plan=JSON.parse(raw);}catch(e){alert('Could not read the upcoming plan.');return;}
+  var curRaw=localStorage.getItem('current_training_plan');
+  if(curRaw){
+    if(!confirm('This will archive your current active plan and make this upcoming plan active now. Continue?'))return;
+    var curPlan=null;try{curPlan=JSON.parse(curRaw);}catch(e){}
+    if(curPlan){
+      var archived=[];try{archived=JSON.parse(localStorage.getItem('archived_plans')||'[]');}catch(e){}
+      curPlan.archivedAt=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+      archived.unshift(curPlan);
+      localStorage.setItem('archived_plans',JSON.stringify(archived));
+    }
+  }
+  delete plan.archivedAt;
+  localStorage.setItem('current_training_plan',JSON.stringify(plan));
+  localStorage.removeItem('upcoming_training_plan');
+  // Clear stale workout caches so the newly active plan's entries load fresh
+  var _ck=[];for(var _i=0;_i<localStorage.length;_i++){var _k=localStorage.key(_i);if(_k&&_k.startsWith('workout_cache_'))_ck.push(_k);}
+  _ck.forEach(function(_k){localStorage.removeItem(_k);});
+  loadCurrentPlan();
+  loadUpcomingPlan();
+  alert('Your upcoming plan is now active.');
+}
+function deleteUpcomingPlan(){
+  if(!confirm('Delete the upcoming plan? This cannot be undone.'))return;
+  localStorage.removeItem('upcoming_training_plan');
+  loadUpcomingPlan();
 }
 function toggleArchivedPlans(){
   var list=document.getElementById('tpArchiveList');
@@ -2470,6 +2530,18 @@ function uploadPlanFromFile(evt){
     const effectiveStart=structured.mode==='dated'&&datedKeys.length?datedKeys.sort()[0]:planStartDate;
     const metaStr='Uploaded text plan'+(weeks?' • '+weeks+' weeks':'');
     const planObj={text,dist:'',weeks,raceDate:'',startDate:effectiveStart,schedule:structured.schedule,scheduleMode:structured.mode,scheduleVersion:3,meta:metaStr,createdAt:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})};
+    const upcomingCb=document.getElementById('tpSaveAsUpcoming');
+    const saveAsUpcoming=!!(upcomingCb&&upcomingCb.checked);
+    const status=document.getElementById('tpUploadStatus');
+    if(saveAsUpcoming){
+      localStorage.setItem('upcoming_training_plan',JSON.stringify(planObj));
+      loadUpcomingPlan();
+      if(status)status.textContent='Saved as an upcoming plan starting '+fmtPlanDate(effectiveStart)+'. Your current active plan keeps running until you tap "Make Active Now".';
+      if(upcomingCb)upcomingCb.checked=false;
+      alert('Saved as an upcoming plan starting '+fmtPlanDate(effectiveStart)+'. It will not replace your active plan until you activate it.');
+      evt.target.value='';
+      return;
+    }
     localStorage.setItem('current_training_plan',JSON.stringify(planObj));
     // Clear stale workout caches so new plan entries load fresh
     const _ck=[];for(let _i=0;_i<localStorage.length;_i++){const _k=localStorage.key(_i);if(_k&&_k.startsWith('workout_cache_'))_ck.push(_k);}
@@ -2480,7 +2552,7 @@ function uploadPlanFromFile(evt){
     if(outputText){outputText.textContent=text;outputText.style.whiteSpace='pre-wrap';}
     if(meta)meta.textContent=metaStr;
     if(outputDiv){outputDiv.style.display='block';setTimeout(()=>outputDiv.scrollIntoView({behavior:'smooth',block:'start'}),100);}
-    const status=document.getElementById('tpUploadStatus');if(status)status.textContent=datedKeys.length+' workout day'+(datedKeys.length===1?'':'s')+' mapped by '+(structured.mode==='dated'?'the dates in the file':'week and weekday')+'. Unlisted dates remain rest days.';
+    if(status)status.textContent=datedKeys.length+' workout day'+(datedKeys.length===1?'':'s')+' mapped by '+(structured.mode==='dated'?'the dates in the file':'week and weekday')+'. Unlisted dates remain rest days.';
     loadCurrentPlan();
     alert('Training plan loaded from '+file.name+'.');
     evt.target.value='';

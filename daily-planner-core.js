@@ -1752,9 +1752,11 @@ function arrangeActivityTrainingCards(){
   const panel=document.querySelector('#tab-activities > .panel');
   const workout=document.getElementById('todayWorkoutCard');
   const active=document.getElementById('tpPersistSection');
+  const upcoming=document.getElementById('tpUpcomingSection');
   const archive=document.getElementById('tpArchiveSection');
   if(!panel)return;
   if(active&&archive)panel.insertBefore(active,archive);
+  if(upcoming&&archive)panel.insertBefore(upcoming,archive);
   if(workout)panel.insertBefore(workout,panel.firstElementChild);
 }
 function renderActivitySectionCharts(){
