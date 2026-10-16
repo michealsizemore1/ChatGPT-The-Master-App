@@ -2063,7 +2063,7 @@ function loadCurrentPlan(){
   }
   // Body
   var body=document.getElementById('tpPersistBody');
-  if(body)body.textContent=plan.text||'(No plan text)';
+  if(body)body.textContent=reflowPlanText(plan.text)||'(No plan text)';
   // Archived plans section
   var archived=[];try{archived=JSON.parse(localStorage.getItem('archived_plans')||'[]');}catch(e){}
   if(archSec)archSec.style.display=archived.length?'block':'none';
@@ -2098,6 +2098,20 @@ function fmtPlanDate(ds){
   if(isNaN(d.getTime()))return ds;
   return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
 }
+// Cleans up plan text for display only (never rewrites the stored plan.text).
+// PDF text extraction -- and some pasted/typed text -- can lose real line
+// breaks, leaving behind runs of 2+ spaces where a line or paragraph break
+// used to be. This turns those back into visible line breaks so a long plan
+// reads in sections instead of one dense wall of text.
+function reflowPlanText(text){
+  if(!text)return text;
+  var t=String(text);
+  t=t.replace(/[ \t]{2,}/g,'\n\n');
+  t=t.replace(/[ \t]+([,.;:])/g,'$1');
+  t=t.replace(/\n[ \t]+/g,'\n');
+  t=t.replace(/\n{3,}/g,'\n\n');
+  return t.trim();
+}
 // A second, "upcoming" plan saved alongside the active one -- e.g. an ultra plan
 // queued up to start once the current marathon plan's race day has passed.
 // Kept in its own localStorage slot so it never overwrites current_training_plan
@@ -2119,7 +2133,7 @@ function loadUpcomingPlan(){
     meta.textContent=parts.join(' \u2022 ');
   }
   var body=document.getElementById('tpUpcomingBody');
-  if(body)body.textContent=plan.text||'(No plan text)';
+  if(body)body.textContent=reflowPlanText(plan.text)||'(No plan text)';
 }
 function makeUpcomingPlanActive(){
   var raw=localStorage.getItem('upcoming_training_plan');
@@ -2173,7 +2187,7 @@ function renderArchivedPlans(){
       +'<button onclick="restoreArchivedPlan('+i+')" style="font-size:0.75rem;padding:3px 10px;border-radius:6px;border:1px solid #667eea;background:#667eea;color:white;cursor:pointer;">Restore</button>'
       +'<button onclick="deleteArchivedPlan('+i+')" style="font-size:0.75rem;padding:3px 10px;border-radius:6px;border:1px solid #e74c3c;background:#e74c3c;color:white;cursor:pointer;">Delete</button>'
       +'</div></div>'
-      +'<div style="white-space:pre-wrap;font-size:0.78rem;color:#555;max-height:120px;overflow-y:auto;margin-top:6px;border-top:1px solid #eee;padding-top:6px;">'+(p.text||'').slice(0,300)+(p.text&&p.text.length>300?'…':'')+'</div>'
+      +'<div style="white-space:pre-wrap;font-size:0.78rem;color:#555;max-height:120px;overflow-y:auto;margin-top:6px;border-top:1px solid #eee;padding-top:6px;">'+reflowPlanText(p.text||'').slice(0,300)+(p.text&&p.text.length>300?'…':'')+'</div>'
       +'</div>';
   }).join('');
 }
@@ -2530,10 +2544,21 @@ async function extractPdfText(file){
   for(let i=1;i<=pdf.numPages;i++){
     const page=await pdf.getPage(i);
     const content=await page.getTextContent();
-    const pageText=content.items.map(function(it){return it.str;}).join(' ');
+    let pageText='';
+    let lastY=null;
+    content.items.forEach(function(it){
+      var y=(it.transform&&typeof it.transform[5]==='number')?it.transform[5]:null;
+      if(lastY!==null&&y!==null&&Math.abs(y-lastY)>1){
+        pageText+=(Math.abs(y-lastY)>18?'\n\n':'\n');
+      }else if(pageText&&!/[\n ]$/.test(pageText)){
+        pageText+=' ';
+      }
+      pageText+=it.str;
+      if(y!==null)lastY=y;
+    });
     text+=(text?'\n\n':'')+pageText;
   }
-  return text.trim();
+  return text.trim().replace(/\n{3,}/g,'\n\n');
 }
 function uploadPlanFromFile(evt){
   const file=evt.target.files[0];if(!file)return;
@@ -2569,7 +2594,7 @@ function uploadPlanFromFile(evt){
     const outputDiv=document.getElementById('tpOutput');
     const outputText=document.getElementById('tpOutputText');
     const meta=document.getElementById('tpMeta');
-    if(outputText){outputText.textContent=text;outputText.style.whiteSpace='pre-wrap';}
+    if(outputText){outputText.textContent=reflowPlanText(text);outputText.style.whiteSpace='pre-wrap';}
     if(meta)meta.textContent=metaStr;
     if(outputDiv){outputDiv.style.display='block';setTimeout(()=>outputDiv.scrollIntoView({behavior:'smooth',block:'start'}),100);}
     if(status)status.textContent=datedKeys.length+' workout day'+(datedKeys.length===1?'':'s')+' mapped by '+(structured.mode==='dated'?'the dates in the file':'week and weekday')+'. Unlisted dates remain rest days.';
