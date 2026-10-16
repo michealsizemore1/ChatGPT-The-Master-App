@@ -1019,6 +1019,119 @@ function renderHeatAcclimationChart(){
   });
 }
 
+// National Weather Service "feels-like" Heat Index estimate (Rothfusz regression),
+// a well-known public meteorological formula for how hot it feels when high
+// temperature and high humidity combine -- humid air makes it harder for sweat to
+// evaporate and cool the body. Below 80°F the formula isn't meaningful, so this
+// just returns the dry-bulb temperature unchanged.
+function nwsHeatIndex(tempF,rhPct){
+  var T=tempF,R=rhPct;
+  if(!(T>=80)||isNaN(R))return T;
+  var HI=-42.379+2.04901523*T+10.14333127*R-0.22475541*T*R-0.00683783*T*T-0.05481717*R*R+0.00122874*T*T*R+0.00085282*T*R*R-0.00000199*T*T*R*R;
+  if(R<13&&T<=112)HI-=((13-R)/4)*Math.sqrt((17-Math.abs(T-95))/17);
+  if(R>85&&T<=87)HI+=((R-85)/10)*((87-T)/5);
+  return HI;
+}
+// Rough, disclosed estimate of how much heat + humidity likely slowed a given run,
+// combining the NWS feels-like Heat Index above with a simple rule of thumb (~0.4%
+// pace slowdown per °F the feels-like temperature sits above a comfortable 60°F
+// baseline). This is a disclosed heuristic for a quick estimate, not a precise
+// physiological model -- effort, fitness, and heat acclimation all affect pace too.
+var HEAT_IMPACT_BASELINE_F=60;
+var HEAT_IMPACT_PCT_PER_F=0.4;
+function heatHumidityImpact(tempF,humidityPct,paceSec){
+  var t=parseFloat(tempF),h=parseFloat(humidityPct);
+  if(isNaN(t)||!(paceSec>0))return null;
+  var feelsLike=nwsHeatIndex(t,isNaN(h)?30:h);
+  var over=feelsLike-HEAT_IMPACT_BASELINE_F;
+  if(over<=0)return{feelsLike:feelsLike,pctSlower:0,secSlower:0};
+  var pctSlower=over*HEAT_IMPACT_PCT_PER_F;
+  var secSlower=paceSec*(pctSlower/100);
+  return{feelsLike:feelsLike,pctSlower:pctSlower,secSlower:secSlower};
+}
+var HUM_BUCKETS=[
+  {label:'<40%',lo:-Infinity,hi:39},
+  {label:'40-54%',lo:40,hi:54},
+  {label:'55-69%',lo:55,hi:69},
+  {label:'70-84%',lo:70,hi:84},
+  {label:'85%+',lo:85,hi:Infinity}
+];
+function toggleHumidityImpact(){
+  var sec=document.getElementById('humSection');var arr=document.getElementById('humArrow');
+  if(!sec)return;
+  var opening=sec.style.display==='none';
+  sec.style.display=opening?'block':'none';
+  if(arr)arr.innerHTML=opening?'&#x25BC;':'&#x25B6;';
+  var toggle=sec.previousElementSibling;
+  if(toggle)toggle.setAttribute('aria-expanded',opening?'true':'false');
+  if(opening)renderHumidityImpactChart();
+}
+function renderHumidityImpactChart(){
+  var canvas=document.getElementById('humChart');
+  var insightEl=document.getElementById('humInsight');
+  if(!canvas)return;
+  if(typeof Chart==='undefined'){
+    canvas.parentNode.innerHTML='<div style="color:#aaa;text-align:center;padding:16px 0;">Chart library did not load. Check your connection and refresh.</div>';
+    return;
+  }
+  var acts=getActivities().filter(function(a){
+    var h=parseFloat(a.humidity);
+    return a.type!=='Rest Day'&&!isNaN(h)&&parsePace(a.pace)>0;
+  });
+  if(acts.length<3){
+    if(charts.humChart){charts.humChart.destroy();delete charts.humChart;}
+    if(insightEl)insightEl.textContent='Log at least 3 runs with humidity and pace to see how humidity correlates with your pace.';
+    return;
+  }
+  var buckets=HUM_BUCKETS.map(function(b){return{label:b.label,lo:b.lo,hi:b.hi,sum:0,count:0};});
+  acts.forEach(function(a){
+    var h=parseFloat(a.humidity),p=parsePace(a.pace);
+    var b=buckets.filter(function(bk){return h>=bk.lo&&h<=bk.hi;})[0];
+    if(b){b.sum+=p;b.count++;}
+  });
+  var used=buckets.filter(function(b){return b.count>0;});
+  var labels=used.map(function(b){return b.label;});
+  var avgPaces=used.map(function(b){return b.sum/b.count;});
+  var counts=used.map(function(b){return b.count;});
+  var fmtPaceSec=function(sec){var m=Math.floor(sec/60),s=Math.round(sec%60);return m+':'+(s<10?'0':'')+s;};
+  var allPaces=acts.map(function(a){return parsePace(a.pace);}).concat(avgPaces);
+  var yMin=Math.max(0,Math.floor((Math.min.apply(null,allPaces)-20)/10)*10);
+  var yMax=Math.ceil((Math.max.apply(null,allPaces)+20)/10)*10;
+  if(charts.humChart){charts.humChart.destroy();delete charts.humChart;}
+  charts.humChart=new Chart(canvas.getContext('2d'),{
+    type:'bar',
+    data:{labels:labels,datasets:[{label:'Avg Pace',data:avgPaces,backgroundColor:'#2980b9',borderRadius:5,borderWidth:0,barPercentage:0.6}]},
+    options:{
+      responsive:true,maintainAspectRatio:false,animation:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:function(ctx){
+          var i=ctx.dataIndex;
+          return 'Avg Pace: '+fmtPaceSec(avgPaces[i])+'/mi • '+counts[i]+' run'+(counts[i]===1?'':'s');
+        }}}
+      },
+      scales:{
+        x:{grid:{display:false},title:{display:true,text:'Humidity',color:'#7d4800',font:{size:11,weight:'600'}}},
+        y:{min:yMin,max:yMax,title:{display:true,text:'Avg Pace (min/mi)',color:'#7d4800',font:{size:11,weight:'600'}},ticks:{stepSize:30,callback:function(v){return fmtPaceSec(v);}},grid:{color:'rgba(148,163,184,.18)'}}
+      }
+    }
+  });
+  if(insightEl){
+    if(used.length>=2){
+      var driest=used[0],humid=used[used.length-1];
+      var driestAvg=driest.sum/driest.count,humidAvg=humid.sum/humid.count;
+      var diffSec=humidAvg-driestAvg;
+      if(Math.abs(diffSec)>=3){
+        insightEl.innerHTML='Runs at <strong>'+humid.label+'</strong> humidity averaged <strong>'+fmtPaceSec(humidAvg)+'</strong>/mi vs. <strong>'+fmtPaceSec(driestAvg)+'</strong>/mi at <strong>'+driest.label+'</strong> humidity &mdash; about <strong>'+Math.round(Math.abs(diffSec))+'s</strong> '+(diffSec>0?'slower':'faster')+' per mile in the most humid conditions logged so far.';
+      }else{
+        insightEl.textContent='No clear pace difference across humidity levels yet in your logged runs.';
+      }
+    }else{
+      insightEl.textContent='Log runs across a wider range of humidity to see a comparison here.';
+    }
+  }
+}
+
 function goToActivityDate(dateStr){
   const target=new Date(dateStr+'T00:00:00');
   today.setFullYear(target.getFullYear(),target.getMonth(),target.getDate());
@@ -1685,6 +1798,12 @@ function renderActivities(){
     if(a.temp)condStats.push('<span class="act-stat">&#x1F321;&#xFE0F; <strong>'+a.temp+'</strong>°F</span>');
     if(a.humidity)condStats.push('<span class="act-stat">&#x1F4A7; Humidity <strong>'+a.humidity+'</strong>%</span>');
     if(a.aqi)condStats.push('<span class="act-stat">&#x1F32C;&#xFE0F; AQI <strong>'+a.aqi+'</strong></span>');
+    if(a.temp&&a.pace){
+      var hhImpact=heatHumidityImpact(a.temp,a.humidity,parsePace(a.pace));
+      if(hhImpact&&hhImpact.pctSlower>=0.5){
+        condStats.push('<span class="act-stat" title="Estimated pace impact from heat/humidity, feels like '+Math.round(hhImpact.feelsLike)+'°F">&#x1F975; +<strong>'+hhImpact.pctSlower.toFixed(1)+'%</strong> ('+Math.round(hhImpact.secSlower)+'s/mi)</span>');
+      }
+    }
     if(a.date&&haPctMap.byDate[a.date]!==undefined){
       var haPct=haPctMap.byDate[a.date];var haInfo=haStatusInfo(haPct);
       condStats.push('<span class="act-stat" title="Estimated heat acclimation on this date: '+haInfo.label+'">&#x1F321;&#xFE0F;&#x1F4A7; Heat Accl. <strong style="color:'+haInfo.color+';">'+haPct+'%</strong></span>');
