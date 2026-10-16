@@ -1631,6 +1631,26 @@ function renderActivities(){
     sleepCache[dateKey]=info;
     return info;
   }
+  var prevWaterCache={};
+  // Looks up the Nutrition-tab Water Intake logged for the calendar day
+  // BEFORE a given activity date, since hydration going into a run is what
+  // the day-before total reflects, not same-day water logged after the run.
+  function getPrevDayWaterOz(dateKey){
+    if(prevWaterCache.hasOwnProperty(dateKey))return prevWaterCache[dateKey];
+    var oz=null;
+    try{
+      var prev=new Date(dateKey+'T00:00:00');
+      prev.setDate(prev.getDate()-1);
+      var raw=localStorage.getItem('planner_'+dk(prev));
+      if(raw){
+        var pd=JSON.parse(raw);
+        var o=parseFloat(pd.waterOz)||(parseFloat(pd.waterCount)*8||0);
+        if(o>0)oz=o;
+      }
+    }catch(e){}
+    prevWaterCache[dateKey]=oz;
+    return oz;
+  }
 
   function buildCard(a,tc,showDate,inGroup){
     // Stats are split into two visually distinct rows -- core performance
@@ -1679,6 +1699,12 @@ function renderActivities(){
           sParts.push('<strong style="color:'+sColor+';">'+Math.round(sleepInfo.score)+'</strong> score');
         }
         condStats.push('<span class="act-stat" title="Sleep logged for this date">&#x1F634; '+sParts.join(' &middot; ')+'</span>');
+      }
+    }
+    if(a.date){
+      var prevWaterOz=getPrevDayWaterOz(a.date);
+      if(prevWaterOz!=null){
+        condStats.push('<span class="act-stat" title="Water intake logged the day before this activity">&#x1F4A7; <strong>'+Math.round(prevWaterOz)+'</strong> oz prev-day</span>');
       }
     }
     if(a.execScore)condStats.push('<span class="act-stat">&#x1F3AF; <strong>'+a.execScore+'</strong>/100</span>');
