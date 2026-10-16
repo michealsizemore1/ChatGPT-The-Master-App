@@ -2101,16 +2101,31 @@ function fmtPlanDate(ds){
 // Cleans up plan text for display only (never rewrites the stored plan.text).
 // PDF text extraction -- and some pasted/typed text -- can lose real line
 // breaks, leaving behind runs of 2+ spaces where a line or paragraph break
-// used to be. This turns those back into visible line breaks so a long plan
-// reads in sections instead of one dense wall of text.
+// used to be. This turns those back into visible line breaks. A recovered
+// break only gets a full blank-line paragraph gap when it looks like the
+// end of a flowing sentence/paragraph; short labels, headings, and
+// weekly-schedule/table cells stay on compact, single-spaced lines instead
+// of being stretched out across the screen.
 function reflowPlanText(text){
   if(!text)return text;
   var t=String(text);
-  t=t.replace(/[ \t]{2,}/g,'\n\n');
+  t=t.replace(/[ \t]{2,}/g,'\x00');
   t=t.replace(/[ \t]+([,.;:])/g,'$1');
+  t=t.replace(/\x00[ \t]+/g,'\x00');
   t=t.replace(/\n[ \t]+/g,'\n');
-  t=t.replace(/\n{3,}/g,'\n\n');
-  return t.trim();
+  var segments=t.split('\x00');
+  var result=segments[0];
+  for(var i=1;i<segments.length;i++){
+    var prevLines=result.split('\n');
+    var prev=prevLines[prevLines.length-1];
+    var nextLines=segments[i].split('\n');
+    var next=nextLines[0];
+    var endsSentence=/[.!?:]$/.test(prev.trim());
+    var bothLong=prev.trim().length>25&&next.trim().length>25;
+    result+=(endsSentence||bothLong)?'\n\n':'\n';
+    result+=segments[i];
+  }
+  return result.replace(/\n{3,}/g,'\n\n').trim();
 }
 // A second, "upcoming" plan saved alongside the active one -- e.g. an ultra plan
 // queued up to start once the current marathon plan's race day has passed.
