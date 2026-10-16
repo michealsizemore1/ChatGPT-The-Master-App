@@ -922,6 +922,33 @@ function haComputeLoadSeries(acts,throughDateStr,daysBack){
   }
   return series;
 }
+// Finds the earliest date among logged (non-Rest-Day) activities, so the
+// shared heat-load series below can start from real history instead of an
+// arbitrary fixed window -- keeping the chart's current-day percentage and
+// the per-activity percentages shown on each run in sync with each other.
+function haEarliestRelevantDate(acts){
+  var todayKey=dk(new Date());
+  var earliest=null;
+  acts.forEach(function(a){
+    if(a.type==='Rest Day'||!a.date||a.date>todayKey)return;
+    if(!earliest||a.date<earliest)earliest=a.date;
+  });
+  return earliest;
+}
+// Builds ONE continuous heat-load series from the earliest relevant activity
+// date through today (capped at 730 days for performance) plus a
+// date-string -> percent lookup map, so every consumer (the aggregate chart
+// and each individual activity card) reads the same underlying estimate.
+function haBuildPercentMap(acts){
+  var todayKey=dk(new Date());
+  var earliest=haEarliestRelevantDate(acts);
+  var startKey=earliest||todayKey;
+  var daysBack=Math.min(730,Math.max(1,Math.round((new Date(todayKey+'T00:00:00')-new Date(startKey+'T00:00:00'))/86400000)+1));
+  var series=haComputeLoadSeries(acts,todayKey,daysBack);
+  var byDate={};
+  series.forEach(function(s){byDate[s.date]=haLoadToPercent(s.load);});
+  return {series:series,byDate:byDate,currentPct:series.length?haLoadToPercent(series[series.length-1].load):0};
+}
 function toggleHeatAcclimation(){
   var sec=document.getElementById('haSection');var arr=document.getElementById('haArrow');
   if(!sec)return;
@@ -956,10 +983,9 @@ function renderHeatAcclimationChart(){
     return;
   }
   var todayKey=dk(new Date());
-  var DAYS_BACK=30;
-  var series=haComputeLoadSeries(acts,todayKey,DAYS_BACK);
-  var currentLoad=series[series.length-1].load;
-  var pct=haLoadToPercent(currentLoad);
+  var haMap=haBuildPercentMap(acts);
+  var series=haMap.series.slice(Math.max(0,haMap.series.length-30));
+  var pct=haMap.currentPct;
   var status=haStatusInfo(pct);
   if(percentEl){percentEl.textContent=pct+'%';percentEl.style.color=status.color;}
   if(statusEl){statusEl.textContent=status.label;statusEl.style.color=status.color;}
@@ -1584,6 +1610,7 @@ function renderActivities(){
   if(colBtn)colBtn.style.display='inline-block';
 
   var typeColor={Run:'#e67e22',Ride:'#8e44ad',Walk:'#27ae60',Swim:'#2980b9',Strength:'#e74c3c',Other:'#95a5a6'};
+  var haPctMap=haBuildPercentMap(acts);
 
   function buildCard(a,tc,showDate,inGroup){
     var stats=[];
@@ -1613,6 +1640,10 @@ function renderActivities(){
     if(a.temp)stats.push('<span class="act-stat">&#x1F321;&#xFE0F; <strong>'+a.temp+'</strong>°F</span>');
     if(a.humidity)stats.push('<span class="act-stat">&#x1F4A7; Humidity <strong>'+a.humidity+'</strong>%</span>');
     if(a.aqi)stats.push('<span class="act-stat">&#x1F32C;&#xFE0F; AQI <strong>'+a.aqi+'</strong></span>');
+    if(a.date&&haPctMap.byDate[a.date]!==undefined){
+      var haPct=haPctMap.byDate[a.date];var haInfo=haStatusInfo(haPct);
+      stats.push('<span class="act-stat" title="Estimated heat acclimation on this date: '+haInfo.label+'">&#x1F321;&#xFE0F;&#x1F4A7; Heat Accl. <strong style="color:'+haInfo.color+';">'+haPct+'%</strong></span>');
+    }
     if(a.execScore)stats.push('<span class="act-stat">&#x1F3AF; <strong>'+a.execScore+'</strong>/100</span>');
     var collapsed=actCollapsed.has(a.id);
     var chevron=collapsed?'&#x25B6;':'&#x25BC;';
