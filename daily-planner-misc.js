@@ -1611,6 +1611,26 @@ function renderActivities(){
 
   var typeColor={Run:'#e67e22',Ride:'#8e44ad',Walk:'#27ae60',Swim:'#2980b9',Strength:'#e74c3c',Other:'#95a5a6'};
   var haPctMap=haBuildPercentMap(acts);
+  var sleepCache={};
+  // Looks up the Wellness-tab Sleep entry logged for a given calendar date
+  // (localStorage key 'planner_<date>'), so each activity card can show
+  // what was logged that day without re-parsing the same day twice when
+  // several activities share a date (e.g. with "Group by day" on).
+  function getSleepInfo(dateKey){
+    if(sleepCache.hasOwnProperty(dateKey))return sleepCache[dateKey];
+    var info=null;
+    try{
+      var raw=localStorage.getItem('planner_'+dateKey);
+      if(raw){
+        var sd=JSON.parse(raw);
+        var mins=parseSleepMins(sd.wSleepVal);
+        var score=parseFloat(sd.wSleepScore)||0;
+        if(mins||score)info={mins:mins,score:score};
+      }
+    }catch(e){}
+    sleepCache[dateKey]=info;
+    return info;
+  }
 
   function buildCard(a,tc,showDate,inGroup){
     var stats=[];
@@ -1643,6 +1663,18 @@ function renderActivities(){
     if(a.date&&haPctMap.byDate[a.date]!==undefined){
       var haPct=haPctMap.byDate[a.date];var haInfo=haStatusInfo(haPct);
       stats.push('<span class="act-stat" title="Estimated heat acclimation on this date: '+haInfo.label+'">&#x1F321;&#xFE0F;&#x1F4A7; Heat Accl. <strong style="color:'+haInfo.color+';">'+haPct+'%</strong></span>');
+    }
+    if(a.date){
+      var sleepInfo=getSleepInfo(a.date);
+      if(sleepInfo){
+        var sParts=[];
+        if(sleepInfo.mins)sParts.push('<strong>'+fmtMins(sleepInfo.mins)+'</strong>');
+        if(sleepInfo.score){
+          var sColor=sleepInfo.score>=85?'#16a34a':sleepInfo.score>=70?'#65a30d':sleepInfo.score>=50?'#f97316':'#dc2626';
+          sParts.push('<strong style="color:'+sColor+';">'+Math.round(sleepInfo.score)+'</strong> score');
+        }
+        stats.push('<span class="act-stat" title="Sleep logged for this date">&#x1F634; '+sParts.join(' &middot; ')+'</span>');
+      }
     }
     if(a.execScore)stats.push('<span class="act-stat">&#x1F3AF; <strong>'+a.execScore+'</strong>/100</span>');
     var collapsed=actCollapsed.has(a.id);
