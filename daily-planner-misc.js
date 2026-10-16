@@ -2064,6 +2064,8 @@ function loadCurrentPlan(){
   // Body
   var body=document.getElementById('tpPersistBody');
   if(body)body.textContent=reflowPlanText(plan.text)||'(No plan text)';
+  var pdfBtn=document.getElementById('tpPersistPdfBtn');
+  if(pdfBtn)pdfBtn.style.display=plan.pdfDataUrl?'inline-block':'none';
   // Archived plans section
   var archived=[];try{archived=JSON.parse(localStorage.getItem('archived_plans')||'[]');}catch(e){}
   if(archSec)archSec.style.display=archived.length?'block':'none';
@@ -2076,6 +2078,7 @@ function archivePlan(){
   var plan;try{plan=JSON.parse(raw);}catch(e){return;}
   var archived=[];try{archived=JSON.parse(localStorage.getItem('archived_plans')||'[]');}catch(e){}
   plan.archivedAt=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  delete plan.pdfDataUrl;
   archived.unshift(plan);
   localStorage.setItem('archived_plans',JSON.stringify(archived));
   localStorage.removeItem('current_training_plan');
@@ -2127,6 +2130,58 @@ function reflowPlanText(text){
   }
   return result.replace(/\n{3,}/g,'\n\n').trim();
 }
+// Saves a plan record to localStorage. If storage is full (most likely
+// because the plan includes a saved copy of its original PDF), retries
+// without that copy so the plan itself is never lost. Returns true,
+// 'stripped', or false so callers know whether the PDF copy survived.
+function savePlanRecord(key,obj){
+  try{
+    localStorage.setItem(key,JSON.stringify(obj));
+    return true;
+  }catch(e){
+    if(obj&&obj.pdfDataUrl){
+      var stripped={};
+      for(var k in obj)if(k!=='pdfDataUrl')stripped[k]=obj[k];
+      try{
+        localStorage.setItem(key,JSON.stringify(stripped));
+        return'stripped';
+      }catch(e2){
+        return false;
+      }
+    }
+    return false;
+  }
+}
+// Opens a saved original PDF (stored as a base64 data: URL) in a new tab, via
+// a Blob/object URL so it opens reliably even on mobile browsers.
+function openStoredPdf(dataUrl){
+  if(!dataUrl){alert('No original PDF is saved for this plan (it was uploaded before this feature existed, or the file was too large to keep a copy of). Re-upload the PDF to enable this.');return;}
+  try{
+    var commaIdx=dataUrl.indexOf(',');
+    var metaPart=dataUrl.slice(0,commaIdx);
+    var mimeMatch=metaPart.match(/data:(.*?);base64/);
+    var mime=mimeMatch?mimeMatch[1]:'application/pdf';
+    var binary=atob(dataUrl.slice(commaIdx+1));
+    var bytes=new Uint8Array(binary.length);
+    for(var i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
+    var blob=new Blob([bytes],{type:mime});
+    var url=URL.createObjectURL(blob);
+    window.open(url,'_blank');
+    setTimeout(function(){URL.revokeObjectURL(url);},60000);
+  }catch(e){
+    alert('Could not open the original PDF.');
+  }
+}
+function viewActivePlanPdf(){
+  var raw=localStorage.getItem('current_training_plan');
+  var plan=null;if(raw){try{plan=JSON.parse(raw);}catch(e){}}
+  openStoredPdf(plan&&plan.pdfDataUrl);
+}
+function viewUpcomingPlanPdf(){
+  var raw=localStorage.getItem('upcoming_training_plan');
+  var plan=null;if(raw){try{plan=JSON.parse(raw);}catch(e){}}
+  openStoredPdf(plan&&plan.pdfDataUrl);
+}
 // A second, "upcoming" plan saved alongside the active one -- e.g. an ultra plan
 // queued up to start once the current marathon plan's race day has passed.
 // Kept in its own localStorage slot so it never overwrites current_training_plan
@@ -2149,6 +2204,8 @@ function loadUpcomingPlan(){
   }
   var body=document.getElementById('tpUpcomingBody');
   if(body)body.textContent=reflowPlanText(plan.text)||'(No plan text)';
+  var upcomingPdfBtn=document.getElementById('tpUpcomingPdfBtn');
+  if(upcomingPdfBtn)upcomingPdfBtn.style.display=plan.pdfDataUrl?'inline-block':'none';
 }
 function makeUpcomingPlanActive(){
   var raw=localStorage.getItem('upcoming_training_plan');
@@ -2161,12 +2218,13 @@ function makeUpcomingPlanActive(){
     if(curPlan){
       var archived=[];try{archived=JSON.parse(localStorage.getItem('archived_plans')||'[]');}catch(e){}
       curPlan.archivedAt=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+      delete curPlan.pdfDataUrl;
       archived.unshift(curPlan);
       localStorage.setItem('archived_plans',JSON.stringify(archived));
     }
   }
   delete plan.archivedAt;
-  localStorage.setItem('current_training_plan',JSON.stringify(plan));
+  savePlanRecord('current_training_plan',plan);
   localStorage.removeItem('upcoming_training_plan');
   // Clear stale workout caches so the newly active plan's entries load fresh
   var _ck=[];for(var _i=0;_i<localStorage.length;_i++){var _k=localStorage.key(_i);if(_k&&_k.startsWith('workout_cache_'))_ck.push(_k);}
@@ -2213,7 +2271,7 @@ function restoreArchivedPlan(i){
   archived.splice(i,1);
   localStorage.setItem('archived_plans',JSON.stringify(archived));
   delete plan.archivedAt;
-  localStorage.setItem('current_training_plan',JSON.stringify(plan));
+  savePlanRecord('current_training_plan',plan);
   loadCurrentPlan();
 }
 function deleteArchivedPlan(i){
@@ -2548,6 +2606,17 @@ function buildUploadedTrainingSchedule(text,startDate,weeks){
 // Only works for PDFs that have real selectable text -- a scanned/photographed
 // page with no text layer will come back empty, which is surfaced to the user
 // as an error asking them to use a .txt file instead.
+// Reads a File as a base64 data: URL. Used to keep a copy of an uploaded
+// PDF's original bytes so it can be opened later and viewed exactly as it
+// looked in the PDF, regardless of how well the text extraction below reads.
+function readFileAsDataUrl(file){
+  return new Promise(function(resolve,reject){
+    var reader=new FileReader();
+    reader.onload=function(e){resolve(e.target.result);};
+    reader.onerror=function(){reject(new Error('Could not read the file'));};
+    reader.readAsDataURL(file);
+  });
+}
 async function extractPdfText(file){
   if(typeof pdfjsLib==='undefined')throw new Error('PDF support did not load (check your connection)');
   if(!pdfjsLib.GlobalWorkerOptions.workerSrc){
@@ -2579,7 +2648,7 @@ function uploadPlanFromFile(evt){
   const file=evt.target.files[0];if(!file)return;
   const isPdf=file.type==='application/pdf'||/\.pdf$/i.test(file.name);
   const status=document.getElementById('tpUploadStatus');
-  function processPlanText(text){
+  function processPlanText(text,pdfDataUrl){
     text=(text||'').trim();
     if(!text){alert(isPdf?'No readable text was found in that PDF. If it\'s a scanned image, please save it as a .txt file instead.':'The selected text file is empty.');evt.target.value='';return;}
     const weekMatches=Array.from(text.matchAll(/\bweek\s+(\d{1,2})\b/gi)).map(m=>parseInt(m[1],10)).filter(n=>n>0&&n<=52);
@@ -2591,18 +2660,20 @@ function uploadPlanFromFile(evt){
     const effectiveStart=structured.mode==='dated'&&datedKeys.length?datedKeys.sort()[0]:planStartDate;
     const metaStr=(isPdf?'Uploaded PDF plan':'Uploaded text plan')+(weeks?' • '+weeks+' weeks':'');
     const planObj={text,dist:'',weeks,raceDate:'',startDate:effectiveStart,schedule:structured.schedule,scheduleMode:structured.mode,scheduleVersion:3,meta:metaStr,createdAt:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})};
+    if(pdfDataUrl)planObj.pdfDataUrl=pdfDataUrl;
     const upcomingCb=document.getElementById('tpSaveAsUpcoming');
     const saveAsUpcoming=!!(upcomingCb&&upcomingCb.checked);
     if(saveAsUpcoming){
-      localStorage.setItem('upcoming_training_plan',JSON.stringify(planObj));
+      const saveResult=savePlanRecord('upcoming_training_plan',planObj);
       loadUpcomingPlan();
+      const pdfNote=(pdfDataUrl&&saveResult==='stripped')?' The original PDF was too large to also keep a viewable copy of.':'';
       if(status)status.textContent='Saved as an upcoming plan starting '+fmtPlanDate(effectiveStart)+'. Your current active plan keeps running until you tap "Make Active Now".';
       if(upcomingCb)upcomingCb.checked=false;
-      alert('Saved as an upcoming plan starting '+fmtPlanDate(effectiveStart)+'. It will not replace your active plan until you activate it.');
+      alert('Saved as an upcoming plan starting '+fmtPlanDate(effectiveStart)+'. It will not replace your active plan until you activate it.'+pdfNote);
       evt.target.value='';
       return;
     }
-    localStorage.setItem('current_training_plan',JSON.stringify(planObj));
+    const saveResult=savePlanRecord('current_training_plan',planObj);
     // Clear stale workout caches so new plan entries load fresh
     const _ck=[];for(let _i=0;_i<localStorage.length;_i++){const _k=localStorage.key(_i);if(_k&&_k.startsWith('workout_cache_'))_ck.push(_k);}
     _ck.forEach(_k=>localStorage.removeItem(_k));
@@ -2612,14 +2683,19 @@ function uploadPlanFromFile(evt){
     if(outputText){outputText.textContent=reflowPlanText(text);outputText.style.whiteSpace='pre-wrap';}
     if(meta)meta.textContent=metaStr;
     if(outputDiv){outputDiv.style.display='block';setTimeout(()=>outputDiv.scrollIntoView({behavior:'smooth',block:'start'}),100);}
-    if(status)status.textContent=datedKeys.length+' workout day'+(datedKeys.length===1?'':'s')+' mapped by '+(structured.mode==='dated'?'the dates in the file':'week and weekday')+'. Unlisted dates remain rest days.';
+    const pdfNote=(pdfDataUrl&&saveResult==='stripped')?' The original PDF was too large to also keep a viewable copy of.':'';
+    if(status)status.textContent=datedKeys.length+' workout day'+(datedKeys.length===1?'':'s')+' mapped by '+(structured.mode==='dated'?'the dates in the file':'week and weekday')+'. Unlisted dates remain rest days.'+pdfNote;
     loadCurrentPlan();
     alert('Training plan loaded from '+file.name+'.');
     evt.target.value='';
   }
+  const MAX_PDF_STORE_BYTES=4*1024*1024;
   if(isPdf){
     if(status)status.textContent='Reading PDF\u2026';
-    extractPdfText(file).then(processPlanText).catch(function(err){
+    const pdfDataUrlPromise=(file.size<=MAX_PDF_STORE_BYTES)?readFileAsDataUrl(file).catch(function(){return null;}):Promise.resolve(null);
+    Promise.all([extractPdfText(file),pdfDataUrlPromise]).then(function(results){
+      processPlanText(results[0],results[1]);
+    }).catch(function(err){
       alert('Could not read that PDF: '+(err&&err.message?err.message:err)+'. Try saving it as a .txt file instead.');
       if(status)status.textContent='';
       evt.target.value='';
