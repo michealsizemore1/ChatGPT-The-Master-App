@@ -2182,6 +2182,65 @@ function viewUpcomingPlanPdf(){
   var plan=null;if(raw){try{plan=JSON.parse(raw);}catch(e){}}
   openStoredPdf(plan&&plan.pdfDataUrl);
 }
+// Sends a plan's current text to the same Anthropic API the AI plan
+// generator already uses (same stored key), asking it to reorganize the
+// text into the same clean, readable layout the app's own generated plans
+// use -- without inventing, dropping, or summarizing away any of the
+// original content. Works on any plan text regardless of where it came
+// from (uploaded PDF, pasted text, or AI-generated), so it also fixes up
+// a plan that was uploaded before "View Original PDF" existed.
+function reformatPlanWithAI(which){
+  var key=journalAIKey();
+  if(!key){alert('Add your Anthropic API key in \u2699\uFE0F Settings first to use AI formatting cleanup.');return;}
+  var storageKey=which==='upcoming'?'upcoming_training_plan':'current_training_plan';
+  var raw=localStorage.getItem(storageKey);
+  if(!raw){alert('No plan to reformat.');return;}
+  var plan;try{plan=JSON.parse(raw);}catch(e){alert('Could not read this plan.');return;}
+  if(!plan.text){alert('This plan has no text to reformat.');return;}
+  var btn=document.getElementById(which==='upcoming'?'tpUpcomingReformatBtn':'tpPersistReformatBtn');
+  if(btn){btn.disabled=true;btn.textContent='\u23F3 Reformatting\u2026';}
+  var prompt='You are formatting a training plan for easy reading in a mobile app. Reformat the plan text below into a clean, consistently structured document, following this style:\n\n'
+    +'- A short title line in capitals (e.g. the distance and plan type)\n'
+    +'- A one-line subtitle describing the plan\'s structure/phases, using \u00B7 as a separator\n'
+    +'- A full-width separator line of = characters\n'
+    +'- Key stats as their own short labeled lines in capitals (e.g. TARGET PACE, FINISH GOAL, PEAK LONG RUN) directly followed by their values, if the plan includes stats like these\n'
+    +'- The plan start date on its own line\n'
+    +'- A week-by-week schedule, each week starting with a clear "Week N \u2014 Phase" header, followed by each training day on its own line (e.g. "Mon: Easy 4 miles")\n\n'
+    +'Keep ALL of the original plan\'s real information -- do not invent, remove, or summarize away any detail, workout, note, or number. Only reorganize and reformat for readability. Reply with ONLY the reformatted plan text, no preamble or commentary.\n\n'
+    +'Plan text to reformat:\n\n'+plan.text;
+  var controller=new AbortController();
+  var timeoutId=setTimeout(function(){controller.abort();},60000);
+  fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    signal:controller.signal,
+    headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:6000,messages:[{role:'user',content:prompt}]})
+  }).then(function(r){return r.json();}).then(function(data){
+    clearTimeout(timeoutId);
+    if(btn){btn.disabled=false;btn.textContent='\uD83E\uDE84 Clean Up Formatting';}
+    if(data.error){alert('AI error: '+data.error.message);return;}
+    var newText=((data.content&&data.content[0]&&data.content[0].text)||'').trim();
+    if(!newText){alert('The AI did not return any text. Please try again.');return;}
+    plan.text=newText;
+    var rebuilt=buildUploadedTrainingSchedule(newText,plan.startDate||dk(new Date()),plan.weeks);
+    plan.schedule=rebuilt.schedule;plan.scheduleMode=rebuilt.mode;plan.scheduleVersion=3;
+    var saveResult=savePlanRecord(storageKey,plan);
+    if(which==='upcoming'){
+      loadUpcomingPlan();
+    }else{
+      var _ck=[];for(var _i=0;_i<localStorage.length;_i++){var _k=localStorage.key(_i);if(_k&&_k.startsWith('workout_cache_'))_ck.push(_k);}
+      _ck.forEach(function(_k){localStorage.removeItem(_k);});
+      loadCurrentPlan();
+    }
+    var pdfNote=(plan.pdfDataUrl&&saveResult==='stripped')?' (The saved original PDF copy had to be dropped to fit storage.)':'';
+    alert('Plan reformatted.'+pdfNote);
+  }).catch(function(err){
+    clearTimeout(timeoutId);
+    if(btn){btn.disabled=false;btn.textContent='\uD83E\uDE84 Clean Up Formatting';}
+    if(err&&err.name==='AbortError'){alert('Reformatting timed out. Please try again.');}
+    else{alert('Could not reformat the plan: '+(err&&err.message?err.message:err));}
+  });
+}
 // A second, "upcoming" plan saved alongside the active one -- e.g. an ultra plan
 // queued up to start once the current marathon plan's race day has passed.
 // Kept in its own localStorage slot so it never overwrites current_training_plan
