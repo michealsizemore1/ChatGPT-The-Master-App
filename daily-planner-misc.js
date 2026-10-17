@@ -2355,6 +2355,76 @@ function addTrainingZonesToUpcoming(){
   var pdfNote=(plan.pdfDataUrl&&saveResult==='stripped')?' (The saved original PDF copy had to be dropped to fit storage.)':'';
   alert((zonesStart>=0?'Training zones updated.':'Training zones added to the upcoming plan.')+pdfNote);
 }
+// Inserts the real calendar date next to each "Sun:"/"Mon:"/... day label in
+// a plan's week-by-week schedule (e.g. "Sun: 4 E" becomes "Sun, Nov 1: 4 E"),
+// computed from the plan's own "Start date:"/"Plan start:" line in its text
+// (never "Race day:"/"Target date:"/"Finish date:", which are end dates, and
+// never the stored plan.startDate field, which can be stale) together with
+// each "Week N" header. Re-tapping recomputes cleanly -- any date this
+// function previously inserted is stripped first, so dates never stack or
+// drift if the plan's start date or weeks are later adjusted. Also upgrades
+// the plan's schedule from position-based "weekly" matching to precise
+// date-based "dated" matching, since every day line now carries a real date.
+function addDatesToSchedule(which){
+  var storageKey=which==='upcoming'?'upcoming_training_plan':'current_training_plan';
+  var raw=localStorage.getItem(storageKey);
+  if(!raw){alert('No '+(which==='upcoming'?'upcoming':'active')+' plan found.');return;}
+  var plan;try{plan=JSON.parse(raw);}catch(e){alert('Could not read the plan.');return;}
+  if(!plan.text){alert('This plan has no text to update.');return;}
+  var lines=plan.text.split(/\r?\n/);
+  var fallbackYear=new Date((plan.startDate||dk(new Date()))+'T00:00:00').getFullYear();
+  var startDate=null;
+  for(var i=0;i<lines.length;i++){
+    if(!/^\s*(start\s*date|plan\s*start)\s*:?\s*/i.test(lines[i]))continue;
+    var rest=lines[i].replace(/^\s*(start\s*date|plan\s*start)\s*:?\s*/i,'');
+    var sameLineKey=rest?trainingPlanDateFromLine(rest,fallbackYear):null;
+    if(sameLineKey){startDate=new Date(sameLineKey+'T00:00:00');}
+    else{
+      for(var n=i+1;n<lines.length;n++){
+        if(lines[n].trim()==='')continue;
+        var nextKey=trainingPlanDateFromLine(lines[n],fallbackYear);
+        if(nextKey)startDate=new Date(nextKey+'T00:00:00');
+        break;
+      }
+    }
+    break;
+  }
+  if((!startDate||isNaN(startDate.getTime()))&&plan.startDate)startDate=new Date(plan.startDate+'T00:00:00');
+  if(!startDate||isNaN(startDate.getTime())){alert('Could not find a start date in this plan to calculate dates from.');return;}
+  var weekdayIdx={sun:0,mon:1,tue:2,wed:3,thu:4,fri:5,sat:6};
+  var startWeekdayIdx=startDate.getDay();
+  var currentWeekNum=null,changed=0;
+  for(var li=0;li<lines.length;li++){
+    var weekMatch=lines[li].match(/^\s*week\s+(\d+)\b/i);
+    if(weekMatch){currentWeekNum=parseInt(weekMatch[1],10);continue;}
+    if(currentWeekNum===null)continue;
+    var stripped=lines[li].replace(/^(\s*(?:sun|mon|tue|wed|thu|fri|sat)(?:day)?),\s*[A-Za-z]{3,9}\s+\d{1,2}(\s*:)/i,'$1$2');
+    var dayMatch=stripped.match(/^(\s*)(sun|mon|tue|wed|thu|fri|sat)(day)?(\s*:)/i);
+    if(!dayMatch)continue;
+    var dayIdx=weekdayIdx[dayMatch[2].toLowerCase()];
+    var offset=(dayIdx-startWeekdayIdx+7)%7;
+    var weekStart=new Date(startDate);weekStart.setDate(startDate.getDate()+(currentWeekNum-1)*7);
+    var actualDate=new Date(weekStart);actualDate.setDate(weekStart.getDate()+offset);
+    var dateStr=actualDate.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    var newPrefix=dayMatch[1]+dayMatch[2]+(dayMatch[3]||'')+', '+dateStr+dayMatch[4];
+    lines[li]=newPrefix+stripped.slice(dayMatch[0].length);
+    changed++;
+  }
+  if(!changed){alert('No "Week N" day-by-day schedule lines were found to add dates to.');return;}
+  plan.text=lines.join('\n');
+  var rebuilt=buildUploadedTrainingSchedule(plan.text,plan.startDate,plan.weeks);
+  plan.schedule=rebuilt.schedule;plan.scheduleMode=rebuilt.mode;plan.scheduleVersion=3;
+  var saveResult=savePlanRecord(storageKey,plan);
+  if(which==='upcoming'){
+    loadUpcomingPlan();
+  }else{
+    var _ck=[];for(var _i=0;_i<localStorage.length;_i++){var _k=localStorage.key(_i);if(_k&&_k.startsWith('workout_cache_'))_ck.push(_k);}
+    _ck.forEach(function(_k){localStorage.removeItem(_k);});
+    loadCurrentPlan();
+  }
+  var pdfNote=(plan.pdfDataUrl&&saveResult==='stripped')?' (The saved original PDF copy had to be dropped to fit storage.)':'';
+  alert('Added dates to '+changed+' day'+(changed===1?'':'s')+' in the schedule.'+pdfNote);
+}
 function makeUpcomingPlanActive(){
   var raw=localStorage.getItem('upcoming_training_plan');
   if(!raw){alert('No upcoming plan saved.');return;}
@@ -2757,7 +2827,13 @@ function buildUploadedTrainingSchedule(text,startDate,weeks){
     headers.push({index:index,key:key});
   });
   var schedule={};
-  headers.forEach(function(header,index){var end=index+1<headers.length?headers[index+1].index:lines.length,section=lines.slice(header.index,end).join('\n').trim();if(section)schedule[header.key]=section;});
+  headers.forEach(function(header,index){
+    var end=index+1<headers.length?headers[index+1].index:lines.length;
+    var sectionLines=lines.slice(header.index,end);
+    for(var si=1;si<sectionLines.length;si++){if(/^\s*week\s+\d+\b/i.test(sectionLines[si])){sectionLines=sectionLines.slice(0,si);break;}}
+    var section=sectionLines.join('\n').trim();
+    if(section)schedule[header.key]=section;
+  });
   if(Object.keys(schedule).length)return{schedule:schedule,mode:'dated'};
   var base={text:text,startDate:startDate},days=Math.max(7,(weeks||1)*7),start=new Date(startDate+'T00:00:00');
   for(var i=0;i<days;i++){
