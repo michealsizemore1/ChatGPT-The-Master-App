@@ -2521,32 +2521,36 @@ function deleteArchivedPlan(i){
   var archSec=document.getElementById('tpArchiveSection');
   if(archSec)archSec.style.display=archived.length?'block':'none';
 }
-function openAdjustPlan(){
-  var box=document.getElementById('tpAdjustBox');
-  if(box){box.style.display='block';var inp=document.getElementById('tpAdjustInput');if(inp)inp.focus();}
+function openAdjustPlan(which){
+  which=which||'current';
+  var box=document.getElementById(which==='upcoming'?'tpUpcomingAdjustBox':'tpAdjustBox');
+  if(box){box.style.display='block';var inp=document.getElementById(which==='upcoming'?'tpUpcomingAdjustInput':'tpAdjustInput');if(inp)inp.focus();}
 }
-function closeAdjustPlan(){
-  var box=document.getElementById('tpAdjustBox');
-  if(box){box.style.display='none';var inp=document.getElementById('tpAdjustInput');if(inp)inp.value='';}
+function closeAdjustPlan(which){
+  which=which||'current';
+  var box=document.getElementById(which==='upcoming'?'tpUpcomingAdjustBox':'tpAdjustBox');
+  if(box){box.style.display='none';var inp=document.getElementById(which==='upcoming'?'tpUpcomingAdjustInput':'tpAdjustInput');if(inp)inp.value='';}
 }
-function submitAdjustPlan(){
-  var inp=document.getElementById('tpAdjustInput');
-  var btn=document.getElementById('tpAdjustBtn');
+function submitAdjustPlan(which){
+  which=which||'current';
+  var storageKey=which==='upcoming'?'upcoming_training_plan':'current_training_plan';
+  var inp=document.getElementById(which==='upcoming'?'tpUpcomingAdjustInput':'tpAdjustInput');
+  var btn=document.getElementById(which==='upcoming'?'tpUpcomingAdjustBtn':'tpAdjustBtn');
   var instruction=(inp&&inp.value.trim())||'';
   if(!instruction){alert('Please describe how you want to adjust the plan.');return;}
-  var raw=localStorage.getItem('current_training_plan');
-  if(!raw){alert('No active training plan found.');return;}
+  var raw=localStorage.getItem(storageKey);
+  if(!raw){alert('No '+(which==='upcoming'?'upcoming':'active')+' training plan found.');return;}
   var plan;try{plan=JSON.parse(raw);}catch(e){alert('Could not read training plan.');return;}
   var currentPlanText=plan.text||'';
-  var prompt='You are a running coach. The athlete has an active training plan and wants to adjust it.\n\nCURRENT PLAN:\n'+currentPlanText+'\n\nATHLETE\'S REQUEST:\n'+instruction+'\n\nPlease rewrite the training plan incorporating the requested adjustments. Keep the same format and structure as the original plan. Return only the updated plan text.';
+  var prompt='You are a running coach. The athlete has '+(which==='upcoming'?'an upcoming':'an active')+' training plan and wants to adjust it.\n\nCURRENT PLAN:\n'+currentPlanText+'\n\nATHLETE\'S REQUEST:\n'+instruction+'\n\nPlease rewrite the training plan incorporating the requested adjustments. Keep the same format and structure as the original plan. Return only the updated plan text.';
   if(btn){btn.disabled=true;btn.textContent='⏳ Adjusting...';}
   aiCall(prompt,5000,function(text){
     plan.text=text;
     plan.adjustedAt=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
     if(plan.scheduleMode){var rebuilt=buildUploadedTrainingSchedule(plan.text,plan.startDate,plan.weeks);plan.schedule=rebuilt.schedule;plan.scheduleMode=rebuilt.mode;plan.scheduleVersion=3;}
-    localStorage.setItem('current_training_plan',JSON.stringify(plan));
-    renderActivePlan();
-    closeAdjustPlan();
+    localStorage.setItem(storageKey,JSON.stringify(plan));
+    if(which==='upcoming'){loadUpcomingPlan();}else{renderActivePlan();}
+    closeAdjustPlan(which);
     if(btn){btn.disabled=false;btn.textContent='✨ Adjust Plan';}
   },function(err){
     alert('AI error: '+err);
