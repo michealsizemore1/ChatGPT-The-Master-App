@@ -1049,6 +1049,29 @@ function renderRunnerMacroGuidance(log,totals,ratios){
   if(dist)dist.innerHTML=meals.map(function(meal){var rows=log.filter(function(x){return (x.meal||'snack')===meal;}),p=0,c=0,f=0;rows.forEach(function(x){var n=parseFloat(x.servings)||1;p+=(parseFloat(x.prot)||0)*n;c+=(parseFloat(x.carbs)||0)*n;f+=(parseFloat(x.fat)||0)*n;});return '<div class="meal-macro-chip"><strong>'+names[meal]+'</strong>'+Math.round(p)+'g P · '+Math.round(c)+'g C · '+Math.round(f)+'g F</div>';}).join('');
 }
 
+function closeMicroSourceModal(){var m=document.getElementById('microSourceModal');if(m)m.style.display='none';}
+function showMicroSourceBreakdown(field,name,unit){
+  var log=window._foodLog||[];
+  var mealNames={breakfast:'Breakfast',lunch:'Lunch',dinner:'Dinner',snack:'Snack',liquids:'Liquids',sports:'Sports'};
+  var rows=log.map(function(x){var s=parseFloat(x.servings)||1,amount=(parseFloat(x[field])||0)*s;return {name:x.name||'Untitled food',meal:mealNames[x.meal]||x.meal||'',amount:amount};}).filter(function(r){return r.amount>0.0001;}).sort(function(a,b){return b.amount-a.amount;});
+  var total=rows.reduce(function(sum,r){return sum+r.amount;},0);
+  var fmt=function(v){return unit==='mg'&&v>=100?Math.round(v).toLocaleString():Math.round(v*10)/10;};
+  var titleEl=document.getElementById('microSourceModalTitle'),summaryEl=document.getElementById('microSourceModalSummary'),bodyEl=document.getElementById('microSourceModalBody'),modal=document.getElementById('microSourceModal');
+  if(titleEl)titleEl.textContent=name+' sources today';
+  if(summaryEl)summaryEl.textContent=rows.length?('From '+rows.length+' logged food'+(rows.length===1?'':'s')+' · '+fmt(total)+unit+' total'):'None of the foods logged today have '+name.toLowerCase()+' recorded.';
+  if(bodyEl){
+    if(!rows.length){
+      bodyEl.innerHTML='<div style="text-align:center;color:#98a2b3;padding:22px 6px;font-size:.82rem;line-height:1.5;">None of the foods logged today have '+escHtml(name.toLowerCase())+' data recorded yet. Items logged before this nutrient was tracked, or added without full nutrition info, show 0 until re-logged or edited.</div>';
+    } else {
+      bodyEl.innerHTML=rows.map(function(r){
+        var pct=total?Math.round(r.amount/total*100):0;
+        return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid #f1f5f9;"><div style="min-width:0;"><div style="font-size:.85rem;color:#1e293b;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+escHtml(r.name)+'</div>'+(r.meal?'<div style="font-size:.7rem;color:#94a3b8;">'+escHtml(r.meal)+'</div>':'')+'</div><div style="text-align:right;white-space:nowrap;"><div style="font-size:.85rem;font-weight:700;color:#1e293b;">'+fmt(r.amount)+unit+'</div><div style="font-size:.7rem;color:#94a3b8;">'+pct+'%</div></div></div>';
+      }).join('');
+    }
+  }
+  if(modal)modal.style.display='flex';
+}
+
 function updateMacroTotals(){
   var log=window._foodLog||[];
   var hasData=log.length>0;
@@ -1106,11 +1129,11 @@ function updateMacroTotals(){
     if(!hasData){microQuality.style.display='none';}
     else {
       var priorityMicros=[
-        {name:'Iron',value:totals.iron||0,target:14,unit:'mg'},
-        {name:'Calcium',value:totals.calcium||0,target:1000,unit:'mg'},
-        {name:'Vitamin D',value:totals.vitD||0,target:25,unit:'mcg'},
-        {name:'Magnesium',value:totals.magnesium||0,target:400,unit:'mg'},
-        {name:'Vitamin B12',value:totals.vitB12||0,target:2.4,unit:'mcg'}
+        {name:'Iron',field:'iron',value:totals.iron||0,target:14,unit:'mg'},
+        {name:'Calcium',field:'calcium',value:totals.calcium||0,target:1000,unit:'mg'},
+        {name:'Vitamin D',field:'vitD',value:totals.vitD||0,target:25,unit:'mcg'},
+        {name:'Magnesium',field:'magnesium',value:totals.magnesium||0,target:400,unit:'mg'},
+        {name:'Vitamin B12',field:'vitB12',value:totals.vitB12||0,target:2.4,unit:'mcg'}
       ];
       var completion=priorityMicros.map(function(n){return Math.max(0,Math.min(1,n.value/n.target));});
       var averageCompletion=completion.reduce(function(sum,n){return sum+n;},0)/completion.length;
@@ -1126,7 +1149,7 @@ function updateMacroTotals(){
         var statusColor=status==='Met'?'#166534':status==='Close'?'#92400e':'#991b1b';
         var barColor=status==='Met'?'#16a34a':status==='Close'?'#f59e0b':'#dc2626';
         var shownValue=n.unit==='mg'&&n.value>=100?Math.round(n.value).toLocaleString():Math.round(n.value*10)/10;
-        return '<div><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.69rem;color:#475569;margin-bottom:3px;"><strong>'+n.name+'</strong><span>'+shownValue+n.unit+' / '+n.target.toLocaleString()+n.unit+' · '+Math.round(pct)+'% · <strong style="color:'+statusColor+'">'+status+'</strong></span></div><div role="progressbar" aria-label="'+n.name+' daily target completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+Math.round(pct)+'" style="height:8px;border-radius:999px;background:#e5e7eb;overflow:hidden;"><span style="display:block;width:'+capped+'%;height:100%;background:'+barColor+';border-radius:999px;"></span></div></div>';
+        return '<div role="button" tabindex="0" aria-label="'+n.name+' - tap to see contributing foods" onclick="showMicroSourceBreakdown(\''+n.field+'\',\''+n.name+'\',\''+n.unit+'\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();showMicroSourceBreakdown(\''+n.field+'\',\''+n.name+'\',\''+n.unit+'\');}" style="cursor:pointer;"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.69rem;color:#475569;margin-bottom:3px;"><strong>'+n.name+'</strong><span>'+shownValue+n.unit+' / '+n.target.toLocaleString()+n.unit+' · '+Math.round(pct)+'% · <strong style="color:'+statusColor+'">'+status+'</strong> <span style="color:#cbd5e1;">›</span></span></div><div role="progressbar" aria-label="'+n.name+' daily target completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+Math.round(pct)+'" style="height:8px;border-radius:999px;background:#e5e7eb;overflow:hidden;"><span style="display:block;width:'+capped+'%;height:100%;background:'+barColor+';border-radius:999px;"></span></div></div>';
       }).join('');
     }
   }
