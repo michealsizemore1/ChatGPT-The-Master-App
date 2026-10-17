@@ -2277,10 +2277,11 @@ function loadUpcomingPlan(){
 // already has a Training Zones section, that section is replaced in place
 // with the current version (so re-tapping the button refreshes it rather
 // than refusing), leaving the rest of the plan untouched.
-function addTrainingZonesToUpcoming(){
-  var raw=localStorage.getItem('upcoming_training_plan');
-  if(!raw){alert('No upcoming plan saved.');return;}
-  var plan;try{plan=JSON.parse(raw);}catch(e){alert('Could not read the upcoming plan.');return;}
+function addTrainingZonesToPlan(which){
+  var storageKey=which==='upcoming'?'upcoming_training_plan':'current_training_plan';
+  var raw=localStorage.getItem(storageKey);
+  if(!raw){alert('No '+(which==='upcoming'?'upcoming':'active')+' plan found.');return;}
+  var plan;try{plan=JSON.parse(raw);}catch(e){alert('Could not read the plan.');return;}
   if(!plan.text){alert('This plan has no text to add to.');return;}
   var zonesBlock=[
     'TRAINING ZONES',
@@ -2350,10 +2351,16 @@ function addTrainingZonesToUpcoming(){
   plan.text=(before?before+'\n\n':'')+zonesBlock+(after?'\n\n'+after:'');
   var rebuilt=buildUploadedTrainingSchedule(plan.text,plan.startDate,plan.weeks);
   plan.schedule=rebuilt.schedule;plan.scheduleMode=rebuilt.mode;plan.scheduleVersion=3;
-  var saveResult=savePlanRecord('upcoming_training_plan',plan);
-  loadUpcomingPlan();
+  var saveResult=savePlanRecord(storageKey,plan);
+  if(which==='upcoming'){
+    loadUpcomingPlan();
+  }else{
+    var _ck=[];for(var _i=0;_i<localStorage.length;_i++){var _k=localStorage.key(_i);if(_k&&_k.startsWith('workout_cache_'))_ck.push(_k);}
+    _ck.forEach(function(_k){localStorage.removeItem(_k);});
+    loadCurrentPlan();
+  }
   var pdfNote=(plan.pdfDataUrl&&saveResult==='stripped')?' (The saved original PDF copy had to be dropped to fit storage.)':'';
-  alert((zonesStart>=0?'Training zones updated.':'Training zones added to the upcoming plan.')+pdfNote);
+  alert((zonesStart>=0?'Training zones updated.':'Training zones added to the '+(which==='upcoming'?'upcoming':'active')+' plan.')+pdfNote);
 }
 // Inserts the real calendar date next to each "Sun:"/"Mon:"/... day label in
 // a plan's week-by-week schedule (e.g. "Sun: 4 E" becomes "Sun, Nov 1: 4 E"),
