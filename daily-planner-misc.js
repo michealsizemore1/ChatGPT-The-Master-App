@@ -1902,7 +1902,7 @@ function renderActivities(){
   // uses (aiNutritionCorrelation, in daily-planner-food-log.js).
   function getPrevDayNutrition(dateKey){
     if(prevNutritionCache.hasOwnProperty(dateKey))return prevNutritionCache[dateKey];
-    var cal=null;
+    var result=null;
     try{
       var prev=new Date(dateKey+'T00:00:00');
       prev.setDate(prev.getDate()-1);
@@ -1910,12 +1910,22 @@ function renderActivities(){
       if(raw){
         var pd=JSON.parse(raw);
         var log=Array.isArray(pd.foodLog)?pd.foodLog:[];
-        var c=log.reduce(function(sum,x){return sum+(parseFloat(x.cal)||0);},0)||parseFloat(pd.nuCalVal)||0;
-        if(c>0)cal=c;
+        var cal=log.reduce(function(sum,x){return sum+(parseFloat(x.cal)||0);},0)||parseFloat(pd.nuCalVal)||0;
+        if(cal>0){
+          var prot=log.reduce(function(sum,x){return sum+(parseFloat(x.prot)||0);},0)||parseFloat(pd.nuProtVal)||0;
+          var carbs=log.reduce(function(sum,x){return sum+(parseFloat(x.carbs)||0);},0)||parseFloat(pd.nuCarbsVal)||0;
+          var fat=log.reduce(function(sum,x){return sum+(parseFloat(x.fat)||0);},0)||parseFloat(pd.nuFatVal)||0;
+          result={cal:cal};
+          if(prot+carbs+fat>0){
+            result.protPct=Math.round(prot*4/cal*100);
+            result.carbsPct=Math.round(carbs*4/cal*100);
+            result.fatPct=Math.round(fat*9/cal*100);
+          }
+        }
       }
     }catch(e){}
-    prevNutritionCache[dateKey]=cal;
-    return cal;
+    prevNutritionCache[dateKey]=result;
+    return result;
   }
 
   function buildCard(a,tc,showDate,inGroup){
@@ -1980,9 +1990,10 @@ function renderActivities(){
       }
     }
     if(a.date){
-      var prevCal=getPrevDayNutrition(a.date);
-      if(prevCal!=null){
-        condStats.push('<span class="act-stat" title="Calories logged the day before this activity">&#x1F37D;&#xFE0F; <strong>'+Math.round(prevCal)+'</strong> cal prev-day</span>');
+      var prevNutr=getPrevDayNutrition(a.date);
+      if(prevNutr!=null){
+        var macroPart=prevNutr.protPct!=null?' &middot; P '+prevNutr.protPct+'% &middot; C '+prevNutr.carbsPct+'% &middot; F '+prevNutr.fatPct+'%':'';
+        condStats.push('<span class="act-stat" title="Calories and macro split logged the day before this activity">&#x1F37D;&#xFE0F; <strong>'+Math.round(prevNutr.cal)+'</strong> cal'+macroPart+' prev-day</span>');
       }
     }
     if(a.execScore)condStats.push('<span class="act-stat">&#x1F3AF; <strong>'+a.execScore+'</strong>/100</span>');
