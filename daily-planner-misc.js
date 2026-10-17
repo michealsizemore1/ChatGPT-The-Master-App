@@ -808,6 +808,48 @@ function getCP(){return parseFloat(localStorage.getItem('cp_value'))||0;}
 function powerZone(p,cp){if(!cp||!p)return null;const r=p/cp;if(r<0.55)return{z:'Z1',cls:'z1'};if(r<0.75)return{z:'Z2',cls:'z2'};if(r<0.90)return{z:'Z3',cls:'z3'};if(r<1.05)return{z:'Z4',cls:'z4'};return{z:'Z5',cls:'z5'};}
 function saveMaxHRAndRender(){const v=document.getElementById('hrMaxInput').value;localStorage.setItem('max_hr_value',v||'');renderActivities();}
 function getMaxHR(){const stored=parseFloat(localStorage.getItem('max_hr_value'));return stored>0?stored:174;}
+function saveRestHRAndRender(){const v=document.getElementById('restHrInput').value;localStorage.setItem('resting_hr_value',v||'');renderActivities();}
+function getRestingHR(){const stored=parseFloat(localStorage.getItem('resting_hr_value'));return stored>0?stored:55;}
+// 30-day trailing average of the Wellness tab's daily Pulse entries
+// (wPulseVal on each planner_<date> record), used as the Resting HR input
+// to the Karvonen zone math. Returns null if nothing was logged in the
+// window, so callers can leave the stored value untouched rather than
+// overwriting it with a meaningless number.
+function computeTrailing30DayRestingHR(){
+  var vals=[],now=new Date();
+  for(var i=0;i<30;i++){
+    var d=new Date(now);d.setDate(now.getDate()-i);
+    var raw=localStorage.getItem('planner_'+dk(d));
+    if(!raw)continue;
+    try{
+      var dd=JSON.parse(raw);
+      var p=parseFloat(dd.wPulseVal);
+      if(p>0)vals.push(p);
+    }catch(e){}
+  }
+  if(!vals.length)return null;
+  var sum=0;for(var j=0;j<vals.length;j++)sum+=vals[j];
+  return Math.round((sum/vals.length)*10)/10;
+}
+// Runs once per calendar month (tracked via resting_hr_auto_update_month):
+// on the first app load on or after the 1st, recomputes Resting HR from the
+// trailing 30 days of logged Pulse data and saves it. If no Pulse data has
+// been logged yet this month, the month is NOT marked done, so this keeps
+// checking on every load until data shows up -- it never gives up partway
+// through the month, and never overwrites a real value with nothing.
+function autoUpdateRestingHRIfNewMonth(){
+  try{
+    var now=new Date();
+    var monthKey=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+    if(localStorage.getItem('resting_hr_auto_update_month')===monthKey)return;
+    var avg=computeTrailing30DayRestingHR();
+    if(avg==null)return;
+    localStorage.setItem('resting_hr_value',String(avg));
+    localStorage.setItem('resting_hr_auto_update_month',monthKey);
+    var el=document.getElementById('restHrInput');if(el)el.value=avg;
+    if(typeof renderActivities==='function')renderActivities();
+  }catch(e){}
+}
 
 // ── Mileage goals (weekly / monthly / yearly) ───────────────────────────────
 // The weekly miles goal is shared between the Activities "This Week" card
@@ -836,7 +878,7 @@ function reconcileWeeklyMilesGoal(){
     localStorage.setItem('act_goal_week_mi',String(g.Miles));
   }
 }
-window.addEventListener('load',function(){reconcileWeeklyMilesGoal();});
+window.addEventListener('load',function(){reconcileWeeklyMilesGoal();autoUpdateRestingHRIfNewMonth();});
 function getActGoal(period){
   if(period==='week'){
     var ownVal=localStorage.getItem('act_goal_week_mi');
@@ -868,13 +910,18 @@ function renderGoalBar(period,actualMi){
 }
 // Garmin's standard 5-zone heart-rate model, as a percentage of max heart rate:
 // Z1 50-60%, Z2 60-70%, Z3 70-80%, Z4 80-90%, Z5 90-100%+. Below 50% is untracked (resting/warm-up).
-// Karvonen (heart-rate-reserve) training zones from the user's updated calculator results:
-// Z1 113-125 (50-60%, recovery), Z2 125-138 (60-70%, aerobic base), Z3 138-151 (70-80%,
-// aerobic threshold), Z4 151-163 (80-90%, anaerobic), Z5 163-176+ (90-100%, max). Stored as
-// fixed bpm boundaries rather than a percent-of-max-HR calculation, since Karvonen needs
-// resting HR too -- these boundaries were generated directly from that formula already, so
-// recomputing here would need a separate resting-HR input this app doesn't currently collect.
-function hrZone(hr){if(!hr)return null;if(hr<113)return null;if(hr<125)return{z:'Z1',cls:'z1'};if(hr<138)return{z:'Z2',cls:'z2'};if(hr<151)return{z:'Z3',cls:'z3'};if(hr<163)return{z:'Z4',cls:'z4'};return{z:'Z5',cls:'z5'};}
+// Karvonen (heart-rate-reserve) training zones, computed live from Max HR and Resting HR
+// (the "Max heart rate" / "Resting HR" inputs above the Training Zones panel) at the usual
+// 50/60/70/80/90% HRR breakpoints: zone edge = resting + (max-resting) * %intensity. This
+// replaces the old fixed bpm boundaries that were baked in from one past calculation --
+// changing either input now actually moves every zone badge, the heat-drift chart, and the
+// Training Zones reference panel together, with no separate recomputation needed.
+function karvonenHRBoundaries(){
+  var max=getMaxHR(),rest=getRestingHR();
+  var reserve=Math.max(1,max-rest);
+  return [0.5,0.6,0.7,0.8,0.9].map(function(p){return Math.round(rest+reserve*p);});
+}
+function hrZone(hr){if(!hr)return null;var b=karvonenHRBoundaries();if(hr<b[0])return null;if(hr<b[1])return{z:'Z1',cls:'z1'};if(hr<b[2])return{z:'Z2',cls:'z2'};if(hr<b[3])return{z:'Z3',cls:'z3'};if(hr<b[4])return{z:'Z4',cls:'z4'};return{z:'Z5',cls:'z5'};}
 
 // ── Training Zones reference panel (Activities tab, under the mileage tiles) ──
 // Heart-rate zone labels for the same fixed Karvonen boundaries hrZone()
@@ -889,11 +936,16 @@ var POWER_ZONE_DEFS=[
   {z:'Z4',cls:'z4',label:'Threshold',loR:0.90,hiR:1.05},
   {z:'Z5',cls:'z5',label:'VO2 max',loR:1.05,hiR:null}
 ];
-function renderTrainingZonesPanel(cp){
+function renderTrainingZonesPanel(){
+  var cp=getCP();
+  var maxHR=getMaxHR();
+  var restHR=getRestingHR();
   var hrEl=document.getElementById('hrZonesTable');
   var pwEl=document.getElementById('powerZonesTable');
+  var hrSubEl=document.getElementById('hrZonesSub');
+  if(hrSubEl)hrSubEl.textContent='Max HR '+maxHR+' bpm \u00b7 Resting HR '+restHR+' bpm';
   if(hrEl){
-    hrEl.innerHTML=CVD_ZONES.map(function(zi){
+    hrEl.innerHTML=getCVDZones().map(function(zi){
       var range=zi.hi<220?(zi.lo+'\u2013'+zi.hi+' bpm'):(zi.lo+'+ bpm');
       return '<div style="display:flex;align-items:center;gap:6px;"><span class="zone-badge '+zi.cls+'">'+zi.z+'</span><span style="color:#555;">'+range+'</span><span style="color:#999;font-size:0.72rem;">'+(HR_ZONE_LABELS[zi.z]||'')+'</span></div>';
     }).join('');
@@ -912,15 +964,18 @@ function renderTrainingZonesPanel(cp){
 }
 
 // ── Cardiovascular Drift: Heart Rate Elevation in the Heat (Activities tab) ──
-// Uses the same zone boundaries as hrZone() above, so this chart always reflects
-// whatever heart-rate training zones are set there.
-var CVD_ZONES=[
-  {z:'Z1',cls:'z1',color:'#5dade2',lo:113,hi:124},
-  {z:'Z2',cls:'z2',color:'#58d68d',lo:125,hi:137},
-  {z:'Z3',cls:'z3',color:'#f4d03f',lo:138,hi:150},
-  {z:'Z4',cls:'z4',color:'#e67e22',lo:151,hi:162},
-  {z:'Z5',cls:'z5',color:'#e74c3c',lo:163,hi:220}
-];
+// Uses the same live Karvonen boundaries as hrZone() above, so this chart
+// always reflects whatever Max HR / Resting HR are currently set.
+function getCVDZones(){
+  var b=karvonenHRBoundaries();
+  return[
+    {z:'Z1',cls:'z1',color:'#5dade2',lo:b[0],hi:b[1]-1},
+    {z:'Z2',cls:'z2',color:'#58d68d',lo:b[1],hi:b[2]-1},
+    {z:'Z3',cls:'z3',color:'#f4d03f',lo:b[2],hi:b[3]-1},
+    {z:'Z4',cls:'z4',color:'#e67e22',lo:b[3],hi:b[4]-1},
+    {z:'Z5',cls:'z5',color:'#e74c3c',lo:b[4],hi:220}
+  ];
+}
 var CVD_BUCKETS=[
   {label:'<60\u00b0F',lo:-Infinity,hi:59},
   {label:'60-69\u00b0F',lo:60,hi:69},
@@ -939,6 +994,7 @@ function toggleCardioDrift(){
   if(opening)renderCardioDriftChart();
 }
 function renderCardioDriftChart(){
+  var CVD_ZONES=getCVDZones();
   var canvas=document.getElementById('cvdChart');
   var legendEl=document.getElementById('cvdZoneLegend');
   var insightEl=document.getElementById('cvdInsight');
@@ -1808,7 +1864,10 @@ function renderActivities(){
   const hrMaxEl=document.getElementById('hrMaxInput');
   if(hrMaxEl&&!hrMaxEl.value){const stored=localStorage.getItem('max_hr_value');if(stored)hrMaxEl.value=stored;}
   const maxHR=getMaxHR();
-  renderTrainingZonesPanel(cp);
+  const restHrEl=document.getElementById('restHrInput');
+  if(restHrEl&&!restHrEl.value){const stored=localStorage.getItem('resting_hr_value');if(stored)restHrEl.value=stored;}
+  getRestingHR();
+  renderTrainingZonesPanel();
   const acts=getActivities();
   const cnt=document.getElementById('actCount');
   if(cnt)cnt.textContent=acts.length?acts.length+' activit'+(acts.length!==1?'ies':'y'):'';
