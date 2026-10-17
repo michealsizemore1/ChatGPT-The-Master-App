@@ -1208,7 +1208,7 @@ function calculateDailyCalorieTarget(showMessage){
 }
 
 // ── Favorites ────────────────────────────────────────
-function getFavorites(){var r=localStorage.getItem('favorites_data');return r?JSON.parse(r):[];}
+function getFavorites(){try{var r=localStorage.getItem('favorites_data');return r?JSON.parse(r):[];}catch(ignore){return [];}}
 function updateFavoriteFoodsCount(count){var el=document.getElementById('favoriteFoodsCount');if(el)el.textContent=Number.isFinite(count)?count:getFavorites().length;}
 function saveFavorites(favs){localStorage.setItem('favorites_data',JSON.stringify(favs));updateFavoriteFoodsCount(favs.length);}
 
