@@ -806,9 +806,9 @@ function setChartMode(m){actChartMode=m;document.getElementById('chartMiBtn').cl
 function saveCPAndRender(){const v=document.getElementById('cpInput').value;localStorage.setItem('cp_value',v||'');renderActivities();}
 function getCP(){return parseFloat(localStorage.getItem('cp_value'))||0;}
 function powerZone(p,cp){if(!cp||!p)return null;const r=p/cp;if(r<0.55)return{z:'Z1',cls:'z1'};if(r<0.75)return{z:'Z2',cls:'z2'};if(r<0.90)return{z:'Z3',cls:'z3'};if(r<1.05)return{z:'Z4',cls:'z4'};return{z:'Z5',cls:'z5'};}
-function saveMaxHRAndRender(){const v=document.getElementById('hrMaxInput').value;localStorage.setItem('max_hr_value',v||'');renderActivities();}
+function saveMaxHRAndRender(){const v=document.getElementById('hrMaxInput').value;localStorage.setItem('max_hr_value',v||'');renderActivities();refreshTrainingZonesInAllPlans();}
 function getMaxHR(){const stored=parseFloat(localStorage.getItem('max_hr_value'));return stored>0?stored:174;}
-function saveRestHRAndRender(){const v=document.getElementById('restHrInput').value;localStorage.setItem('resting_hr_value',v||'');renderActivities();}
+function saveRestHRAndRender(){const v=document.getElementById('restHrInput').value;localStorage.setItem('resting_hr_value',v||'');renderActivities();refreshTrainingZonesInAllPlans();}
 function getRestingHR(){const stored=parseFloat(localStorage.getItem('resting_hr_value'));return stored>0?stored:55;}
 // 30-day trailing average of the Wellness tab's daily Pulse entries
 // (wPulseVal on each planner_<date> record), used as the Resting HR input
@@ -848,6 +848,7 @@ function autoUpdateRestingHRIfNewMonth(){
     localStorage.setItem('resting_hr_auto_update_month',monthKey);
     var el=document.getElementById('restHrInput');if(el)el.value=avg;
     if(typeof renderActivities==='function')renderActivities();
+    refreshTrainingZonesInAllPlans();
   }catch(e){}
 }
 
@@ -2511,50 +2512,98 @@ function loadUpcomingPlan(){
 // already has a Training Zones section, that section is replaced in place
 // with the current version (so re-tapping the button refreshes it rather
 // than refusing), leaving the rest of the plan untouched.
-function addTrainingZonesToPlan(which){
-  var storageKey=which==='upcoming'?'upcoming_training_plan':'current_training_plan';
-  var raw=localStorage.getItem(storageKey);
-  if(!raw){alert('No '+(which==='upcoming'?'upcoming':'active')+' plan found.');return;}
-  var plan;try{plan=JSON.parse(raw);}catch(e){alert('Could not read the plan.');return;}
-  if(!plan.text){alert('This plan has no text to add to.');return;}
-  var zonesBlock=[
+// These "TRAINING ZONES" HR numbers were originally authored against Max HR 176 /
+// Resting HR 49 (heart-rate reserve 127 bpm). scaleHRFromLegacyBaseline() keeps each
+// one at the same position within the reserve as Max HR / Resting HR change, so the
+// McMillan pace zones stay exactly as written while the HR side tracks the same
+// Karvonen math karvonenHRBoundaries() uses. At today's Max HR 176 / Resting HR 49
+// this reproduces the original numbers exactly (zero change); it only starts moving
+// them once either input changes.
+function scaleHRFromLegacyBaseline(oldBpm){
+  var LEGACY_REST=49,LEGACY_RESERVE=127;
+  var restHR=getRestingHR();
+  var reserve=Math.max(1,getMaxHR()-restHR);
+  return Math.round(restHR+reserve*(oldBpm-LEGACY_REST)/LEGACY_RESERVE);
+}
+function buildTrainingZonesBlock(){
+  var b=karvonenHRBoundaries();
+  var z2Start=b[1],z2Ceiling=b[2]-1;
+  var raceLo=scaleHRFromLegacyBaseline(130),raceHi=scaleHRFromLegacyBaseline(140);
+  var steadyLo=raceHi,steadyHi=scaleHRFromLegacyBaseline(148);
+  var tempoLo=steadyHi,tempoHi=scaleHRFromLegacyBaseline(155);
+  var cruiseLo=scaleHRFromLegacyBaseline(152),cruiseHi=scaleHRFromLegacyBaseline(158);
+  var speedFloor=cruiseHi;
+  return [
     'TRAINING ZONES',
     'Paces are approximate McMillan-style zones for a ~4:00 marathon runner. On easy and long days, heart rate wins over pace; on trails and hills, effort wins over both.',
     '',
     'RECOVERY (Endurance)',
-    'Pace: 10:45\u201311:30/mi  \u00b7  HR: under 125',
+    'Pace: 10:45\u201311:30/mi  \u00b7  HR: under '+z2Start,
     'Day after a hard effort',
     '',
     'EASY / LONG (Endurance)',
-    'Pace: 9:45\u201310:45/mi  \u00b7  HR: 125\u2013137',
+    'Pace: 9:45\u201310:45/mi  \u00b7  HR: '+z2Start+'\u2013'+z2Ceiling,
     'Most miles, long runs',
     '',
     '50K RACE EFFORT (Endurance)',
-    'Pace: 10:15\u201311:00/mi (trail varies)  \u00b7  HR: 130\u2013140',
+    'Pace: 10:15\u201311:00/mi (trail varies)  \u00b7  HR: '+raceLo+'\u2013'+raceHi,
     'Long-run segments, race day',
     '',
     'STEADY STATE (Stamina)',
-    'Pace: 9:00\u20139:20/mi  \u00b7  HR: 140\u2013148',
+    'Pace: 9:00\u20139:20/mi  \u00b7  HR: '+steadyLo+'\u2013'+steadyHi,
     'Fast finishes, steady runs',
     '',
     'TEMPO (Stamina)',
-    'Pace: 8:35\u20138:50/mi  \u00b7  HR: 148\u2013155',
+    'Pace: 8:35\u20138:50/mi  \u00b7  HR: '+tempoLo+'\u2013'+tempoHi,
     'Tempo runs',
     '',
     'CRUISE / TEMPO INTERVALS (Stamina)',
-    'Pace: 8:15\u20138:35/mi  \u00b7  HR: 152\u2013158',
+    'Pace: 8:15\u20138:35/mi  \u00b7  HR: '+cruiseLo+'\u2013'+cruiseHi,
     'Interval-style threshold work',
     '',
     'SPEED (Speed)',
-    'Pace: 7:45\u20138:05/mi  \u00b7  HR: 158+',
+    'Pace: 7:45\u20138:05/mi  \u00b7  HR: '+speedFloor+'+',
     'Short VO2 repeats, Phase 1-2 only',
     '',
     'STRIDES / HILL SPRINTS (Sprint)',
     'Pace: Fast, relaxed  \u00b7  HR: not used',
     '15-20s pickups',
     '',
-    'Set the 137 bpm Zone 2 ceiling as a custom HR alert on your Galaxy Watch Ultra. Use the Polar H10 for long runs so the readings are trustworthy.'
+    'Set the '+z2Ceiling+' bpm Zone 2 ceiling as a custom HR alert on your Galaxy Watch Ultra. Use the Polar H10 for long runs so the readings are trustworthy.'
   ].join('\n');
+}
+function planHasTrainingZonesSection(text){
+  if(!text)return false;
+  var lines=text.split(/\r?\n/);
+  for(var i=0;i<lines.length;i++){if(/^\s*training zones\s*$/i.test(lines[i]))return true;}
+  return false;
+}
+// Called whenever Max HR or Resting HR changes (manual edit, or the monthly
+// auto-update). Silently re-applies the live TRAINING ZONES block to any plan
+// that already has one -- never inserts a fresh section into a plan that never
+// had one, so this only keeps existing content in sync, it never adds new
+// content on its own.
+function refreshTrainingZonesInAllPlans(){
+  var orig=window.alert;
+  try{
+    window.alert=function(){};
+    ['current_training_plan','upcoming_training_plan'].forEach(function(key){
+      var raw=localStorage.getItem(key);
+      if(!raw)return;
+      var plan;try{plan=JSON.parse(raw);}catch(e){return;}
+      if(!planHasTrainingZonesSection(plan.text))return;
+      addTrainingZonesToPlan(key==='upcoming_training_plan'?'upcoming':'current');
+    });
+  }catch(e){}
+  window.alert=orig;
+}
+function addTrainingZonesToPlan(which){
+  var storageKey=which==='upcoming'?'upcoming_training_plan':'current_training_plan';
+  var raw=localStorage.getItem(storageKey);
+  if(!raw){alert('No '+(which==='upcoming'?'upcoming':'active')+' plan found.');return;}
+  var plan;try{plan=JSON.parse(raw);}catch(e){alert('Could not read the plan.');return;}
+  if(!plan.text){alert('This plan has no text to add to.');return;}
+  var zonesBlock=buildTrainingZonesBlock();
   var lines=plan.text.split(/\r?\n/);
   var zonesStart=-1;
   for(var z=0;z<lines.length;z++){if(/^\s*training zones\s*$/i.test(lines[z])){zonesStart=z;break;}}
