@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-16T22:32:12+00:00",
+  "updatedAt": "2026-10-17T00:46:30+00:00",
   "source": "Yahoo Finance public chart data",
   "quotes": {
     "SCHD": {
@@ -123,12 +123,12 @@
       "currency": "USD"
     },
     "BTC-USD": {
-      "price": 81708.89,
-      "prev": 82132.23,
-      "change": -423.34,
-      "changesPercentage": -0.5154,
-      "volume": 27032745984,
-      "avgVolume": 32001358103,
+      "price": 81415.03,
+      "prev": 81501.61,
+      "change": -86.58,
+      "changesPercentage": -0.1062,
+      "volume": 26276110336,
+      "avgVolume": 33175966436,
       "yearHigh": 116273.31,
       "yearLow": 57747.766,
       "marketState": "",
@@ -221,12 +221,12 @@
       "currency": "USD"
     },
     "BTC=F": {
-      "price": 81700.0,
+      "price": 81680.0,
       "prev": 81600.0,
-      "change": 100.0,
-      "changesPercentage": 0.1225,
-      "volume": 20,
-      "avgVolume": 6548,
+      "change": 80.0,
+      "changesPercentage": 0.098,
+      "volume": 32,
+      "avgVolume": 6550,
       "yearHigh": 116570.0,
       "yearLow": 57850.0,
       "marketState": "",
@@ -265,12 +265,12 @@
     "Stocks struggle to bounce back from AI angst-fueled rout - Yahoo Finance Singapore",
     "Market Movers blog: Chip stocks and global indices continue to slide following US inflation jump - Investment Week",
     "AI investment, \u2018friendly\u2019 fiscal environment to propel growth, despite headwinds - Investment Executive",
+    "Warsh avoids rate guidance; Tesla\u2019s Roadster turns in air - what\u2019s moving markets - Investing.com",
     "Word on Wall Street: Healthy Economic Readings but Inflation Remains Stubbornly High | Wyncote Wealth Management Group - MoreThanTheCurve",
-    "Fed\u2019s Warsh says AI boom could boost growth, but warns of bumpy transition - Investing.com",
+    "Big US bank stocks head for longest weekly losing streak since 2008 - The Economic Times",
     "US Stocks Set for Muted Open as Investors Assess Inflation Data and Technology Sector Volatility: Dow Jones, S&P, Nasdaq, Wall Street - Yahoo Finance",
     "Dow Jones futures analysis: Fed risks and key levels for October 16 - investingLive",
     "Bad News for Trump. The US Is In Its Worst Bond Crisis Since Alexander Hamilton Was Leading the Treasury - 24/7 Wall St.",
-    "U.S. dollar heads for weekly fall as investors gauge AI selloff impact - BNN Bloomberg",
     "US September PPI Hits 6.3% as Asian Markets Sell Off Amid AI Stock Rout - Tekedia"
   ],
   "economy": [
@@ -285,7 +285,7 @@
     "DXY  101.78 \u25bc0.27%",
     "Gold  $4,186.70 \u25b20.40%",
     "WTI  $99.04 \u25b22.63%",
-    "Bitcoin  $81,709 \u25bc0.52%",
+    "Bitcoin  $81,415 \u25bc0.11%",
     "EUR/USD  1.1244 \u25b20.20%",
     "USD/JPY  157.99 \u25b20.01%",
     "VIX  19.99 \u25b221.45%",
