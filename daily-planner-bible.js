@@ -1903,7 +1903,7 @@ function appendUploadedJournalSearch(query,container,append){
 // ── Library ───────────────────────────────────────────────
 let newBookRating=0,sortOrder='newest',editingBookId=null,editBookRating=0;
 function escHtml(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function getBooks(){const r=localStorage.getItem('library_books');return r?JSON.parse(r):[];}
+function getBooks(){try{const r=localStorage.getItem('library_books');return r?JSON.parse(r):[];}catch(ignore){return [];}}
 function saveBooks(b){localStorage.setItem('library_books',JSON.stringify(b));}
 function sortBooks(books){
   const b=[...books];
