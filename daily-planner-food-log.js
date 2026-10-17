@@ -1106,7 +1106,7 @@ function updateMacroTotals(){
     if(!hasData){microQuality.style.display='none';}
     else {
       var priorityMicros=[
-        {name:'Iron',value:totals.iron||0,target:8,unit:'mg'},
+        {name:'Iron',value:totals.iron||0,target:14,unit:'mg'},
         {name:'Calcium',value:totals.calcium||0,target:1000,unit:'mg'},
         {name:'Vitamin D',value:totals.vitD||0,target:25,unit:'mcg'},
         {name:'Magnesium',value:totals.magnesium||0,target:400,unit:'mg'},
@@ -1120,7 +1120,7 @@ function updateMacroTotals(){
       if(microQualityLabel)microQualityLabel.textContent=microScore.toFixed(1)+'/10 · '+microLabel;
       if(microQualityMarker)microQualityMarker.style.left=Math.max(0,Math.min(100,(microScore-1)/9*100))+'%';
       if(microQualityTrack)microQualityTrack.setAttribute('aria-valuenow',microScore.toFixed(1));
-      if(microQualityNote)microQualityNote.textContent='Targets: iron 8mg · calcium 1,000mg · vitamin D 25mcg · magnesium 400mg · vitamin B12 2.4mcg · lowest today: '+weakest.name+' '+Math.round(weakest.value)+weakest.unit;
+      if(microQualityNote)microQualityNote.textContent='Targets: iron 14mg · calcium 1,000mg · vitamin D 25mcg · magnesium 400mg · vitamin B12 2.4mcg · lowest today: '+weakest.name+' '+Math.round(weakest.value)+weakest.unit;
       if(microBreakdown)microBreakdown.innerHTML=priorityMicros.map(function(n){
         var pct=n.target?Math.max(0,n.value/n.target*100):0,capped=Math.min(100,pct),status=pct>=100?'Met':pct>=75?'Close':'Low';
         var statusColor=status==='Met'?'#166534':status==='Close'?'#92400e':'#991b1b';
