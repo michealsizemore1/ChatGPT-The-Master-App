@@ -876,6 +876,41 @@ function renderGoalBar(period,actualMi){
 // recomputing here would need a separate resting-HR input this app doesn't currently collect.
 function hrZone(hr){if(!hr)return null;if(hr<113)return null;if(hr<125)return{z:'Z1',cls:'z1'};if(hr<138)return{z:'Z2',cls:'z2'};if(hr<151)return{z:'Z3',cls:'z3'};if(hr<163)return{z:'Z4',cls:'z4'};return{z:'Z5',cls:'z5'};}
 
+// ── Training Zones reference panel (Activities tab, under the mileage tiles) ──
+// Heart-rate zone labels for the same fixed Karvonen boundaries hrZone()
+// uses (see the comment above it). Power zone definitions mirror the exact
+// ratio thresholds powerZone() uses, so this reference table and the
+// per-activity zone badges never drift apart.
+var HR_ZONE_LABELS={Z1:'Recovery',Z2:'Aerobic base',Z3:'Aerobic threshold',Z4:'Anaerobic',Z5:'Max effort'};
+var POWER_ZONE_DEFS=[
+  {z:'Z1',cls:'z1',label:'Recovery',loR:0,hiR:0.55},
+  {z:'Z2',cls:'z2',label:'Aerobic / endurance',loR:0.55,hiR:0.75},
+  {z:'Z3',cls:'z3',label:'Tempo',loR:0.75,hiR:0.90},
+  {z:'Z4',cls:'z4',label:'Threshold',loR:0.90,hiR:1.05},
+  {z:'Z5',cls:'z5',label:'VO2 max',loR:1.05,hiR:null}
+];
+function renderTrainingZonesPanel(cp){
+  var hrEl=document.getElementById('hrZonesTable');
+  var pwEl=document.getElementById('powerZonesTable');
+  if(hrEl){
+    hrEl.innerHTML=CVD_ZONES.map(function(zi){
+      var range=zi.hi<220?(zi.lo+'\u2013'+zi.hi+' bpm'):(zi.lo+'+ bpm');
+      return '<div style="display:flex;align-items:center;gap:6px;"><span class="zone-badge '+zi.cls+'">'+zi.z+'</span><span style="color:#555;">'+range+'</span><span style="color:#999;font-size:0.72rem;">'+(HR_ZONE_LABELS[zi.z]||'')+'</span></div>';
+    }).join('');
+  }
+  if(pwEl){
+    if(!cp){
+      pwEl.innerHTML='<div style="color:#999;font-size:0.76rem;">Set Critical Power above to see your power zone ranges.</div>';
+    }else{
+      pwEl.innerHTML=POWER_ZONE_DEFS.map(function(zi){
+        var lo=Math.round(cp*zi.loR);
+        var range=zi.hiR!=null?(lo+'\u2013'+Math.round(cp*zi.hiR)+' W'):(lo+'+ W');
+        return '<div style="display:flex;align-items:center;gap:6px;"><span class="zone-badge '+zi.cls+'">'+zi.z+'</span><span style="color:#555;">'+range+'</span><span style="color:#999;font-size:0.72rem;">'+zi.label+'</span></div>';
+      }).join('');
+    }
+  }
+}
+
 // ── Cardiovascular Drift: Heart Rate Elevation in the Heat (Activities tab) ──
 // Uses the same zone boundaries as hrZone() above, so this chart always reflects
 // whatever heart-rate training zones are set there.
@@ -1773,6 +1808,7 @@ function renderActivities(){
   const hrMaxEl=document.getElementById('hrMaxInput');
   if(hrMaxEl&&!hrMaxEl.value){const stored=localStorage.getItem('max_hr_value');if(stored)hrMaxEl.value=stored;}
   const maxHR=getMaxHR();
+  renderTrainingZonesPanel(cp);
   const acts=getActivities();
   const cnt=document.getElementById('actCount');
   if(cnt)cnt.textContent=acts.length?acts.length+' activit'+(acts.length!==1?'ies':'y'):'';
