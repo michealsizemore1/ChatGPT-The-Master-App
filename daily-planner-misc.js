@@ -2266,53 +2266,71 @@ function loadUpcomingPlan(){
   var upcomingPdfBtn=document.getElementById('tpUpcomingPdfBtn');
   if(upcomingPdfBtn)upcomingPdfBtn.style.display=plan.pdfDataUrl?'inline-block':'none';
 }
-// Inserts a standard reference "TRAINING ZONES" section (McMillan-style pace
-// zones) into a plan's text, matching the app's own house style. Placed right
-// before the week-by-week schedule starts (i.e. right before the "Week 1"
-// header, after any separator line that leads into it) so it reads as plan
-// reference material rather than a scheduled day, and so it can never get
-// swallowed into a week's day-by-day parsing. If no "Week 1" header is found
-// at all, it's appended at the end instead. Never overwrites or duplicates
-// an existing Training Zones section.
+// Inserts (or refreshes) a standard reference "TRAINING ZONES" section
+// (McMillan-style pace zones, with heart-rate ranges and what each zone is
+// used for) into a plan's text, matching the app's own house style. Placed
+// right before the week-by-week schedule starts (i.e. right before the
+// "Week 1" header, after any separator line that leads into it) so it reads
+// as plan reference material rather than a scheduled day, and so it can
+// never get swallowed into a week's day-by-day parsing. If no "Week 1"
+// header is found at all, it's appended at the end instead. If the plan
+// already has a Training Zones section, that section is replaced in place
+// with the current version (so re-tapping the button refreshes it rather
+// than refusing), leaving the rest of the plan untouched.
 function addTrainingZonesToUpcoming(){
   var raw=localStorage.getItem('upcoming_training_plan');
   if(!raw){alert('No upcoming plan saved.');return;}
   var plan;try{plan=JSON.parse(raw);}catch(e){alert('Could not read the upcoming plan.');return;}
   if(!plan.text){alert('This plan has no text to add to.');return;}
-  if(/^\s*training zones\s*$/im.test(plan.text)){alert('This plan already has a Training Zones section.');return;}
   var zonesBlock=[
     'TRAINING ZONES',
     'Paces are approximate McMillan-style zones for a ~4:00 marathon runner. On easy and long days, heart rate wins over pace; on trails and hills, effort wins over both.',
     '',
-    'Recovery: Endurance',
-    'Easy / Long: Endurance',
-    '50K race effort: Endurance',
-    'Steady state: Stamina',
-    'Tempo: Stamina',
-    'Cruise / tempo intervals: Stamina',
-    'Speed: Speed',
-    'Strides / hill sprints: Sprint'
+    'Recovery (Endurance): 10:45\u201311:30/mi \u00b7 HR under 125 \u00b7 Day after a hard effort',
+    'Easy / Long (Endurance): 9:45\u201310:45/mi \u00b7 HR 125\u2013137 \u00b7 Most miles, long runs',
+    '50K race effort (Endurance): 10:15\u201311:00/mi (trail varies) \u00b7 HR 130\u2013140 \u00b7 Long-run segments, race day',
+    'Steady state (Stamina): 9:00\u20139:20/mi \u00b7 HR 140\u2013148 \u00b7 Fast finishes, steady runs',
+    'Tempo (Stamina): 8:35\u20138:50/mi \u00b7 HR 148\u2013155 \u00b7 Tempo runs',
+    'Cruise / tempo intervals (Stamina): 8:15\u20138:35/mi \u00b7 HR 152\u2013158 \u00b7 Interval-style threshold work',
+    'Speed (Speed): 7:45\u20138:05/mi \u00b7 HR 158+ \u00b7 Short VO2 repeats, Phase 1-2 only',
+    'Strides / hill sprints (Sprint): Fast, relaxed pace \u00b7 HR not used \u00b7 15-20s pickups',
+    '',
+    'Set the 137 bpm Zone 2 ceiling as a custom HR alert on your Galaxy Watch Ultra. Use the Polar H10 for long runs so the readings are trustworthy.'
   ].join('\n');
   var lines=plan.text.split(/\r?\n/);
-  var weekIdx=-1;
-  for(var i=0;i<lines.length;i++){if(/^\s*week\s+1\b/i.test(lines[i])){weekIdx=i;break;}}
-  var insertAt;
-  if(weekIdx>=0){
-    var sepIdx=-1;
-    for(var j=weekIdx-1;j>=0&&j>=weekIdx-4;j--){if(/^\s*=+\s*$/.test(lines[j])){sepIdx=j;break;}}
-    insertAt=sepIdx>=0?sepIdx:weekIdx;
+  var zonesStart=-1;
+  for(var z=0;z<lines.length;z++){if(/^\s*training zones\s*$/i.test(lines[z])){zonesStart=z;break;}}
+  var before,after;
+  if(zonesStart>=0){
+    var zonesEnd=lines.length;
+    for(var e=zonesStart+1;e<lines.length;e++){if(/^\s*=+\s*$/.test(lines[e])||/^\s*week\s+1\b/i.test(lines[e])){zonesEnd=e;break;}}
+    var beforeLines=lines.slice(0,zonesStart);
+    while(beforeLines.length&&beforeLines[beforeLines.length-1].trim()==='')beforeLines.pop();
+    var afterLines=lines.slice(zonesEnd);
+    while(afterLines.length&&afterLines[0].trim()==='')afterLines.shift();
+    before=beforeLines.join('\n');
+    after=afterLines.join('\n');
   }else{
-    insertAt=lines.length;
+    var weekIdx=-1;
+    for(var i=0;i<lines.length;i++){if(/^\s*week\s+1\b/i.test(lines[i])){weekIdx=i;break;}}
+    var insertAt;
+    if(weekIdx>=0){
+      var sepIdx=-1;
+      for(var j=weekIdx-1;j>=0&&j>=weekIdx-4;j--){if(/^\s*=+\s*$/.test(lines[j])){sepIdx=j;break;}}
+      insertAt=sepIdx>=0?sepIdx:weekIdx;
+    }else{
+      insertAt=lines.length;
+    }
+    before=lines.slice(0,insertAt).join('\n').replace(/\s+$/,'');
+    after=lines.slice(insertAt).join('\n');
   }
-  var before=lines.slice(0,insertAt).join('\n').replace(/\s+$/,'');
-  var after=lines.slice(insertAt).join('\n');
   plan.text=(before?before+'\n\n':'')+zonesBlock+(after?'\n\n'+after:'');
   var rebuilt=buildUploadedTrainingSchedule(plan.text,plan.startDate,plan.weeks);
   plan.schedule=rebuilt.schedule;plan.scheduleMode=rebuilt.mode;plan.scheduleVersion=3;
   var saveResult=savePlanRecord('upcoming_training_plan',plan);
   loadUpcomingPlan();
   var pdfNote=(plan.pdfDataUrl&&saveResult==='stripped')?' (The saved original PDF copy had to be dropped to fit storage.)':'';
-  alert('Training zones added to the upcoming plan.'+pdfNote);
+  alert((zonesStart>=0?'Training zones updated.':'Training zones added to the upcoming plan.')+pdfNote);
 }
 function makeUpcomingPlanActive(){
   var raw=localStorage.getItem('upcoming_training_plan');
@@ -2697,7 +2715,24 @@ function trainingPlanDateFromLine(line,fallbackYear){
 }
 function buildUploadedTrainingSchedule(text,startDate,weeks){
   var lines=String(text||'').split(/\r?\n/),headers=[],fallbackYear=new Date((startDate||dk(new Date()))+'T00:00:00').getFullYear();
-  lines.forEach(function(line,index){var key=trainingPlanDateFromLine(line,fallbackYear);if(key)headers.push({index:index,key:key});});
+  // A one-off metadata line like "Start date: Sunday, November 1, 2026" or a
+  // "RACE DAY:" label with the date on the next line both contain a real date,
+  // so trainingPlanDateFromLine() matches them -- but they aren't a per-day
+  // schedule entry. Without this guard, a plan with no other dated day headers
+  // collapses into a single giant "day" that swallows the entire rest of the
+  // plan text under that one date, and every other real day falls back to
+  // "Rest Day". Skip any date match that's a metadata label (same line) or
+  // immediately follows one (date alone on the next line).
+  var metaLabelRe=/^\s*(start\s*date|plan\s*start|race\s*day|target\s*date|finish\s*date)\s*:?\s*$/i;
+  lines.forEach(function(line,index){
+    var key=trainingPlanDateFromLine(line,fallbackYear);
+    if(!key)return;
+    if(/^\s*(start\s*date|plan\s*start|race\s*day|target\s*date|finish\s*date)\s*:/i.test(line))return;
+    var prevNonEmpty=null;
+    for(var p=index-1;p>=0;p--){if(lines[p].trim()!==''){prevNonEmpty=lines[p];break;}}
+    if(prevNonEmpty&&metaLabelRe.test(prevNonEmpty))return;
+    headers.push({index:index,key:key});
+  });
   var schedule={};
   headers.forEach(function(header,index){var end=index+1<headers.length?headers[index+1].index:lines.length,section=lines.slice(header.index,end).join('\n').trim();if(section)schedule[header.key]=section;});
   if(Object.keys(schedule).length)return{schedule:schedule,mode:'dated'};

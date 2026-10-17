@@ -584,10 +584,22 @@ function extractWorkoutSection(planText, targetDate){
   ].map(f=>f.toLowerCase());
 
   const lines=planText.split('\n');
+  // A one-off metadata line like "Start date: Sunday, November 1, 2026", or a
+  // "RACE DAY:"/"PLAN START:" label with the date on the next line, both
+  // contain a real date and would otherwise be mistaken for a scheduled day's
+  // header -- swallowing up to 20 lines of the plan (everything up to the
+  // next differently-dated line) as that single day's "workout". Skip any
+  // match that's a metadata label (same line) or immediately follows one.
+  const metaLabelLine=/^\s*(start\s*date|plan\s*start|race\s*day|target\s*date|finish\s*date)\s*:?\s*$/i;
   let startIdx=-1;
   for(let i=0;i<lines.length;i++){
     const lower=lines[i].toLowerCase();
-    if(fmts.some(f=>lower.includes(f))){startIdx=i;break;}
+    if(!fmts.some(f=>lower.includes(f)))continue;
+    if(/^\s*(start\s*date|plan\s*start|race\s*day|target\s*date|finish\s*date)\s*:/i.test(lines[i]))continue;
+    let prevNonEmpty=null;
+    for(let p=i-1;p>=0;p--){if(lines[p].trim()!==''){prevNonEmpty=lines[p];break;}}
+    if(prevNonEmpty&&metaLabelLine.test(prevNonEmpty))continue;
+    startIdx=i;break;
   }
   if(startIdx===-1)return null;
 
