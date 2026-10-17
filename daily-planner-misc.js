@@ -2072,22 +2072,30 @@ function loadCurrentPlan(){
   renderArchivedPlans();
   renderJournalHome();
 }
-function archivePlan(){
-  var raw=localStorage.getItem('current_training_plan');
-  if(!raw){alert('No active plan to archive.');return;}
+function archivePlan(which){
+  which=which||'current';
+  var storageKey=which==='upcoming'?'upcoming_training_plan':'current_training_plan';
+  var raw=localStorage.getItem(storageKey);
+  if(!raw){alert('No '+(which==='upcoming'?'upcoming':'active')+' plan to archive.');return;}
   var plan;try{plan=JSON.parse(raw);}catch(e){return;}
   var archived=[];try{archived=JSON.parse(localStorage.getItem('archived_plans')||'[]');}catch(e){}
   plan.archivedAt=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  plan.archivedFrom=which==='upcoming'?'upcoming':'current';
   delete plan.pdfDataUrl;
   archived.unshift(plan);
   localStorage.setItem('archived_plans',JSON.stringify(archived));
-  localStorage.removeItem('current_training_plan');
-  var sec=document.getElementById('tpPersistSection');
-  if(sec)sec.style.display='none';
+  localStorage.removeItem(storageKey);
+  if(which==='upcoming'){
+    var upSec=document.getElementById('tpUpcomingSection');
+    if(upSec)upSec.style.display='none';
+  }else{
+    var sec=document.getElementById('tpPersistSection');
+    if(sec)sec.style.display='none';
+  }
   var archSec=document.getElementById('tpArchiveSection');
   if(archSec)archSec.style.display='block';
   renderArchivedPlans();
-  alert('Plan archived.');
+  alert(which==='upcoming'?'Upcoming plan archived.':'Plan archived.');
 }
 function deletePlan(){
   if(!confirm('Delete the active training plan? This cannot be undone.'))return;
@@ -2443,6 +2451,7 @@ function makeUpcomingPlanActive(){
     if(curPlan){
       var archived=[];try{archived=JSON.parse(localStorage.getItem('archived_plans')||'[]');}catch(e){}
       curPlan.archivedAt=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+      curPlan.archivedFrom='current';
       delete curPlan.pdfDataUrl;
       archived.unshift(curPlan);
       localStorage.setItem('archived_plans',JSON.stringify(archived));
@@ -2477,7 +2486,8 @@ function renderArchivedPlans(){
   var archived=[];try{archived=JSON.parse(localStorage.getItem('archived_plans')||'[]');}catch(e){}
   if(!archived.length){list.innerHTML='<div style="font-size:0.82rem;color:#aaa;padding:8px 4px;">No archived plans.</div>';return;}
   list.innerHTML=archived.map(function(p,i){
-    var lbl=(p.type||'Plan')+' • '+(p.weeks?p.weeks+'-wk • ':'')+('Archived '+(p.archivedAt||''));
+    var sourceLbl=p.archivedFrom==='upcoming'?'Upcoming':'Active';
+    var lbl=sourceLbl+' '+(p.type||'Plan')+' • '+(p.weeks?p.weeks+'-wk • ':'')+('Archived '+(p.archivedAt||''));
     return'<div style="border:1px solid #e9ecef;border-radius:8px;padding:10px 12px;margin-bottom:8px;background:#fafafa;">'
       +'<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">'
       +'<span style="font-size:0.8rem;font-weight:600;color:#555;">'+lbl+'</span>'
@@ -2492,12 +2502,15 @@ function renderArchivedPlans(){
 function restoreArchivedPlan(i){
   var archived=[];try{archived=JSON.parse(localStorage.getItem('archived_plans')||'[]');}catch(e){}
   var plan=archived[i];if(!plan)return;
-  if(localStorage.getItem('current_training_plan')){if(!confirm('Replace your current active plan with this archived one?'))return;}
+  var targetWhich=plan.archivedFrom==='upcoming'?'upcoming':'current';
+  var storageKey=targetWhich==='upcoming'?'upcoming_training_plan':'current_training_plan';
+  if(localStorage.getItem(storageKey)){if(!confirm('Replace your '+(targetWhich==='upcoming'?'upcoming':'current active')+' plan with this archived one?'))return;}
   archived.splice(i,1);
   localStorage.setItem('archived_plans',JSON.stringify(archived));
   delete plan.archivedAt;
-  savePlanRecord('current_training_plan',plan);
-  loadCurrentPlan();
+  delete plan.archivedFrom;
+  savePlanRecord(storageKey,plan);
+  if(targetWhich==='upcoming'){loadUpcomingPlan();}else{loadCurrentPlan();}
 }
 function deleteArchivedPlan(i){
   if(!confirm('Permanently delete this archived plan?'))return;
