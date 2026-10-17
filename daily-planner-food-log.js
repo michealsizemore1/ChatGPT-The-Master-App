@@ -1328,6 +1328,11 @@ function applyFoodSort(list){
   if(sortBy==='prot_desc')arr.sort(cmp('prot','desc'));
   else if(sortBy==='carbs_desc')arr.sort(cmp('carbs','desc'));
   else if(sortBy==='fat_asc')arr.sort(cmp('fat','asc'));
+  else if(sortBy==='iron_desc')arr.sort(cmp('iron','desc'));
+  else if(sortBy==='calcium_desc')arr.sort(cmp('calcium','desc'));
+  else if(sortBy==='vitD_desc')arr.sort(cmp('vitD','desc'));
+  else if(sortBy==='magnesium_desc')arr.sort(cmp('magnesium','desc'));
+  else if(sortBy==='vitB12_desc')arr.sort(cmp('vitB12','desc'));
   return arr;
 }
 function renderHealthyFoodsList(){
