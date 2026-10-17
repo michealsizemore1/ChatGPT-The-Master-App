@@ -1971,20 +1971,34 @@ function renderActivities(){
           }
           if(qualityWeight>0){
             var qualityScore=qualityTotal/qualityWeight;
+            // runnerFoodQuality() starts every item at a baseline of 5 and
+            // nudges it with small (roughly 0.4-1.5 point) bonuses/penalties,
+            // so a day's calorie-weighted average across breakfast, lunch,
+            // dinner, and snacks naturally compresses toward the middle of
+            // its 1-10 scale -- real mixed diets are rarely all-excellent or
+            // all-poor. Stretch the deviation from that same baseline (5) so
+            // a genuinely strong or weak fueling day actually reaches the
+            // ends of the 0-10 scale shown here, instead of the roughly 3-7
+            // band the raw average tends to sit in.
+            var stretched=5+(qualityScore-5)*2.5;
             var nutr=getPrevDayNutrition(dateKey);
             var preset=nutritionPerformancePreset(prevKey);
             var penalty=0,notes=[];
             if(preset&&preset.phase==='prior'&&nutr){
-              if(Math.abs(nutr.cal-preset.calories)>preset.calories*0.2){
-                penalty++;
+              var calOffPct=Math.abs(nutr.cal-preset.calories)/preset.calories;
+              if(calOffPct>0.2){
+                penalty+=Math.min(3,(calOffPct-0.2)*10);
                 notes.push(Math.round(nutr.cal)+' cal vs '+preset.calories+' target');
               }
-              if(nutr.carbsPct!=null&&Math.abs(nutr.carbsPct-preset.carbs)>10){
-                penalty++;
-                notes.push(nutr.carbsPct+'% carbs vs '+preset.carbs+'% target');
+              if(nutr.carbsPct!=null){
+                var carbOffPts=Math.abs(nutr.carbsPct-preset.carbs);
+                if(carbOffPts>10){
+                  penalty+=Math.min(2,(carbOffPts-10)/10);
+                  notes.push(nutr.carbsPct+'% carbs vs '+preset.carbs+'% target');
+                }
               }
             }
-            var impact=Math.max(1,Math.min(10,Math.round((qualityScore-penalty)*10)/10));
+            var impact=Math.max(0,Math.min(10,Math.round((stretched-penalty)*10)/10));
             var label=impact>=9?'Excellent':impact>=7?'Good':impact>=5?'Fair':impact>=3?'Low':'Poor';
             result={score:impact,label:label,notes:notes,presetLabel:(preset&&preset.phase==='prior')?preset.label.replace('Tomorrow: ',''):''};
           }
