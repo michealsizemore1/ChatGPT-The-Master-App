@@ -2266,6 +2266,54 @@ function loadUpcomingPlan(){
   var upcomingPdfBtn=document.getElementById('tpUpcomingPdfBtn');
   if(upcomingPdfBtn)upcomingPdfBtn.style.display=plan.pdfDataUrl?'inline-block':'none';
 }
+// Inserts a standard reference "TRAINING ZONES" section (McMillan-style pace
+// zones) into a plan's text, matching the app's own house style. Placed right
+// before the week-by-week schedule starts (i.e. right before the "Week 1"
+// header, after any separator line that leads into it) so it reads as plan
+// reference material rather than a scheduled day, and so it can never get
+// swallowed into a week's day-by-day parsing. If no "Week 1" header is found
+// at all, it's appended at the end instead. Never overwrites or duplicates
+// an existing Training Zones section.
+function addTrainingZonesToUpcoming(){
+  var raw=localStorage.getItem('upcoming_training_plan');
+  if(!raw){alert('No upcoming plan saved.');return;}
+  var plan;try{plan=JSON.parse(raw);}catch(e){alert('Could not read the upcoming plan.');return;}
+  if(!plan.text){alert('This plan has no text to add to.');return;}
+  if(/^\s*training zones\s*$/im.test(plan.text)){alert('This plan already has a Training Zones section.');return;}
+  var zonesBlock=[
+    'TRAINING ZONES',
+    'Paces are approximate McMillan-style zones for a ~4:00 marathon runner. On easy and long days, heart rate wins over pace; on trails and hills, effort wins over both.',
+    '',
+    'Recovery: Endurance',
+    'Easy / Long: Endurance',
+    '50K race effort: Endurance',
+    'Steady state: Stamina',
+    'Tempo: Stamina',
+    'Cruise / tempo intervals: Stamina',
+    'Speed: Speed',
+    'Strides / hill sprints: Sprint'
+  ].join('\n');
+  var lines=plan.text.split(/\r?\n/);
+  var weekIdx=-1;
+  for(var i=0;i<lines.length;i++){if(/^\s*week\s+1\b/i.test(lines[i])){weekIdx=i;break;}}
+  var insertAt;
+  if(weekIdx>=0){
+    var sepIdx=-1;
+    for(var j=weekIdx-1;j>=0&&j>=weekIdx-4;j--){if(/^\s*=+\s*$/.test(lines[j])){sepIdx=j;break;}}
+    insertAt=sepIdx>=0?sepIdx:weekIdx;
+  }else{
+    insertAt=lines.length;
+  }
+  var before=lines.slice(0,insertAt).join('\n').replace(/\s+$/,'');
+  var after=lines.slice(insertAt).join('\n');
+  plan.text=(before?before+'\n\n':'')+zonesBlock+(after?'\n\n'+after:'');
+  var rebuilt=buildUploadedTrainingSchedule(plan.text,plan.startDate,plan.weeks);
+  plan.schedule=rebuilt.schedule;plan.scheduleMode=rebuilt.mode;plan.scheduleVersion=3;
+  var saveResult=savePlanRecord('upcoming_training_plan',plan);
+  loadUpcomingPlan();
+  var pdfNote=(plan.pdfDataUrl&&saveResult==='stripped')?' (The saved original PDF copy had to be dropped to fit storage.)':'';
+  alert('Training zones added to the upcoming plan.'+pdfNote);
+}
 function makeUpcomingPlanActive(){
   var raw=localStorage.getItem('upcoming_training_plan');
   if(!raw){alert('No upcoming plan saved.');return;}
