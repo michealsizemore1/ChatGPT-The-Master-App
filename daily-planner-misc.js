@@ -1927,6 +1927,73 @@ function renderActivities(){
     prevNutritionCache[dateKey]=result;
     return result;
   }
+  var prevFoodImpactCache={};
+  // Combines the previous day's logged food quality (reusing the exact
+  // runnerFoodQuality() scoring the Nutrition tab's own "Daily food quality"
+  // meter already uses, in daily-planner-food-log.js) with how well that
+  // day's actual calories/carbs matched the app's own personalized
+  // pre-workout fueling target for THIS activity's run -- when the activity
+  // follows a long/tempo/interval session, nutritionPerformancePreset()
+  // already computes that target, bodyweight-scaled -- into a single 1-10
+  // "fuel impact" score for the Activities feed.
+  function getPrevDayFoodImpact(dateKey){
+    if(prevFoodImpactCache.hasOwnProperty(dateKey))return prevFoodImpactCache[dateKey];
+    var result=null;
+    try{
+      var prev=new Date(dateKey+'T00:00:00');
+      prev.setDate(prev.getDate()-1);
+      var prevKey=dk(prev);
+      var raw=localStorage.getItem('planner_'+prevKey);
+      if(raw){
+        var pd=JSON.parse(raw);
+        var log=Array.isArray(pd.foodLog)?pd.foodLog:[];
+        if(log.length){
+          // runnerFoodQuality() reads the shared `today` global to find
+          // that day's own workouts/journal context (for its run-fuel and
+          // post-run-breakfast bonuses). Swap it to the prior day just for
+          // this scoring pass -- always restored, even if scoring throws --
+          // so each activity's score reflects that activity's own previous
+          // day, not whatever day happens to be selected elsewhere in the
+          // app right now.
+          var savedToday=today,qualityTotal=0,qualityWeight=0;
+          try{
+            today=prev;
+            log.forEach(function(item){
+              inferFoodMacroSources(item);
+              var q=runnerFoodQuality(item);
+              var servings=Math.max(0.01,parseFloat(item.servings)||1);
+              var weight=Math.max(0,(parseFloat(item.cal)||0)*servings)||servings;
+              qualityTotal+=q.score*weight;
+              qualityWeight+=weight;
+            });
+          }finally{
+            today=savedToday;
+          }
+          if(qualityWeight>0){
+            var qualityScore=qualityTotal/qualityWeight;
+            var nutr=getPrevDayNutrition(dateKey);
+            var preset=nutritionPerformancePreset(prevKey);
+            var penalty=0,notes=[];
+            if(preset&&preset.phase==='prior'&&nutr){
+              if(Math.abs(nutr.cal-preset.calories)>preset.calories*0.2){
+                penalty++;
+                notes.push(Math.round(nutr.cal)+' cal vs '+preset.calories+' target');
+              }
+              if(nutr.carbsPct!=null&&Math.abs(nutr.carbsPct-preset.carbs)>10){
+                penalty++;
+                notes.push(nutr.carbsPct+'% carbs vs '+preset.carbs+'% target');
+              }
+            }
+            var impact=Math.max(1,Math.min(10,Math.round((qualityScore-penalty)*10)/10));
+            var label=impact>=9?'Excellent':impact>=7?'Good':impact>=5?'Fair':impact>=3?'Low':'Poor';
+            result={score:impact,label:label,notes:notes,presetLabel:(preset&&preset.phase==='prior')?preset.label.replace('Tomorrow: ',''):''};
+          }
+        }
+      }
+    }catch(e){}
+    prevFoodImpactCache[dateKey]=result;
+    return result;
+  }
 
   function buildCard(a,tc,showDate,inGroup){
     // Stats are split into two visually distinct rows -- core performance
@@ -1994,6 +2061,14 @@ function renderActivities(){
       if(prevNutr!=null){
         var macroPart=prevNutr.protPct!=null?' &middot; P '+prevNutr.protPct+'% &middot; C '+prevNutr.carbsPct+'% &middot; F '+prevNutr.fatPct+'%':'';
         condStats.push('<span class="act-stat" title="Calories and macro split logged the day before this activity">&#x1F37D;&#xFE0F; <strong>'+Math.round(prevNutr.cal)+'</strong> cal'+macroPart+' prev-day</span>');
+      }
+    }
+    if(a.date){
+      var foodImpact=getPrevDayFoodImpact(a.date);
+      if(foodImpact!=null){
+        var impactColor=foodImpact.score>=7?'#16a34a':foodImpact.score>=5?'#65a30d':foodImpact.score>=3?'#f97316':'#dc2626';
+        var impactExtra=(foodImpact.presetLabel?' \u00b7 '+foodImpact.presetLabel:'')+(foodImpact.notes.length?' \u00b7 '+foodImpact.notes.join(', '):'');
+        condStats.push('<span class="act-stat" title="Previous day food quality + fueling vs. target, scored 1-10 ('+foodImpact.label+')'+impactExtra+'">&#x1F3C5; <strong style="color:'+impactColor+';">'+foodImpact.score.toFixed(1)+'</strong>/10 fuel impact</span>');
       }
     }
     if(a.execScore)condStats.push('<span class="act-stat">&#x1F3AF; <strong>'+a.execScore+'</strong>/100</span>');
