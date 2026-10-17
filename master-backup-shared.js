@@ -148,7 +148,11 @@ function checkAndRunDailyAutoBackup(){
     var today=new Date().toISOString().slice(0,10);
     if(localStorage.getItem(MASTER_AUTO_BACKUP_DATE_KEY)===today)return;
     localStorage.setItem(MASTER_AUTO_BACKUP_DATE_KEY,today);
-    downloadMasterBackup();
+    downloadMasterBackup().then(function(ok){
+      if(!ok&&localStorage.getItem(MASTER_AUTO_BACKUP_DATE_KEY)===today)localStorage.removeItem(MASTER_AUTO_BACKUP_DATE_KEY);
+    }).catch(function(){
+      if(localStorage.getItem(MASTER_AUTO_BACKUP_DATE_KEY)===today)localStorage.removeItem(MASTER_AUTO_BACKUP_DATE_KEY);
+    });
   }catch(e){}
 }
 (function(){
