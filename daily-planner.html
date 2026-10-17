@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-10-15-29">
+<meta name="app-build" content="2026-10-15-30">
 <script src="theme-switcher.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#ff6b00">
@@ -2650,6 +2650,33 @@ body{
       <button class="btn-primary" onclick="confirmPasteLibrary()">Import Books</button>
     </div>
 
+  </div>
+</div>
+
+<!-- Reading Note Modal -->
+<div class="modal-overlay" id="readingNoteModal" style="display:none;">
+  <div class="modal" style="max-width:480px;max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px);overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;box-sizing:border-box;margin:auto 0;">
+    <h2 style="margin-top:0;">&#x1F4DD; Reading Note &mdash; <span id="rnModalBookTitle"></span></h2>
+    <input type="hidden" id="rnModalBookId">
+    <input type="hidden" id="rnModalNoteIdx">
+    <label for="rnDate" style="display:block;font-size:0.85rem;font-weight:600;color:#555;margin-bottom:4px;">Date</label>
+    <input type="date" id="rnDate" style="width:100%;border:1px solid #d0d8ff;border-radius:6px;padding:8px;font-size:0.88rem;box-sizing:border-box;margin-bottom:12px;outline:none;">
+    <label for="rnChapter" style="display:block;font-size:0.85rem;font-weight:600;color:#555;margin-bottom:4px;">Chapter / Pages</label>
+    <input type="text" id="rnChapter" placeholder="e.g. Chapter 4, pp. 52-61" style="width:100%;border:1px solid #d0d8ff;border-radius:6px;padding:8px;font-size:0.88rem;box-sizing:border-box;margin-bottom:12px;outline:none;">
+    <label for="rnQuote" style="display:block;font-size:0.85rem;font-weight:600;color:#555;margin-bottom:4px;">Favorite Quote</label>
+    <textarea id="rnQuote" style="width:100%;height:60px;border:1px solid #d0d8ff;border-radius:6px;padding:8px;font-size:0.88rem;box-sizing:border-box;margin-bottom:12px;outline:none;resize:vertical;"></textarea>
+    <label for="rnSummary" style="display:block;font-size:0.85rem;font-weight:600;color:#555;margin-bottom:4px;">Summary</label>
+    <textarea id="rnSummary" style="width:100%;height:60px;border:1px solid #d0d8ff;border-radius:6px;padding:8px;font-size:0.88rem;box-sizing:border-box;margin-bottom:12px;outline:none;resize:vertical;"></textarea>
+    <label for="rnInsights" style="display:block;font-size:0.85rem;font-weight:600;color:#555;margin-bottom:4px;">Insights</label>
+    <textarea id="rnInsights" style="width:100%;height:60px;border:1px solid #d0d8ff;border-radius:6px;padding:8px;font-size:0.88rem;box-sizing:border-box;margin-bottom:12px;outline:none;resize:vertical;"></textarea>
+    <label for="rnApplication" style="display:block;font-size:0.85rem;font-weight:600;color:#555;margin-bottom:4px;">Application</label>
+    <textarea id="rnApplication" style="width:100%;height:60px;border:1px solid #d0d8ff;border-radius:6px;padding:8px;font-size:0.88rem;box-sizing:border-box;margin-bottom:12px;outline:none;resize:vertical;"></textarea>
+    <label for="rnQuestions" style="display:block;font-size:0.85rem;font-weight:600;color:#555;margin-bottom:4px;">Questions</label>
+    <textarea id="rnQuestions" style="width:100%;height:60px;border:1px solid #d0d8ff;border-radius:6px;padding:8px;font-size:0.88rem;box-sizing:border-box;margin-bottom:12px;outline:none;resize:vertical;"></textarea>
+    <div class="modal-btns">
+      <button class="btn-secondary" onclick="closeReadingNoteModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveReadingNoteFromModal()">Save Note</button>
+    </div>
   </div>
 </div>
 
