@@ -1892,6 +1892,31 @@ function renderActivities(){
     prevWaterCache[dateKey]=oz;
     return oz;
   }
+  var prevNutritionCache={};
+  // Looks up total calories logged for the calendar day BEFORE a given
+  // activity date -- same day-before reasoning as the hydration chip above
+  // (what you ate going into a run, not what you logged afterward). Sums
+  // the itemized Nutrition-tab food log for that day, falling back to the
+  // manually-entered daily total when there's no itemized log, matching
+  // the calorie calculation the app's own Fuel Analysis AI feature already
+  // uses (aiNutritionCorrelation, in daily-planner-food-log.js).
+  function getPrevDayNutrition(dateKey){
+    if(prevNutritionCache.hasOwnProperty(dateKey))return prevNutritionCache[dateKey];
+    var cal=null;
+    try{
+      var prev=new Date(dateKey+'T00:00:00');
+      prev.setDate(prev.getDate()-1);
+      var raw=localStorage.getItem('planner_'+dk(prev));
+      if(raw){
+        var pd=JSON.parse(raw);
+        var log=Array.isArray(pd.foodLog)?pd.foodLog:[];
+        var c=log.reduce(function(sum,x){return sum+(parseFloat(x.cal)||0);},0)||parseFloat(pd.nuCalVal)||0;
+        if(c>0)cal=c;
+      }
+    }catch(e){}
+    prevNutritionCache[dateKey]=cal;
+    return cal;
+  }
 
   function buildCard(a,tc,showDate,inGroup){
     // Stats are split into two visually distinct rows -- core performance
@@ -1952,6 +1977,12 @@ function renderActivities(){
       var prevWaterOz=getPrevDayWaterOz(a.date);
       if(prevWaterOz!=null){
         condStats.push('<span class="act-stat" title="Water intake logged the day before this activity">&#x1F4A7; <strong>'+Math.round(prevWaterOz)+'</strong> oz prev-day</span>');
+      }
+    }
+    if(a.date){
+      var prevCal=getPrevDayNutrition(a.date);
+      if(prevCal!=null){
+        condStats.push('<span class="act-stat" title="Calories logged the day before this activity">&#x1F37D;&#xFE0F; <strong>'+Math.round(prevCal)+'</strong> cal prev-day</span>');
       }
     }
     if(a.execScore)condStats.push('<span class="act-stat">&#x1F3AF; <strong>'+a.execScore+'</strong>/100</span>');
