@@ -1841,7 +1841,7 @@ function aiNutritionCorrelation(){
   var nProt=nLog.reduce(function(a,x){return a+(parseFloat(x.prot)||0);},0)||parseFloat(nData.nuProtVal)||0;
   var nCarbs=nLog.reduce(function(a,x){return a+(parseFloat(x.carbs)||0);},0)||parseFloat(nData.nuCarbsVal)||0;
   var nFat=nLog.reduce(function(a,x){return a+(parseFloat(x.fat)||0);},0)||parseFloat(nData.nuFatVal)||0;
-  var nWater=nData.waterOz||(nData.waterCount?nData.waterCount*8:0);
+  var nWater=(nData.waterOz||(nData.waterCount?nData.waterCount*8:0))+(parseFloat(nData.sportsDrinksOz)||0)+(parseFloat(nData.otherLiquidsOz)||0);
   // Meal breakdown
   var mealTypes=['breakfast','lunch','dinner','snack','liquids','sports'];
   var mealLines=[];
@@ -1862,7 +1862,7 @@ function aiNutritionCorrelation(){
   var pace=rData.exPace||(runAct.length?runAct[0].pace:'');
   var runNotes=rData.exRunVal||(runAct.length?runAct[0].notes:'');
   // Sports nutrition + water from run day
-  var rWater=rData.waterOz||(rData.waterCount?rData.waterCount*8:0);
+  var rWater=(rData.waterOz||(rData.waterCount?rData.waterCount*8:0))+(parseFloat(rData.sportsDrinksOz)||0)+(parseFloat(rData.otherLiquidsOz)||0);
   var rLog=Array.isArray(rData.foodLog)?rData.foodLog:[];
   var runSports=rLog.filter(function(x){return x.meal==='sports';});
   // Build focused prompt
