@@ -1,6 +1,6 @@
 
 let today=new Date();const _realToday=new Date(today);// snapshot of actual launch date — never changes with navigation
-const charts={};let waterOz=0,otherLiquidsOz=0,scoreVal=0,copiedDayData=null;
+const charts={};let waterOz=0,sportsDrinksOz=0,otherLiquidsOz=0,scoreVal=0,copiedDayData=null;
 function dk(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return y+'-'+m+'-'+day;}
 function fmtD(d){return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});}
 function wkStart(off=0){const t=new Date();t.setDate(t.getDate()+off*7);const dow=(t.getDay()+6)%7;const ws=new Date(t);ws.setDate(t.getDate()-dow);ws.setHours(0,0,0,0);return ws;}
@@ -276,6 +276,8 @@ function jumpToDailyCheck(btn){
 
 function updateWaterDisplay(){const cups=(waterOz/8).toFixed(1);const el=document.getElementById('waterDisplay');if(el)el.textContent=waterOz+' oz ('+cups+' cups)';}
 function changeWater(delta){waterOz=Math.max(0,waterOz+delta);updateWaterDisplay();save();renderJournalSchedule();}
+function updateSportsDrinksDisplay(){const cups=(sportsDrinksOz/8).toFixed(1);const el=document.getElementById('sportsDrinksDisplay');if(el)el.textContent=sportsDrinksOz+' oz ('+cups+' cups)';}
+function changeSportsDrinks(delta){sportsDrinksOz=Math.max(0,sportsDrinksOz+delta);updateSportsDrinksDisplay();save();}
 function updateOtherLiquidsDisplay(){const cups=(otherLiquidsOz/8).toFixed(1);const el=document.getElementById('otherLiquidsDisplay');if(el)el.textContent=otherLiquidsOz+' oz ('+cups+' cups)';}
 function changeOtherLiquids(delta){otherLiquidsOz=Math.max(0,otherLiquidsOz+delta);updateOtherLiquidsDisplay();save();}
 function syncMassageMinutes(source){
@@ -305,7 +307,7 @@ function save(){
   NMS.forEach(id=>{const e=document.getElementById(id);if(e)d[id]=e.value;});
   // Priority/goal text
   PTIDS.forEach(id=>{const row=document.getElementById(id);if(row){const tx=row.querySelector('input[type=text]');if(tx)d[id+'t']=tx.value;}});
-  d.waterOz=waterOz;d.otherLiquidsOz=otherLiquidsOz;d.score=scoreVal;
+  d.waterOz=waterOz;d.sportsDrinksOz=sportsDrinksOz;d.otherLiquidsOz=otherLiquidsOz;d.score=scoreVal;
   d.foodLog=window._foodLog||[];
   try{
     localStorage.setItem('planner_'+dk(today),JSON.stringify(d));
@@ -770,6 +772,7 @@ function load(){
     const dailyMassage=document.getElementById('dailyMassageMinutes');if(dailyMassage)dailyMassage.value=d.exMassageMinutes||'';
     const jcEl=document.getElementById('jCombined');if(jcEl)jcEl.value=buildJournalCombined();
     waterOz=d.waterOz||(d.waterCount?d.waterCount*8:0);updateWaterDisplay();
+    sportsDrinksOz=d.sportsDrinksOz||0;updateSportsDrinksDisplay();
     otherLiquidsOz=d.otherLiquidsOz||0;updateOtherLiquidsDisplay();
     scoreVal=d.score||0;buildStars();
   }catch(e){console.error('load fields:',e);}

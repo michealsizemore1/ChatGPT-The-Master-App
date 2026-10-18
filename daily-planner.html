@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-10-15-52">
+<meta name="app-build" content="2026-10-15-53">
 <script src="theme-switcher.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#ff6b00">
@@ -3138,7 +3138,15 @@ body{
     </div>
   </div>
   <div class="water-row" style="margin-top:0;margin-bottom:16px;padding:12px 14px;background:#fff;border:1px solid #f0e8d8;border-radius:10px;box-shadow:0 1px 3px rgba(15,23,42,.16),0 8px 16px rgba(15,23,42,.2),0 26px 48px rgba(15,23,42,.24);">
-    <label style="font-size:0.92rem;color:#555;font-weight:600;">&#x1F964; Other Liquids <span style="font-weight:400;color:#888;">(sports nutrition drinks, etc.)</span>:</label>
+    <label style="font-size:0.92rem;color:#555;font-weight:600;">&#x1F3C3; Sports Nutrition Drinks:</label>
+    <div class="water-ctrl" style="margin-top:4px;">
+      <button class="water-pm" onclick="changeSportsDrinks(-1)">&#x2212;</button>
+      <span id="sportsDrinksDisplay" style="min-width:110px;text-align:center;font-size:0.88rem;color:#333;font-weight:600;">0 oz (0.0 cups)</span>
+      <button class="water-pm" onclick="changeSportsDrinks(1)">+</button>
+    </div>
+  </div>
+  <div class="water-row" style="margin-top:0;margin-bottom:16px;padding:12px 14px;background:#fff;border:1px solid #f0e8d8;border-radius:10px;box-shadow:0 1px 3px rgba(15,23,42,.16),0 8px 16px rgba(15,23,42,.2),0 26px 48px rgba(15,23,42,.24);">
+    <label style="font-size:0.92rem;color:#555;font-weight:600;">&#x1F964; Other Drinks <span style="font-weight:400;color:#888;">(coffee, tea, juice, soda, etc.)</span>:</label>
     <div class="water-ctrl" style="margin-top:4px;">
       <button class="water-pm" onclick="changeOtherLiquids(-1)">&#x2212;</button>
       <span id="otherLiquidsDisplay" style="min-width:110px;text-align:center;font-size:0.88rem;color:#333;font-weight:600;">0 oz (0.0 cups)</span>
@@ -3282,7 +3290,7 @@ body{
     </div>
   </div>
 </div>
-<script src="daily-planner-core.js?v=2026-10-15-9"></script>
+<script src="daily-planner-core.js?v=2026-10-15-10"></script>
 <script src="daily-planner-food-log.js?v=2026-10-15-13"></script>
 <script src="daily-planner-bible.js?v=2026-10-15-7"></script>
 <script src="daily-planner-meditation.js?v=2026-10-15-7"></script>
