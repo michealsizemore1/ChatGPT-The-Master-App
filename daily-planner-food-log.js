@@ -506,6 +506,14 @@ function parseFluidOzFromServingLabel(label){
     if(/ml|milli/.test(unit))return qty/29.5735;
     if(/liter|litre/.test(unit))return qty*33.814;
   }
+  var mc=s.match(/^\s*(\d+(?:\.\d+)?)[^()]*\((\d+(?:\.\d+)?)\s*(fl\.?\s*oz|fluid\s*ounces?|ml|milliliters?|millilitres?|liters?|litres?)\)/);
+  if(mc){
+    var count=parseFloat(mc[1]),vol=parseFloat(mc[2]),vunit=mc[3],ozEach=0;
+    if(/fl|fluid/.test(vunit))ozEach=vol;
+    else if(/ml|milli/.test(vunit))ozEach=vol/29.5735;
+    else if(/liter|litre/.test(vunit))ozEach=vol*33.814;
+    if(ozEach>0)return count*ozEach;
+  }
   var mw=s.match(/(\d+(?:\.\d+)?)\s*(fl\.?\s*oz|oz|ounces?|milliliters?|millilitres?|ml|liters?|litres?)\s*(?:of\s*)?water\b/);
   if(mw){
     var qty2=parseFloat(mw[1]),unit2=mw[2];
@@ -519,6 +527,16 @@ function isCaffeinatedBeverageName(name){
   var n=String(name||'').toLowerCase();
   return /\b(coffee|espresso|latte|cappuccino|mocha|americano|cold\s*brew|black\s*tea|green\s*tea|energy\s*drinks?|red\s*bull|monster(?:\s*energy)?|celsius|bang\s*energy|rockstar|reign|ghost\s*energy|c4\s*energy|alani\s*nu)\b/.test(n);
 }
+function lookupGusisServingOz(name){
+  if(typeof GUSIS_PRODUCTS==='undefined'||!GUSIS_PRODUCTS.length)return 0;
+  var n=String(name||'').toLowerCase();
+  for(var i=0;i<GUSIS_PRODUCTS.length;i++){
+    if(n.indexOf(GUSIS_PRODUCTS[i].line.toLowerCase())!==-1){
+      return parseFluidOzFromServingLabel(GUSIS_PRODUCTS[i].serving);
+    }
+  }
+  return 0;
+}
 function liquidOzForMeal(meal){
   var log=window._foodLog||[];
   var total=0;
@@ -526,7 +544,12 @@ function liquidOzForMeal(meal){
     if(x.meal!==meal)return;
     if(isCaffeinatedBeverageName(x.name))return;
     var s=parseFloat(x.servings)||1;
-    total+=parseFluidOzFromServingLabel(x.servingLabel)*s;
+    var oz=parseFluidOzFromServingLabel(x.servingLabel);
+    if(!oz){
+      var fromCatalog=lookupGusisServingOz(x.name);
+      if(fromCatalog)oz=fromCatalog;
+    }
+    total+=oz*s;
   });
   return Math.round(total);
 }
