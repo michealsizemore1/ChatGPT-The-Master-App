@@ -498,10 +498,10 @@ function runnerFoodQuality(item){
 
 function parseFluidOzFromServingLabel(label){
   var s=String(label||'').toLowerCase();
-  var m=s.match(/^\s*(\d+(?:\.\d+)?)\s*(fl\.?\s*oz|fluid\s*ounces?|milliliters?|millilitres?|ml|liters?|litres?|cups?)\b/);
+  var m=s.match(/^\s*(\d+(?:\.\d+)?)\s*(fl\.?\s*oz|fluid\s*ounces?|oz|ounces?|milliliters?|millilitres?|ml|liters?|litres?|cups?)\b/);
   if(m){
     var qty=parseFloat(m[1]),unit=m[2];
-    if(/fl|fluid/.test(unit))return qty;
+    if(/oz|ounce/.test(unit))return qty;
     if(/cup/.test(unit))return qty*8;
     if(/ml|milli/.test(unit))return qty/29.5735;
     if(/liter|litre/.test(unit))return qty*33.814;
