@@ -952,6 +952,40 @@ function rescanHealthyFoodsAndImages(button,statusId){
   }).catch(function(){renderHealthyFoodsList();renderFavsList();var failed=document.getElementById(statusId);if(failed){failed.style.display='block';failed.style.color='#991b1b';failed.textContent='The food scan finished, but barcode pictures could not be checked. Try again when connected to the internet.';}});
 }
 
+function removeDuplicateFoodItems(button,statusId){
+  statusId=statusId||'dedupeFoodStatus';
+  var status=document.getElementById(statusId);
+  if(button)button.disabled=true;
+  var log=window._foodLog||[];
+  var seen={},keepLog=[],removedToday=0;
+  log.forEach(function(item){
+    var key=[String(item&&item.name||'').trim().toLowerCase(),item.meal||'',parseFloat(item.cal)||0,parseFloat(item.prot)||0,parseFloat(item.carbs)||0,parseFloat(item.fat)||0,parseFloat(item.servings)||1].join('|');
+    if(seen[key]){removedToday++;}
+    else{seen[key]=true;keepLog.push(item);}
+  });
+  window._foodLog=keepLog;
+  var favs=getFavorites(),seenFav={},keepFavs=[],removedFavs=0;
+  favs.forEach(function(f){
+    var key=String(f&&f.name||'').trim().toLowerCase();
+    if(!key){keepFavs.push(f);return;}
+    if(seenFav[key]){removedFavs++;}
+    else{seenFav[key]=true;keepFavs.push(f);}
+  });
+  if(removedFavs)saveFavorites(keepFavs);
+  renderFoodItems();save();
+  if(typeof renderFoodLibrarySearch==='function')renderFoodLibrarySearch();
+  if(button)button.disabled=false;
+  var total=removedToday+removedFavs;
+  if(status){
+    status.style.display='block';
+    status.style.color=total?'#166534':'#475569';
+    var parts=[];
+    if(removedToday)parts.push(removedToday+' from the food log');
+    if(removedFavs)parts.push(removedFavs+' from Favorites');
+    status.textContent=total?('✓ Removed '+total+' duplicate'+(total===1?'':'s')+' - '+parts.join(', ')+'.'):'No duplicate foods found on this device - everything already looks unique.';
+  }
+}
+
 function copyFoodItem(id){
   var log=window._foodLog||[];
   var idx=log.findIndex(function(x){return x.id===id;});
