@@ -260,11 +260,11 @@ const GUSIS_PRODUCTS=[
   {brand:'GU',line:'GU Hydration Drink Tabs',flavor:'Orange',serving:'1 tab in 16oz water',cal:10,carbs:3,prot:0,fat:0,sodium:320,potassium:55,caffeine:0},
   {brand:'GU',line:'GU Hydration Drink Tabs',flavor:'Tri-Berry',serving:'1 tab in 16oz water',cal:10,carbs:3,prot:0,fat:0,sodium:320,potassium:55,caffeine:0},
   {brand:'GU',line:'GU Hydration Drink Tabs',flavor:'Lemon Lime',serving:'1 tab in 16oz water',cal:10,carbs:3,prot:0,fat:0,sodium:320,potassium:55,caffeine:0},
-  {brand:'GU',line:'GU Roctane Energy & Hydration Drink Mix',flavor:'Lemon Berry',serving:'2 scoops (65g)',cal:250,carbs:60,prot:0,fat:0,sodium:320,potassium:80,caffeine:35},
-  {brand:'GU',line:'GU Roctane Energy & Hydration Drink Mix',flavor:'Summit Tea',serving:'2 scoops (65g)',cal:250,carbs:60,prot:0,fat:0,sodium:320,potassium:80,caffeine:35},
-  {brand:'GU',line:'GU Roctane Energy & Hydration Drink Mix',flavor:'Tropical Fruit',serving:'2 scoops (65g)',cal:250,carbs:60,prot:0,fat:0,sodium:320,potassium:80,caffeine:35},
-  {brand:'GU',line:'GU Roctane Energy & Hydration Drink Mix',flavor:'Grape',serving:'2 scoops (65g)',cal:250,carbs:60,prot:0,fat:0,sodium:320,potassium:80,caffeine:0},
-  {brand:'GU',line:'GU Roctane Energy & Hydration Drink Mix',flavor:'Strawberry Hibiscus',serving:'2 scoops (65g)',cal:250,carbs:60,prot:0,fat:0,sodium:320,potassium:80,caffeine:0},
+  {brand:'GU',line:'GU Roctane Energy & Hydration Drink Mix',flavor:'Lemon Berry',serving:'2 scoops (65g) in 21oz water',cal:250,carbs:60,prot:0,fat:0,sodium:320,potassium:80,caffeine:35},
+  {brand:'GU',line:'GU Roctane Energy & Hydration Drink Mix',flavor:'Summit Tea',serving:'2 scoops (65g) in 21oz water',cal:250,carbs:60,prot:0,fat:0,sodium:320,potassium:80,caffeine:35},
+  {brand:'GU',line:'GU Roctane Energy & Hydration Drink Mix',flavor:'Tropical Fruit',serving:'2 scoops (65g) in 21oz water',cal:250,carbs:60,prot:0,fat:0,sodium:320,potassium:80,caffeine:35},
+  {brand:'GU',line:'GU Roctane Energy & Hydration Drink Mix',flavor:'Grape',serving:'2 scoops (65g) in 21oz water',cal:250,carbs:60,prot:0,fat:0,sodium:320,potassium:80,caffeine:0},
+  {brand:'GU',line:'GU Roctane Energy & Hydration Drink Mix',flavor:'Strawberry Hibiscus',serving:'2 scoops (65g) in 21oz water',cal:250,carbs:60,prot:0,fat:0,sodium:320,potassium:80,caffeine:0},
   {brand:'GU',line:'GU Roctane Electrolyte Capsules',flavor:'Unflavored',serving:'1 capsule',cal:0,carbs:0,prot:0,fat:0,sodium:140,potassium:0,caffeine:0},
   {brand:'GU',line:'GU Energy Waffle',flavor:'Maple Cinnamon',serving:'1 waffle (~30g)',cal:150,carbs:22,prot:0,fat:0,sodium:100,potassium:20,caffeine:0},
   {brand:'GU',line:'GU Energy Waffle',flavor:'Campfire S\'mores',serving:'1 waffle (~30g)',cal:150,carbs:22,prot:0,fat:0,sodium:100,potassium:20,caffeine:0},
@@ -515,11 +515,16 @@ function parseFluidOzFromServingLabel(label){
   }
   return 0;
 }
+function isCaffeinatedBeverageName(name){
+  var n=String(name||'').toLowerCase();
+  return /\b(coffee|espresso|latte|cappuccino|mocha|americano|cold\s*brew|black\s*tea|green\s*tea|energy\s*drinks?|red\s*bull|monster(?:\s*energy)?|celsius|bang\s*energy|rockstar|reign|ghost\s*energy|c4\s*energy|alani\s*nu)\b/.test(n);
+}
 function liquidOzForMeal(meal){
   var log=window._foodLog||[];
   var total=0;
   log.forEach(function(x){
     if(x.meal!==meal)return;
+    if(isCaffeinatedBeverageName(x.name))return;
     var s=parseFloat(x.servings)||1;
     total+=parseFluidOzFromServingLabel(x.servingLabel)*s;
   });
