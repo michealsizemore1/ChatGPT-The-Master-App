@@ -496,6 +496,53 @@ function runnerFoodQuality(item){
   return {score:score,label:label,reason:reasons.slice(0,3).join(' · ')||'Add label details for a more precise rating',confidence:confidence,confidencePct:confidencePct,workoutContext:runDay?(hardWorkout?hardWorkout+' workout':'run day'):'rest / recovery day'};
 }
 
+function parseFluidOzFromServingLabel(label){
+  var s=String(label||'').toLowerCase();
+  var m=s.match(/^\s*(\d+(?:\.\d+)?)\s*(fl\.?\s*oz|fluid\s*ounces?|milliliters?|millilitres?|ml|liters?|litres?|cups?)\b/);
+  if(m){
+    var qty=parseFloat(m[1]),unit=m[2];
+    if(/fl|fluid/.test(unit))return qty;
+    if(/cup/.test(unit))return qty*8;
+    if(/ml|milli/.test(unit))return qty/29.5735;
+    if(/liter|litre/.test(unit))return qty*33.814;
+  }
+  var mw=s.match(/(\d+(?:\.\d+)?)\s*(fl\.?\s*oz|oz|ounces?|milliliters?|millilitres?|ml|liters?|litres?)\s*(?:of\s*)?water\b/);
+  if(mw){
+    var qty2=parseFloat(mw[1]),unit2=mw[2];
+    if(/ml|milli/.test(unit2))return qty2/29.5735;
+    if(/liter|litre/.test(unit2))return qty2*33.814;
+    return qty2;
+  }
+  return 0;
+}
+function liquidOzForMeal(meal){
+  var log=window._foodLog||[];
+  var total=0;
+  log.forEach(function(x){
+    if(x.meal!==meal)return;
+    var s=parseFloat(x.servings)||1;
+    total+=parseFluidOzFromServingLabel(x.servingLabel)*s;
+  });
+  return Math.round(total);
+}
+function syncAutoLiquidCounters(){
+  var changed=false;
+  var sportsAuto=liquidOzForMeal('sports');
+  var liquidsAuto=liquidOzForMeal('liquids');
+  if(sportsAuto!==autoSportsDrinksOz){
+    sportsDrinksOz=Math.max(0,sportsDrinksOz+(sportsAuto-autoSportsDrinksOz));
+    autoSportsDrinksOz=sportsAuto;
+    if(typeof updateSportsDrinksDisplay==='function')updateSportsDrinksDisplay();
+    changed=true;
+  }
+  if(liquidsAuto!==autoOtherLiquidsOz){
+    otherLiquidsOz=Math.max(0,otherLiquidsOz+(liquidsAuto-autoOtherLiquidsOz));
+    autoOtherLiquidsOz=liquidsAuto;
+    if(typeof updateOtherLiquidsDisplay==='function')updateOtherLiquidsDisplay();
+    changed=true;
+  }
+  if(changed&&typeof save==='function')setTimeout(function(){save();},0);
+}
 function renderFoodItems(){
   var log=window._foodLog||[];
   var autoClassChanged=false;
@@ -684,6 +731,7 @@ function renderFoodItems(){
     }
   });
   updateMacroTotals();
+  syncAutoLiquidCounters();
   if(autoClassChanged)setTimeout(function(){save();},0);
 }
 function _setMealOpen(meal,isOpen){

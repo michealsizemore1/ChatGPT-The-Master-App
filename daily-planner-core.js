@@ -1,6 +1,6 @@
 
 let today=new Date();const _realToday=new Date(today);// snapshot of actual launch date — never changes with navigation
-const charts={};let waterOz=0,sportsDrinksOz=0,otherLiquidsOz=0,scoreVal=0,copiedDayData=null;
+const charts={};let waterOz=0,sportsDrinksOz=0,otherLiquidsOz=0,autoSportsDrinksOz=0,autoOtherLiquidsOz=0,scoreVal=0,copiedDayData=null;
 function dk(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return y+'-'+m+'-'+day;}
 function fmtD(d){return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});}
 function wkStart(off=0){const t=new Date();t.setDate(t.getDate()+off*7);const dow=(t.getDay()+6)%7;const ws=new Date(t);ws.setDate(t.getDate()-dow);ws.setHours(0,0,0,0);return ws;}
@@ -307,7 +307,7 @@ function save(){
   NMS.forEach(id=>{const e=document.getElementById(id);if(e)d[id]=e.value;});
   // Priority/goal text
   PTIDS.forEach(id=>{const row=document.getElementById(id);if(row){const tx=row.querySelector('input[type=text]');if(tx)d[id+'t']=tx.value;}});
-  d.waterOz=waterOz;d.sportsDrinksOz=sportsDrinksOz;d.otherLiquidsOz=otherLiquidsOz;d.score=scoreVal;
+  d.waterOz=waterOz;d.sportsDrinksOz=sportsDrinksOz;d.otherLiquidsOz=otherLiquidsOz;d.autoSportsDrinksOz=autoSportsDrinksOz;d.autoOtherLiquidsOz=autoOtherLiquidsOz;d.score=scoreVal;
   d.foodLog=window._foodLog||[];
   try{
     localStorage.setItem('planner_'+dk(today),JSON.stringify(d));
@@ -774,6 +774,7 @@ function load(){
     waterOz=d.waterOz||(d.waterCount?d.waterCount*8:0);updateWaterDisplay();
     sportsDrinksOz=d.sportsDrinksOz||0;updateSportsDrinksDisplay();
     otherLiquidsOz=d.otherLiquidsOz||0;updateOtherLiquidsDisplay();
+    autoSportsDrinksOz=d.autoSportsDrinksOz||0;autoOtherLiquidsOz=d.autoOtherLiquidsOz||0;
     scoreVal=d.score||0;buildStars();
   }catch(e){console.error('load fields:',e);}
   attachListeners();
