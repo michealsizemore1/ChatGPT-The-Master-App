@@ -1243,14 +1243,19 @@ function updateMacroTotals(){
   if(microQuality){
     if(!hasData){microQuality.style.display='none';}
     else {
+      // Targets for a 53-year-old male distance runner (US Dietary Reference Intakes, men 51-70).
+      // Iron uses the endurance-athlete adjustment (RDA 8mg x ~1.7). Sodium is a floor for
+      // sweat losses with a ceiling: above 4,000mg shows as High.
       var priorityMicros=[
         {name:'Iron',field:'iron',value:totals.iron||0,target:14,unit:'mg'},
         {name:'Calcium',field:'calcium',value:totals.calcium||0,target:1000,unit:'mg'},
-        {name:'Vitamin D',field:'vitD',value:totals.vitD||0,target:25,unit:'mcg'},
-        {name:'Magnesium',field:'magnesium',value:totals.magnesium||0,target:400,unit:'mg'},
-        {name:'Vitamin B12',field:'vitB12',value:totals.vitB12||0,target:2.4,unit:'mcg'}
+        {name:'Vitamin D',field:'vitD',value:totals.vitD||0,target:15,unit:'mcg'},
+        {name:'Magnesium',field:'magnesium',value:totals.magnesium||0,target:420,unit:'mg'},
+        {name:'Vitamin B12',field:'vitB12',value:totals.vitB12||0,target:2.4,unit:'mcg'},
+        {name:'Sodium',field:'sodium',value:totals.sodium||0,target:2300,max:4000,unit:'mg'},
+        {name:'Potassium',field:'potassium',value:totals.potassium||0,target:3400,unit:'mg'}
       ];
-      var completion=priorityMicros.map(function(n){return Math.max(0,Math.min(1,n.value/n.target));});
+      var completion=priorityMicros.map(function(n){if(n.max&&n.value>n.max)return Math.max(0,1-(n.value-n.max)/n.max);return Math.max(0,Math.min(1,n.value/n.target));});
       var averageCompletion=completion.reduce(function(sum,n){return sum+n;},0)/completion.length;
       var microScore=1+(averageCompletion*9),microLabel=microScore>=9?'Excellent':microScore>=7?'Good':microScore>=5?'Fair':microScore>=3?'Low':'Poor';
       var weakestIndex=completion.indexOf(Math.min.apply(null,completion)),weakest=priorityMicros[weakestIndex];
@@ -1258,13 +1263,13 @@ function updateMacroTotals(){
       if(microQualityLabel)microQualityLabel.textContent=microScore.toFixed(1)+'/10 · '+microLabel;
       if(microQualityMarker)microQualityMarker.style.left=Math.max(0,Math.min(100,(microScore-1)/9*100))+'%';
       if(microQualityTrack)microQualityTrack.setAttribute('aria-valuenow',microScore.toFixed(1));
-      if(microQualityNote)microQualityNote.textContent='Targets: iron 14mg · calcium 1,000mg · vitamin D 25mcg · magnesium 400mg · vitamin B12 2.4mcg · lowest today: '+weakest.name+' '+Math.round(weakest.value)+weakest.unit;
+      if(microQualityNote)microQualityNote.textContent='Targets for a 53-year-old male distance runner: iron 14mg · calcium 1,000mg · vitamin D 15mcg · magnesium 420mg · vitamin B12 2.4mcg · sodium 2,300–4,000mg · potassium 3,400mg · lowest today: '+weakest.name+' '+Math.round(weakest.value)+weakest.unit;
       if(microBreakdown)microBreakdown.innerHTML=priorityMicros.map(function(n){
-        var pct=n.target?Math.max(0,n.value/n.target*100):0,capped=Math.min(100,pct),status=pct>=100?'Met':pct>=75?'Close':'Low';
-        var statusColor=status==='Met'?'#166534':status==='Close'?'#92400e':'#991b1b';
-        var barColor=status==='Met'?'#16a34a':status==='Close'?'#f59e0b':'#dc2626';
+        var pct=n.target?Math.max(0,n.value/n.target*100):0,capped=Math.min(100,pct),status=(n.max&&n.value>n.max)?'High':pct>=100?'Met':pct>=75?'Close':'Low';
+        var statusColor=status==='Met'?'#166534':(status==='Close'||status==='High')?'#92400e':'#991b1b';
+        var barColor=status==='Met'?'#16a34a':(status==='Close'||status==='High')?'#f59e0b':'#dc2626';
         var shownValue=n.unit==='mg'&&n.value>=100?Math.round(n.value).toLocaleString():Math.round(n.value*10)/10;
-        return '<div role="button" tabindex="0" aria-label="'+n.name+' - tap to see contributing foods" onclick="showMicroSourceBreakdown(\''+n.field+'\',\''+n.name+'\',\''+n.unit+'\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();showMicroSourceBreakdown(\''+n.field+'\',\''+n.name+'\',\''+n.unit+'\');}" style="cursor:pointer;"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.69rem;color:#475569;margin-bottom:3px;"><strong>'+n.name+'</strong><span>'+shownValue+n.unit+' / '+n.target.toLocaleString()+n.unit+' · '+Math.round(pct)+'% · <strong style="color:'+statusColor+'">'+status+'</strong> <span style="color:#cbd5e1;">›</span></span></div><div role="progressbar" aria-label="'+n.name+' daily target completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+Math.round(pct)+'" style="height:8px;border-radius:999px;background:#e5e7eb;overflow:hidden;"><span style="display:block;width:'+capped+'%;height:100%;background:'+barColor+';border-radius:999px;"></span></div></div>';
+        return '<div role="button" tabindex="0" aria-label="'+n.name+' - tap to see contributing foods" onclick="showMicroSourceBreakdown(\''+n.field+'\',\''+n.name+'\',\''+n.unit+'\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();showMicroSourceBreakdown(\''+n.field+'\',\''+n.name+'\',\''+n.unit+'\');}" style="cursor:pointer;"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.69rem;color:#475569;margin-bottom:3px;"><strong>'+n.name+'</strong><span>'+shownValue+n.unit+' / '+n.target.toLocaleString()+(n.max?'–'+n.max.toLocaleString():'')+n.unit+' · '+Math.round(pct)+'% · <strong style="color:'+statusColor+'">'+status+'</strong> <span style="color:#cbd5e1;">›</span></span></div><div role="progressbar" aria-label="'+n.name+' daily target completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+Math.round(pct)+'" style="height:8px;border-radius:999px;background:#e5e7eb;overflow:hidden;"><span style="display:block;width:'+capped+'%;height:100%;background:'+barColor+';border-radius:999px;"></span></div></div>';
       }).join('');
     }
   }
