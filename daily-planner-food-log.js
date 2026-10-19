@@ -1156,7 +1156,7 @@ function renderRunnerMacroGuidance(log,totals,ratios){
   if(fuelNote){fuelNote.style.display=performance?'block':'none';fuelNote.textContent=performance?(performance.phase==='day'?'Morning workout: aim for 30–40g protein with the post-run meal, then spread the remaining protein across the day.':'Pre-fueling day: emphasize carbohydrates at lunch, dinner, and the evening snack.') : '';}
   var fields={prot:{grams:totals.prot,kcal:4,name:'protein'},carbs:{grams:totals.carbs,kcal:4,name:'carbohydrates'},fat:{grams:totals.fat,kcal:9,name:'fat'}};
   Object.keys(fields).forEach(function(kind){
-    var cap=kind==='prot'?'Prot':kind.charAt(0).toUpperCase()+kind.slice(1),actual=ratios[kind]||0,goal=target[kind],gramsGoal=target.calories*(goal/100)/fields[kind].kcal,remaining=Math.max(0,Math.round(gramsGoal-fields[kind].grams)),difference=actual-goal,status=difference<-2.5?'Low':difference>2.5?'High':'On target';
+    var cap=kind==='prot'?'Prot':kind.charAt(0).toUpperCase()+kind.slice(1),actual=ratios[kind]||0,goal=target[kind],gramsGoal=target.calories*(goal/100)/fields[kind].kcal,remaining=Math.max(0,Math.round(gramsGoal-fields[kind].grams)),difference=actual-goal,status=difference<-3?'Low':difference>3?'High':'On target';
     var a=document.getElementById('targetActual'+cap),t=document.getElementById('target'+cap),r=document.getElementById('remain'+cap),s=document.getElementById('status'+cap);if(a)a.textContent=actual.toFixed(1)+'%';if(t)t.textContent=goal+'%';if(r)r.textContent=remaining+'g';if(s){s.textContent=status;s.className='macro-status '+(status==='On target'?'on':status.toLowerCase());}
     fields[kind].remaining=remaining;fields[kind].difference=difference;
   });
