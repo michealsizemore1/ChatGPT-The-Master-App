@@ -526,10 +526,6 @@ function parseFluidOzFromServingLabel(label){
     if(/liter|litre/.test(unit2))return qty2*33.814;
     return qty2;
   }
-  var mg=s.match(/^\s*(\d+(?:\.\d+)?)\s*(g|grams?)\b/);
-  if(mg){
-    return parseFloat(mg[1])/29.5735;
-  }
   return 0;
 }
 function isCaffeinatedBeverageName(name){
