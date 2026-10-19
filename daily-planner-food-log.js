@@ -318,7 +318,12 @@ const GUSIS_PRODUCTS=[
   {brand:'SiS',line:'SiS REGO Rapid Recovery',flavor:'Chocolate',serving:'1 scoop (50g)',cal:180,carbs:22,prot:20,fat:1.1,sodium:400,potassium:2,caffeine:0},
   {brand:'SiS',line:'SiS REGO Rapid Recovery',flavor:'Vanilla',serving:'1 scoop (50g)',cal:180,carbs:22,prot:20,fat:1.1,sodium:400,potassium:2,caffeine:0},
   {brand:'SiS',line:'SiS REGO Rapid Recovery',flavor:'Strawberry',serving:'1 scoop (50g)',cal:180,carbs:22,prot:20,fat:1.1,sodium:400,potassium:2,caffeine:0},
-  {brand:'SiS',line:'SiS REGO Rapid Recovery',flavor:'Banana',serving:'1 scoop (50g)',cal:180,carbs:22,prot:20,fat:1.1,sodium:400,potassium:2,caffeine:0}
+  {brand:'SiS',line:'SiS REGO Rapid Recovery',flavor:'Banana',serving:'1 scoop (50g)',cal:180,carbs:22,prot:20,fat:1.1,sodium:400,potassium:2,caffeine:0},
+  {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Chocolate',serving:'1 shake (11 fl oz)',cal:160,carbs:4,prot:30,fat:3,sodium:230,potassium:0,caffeine:0},
+  {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Vanilla',serving:'1 shake (11 fl oz)',cal:160,carbs:4,prot:30,fat:3,sodium:230,potassium:0,caffeine:0},
+  {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Caramel',serving:'1 shake (11 fl oz)',cal:160,carbs:2,prot:30,fat:3,sodium:350,potassium:0,caffeine:0},
+  {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Cookies and Cream',serving:'1 shake (11 fl oz)',cal:160,carbs:4,prot:30,fat:3,sodium:220,potassium:0,caffeine:0},
+  {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Chocolate Peanut Butter',serving:'1 shake (11 fl oz)',cal:160,carbs:5,prot:30,fat:3,sodium:380,potassium:0,caffeine:0}
 ];
 
 function gusisLinesFor(brand){
