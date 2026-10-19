@@ -671,6 +671,134 @@ function exportActivities(){
   a.href=URL.createObjectURL(new Blob([csvRows.join('\n')],{type:'text/csv'}));
   a.download='activities_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
 }
+function printActivities(){
+  const acts=getActivities();
+  if(!acts.length){alert('No activities to print.');return;}
+  const cp=getCP();
+  const filterType=(document.getElementById('actFilterType')||{}).value||'';
+  const rawSrc=(document.getElementById('actFilterSource')||{}).value;
+  const filterSource=(rawSrc===undefined||rawSrc===''||rawSrc==='all')?'all':rawSrc.toLowerCase();
+  const search=((document.getElementById('actSearch')||{}).value||'').toLowerCase();
+  const dateFrom=(document.getElementById('actDateFrom')||{}).value||'';
+  const dateTo=(document.getElementById('actDateTo')||{}).value||'';
+
+  var filtered=acts.filter(function(a){
+    if(filterType){var at=(a.type||'').toLowerCase();var ft=filterType.toLowerCase();var runTypes=['run','running','trail run','trail running','treadmill','treadmill running','track running','road running','virtual run'];var isRunFilter=ft==='run';var actIsRun=runTypes.some(function(r){return at===r||at.includes('run');});if(isRunFilter?!actIsRun:at!==ft)return false;}
+    if(filterSource!=='all'){var actSrc=(a.source||'manual').toLowerCase();if(actSrc!==filterSource)return false;}
+    if(search&&!((a.title||'').toLowerCase().includes(search)||(a.date||'').includes(search)||(a.type||'').toLowerCase().includes(search)))return false;
+    if(dateFrom&&a.date&&a.date<dateFrom)return false;
+    if(dateTo&&a.date&&a.date>dateTo)return false;
+    return true;
+  });
+  if(!filtered.length){alert('No activities match your current filters.');return;}
+
+  // Chronological order reads best for an AI building a training plan from history
+  var chronological=filtered.slice().sort(function(a,b){return(a.date||'').localeCompare(b.date||'');});
+
+  var totalMiles=0;
+  chronological.forEach(function(a){totalMiles+=parseFloat(a.distance)||0;});
+  var firstDate=chronological[0].date||'',lastDate=chronological[chronological.length-1].date||'';
+  var weekSpan=1;
+  if(firstDate&&lastDate){
+    var d1=new Date(firstDate+'T00:00:00'),d2=new Date(lastDate+'T00:00:00');
+    weekSpan=Math.max(1,Math.round((d2-d1)/(7*86400000))+1);
+  }
+
+  function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function fmtDate(ds){
+    if(!ds)return'';
+    var d=new Date(ds+'T00:00:00');
+    return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+  }
+  function perfParts(a){
+    var perf=[];
+    if(a.distance)perf.push(a.distance+' mi');
+    if(a.duration)perf.push(fmtDuration(a.duration));
+    if(a.pace)perf.push(a.pace+'/mi pace');
+    if(a.power){var pz=powerZone(a.power,cp);perf.push(a.power+'W'+(pz?' ('+pz.z+')':''));}
+    if(a.heartRate){var hz=hrZone(a.heartRate);perf.push(a.heartRate+' bpm'+(hz?' ('+hz.z+')':''));}
+    if(a.cadence)perf.push(a.cadence+' spm');
+    if(a.calories)perf.push(a.calories+' cal');
+    if(a.elevGain)perf.push(a.elevGain+' ft gain'+(a.distance?' ('+Math.round(a.elevGain/a.distance)+' ft/mi)':''));
+    return perf;
+  }
+  function condParts(a){
+    var cond=[];
+    if(a.temp)cond.push(a.temp+'°F');
+    if(a.humidity)cond.push(a.humidity+'% humidity');
+    if(a.aqi)cond.push('AQI '+a.aqi);
+    if(a.temp&&a.pace){
+      var hh=heatHumidityImpact(a.temp,a.humidity,parsePace(a.pace));
+      if(hh&&hh.pctSlower>=0.5)cond.push('est. heat/humidity impact +'+hh.pctSlower.toFixed(1)+'% ('+Math.round(hh.secSlower)+'s/mi)');
+    }
+    return cond;
+  }
+
+  var summaryLine1='Range: '+(firstDate?fmtDate(firstDate):'—')+' to '+(lastDate?fmtDate(lastDate):'—')+' ('+weekSpan+' week'+(weekSpan!==1?'s':'')+')';
+  var summaryLine2='Activities: '+chronological.length+' | Total distance: '+totalMiles.toFixed(1)+' mi | Avg/week: '+(totalMiles/weekSpan).toFixed(1)+' mi';
+
+  var textLines=['TRAINING LOG EXPORT','Generated: '+new Date().toLocaleString(),summaryLine1,summaryLine2,''];
+  chronological.forEach(function(a){
+    textLines.push(fmtDate(a.date)+' — '+(a.title||'Activity')+' ('+(a.type||'')+')');
+    var perf=perfParts(a);
+    if(perf.length)textLines.push('  '+perf.join(' | '));
+    var cond=condParts(a);
+    if(cond.length)textLines.push('  Conditions: '+cond.join(' | '));
+    if(a.notes)textLines.push('  Notes: '+String(a.notes).replace(/\n+/g,' '));
+    textLines.push('');
+  });
+  var plainText=textLines.join('\n');
+
+  var rowsHtml=chronological.map(function(a){
+    var perf=perfParts(a),cond=condParts(a);
+    return '<div class="pa-entry">'
+      +'<div class="pa-head">'+esc(fmtDate(a.date))+' &mdash; '+esc(a.title||'Activity')+' <span class="pa-type">('+esc(a.type||'')+')</span></div>'
+      +(perf.length?'<div class="pa-line">'+esc(perf.join('  |  '))+'</div>':'')
+      +(cond.length?'<div class="pa-line pa-cond">'+esc(cond.join('  |  '))+'</div>':'')
+      +(a.notes?'<div class="pa-notes">'+esc(a.notes)+'</div>':'')
+      +'</div>';
+  }).join('');
+
+  var w=window.open('','_blank');
+  if(!w){alert('Please allow pop-ups to open the print view.');return;}
+  w.document.open();
+  w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>Training Log Export</title><style>'
+    +'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;max-width:780px;margin:24px auto;padding:0 16px;color:#222;line-height:1.5;}'
+    +'h1{font-size:1.3rem;margin-bottom:2px;}'
+    +'.pa-meta{color:#555;font-size:0.9rem;margin-bottom:18px;}'
+    +'.pa-toolbar{margin-bottom:20px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}'
+    +'.pa-toolbar button{font-size:0.85rem;padding:8px 16px;border-radius:6px;border:none;cursor:pointer;font-weight:600;}'
+    +'.pa-print-btn{background:#e67e22;color:#fff;}'
+    +'.pa-copy-btn{background:#27ae60;color:#fff;}'
+    +'.pa-entry{border-bottom:1px solid #eee;padding:10px 0;break-inside:avoid;page-break-inside:avoid;}'
+    +'.pa-head{font-weight:700;font-size:0.95rem;}'
+    +'.pa-type{font-weight:400;color:#888;}'
+    +'.pa-line{font-size:0.85rem;color:#333;margin-top:3px;}'
+    +'.pa-cond{color:#777;}'
+    +'.pa-notes{font-size:0.83rem;color:#555;margin-top:4px;white-space:pre-wrap;}'
+    +'#pa-copied{color:#27ae60;font-size:0.85rem;font-weight:600;}'
+    +'@media print{.pa-toolbar{display:none;}}'
+    +'</style></head><body>'
+    +'<div class="pa-toolbar">'
+    +'<button class="pa-print-btn" onclick="window.print()">🖨️ Print / Save as PDF</button>'
+    +'<button class="pa-copy-btn" id="pa-copy-btn">📋 Copy as Text (for AI)</button>'
+    +'<span id="pa-copied" style="display:none;">Copied!</span>'
+    +'</div>'
+    +'<h1>Training Log Export</h1>'
+    +'<div class="pa-meta">'+esc(summaryLine1)+'<br>'+esc(summaryLine2)+'</div>'
+    +rowsHtml
+    +'<textarea id="pa-plaintext" style="position:absolute;left:-9999px;top:-9999px;">'+esc(plainText)+'</textarea>'
+    +'<script>'
+    +'document.getElementById("pa-copy-btn").addEventListener("click",function(){'
+    +'var ta=document.getElementById("pa-plaintext");'
+    +'function fallback(){ta.style.position="fixed";ta.style.left="0";ta.style.top="0";ta.focus();ta.select();try{document.execCommand("copy");}catch(e){}ta.style.position="absolute";ta.style.left="-9999px";ta.style.top="-9999px";}'
+    +'if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(ta.value).catch(fallback);}else{fallback();}'
+    +'var msg=document.getElementById("pa-copied");msg.style.display="inline";setTimeout(function(){msg.style.display="none";},1800);'
+    +'});'
+    +'<\/script>'
+    +'</body></html>');
+  w.document.close();
+}
 
 // ── Activities: enhancements ────────────────────────────────────────────────
 let actChartMode='miles';
@@ -678,8 +806,51 @@ function setChartMode(m){actChartMode=m;document.getElementById('chartMiBtn').cl
 function saveCPAndRender(){const v=document.getElementById('cpInput').value;localStorage.setItem('cp_value',v||'');renderActivities();}
 function getCP(){return parseFloat(localStorage.getItem('cp_value'))||0;}
 function powerZone(p,cp){if(!cp||!p)return null;const r=p/cp;if(r<0.55)return{z:'Z1',cls:'z1'};if(r<0.75)return{z:'Z2',cls:'z2'};if(r<0.90)return{z:'Z3',cls:'z3'};if(r<1.05)return{z:'Z4',cls:'z4'};return{z:'Z5',cls:'z5'};}
-function saveMaxHRAndRender(){const v=document.getElementById('hrMaxInput').value;localStorage.setItem('max_hr_value',v||'');renderActivities();}
+function saveMaxHRAndRender(){const v=document.getElementById('hrMaxInput').value;localStorage.setItem('max_hr_value',v||'');renderActivities();refreshTrainingZonesInAllPlans();}
 function getMaxHR(){const stored=parseFloat(localStorage.getItem('max_hr_value'));return stored>0?stored:174;}
+function saveRestHRAndRender(){const v=document.getElementById('restHrInput').value;localStorage.setItem('resting_hr_value',v||'');renderActivities();refreshTrainingZonesInAllPlans();}
+function getRestingHR(){const stored=parseFloat(localStorage.getItem('resting_hr_value'));return stored>0?stored:55;}
+// 30-day trailing average of the Wellness tab's daily Pulse entries
+// (wPulseVal on each planner_<date> record), used as the Resting HR input
+// to the Karvonen zone math. Returns null if nothing was logged in the
+// window, so callers can leave the stored value untouched rather than
+// overwriting it with a meaningless number.
+function computeTrailing30DayRestingHR(){
+  var vals=[],now=new Date();
+  for(var i=0;i<30;i++){
+    var d=new Date(now);d.setDate(now.getDate()-i);
+    var raw=localStorage.getItem('planner_'+dk(d));
+    if(!raw)continue;
+    try{
+      var dd=JSON.parse(raw);
+      var p=parseFloat(dd.wPulseVal);
+      if(p>0)vals.push(p);
+    }catch(e){}
+  }
+  if(!vals.length)return null;
+  var sum=0;for(var j=0;j<vals.length;j++)sum+=vals[j];
+  return Math.round((sum/vals.length)*10)/10;
+}
+// Runs once per calendar month (tracked via resting_hr_auto_update_month):
+// on the first app load on or after the 1st, recomputes Resting HR from the
+// trailing 30 days of logged Pulse data and saves it. If no Pulse data has
+// been logged yet this month, the month is NOT marked done, so this keeps
+// checking on every load until data shows up -- it never gives up partway
+// through the month, and never overwrites a real value with nothing.
+function autoUpdateRestingHRIfNewMonth(){
+  try{
+    var now=new Date();
+    var monthKey=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+    if(localStorage.getItem('resting_hr_auto_update_month')===monthKey)return;
+    var avg=computeTrailing30DayRestingHR();
+    if(avg==null)return;
+    localStorage.setItem('resting_hr_value',String(avg));
+    localStorage.setItem('resting_hr_auto_update_month',monthKey);
+    var el=document.getElementById('restHrInput');if(el)el.value=avg;
+    if(typeof renderActivities==='function')renderActivities();
+    refreshTrainingZonesInAllPlans();
+  }catch(e){}
+}
 
 // ── Mileage goals (weekly / monthly / yearly) ───────────────────────────────
 // The weekly miles goal is shared between the Activities "This Week" card
@@ -708,7 +879,7 @@ function reconcileWeeklyMilesGoal(){
     localStorage.setItem('act_goal_week_mi',String(g.Miles));
   }
 }
-window.addEventListener('load',function(){reconcileWeeklyMilesGoal();});
+window.addEventListener('load',function(){reconcileWeeklyMilesGoal();autoUpdateRestingHRIfNewMonth();});
 function getActGoal(period){
   if(period==='week'){
     var ownVal=localStorage.getItem('act_goal_week_mi');
@@ -740,13 +911,446 @@ function renderGoalBar(period,actualMi){
 }
 // Garmin's standard 5-zone heart-rate model, as a percentage of max heart rate:
 // Z1 50-60%, Z2 60-70%, Z3 70-80%, Z4 80-90%, Z5 90-100%+. Below 50% is untracked (resting/warm-up).
-// Karvonen (heart-rate-reserve) training zones from the user's updated calculator results:
-// Z1 113-125 (50-60%, recovery), Z2 125-138 (60-70%, aerobic base), Z3 138-151 (70-80%,
-// aerobic threshold), Z4 151-163 (80-90%, anaerobic), Z5 163-176+ (90-100%, max). Stored as
-// fixed bpm boundaries rather than a percent-of-max-HR calculation, since Karvonen needs
-// resting HR too -- these boundaries were generated directly from that formula already, so
-// recomputing here would need a separate resting-HR input this app doesn't currently collect.
-function hrZone(hr){if(!hr)return null;if(hr<113)return null;if(hr<125)return{z:'Z1',cls:'z1'};if(hr<138)return{z:'Z2',cls:'z2'};if(hr<151)return{z:'Z3',cls:'z3'};if(hr<163)return{z:'Z4',cls:'z4'};return{z:'Z5',cls:'z5'};}
+// Karvonen (heart-rate-reserve) training zones, computed live from Max HR and Resting HR
+// (the "Max heart rate" / "Resting HR" inputs above the Training Zones panel) at the usual
+// 50/60/70/80/90% HRR breakpoints: zone edge = resting + (max-resting) * %intensity. This
+// replaces the old fixed bpm boundaries that were baked in from one past calculation --
+// changing either input now actually moves every zone badge, the heat-drift chart, and the
+// Training Zones reference panel together, with no separate recomputation needed.
+function karvonenHRBoundaries(){
+  var max=getMaxHR(),rest=getRestingHR();
+  var reserve=Math.max(1,max-rest);
+  return [0.5,0.6,0.7,0.8,0.9].map(function(p){return Math.round(rest+reserve*p);});
+}
+function hrZone(hr){if(!hr)return null;var b=karvonenHRBoundaries();if(hr<b[0])return null;if(hr<b[1])return{z:'Z1',cls:'z1'};if(hr<b[2])return{z:'Z2',cls:'z2'};if(hr<b[3])return{z:'Z3',cls:'z3'};if(hr<b[4])return{z:'Z4',cls:'z4'};return{z:'Z5',cls:'z5'};}
+
+// ── Training Zones reference panel (Activities tab, under the mileage tiles) ──
+// Heart-rate zone labels for the same fixed Karvonen boundaries hrZone()
+// uses (see the comment above it). Power zone definitions mirror the exact
+// ratio thresholds powerZone() uses, so this reference table and the
+// per-activity zone badges never drift apart.
+var HR_ZONE_LABELS={Z1:'Recovery',Z2:'Aerobic base',Z3:'Aerobic threshold',Z4:'Anaerobic',Z5:'Max effort'};
+var POWER_ZONE_DEFS=[
+  {z:'Z1',cls:'z1',label:'Recovery',loR:0,hiR:0.55},
+  {z:'Z2',cls:'z2',label:'Aerobic / endurance',loR:0.55,hiR:0.75},
+  {z:'Z3',cls:'z3',label:'Tempo',loR:0.75,hiR:0.90},
+  {z:'Z4',cls:'z4',label:'Threshold',loR:0.90,hiR:1.05},
+  {z:'Z5',cls:'z5',label:'VO2 max',loR:1.05,hiR:null}
+];
+function renderTrainingZonesPanel(){
+  var cp=getCP();
+  var maxHR=getMaxHR();
+  var restHR=getRestingHR();
+  var hrEl=document.getElementById('hrZonesTable');
+  var pwEl=document.getElementById('powerZonesTable');
+  var hrSubEl=document.getElementById('hrZonesSub');
+  if(hrSubEl)hrSubEl.textContent='Max HR '+maxHR+' bpm \u00b7 Resting HR '+restHR+' bpm';
+  if(hrEl){
+    hrEl.innerHTML=getCVDZones().map(function(zi){
+      var range=zi.hi<220?(zi.lo+'\u2013'+zi.hi+' bpm'):(zi.lo+'+ bpm');
+      return '<div style="display:flex;align-items:center;gap:6px;"><span class="zone-badge '+zi.cls+'">'+zi.z+'</span><span style="color:#555;">'+range+'</span><span style="color:#999;font-size:0.72rem;">'+(HR_ZONE_LABELS[zi.z]||'')+'</span></div>';
+    }).join('');
+  }
+  if(pwEl){
+    if(!cp){
+      pwEl.innerHTML='<div style="color:#999;font-size:0.76rem;">Set Critical Power above to see your power zone ranges.</div>';
+    }else{
+      pwEl.innerHTML=POWER_ZONE_DEFS.map(function(zi){
+        var lo=Math.round(cp*zi.loR);
+        var range=zi.hiR!=null?(lo+'\u2013'+Math.round(cp*zi.hiR)+' W'):(lo+'+ W');
+        return '<div style="display:flex;align-items:center;gap:6px;"><span class="zone-badge '+zi.cls+'">'+zi.z+'</span><span style="color:#555;">'+range+'</span><span style="color:#999;font-size:0.72rem;">'+zi.label+'</span></div>';
+      }).join('');
+    }
+  }
+}
+
+// ── Cardiovascular Drift: Heart Rate Elevation in the Heat (Activities tab) ──
+// Uses the same live Karvonen boundaries as hrZone() above, so this chart
+// always reflects whatever Max HR / Resting HR are currently set.
+function getCVDZones(){
+  var b=karvonenHRBoundaries();
+  return[
+    {z:'Z1',cls:'z1',color:'#5dade2',lo:b[0],hi:b[1]-1},
+    {z:'Z2',cls:'z2',color:'#58d68d',lo:b[1],hi:b[2]-1},
+    {z:'Z3',cls:'z3',color:'#f4d03f',lo:b[2],hi:b[3]-1},
+    {z:'Z4',cls:'z4',color:'#e67e22',lo:b[3],hi:b[4]-1},
+    {z:'Z5',cls:'z5',color:'#e74c3c',lo:b[4],hi:220}
+  ];
+}
+var CVD_BUCKETS=[
+  {label:'<60\u00b0F',lo:-Infinity,hi:59},
+  {label:'60-69\u00b0F',lo:60,hi:69},
+  {label:'70-79\u00b0F',lo:70,hi:79},
+  {label:'80-89\u00b0F',lo:80,hi:89},
+  {label:'90\u00b0F+',lo:90,hi:Infinity}
+];
+function toggleCardioDrift(){
+  var sec=document.getElementById('cvdSection');var arr=document.getElementById('cvdArrow');
+  if(!sec)return;
+  var opening=sec.style.display==='none';
+  sec.style.display=opening?'block':'none';
+  if(arr)arr.innerHTML=opening?'&#x25BC;':'&#x25B6;';
+  var toggle=sec.previousElementSibling;
+  if(toggle)toggle.setAttribute('aria-expanded',opening?'true':'false');
+  if(opening)renderCardioDriftChart();
+}
+function renderCardioDriftChart(){
+  var CVD_ZONES=getCVDZones();
+  var canvas=document.getElementById('cvdChart');
+  var legendEl=document.getElementById('cvdZoneLegend');
+  var insightEl=document.getElementById('cvdInsight');
+  if(!canvas)return;
+  if(legendEl){
+    legendEl.innerHTML=CVD_ZONES.map(function(zi){
+      return '<span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:9px;height:9px;border-radius:2px;background:'+zi.color+';display:inline-block;"></span>'+zi.z+' \u2022 '+zi.lo+(zi.hi<220?('\u2013'+zi.hi):'+')+' bpm</span>';
+    }).join('');
+  }
+  if(typeof Chart==='undefined'){
+    canvas.parentNode.innerHTML='<div style="color:#aaa;text-align:center;padding:16px 0;">Chart library did not load. Check your connection and refresh.</div>';
+    return;
+  }
+  var acts=getActivities().filter(function(a){
+    var t=parseFloat(a.temp);
+    return a.type!=='Rest Day'&&(parseFloat(a.heartRate)||0)>0&&a.temp!==''&&a.temp!=null&&!isNaN(t);
+  });
+  if(acts.length<3){
+    if(charts.cvdChart){charts.cvdChart.destroy();delete charts.cvdChart;}
+    if(insightEl)insightEl.textContent='Log at least 3 activities with temperature and heart rate to see your heat drift here.';
+    return;
+  }
+  var buckets=CVD_BUCKETS.map(function(b){return{label:b.label,lo:b.lo,hi:b.hi,sum:0,count:0};});
+  acts.forEach(function(a){
+    var t=parseFloat(a.temp),hr=parseFloat(a.heartRate);
+    var b=buckets.filter(function(bk){return t>=bk.lo&&t<=bk.hi;})[0];
+    if(b){b.sum+=hr;b.count++;}
+  });
+  var used=buckets.filter(function(b){return b.count>0;});
+  var labels=used.map(function(b){return b.label;});
+  var avgHRs=used.map(function(b){return Math.round(b.sum/b.count);});
+  var counts=used.map(function(b){return b.count;});
+  var barColors=avgHRs.map(function(hr){
+    var zi=hrZone(hr);
+    if(!zi)return'#b0b8c1';
+    var match=CVD_ZONES.filter(function(z){return z.z===zi.z;})[0];
+    return match?match.color:'#b0b8c1';
+  });
+  var allHRs=acts.map(function(a){return parseFloat(a.heartRate);}).concat(avgHRs);
+  var yMin=Math.max(60,Math.floor((Math.min.apply(null,allHRs)-10)/5)*5);
+  var yMax=Math.ceil((Math.max.apply(null,allHRs)+10)/5)*5;
+  if(charts.cvdChart){charts.cvdChart.destroy();delete charts.cvdChart;}
+  var cvdZoneBandPlugin={
+    id:'cvdZoneBands',
+    beforeDatasetsDraw:function(chart){
+      var yScale=chart.scales.y,area=chart.chartArea,ctx=chart.ctx;
+      if(!yScale||!area)return;
+      ctx.save();
+      CVD_ZONES.forEach(function(zi){
+        if(zi.hi<yMin||zi.lo>yMax)return;
+        var top=yScale.getPixelForValue(Math.min(zi.hi,yMax));
+        var bottom=yScale.getPixelForValue(Math.max(zi.lo,yMin));
+        if(bottom<=top)return;
+        ctx.fillStyle=zi.color+'22';
+        ctx.fillRect(area.left,top,area.right-area.left,bottom-top);
+      });
+      ctx.restore();
+    }
+  };
+  charts.cvdChart=new Chart(canvas.getContext('2d'),{
+    type:'bar',
+    data:{labels:labels,datasets:[{label:'Avg Heart Rate',data:avgHRs,backgroundColor:barColors,borderRadius:5,borderWidth:0,barPercentage:0.6}]},
+    options:{
+      responsive:true,maintainAspectRatio:false,animation:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:function(ctx){
+          var i=ctx.dataIndex,z=hrZone(avgHRs[i]);
+          return 'Avg HR: '+avgHRs[i]+' bpm'+(z?' ('+z.z+')':'')+' \u2022 '+counts[i]+' activit'+(counts[i]===1?'y':'ies');
+        }}}
+      },
+      scales:{
+        x:{grid:{display:false},title:{display:true,text:'Temperature',color:'#7d4800',font:{size:11,weight:'600'}}},
+        y:{min:yMin,max:yMax,title:{display:true,text:'Avg Heart Rate (bpm)',color:'#7d4800',font:{size:11,weight:'600'}},ticks:{stepSize:10},grid:{color:'rgba(148,163,184,.18)'}}
+      }
+    },
+    plugins:[cvdZoneBandPlugin]
+  });
+  var hotActs=acts.filter(function(a){return parseFloat(a.temp)>=80&&a.date;}).sort(function(a,b){return String(a.date).localeCompare(String(b.date));});
+  if(insightEl){
+    if(hotActs.length>=4){
+      var half=Math.floor(hotActs.length/2);
+      var avg=function(list){return list.reduce(function(s,a){return s+parseFloat(a.heartRate);},0)/list.length;};
+      var earlyAvg=avg(hotActs.slice(0,half)),recentAvg=avg(hotActs.slice(half));
+      var delta=Math.round(recentAvg-earlyAvg);
+      insightEl.innerHTML='In 80\u00b0F+ conditions, your average heart rate is now <strong>'
+        +(delta===0?'about the same as':(Math.abs(delta)+' bpm '+(delta>0?'higher':'lower')+' than'))
+        +'</strong> your earliest logged hot-weather activities ('+Math.round(earlyAvg)+' \u2192 '+Math.round(recentAvg)+' bpm across '+hotActs.length+' runs).'
+        +(delta>2?' That upward drift can be a sign of heat strain \u2014 consider more fluids, slower paces in the heat, or extra recovery.':delta<-2?' That\u2019s a good sign of heat acclimation.':'');
+    } else {
+      insightEl.textContent='Log a few more 80\u00b0F+ activities with heart rate to see your heat-drift trend over time.';
+    }
+  }
+}
+
+// ── Heat Acclimation: Garmin Enduro/Fenix-style heat-load estimate (Activities tab) ──
+// Approximates the Heat Acclimation status found on higher-end Garmin watches using
+// logged temperature + duration instead of a core-temperature sensor. Each qualifying
+// activity adds a heat stimulus scaled by how hot it was and how long it lasted, and
+// that accumulated load decays a few percent every day without further heat exposure
+// -- roughly matching published heat-acclimation decay research (about three-quarters
+// of the adaptation is lost after a week fully away from heat).
+var HA_DECAY_PER_DAY=0.96;   // ~4% of accumulated heat load lost per day without a heat session
+var HA_TEMP_FLOOR=70;        // \u00b0F at/below this, an activity contributes no heat stimulus
+var HA_TEMP_CEIL=95;         // \u00b0F at/above this, an activity contributes full heat stimulus
+var HA_SATURATION=6;         // heat-load units at which the percentage is roughly 95% saturated
+function haHeatFactor(tempF){
+  if(tempF<=HA_TEMP_FLOOR)return 0;
+  if(tempF>=HA_TEMP_CEIL)return 1;
+  return (tempF-HA_TEMP_FLOOR)/(HA_TEMP_CEIL-HA_TEMP_FLOOR);
+}
+function haStatusInfo(pct){
+  if(pct<20)return{label:'Not Acclimated',color:'#dc2626'};
+  if(pct<45)return{label:'Minimally Acclimated',color:'#f97316'};
+  if(pct<70)return{label:'Acclimatizing',color:'#ca8a04'};
+  if(pct<90)return{label:'Mostly Acclimated',color:'#65a30d'};
+  return{label:'Well Acclimated',color:'#16a34a'};
+}
+function haLoadToPercent(load){
+  return Math.max(0,Math.min(100,Math.round(100*(1-Math.exp(-load/HA_SATURATION)))));
+}
+// Builds a day-by-day heat-load series ending on throughDateStr (YYYY-MM-DD), going
+// back daysBack days, by applying HA_DECAY_PER_DAY each day and adding that day's
+// qualifying activity stimulus (temperature-scaled, duration-weighted, capped per
+// session so one very long hot session can't saturate the whole estimate at once).
+function haComputeLoadSeries(acts,throughDateStr,daysBack){
+  var byDate={};
+  acts.forEach(function(a){
+    var t=parseFloat(a.temp);
+    if(a.type==='Rest Day'||!a.date||isNaN(t))return;
+    var hrs=parseMins(a.duration)/60;
+    if(!(hrs>0))return;
+    var stim=haHeatFactor(t)*Math.min(hrs,3);
+    if(stim<=0)return;
+    byDate[a.date]=(byDate[a.date]||0)+stim;
+  });
+  var through=new Date(throughDateStr+'T00:00:00');
+  var series=[],load=0;
+  for(var i=daysBack-1;i>=0;i--){
+    var d=new Date(through);d.setDate(through.getDate()-i);
+    var key=dk(d);
+    load=load*HA_DECAY_PER_DAY+(byDate[key]||0);
+    series.push({date:key,load:load});
+  }
+  return series;
+}
+// Finds the earliest date among logged (non-Rest-Day) activities, so the
+// shared heat-load series below can start from real history instead of an
+// arbitrary fixed window -- keeping the chart's current-day percentage and
+// the per-activity percentages shown on each run in sync with each other.
+function haEarliestRelevantDate(acts){
+  var todayKey=dk(new Date());
+  var earliest=null;
+  acts.forEach(function(a){
+    if(a.type==='Rest Day'||!a.date||a.date>todayKey)return;
+    if(!earliest||a.date<earliest)earliest=a.date;
+  });
+  return earliest;
+}
+// Builds ONE continuous heat-load series from the earliest relevant activity
+// date through today (capped at 730 days for performance) plus a
+// date-string -> percent lookup map, so every consumer (the aggregate chart
+// and each individual activity card) reads the same underlying estimate.
+function haBuildPercentMap(acts){
+  var todayKey=dk(new Date());
+  var earliest=haEarliestRelevantDate(acts);
+  var startKey=earliest||todayKey;
+  var daysBack=Math.min(730,Math.max(1,Math.round((new Date(todayKey+'T00:00:00')-new Date(startKey+'T00:00:00'))/86400000)+1));
+  var series=haComputeLoadSeries(acts,todayKey,daysBack);
+  var byDate={};
+  series.forEach(function(s){byDate[s.date]=haLoadToPercent(s.load);});
+  return {series:series,byDate:byDate,currentPct:series.length?haLoadToPercent(series[series.length-1].load):0};
+}
+function toggleHeatAcclimation(){
+  var sec=document.getElementById('haSection');var arr=document.getElementById('haArrow');
+  if(!sec)return;
+  var opening=sec.style.display==='none';
+  sec.style.display=opening?'block':'none';
+  if(arr)arr.innerHTML=opening?'&#x25BC;':'&#x25B6;';
+  var toggle=sec.previousElementSibling;
+  if(toggle)toggle.setAttribute('aria-expanded',opening?'true':'false');
+  if(opening)renderHeatAcclimationChart();
+}
+function renderHeatAcclimationChart(){
+  var canvas=document.getElementById('haChart');
+  var percentEl=document.getElementById('haPercent');
+  var statusEl=document.getElementById('haStatusLabel');
+  var markerEl=document.getElementById('haMarker');
+  var trackEl=document.getElementById('haTrack');
+  var summaryEl=document.getElementById('haSummary');
+  if(!canvas)return;
+  if(typeof Chart==='undefined'){
+    canvas.parentNode.innerHTML='<div style="color:#aaa;text-align:center;padding:16px 0;">Chart library did not load. Check your connection and refresh.</div>';
+    return;
+  }
+  var acts=getActivities();
+  var hasAnyHeatSource=acts.some(function(a){var t=parseFloat(a.temp);return a.type!=='Rest Day'&&!isNaN(t)&&a.date&&parseMins(a.duration)>0;});
+  if(!hasAnyHeatSource){
+    if(percentEl)percentEl.textContent='\u2014';
+    if(statusEl){statusEl.textContent='No data yet';statusEl.style.color='#7d4800';}
+    if(markerEl)markerEl.style.left='0%';
+    if(trackEl)trackEl.setAttribute('aria-valuenow','0');
+    if(summaryEl)summaryEl.textContent='Log a few activities with temperature and duration to see your heat acclimation estimate.';
+    if(charts.haChart){charts.haChart.destroy();delete charts.haChart;}
+    return;
+  }
+  var todayKey=dk(new Date());
+  var haMap=haBuildPercentMap(acts);
+  var series=haMap.series.slice(Math.max(0,haMap.series.length-30));
+  var pct=haMap.currentPct;
+  var status=haStatusInfo(pct);
+  if(percentEl){percentEl.textContent=pct+'%';percentEl.style.color=status.color;}
+  if(statusEl){statusEl.textContent=status.label;statusEl.style.color=status.color;}
+  if(markerEl)markerEl.style.left=pct+'%';
+  if(trackEl)trackEl.setAttribute('aria-valuenow',String(pct));
+  var heatActs=acts.filter(function(a){var t=parseFloat(a.temp);return a.type!=='Rest Day'&&!isNaN(t)&&t>HA_TEMP_FLOOR&&a.date&&parseMins(a.duration)>0;}).sort(function(a,b){return String(b.date).localeCompare(String(a.date));});
+  var lastHeatDate=heatActs.length?heatActs[0].date:null;
+  var daysSince=lastHeatDate?Math.round((new Date(todayKey+'T00:00:00')-new Date(lastHeatDate+'T00:00:00'))/86400000):null;
+  var cutoff14=new Date(todayKey+'T00:00:00');cutoff14.setDate(cutoff14.getDate()-14);
+  var sessions14=heatActs.filter(function(a){return new Date(a.date+'T00:00:00')>=cutoff14;}).length;
+  if(summaryEl){
+    var bits=[];
+    bits.push(sessions14+' session'+(sessions14===1?'':'s')+' over '+HA_TEMP_FLOOR+'\u00b0F in the last 14 days');
+    bits.push(daysSince==null?'no heat sessions logged yet':('last one '+(daysSince===0?'today':daysSince===1?'1 day ago':daysSince+' days ago')));
+    summaryEl.innerHTML=bits.join(' \u2022 ');
+  }
+  if(charts.haChart){charts.haChart.destroy();delete charts.haChart;}
+  var labels=series.map(function(s){var d=new Date(s.date+'T00:00:00');return (d.getMonth()+1)+'/'+d.getDate();});
+  var pcts=series.map(function(s){return haLoadToPercent(s.load);});
+  charts.haChart=new Chart(canvas.getContext('2d'),{
+    type:'line',
+    data:{labels:labels,datasets:[{label:'Heat Acclimation %',data:pcts,borderColor:'#e67e22',backgroundColor:'#e67e2222',tension:0.3,fill:true,pointRadius:0,borderWidth:2}]},
+    options:{
+      responsive:true,maintainAspectRatio:false,animation:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return 'Heat Acclimation: '+ctx.parsed.y+'%';}}}},
+      scales:{
+        x:{grid:{display:false},ticks:{maxTicksLimit:6,color:'#888',font:{size:10}}},
+        y:{min:0,max:100,ticks:{stepSize:25,color:'#888',font:{size:10}},grid:{color:'rgba(148,163,184,.18)'}}
+      }
+    }
+  });
+}
+
+// National Weather Service "feels-like" Heat Index estimate (Rothfusz regression),
+// a well-known public meteorological formula for how hot it feels when high
+// temperature and high humidity combine -- humid air makes it harder for sweat to
+// evaporate and cool the body. Below 80°F the formula isn't meaningful, so this
+// just returns the dry-bulb temperature unchanged.
+function nwsHeatIndex(tempF,rhPct){
+  var T=tempF,R=rhPct;
+  if(!(T>=80)||isNaN(R))return T;
+  var HI=-42.379+2.04901523*T+10.14333127*R-0.22475541*T*R-0.00683783*T*T-0.05481717*R*R+0.00122874*T*T*R+0.00085282*T*R*R-0.00000199*T*T*R*R;
+  if(R<13&&T<=112)HI-=((13-R)/4)*Math.sqrt((17-Math.abs(T-95))/17);
+  if(R>85&&T<=87)HI+=((R-85)/10)*((87-T)/5);
+  return HI;
+}
+// Rough, disclosed estimate of how much heat + humidity likely slowed a given run,
+// combining the NWS feels-like Heat Index above with a simple rule of thumb (~0.4%
+// pace slowdown per °F the feels-like temperature sits above a comfortable 60°F
+// baseline). This is a disclosed heuristic for a quick estimate, not a precise
+// physiological model -- effort, fitness, and heat acclimation all affect pace too.
+var HEAT_IMPACT_BASELINE_F=60;
+var HEAT_IMPACT_PCT_PER_F=0.4;
+function heatHumidityImpact(tempF,humidityPct,paceSec){
+  var t=parseFloat(tempF),h=parseFloat(humidityPct);
+  if(isNaN(t)||!(paceSec>0))return null;
+  var feelsLike=nwsHeatIndex(t,isNaN(h)?30:h);
+  var over=feelsLike-HEAT_IMPACT_BASELINE_F;
+  if(over<=0)return{feelsLike:feelsLike,pctSlower:0,secSlower:0};
+  var pctSlower=over*HEAT_IMPACT_PCT_PER_F;
+  var secSlower=paceSec*(pctSlower/100);
+  return{feelsLike:feelsLike,pctSlower:pctSlower,secSlower:secSlower};
+}
+var HUM_BUCKETS=[
+  {label:'<40%',lo:-Infinity,hi:39},
+  {label:'40-54%',lo:40,hi:54},
+  {label:'55-69%',lo:55,hi:69},
+  {label:'70-84%',lo:70,hi:84},
+  {label:'85%+',lo:85,hi:Infinity}
+];
+function toggleHumidityImpact(){
+  var sec=document.getElementById('humSection');var arr=document.getElementById('humArrow');
+  if(!sec)return;
+  var opening=sec.style.display==='none';
+  sec.style.display=opening?'block':'none';
+  if(arr)arr.innerHTML=opening?'&#x25BC;':'&#x25B6;';
+  var toggle=sec.previousElementSibling;
+  if(toggle)toggle.setAttribute('aria-expanded',opening?'true':'false');
+  if(opening)renderHumidityImpactChart();
+}
+function renderHumidityImpactChart(){
+  var canvas=document.getElementById('humChart');
+  var insightEl=document.getElementById('humInsight');
+  if(!canvas)return;
+  if(typeof Chart==='undefined'){
+    canvas.parentNode.innerHTML='<div style="color:#aaa;text-align:center;padding:16px 0;">Chart library did not load. Check your connection and refresh.</div>';
+    return;
+  }
+  var acts=getActivities().filter(function(a){
+    var h=parseFloat(a.humidity);
+    return a.type!=='Rest Day'&&!isNaN(h)&&parsePace(a.pace)>0;
+  });
+  if(acts.length<3){
+    if(charts.humChart){charts.humChart.destroy();delete charts.humChart;}
+    if(insightEl)insightEl.textContent='Log at least 3 runs with humidity and pace to see how humidity correlates with your pace.';
+    return;
+  }
+  var buckets=HUM_BUCKETS.map(function(b){return{label:b.label,lo:b.lo,hi:b.hi,sum:0,count:0};});
+  acts.forEach(function(a){
+    var h=parseFloat(a.humidity),p=parsePace(a.pace);
+    var b=buckets.filter(function(bk){return h>=bk.lo&&h<=bk.hi;})[0];
+    if(b){b.sum+=p;b.count++;}
+  });
+  var used=buckets.filter(function(b){return b.count>0;});
+  var labels=used.map(function(b){return b.label;});
+  var avgPaces=used.map(function(b){return b.sum/b.count;});
+  var counts=used.map(function(b){return b.count;});
+  var fmtPaceSec=function(sec){var m=Math.floor(sec/60),s=Math.round(sec%60);return m+':'+(s<10?'0':'')+s;};
+  var allPaces=acts.map(function(a){return parsePace(a.pace);}).concat(avgPaces);
+  var yMin=Math.max(0,Math.floor((Math.min.apply(null,allPaces)-20)/10)*10);
+  var yMax=Math.ceil((Math.max.apply(null,allPaces)+20)/10)*10;
+  if(charts.humChart){charts.humChart.destroy();delete charts.humChart;}
+  charts.humChart=new Chart(canvas.getContext('2d'),{
+    type:'bar',
+    data:{labels:labels,datasets:[{label:'Avg Pace',data:avgPaces,backgroundColor:'#2980b9',borderRadius:5,borderWidth:0,barPercentage:0.6}]},
+    options:{
+      responsive:true,maintainAspectRatio:false,animation:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:function(ctx){
+          var i=ctx.dataIndex;
+          return 'Avg Pace: '+fmtPaceSec(avgPaces[i])+'/mi • '+counts[i]+' run'+(counts[i]===1?'':'s');
+        }}}
+      },
+      scales:{
+        x:{grid:{display:false},title:{display:true,text:'Humidity',color:'#7d4800',font:{size:11,weight:'600'}}},
+        y:{min:yMin,max:yMax,title:{display:true,text:'Avg Pace (min/mi)',color:'#7d4800',font:{size:11,weight:'600'}},ticks:{stepSize:30,callback:function(v){return fmtPaceSec(v);}},grid:{color:'rgba(148,163,184,.18)'}}
+      }
+    }
+  });
+  if(insightEl){
+    if(used.length>=2){
+      var driest=used[0],humid=used[used.length-1];
+      var driestAvg=driest.sum/driest.count,humidAvg=humid.sum/humid.count;
+      var diffSec=humidAvg-driestAvg;
+      if(Math.abs(diffSec)>=3){
+        insightEl.innerHTML='Runs at <strong>'+humid.label+'</strong> humidity averaged <strong>'+fmtPaceSec(humidAvg)+'</strong>/mi vs. <strong>'+fmtPaceSec(driestAvg)+'</strong>/mi at <strong>'+driest.label+'</strong> humidity &mdash; about <strong>'+Math.round(Math.abs(diffSec))+'s</strong> '+(diffSec>0?'slower':'faster')+' per mile in the most humid conditions logged so far.';
+      }else{
+        insightEl.textContent='No clear pace difference across humidity levels yet in your logged runs.';
+      }
+    }else{
+      insightEl.textContent='Log runs across a wider range of humidity to see a comparison here.';
+    }
+  }
+}
 
 function goToActivityDate(dateStr){
   const target=new Date(dateStr+'T00:00:00');
@@ -1261,6 +1865,10 @@ function renderActivities(){
   const hrMaxEl=document.getElementById('hrMaxInput');
   if(hrMaxEl&&!hrMaxEl.value){const stored=localStorage.getItem('max_hr_value');if(stored)hrMaxEl.value=stored;}
   const maxHR=getMaxHR();
+  const restHrEl=document.getElementById('restHrInput');
+  if(restHrEl&&!restHrEl.value){const stored=localStorage.getItem('resting_hr_value');if(stored)restHrEl.value=stored;}
+  getRestingHR();
+  renderTrainingZonesPanel();
   const acts=getActivities();
   const cnt=document.getElementById('actCount');
   if(cnt)cnt.textContent=acts.length?acts.length+' activit'+(acts.length!==1?'ies':'y'):'';
@@ -1339,20 +1947,182 @@ function renderActivities(){
   if(colBtn)colBtn.style.display='inline-block';
 
   var typeColor={Run:'#e67e22',Ride:'#8e44ad',Walk:'#27ae60',Swim:'#2980b9',Strength:'#e74c3c',Other:'#95a5a6'};
+  var haPctMap=haBuildPercentMap(acts);
+  var sleepCache={};
+  // Looks up the Wellness-tab Sleep entry logged for a given calendar date
+  // (localStorage key 'planner_<date>'), so each activity card can show
+  // what was logged that day without re-parsing the same day twice when
+  // several activities share a date (e.g. with "Group by day" on).
+  function getSleepInfo(dateKey){
+    if(sleepCache.hasOwnProperty(dateKey))return sleepCache[dateKey];
+    var info=null;
+    try{
+      var raw=localStorage.getItem('planner_'+dateKey);
+      if(raw){
+        var sd=JSON.parse(raw);
+        var mins=parseSleepMins(sd.wSleepVal);
+        var score=parseFloat(sd.wSleepScore)||0;
+        if(mins||score)info={mins:mins,score:score};
+      }
+    }catch(e){}
+    sleepCache[dateKey]=info;
+    return info;
+  }
+  var prevWaterCache={};
+  // Looks up the Nutrition-tab Water Intake logged for the calendar day
+  // BEFORE a given activity date, since hydration going into a run is what
+  // the day-before total reflects, not same-day water logged after the run.
+  function getPrevDayWaterOz(dateKey){
+    if(prevWaterCache.hasOwnProperty(dateKey))return prevWaterCache[dateKey];
+    var oz=null;
+    try{
+      var prev=new Date(dateKey+'T00:00:00');
+      prev.setDate(prev.getDate()-1);
+      var raw=localStorage.getItem('planner_'+dk(prev));
+      if(raw){
+        var pd=JSON.parse(raw);
+        var o=parseFloat(pd.waterOz)||(parseFloat(pd.waterCount)*8||0);
+        if(o>0)oz=o;
+      }
+    }catch(e){}
+    prevWaterCache[dateKey]=oz;
+    return oz;
+  }
+  var prevNutritionCache={};
+  // Looks up total calories logged for the calendar day BEFORE a given
+  // activity date -- same day-before reasoning as the hydration chip above
+  // (what you ate going into a run, not what you logged afterward). Sums
+  // the itemized Nutrition-tab food log for that day, falling back to the
+  // manually-entered daily total when there's no itemized log, matching
+  // the calorie calculation the app's own Fuel Analysis AI feature already
+  // uses (aiNutritionCorrelation, in daily-planner-food-log.js).
+  function getPrevDayNutrition(dateKey){
+    if(prevNutritionCache.hasOwnProperty(dateKey))return prevNutritionCache[dateKey];
+    var result=null;
+    try{
+      var prev=new Date(dateKey+'T00:00:00');
+      prev.setDate(prev.getDate()-1);
+      var raw=localStorage.getItem('planner_'+dk(prev));
+      if(raw){
+        var pd=JSON.parse(raw);
+        var log=Array.isArray(pd.foodLog)?pd.foodLog:[];
+        var cal=log.reduce(function(sum,x){return sum+(parseFloat(x.cal)||0);},0)||parseFloat(pd.nuCalVal)||0;
+        if(cal>0){
+          var prot=log.reduce(function(sum,x){return sum+(parseFloat(x.prot)||0);},0)||parseFloat(pd.nuProtVal)||0;
+          var carbs=log.reduce(function(sum,x){return sum+(parseFloat(x.carbs)||0);},0)||parseFloat(pd.nuCarbsVal)||0;
+          var fat=log.reduce(function(sum,x){return sum+(parseFloat(x.fat)||0);},0)||parseFloat(pd.nuFatVal)||0;
+          result={cal:cal};
+          if(prot+carbs+fat>0){
+            result.protPct=Math.round(prot*4/cal*100);
+            result.carbsPct=Math.round(carbs*4/cal*100);
+            result.fatPct=Math.round(fat*9/cal*100);
+          }
+        }
+      }
+    }catch(e){}
+    prevNutritionCache[dateKey]=result;
+    return result;
+  }
+  var prevFoodImpactCache={};
+  // Combines the previous day's logged food quality (reusing the exact
+  // runnerFoodQuality() scoring the Nutrition tab's own "Daily food quality"
+  // meter already uses, in daily-planner-food-log.js) with how well that
+  // day's actual calories/carbs matched the app's own personalized
+  // pre-workout fueling target for THIS activity's run -- when the activity
+  // follows a long/tempo/interval session, nutritionPerformancePreset()
+  // already computes that target, bodyweight-scaled -- into a single 1-10
+  // "fuel impact" score for the Activities feed.
+  function getPrevDayFoodImpact(dateKey){
+    if(prevFoodImpactCache.hasOwnProperty(dateKey))return prevFoodImpactCache[dateKey];
+    var result=null;
+    try{
+      var prev=new Date(dateKey+'T00:00:00');
+      prev.setDate(prev.getDate()-1);
+      var prevKey=dk(prev);
+      var raw=localStorage.getItem('planner_'+prevKey);
+      if(raw){
+        var pd=JSON.parse(raw);
+        var log=Array.isArray(pd.foodLog)?pd.foodLog:[];
+        if(log.length){
+          // runnerFoodQuality() reads the shared `today` global to find
+          // that day's own workouts/journal context (for its run-fuel and
+          // post-run-breakfast bonuses). Swap it to the prior day just for
+          // this scoring pass -- always restored, even if scoring throws --
+          // so each activity's score reflects that activity's own previous
+          // day, not whatever day happens to be selected elsewhere in the
+          // app right now.
+          var savedToday=today,qualityTotal=0,qualityWeight=0;
+          try{
+            today=prev;
+            log.forEach(function(item){
+              inferFoodMacroSources(item);
+              var q=runnerFoodQuality(item);
+              var servings=Math.max(0.01,parseFloat(item.servings)||1);
+              var weight=Math.max(0,(parseFloat(item.cal)||0)*servings)||servings;
+              qualityTotal+=q.score*weight;
+              qualityWeight+=weight;
+            });
+          }finally{
+            today=savedToday;
+          }
+          if(qualityWeight>0){
+            var qualityScore=qualityTotal/qualityWeight;
+            // runnerFoodQuality() starts every item at a baseline of 5 and
+            // nudges it with small (roughly 0.4-1.5 point) bonuses/penalties,
+            // so a day's calorie-weighted average across breakfast, lunch,
+            // dinner, and snacks naturally compresses toward the middle of
+            // its 1-10 scale -- real mixed diets are rarely all-excellent or
+            // all-poor. Stretch the deviation from that same baseline (5) so
+            // a genuinely strong or weak fueling day actually reaches the
+            // ends of the 0-10 scale shown here, instead of the roughly 3-7
+            // band the raw average tends to sit in.
+            var stretched=5+(qualityScore-5)*2.5;
+            var nutr=getPrevDayNutrition(dateKey);
+            var preset=nutritionPerformancePreset(prevKey);
+            var penalty=0,notes=[];
+            if(preset&&preset.phase==='prior'&&nutr){
+              var calOffPct=Math.abs(nutr.cal-preset.calories)/preset.calories;
+              if(calOffPct>0.2){
+                penalty+=Math.min(3,(calOffPct-0.2)*10);
+                notes.push(Math.round(nutr.cal)+' cal vs '+preset.calories+' target');
+              }
+              if(nutr.carbsPct!=null){
+                var carbOffPts=Math.abs(nutr.carbsPct-preset.carbs);
+                if(carbOffPts>10){
+                  penalty+=Math.min(2,(carbOffPts-10)/10);
+                  notes.push(nutr.carbsPct+'% carbs vs '+preset.carbs+'% target');
+                }
+              }
+            }
+            var impact=Math.max(0,Math.min(10,Math.round((stretched-penalty)*10)/10));
+            var label=impact>=9?'Excellent':impact>=7?'Good':impact>=5?'Fair':impact>=3?'Low':'Poor';
+            result={score:impact,label:label,notes:notes,presetLabel:(preset&&preset.phase==='prior')?preset.label.replace('Tomorrow: ',''):''};
+          }
+        }
+      }
+    }catch(e){}
+    prevFoodImpactCache[dateKey]=result;
+    return result;
+  }
 
   function buildCard(a,tc,showDate,inGroup){
-    var stats=[];
-    if(a.distance)stats.push('<span class="act-stat">&#x1F4CF; <strong>'+a.distance+'</strong> mi</span>');
-    if(a.duration)stats.push('<span class="act-stat">&#x23F1; <strong>'+fmtDuration(a.duration)+'</strong></span>');
-    if(a.pace)stats.push('<span class="act-stat">&#x1F3C3; <strong>'+a.pace+'</strong>/mi</span>');
-    if(a.power){var zone=powerZone(a.power,cp);var zb=zone?'<span class="zone-badge '+zone.cls+'">'+zone.z+'</span>':'';stats.push('<span class="act-stat">&#x26A1; <strong>'+a.power+'</strong>W'+zb+'</span>');}
-    if(a.heartRate){var hzone=hrZone(a.heartRate,maxHR);var hzb=hzone?'<span class="zone-badge '+hzone.cls+'">'+hzone.z+'</span>':'';stats.push('<span class="act-stat">&#x2764; <strong>'+a.heartRate+'</strong> bpm'+hzb+'</span>');}
-    if(a.cadence)stats.push('<span class="act-stat">&#x1F9B5; <strong>'+a.cadence+'</strong> spm</span>');
-    if(a.calories)stats.push('<span class="act-stat">&#x1F525; <strong>'+a.calories+'</strong> cal</span>');
-    if(a.elevGain)stats.push('<span class="act-stat">&#x26F0; <strong>'+a.elevGain+'</strong> ft</span>');
+    // Stats are split into two visually distinct rows -- core performance
+    // numbers (pace, power, HR, etc.) on top, and day-level conditions /
+    // recovery context (weather, heat acclimation, sleep) below a divider --
+    // so the card reads as organized groups instead of one long wrapped line.
+    var perfStats=[];
+    var condStats=[];
+    if(a.distance)perfStats.push('<span class="act-stat">&#x1F4CF; <strong>'+a.distance+'</strong> mi</span>');
+    if(a.duration)perfStats.push('<span class="act-stat">&#x23F1; <strong>'+fmtDuration(a.duration)+'</strong></span>');
+    if(a.pace)perfStats.push('<span class="act-stat">&#x1F3C3; <strong>'+a.pace+'</strong>/mi</span>');
+    if(a.power){var zone=powerZone(a.power,cp);var zb=zone?'<span class="zone-badge '+zone.cls+'">'+zone.z+'</span>':'';perfStats.push('<span class="act-stat">&#x26A1; <strong>'+a.power+'</strong>W'+zb+'</span>');}
+    if(a.heartRate){var hzone=hrZone(a.heartRate,maxHR);var hzb=hzone?'<span class="zone-badge '+hzone.cls+'">'+hzone.z+'</span>':'';perfStats.push('<span class="act-stat">&#x2764; <strong>'+a.heartRate+'</strong> bpm'+hzb+'</span>');}
+    if(a.cadence)perfStats.push('<span class="act-stat">&#x1F9B5; <strong>'+a.cadence+'</strong> spm</span>');
+    if(a.calories)perfStats.push('<span class="act-stat">&#x1F525; <strong>'+a.calories+'</strong> cal</span>');
+    if(a.elevGain)perfStats.push('<span class="act-stat">&#x26F0; <strong>'+a.elevGain+'</strong> ft</span>');
     if(a.elevGain&&a.distance){
       var ftPerMi=a.elevGain/a.distance;
-      stats.push('<span class="act-stat" title="Elevation gain per mile">&#x26F0; <strong>'+Math.round(ftPerMi)+'</strong> ft/mi</span>');
+      perfStats.push('<span class="act-stat" title="Elevation gain per mile">&#x26F0; <strong>'+Math.round(ftPerMi)+'</strong> ft/mi</span>');
       var gapBaseSec=parsePace(a.pace);
       if(gapBaseSec>0){
         // Rough estimate (~12 sec/mile per 1% average grade) of a flat-
@@ -1362,13 +2132,56 @@ function renderActivities(){
         var avgGradePct=(a.elevGain/(a.distance*5280))*100;
         var gapSec=gapBaseSec+avgGradePct*12;
         var gm=Math.floor(gapSec/60),gs=Math.round(gapSec%60);
-        stats.push('<span class="act-stat" title="Estimated flat-equivalent pace based on this run’s average grade">&#x2248;GAP <strong>'+gm+':'+(gs<10?'0':'')+gs+'</strong>/mi</span>');
+        perfStats.push('<span class="act-stat" title="Estimated flat-equivalent pace based on this run’s average grade">&#x2248;GAP <strong>'+gm+':'+(gs<10?'0':'')+gs+'</strong>/mi</span>');
       }
     }
-    if(a.temp)stats.push('<span class="act-stat">&#x1F321;&#xFE0F; <strong>'+a.temp+'</strong>°F</span>');
-    if(a.humidity)stats.push('<span class="act-stat">&#x1F4A7; Humidity <strong>'+a.humidity+'</strong>%</span>');
-    if(a.aqi)stats.push('<span class="act-stat">&#x1F32C;&#xFE0F; AQI <strong>'+a.aqi+'</strong></span>');
-    if(a.execScore)stats.push('<span class="act-stat">&#x1F3AF; <strong>'+a.execScore+'</strong>/100</span>');
+    if(a.temp)condStats.push('<span class="act-stat">&#x1F321;&#xFE0F; <strong>'+a.temp+'</strong>°F</span>');
+    if(a.humidity)condStats.push('<span class="act-stat">&#x1F4A7; Humidity <strong>'+a.humidity+'</strong>%</span>');
+    if(a.aqi)condStats.push('<span class="act-stat">&#x1F32C;&#xFE0F; AQI <strong>'+a.aqi+'</strong></span>');
+    if(a.temp&&a.pace){
+      var hhImpact=heatHumidityImpact(a.temp,a.humidity,parsePace(a.pace));
+      if(hhImpact&&hhImpact.pctSlower>=0.5){
+        condStats.push('<span class="act-stat" title="Estimated pace impact from heat/humidity, feels like '+Math.round(hhImpact.feelsLike)+'°F">&#x1F975; +<strong>'+hhImpact.pctSlower.toFixed(1)+'%</strong> ('+Math.round(hhImpact.secSlower)+'s/mi)</span>');
+      }
+    }
+    if(a.date&&haPctMap.byDate[a.date]!==undefined){
+      var haPct=haPctMap.byDate[a.date];var haInfo=haStatusInfo(haPct);
+      condStats.push('<span class="act-stat" title="Estimated heat acclimation on this date: '+haInfo.label+'">&#x1F321;&#xFE0F;&#x1F4A7; Heat Accl. <strong style="color:'+haInfo.color+';">'+haPct+'%</strong></span>');
+    }
+    if(a.date){
+      var sleepInfo=getSleepInfo(a.date);
+      if(sleepInfo){
+        var sParts=[];
+        if(sleepInfo.mins)sParts.push('<strong>'+fmtMins(sleepInfo.mins)+'</strong>');
+        if(sleepInfo.score){
+          var sColor=sleepInfo.score>=85?'#16a34a':sleepInfo.score>=70?'#65a30d':sleepInfo.score>=50?'#f97316':'#dc2626';
+          sParts.push('<strong style="color:'+sColor+';">'+Math.round(sleepInfo.score)+'</strong> score');
+        }
+        condStats.push('<span class="act-stat" title="Sleep logged for this date">&#x1F634; '+sParts.join(' &middot; ')+'</span>');
+      }
+    }
+    if(a.date){
+      var prevWaterOz=getPrevDayWaterOz(a.date);
+      if(prevWaterOz!=null){
+        condStats.push('<span class="act-stat" title="Water intake logged the day before this activity">&#x1F4A7; <strong>'+Math.round(prevWaterOz)+'</strong> oz prev-day</span>');
+      }
+    }
+    if(a.date){
+      var prevNutr=getPrevDayNutrition(a.date);
+      if(prevNutr!=null){
+        var macroPart=prevNutr.protPct!=null?' &middot; P '+prevNutr.protPct+'% &middot; C '+prevNutr.carbsPct+'% &middot; F '+prevNutr.fatPct+'%':'';
+        condStats.push('<span class="act-stat" title="Calories and macro split logged the day before this activity">&#x1F37D;&#xFE0F; <strong>'+Math.round(prevNutr.cal)+'</strong> cal'+macroPart+' prev-day</span>');
+      }
+    }
+    if(a.date){
+      var foodImpact=getPrevDayFoodImpact(a.date);
+      if(foodImpact!=null){
+        var impactColor=foodImpact.score>=7?'#16a34a':foodImpact.score>=5?'#65a30d':foodImpact.score>=3?'#f97316':'#dc2626';
+        var impactExtra=(foodImpact.presetLabel?' \u00b7 '+foodImpact.presetLabel:'')+(foodImpact.notes.length?' \u00b7 '+foodImpact.notes.join(', '):'');
+        condStats.push('<span class="act-stat" title="Previous day food quality + fueling vs. target, scored 1-10 ('+foodImpact.label+')'+impactExtra+'">&#x1F3C5; <strong style="color:'+impactColor+';">'+foodImpact.score.toFixed(1)+'</strong>/10 fuel impact</span>');
+      }
+    }
+    if(a.execScore)condStats.push('<span class="act-stat">&#x1F3AF; <strong>'+a.execScore+'</strong>/100</span>');
     var collapsed=actCollapsed.has(a.id);
     var chevron=collapsed?'&#x25B6;':'&#x25BC;';
     var bodyDisplay=collapsed?'none':'block';
@@ -1391,7 +2204,7 @@ function renderActivities(){
       +'</div>'
       +'</div>'
       +'<div id="actBody_'+a.id+'" style="display:'+bodyDisplay+';">'
-      +'<div class="act-stats">'+stats.join('')+'</div>'
+      +'<div class="act-stats">'+(perfStats.length?'<div class="act-stats-row">'+perfStats.join('')+'</div>':'')+(condStats.length?'<div class="act-stats-row act-stats-conditions">'+condStats.join('')+'</div>':'')+'</div>'
       +(a.routeUrl?'<a href="'+escHtml(a.routeUrl)+'" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:5px;margin-top:8px;background:#e0f2fe;border:1px solid #7dd3fc;color:#075985;border-radius:7px;padding:6px 10px;font-size:.76rem;font-weight:800;text-decoration:none;">&#x1F5FA;&#xFE0F; Open Run Map</a>':'')
       +(a.notes?'<div style="font-size:0.82rem;color:#666;margin-top:8px;white-space:pre-wrap;"><strong style="display:block;color:#475569;margin-bottom:2px;">Notes</strong>'+formatActivityNotesHtml(a.notes)+'</div>':'')
       +(a.injuryReport?'<div style="font-size:0.82rem;color:#7f1d1d;margin-top:8px;padding:8px 10px;background:#fff7f7;border:1px solid #fecaca;border-radius:7px;white-space:pre-wrap;"><strong style="display:block;color:#b91c1c;margin-bottom:2px;">Injury Report</strong>'+escHtml(a.injuryReport)+'</div>':'')
@@ -1454,6 +2267,7 @@ function renderActivePlan(){loadCurrentPlan();}
 function loadCurrentPlan(){
   var sec=document.getElementById('tpPersistSection');
   var archSec=document.getElementById('tpArchiveSection');
+  loadUpcomingPlan();
   var raw=localStorage.getItem('current_training_plan');
   if(!raw||!sec){if(sec)sec.style.display='none';return;}
   var plan;try{plan=JSON.parse(raw);}catch(e){sec.style.display='none';return;}
@@ -1476,34 +2290,462 @@ function loadCurrentPlan(){
   }
   // Body
   var body=document.getElementById('tpPersistBody');
-  if(body)body.textContent=plan.text||'(No plan text)';
+  if(body)body.textContent=reflowPlanText(plan.text)||'(No plan text)';
+  var pdfBtn=document.getElementById('tpPersistPdfBtn');
+  if(pdfBtn)pdfBtn.style.display=plan.pdfDataUrl?'inline-block':'none';
   // Archived plans section
   var archived=[];try{archived=JSON.parse(localStorage.getItem('archived_plans')||'[]');}catch(e){}
   if(archSec)archSec.style.display=archived.length?'block':'none';
   renderArchivedPlans();
   renderJournalHome();
 }
-function archivePlan(){
-  var raw=localStorage.getItem('current_training_plan');
-  if(!raw){alert('No active plan to archive.');return;}
+function archivePlan(which){
+  which=which||'current';
+  var storageKey=which==='upcoming'?'upcoming_training_plan':'current_training_plan';
+  var raw=localStorage.getItem(storageKey);
+  if(!raw){alert('No '+(which==='upcoming'?'upcoming':'active')+' plan to archive.');return;}
   var plan;try{plan=JSON.parse(raw);}catch(e){return;}
   var archived=[];try{archived=JSON.parse(localStorage.getItem('archived_plans')||'[]');}catch(e){}
   plan.archivedAt=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  plan.archivedFrom=which==='upcoming'?'upcoming':'current';
+  delete plan.pdfDataUrl;
   archived.unshift(plan);
   localStorage.setItem('archived_plans',JSON.stringify(archived));
-  localStorage.removeItem('current_training_plan');
-  var sec=document.getElementById('tpPersistSection');
-  if(sec)sec.style.display='none';
+  localStorage.removeItem(storageKey);
+  if(which==='upcoming'){
+    var upSec=document.getElementById('tpUpcomingSection');
+    if(upSec)upSec.style.display='none';
+  }else{
+    var sec=document.getElementById('tpPersistSection');
+    if(sec)sec.style.display='none';
+  }
   var archSec=document.getElementById('tpArchiveSection');
   if(archSec)archSec.style.display='block';
   renderArchivedPlans();
-  alert('Plan archived.');
+  alert(which==='upcoming'?'Upcoming plan archived.':'Plan archived.');
 }
 function deletePlan(){
   if(!confirm('Delete the active training plan? This cannot be undone.'))return;
   localStorage.removeItem('current_training_plan');
   var sec=document.getElementById('tpPersistSection');
   if(sec)sec.style.display='none';
+}
+function fmtPlanDate(ds){
+  if(!ds)return'\u2014';
+  var d=new Date(ds+'T00:00:00');
+  if(isNaN(d.getTime()))return ds;
+  return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+}
+// Cleans up plan text for display only (never rewrites the stored plan.text).
+// PDF text extraction -- and some pasted/typed text -- can lose real line
+// breaks, leaving behind runs of 2+ spaces where a line or paragraph break
+// used to be. This turns those back into visible line breaks. A recovered
+// break only gets a full blank-line paragraph gap when it looks like the
+// end of a flowing sentence/paragraph; short labels, headings, and
+// weekly-schedule/table cells stay on compact, single-spaced lines instead
+// of being stretched out across the screen.
+function reflowPlanText(text){
+  if(!text)return text;
+  var t=String(text);
+  t=t.replace(/[ \t]{2,}/g,'\x00');
+  t=t.replace(/[ \t]+([,.;:])/g,'$1');
+  t=t.replace(/\x00[ \t]+/g,'\x00');
+  t=t.replace(/\n[ \t]+/g,'\n');
+  var segments=t.split('\x00');
+  var result=segments[0];
+  for(var i=1;i<segments.length;i++){
+    var prevLines=result.split('\n');
+    var prev=prevLines[prevLines.length-1];
+    var nextLines=segments[i].split('\n');
+    var next=nextLines[0];
+    var endsSentence=/[.!?:]$/.test(prev.trim());
+    var bothLong=prev.trim().length>25&&next.trim().length>25;
+    result+=(endsSentence||bothLong)?'\n\n':'\n';
+    result+=segments[i];
+  }
+  return result.replace(/\n{3,}/g,'\n\n').trim();
+}
+// Saves a plan record to localStorage. If storage is full (most likely
+// because the plan includes a saved copy of its original PDF), retries
+// without that copy so the plan itself is never lost. Returns true,
+// 'stripped', or false so callers know whether the PDF copy survived.
+function savePlanRecord(key,obj){
+  try{
+    localStorage.setItem(key,JSON.stringify(obj));
+    return true;
+  }catch(e){
+    if(obj&&obj.pdfDataUrl){
+      var stripped={};
+      for(var k in obj)if(k!=='pdfDataUrl')stripped[k]=obj[k];
+      try{
+        localStorage.setItem(key,JSON.stringify(stripped));
+        return'stripped';
+      }catch(e2){
+        return false;
+      }
+    }
+    return false;
+  }
+}
+// Opens a saved original PDF (stored as a base64 data: URL) in a new tab, via
+// a Blob/object URL so it opens reliably even on mobile browsers.
+function openStoredPdf(dataUrl){
+  if(!dataUrl){alert('No original PDF is saved for this plan (it was uploaded before this feature existed, or the file was too large to keep a copy of). Re-upload the PDF to enable this.');return;}
+  try{
+    var commaIdx=dataUrl.indexOf(',');
+    var metaPart=dataUrl.slice(0,commaIdx);
+    var mimeMatch=metaPart.match(/data:(.*?);base64/);
+    var mime=mimeMatch?mimeMatch[1]:'application/pdf';
+    var binary=atob(dataUrl.slice(commaIdx+1));
+    var bytes=new Uint8Array(binary.length);
+    for(var i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
+    var blob=new Blob([bytes],{type:mime});
+    var url=URL.createObjectURL(blob);
+    window.open(url,'_blank');
+    setTimeout(function(){URL.revokeObjectURL(url);},60000);
+  }catch(e){
+    alert('Could not open the original PDF.');
+  }
+}
+function viewActivePlanPdf(){
+  var raw=localStorage.getItem('current_training_plan');
+  var plan=null;if(raw){try{plan=JSON.parse(raw);}catch(e){}}
+  openStoredPdf(plan&&plan.pdfDataUrl);
+}
+function viewUpcomingPlanPdf(){
+  var raw=localStorage.getItem('upcoming_training_plan');
+  var plan=null;if(raw){try{plan=JSON.parse(raw);}catch(e){}}
+  openStoredPdf(plan&&plan.pdfDataUrl);
+}
+// Sends a plan's current text to the same Anthropic API the AI plan
+// generator already uses (same stored key), asking it to reorganize the
+// text into the same clean, readable layout the app's own generated plans
+// use -- without inventing, dropping, or summarizing away any of the
+// original content. Works on any plan text regardless of where it came
+// from (uploaded PDF, pasted text, or AI-generated), so it also fixes up
+// a plan that was uploaded before "View Original PDF" existed.
+function reformatPlanWithAI(which){
+  var key=journalAIKey();
+  if(!key){alert('Add your Anthropic API key in \u2699\uFE0F Settings first to use AI formatting cleanup.');return;}
+  var storageKey=which==='upcoming'?'upcoming_training_plan':'current_training_plan';
+  var raw=localStorage.getItem(storageKey);
+  if(!raw){alert('No plan to reformat.');return;}
+  var plan;try{plan=JSON.parse(raw);}catch(e){alert('Could not read this plan.');return;}
+  if(!plan.text){alert('This plan has no text to reformat.');return;}
+  var btn=document.getElementById(which==='upcoming'?'tpUpcomingReformatBtn':'tpPersistReformatBtn');
+  if(btn){btn.disabled=true;btn.textContent='\u23F3 Reformatting\u2026';}
+  var prompt='You are formatting a training plan for easy reading in a mobile app. Reformat the plan text below into a clean, consistently structured document, following this style:\n\n'
+    +'- A short title line in capitals (e.g. the distance and plan type)\n'
+    +'- A one-line subtitle describing the plan\'s structure/phases, using \u00B7 as a separator\n'
+    +'- A full-width separator line of = characters\n'
+    +'- Key stats as their own short labeled lines in capitals (e.g. TARGET PACE, FINISH GOAL, PEAK LONG RUN) directly followed by their values, if the plan includes stats like these\n'
+    +'- The plan start date on its own line\n'
+    +'- A week-by-week schedule, each week starting with a clear "Week N \u2014 Phase" header, followed by each training day on its own line (e.g. "Mon: Easy 4 miles")\n\n'
+    +'Keep ALL of the original plan\'s real information -- do not invent, remove, or summarize away any detail, workout, note, or number. Only reorganize and reformat for readability. Reply with ONLY the reformatted plan text, no preamble or commentary.\n\n'
+    +'Plan text to reformat:\n\n'+plan.text;
+  var controller=new AbortController();
+  var timeoutId=setTimeout(function(){controller.abort();},60000);
+  fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    signal:controller.signal,
+    headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:6000,messages:[{role:'user',content:prompt}]})
+  }).then(function(r){return r.json();}).then(function(data){
+    clearTimeout(timeoutId);
+    if(btn){btn.disabled=false;btn.textContent='\uD83E\uDE84 Clean Up Formatting';}
+    if(data.error){alert('AI error: '+data.error.message);return;}
+    var newText=((data.content&&data.content[0]&&data.content[0].text)||'').trim();
+    if(!newText){alert('The AI did not return any text. Please try again.');return;}
+    plan.text=newText;
+    var rebuilt=buildUploadedTrainingSchedule(newText,plan.startDate||dk(new Date()),plan.weeks);
+    plan.schedule=rebuilt.schedule;plan.scheduleMode=rebuilt.mode;plan.scheduleVersion=3;
+    var saveResult=savePlanRecord(storageKey,plan);
+    if(which==='upcoming'){
+      loadUpcomingPlan();
+    }else{
+      var _ck=[];for(var _i=0;_i<localStorage.length;_i++){var _k=localStorage.key(_i);if(_k&&_k.startsWith('workout_cache_'))_ck.push(_k);}
+      _ck.forEach(function(_k){localStorage.removeItem(_k);});
+      loadCurrentPlan();
+    }
+    var pdfNote=(plan.pdfDataUrl&&saveResult==='stripped')?' (The saved original PDF copy had to be dropped to fit storage.)':'';
+    alert('Plan reformatted.'+pdfNote);
+  }).catch(function(err){
+    clearTimeout(timeoutId);
+    if(btn){btn.disabled=false;btn.textContent='\uD83E\uDE84 Clean Up Formatting';}
+    if(err&&err.name==='AbortError'){alert('Reformatting timed out. Please try again.');}
+    else{alert('Could not reformat the plan: '+(err&&err.message?err.message:err));}
+  });
+}
+// A second, "upcoming" plan saved alongside the active one -- e.g. an ultra plan
+// queued up to start once the current marathon plan's race day has passed.
+// Kept in its own localStorage slot so it never overwrites current_training_plan
+// until the person explicitly promotes it with makeUpcomingPlanActive().
+function loadUpcomingPlan(){
+  var sec=document.getElementById('tpUpcomingSection');
+  if(!sec)return;
+  var raw=localStorage.getItem('upcoming_training_plan');
+  if(!raw){sec.style.display='none';return;}
+  var plan;try{plan=JSON.parse(raw);}catch(e){sec.style.display='none';return;}
+  sec.style.display='block';
+  var meta=document.getElementById('tpUpcomingMeta');
+  if(meta){
+    var parts=[];
+    if(plan.type)parts.push(plan.type);
+    if(plan.weeks)parts.push(plan.weeks+'-week plan');
+    parts.push('Starts '+fmtPlanDate(plan.startDate));
+    if(plan.createdAt)parts.push('Saved '+plan.createdAt);
+    meta.textContent=parts.join(' \u2022 ');
+  }
+  var body=document.getElementById('tpUpcomingBody');
+  if(body)body.textContent=reflowPlanText(plan.text)||'(No plan text)';
+  var upcomingPdfBtn=document.getElementById('tpUpcomingPdfBtn');
+  if(upcomingPdfBtn)upcomingPdfBtn.style.display=plan.pdfDataUrl?'inline-block':'none';
+}
+// Inserts (or refreshes) a standard reference "TRAINING ZONES" section
+// (McMillan-style pace zones, with heart-rate ranges and what each zone is
+// used for) into a plan's text, matching the app's own house style. Placed
+// right before the week-by-week schedule starts (i.e. right before the
+// "Week 1" header, after any separator line that leads into it) so it reads
+// as plan reference material rather than a scheduled day, and so it can
+// never get swallowed into a week's day-by-day parsing. If no "Week 1"
+// header is found at all, it's appended at the end instead. If the plan
+// already has a Training Zones section, that section is replaced in place
+// with the current version (so re-tapping the button refreshes it rather
+// than refusing), leaving the rest of the plan untouched.
+// These "TRAINING ZONES" HR numbers were originally authored against Max HR 176 /
+// Resting HR 49 (heart-rate reserve 127 bpm). scaleHRFromLegacyBaseline() keeps each
+// one at the same position within the reserve as Max HR / Resting HR change, so the
+// McMillan pace zones stay exactly as written while the HR side tracks the same
+// Karvonen math karvonenHRBoundaries() uses. At today's Max HR 176 / Resting HR 49
+// this reproduces the original numbers exactly (zero change); it only starts moving
+// them once either input changes.
+function scaleHRFromLegacyBaseline(oldBpm){
+  var LEGACY_REST=49,LEGACY_RESERVE=127;
+  var restHR=getRestingHR();
+  var reserve=Math.max(1,getMaxHR()-restHR);
+  return Math.round(restHR+reserve*(oldBpm-LEGACY_REST)/LEGACY_RESERVE);
+}
+function buildTrainingZonesBlock(){
+  var b=karvonenHRBoundaries();
+  var z2Start=b[1],z2Ceiling=b[2]-1;
+  var raceLo=scaleHRFromLegacyBaseline(130),raceHi=scaleHRFromLegacyBaseline(140);
+  var steadyLo=raceHi,steadyHi=scaleHRFromLegacyBaseline(148);
+  var tempoLo=steadyHi,tempoHi=scaleHRFromLegacyBaseline(155);
+  var cruiseLo=scaleHRFromLegacyBaseline(152),cruiseHi=scaleHRFromLegacyBaseline(158);
+  var speedFloor=cruiseHi;
+  return [
+    'TRAINING ZONES',
+    'Paces are approximate McMillan-style zones for a ~4:00 marathon runner. On easy and long days, heart rate wins over pace; on trails and hills, effort wins over both.',
+    '',
+    'RECOVERY (Endurance)',
+    'Pace: 10:45\u201311:30/mi  \u00b7  HR: under '+z2Start,
+    'Day after a hard effort',
+    '',
+    'EASY / LONG (Endurance)',
+    'Pace: 9:45\u201310:45/mi  \u00b7  HR: '+z2Start+'\u2013'+z2Ceiling,
+    'Most miles, long runs',
+    '',
+    '50K RACE EFFORT (Endurance)',
+    'Pace: 10:15\u201311:00/mi (trail varies)  \u00b7  HR: '+raceLo+'\u2013'+raceHi,
+    'Long-run segments, race day',
+    '',
+    'STEADY STATE (Stamina)',
+    'Pace: 9:00\u20139:20/mi  \u00b7  HR: '+steadyLo+'\u2013'+steadyHi,
+    'Fast finishes, steady runs',
+    '',
+    'TEMPO (Stamina)',
+    'Pace: 8:35\u20138:50/mi  \u00b7  HR: '+tempoLo+'\u2013'+tempoHi,
+    'Tempo runs',
+    '',
+    'CRUISE / TEMPO INTERVALS (Stamina)',
+    'Pace: 8:15\u20138:35/mi  \u00b7  HR: '+cruiseLo+'\u2013'+cruiseHi,
+    'Interval-style threshold work',
+    '',
+    'SPEED (Speed)',
+    'Pace: 7:45\u20138:05/mi  \u00b7  HR: '+speedFloor+'+',
+    'Short VO2 repeats, Phase 1-2 only',
+    '',
+    'STRIDES / HILL SPRINTS (Sprint)',
+    'Pace: Fast, relaxed  \u00b7  HR: not used',
+    '15-20s pickups',
+    '',
+    'Set the '+z2Ceiling+' bpm Zone 2 ceiling as a custom HR alert on your Galaxy Watch Ultra. Use the Polar H10 for long runs so the readings are trustworthy.'
+  ].join('\n');
+}
+function planHasTrainingZonesSection(text){
+  if(!text)return false;
+  var lines=text.split(/\r?\n/);
+  for(var i=0;i<lines.length;i++){if(/^\s*training zones\s*$/i.test(lines[i]))return true;}
+  return false;
+}
+// Called whenever Max HR or Resting HR changes (manual edit, or the monthly
+// auto-update). Silently re-applies the live TRAINING ZONES block to any plan
+// that already has one -- never inserts a fresh section into a plan that never
+// had one, so this only keeps existing content in sync, it never adds new
+// content on its own.
+function refreshTrainingZonesInAllPlans(){
+  var orig=window.alert;
+  try{
+    window.alert=function(){};
+    ['current_training_plan','upcoming_training_plan'].forEach(function(key){
+      var raw=localStorage.getItem(key);
+      if(!raw)return;
+      var plan;try{plan=JSON.parse(raw);}catch(e){return;}
+      if(!planHasTrainingZonesSection(plan.text))return;
+      addTrainingZonesToPlan(key==='upcoming_training_plan'?'upcoming':'current');
+    });
+  }catch(e){}
+  window.alert=orig;
+}
+function addTrainingZonesToPlan(which){
+  var storageKey=which==='upcoming'?'upcoming_training_plan':'current_training_plan';
+  var raw=localStorage.getItem(storageKey);
+  if(!raw){alert('No '+(which==='upcoming'?'upcoming':'active')+' plan found.');return;}
+  var plan;try{plan=JSON.parse(raw);}catch(e){alert('Could not read the plan.');return;}
+  if(!plan.text){alert('This plan has no text to add to.');return;}
+  var zonesBlock=buildTrainingZonesBlock();
+  var lines=plan.text.split(/\r?\n/);
+  var zonesStart=-1;
+  for(var z=0;z<lines.length;z++){if(/^\s*training zones\s*$/i.test(lines[z])){zonesStart=z;break;}}
+  var before,after;
+  if(zonesStart>=0){
+    var zonesEnd=lines.length;
+    for(var e=zonesStart+1;e<lines.length;e++){if(/^\s*=+\s*$/.test(lines[e])||/^\s*week\s+1\b/i.test(lines[e])){zonesEnd=e;break;}}
+    var beforeLines=lines.slice(0,zonesStart);
+    while(beforeLines.length&&beforeLines[beforeLines.length-1].trim()==='')beforeLines.pop();
+    var afterLines=lines.slice(zonesEnd);
+    while(afterLines.length&&afterLines[0].trim()==='')afterLines.shift();
+    before=beforeLines.join('\n');
+    after=afterLines.join('\n');
+  }else{
+    var weekIdx=-1;
+    for(var i=0;i<lines.length;i++){if(/^\s*week\s+1\b/i.test(lines[i])){weekIdx=i;break;}}
+    var insertAt;
+    if(weekIdx>=0){
+      var sepIdx=-1;
+      for(var j=weekIdx-1;j>=0&&j>=weekIdx-4;j--){if(/^\s*=+\s*$/.test(lines[j])){sepIdx=j;break;}}
+      insertAt=sepIdx>=0?sepIdx:weekIdx;
+    }else{
+      insertAt=lines.length;
+    }
+    before=lines.slice(0,insertAt).join('\n').replace(/\s+$/,'');
+    after=lines.slice(insertAt).join('\n');
+  }
+  plan.text=(before?before+'\n\n':'')+zonesBlock+(after?'\n\n'+after:'');
+  var rebuilt=buildUploadedTrainingSchedule(plan.text,plan.startDate,plan.weeks);
+  plan.schedule=rebuilt.schedule;plan.scheduleMode=rebuilt.mode;plan.scheduleVersion=3;
+  var saveResult=savePlanRecord(storageKey,plan);
+  if(which==='upcoming'){
+    loadUpcomingPlan();
+  }else{
+    var _ck=[];for(var _i=0;_i<localStorage.length;_i++){var _k=localStorage.key(_i);if(_k&&_k.startsWith('workout_cache_'))_ck.push(_k);}
+    _ck.forEach(function(_k){localStorage.removeItem(_k);});
+    loadCurrentPlan();
+  }
+  var pdfNote=(plan.pdfDataUrl&&saveResult==='stripped')?' (The saved original PDF copy had to be dropped to fit storage.)':'';
+  alert((zonesStart>=0?'Training zones updated.':'Training zones added to the '+(which==='upcoming'?'upcoming':'active')+' plan.')+pdfNote);
+}
+// Inserts the real calendar date next to each "Sun:"/"Mon:"/... day label in
+// a plan's week-by-week schedule (e.g. "Sun: 4 E" becomes "Sun, Nov 1: 4 E"),
+// computed from the plan's own "Start date:"/"Plan start:" line in its text
+// (never "Race day:"/"Target date:"/"Finish date:", which are end dates, and
+// never the stored plan.startDate field, which can be stale) together with
+// each "Week N" header. Re-tapping recomputes cleanly -- any date this
+// function previously inserted is stripped first, so dates never stack or
+// drift if the plan's start date or weeks are later adjusted. Also upgrades
+// the plan's schedule from position-based "weekly" matching to precise
+// date-based "dated" matching, since every day line now carries a real date.
+function addDatesToSchedule(which){
+  var storageKey=which==='upcoming'?'upcoming_training_plan':'current_training_plan';
+  var raw=localStorage.getItem(storageKey);
+  if(!raw){alert('No '+(which==='upcoming'?'upcoming':'active')+' plan found.');return;}
+  var plan;try{plan=JSON.parse(raw);}catch(e){alert('Could not read the plan.');return;}
+  if(!plan.text){alert('This plan has no text to update.');return;}
+  var lines=plan.text.split(/\r?\n/);
+  var fallbackYear=new Date((plan.startDate||dk(new Date()))+'T00:00:00').getFullYear();
+  var startDate=null;
+  for(var i=0;i<lines.length;i++){
+    if(!/^\s*(start\s*date|plan\s*start)\s*:?\s*/i.test(lines[i]))continue;
+    var rest=lines[i].replace(/^\s*(start\s*date|plan\s*start)\s*:?\s*/i,'');
+    var sameLineKey=rest?trainingPlanDateFromLine(rest,fallbackYear):null;
+    if(sameLineKey){startDate=new Date(sameLineKey+'T00:00:00');}
+    else{
+      for(var n=i+1;n<lines.length;n++){
+        if(lines[n].trim()==='')continue;
+        var nextKey=trainingPlanDateFromLine(lines[n],fallbackYear);
+        if(nextKey)startDate=new Date(nextKey+'T00:00:00');
+        break;
+      }
+    }
+    break;
+  }
+  if((!startDate||isNaN(startDate.getTime()))&&plan.startDate)startDate=new Date(plan.startDate+'T00:00:00');
+  if(!startDate||isNaN(startDate.getTime())){alert('Could not find a start date in this plan to calculate dates from.');return;}
+  var weekdayIdx={sun:0,mon:1,tue:2,wed:3,thu:4,fri:5,sat:6};
+  var startWeekdayIdx=startDate.getDay();
+  var currentWeekNum=null,changed=0;
+  for(var li=0;li<lines.length;li++){
+    var weekMatch=lines[li].match(/^\s*week\s+(\d+)\b/i);
+    if(weekMatch){currentWeekNum=parseInt(weekMatch[1],10);continue;}
+    if(currentWeekNum===null)continue;
+    var stripped=lines[li].replace(/^(\s*(?:sun|mon|tue|wed|thu|fri|sat)(?:day)?),\s*[A-Za-z]{3,9}\s+\d{1,2}(\s*:)/i,'$1$2');
+    var dayMatch=stripped.match(/^(\s*)(sun|mon|tue|wed|thu|fri|sat)(day)?(\s*:)/i);
+    if(!dayMatch)continue;
+    var dayIdx=weekdayIdx[dayMatch[2].toLowerCase()];
+    var offset=(dayIdx-startWeekdayIdx+7)%7;
+    var weekStart=new Date(startDate);weekStart.setDate(startDate.getDate()+(currentWeekNum-1)*7);
+    var actualDate=new Date(weekStart);actualDate.setDate(weekStart.getDate()+offset);
+    var dateStr=actualDate.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    var newPrefix=dayMatch[1]+dayMatch[2]+(dayMatch[3]||'')+', '+dateStr+dayMatch[4];
+    lines[li]=newPrefix+stripped.slice(dayMatch[0].length);
+    changed++;
+  }
+  if(!changed){alert('No "Week N" day-by-day schedule lines were found to add dates to.');return;}
+  plan.text=lines.join('\n');
+  var rebuilt=buildUploadedTrainingSchedule(plan.text,plan.startDate,plan.weeks);
+  plan.schedule=rebuilt.schedule;plan.scheduleMode=rebuilt.mode;plan.scheduleVersion=3;
+  var saveResult=savePlanRecord(storageKey,plan);
+  if(which==='upcoming'){
+    loadUpcomingPlan();
+  }else{
+    var _ck=[];for(var _i=0;_i<localStorage.length;_i++){var _k=localStorage.key(_i);if(_k&&_k.startsWith('workout_cache_'))_ck.push(_k);}
+    _ck.forEach(function(_k){localStorage.removeItem(_k);});
+    loadCurrentPlan();
+  }
+  var pdfNote=(plan.pdfDataUrl&&saveResult==='stripped')?' (The saved original PDF copy had to be dropped to fit storage.)':'';
+  alert('Added dates to '+changed+' day'+(changed===1?'':'s')+' in the schedule.'+pdfNote);
+}
+function makeUpcomingPlanActive(){
+  var raw=localStorage.getItem('upcoming_training_plan');
+  if(!raw){alert('No upcoming plan saved.');return;}
+  var plan;try{plan=JSON.parse(raw);}catch(e){alert('Could not read the upcoming plan.');return;}
+  var curRaw=localStorage.getItem('current_training_plan');
+  if(curRaw){
+    if(!confirm('This will archive your current active plan and make this upcoming plan active now. Continue?'))return;
+    var curPlan=null;try{curPlan=JSON.parse(curRaw);}catch(e){}
+    if(curPlan){
+      var archived=[];try{archived=JSON.parse(localStorage.getItem('archived_plans')||'[]');}catch(e){}
+      curPlan.archivedAt=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+      curPlan.archivedFrom='current';
+      delete curPlan.pdfDataUrl;
+      archived.unshift(curPlan);
+      localStorage.setItem('archived_plans',JSON.stringify(archived));
+    }
+  }
+  delete plan.archivedAt;
+  savePlanRecord('current_training_plan',plan);
+  localStorage.removeItem('upcoming_training_plan');
+  // Clear stale workout caches so the newly active plan's entries load fresh
+  var _ck=[];for(var _i=0;_i<localStorage.length;_i++){var _k=localStorage.key(_i);if(_k&&_k.startsWith('workout_cache_'))_ck.push(_k);}
+  _ck.forEach(function(_k){localStorage.removeItem(_k);});
+  loadCurrentPlan();
+  loadUpcomingPlan();
+  alert('Your upcoming plan is now active.');
+}
+function deleteUpcomingPlan(){
+  if(!confirm('Delete the upcoming plan? This cannot be undone.'))return;
+  localStorage.removeItem('upcoming_training_plan');
+  loadUpcomingPlan();
 }
 function toggleArchivedPlans(){
   var list=document.getElementById('tpArchiveList');
@@ -1519,7 +2761,8 @@ function renderArchivedPlans(){
   var archived=[];try{archived=JSON.parse(localStorage.getItem('archived_plans')||'[]');}catch(e){}
   if(!archived.length){list.innerHTML='<div style="font-size:0.82rem;color:#aaa;padding:8px 4px;">No archived plans.</div>';return;}
   list.innerHTML=archived.map(function(p,i){
-    var lbl=(p.type||'Plan')+' • '+(p.weeks?p.weeks+'-wk • ':'')+('Archived '+(p.archivedAt||''));
+    var sourceLbl=p.archivedFrom==='upcoming'?'Upcoming':'Active';
+    var lbl=sourceLbl+' '+(p.type||'Plan')+' • '+(p.weeks?p.weeks+'-wk • ':'')+('Archived '+(p.archivedAt||''));
     return'<div style="border:1px solid #e9ecef;border-radius:8px;padding:10px 12px;margin-bottom:8px;background:#fafafa;">'
       +'<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">'
       +'<span style="font-size:0.8rem;font-weight:600;color:#555;">'+lbl+'</span>'
@@ -1527,19 +2770,22 @@ function renderArchivedPlans(){
       +'<button onclick="restoreArchivedPlan('+i+')" style="font-size:0.75rem;padding:3px 10px;border-radius:6px;border:1px solid #667eea;background:#667eea;color:white;cursor:pointer;">Restore</button>'
       +'<button onclick="deleteArchivedPlan('+i+')" style="font-size:0.75rem;padding:3px 10px;border-radius:6px;border:1px solid #e74c3c;background:#e74c3c;color:white;cursor:pointer;">Delete</button>'
       +'</div></div>'
-      +'<div style="white-space:pre-wrap;font-size:0.78rem;color:#555;max-height:120px;overflow-y:auto;margin-top:6px;border-top:1px solid #eee;padding-top:6px;">'+(p.text||'').slice(0,300)+(p.text&&p.text.length>300?'…':'')+'</div>'
+      +'<div style="white-space:pre-wrap;font-size:0.78rem;color:#555;max-height:120px;overflow-y:auto;margin-top:6px;border-top:1px solid #eee;padding-top:6px;">'+reflowPlanText(p.text||'').slice(0,300)+(p.text&&p.text.length>300?'…':'')+'</div>'
       +'</div>';
   }).join('');
 }
 function restoreArchivedPlan(i){
   var archived=[];try{archived=JSON.parse(localStorage.getItem('archived_plans')||'[]');}catch(e){}
   var plan=archived[i];if(!plan)return;
-  if(localStorage.getItem('current_training_plan')){if(!confirm('Replace your current active plan with this archived one?'))return;}
+  var targetWhich=plan.archivedFrom==='upcoming'?'upcoming':'current';
+  var storageKey=targetWhich==='upcoming'?'upcoming_training_plan':'current_training_plan';
+  if(localStorage.getItem(storageKey)){if(!confirm('Replace your '+(targetWhich==='upcoming'?'upcoming':'current active')+' plan with this archived one?'))return;}
   archived.splice(i,1);
   localStorage.setItem('archived_plans',JSON.stringify(archived));
   delete plan.archivedAt;
-  localStorage.setItem('current_training_plan',JSON.stringify(plan));
-  loadCurrentPlan();
+  delete plan.archivedFrom;
+  savePlanRecord(storageKey,plan);
+  if(targetWhich==='upcoming'){loadUpcomingPlan();}else{loadCurrentPlan();}
 }
 function deleteArchivedPlan(i){
   if(!confirm('Permanently delete this archived plan?'))return;
@@ -1550,32 +2796,36 @@ function deleteArchivedPlan(i){
   var archSec=document.getElementById('tpArchiveSection');
   if(archSec)archSec.style.display=archived.length?'block':'none';
 }
-function openAdjustPlan(){
-  var box=document.getElementById('tpAdjustBox');
-  if(box){box.style.display='block';var inp=document.getElementById('tpAdjustInput');if(inp)inp.focus();}
+function openAdjustPlan(which){
+  which=which||'current';
+  var box=document.getElementById(which==='upcoming'?'tpUpcomingAdjustBox':'tpAdjustBox');
+  if(box){box.style.display='block';var inp=document.getElementById(which==='upcoming'?'tpUpcomingAdjustInput':'tpAdjustInput');if(inp)inp.focus();}
 }
-function closeAdjustPlan(){
-  var box=document.getElementById('tpAdjustBox');
-  if(box){box.style.display='none';var inp=document.getElementById('tpAdjustInput');if(inp)inp.value='';}
+function closeAdjustPlan(which){
+  which=which||'current';
+  var box=document.getElementById(which==='upcoming'?'tpUpcomingAdjustBox':'tpAdjustBox');
+  if(box){box.style.display='none';var inp=document.getElementById(which==='upcoming'?'tpUpcomingAdjustInput':'tpAdjustInput');if(inp)inp.value='';}
 }
-function submitAdjustPlan(){
-  var inp=document.getElementById('tpAdjustInput');
-  var btn=document.getElementById('tpAdjustBtn');
+function submitAdjustPlan(which){
+  which=which||'current';
+  var storageKey=which==='upcoming'?'upcoming_training_plan':'current_training_plan';
+  var inp=document.getElementById(which==='upcoming'?'tpUpcomingAdjustInput':'tpAdjustInput');
+  var btn=document.getElementById(which==='upcoming'?'tpUpcomingAdjustBtn':'tpAdjustBtn');
   var instruction=(inp&&inp.value.trim())||'';
   if(!instruction){alert('Please describe how you want to adjust the plan.');return;}
-  var raw=localStorage.getItem('current_training_plan');
-  if(!raw){alert('No active training plan found.');return;}
+  var raw=localStorage.getItem(storageKey);
+  if(!raw){alert('No '+(which==='upcoming'?'upcoming':'active')+' training plan found.');return;}
   var plan;try{plan=JSON.parse(raw);}catch(e){alert('Could not read training plan.');return;}
   var currentPlanText=plan.text||'';
-  var prompt='You are a running coach. The athlete has an active training plan and wants to adjust it.\n\nCURRENT PLAN:\n'+currentPlanText+'\n\nATHLETE\'S REQUEST:\n'+instruction+'\n\nPlease rewrite the training plan incorporating the requested adjustments. Keep the same format and structure as the original plan. Return only the updated plan text.';
+  var prompt='You are a running coach. The athlete has '+(which==='upcoming'?'an upcoming':'an active')+' training plan and wants to adjust it.\n\nCURRENT PLAN:\n'+currentPlanText+'\n\nATHLETE\'S REQUEST:\n'+instruction+'\n\nPlease rewrite the training plan incorporating the requested adjustments. Keep the same format and structure as the original plan. Return only the updated plan text.';
   if(btn){btn.disabled=true;btn.textContent='⏳ Adjusting...';}
   aiCall(prompt,5000,function(text){
     plan.text=text;
     plan.adjustedAt=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
     if(plan.scheduleMode){var rebuilt=buildUploadedTrainingSchedule(plan.text,plan.startDate,plan.weeks);plan.schedule=rebuilt.schedule;plan.scheduleMode=rebuilt.mode;plan.scheduleVersion=3;}
-    localStorage.setItem('current_training_plan',JSON.stringify(plan));
-    renderActivePlan();
-    closeAdjustPlan();
+    localStorage.setItem(storageKey,JSON.stringify(plan));
+    if(which==='upcoming'){loadUpcomingPlan();}else{renderActivePlan();}
+    closeAdjustPlan(which);
     if(btn){btn.disabled=false;btn.textContent='✨ Adjust Plan';}
   },function(err){
     alert('AI error: '+err);
@@ -1857,9 +3107,32 @@ function trainingPlanDateFromLine(line,fallbackYear){
 }
 function buildUploadedTrainingSchedule(text,startDate,weeks){
   var lines=String(text||'').split(/\r?\n/),headers=[],fallbackYear=new Date((startDate||dk(new Date()))+'T00:00:00').getFullYear();
-  lines.forEach(function(line,index){var key=trainingPlanDateFromLine(line,fallbackYear);if(key)headers.push({index:index,key:key});});
+  // A one-off metadata line like "Start date: Sunday, November 1, 2026" or a
+  // "RACE DAY:" label with the date on the next line both contain a real date,
+  // so trainingPlanDateFromLine() matches them -- but they aren't a per-day
+  // schedule entry. Without this guard, a plan with no other dated day headers
+  // collapses into a single giant "day" that swallows the entire rest of the
+  // plan text under that one date, and every other real day falls back to
+  // "Rest Day". Skip any date match that's a metadata label (same line) or
+  // immediately follows one (date alone on the next line).
+  var metaLabelRe=/^\s*(start\s*date|plan\s*start|race\s*day|target\s*date|finish\s*date)\s*:?\s*$/i;
+  lines.forEach(function(line,index){
+    var key=trainingPlanDateFromLine(line,fallbackYear);
+    if(!key)return;
+    if(/^\s*(start\s*date|plan\s*start|race\s*day|target\s*date|finish\s*date)\s*:/i.test(line))return;
+    var prevNonEmpty=null;
+    for(var p=index-1;p>=0;p--){if(lines[p].trim()!==''){prevNonEmpty=lines[p];break;}}
+    if(prevNonEmpty&&metaLabelRe.test(prevNonEmpty))return;
+    headers.push({index:index,key:key});
+  });
   var schedule={};
-  headers.forEach(function(header,index){var end=index+1<headers.length?headers[index+1].index:lines.length,section=lines.slice(header.index,end).join('\n').trim();if(section)schedule[header.key]=section;});
+  headers.forEach(function(header,index){
+    var end=index+1<headers.length?headers[index+1].index:lines.length;
+    var sectionLines=lines.slice(header.index,end);
+    for(var si=1;si<sectionLines.length;si++){if(/^\s*week\s+\d+\b/i.test(sectionLines[si])){sectionLines=sectionLines.slice(0,si);break;}}
+    var section=sectionLines.join('\n').trim();
+    if(section)schedule[header.key]=section;
+  });
   if(Object.keys(schedule).length)return{schedule:schedule,mode:'dated'};
   var base={text:text,startDate:startDate},days=Math.max(7,(weeks||1)*7),start=new Date(startDate+'T00:00:00');
   for(var i=0;i<days;i++){
@@ -1869,12 +3142,55 @@ function buildUploadedTrainingSchedule(text,startDate,weeks){
   }
   return{schedule:schedule,mode:'weekly'};
 }
+// Extracts the text layer from a PDF using pdf.js (loaded in daily-planner.html).
+// Only works for PDFs that have real selectable text -- a scanned/photographed
+// page with no text layer will come back empty, which is surfaced to the user
+// as an error asking them to use a .txt file instead.
+// Reads a File as a base64 data: URL. Used to keep a copy of an uploaded
+// PDF's original bytes so it can be opened later and viewed exactly as it
+// looked in the PDF, regardless of how well the text extraction below reads.
+function readFileAsDataUrl(file){
+  return new Promise(function(resolve,reject){
+    var reader=new FileReader();
+    reader.onload=function(e){resolve(e.target.result);};
+    reader.onerror=function(){reject(new Error('Could not read the file'));};
+    reader.readAsDataURL(file);
+  });
+}
+async function extractPdfText(file){
+  if(typeof pdfjsLib==='undefined')throw new Error('PDF support did not load (check your connection)');
+  if(!pdfjsLib.GlobalWorkerOptions.workerSrc){
+    pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.7.107/pdf.worker.min.js';
+  }
+  const buf=await file.arrayBuffer();
+  const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+  let text='';
+  for(let i=1;i<=pdf.numPages;i++){
+    const page=await pdf.getPage(i);
+    const content=await page.getTextContent();
+    let pageText='';
+    let lastY=null;
+    content.items.forEach(function(it){
+      var y=(it.transform&&typeof it.transform[5]==='number')?it.transform[5]:null;
+      if(lastY!==null&&y!==null&&Math.abs(y-lastY)>1){
+        pageText+=(Math.abs(y-lastY)>18?'\n\n':'\n');
+      }else if(pageText&&!/[\n ]$/.test(pageText)){
+        pageText+=' ';
+      }
+      pageText+=it.str;
+      if(y!==null)lastY=y;
+    });
+    text+=(text?'\n\n':'')+pageText;
+  }
+  return text.trim().replace(/\n{3,}/g,'\n\n');
+}
 function uploadPlanFromFile(evt){
   const file=evt.target.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=e=>{
-    const text=(e.target.result||'').trim();
-    if(!text){alert('The selected text file is empty.');evt.target.value='';return;}
+  const isPdf=file.type==='application/pdf'||/\.pdf$/i.test(file.name);
+  const status=document.getElementById('tpUploadStatus');
+  function processPlanText(text,pdfDataUrl){
+    text=(text||'').trim();
+    if(!text){alert(isPdf?'No readable text was found in that PDF. If it\'s a scanned image, please save it as a .txt file instead.':'The selected text file is empty.');evt.target.value='';return;}
     const weekMatches=Array.from(text.matchAll(/\bweek\s+(\d{1,2})\b/gi)).map(m=>parseInt(m[1],10)).filter(n=>n>0&&n<=52);
     const weeks=weekMatches.length?Math.max.apply(null,weekMatches):0;
     const startInput=document.getElementById('tpUploadStartDate');
@@ -1882,23 +3198,53 @@ function uploadPlanFromFile(evt){
     const structured=buildUploadedTrainingSchedule(text,planStartDate,weeks);
     const datedKeys=Object.keys(structured.schedule);
     const effectiveStart=structured.mode==='dated'&&datedKeys.length?datedKeys.sort()[0]:planStartDate;
-    const metaStr='Uploaded text plan'+(weeks?' • '+weeks+' weeks':'');
+    const metaStr=(isPdf?'Uploaded PDF plan':'Uploaded text plan')+(weeks?' • '+weeks+' weeks':'');
     const planObj={text,dist:'',weeks,raceDate:'',startDate:effectiveStart,schedule:structured.schedule,scheduleMode:structured.mode,scheduleVersion:3,meta:metaStr,createdAt:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})};
-    localStorage.setItem('current_training_plan',JSON.stringify(planObj));
+    if(pdfDataUrl)planObj.pdfDataUrl=pdfDataUrl;
+    const upcomingCb=document.getElementById('tpSaveAsUpcoming');
+    const saveAsUpcoming=!!(upcomingCb&&upcomingCb.checked);
+    if(saveAsUpcoming){
+      const saveResult=savePlanRecord('upcoming_training_plan',planObj);
+      loadUpcomingPlan();
+      const pdfNote=(pdfDataUrl&&saveResult==='stripped')?' The original PDF was too large to also keep a viewable copy of.':'';
+      if(status)status.textContent='Saved as an upcoming plan starting '+fmtPlanDate(effectiveStart)+'. Your current active plan keeps running until you tap "Make Active Now".';
+      if(upcomingCb)upcomingCb.checked=false;
+      alert('Saved as an upcoming plan starting '+fmtPlanDate(effectiveStart)+'. It will not replace your active plan until you activate it.'+pdfNote);
+      evt.target.value='';
+      return;
+    }
+    const saveResult=savePlanRecord('current_training_plan',planObj);
     // Clear stale workout caches so new plan entries load fresh
     const _ck=[];for(let _i=0;_i<localStorage.length;_i++){const _k=localStorage.key(_i);if(_k&&_k.startsWith('workout_cache_'))_ck.push(_k);}
     _ck.forEach(_k=>localStorage.removeItem(_k));
     const outputDiv=document.getElementById('tpOutput');
     const outputText=document.getElementById('tpOutputText');
     const meta=document.getElementById('tpMeta');
-    if(outputText){outputText.textContent=text;outputText.style.whiteSpace='pre-wrap';}
+    if(outputText){outputText.textContent=reflowPlanText(text);outputText.style.whiteSpace='pre-wrap';}
     if(meta)meta.textContent=metaStr;
     if(outputDiv){outputDiv.style.display='block';setTimeout(()=>outputDiv.scrollIntoView({behavior:'smooth',block:'start'}),100);}
-    const status=document.getElementById('tpUploadStatus');if(status)status.textContent=datedKeys.length+' workout day'+(datedKeys.length===1?'':'s')+' mapped by '+(structured.mode==='dated'?'the dates in the file':'week and weekday')+'. Unlisted dates remain rest days.';
+    const pdfNote=(pdfDataUrl&&saveResult==='stripped')?' The original PDF was too large to also keep a viewable copy of.':'';
+    if(status)status.textContent=datedKeys.length+' workout day'+(datedKeys.length===1?'':'s')+' mapped by '+(structured.mode==='dated'?'the dates in the file':'week and weekday')+'. Unlisted dates remain rest days.'+pdfNote;
     loadCurrentPlan();
     alert('Training plan loaded from '+file.name+'.');
     evt.target.value='';
-  };
+  }
+  const MAX_PDF_STORE_BYTES=4*1024*1024;
+  if(isPdf){
+    if(status)status.textContent='Reading PDF\u2026';
+    const pdfDataUrlPromise=(file.size<=MAX_PDF_STORE_BYTES)?readFileAsDataUrl(file).catch(function(){return null;}):Promise.resolve(null);
+    Promise.all([extractPdfText(file),pdfDataUrlPromise]).then(function(results){
+      processPlanText(results[0],results[1]);
+    }).catch(function(err){
+      alert('Could not read that PDF: '+(err&&err.message?err.message:err)+'. Try saving it as a .txt file instead.');
+      if(status)status.textContent='';
+      evt.target.value='';
+    });
+    return;
+  }
+  const reader=new FileReader();
+  reader.onload=e=>{processPlanText(e.target.result);};
+  reader.onerror=()=>{alert('The selected file could not be read.');evt.target.value='';};
   reader.readAsText(file);
 }
 function toggleAIGenPanel(){

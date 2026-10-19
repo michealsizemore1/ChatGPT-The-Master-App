@@ -1,6 +1,6 @@
 
 let today=new Date();const _realToday=new Date(today);// snapshot of actual launch date — never changes with navigation
-const charts={};let waterOz=0,scoreVal=0,copiedDayData=null;
+const charts={};let waterOz=0,sportsDrinksOz=0,otherLiquidsOz=0,autoSportsDrinksOz=0,autoOtherLiquidsOz=0,scoreVal=0,copiedDayData=null;
 function dk(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return y+'-'+m+'-'+day;}
 function fmtD(d){return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});}
 function wkStart(off=0){const t=new Date();t.setDate(t.getDate()+off*7);const dow=(t.getDay()+6)%7;const ws=new Date(t);ws.setDate(t.getDate()-dow);ws.setHours(0,0,0,0);return ws;}
@@ -276,6 +276,10 @@ function jumpToDailyCheck(btn){
 
 function updateWaterDisplay(){const cups=(waterOz/8).toFixed(1);const el=document.getElementById('waterDisplay');if(el)el.textContent=waterOz+' oz ('+cups+' cups)';}
 function changeWater(delta){waterOz=Math.max(0,waterOz+delta);updateWaterDisplay();save();renderJournalSchedule();}
+function updateSportsDrinksDisplay(){const cups=(sportsDrinksOz/8).toFixed(1);const el=document.getElementById('sportsDrinksDisplay');if(el)el.textContent=sportsDrinksOz+' oz ('+cups+' cups)';}
+function changeSportsDrinks(delta){sportsDrinksOz=Math.max(0,sportsDrinksOz+delta);updateSportsDrinksDisplay();save();}
+function updateOtherLiquidsDisplay(){const cups=(otherLiquidsOz/8).toFixed(1);const el=document.getElementById('otherLiquidsDisplay');if(el)el.textContent=otherLiquidsOz+' oz ('+cups+' cups)';}
+function changeOtherLiquids(delta){otherLiquidsOz=Math.max(0,otherLiquidsOz+delta);updateOtherLiquidsDisplay();save();}
 function syncMassageMinutes(source){
   var daily=document.getElementById('dailyMassageMinutes'),activities=document.getElementById('exMassageMinutes');
   if(source==='daily'&&daily&&activities)activities.value=daily.value;
@@ -286,7 +290,7 @@ function parseBP(s){if(!s)return{sys:0,dia:0};const m=s.match(/(\d+)\s*\/\s*(\d+
 function buildStars(){const ss=document.getElementById('scoreStars');if(!ss)return;ss.innerHTML='';for(let i=1;i<=5;i++){const s=document.createElement('span');s.className='star'+(i<=scoreVal?' active':'');s.textContent='★';s.onclick=()=>{scoreVal=(scoreVal===i)?i-1:i;buildStars();save();};ss.appendChild(s);}updateTodayGlance();}
 
 // All text/number fields
-const TXS=['spDailyBreadText','spMeditationText','gaAudiobookText','gaAudiobookTime','gaSkillText','gaSkillTime','wBPVal','wPulseVal','wMedsVal','wWghtVal','wSleepVal','exStrengthVal','exBikeVal','exWalkVal','exDogWalkVal','nuCalVal','nuProtVal','nuFatVal','nuCarbsVal','jAccomplish','jImprov','jGratitude','jNotes','habitIdentity','habitReflection','mnotes-breakfast','mnotes-lunch','mnotes-dinner','mnotes-snack','mnotes-liquids','mnotes-sports'];
+const TXS=['spDailyBreadText','spMeditationText','gaAudiobookText','gaAudiobookTime','gaSkillText','gaSkillTime','wBPVal','wPulseVal','wMedsVal','wWghtVal','wSleepVal','exStrengthVal','exBikeVal','exWalkVal','exDogWalkVal','nuCalVal','nuProtVal','nuFatVal','nuCarbsVal','jAccomplish','jImprov','jGratitude','jNotes','habitIdentity','habitReflection','mnotes-breakfast','mnotes-lunch','mnotes-dinner','mnotes-snack','mnotes-liquids','mnotes-sports','mnotes-supplements'];
 const NMS=['exSteps','wSleepScore','exMassageMinutes','gaFinancialVideosTime'];
 const PTIDS=['pt0','pt1','pt2','dg0','dg1','dg2'];
 
@@ -303,7 +307,7 @@ function save(){
   NMS.forEach(id=>{const e=document.getElementById(id);if(e)d[id]=e.value;});
   // Priority/goal text
   PTIDS.forEach(id=>{const row=document.getElementById(id);if(row){const tx=row.querySelector('input[type=text]');if(tx)d[id+'t']=tx.value;}});
-  d.waterOz=waterOz;d.score=scoreVal;
+  d.waterOz=waterOz;d.sportsDrinksOz=sportsDrinksOz;d.otherLiquidsOz=otherLiquidsOz;d.autoSportsDrinksOz=autoSportsDrinksOz;d.autoOtherLiquidsOz=autoOtherLiquidsOz;d.score=scoreVal;
   d.foodLog=window._foodLog||[];
   try{
     localStorage.setItem('planner_'+dk(today),JSON.stringify(d));
@@ -584,10 +588,22 @@ function extractWorkoutSection(planText, targetDate){
   ].map(f=>f.toLowerCase());
 
   const lines=planText.split('\n');
+  // A one-off metadata line like "Start date: Sunday, November 1, 2026", or a
+  // "RACE DAY:"/"PLAN START:" label with the date on the next line, both
+  // contain a real date and would otherwise be mistaken for a scheduled day's
+  // header -- swallowing up to 20 lines of the plan (everything up to the
+  // next differently-dated line) as that single day's "workout". Skip any
+  // match that's a metadata label (same line) or immediately follows one.
+  const metaLabelLine=/^\s*(start\s*date|plan\s*start|race\s*day|target\s*date|finish\s*date)\s*:?\s*$/i;
   let startIdx=-1;
   for(let i=0;i<lines.length;i++){
     const lower=lines[i].toLowerCase();
-    if(fmts.some(f=>lower.includes(f))){startIdx=i;break;}
+    if(!fmts.some(f=>lower.includes(f)))continue;
+    if(/^\s*(start\s*date|plan\s*start|race\s*day|target\s*date|finish\s*date)\s*:/i.test(lines[i]))continue;
+    let prevNonEmpty=null;
+    for(let p=i-1;p>=0;p--){if(lines[p].trim()!==''){prevNonEmpty=lines[p];break;}}
+    if(prevNonEmpty&&metaLabelLine.test(prevNonEmpty))continue;
+    startIdx=i;break;
   }
   if(startIdx===-1)return null;
 
@@ -756,6 +772,9 @@ function load(){
     const dailyMassage=document.getElementById('dailyMassageMinutes');if(dailyMassage)dailyMassage.value=d.exMassageMinutes||'';
     const jcEl=document.getElementById('jCombined');if(jcEl)jcEl.value=buildJournalCombined();
     waterOz=d.waterOz||(d.waterCount?d.waterCount*8:0);updateWaterDisplay();
+    sportsDrinksOz=d.sportsDrinksOz||0;updateSportsDrinksDisplay();
+    otherLiquidsOz=d.otherLiquidsOz||0;updateOtherLiquidsDisplay();
+    autoSportsDrinksOz=d.autoSportsDrinksOz||0;autoOtherLiquidsOz=d.autoOtherLiquidsOz||0;
     scoreVal=d.score||0;buildStars();
   }catch(e){console.error('load fields:',e);}
   attachListeners();
@@ -1407,7 +1426,7 @@ function getDM(d,dateKey){
       if(a.pace&&parsePace(a.pace)){actPace+=parsePace(a.pace);actPaceN++;}
     });
   }
-  const bp=parseBP(d.wBPVal);return{miles:actMiles,pace:actPaceN?actPace/actPaceN:0,watts:actWattsN?actWatts/actWattsN:0,time:actTime,steps:parseFloat(d.exSteps)||0,stretch:parseTimedMins(d.exStretchVal)||0,massage:parseFloat(d.exMassageMinutes)||parseTimedMins(d.exMassageVal)||0,score:parseFloat(d.score)||0,weight:parseFloat(d.wWghtVal)||0,sleep:parseSleepMins(d.wSleepVal),sleepScore:parseFloat(d.wSleepScore)||0,calories:parseFloat(d.nuCalVal)||0,water:parseFloat(d.waterOz)||(parseFloat(d.waterCount)*8||0),audiobook:journalAudiobookMinutesForDate(dateKey,d),financialVideos:parseTimedMins(d.gaFinancialVideosTime),financialVideosDone:d.gaFinancialVideos==='green'?1:0,skill:parseMins(d.gaSkillTime),skillName:d.gaSkillText||'',skillDone:d.gaSkill==='green'?1:0,bpSys:bp.sys,bpDia:bp.dia,pulse:parseFloat(d.wPulseVal)||0,dogWalk:parseFloat(d.exDogWalkVal)||(d.exDogWalk==='green'?1:0),walk:parseFloat(d.exWalkVal)||(d.exWalk==='green'?1:0),headache:d.wHeadache==='green'?1:0};}
+  const bp=parseBP(d.wBPVal);const waterOzDay=parseFloat(d.waterOz)||(parseFloat(d.waterCount)*8||0);return{miles:actMiles,pace:actPaceN?actPace/actPaceN:0,watts:actWattsN?actWatts/actWattsN:0,time:actTime,steps:parseFloat(d.exSteps)||0,stretch:parseTimedMins(d.exStretchVal)||0,massage:parseFloat(d.exMassageMinutes)||parseTimedMins(d.exMassageVal)||0,score:parseFloat(d.score)||0,weight:parseFloat(d.wWghtVal)||0,sleep:parseSleepMins(d.wSleepVal),sleepScore:parseFloat(d.wSleepScore)||0,calories:parseFloat(d.nuCalVal)||0,water:waterOzDay,liquidsNoCaf:waterOzDay+(parseFloat(d.sportsDrinksOz)||0)+(parseFloat(d.otherLiquidsOz)||0),audiobook:journalAudiobookMinutesForDate(dateKey,d),financialVideos:parseTimedMins(d.gaFinancialVideosTime),financialVideosDone:d.gaFinancialVideos==='green'?1:0,skill:parseMins(d.gaSkillTime),skillName:d.gaSkillText||'',skillDone:d.gaSkill==='green'?1:0,bpSys:bp.sys,bpDia:bp.dia,pulse:parseFloat(d.wPulseVal)||0,dogWalk:parseFloat(d.exDogWalkVal)||(d.exDogWalk==='green'?1:0),walk:parseFloat(d.exWalkVal)||(d.exWalk==='green'?1:0),headache:d.wHeadache==='green'?1:0};}
 function agg(arr){const t={miles:0,pace:0,watts:0,time:0,steps:0,stretch:0,massage:0,score:0,weight:0,sleep:0,sleepScore:0,calories:0,water:0,audiobook:0,skill:0,skillDone:0,bpSys:0,bpDia:0,pulse:0,dogWalk:0,walk:0,headache:0};const c={pace:0,watts:0,score:0,weight:0,sleep:0,sleepScore:0,bp:0,pulse:0};arr.forEach(m=>{t.miles+=m.miles;t.time+=m.time;t.steps+=m.steps;t.stretch+=(m.stretch||0);t.massage+=(m.massage||0);t.calories+=m.calories;t.water+=m.water;t.audiobook+=m.audiobook;t.skill+=m.skill||0;t.skillDone+=(m.skillDone||0);t.dogWalk+=(m.dogWalk||0);t.walk+=(m.walk||0);t.headache+=(m.headache||0);if(m.pace){t.pace+=m.pace;c.pace++;}if(m.watts){t.watts+=m.watts;c.watts++;}if(m.score){t.score+=m.score;c.score++;}if(m.weight){t.weight+=m.weight;c.weight++;}if(m.sleep){t.sleep+=m.sleep;c.sleep++;}if(m.sleepScore){t.sleepScore+=m.sleepScore;c.sleepScore++;}if(m.bpSys){t.bpSys+=m.bpSys;t.bpDia+=m.bpDia;c.bp++;}if(m.pulse){t.pulse+=m.pulse;c.pulse++;}});return{miles:t.miles,pace:c.pace?t.pace/c.pace:0,watts:c.watts?t.watts/c.watts:0,time:t.time,steps:t.steps,stretch:t.stretch,massage:t.massage,calories:t.calories,water:t.water,score:c.score?t.score/c.score:0,weight:c.weight?t.weight/c.weight:0,sleep:c.sleep?t.sleep/c.sleep:0,sleepScore:c.sleepScore?t.sleepScore/c.sleepScore:0,audiobook:t.audiobook,skill:t.skill,skillDone:t.skillDone,bpSys:c.bp?t.bpSys/c.bp:0,bpDia:c.bp?t.bpDia/c.bp:0,pulse:c.pulse?t.pulse/c.pulse:0,dogWalk:t.dogWalk,walk:t.walk,headache:t.headache};}
 function gRow(l,m,t){const b=t?'background:#f8f9fa;font-weight:700':'';const skillCell=m.skillDone?(t?m.skillDone+'d':'✅'):'-';return`<tr style="${b}"><td>${l}</td><td>${fmtMins(m.audiobook)}</td><td>${skillCell}</td></tr>`;}
 function fRow(l,m,t){const b=t?'background:#f8f9fa;font-weight:700':'';return`<tr style="${b}"><td>${l}</td><td>${m.miles?m.miles.toFixed(1):'-'}</td><td>${m.pace?fmtPace(m.pace):'-'}</td><td>${m.watts?Math.round(m.watts):'-'}</td><td>${fmtMins(m.time)}</td><td>${m.steps?Math.round(m.steps):'-'}</td><td>${m.dogWalk?(Math.round(m.dogWalk*10)/10)%1===0?Math.round(m.dogWalk):+(m.dogWalk.toFixed(1)):'-'}</td><td>${m.walk?(Math.round(m.walk*10)/10)%1===0?Math.round(m.walk):+(m.walk.toFixed(1)):'-'}</td></tr>`;}
@@ -1752,15 +1771,17 @@ function arrangeActivityTrainingCards(){
   const panel=document.querySelector('#tab-activities > .panel');
   const workout=document.getElementById('todayWorkoutCard');
   const active=document.getElementById('tpPersistSection');
+  const upcoming=document.getElementById('tpUpcomingSection');
   const archive=document.getElementById('tpArchiveSection');
   if(!panel)return;
   if(active&&archive)panel.insertBefore(active,archive);
+  if(upcoming&&archive)panel.insertBefore(upcoming,archive);
   if(workout)panel.insertBefore(workout,panel.firstElementChild);
 }
 function renderActivitySectionCharts(){
   renderMilesChart();
 }
-function renderNutritionSectionCharts(){renderSectionCharts('nutritionChartsGrid',[{k:'calories',l:'Calories',c:'#f39c12'},{k:'water',l:'Water',c:'#3498db'}]);}
+function renderNutritionSectionCharts(){renderSectionCharts('nutritionChartsGrid',[{k:'calories',l:'Calories',c:'#f39c12'},{k:'water',l:'Water',c:'#3498db'},{k:'liquidsNoCaf',l:'Total Liquids (excl. Caffeine)',c:'#16a085',help:'Water + Sports Nutrition Drinks + Other Drinks, minus coffee, energy drinks, and black/green tea. GU drink mix still counts.'}]);}
 function renderLibrarySectionCharts(){renderSectionCharts('libraryChartsGrid',[{k:'audiobook',l:'Audiobook Time',c:'#27ae60'}]);}
 function renderSkillSectionCharts(){
   var grid=document.getElementById('skillChartsGrid');if(!grid)return;
@@ -2310,10 +2331,27 @@ function toggleActivitiesLog(){
   var toggle=section?section.previousElementSibling:null;
   if(!section)return;
   var opening=section.style.display==='none';
+  // This section can swing from empty to hundreds of activity cards plus
+  // charts in one tap, and some mobile browsers mis-fire their scroll-anchoring
+  // heuristic on a layout change that large, jumping the viewport away from
+  // the toggle the user just tapped. Re-anchor the scroll position to the
+  // toggle itself immediately, next frame, and shortly after (to also cover
+  // Chart.js resizing its canvases a beat later), so the tap keeps its place.
+  var anchorTop=toggle?toggle.getBoundingClientRect().top:null;
   section.style.display=opening?'block':'none';
   if(arrow)arrow.innerHTML=opening?'&#x25BC;':'&#x25B6;';
   if(toggle)toggle.setAttribute('aria-expanded',opening?'true':'false');
   if(opening)renderActivities();
+  if(toggle&&anchorTop!==null){
+    var restoreScroll=function(){
+      var newTop=toggle.getBoundingClientRect().top;
+      var delta=newTop-anchorTop;
+      if(Math.abs(delta)>1)window.scrollBy(0,delta);
+    };
+    restoreScroll();
+    requestAnimationFrame(restoreScroll);
+    setTimeout(restoreScroll,120);
+  }
 }
 function resetActivityAdvancedPanels(){
   var metrics=document.getElementById('runMetricsPanel');

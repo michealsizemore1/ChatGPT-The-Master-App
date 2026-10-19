@@ -350,8 +350,6 @@ async function journalCloudSmartSync(){
 }
 function journalCloudInit(){
   journalCloudClient=null;journalCloudUser=null;journalCloudReady=false;
-  localStorage.removeItem('journal_cloud_dirty');
-  localStorage.removeItem('journal_cloud_last_sync');
   var localStatus=document.getElementById('v26SaveText');if(localStatus)localStatus.textContent='Saved on this device';
   try{hydrateBibleReadingArchiveStorage().then(function(){compactBibleReadingArchiveStorage();});}catch(ignoreBible){}
   try{hydrateActivitiesStorage();}catch(ignoreActivities){}

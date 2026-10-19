@@ -3,10 +3,10 @@
 // ══════════════════════════════════════════════════════
 if(!window._foodLog)window._foodLog=[];
 
-const MEALS=['breakfast','lunch','dinner','snack','liquids','sports'];
-const MEAL_LABELS={breakfast:'🌅 Breakfast',lunch:'🥗 Lunch',dinner:'🍽️ Dinner',snack:'🍎 Snacks',liquids:'💧 Liquids',sports:'💪 Sports Nutrition'};
-const MEAL_HINTS={breakfast:'Food name',lunch:'Food name',dinner:'Food name',snack:'Snack name',liquids:'Drink name',sports:'Sports fuel / supplement'};
-const SERVING_UNITS=['serving','cup','tablespoon','teaspoon','fluid ounce','ounce','gram','milligram','milliliter','liter','piece','item','slice','scoop','packet','bar','bottle','can','container','handful'];
+const MEALS=['breakfast','lunch','dinner','snack','liquids','sports','supplements'];
+const MEAL_LABELS={breakfast:'🌅 Breakfast',lunch:'🥗 Lunch',dinner:'🍽️ Dinner',snack:'🍎 Snacks',liquids:'💧 Liquids',sports:'💪 Sports Nutrition',supplements:'💊 Supplements'};
+const MEAL_HINTS={breakfast:'Food name',lunch:'Food name',dinner:'Food name',snack:'Snack name',liquids:'Drink name',sports:'Sports fuel',supplements:'Supplement (e.g. Creatine 5 g)'};
+const SERVING_UNITS=['serving','cup','tablespoon','teaspoon','fluid ounce','ounce','gram','milligram','milliliter','liter','piece','item','slice','scoop','packet','bar','bottle','can','container','handful','capsule','tablet','softgel','gummy','IU','microgram'];
 // ── Macro-Target Meal Suggestions (20% protein / 60% carbs / 20% fat) ──
 const MACRO_MEALS=[
   {id:'mm1',mealType:'breakfast',label:'Oats with Egg Whites & Almond Butter',kcal:402,protein:20,carbs:60,fat:9,items:[
@@ -196,7 +196,7 @@ function applyFoodServingUnit(id,unit){
 }
 
 // Micronutrient fields tracked per food item, in addition to cal/prot/fat/carbs
-const MICRO_FIELDS=['fiber','sugar','sodium','vitA','vitC','vitD','calcium','iron','potassium','caffeine'];
+const MICRO_FIELDS=['fiber','sugar','sodium','vitA','vitC','vitD','calcium','iron','potassium','caffeine','magnesium','vitB12'];
 const MICRO_META={
   fiber:{label:'Fiber',unit:'g',icon:'🌾',elId:'totFiber'},
   sugar:{label:'Sugar',unit:'g',icon:'🍬',elId:'totSugar'},
@@ -207,7 +207,9 @@ const MICRO_META={
   calcium:{label:'Calcium',unit:'mg',icon:'🦴',elId:'totCalcium'},
   iron:{label:'Iron',unit:'mg',icon:'🩸',elId:'totIron'},
   potassium:{label:'Potassium',unit:'mg',icon:'🍌',elId:'totPotassium'},
-  caffeine:{label:'Caffeine',unit:'mg',icon:'☕',elId:'totCaffeine'}
+  caffeine:{label:'Caffeine',unit:'mg',icon:'☕',elId:'totCaffeine'},
+  magnesium:{label:'Magnesium',unit:'mg',icon:'💪',elId:'totMagnesium'},
+  vitB12:{label:'Vit B12',unit:'mcg',icon:'⚡',elId:'totVitB12'}
 };
 
 // Quick-add product database for the Sports Nutrition section: full current
@@ -258,11 +260,11 @@ const GUSIS_PRODUCTS=[
   {brand:'GU',line:'GU Hydration Drink Tabs',flavor:'Orange',serving:'1 tab in 16oz water',cal:10,carbs:3,prot:0,fat:0,sodium:320,potassium:55,caffeine:0},
   {brand:'GU',line:'GU Hydration Drink Tabs',flavor:'Tri-Berry',serving:'1 tab in 16oz water',cal:10,carbs:3,prot:0,fat:0,sodium:320,potassium:55,caffeine:0},
   {brand:'GU',line:'GU Hydration Drink Tabs',flavor:'Lemon Lime',serving:'1 tab in 16oz water',cal:10,carbs:3,prot:0,fat:0,sodium:320,potassium:55,caffeine:0},
-  {brand:'GU',line:'GU Roctane Energy & Hydration Drink Mix',flavor:'Lemon Berry',serving:'2 scoops (65g)',cal:250,carbs:60,prot:0,fat:0,sodium:320,potassium:80,caffeine:35},
-  {brand:'GU',line:'GU Roctane Energy & Hydration Drink Mix',flavor:'Summit Tea',serving:'2 scoops (65g)',cal:250,carbs:60,prot:0,fat:0,sodium:320,potassium:80,caffeine:35},
-  {brand:'GU',line:'GU Roctane Energy & Hydration Drink Mix',flavor:'Tropical Fruit',serving:'2 scoops (65g)',cal:250,carbs:60,prot:0,fat:0,sodium:320,potassium:80,caffeine:35},
-  {brand:'GU',line:'GU Roctane Energy & Hydration Drink Mix',flavor:'Grape',serving:'2 scoops (65g)',cal:250,carbs:60,prot:0,fat:0,sodium:320,potassium:80,caffeine:0},
-  {brand:'GU',line:'GU Roctane Energy & Hydration Drink Mix',flavor:'Strawberry Hibiscus',serving:'2 scoops (65g)',cal:250,carbs:60,prot:0,fat:0,sodium:320,potassium:80,caffeine:0},
+  {brand:'GU',line:'GU Roctane Energy & Hydration Drink Mix',flavor:'Lemon Berry',serving:'2 scoops (65g) in 21oz water',cal:250,carbs:60,prot:0,fat:0,sodium:320,potassium:80,caffeine:35},
+  {brand:'GU',line:'GU Roctane Energy & Hydration Drink Mix',flavor:'Summit Tea',serving:'2 scoops (65g) in 21oz water',cal:250,carbs:60,prot:0,fat:0,sodium:320,potassium:80,caffeine:35},
+  {brand:'GU',line:'GU Roctane Energy & Hydration Drink Mix',flavor:'Tropical Fruit',serving:'2 scoops (65g) in 21oz water',cal:250,carbs:60,prot:0,fat:0,sodium:320,potassium:80,caffeine:35},
+  {brand:'GU',line:'GU Roctane Energy & Hydration Drink Mix',flavor:'Grape',serving:'2 scoops (65g) in 21oz water',cal:250,carbs:60,prot:0,fat:0,sodium:320,potassium:80,caffeine:0},
+  {brand:'GU',line:'GU Roctane Energy & Hydration Drink Mix',flavor:'Strawberry Hibiscus',serving:'2 scoops (65g) in 21oz water',cal:250,carbs:60,prot:0,fat:0,sodium:320,potassium:80,caffeine:0},
   {brand:'GU',line:'GU Roctane Electrolyte Capsules',flavor:'Unflavored',serving:'1 capsule',cal:0,carbs:0,prot:0,fat:0,sodium:140,potassium:0,caffeine:0},
   {brand:'GU',line:'GU Energy Waffle',flavor:'Maple Cinnamon',serving:'1 waffle (~30g)',cal:150,carbs:22,prot:0,fat:0,sodium:100,potassium:20,caffeine:0},
   {brand:'GU',line:'GU Energy Waffle',flavor:'Campfire S\'mores',serving:'1 waffle (~30g)',cal:150,carbs:22,prot:0,fat:0,sodium:100,potassium:20,caffeine:0},
@@ -316,7 +318,12 @@ const GUSIS_PRODUCTS=[
   {brand:'SiS',line:'SiS REGO Rapid Recovery',flavor:'Chocolate',serving:'1 scoop (50g)',cal:180,carbs:22,prot:20,fat:1.1,sodium:400,potassium:2,caffeine:0},
   {brand:'SiS',line:'SiS REGO Rapid Recovery',flavor:'Vanilla',serving:'1 scoop (50g)',cal:180,carbs:22,prot:20,fat:1.1,sodium:400,potassium:2,caffeine:0},
   {brand:'SiS',line:'SiS REGO Rapid Recovery',flavor:'Strawberry',serving:'1 scoop (50g)',cal:180,carbs:22,prot:20,fat:1.1,sodium:400,potassium:2,caffeine:0},
-  {brand:'SiS',line:'SiS REGO Rapid Recovery',flavor:'Banana',serving:'1 scoop (50g)',cal:180,carbs:22,prot:20,fat:1.1,sodium:400,potassium:2,caffeine:0}
+  {brand:'SiS',line:'SiS REGO Rapid Recovery',flavor:'Banana',serving:'1 scoop (50g)',cal:180,carbs:22,prot:20,fat:1.1,sodium:400,potassium:2,caffeine:0},
+  {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Chocolate',serving:'1 shake (11 fl oz)',cal:160,carbs:4,prot:30,fat:3,sodium:230,potassium:0,caffeine:0},
+  {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Vanilla',serving:'1 shake (11 fl oz)',cal:160,carbs:4,prot:30,fat:3,sodium:230,potassium:0,caffeine:0},
+  {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Caramel',serving:'1 shake (11 fl oz)',cal:160,carbs:2,prot:30,fat:3,sodium:350,potassium:0,caffeine:0},
+  {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Cookies and Cream',serving:'1 shake (11 fl oz)',cal:160,carbs:4,prot:30,fat:3,sodium:220,potassium:0,caffeine:0},
+  {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Chocolate Peanut Butter',serving:'1 shake (11 fl oz)',cal:160,carbs:5,prot:30,fat:3,sodium:380,potassium:0,caffeine:0}
 ];
 
 function gusisLinesFor(brand){
@@ -494,6 +501,81 @@ function runnerFoodQuality(item){
   return {score:score,label:label,reason:reasons.slice(0,3).join(' · ')||'Add label details for a more precise rating',confidence:confidence,confidencePct:confidencePct,workoutContext:runDay?(hardWorkout?hardWorkout+' workout':'run day'):'rest / recovery day'};
 }
 
+function parseFluidOzFromServingLabel(label){
+  var s=String(label||'').toLowerCase();
+  var m=s.match(/^\s*(\d+(?:\.\d+)?)\s*(fl\.?\s*oz|fluid\s*ounces?|oz|ounces?|milliliters?|millilitres?|ml|liters?|litres?|cups?)\b/);
+  if(m){
+    var qty=parseFloat(m[1]),unit=m[2];
+    if(/oz|ounce/.test(unit))return qty;
+    if(/cup/.test(unit))return qty*8;
+    if(/ml|milli/.test(unit))return qty/29.5735;
+    if(/liter|litre/.test(unit))return qty*33.814;
+  }
+  var mc=s.match(/^\s*(\d+(?:\.\d+)?)[^()]*\((\d+(?:\.\d+)?)\s*(fl\.?\s*oz|fluid\s*ounces?|ml|milliliters?|millilitres?|liters?|litres?)\)/);
+  if(mc){
+    var count=parseFloat(mc[1]),vol=parseFloat(mc[2]),vunit=mc[3],ozEach=0;
+    if(/fl|fluid/.test(vunit))ozEach=vol;
+    else if(/ml|milli/.test(vunit))ozEach=vol/29.5735;
+    else if(/liter|litre/.test(vunit))ozEach=vol*33.814;
+    if(ozEach>0)return count*ozEach;
+  }
+  var mw=s.match(/(\d+(?:\.\d+)?)\s*(fl\.?\s*oz|oz|ounces?|milliliters?|millilitres?|ml|liters?|litres?)\s*(?:of\s*)?water\b/);
+  if(mw){
+    var qty2=parseFloat(mw[1]),unit2=mw[2];
+    if(/ml|milli/.test(unit2))return qty2/29.5735;
+    if(/liter|litre/.test(unit2))return qty2*33.814;
+    return qty2;
+  }
+  return 0;
+}
+function isCaffeinatedBeverageName(name){
+  var n=String(name||'').toLowerCase();
+  return /\b(coffee|espresso|latte|cappuccino|mocha|americano|cold\s*brew|black\s*tea|green\s*tea|energy\s*drinks?|red\s*bull|monster(?:\s*energy)?|celsius|bang\s*energy|rockstar|reign|ghost\s*energy|c4\s*energy|alani\s*nu)\b/.test(n);
+}
+function lookupGusisServingOz(name){
+  if(typeof GUSIS_PRODUCTS==='undefined'||!GUSIS_PRODUCTS.length)return 0;
+  var n=String(name||'').toLowerCase();
+  for(var i=0;i<GUSIS_PRODUCTS.length;i++){
+    if(n.indexOf(GUSIS_PRODUCTS[i].line.toLowerCase())!==-1){
+      return parseFluidOzFromServingLabel(GUSIS_PRODUCTS[i].serving);
+    }
+  }
+  return 0;
+}
+function liquidOzForMeal(meal){
+  var log=window._foodLog||[];
+  var total=0;
+  log.forEach(function(x){
+    if(x.meal!==meal)return;
+    if(isCaffeinatedBeverageName(x.name))return;
+    var s=parseFloat(x.servings)||1;
+    var oz=parseFluidOzFromServingLabel(x.servingLabel);
+    if(!oz){
+      var fromCatalog=lookupGusisServingOz(x.name);
+      if(fromCatalog)oz=fromCatalog;
+    }
+    total+=oz*s;
+  });
+  return Math.round(total);
+}
+function syncAutoLiquidCounters(){
+  var changed=false;
+  var sportsAuto=liquidOzForMeal('sports');
+  var liquidsAuto=liquidOzForMeal('liquids');
+  if(sportsAuto!==autoSportsDrinksOz){
+    sportsDrinksOz=Math.max(0,sportsDrinksOz+(sportsAuto-autoSportsDrinksOz));
+    autoSportsDrinksOz=sportsAuto;
+    if(typeof updateSportsDrinksDisplay==='function')updateSportsDrinksDisplay();
+    changed=true;
+  }
+  if(liquidsAuto!==autoOtherLiquidsOz){
+    otherLiquidsOz=Math.max(0,otherLiquidsOz+(liquidsAuto-autoOtherLiquidsOz));
+    autoOtherLiquidsOz=liquidsAuto;
+    if(typeof updateOtherLiquidsDisplay==='function')updateOtherLiquidsDisplay();
+    changed=true;
+  }
+  if(changed&&typeof save==='function')setTimeout(function(){save();},0);
+}
 function renderFoodItems(){
   var log=window._foodLog||[];
   var autoClassChanged=false;
@@ -682,6 +764,7 @@ function renderFoodItems(){
     }
   });
   updateMacroTotals();
+  syncAutoLiquidCounters();
   if(autoClassChanged)setTimeout(function(){save();},0);
 }
 function _setMealOpen(meal,isOpen){
@@ -708,7 +791,7 @@ function aiSearchFood(){
   var resultsDiv=document.getElementById('aiFoodResults');
   if(resultsDiv){resultsDiv.style.display='block';resultsDiv.innerHTML='<div style="color:#666;font-size:0.82rem;padding:4px;">&#x23F3; Searching...</div>';}
   var prompt='Return nutrition facts for: '+q+'\n'
-    +'Format each food/serving as a single line: NAME | CALORIES cal | PROTEINg protein | FATg fat | CARBSg carbs | FIBERg fiber | SUGARg sugar | SODIUMmg sodium | VITAmcg vitA | VITCmg vitC | VITDmcg vitD | CALCIUMmg calcium | IRONmg iron | POTASSIUMmg potassium\n'
+    +'Format each food/serving as a single line: NAME | CALORIES cal | PROTEINg protein | FATg fat | CARBSg carbs | FIBERg fiber | SUGARg sugar | SODIUMmg sodium | VITAmcg vitA | VITCmg vitC | VITDmcg vitD | CALCIUMmg calcium | IRONmg iron | POTASSIUMmg potassium | MAGNESIUMmg magnesium | VITB12mcg vitB12\n'
     +'Use your best nutritional knowledge for realistic values, including fiber, sugar, sodium, vitamins and minerals. Use 0 for a value only if it is genuinely negligible.\n'
     +'Include 1-3 common serving sizes if relevant. Be concise. No extra text.';
   fetch('https://api.anthropic.com/v1/messages',{
@@ -726,7 +809,7 @@ function aiSearchFood(){
     lines.forEach(function(line,idx){
       var parts=line.split('|').map(function(p){return p.trim();});
       var name=parts[0]||'';
-      var cal=0,prot=0,fat=0,carbs=0,fiber=0,sugar=0,sodium=0,vitA=0,vitC=0,vitD=0,calcium=0,iron=0,potassium=0;
+      var cal=0,prot=0,fat=0,carbs=0,fiber=0,sugar=0,sodium=0,vitA=0,vitC=0,vitD=0,calcium=0,iron=0,potassium=0,magnesium=0,vitB12=0;
       parts.forEach(function(p){
         var m;
         if((m=p.match(/(\d+(?:\.\d+)?)\s*cal/i)))cal=parseFloat(m[1]);
@@ -742,8 +825,10 @@ function aiSearchFood(){
         else if((m=p.match(/(\d+(?:\.\d+)?)\s*mg?\s*calcium/i)))calcium=parseFloat(m[1]);
         else if((m=p.match(/(\d+(?:\.\d+)?)\s*mg?\s*iron/i)))iron=parseFloat(m[1]);
         else if((m=p.match(/(\d+(?:\.\d+)?)\s*mg?\s*potassium/i)))potassium=parseFloat(m[1]);
+        else if((m=p.match(/(\d+(?:\.\d+)?)\s*mg?\s*magnesium/i)))magnesium=parseFloat(m[1]);
+        else if((m=p.match(/(\d+(?:\.\d+)?)\s*mcg?\s*vit\s*b\s*12/i)))vitB12=parseFloat(m[1]);
       });
-      window._aiFoodCache.push({name:name,cal:cal,prot:prot,fat:fat,carbs:carbs,fiber:fiber,sugar:sugar,sodium:sodium,vitA:vitA,vitC:vitC,vitD:vitD,calcium:calcium,iron:iron,potassium:potassium});
+      window._aiFoodCache.push({name:name,cal:cal,prot:prot,fat:fat,carbs:carbs,fiber:fiber,sugar:sugar,sodium:sodium,vitA:vitA,vitC:vitC,vitD:vitD,calcium:calcium,iron:iron,potassium:potassium,magnesium:magnesium,vitB12:vitB12});
       var summary=[cal?cal+' cal':'',prot?prot+'g pro':'',fat?fat+'g fat':'',carbs?carbs+'g carb':'',fiber?fiber+'g fiber':'',sodium?sodium+'mg Na':''].filter(Boolean).join(' · ');
       html+='<div style="display:flex;justify-content:space-between;align-items:center;background:#fff;border:1px solid #ddd;border-radius:7px;padding:6px 10px;gap:8px;">'
         +'<div style="flex:1;min-width:0;">'
@@ -806,7 +891,7 @@ function addFoodItem(meal){
     inp.style.cssText='width:'+w+';border:1px solid #d1d5db;border-radius:4px;padding:5px 7px;font-size:0.82rem;box-sizing:border-box;';
     return inp;
   }
-  var nameInp=mkInput('fe-name-','Food name','min(120px,40%)',null);
+  var nameInp=mkInput('fe-name-',meal==='supplements'?'Supplement name':'Food name','min(120px,40%)',null);
   nameInp.style.flex='2';
   var servingInp=mkInput('fe-serving-','Amount','72px',null);
   var servingUnitInp=document.createElement('select');servingUnitInp.id='fe-serving-unit-'+meal;servingUnitInp.style.cssText='width:92px;border:1px solid #d1d5db;border-radius:4px;padding:5px 4px;font-size:0.78rem;box-sizing:border-box;background:#fff;';
@@ -948,6 +1033,40 @@ function rescanHealthyFoodsAndImages(button,statusId){
   }).catch(function(){renderHealthyFoodsList();renderFavsList();var failed=document.getElementById(statusId);if(failed){failed.style.display='block';failed.style.color='#991b1b';failed.textContent='The food scan finished, but barcode pictures could not be checked. Try again when connected to the internet.';}});
 }
 
+function removeDuplicateFoodItems(button,statusId){
+  statusId=statusId||'dedupeFoodStatus';
+  var status=document.getElementById(statusId);
+  if(button)button.disabled=true;
+  var log=window._foodLog||[];
+  var seen={},keepLog=[],removedToday=0;
+  log.forEach(function(item){
+    var key=[String(item&&item.name||'').trim().toLowerCase(),item.meal||'',parseFloat(item.cal)||0,parseFloat(item.prot)||0,parseFloat(item.carbs)||0,parseFloat(item.fat)||0,parseFloat(item.servings)||1].join('|');
+    if(seen[key]){removedToday++;}
+    else{seen[key]=true;keepLog.push(item);}
+  });
+  window._foodLog=keepLog;
+  var favs=getFavorites(),seenFav={},keepFavs=[],removedFavs=0;
+  favs.forEach(function(f){
+    var key=String(f&&f.name||'').trim().toLowerCase();
+    if(!key){keepFavs.push(f);return;}
+    if(seenFav[key]){removedFavs++;}
+    else{seenFav[key]=true;keepFavs.push(f);}
+  });
+  if(removedFavs)saveFavorites(keepFavs);
+  renderFoodItems();save();
+  if(typeof renderFoodLibrarySearch==='function')renderFoodLibrarySearch();
+  if(button)button.disabled=false;
+  var total=removedToday+removedFavs;
+  if(status){
+    status.style.display='block';
+    status.style.color=total?'#166534':'#475569';
+    var parts=[];
+    if(removedToday)parts.push(removedToday+' from the food log');
+    if(removedFavs)parts.push(removedFavs+' from Favorites');
+    status.textContent=total?('✓ Removed '+total+' duplicate'+(total===1?'':'s')+' - '+parts.join(', ')+'.'):'No duplicate foods found on this device - everything already looks unique.';
+  }
+}
+
 function copyFoodItem(id){
   var log=window._foodLog||[];
   var idx=log.findIndex(function(x){return x.id===id;});
@@ -1037,12 +1156,35 @@ function renderRunnerMacroGuidance(log,totals,ratios){
   if(fuelNote){fuelNote.style.display=performance?'block':'none';fuelNote.textContent=performance?(performance.phase==='day'?'Morning workout: aim for 30–40g protein with the post-run meal, then spread the remaining protein across the day.':'Pre-fueling day: emphasize carbohydrates at lunch, dinner, and the evening snack.') : '';}
   var fields={prot:{grams:totals.prot,kcal:4,name:'protein'},carbs:{grams:totals.carbs,kcal:4,name:'carbohydrates'},fat:{grams:totals.fat,kcal:9,name:'fat'}};
   Object.keys(fields).forEach(function(kind){
-    var cap=kind==='prot'?'Prot':kind.charAt(0).toUpperCase()+kind.slice(1),actual=ratios[kind]||0,goal=target[kind],gramsGoal=target.calories*(goal/100)/fields[kind].kcal,remaining=Math.max(0,Math.round(gramsGoal-fields[kind].grams)),difference=actual-goal,status=difference<-2.5?'Low':difference>2.5?'High':'On target';
+    var cap=kind==='prot'?'Prot':kind.charAt(0).toUpperCase()+kind.slice(1),actual=ratios[kind]||0,goal=target[kind],gramsGoal=target.calories*(goal/100)/fields[kind].kcal,remaining=Math.max(0,Math.round(gramsGoal-fields[kind].grams)),difference=actual-goal,status=difference<-3?'Low':difference>3?'High':'On target';
     var a=document.getElementById('targetActual'+cap),t=document.getElementById('target'+cap),r=document.getElementById('remain'+cap),s=document.getElementById('status'+cap);if(a)a.textContent=actual.toFixed(1)+'%';if(t)t.textContent=goal+'%';if(r)r.textContent=remaining+'g';if(s){s.textContent=status;s.className='macro-status '+(status==='On target'?'on':status.toLowerCase());}
     fields[kind].remaining=remaining;fields[kind].difference=difference;
   });
-  var meals=['breakfast','lunch','dinner','snack','liquids','sports'],names={breakfast:'Breakfast',lunch:'Lunch',dinner:'Dinner',snack:'Snacks',liquids:'Liquids',sports:'Sports'},dist=document.getElementById('macroMealDistribution');
+  var meals=['breakfast','lunch','dinner','snack','liquids','sports','supplements'],names={breakfast:'Breakfast',lunch:'Lunch',dinner:'Dinner',snack:'Snacks',liquids:'Liquids',sports:'Sports',supplements:'Supplements'},dist=document.getElementById('macroMealDistribution');
   if(dist)dist.innerHTML=meals.map(function(meal){var rows=log.filter(function(x){return (x.meal||'snack')===meal;}),p=0,c=0,f=0;rows.forEach(function(x){var n=parseFloat(x.servings)||1;p+=(parseFloat(x.prot)||0)*n;c+=(parseFloat(x.carbs)||0)*n;f+=(parseFloat(x.fat)||0)*n;});return '<div class="meal-macro-chip"><strong>'+names[meal]+'</strong>'+Math.round(p)+'g P · '+Math.round(c)+'g C · '+Math.round(f)+'g F</div>';}).join('');
+}
+
+function closeMicroSourceModal(){var m=document.getElementById('microSourceModal');if(m)m.style.display='none';}
+function showMicroSourceBreakdown(field,name,unit){
+  var log=window._foodLog||[];
+  var mealNames={breakfast:'Breakfast',lunch:'Lunch',dinner:'Dinner',snack:'Snack',liquids:'Liquids',sports:'Sports',supplements:'Supplements'};
+  var rows=log.map(function(x){var s=parseFloat(x.servings)||1,amount=(parseFloat(x[field])||0)*s;return {name:x.name||'Untitled food',meal:mealNames[x.meal]||x.meal||'',amount:amount};}).filter(function(r){return r.amount>0.0001;}).sort(function(a,b){return b.amount-a.amount;});
+  var total=rows.reduce(function(sum,r){return sum+r.amount;},0);
+  var fmt=function(v){return unit==='mg'&&v>=100?Math.round(v).toLocaleString():Math.round(v*10)/10;};
+  var titleEl=document.getElementById('microSourceModalTitle'),summaryEl=document.getElementById('microSourceModalSummary'),bodyEl=document.getElementById('microSourceModalBody'),modal=document.getElementById('microSourceModal');
+  if(titleEl)titleEl.textContent=name+' sources today';
+  if(summaryEl)summaryEl.textContent=rows.length?('From '+rows.length+' logged food'+(rows.length===1?'':'s')+' · '+fmt(total)+unit+' total'):'None of the foods logged today have '+name.toLowerCase()+' recorded.';
+  if(bodyEl){
+    if(!rows.length){
+      bodyEl.innerHTML='<div style="text-align:center;color:#98a2b3;padding:22px 6px;font-size:.82rem;line-height:1.5;">None of the foods logged today have '+escHtml(name.toLowerCase())+' data recorded yet. Items logged before this nutrient was tracked, or added without full nutrition info, show 0 until re-logged or edited.</div>';
+    } else {
+      bodyEl.innerHTML=rows.map(function(r){
+        var pct=total?Math.round(r.amount/total*100):0;
+        return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid #f1f5f9;"><div style="min-width:0;"><div style="font-size:.85rem;color:#1e293b;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+escHtml(r.name)+'</div>'+(r.meal?'<div style="font-size:.7rem;color:#94a3b8;">'+escHtml(r.meal)+'</div>':'')+'</div><div style="text-align:right;white-space:nowrap;"><div style="font-size:.85rem;font-weight:700;color:#1e293b;">'+fmt(r.amount)+unit+'</div><div style="font-size:.7rem;color:#94a3b8;">'+pct+'%</div></div></div>';
+      }).join('');
+    }
+  }
+  if(modal)modal.style.display='flex';
 }
 
 function updateMacroTotals(){
@@ -1101,12 +1243,19 @@ function updateMacroTotals(){
   if(microQuality){
     if(!hasData){microQuality.style.display='none';}
     else {
+      // Targets for a 53-year-old male distance runner (US Dietary Reference Intakes, men 51-70).
+      // Iron uses the endurance-athlete adjustment (RDA 8mg x ~1.7). Sodium is a floor for
+      // sweat losses with a ceiling: above 4,000mg shows as High.
       var priorityMicros=[
-        {name:'Iron',value:totals.iron||0,target:8,unit:'mg'},
-        {name:'Calcium',value:totals.calcium||0,target:1000,unit:'mg'},
-        {name:'Vitamin D',value:totals.vitD||0,target:15,unit:'mcg'}
+        {name:'Iron',field:'iron',value:totals.iron||0,target:14,unit:'mg'},
+        {name:'Calcium',field:'calcium',value:totals.calcium||0,target:1000,unit:'mg'},
+        {name:'Vitamin D',field:'vitD',value:totals.vitD||0,target:15,unit:'mcg'},
+        {name:'Magnesium',field:'magnesium',value:totals.magnesium||0,target:420,unit:'mg'},
+        {name:'Vitamin B12',field:'vitB12',value:totals.vitB12||0,target:2.4,unit:'mcg'},
+        {name:'Sodium',field:'sodium',value:totals.sodium||0,target:2300,max:4000,unit:'mg'},
+        {name:'Potassium',field:'potassium',value:totals.potassium||0,target:3400,unit:'mg'}
       ];
-      var completion=priorityMicros.map(function(n){return Math.max(0,Math.min(1,n.value/n.target));});
+      var completion=priorityMicros.map(function(n){if(n.max&&n.value>n.max)return Math.max(0,1-(n.value-n.max)/n.max);return Math.max(0,Math.min(1,n.value/n.target));});
       var averageCompletion=completion.reduce(function(sum,n){return sum+n;},0)/completion.length;
       var microScore=1+(averageCompletion*9),microLabel=microScore>=9?'Excellent':microScore>=7?'Good':microScore>=5?'Fair':microScore>=3?'Low':'Poor';
       var weakestIndex=completion.indexOf(Math.min.apply(null,completion)),weakest=priorityMicros[weakestIndex];
@@ -1114,13 +1263,13 @@ function updateMacroTotals(){
       if(microQualityLabel)microQualityLabel.textContent=microScore.toFixed(1)+'/10 · '+microLabel;
       if(microQualityMarker)microQualityMarker.style.left=Math.max(0,Math.min(100,(microScore-1)/9*100))+'%';
       if(microQualityTrack)microQualityTrack.setAttribute('aria-valuenow',microScore.toFixed(1));
-      if(microQualityNote)microQualityNote.textContent='Targets: iron 8mg · calcium 1,000mg · vitamin D 15mcg · lowest today: '+weakest.name+' '+Math.round(weakest.value)+weakest.unit;
+      if(microQualityNote)microQualityNote.textContent='Targets for a 53-year-old male distance runner: iron 14mg · calcium 1,000mg · vitamin D 15mcg · magnesium 420mg · vitamin B12 2.4mcg · sodium 2,300–4,000mg · potassium 3,400mg · lowest today: '+weakest.name+' '+Math.round(weakest.value)+weakest.unit;
       if(microBreakdown)microBreakdown.innerHTML=priorityMicros.map(function(n){
-        var pct=n.target?Math.max(0,n.value/n.target*100):0,capped=Math.min(100,pct),status=pct>=100?'Met':pct>=75?'Close':'Low';
-        var statusColor=status==='Met'?'#166534':status==='Close'?'#92400e':'#991b1b';
-        var barColor=status==='Met'?'#16a34a':status==='Close'?'#f59e0b':'#dc2626';
+        var pct=n.target?Math.max(0,n.value/n.target*100):0,capped=Math.min(100,pct),status=(n.max&&n.value>n.max)?'High':pct>=100?'Met':pct>=75?'Close':'Low';
+        var statusColor=status==='Met'?'#166534':(status==='Close'||status==='High')?'#92400e':'#991b1b';
+        var barColor=status==='Met'?'#16a34a':(status==='Close'||status==='High')?'#f59e0b':'#dc2626';
         var shownValue=n.unit==='mg'&&n.value>=100?Math.round(n.value).toLocaleString():Math.round(n.value*10)/10;
-        return '<div><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.69rem;color:#475569;margin-bottom:3px;"><strong>'+n.name+'</strong><span>'+shownValue+n.unit+' / '+n.target.toLocaleString()+n.unit+' · '+Math.round(pct)+'% · <strong style="color:'+statusColor+'">'+status+'</strong></span></div><div role="progressbar" aria-label="'+n.name+' daily target completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+Math.round(pct)+'" style="height:8px;border-radius:999px;background:#e5e7eb;overflow:hidden;"><span style="display:block;width:'+capped+'%;height:100%;background:'+barColor+';border-radius:999px;"></span></div></div>';
+        return '<div role="button" tabindex="0" aria-label="'+n.name+' - tap to see contributing foods" onclick="showMicroSourceBreakdown(\''+n.field+'\',\''+n.name+'\',\''+n.unit+'\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();showMicroSourceBreakdown(\''+n.field+'\',\''+n.name+'\',\''+n.unit+'\');}" style="cursor:pointer;"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.69rem;color:#475569;margin-bottom:3px;"><strong>'+n.name+'</strong><span>'+shownValue+n.unit+' / '+n.target.toLocaleString()+(n.max?'–'+n.max.toLocaleString():'')+n.unit+' · '+Math.round(pct)+'% · <strong style="color:'+statusColor+'">'+status+'</strong> <span style="color:#cbd5e1;">›</span></span></div><div role="progressbar" aria-label="'+n.name+' daily target completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+Math.round(pct)+'" style="height:8px;border-radius:999px;background:#e5e7eb;overflow:hidden;"><span style="display:block;width:'+capped+'%;height:100%;background:'+barColor+';border-radius:999px;"></span></div></div>';
       }).join('');
     }
   }
@@ -1208,7 +1357,7 @@ function calculateDailyCalorieTarget(showMessage){
 }
 
 // ── Favorites ────────────────────────────────────────
-function getFavorites(){var r=localStorage.getItem('favorites_data');return r?JSON.parse(r):[];}
+function getFavorites(){try{var r=localStorage.getItem('favorites_data');return r?JSON.parse(r):[];}catch(ignore){return [];}}
 function updateFavoriteFoodsCount(count){var el=document.getElementById('favoriteFoodsCount');if(el)el.textContent=Number.isFinite(count)?count:getFavorites().length;}
 function saveFavorites(favs){localStorage.setItem('favorites_data',JSON.stringify(favs));updateFavoriteFoodsCount(favs.length);}
 
@@ -1299,6 +1448,11 @@ function applyFoodSort(list){
   if(sortBy==='prot_desc')arr.sort(cmp('prot','desc'));
   else if(sortBy==='carbs_desc')arr.sort(cmp('carbs','desc'));
   else if(sortBy==='fat_asc')arr.sort(cmp('fat','asc'));
+  else if(sortBy==='iron_desc')arr.sort(cmp('iron','desc'));
+  else if(sortBy==='calcium_desc')arr.sort(cmp('calcium','desc'));
+  else if(sortBy==='vitD_desc')arr.sort(cmp('vitD','desc'));
+  else if(sortBy==='magnesium_desc')arr.sort(cmp('magnesium','desc'));
+  else if(sortBy==='vitB12_desc')arr.sort(cmp('vitB12','desc'));
   return arr;
 }
 function renderHealthyFoodsList(){
@@ -1435,6 +1589,7 @@ function renderMealsList(){
           +'<option value="snack"'+(m.category==='snack'?' selected':'')+'>🍎 Snacks</option>'
           +'<option value="liquids"'+(m.category==='liquids'?' selected':'')+'>💧 Liquids</option>'
           +'<option value="sports"'+(m.category==='sports'?' selected':'')+'>💪 Sports Nutrition</option>'
+          +'<option value="supplements"'+(m.category==='supplements'?' selected':'')+'>💊 Supplements</option>'
         +'</select>'
         +'<button onclick="loadMeal('+i+')" style="background:#2980b9;color:#fff;border:none;border-radius:5px;padding:4px 9px;font-size:0.78rem;cursor:pointer;">Load</button>'
       +'</div>'
@@ -1612,7 +1767,7 @@ function scanFoodLabel(ev){
         max_tokens:400,
         messages:[{role:'user',content:[
           {type:'image',source:{type:'base64',media_type:mtype,data:b64}},
-          {type:'text',text:'Read this nutrition information image carefully — it may be a photo of a food package label, or a screenshot from a nutrition app, recipe site, or restaurant menu. Extract the per-serving Nutrition Facts, any visible product or food name, and the complete visible ingredient list (leave ingredientsText empty if the image does not show one, such as most app/menu screenshots). Use the ingredients to classify the dominant source of ALL THREE macros for a runner: protein (lean/plant versus higher-fat/processed), carbohydrates (complex/fiber-rich versus simple/refined), and fat (unsaturated versus saturated/trans). Respond with ONLY a single JSON object — no markdown, no code fences, no explanation, nothing else before or after. The JSON must have these exact keys:\n- "name": the product or food name visible anywhere on the label/package (use "Scanned Food" if not visible)\n- "ingredientsText": the complete ingredient list exactly as visible (use an empty string if it is not visible; do not guess)\n- "proteinSource": use "support" for lean/plant, "limit" for higher-fat/processed, or "unknown" when not supported by visible evidence\n- "carbSource": use "support" for complex/fiber-rich, "limit" for simple/refined, or "unknown" when not supported by visible evidence\n- "fatSource": use "support" for unsaturated, "limit" for saturated/trans, or "unknown" when not supported by visible evidence\n- "cal": Calories per serving as a plain number\n- "prot": Protein grams per serving as a plain number\n- "fat": Total Fat grams per serving as a plain number\n- "carbs": Total Carbohydrate grams per serving as a plain number\n- "fiber": Dietary Fiber grams per serving as a plain number\n- "sugar": Total Sugars grams per serving as a plain number\n- "sodium": Sodium milligrams per serving as a plain number\n- "vitA": Vitamin A in mcg per serving as a plain number\n- "vitC": Vitamin C in mg per serving as a plain number\n- "vitD": Vitamin D in mcg per serving as a plain number\n- "calcium": Calcium in mg per serving as a plain number\n- "iron": Iron in mg per serving as a plain number\n- "potassium": Potassium in mg per serving as a plain number\nAll numeric values must be numbers, not strings. Use 0 if a numeric value cannot be read from the label. Never invent missing ingredients or classifications. Output the JSON object only.'}
+          {type:'text',text:'Read this nutrition information image carefully — it may be a photo of a food package label, or a screenshot from a nutrition app, recipe site, or restaurant menu. Extract the per-serving Nutrition Facts, any visible product or food name, and the complete visible ingredient list (leave ingredientsText empty if the image does not show one, such as most app/menu screenshots). Use the ingredients to classify the dominant source of ALL THREE macros for a runner: protein (lean/plant versus higher-fat/processed), carbohydrates (complex/fiber-rich versus simple/refined), and fat (unsaturated versus saturated/trans). Respond with ONLY a single JSON object — no markdown, no code fences, no explanation, nothing else before or after. The JSON must have these exact keys:\n- "name": the product or food name visible anywhere on the label/package (use "Scanned Food" if not visible)\n- "ingredientsText": the complete ingredient list exactly as visible (use an empty string if it is not visible; do not guess)\n- "proteinSource": use "support" for lean/plant, "limit" for higher-fat/processed, or "unknown" when not supported by visible evidence\n- "carbSource": use "support" for complex/fiber-rich, "limit" for simple/refined, or "unknown" when not supported by visible evidence\n- "fatSource": use "support" for unsaturated, "limit" for saturated/trans, or "unknown" when not supported by visible evidence\n- "cal": Calories per serving as a plain number\n- "prot": Protein grams per serving as a plain number\n- "fat": Total Fat grams per serving as a plain number\n- "carbs": Total Carbohydrate grams per serving as a plain number\n- "fiber": Dietary Fiber grams per serving as a plain number\n- "sugar": Total Sugars grams per serving as a plain number\n- "sodium": Sodium milligrams per serving as a plain number\n- "vitA": Vitamin A in mcg per serving as a plain number\n- "vitC": Vitamin C in mg per serving as a plain number\n- "vitD": Vitamin D in mcg per serving as a plain number\n- "calcium": Calcium in mg per serving as a plain number\n- "iron": Iron in mg per serving as a plain number\n- "potassium": Potassium in mg per serving as a plain number\n- "magnesium": Magnesium in mg per serving as a plain number\n- "vitB12": Vitamin B12 in mcg per serving as a plain number\nAll numeric values must be numbers, not strings. Use 0 if a numeric value cannot be read from the label. Never invent missing ingredients or classifications. Output the JSON object only.'}
           ,{type:'text',text:'Also include a string key named "servingLabel" containing the exact serving size printed on the label, including its unit (for example, "1 cup (240 mL)" or "30 g"). Use "1 serving" only when the serving size cannot be read.'}
         ]}]
       })
@@ -1697,9 +1852,9 @@ function aiNutritionCorrelation(){
   var nProt=nLog.reduce(function(a,x){return a+(parseFloat(x.prot)||0);},0)||parseFloat(nData.nuProtVal)||0;
   var nCarbs=nLog.reduce(function(a,x){return a+(parseFloat(x.carbs)||0);},0)||parseFloat(nData.nuCarbsVal)||0;
   var nFat=nLog.reduce(function(a,x){return a+(parseFloat(x.fat)||0);},0)||parseFloat(nData.nuFatVal)||0;
-  var nWater=nData.waterOz||(nData.waterCount?nData.waterCount*8:0);
+  var nWater=(nData.waterOz||(nData.waterCount?nData.waterCount*8:0))+(parseFloat(nData.sportsDrinksOz)||0)+(parseFloat(nData.otherLiquidsOz)||0);
   // Meal breakdown
-  var mealTypes=['breakfast','lunch','dinner','snack','liquids','sports'];
+  var mealTypes=['breakfast','lunch','dinner','snack','liquids','sports','supplements'];
   var mealLines=[];
   mealTypes.forEach(function(mt){
     var items=nLog.filter(function(x){return x.meal===mt;});
@@ -1718,7 +1873,7 @@ function aiNutritionCorrelation(){
   var pace=rData.exPace||(runAct.length?runAct[0].pace:'');
   var runNotes=rData.exRunVal||(runAct.length?runAct[0].notes:'');
   // Sports nutrition + water from run day
-  var rWater=rData.waterOz||(rData.waterCount?rData.waterCount*8:0);
+  var rWater=(rData.waterOz||(rData.waterCount?rData.waterCount*8:0))+(parseFloat(rData.sportsDrinksOz)||0)+(parseFloat(rData.otherLiquidsOz)||0);
   var rLog=Array.isArray(rData.foodLog)?rData.foodLog:[];
   var runSports=rLog.filter(function(x){return x.meal==='sports';});
   // Build focused prompt

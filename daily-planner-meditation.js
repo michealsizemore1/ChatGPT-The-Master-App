@@ -8,7 +8,7 @@ function meditGetCtx(){
 }
 
 /* --- Timer --- */
-function meditTodayKey(){return new Date().toISOString().slice(0,10);}
+function meditTodayKey(){return dk(new Date());}
 
 function meditSetDuration(m){
   if(_meditRunning)return;
