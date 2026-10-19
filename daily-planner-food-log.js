@@ -3,10 +3,10 @@
 // ══════════════════════════════════════════════════════
 if(!window._foodLog)window._foodLog=[];
 
-const MEALS=['breakfast','lunch','dinner','snack','liquids','sports'];
-const MEAL_LABELS={breakfast:'🌅 Breakfast',lunch:'🥗 Lunch',dinner:'🍽️ Dinner',snack:'🍎 Snacks',liquids:'💧 Liquids',sports:'💪 Sports Nutrition'};
-const MEAL_HINTS={breakfast:'Food name',lunch:'Food name',dinner:'Food name',snack:'Snack name',liquids:'Drink name',sports:'Sports fuel / supplement'};
-const SERVING_UNITS=['serving','cup','tablespoon','teaspoon','fluid ounce','ounce','gram','milligram','milliliter','liter','piece','item','slice','scoop','packet','bar','bottle','can','container','handful'];
+const MEALS=['breakfast','lunch','dinner','snack','liquids','sports','supplements'];
+const MEAL_LABELS={breakfast:'🌅 Breakfast',lunch:'🥗 Lunch',dinner:'🍽️ Dinner',snack:'🍎 Snacks',liquids:'💧 Liquids',sports:'💪 Sports Nutrition',supplements:'💊 Supplements'};
+const MEAL_HINTS={breakfast:'Food name',lunch:'Food name',dinner:'Food name',snack:'Snack name',liquids:'Drink name',sports:'Sports fuel',supplements:'Supplement (e.g. Creatine 5 g)'};
+const SERVING_UNITS=['serving','cup','tablespoon','teaspoon','fluid ounce','ounce','gram','milligram','milliliter','liter','piece','item','slice','scoop','packet','bar','bottle','can','container','handful','capsule','tablet','softgel','gummy','IU','microgram'];
 // ── Macro-Target Meal Suggestions (20% protein / 60% carbs / 20% fat) ──
 const MACRO_MEALS=[
   {id:'mm1',mealType:'breakfast',label:'Oats with Egg Whites & Almond Butter',kcal:402,protein:20,carbs:60,fat:9,items:[
@@ -891,7 +891,7 @@ function addFoodItem(meal){
     inp.style.cssText='width:'+w+';border:1px solid #d1d5db;border-radius:4px;padding:5px 7px;font-size:0.82rem;box-sizing:border-box;';
     return inp;
   }
-  var nameInp=mkInput('fe-name-','Food name','min(120px,40%)',null);
+  var nameInp=mkInput('fe-name-',meal==='supplements'?'Supplement name':'Food name','min(120px,40%)',null);
   nameInp.style.flex='2';
   var servingInp=mkInput('fe-serving-','Amount','72px',null);
   var servingUnitInp=document.createElement('select');servingUnitInp.id='fe-serving-unit-'+meal;servingUnitInp.style.cssText='width:92px;border:1px solid #d1d5db;border-radius:4px;padding:5px 4px;font-size:0.78rem;box-sizing:border-box;background:#fff;';
@@ -1160,14 +1160,14 @@ function renderRunnerMacroGuidance(log,totals,ratios){
     var a=document.getElementById('targetActual'+cap),t=document.getElementById('target'+cap),r=document.getElementById('remain'+cap),s=document.getElementById('status'+cap);if(a)a.textContent=actual.toFixed(1)+'%';if(t)t.textContent=goal+'%';if(r)r.textContent=remaining+'g';if(s){s.textContent=status;s.className='macro-status '+(status==='On target'?'on':status.toLowerCase());}
     fields[kind].remaining=remaining;fields[kind].difference=difference;
   });
-  var meals=['breakfast','lunch','dinner','snack','liquids','sports'],names={breakfast:'Breakfast',lunch:'Lunch',dinner:'Dinner',snack:'Snacks',liquids:'Liquids',sports:'Sports'},dist=document.getElementById('macroMealDistribution');
+  var meals=['breakfast','lunch','dinner','snack','liquids','sports','supplements'],names={breakfast:'Breakfast',lunch:'Lunch',dinner:'Dinner',snack:'Snacks',liquids:'Liquids',sports:'Sports',supplements:'Supplements'},dist=document.getElementById('macroMealDistribution');
   if(dist)dist.innerHTML=meals.map(function(meal){var rows=log.filter(function(x){return (x.meal||'snack')===meal;}),p=0,c=0,f=0;rows.forEach(function(x){var n=parseFloat(x.servings)||1;p+=(parseFloat(x.prot)||0)*n;c+=(parseFloat(x.carbs)||0)*n;f+=(parseFloat(x.fat)||0)*n;});return '<div class="meal-macro-chip"><strong>'+names[meal]+'</strong>'+Math.round(p)+'g P · '+Math.round(c)+'g C · '+Math.round(f)+'g F</div>';}).join('');
 }
 
 function closeMicroSourceModal(){var m=document.getElementById('microSourceModal');if(m)m.style.display='none';}
 function showMicroSourceBreakdown(field,name,unit){
   var log=window._foodLog||[];
-  var mealNames={breakfast:'Breakfast',lunch:'Lunch',dinner:'Dinner',snack:'Snack',liquids:'Liquids',sports:'Sports'};
+  var mealNames={breakfast:'Breakfast',lunch:'Lunch',dinner:'Dinner',snack:'Snack',liquids:'Liquids',sports:'Sports',supplements:'Supplements'};
   var rows=log.map(function(x){var s=parseFloat(x.servings)||1,amount=(parseFloat(x[field])||0)*s;return {name:x.name||'Untitled food',meal:mealNames[x.meal]||x.meal||'',amount:amount};}).filter(function(r){return r.amount>0.0001;}).sort(function(a,b){return b.amount-a.amount;});
   var total=rows.reduce(function(sum,r){return sum+r.amount;},0);
   var fmt=function(v){return unit==='mg'&&v>=100?Math.round(v).toLocaleString():Math.round(v*10)/10;};
@@ -1584,6 +1584,7 @@ function renderMealsList(){
           +'<option value="snack"'+(m.category==='snack'?' selected':'')+'>🍎 Snacks</option>'
           +'<option value="liquids"'+(m.category==='liquids'?' selected':'')+'>💧 Liquids</option>'
           +'<option value="sports"'+(m.category==='sports'?' selected':'')+'>💪 Sports Nutrition</option>'
+          +'<option value="supplements"'+(m.category==='supplements'?' selected':'')+'>💊 Supplements</option>'
         +'</select>'
         +'<button onclick="loadMeal('+i+')" style="background:#2980b9;color:#fff;border:none;border-radius:5px;padding:4px 9px;font-size:0.78rem;cursor:pointer;">Load</button>'
       +'</div>'
@@ -1848,7 +1849,7 @@ function aiNutritionCorrelation(){
   var nFat=nLog.reduce(function(a,x){return a+(parseFloat(x.fat)||0);},0)||parseFloat(nData.nuFatVal)||0;
   var nWater=(nData.waterOz||(nData.waterCount?nData.waterCount*8:0))+(parseFloat(nData.sportsDrinksOz)||0)+(parseFloat(nData.otherLiquidsOz)||0);
   // Meal breakdown
-  var mealTypes=['breakfast','lunch','dinner','snack','liquids','sports'];
+  var mealTypes=['breakfast','lunch','dinner','snack','liquids','sports','supplements'];
   var mealLines=[];
   mealTypes.forEach(function(mt){
     var items=nLog.filter(function(x){return x.meal===mt;});

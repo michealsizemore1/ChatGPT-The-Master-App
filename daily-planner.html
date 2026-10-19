@@ -2748,6 +2748,7 @@ body{
       <option value="snack">&#x1F34E; Snacks</option>
       <option value="liquids">&#x1F4A7; Liquids</option>
       <option value="sports">&#x1F4AA; Sports Nutrition</option>
+      <option value="supplements">&#x1F48A; Supplements</option>
     </select>
     <div style="display:flex;gap:8px;">
       <button onclick="confirmSaveMeal()" style="flex:1;background:#e67e22;color:#fff;border:none;padding:9px;border-radius:6px;font-size:0.9rem;cursor:pointer;font-weight:600;">&#x1F4BE; Save</button>
@@ -2973,6 +2974,14 @@ body{
         <div style="padding:6px 8px 8px;"><textarea id="mnotes-sports" rows="1" placeholder="Sports nutrition notes..." oninput="save()" style="width:100%;border:1px solid #e9ecef;border-radius:5px;padding:4px 8px;font-size:0.78rem;resize:vertical;font-family:inherit;box-sizing:border-box;background:#fafafa;color:#555;"></textarea><div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;"><button onclick="openCopyMealToDate('sports')" class="meal-action-btn">&#x1F4C5; Copy to Date</button></div></div>
       </div>
     </div>
+    <div class="meal-section" id="ms-supplements" data-meal="supplements">
+      <div class="meal-header" onclick="toggleMealSection('supplements')" style="border-left-color:#8e44ad;">
+        <span>💊 Supplements</span><div class="meal-right"><span class="meal-subtotal" id="st-supplements" style="font-size:0.75rem;color:#888;"></span><button onclick="event.stopPropagation();saveMealFromSection('supplements')" class="meal-action-btn" title="Save meal" aria-label="Save supplements">&#x1F4BE;</button><button onclick="event.stopPropagation();addFoodItem('supplements')" class="meal-add-btn" style="background:#8e44ad;">+ Add</button><span class="meal-chevron" id="chev-supplements">▸</span></div>
+      </div>
+      <div class="meal-body" id="mb-supplements" style="display:none;"><div id="foodList-supplements"></div>
+        <div style="padding:6px 8px 8px;"><textarea id="mnotes-supplements" rows="1" placeholder="Supplement notes (dose, timing)..." oninput="save()" style="width:100%;border:1px solid #e9ecef;border-radius:5px;padding:4px 8px;font-size:0.78rem;resize:vertical;font-family:inherit;box-sizing:border-box;background:#fafafa;color:#555;"></textarea><div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;"><button onclick="openCopyMealToDate('supplements')" class="meal-action-btn">&#x1F4C5; Copy to Date</button></div></div>
+      </div>
+    </div>
   </div>
   <!-- Legacy flat list (hidden, kept for compat) -->
   <div id="foodItemsList" style="display:none;"></div>
@@ -3102,6 +3111,7 @@ body{
         <option value="snack">🍎 Add to Snacks</option>
         <option value="liquids">💧 Add to Liquids</option>
         <option value="sports">💪 Add to Sports Nutrition</option>
+        <option value="supplements">💊 Add to Supplements</option>
       </select>
     </div>
     <div id="favsList" style="max-height:180px;overflow-y:auto;"></div>
@@ -3121,6 +3131,7 @@ body{
           <option value="snack">&#x1F34E; Snacks</option>
           <option value="liquids">&#x1F4A7; Liquids</option>
           <option value="sports">&#x1F4AA; Sports</option>
+          <option value="supplements">&#x1F48A; Supplements</option>
         </select>
         <button onclick="aiSearchFood()" style="background:#4338ca;color:#fff;border:none;border-radius:6px;padding:5px 14px;font-size:0.82rem;cursor:pointer;white-space:nowrap;flex-shrink:0;">Search</button>
       </div>
@@ -3207,6 +3218,7 @@ body{
       <option value="snack">🍎 Snacks</option>
       <option value="liquids">💧 Liquids</option>
       <option value="sports">💪 Sports Nutrition</option>
+      <option value="supplements">💊 Supplements</option>
     </select>
     <div id="copyDayFoodRow" style="display:none;">
       <label style="font-size:0.82rem;color:#555;display:block;margin-bottom:6px;">Which food item:</label>
@@ -3284,6 +3296,7 @@ body{
       <option value="snack">&#x1F34E; Snacks</option>
       <option value="liquids">&#x1F4A7; Liquids</option>
       <option value="sports">&#x1F4AA; Sports Nutrition</option>
+      <option value="supplements">&#x1F48A; Supplements</option>
     </select>
     <div style="display:flex;gap:8px;">
       <button onclick="confirmScanAdd()" style="flex:1;background:#e67e22;color:#fff;border:none;padding:9px;border-radius:6px;font-size:0.9rem;cursor:pointer;font-weight:600;">&#x2795; Add Food</button>
@@ -3291,8 +3304,8 @@ body{
     </div>
   </div>
 </div>
-<script src="daily-planner-core.js?v=2026-10-15-12"></script>
-<script src="daily-planner-food-log.js?v=2026-10-15-21"></script>
+<script src="daily-planner-core.js?v=2026-10-18-1"></script>
+<script src="daily-planner-food-log.js?v=2026-10-18-1"></script>
 <script src="daily-planner-bible.js?v=2026-10-15-7"></script>
 <script src="daily-planner-meditation.js?v=2026-10-15-7"></script>
 <script src="daily-planner-journal-archive.js?v=2026-10-15-6"></script>
