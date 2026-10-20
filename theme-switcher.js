@@ -8,10 +8,11 @@
     halloween:    { label: 'Halloween',    emoji: '🎃', color: '#ff6b00' },
     thanksgiving: { label: 'Thanksgiving', emoji: '🦃', color: '#d97706' },
     christmas:    { label: 'Christmas',    emoji: '🎄', color: '#c21807' },
+    newyear:      { label: "New Year's",   emoji: '🎉', color: '#ffc107' },
     july4:        { label: '4th of July',  emoji: '🎆', color: '#dc2626' }
   };
   var DEFAULT_THEME = 'halloween';
-  var THEME_ORDER = ['halloween','thanksgiving','christmas','july4'];
+  var THEME_ORDER = ['halloween','thanksgiving','christmas','newyear','july4'];
 
   function getSavedTheme(){
     try{
