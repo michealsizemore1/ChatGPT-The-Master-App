@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-10-15-62">
+<meta name="app-build" content="2026-10-15-63">
 <script src="theme-switcher.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#ff6b00">
@@ -697,7 +697,76 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;paddi
 }
 #hmSidebar.open{transform:translateX(0);}
 
-.hm-fireworks{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;}
+.hm-fx{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;display:none;}
+html[data-theme="original"] .hm-fx-original{display:block;}
+html[data-theme="halloween"] .hm-fx-halloween{display:block;}
+html[data-theme="thanksgiving"] .hm-fx-thanksgiving{display:block;}
+html[data-theme="christmas"] .hm-fx-christmas{display:block;}
+html[data-theme="july4"] .hm-fx-july4{display:block;}
+
+/* Original theme: soft floating sparkle orbs, no holiday motif. */
+.hm-fx-original .hm-orb{position:absolute;border-radius:50%;background:radial-gradient(circle, rgba(255,255,255,.9) 0%, rgba(255,255,255,0) 70%);opacity:0;animation:hmOrbFloat 7s ease-in-out infinite;}
+.hm-fx-original .orb1{width:10px;height:10px;left:12%;bottom:-6%;animation-delay:0s;}
+.hm-fx-original .orb2{width:7px; height:7px; left:30%;bottom:-9%;animation-delay:1.4s;}
+.hm-fx-original .orb3{width:12px;height:12px;left:52%;bottom:-7%;animation-delay:2.6s;}
+.hm-fx-original .orb4{width:6px; height:6px; left:68%;bottom:-11%;animation-delay:0.8s;}
+.hm-fx-original .orb5{width:9px; height:9px; left:82%;bottom:-5%;animation-delay:3.5s;}
+.hm-fx-original .orb6{width:8px; height:8px; left:22%;bottom:-13%;animation-delay:4.6s;}
+@keyframes hmOrbFloat{
+  0%{opacity:0;transform:translateY(0) scale(0.6);}
+  12%{opacity:.9;}
+  85%{opacity:.5;}
+  100%{opacity:0;transform:translateY(-110vh) scale(1.1);}
+}
+
+/* Halloween theme: bats drifting across the sidebar. */
+.hm-fx-halloween .hm-bat{position:absolute;left:-10%;font-size:1.2rem;opacity:0;filter:drop-shadow(0 1px 3px rgba(0,0,0,.5));animation:hmBatFly 6s linear infinite;}
+.hm-fx-halloween .bat1{top:10%; animation-delay:0s;}
+.hm-fx-halloween .bat2{top:28%; animation-delay:1.6s; font-size:1rem;}
+.hm-fx-halloween .bat3{top:50%; animation-delay:3.1s;}
+.hm-fx-halloween .bat4{top:66%; animation-delay:4.4s; font-size:1.1rem;}
+.hm-fx-halloween .bat5{top:8%;  animation-delay:2.3s; font-size:0.9rem;}
+.hm-fx-halloween .bat6{top:82%; animation-delay:5.2s;}
+@keyframes hmBatFly{
+  0%{opacity:0; transform:translate(0,0) rotate(0deg);}
+  8%{opacity:.85;}
+  50%{transform:translate(130px,-14px) rotate(-6deg);}
+  92%{opacity:.85;}
+  100%{opacity:0; transform:translate(260px,6px) rotate(6deg);}
+}
+
+/* Thanksgiving theme: falling autumn leaves. */
+.hm-fx-thanksgiving .hm-leaf{position:absolute;top:-8%;font-size:1.1rem;opacity:0;animation:hmLeafFall 7s linear infinite;}
+.hm-fx-thanksgiving .leaf1{left:10%; animation-delay:0s;}
+.hm-fx-thanksgiving .leaf2{left:28%; animation-delay:1.2s; font-size:0.95rem;}
+.hm-fx-thanksgiving .leaf3{left:46%; animation-delay:2.6s;}
+.hm-fx-thanksgiving .leaf4{left:62%; animation-delay:3.8s; font-size:1rem;}
+.hm-fx-thanksgiving .leaf5{left:78%; animation-delay:0.6s;}
+.hm-fx-thanksgiving .leaf6{left:90%; animation-delay:4.9s; font-size:0.9rem;}
+@keyframes hmLeafFall{
+  0%{opacity:0; transform:translate(0,0) rotate(0deg);}
+  8%{opacity:.9;}
+  50%{transform:translate(18px,55vh) rotate(130deg);}
+  92%{opacity:.85;}
+  100%{opacity:0; transform:translate(-14px,112vh) rotate(260deg);}
+}
+
+/* Christmas theme: falling snow. */
+.hm-fx-christmas .hm-snow{position:absolute;top:-8%;color:#fff;text-shadow:0 0 4px rgba(255,255,255,.8);opacity:0;animation:hmSnowFall 8s linear infinite;}
+.hm-fx-christmas .snow1{left:8%;  font-size:0.9rem; animation-delay:0s;}
+.hm-fx-christmas .snow2{left:24%; font-size:1.2rem; animation-delay:1.3s;}
+.hm-fx-christmas .snow3{left:40%; font-size:0.8rem; animation-delay:2.7s;}
+.hm-fx-christmas .snow4{left:58%; font-size:1.1rem; animation-delay:4.1s;}
+.hm-fx-christmas .snow5{left:74%; font-size:0.9rem; animation-delay:0.9s;}
+.hm-fx-christmas .snow6{left:90%; font-size:1rem;   animation-delay:5.5s;}
+@keyframes hmSnowFall{
+  0%{opacity:0; transform:translate(0,0);}
+  8%{opacity:.95;}
+  50%{transform:translate(10px,55vh);}
+  92%{opacity:.8;}
+  100%{opacity:0; transform:translate(-8px,112vh);}
+}
+
 .hm-fw{
   position:absolute;
   border-radius:50%;
@@ -1315,7 +1384,39 @@ body{
 <!-- Sidebar overlay + panel (outside container so fixed positioning works) -->
 <div id="hmOverlay" onclick="closeHamburger()"></div>
 <nav id="hmSidebar">
-  <div class="hm-fireworks" aria-hidden="true">
+  <div class="hm-fx hm-fx-original" aria-hidden="true">
+    <span class="hm-orb orb1"></span>
+    <span class="hm-orb orb2"></span>
+    <span class="hm-orb orb3"></span>
+    <span class="hm-orb orb4"></span>
+    <span class="hm-orb orb5"></span>
+    <span class="hm-orb orb6"></span>
+  </div>
+  <div class="hm-fx hm-fx-halloween" aria-hidden="true">
+    <span class="hm-bat bat1">&#x1F987;</span>
+    <span class="hm-bat bat2">&#x1F987;</span>
+    <span class="hm-bat bat3">&#x1F987;</span>
+    <span class="hm-bat bat4">&#x1F987;</span>
+    <span class="hm-bat bat5">&#x1F987;</span>
+    <span class="hm-bat bat6">&#x1F987;</span>
+  </div>
+  <div class="hm-fx hm-fx-thanksgiving" aria-hidden="true">
+    <span class="hm-leaf leaf1">&#x1F342;</span>
+    <span class="hm-leaf leaf2">&#x1F343;</span>
+    <span class="hm-leaf leaf3">&#x1F342;</span>
+    <span class="hm-leaf leaf4">&#x1F343;</span>
+    <span class="hm-leaf leaf5">&#x1F342;</span>
+    <span class="hm-leaf leaf6">&#x1F343;</span>
+  </div>
+  <div class="hm-fx hm-fx-christmas" aria-hidden="true">
+    <span class="hm-snow snow1">&#x2744;&#xFE0F;</span>
+    <span class="hm-snow snow2">&#x2744;&#xFE0F;</span>
+    <span class="hm-snow snow3">&#x2744;&#xFE0F;</span>
+    <span class="hm-snow snow4">&#x2744;&#xFE0F;</span>
+    <span class="hm-snow snow5">&#x2744;&#xFE0F;</span>
+    <span class="hm-snow snow6">&#x2744;&#xFE0F;</span>
+  </div>
+  <div class="hm-fx hm-fx-july4" aria-hidden="true">
     <span class="hm-fw fw1"></span>
     <span class="hm-fw fw2"></span>
     <span class="hm-fw fw3"></span>
