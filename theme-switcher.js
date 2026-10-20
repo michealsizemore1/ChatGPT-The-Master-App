@@ -5,14 +5,13 @@
 (function(){
   var THEME_KEY = 'app_theme';
   var THEMES = {
-    original:     { label: 'Original',     emoji: '🧭', color: '#7c3aed' },
     halloween:    { label: 'Halloween',    emoji: '🎃', color: '#ff6b00' },
     thanksgiving: { label: 'Thanksgiving', emoji: '🦃', color: '#d97706' },
     christmas:    { label: 'Christmas',    emoji: '🎄', color: '#c21807' },
     july4:        { label: '4th of July',  emoji: '🎆', color: '#dc2626' }
   };
   var DEFAULT_THEME = 'halloween';
-  var THEME_ORDER = ['original','halloween','thanksgiving','christmas','july4'];
+  var THEME_ORDER = ['halloween','thanksgiving','christmas','july4'];
 
   function getSavedTheme(){
     try{
