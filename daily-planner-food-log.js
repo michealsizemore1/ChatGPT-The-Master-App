@@ -1056,6 +1056,7 @@ function removeDuplicateFoodItems(button,statusId){
   renderFoodItems();save();
   if(typeof renderFoodLibrarySearch==='function')renderFoodLibrarySearch();
   if(button)button.disabled=false;
+  status=document.getElementById(statusId);
   var total=removedToday+removedFavs;
   if(status){
     status.style.display='block';
