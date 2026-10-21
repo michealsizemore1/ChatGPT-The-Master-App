@@ -1125,6 +1125,7 @@ function nutritionHardWorkoutForDate(date){
   if(/\blong\s+run\b|\bhalf\s+marathon\b|\bmarathon\b/.test(text))return'long';
   if(/\bintervals?\b|\brepeats?\b|\bspeed\s*work\b|\btrack\s+(?:workout|session)\b|\bhill\s+repeats?\b/.test(text))return'interval';
   if(/\btempo\b|\bthreshold\b/.test(text))return'tempo';
+  if(/\bquality\b/.test(text))return'quality';
   return'';
 }
 function nutritionPerformancePreset(dateKey){
@@ -1135,8 +1136,9 @@ function nutritionPerformancePreset(dateKey){
   var table={
     long:{prior:{calories:3200,prot:19,carbs:63,fat:18},day:{calories:3300,prot:20,carbs:60,fat:20}},
     tempo:{prior:{calories:2800,prot:20,carbs:60,fat:20},day:{calories:2900,prot:22,carbs:55,fat:23}},
-    interval:{prior:{calories:2800,prot:20,carbs:60,fat:20},day:{calories:2950,prot:21,carbs:56,fat:23}}
-  },target=table[workout][phase],weight=calorieAdvisorLatestWeight(dateKey||dk(today))||185,scaledCalories=Math.round((target.calories*(weight/185))/25)*25,names={long:'Long Run',tempo:'Tempo Run',interval:'Interval Run'};
+    interval:{prior:{calories:2800,prot:20,carbs:60,fat:20},day:{calories:2950,prot:21,carbs:56,fat:23}},
+    quality:{prior:{calories:2800,prot:20,carbs:60,fat:20},day:{calories:2900,prot:22,carbs:55,fat:23}}
+  },target=table[workout][phase],weight=calorieAdvisorLatestWeight(dateKey||dk(today))||185,scaledCalories=Math.round((target.calories*(weight/185))/25)*25,names={long:'Long Run',tempo:'Tempo Run',interval:'Interval Run',quality:'Quality Run'};
   return{workout:workout,phase:phase,calories:scaledCalories,prot:target.prot,carbs:target.carbs,fat:target.fat,label:phase==='day'?'Today: '+names[workout]+' — Training & Recovery Target':'Tomorrow: '+names[workout]+' — Pre-Fueling Target'};
 }
 
@@ -1145,7 +1147,7 @@ function runnerMacroTarget(){
   var planSummary=typeof journalTodayTrainingSummary==='function'?journalTodayTrainingSummary():'',activityText=workouts.map(function(a){return [a.title,a.type].filter(Boolean).join(' ');}).join(' '),text=(activityText||planSummary||'').toLowerCase();
   var longest=workouts.reduce(function(max,a){return Math.max(max,parseFloat(a.distance)||0);},0),target={prot:20,carbs:50,fat:30,label:'Rest / recovery day'};
   if(/race|long run|marathon|half marathon/.test(text)||longest>=8)target={prot:18,carbs:65,fat:17,label:'Long-run / race-day target'};
-  else if(/tempo|interval|speed|threshold|track|hill repeat/.test(text))target={prot:20,carbs:60,fat:20,label:'Speed / quality-workout target'};
+  else if(/tempo|interval|speed|threshold|track|hill repeat|quality/.test(text))target={prot:20,carbs:60,fat:20,label:'Speed / quality-workout target'};
   else if(/run|cycle|bike|strength|weight|cross.train/.test(text)||activities.length)target={prot:20,carbs:55,fat:25,label:'Training-day target'};
   var performance=nutritionPerformancePreset(dateKey);if(performance)target={prot:performance.prot,carbs:performance.carbs,fat:performance.fat,label:performance.label};
   var custom=macroRatioSettings();if(custom.enabled&&Number(custom.prot)+Number(custom.carbs)+Number(custom.fat)===100)target={prot:Number(custom.prot),carbs:Number(custom.carbs),fat:Number(custom.fat),label:'Custom macro target'};
@@ -1483,7 +1485,7 @@ function renderPreRunMealIdeas(){
   var performance=typeof nutritionPerformancePreset==='function'?nutritionPerformancePreset(dk(today)):null;
   if(!performance||performance.phase!=='prior'){card.style.display='none';return;}
   card.style.display='block';
-  var names={long:'Long Run',tempo:'Tempo Run',interval:'Interval Run'},title=document.getElementById('preRunMealIdeasTitle');
+  var names={long:'Long Run',tempo:'Tempo Run',interval:'Interval Run',quality:'Quality Run'},title=document.getElementById('preRunMealIdeasTitle');
   if(title)title.textContent='🍽️ Tomorrow: '+names[performance.workout]+' — Meal Ideas';
   var dateKey=dk(today),nonce=getMealIdeasNonce(dateKey),exclude=[];
   var slots=[{key:'breakfast',label:'🌅 Breakfast'},{key:'lunch',label:'🥗 Lunch'},{key:'dinner',label:'🍽️ Dinner'}];
