@@ -1205,6 +1205,8 @@ function renderRunMetrics(){
   var aqiValues=acts.map(function(a){return Number(a.aqi);}).filter(function(value){return Number.isFinite(value)&&value>0;});
   var avgAQI=aqiValues.length?Math.round(aqiValues.reduce(function(sum,value){return sum+value;},0)/aqiValues.length):0;
   function aqiCategory(value){return value<=50?'Good':value<=100?'Moderate':value<=150?'Unhealthy for sensitive groups':value<=200?'Unhealthy':value<=300?'Very unhealthy':'Hazardous';}
+  var humidityValues=acts.map(function(a){return Number(a.humidity);}).filter(function(value){return Number.isFinite(value)&&value>0;});
+  var avgHumidity=humidityValues.length?Math.round(humidityValues.reduce(function(sum,value){return sum+value;},0)/humidityValues.length):0;
 
   function metBox(icon,label,val,sub){
     return '<div style="background:#fff;border:1px solid #f5cba7;border-radius:8px;padding:10px 12px;min-width:130px;flex:1;">'
@@ -1245,6 +1247,7 @@ function renderRunMetrics(){
     +metBox('&#x1F4D0;','Avg Distance',avgDist.toFixed(2)+' mi','per run')
     +metBox('&#x1F9B5;','Average Cadence',avgCadence?avgCadence+' spm':'-',avgCadence?cadenceCount+' run'+(cadenceCount!==1?'s':'')+' averaged':'No cadence recorded yet')
     +metBox('&#x1F32C;&#xFE0F;','Average AQI',avgAQI||'-',avgAQI?aqiCategory(avgAQI)+' &bull; '+aqiValues.length+' recorded workout'+(aqiValues.length!==1?'s':''):'No AQI recorded yet')
+    +metBox('&#x1F4A7;','Average Humidity',avgHumidity?avgHumidity+'%':'-',avgHumidity?humidityValues.length+' recorded workout'+(humidityValues.length!==1?'s':''):'No humidity recorded yet')
     +metBox('&#x23F3;','Total Time',totalDurSec?fmtSecs(totalDurSec):'-','all runs')
     +metBox('&#x1F4C5;','This Month',thisMonthMiles.toFixed(1)+' mi','')
     +metBox('&#x1F4C6;','This Year',thisYearMiles.toFixed(1)+' mi','')
