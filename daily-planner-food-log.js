@@ -1280,6 +1280,7 @@ function updateMacroTotals(){
   var wEl=document.getElementById('totWater');
   if(wEl)wEl.textContent=waterOz?waterOz+' oz':'—';
   if(document.getElementById('calorieAdvisorResult'))calculateDailyCalorieTarget();
+  if(typeof renderPreRunMealIdeas==='function')renderPreRunMealIdeas();
 }
 
 function calorieAdvisorSettings(){
@@ -1417,10 +1418,15 @@ function importHealthyFoodsFromSavedNutrition(force){
   saved=saved.concat(window._foodLog||[]);
   var latestByName={};
   saved.forEach(function(item){var key=String(item&&item.name||'').trim().toLowerCase();if(key)latestByName[key]=item;});
+  // Tally which meal slot each food name was logged under across every saved
+  // entry (not just the latest), so the dominant slot can be used to sort
+  // foods into breakfast/lunch/dinner suggestions.
+  var mealCountsByName={};
+  saved.forEach(function(item){var key=String(item&&item.name||'').trim().toLowerCase(),mealKey=item&&item.meal;if(!key||!mealKey)return;var counts=mealCountsByName[key]||(mealCountsByName[key]={});counts[mealKey]=(counts[mealKey]||0)+1;});
   var rebuilt=[];
   Object.keys(latestByName).forEach(function(key){
     var item=latestByName[key];inferFoodMacroSources(item);var quality=runnerFoodQuality(item);if(quality.score<7||quality.confidence==='Low')return;
-    var copy={name:String(item.name).trim(),cal:item.cal,prot:item.prot,fat:item.fat,carbs:item.carbs,fiber:item.fiber,sugar:item.sugar,sodium:item.sodium,servingLabel:item.servingLabel||'1 serving',servings:parseFloat(item.servings)||1,proteinSource:item.proteinSource||'',carbSource:item.carbSource||'',fatSource:item.fatSource||'',barcode:item.barcode||'',imageUrl:item.imageUrl||'',imageData:item.imageData||'',score:quality.score,label:quality.label,confidence:quality.confidence,confidencePct:quality.confidencePct,updatedAt:new Date().toISOString()};
+    var copy={name:String(item.name).trim(),cal:item.cal,prot:item.prot,fat:item.fat,carbs:item.carbs,fiber:item.fiber,sugar:item.sugar,sodium:item.sodium,servingLabel:item.servingLabel||'1 serving',servings:parseFloat(item.servings)||1,proteinSource:item.proteinSource||'',carbSource:item.carbSource||'',fatSource:item.fatSource||'',barcode:item.barcode||'',imageUrl:item.imageUrl||'',imageData:item.imageData||'',score:quality.score,label:quality.label,confidence:quality.confidence,confidencePct:quality.confidencePct,mealCounts:mealCountsByName[key]||{},updatedAt:new Date().toISOString()};
     MICRO_FIELDS.forEach(function(field){copy[field]=item[field]!=null?item[field]:null;});rebuilt.push(copy);
   });
   saveHealthyFoods(rebuilt.sort(function(a,b){return (b.score||0)-(a.score||0)||a.name.localeCompare(b.name);}));
@@ -1431,11 +1437,63 @@ function captureHealthyFoods(log){
     if(!item||!String(item.name||'').trim())return;
     var quality=runnerFoodQuality(item),key=String(item.name).trim().toLowerCase(),idx=healthy.findIndex(function(food){return String(food.name||'').trim().toLowerCase()===key;});
     if(quality.score<7||quality.confidence==='Low'){if(idx>=0){healthy.splice(idx,1);changed=true;}return;}
-    var copy={name:String(item.name).trim(),cal:item.cal,prot:item.prot,fat:item.fat,carbs:item.carbs,fiber:item.fiber,sugar:item.sugar,sodium:item.sodium,servingLabel:item.servingLabel||'1 serving',servings:parseFloat(item.servings)||1,proteinSource:item.proteinSource||'',carbSource:item.carbSource||'',fatSource:item.fatSource||'',barcode:item.barcode||'',imageUrl:item.imageUrl||'',imageData:item.imageData||'',score:quality.score,label:quality.label,confidence:quality.confidence,confidencePct:quality.confidencePct,updatedAt:new Date().toISOString()};
+    var mealCounts=Object.assign({},(idx>=0&&healthy[idx].mealCounts)||{});
+    var mealKey=item.meal||'';if(mealKey)mealCounts[mealKey]=(mealCounts[mealKey]||0)+1;
+    var copy={name:String(item.name).trim(),cal:item.cal,prot:item.prot,fat:item.fat,carbs:item.carbs,fiber:item.fiber,sugar:item.sugar,sodium:item.sodium,servingLabel:item.servingLabel||'1 serving',servings:parseFloat(item.servings)||1,proteinSource:item.proteinSource||'',carbSource:item.carbSource||'',fatSource:item.fatSource||'',barcode:item.barcode||'',imageUrl:item.imageUrl||'',imageData:item.imageData||'',score:quality.score,label:quality.label,confidence:quality.confidence,confidencePct:quality.confidencePct,mealCounts:mealCounts,updatedAt:new Date().toISOString()};
     MICRO_FIELDS.forEach(function(field){copy[field]=item[field]!=null?item[field]:null;});
     if(idx<0)healthy.push(copy);else healthy[idx]=copy;changed=true;
   });
   if(changed)saveHealthyFoods(healthy.sort(function(a,b){return (b.score||0)-(a.score||0)||a.name.localeCompare(b.name);}));
+}
+// ── Pre-Run Meal Ideas (built from Healthy 7+ foods, shown the day before a
+// quality workout or long run) ──
+function healthyFoodMealSlot(food){
+  var counts=food&&food.mealCounts,best='',bestCount=0;
+  if(counts){['breakfast','lunch','dinner'].forEach(function(m){var c=counts[m]||0;if(c>bestCount){bestCount=c;best=m;}});}
+  return best;
+}
+function mealIdeasRng(seedStr){
+  var h=0;
+  for(var i=0;i<seedStr.length;i++){h=(h*31+seedStr.charCodeAt(i))>>>0;}
+  return function(){h=(h*1664525+1013904223)>>>0;return h/4294967296;};
+}
+function seededShuffle(arr,rng){
+  var a=arr.slice();
+  for(var i=a.length-1;i>0;i--){var j=Math.floor(rng()*(i+1));var tmp=a[i];a[i]=a[j];a[j]=tmp;}
+  return a;
+}
+function pickMealIdeaFoods(mealSlot,rng,exclude){
+  var all=getHealthyFoods().filter(function(f){return exclude.indexOf(String(f.name||'').toLowerCase())===-1;});
+  var matched=all.filter(function(f){return healthyFoodMealSlot(f)===mealSlot;});
+  var anyMeal=all.filter(function(f){return healthyFoodMealSlot(f)==='';});
+  var other=all.filter(function(f){var slot=healthyFoodMealSlot(f);return slot&&slot!==mealSlot;});
+  var combined=seededShuffle(matched,rng).concat(seededShuffle(anyMeal,rng)).concat(seededShuffle(other,rng));
+  return combined.slice(0,2);
+}
+function mealIdeasNonceKey(dateKey){return 'meal_ideas_nonce_'+dateKey;}
+function getMealIdeasNonce(dateKey){return parseInt(localStorage.getItem(mealIdeasNonceKey(dateKey))||'0',10)||0;}
+function shuffleMealIdeas(){
+  var dateKey=dk(today);
+  localStorage.setItem(mealIdeasNonceKey(dateKey),String(getMealIdeasNonce(dateKey)+1));
+  renderPreRunMealIdeas();
+  if(typeof v26Toast==='function')v26Toast('New meal ideas shuffled in');
+}
+function renderPreRunMealIdeas(){
+  var card=document.getElementById('preRunMealIdeas');if(!card)return;
+  var performance=typeof nutritionPerformancePreset==='function'?nutritionPerformancePreset(dk(today)):null;
+  if(!performance||performance.phase!=='prior'){card.style.display='none';return;}
+  card.style.display='block';
+  var names={long:'Long Run',tempo:'Tempo Run',interval:'Interval Run'},title=document.getElementById('preRunMealIdeasTitle');
+  if(title)title.textContent='🍽️ Tomorrow: '+names[performance.workout]+' — Meal Ideas';
+  var dateKey=dk(today),nonce=getMealIdeasNonce(dateKey),exclude=[];
+  var slots=[{key:'breakfast',label:'🌅 Breakfast'},{key:'lunch',label:'🥗 Lunch'},{key:'dinner',label:'🍽️ Dinner'}];
+  var body=document.getElementById('preRunMealIdeasBody');
+  if(body)body.innerHTML=slots.map(function(slot){
+    var rng=mealIdeasRng(dateKey+'|'+slot.key+'|'+nonce),picks=pickMealIdeaFoods(slot.key,rng,exclude);
+    picks.forEach(function(f){exclude.push(String(f.name||'').toLowerCase());});
+    var itemsHtml=picks.length?picks.map(function(f){return '<div>'+escHtml(f.name)+' <span style="color:#64748b;">· '+Math.round(f.cal||0)+' cal</span></div>';}).join(''):'<div style="color:#94a3b8;">Log a few more healthy foods to get ideas here.</div>';
+    return '<div style="background:#fff;border:1px solid #c7d2fe;border-radius:9px;padding:8px 10px;"><strong style="display:block;font-size:.76rem;color:#1e3a8a;margin-bottom:4px;">'+slot.label+'</strong><div style="font-size:.76rem;color:#334155;line-height:1.5;">'+itemsHtml+'</div></div>';
+  }).join('');
 }
 function applyFoodSort(list){
   var sortBy=(document.getElementById('favSortBy')||{value:''}).value;
