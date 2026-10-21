@@ -6,8 +6,8 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-10-15-72">
-<script src="theme-switcher.js"></script>
+<meta name="app-build" content="2026-10-15-73">
+<script src="theme-switcher.js?v=2026-10-21-1"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#ff6b00">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -703,6 +703,8 @@ html[data-theme="thanksgiving"] .hm-fx-thanksgiving{display:block;}
 html[data-theme="christmas"] .hm-fx-christmas{display:block;}
 html[data-theme="newyear"] .hm-fx-newyear{display:block;}
 html[data-theme="july4"] .hm-fx-july4{display:block;}
+html[data-theme="winter"] .hm-fx-winter{display:block;}
+html[data-theme="spring"] .hm-fx-spring{display:block;}
 
 /* Halloween theme: bats drifting across the sidebar. */
 .hm-fx-halloween .hm-bat{position:absolute;left:-10%;font-size:1.2rem;opacity:0;filter:drop-shadow(0 1px 3px rgba(0,0,0,.5));animation:hmBatFly 6s linear infinite;}
@@ -797,6 +799,24 @@ html[data-theme="july4"] .hm-fx-july4{display:block;}
   70%{opacity:0;transform:scale(1.4) rotate(28deg);}
   100%{opacity:0;transform:scale(1.4) rotate(28deg);}
 }
+
+/* Winter theme: falling snow. */
+.hm-fx-winter .hm-snow{position:absolute;top:-8%;color:#fff;text-shadow:0 0 4px rgba(255,255,255,.8);opacity:0;animation:hmSnowFall 8s linear infinite;}
+.hm-fx-winter .snow1{left:8%;  font-size:0.9rem; animation-delay:0s;}
+.hm-fx-winter .snow2{left:24%; font-size:1.2rem; animation-delay:1.3s;}
+.hm-fx-winter .snow3{left:40%; font-size:0.8rem; animation-delay:2.7s;}
+.hm-fx-winter .snow4{left:58%; font-size:1.1rem; animation-delay:4.1s;}
+.hm-fx-winter .snow5{left:74%; font-size:0.9rem; animation-delay:0.9s;}
+.hm-fx-winter .snow6{left:90%; font-size:1rem;   animation-delay:5.5s;}
+
+/* Spring theme: falling flower petals. */
+.hm-fx-spring .hm-petal{position:absolute;top:-8%;font-size:1.1rem;opacity:0;animation:hmLeafFall 7s linear infinite;}
+.hm-fx-spring .petal1{left:10%; animation-delay:0s;}
+.hm-fx-spring .petal2{left:28%; animation-delay:1.2s; font-size:0.95rem;}
+.hm-fx-spring .petal3{left:46%; animation-delay:2.6s;}
+.hm-fx-spring .petal4{left:62%; animation-delay:3.8s; font-size:1rem;}
+.hm-fx-spring .petal5{left:78%; animation-delay:0.6s;}
+.hm-fx-spring .petal6{left:90%; animation-delay:4.9s; font-size:0.9rem;}
 
 .hm-sidebar-header{
   position:relative;
@@ -1144,6 +1164,34 @@ html[data-theme="july4"]{
   --brand2-rgb:220,38,38;
   --grad-start:#030a1f;
 }
+html[data-theme="winter"]{
+  --ink:#0f1f2e;
+  --muted:#5b7184;
+  --line:#dce8f0;
+  --surface:#ffffff;
+  --canvas:#f2f8fb;
+  --brand:#0c4a6e;
+  --brand2:#38bdf8;
+  --focus:0 0 0 3px rgba(56,189,248,.28);
+  --ink-rgb:15,31,46;
+  --brand-rgb:12,74,110;
+  --brand2-rgb:56,189,248;
+  --grad-start:#041624;
+}
+html[data-theme="spring"]{
+  --ink:#1a2e1a;
+  --muted:#6b8060;
+  --line:#e1f0d9;
+  --surface:#ffffff;
+  --canvas:#f5fbf0;
+  --brand:#15803d;
+  --brand2:#f472b6;
+  --focus:0 0 0 3px rgba(244,114,182,.28);
+  --ink-rgb:26,46,26;
+  --brand-rgb:21,128,61;
+  --brand2-rgb:244,114,182;
+  --grad-start:#06210f;
+}
 .theme-switcher-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px;}
 .theme-btn{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.42);color:#fff;border-radius:999px;padding:5px 12px;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;transition:background .15s ease,border-color .15s ease,box-shadow .15s ease;}
 .theme-btn:hover{background:rgba(255,255,255,.28);}
@@ -1439,6 +1487,22 @@ body{
     <span class="hm-fw fw5"></span>
     <span class="hm-fw fw6"></span>
   </div>
+  <div class="hm-fx hm-fx-winter" aria-hidden="true">
+    <span class="hm-snow snow1">&#x2744;&#xFE0F;</span>
+    <span class="hm-snow snow2">&#x2744;&#xFE0F;</span>
+    <span class="hm-snow snow3">&#x2744;&#xFE0F;</span>
+    <span class="hm-snow snow4">&#x2744;&#xFE0F;</span>
+    <span class="hm-snow snow5">&#x2744;&#xFE0F;</span>
+    <span class="hm-snow snow6">&#x2744;&#xFE0F;</span>
+  </div>
+  <div class="hm-fx hm-fx-spring" aria-hidden="true">
+    <span class="hm-petal petal1">&#x1F338;</span>
+    <span class="hm-petal petal2">&#x1F338;</span>
+    <span class="hm-petal petal3">&#x1F338;</span>
+    <span class="hm-petal petal4">&#x1F338;</span>
+    <span class="hm-petal petal5">&#x1F338;</span>
+    <span class="hm-petal petal6">&#x1F338;</span>
+  </div>
   <div class="hm-sidebar-header">More Tabs</div>
   <button id="hm-activities" class="hm-nav-btn" onclick="hmSwitch('activities',event)">&#x1F3C3; Activities</button>
   <button id="hm-bible" class="hm-nav-btn" onclick="hmSwitch('bible',event)">&#x1F4D6; Bible</button>
@@ -1487,14 +1551,16 @@ body{
       <div class="v26-focus-pair" style="display:flex;align-items:center;gap:7px;flex-wrap:nowrap;">
         <button class="v26-quiet-btn v26-focus-btn" type="button" onclick="v26ToggleFocus()" id="v26FocusBtn" title="Hide distractions (F)">Focus</button>
         <span class="v26-weather" id="meridianWeather" title="Current temperature for Meridian, Idaho">&#x1F321;&#xFE0F; Meridian &mdash;&deg;</span>
+        <select id="themeSelect" class="v26-weather" style="cursor:pointer;" onchange="setAppTheme(this.value)" aria-label="App theme" title="App theme">
+          <option value="halloween">&#x1F383; Halloween</option>
+          <option value="thanksgiving">&#x1F983; Thanksgiving</option>
+          <option value="christmas">&#x1F384; Christmas</option>
+          <option value="newyear">&#x1F389; New Year's</option>
+          <option value="winter">&#x2744;&#xFE0F; Winter</option>
+          <option value="spring">&#x1F338; Spring</option>
+          <option value="july4">&#x1F386; 4th of July</option>
+        </select>
       </div>
-    </div>
-    <div class="theme-switcher-row" role="group" aria-label="App theme">
-      <button type="button" class="theme-btn" data-theme-choice="halloween" onclick="setAppTheme('halloween')" title="Halloween theme">&#x1F383; Halloween</button>
-      <button type="button" class="theme-btn" data-theme-choice="thanksgiving" onclick="setAppTheme('thanksgiving')" title="Thanksgiving theme">&#x1F983; Thanksgiving</button>
-      <button type="button" class="theme-btn" data-theme-choice="christmas" onclick="setAppTheme('christmas')" title="Christmas theme">&#x1F384; Christmas</button>
-      <button type="button" class="theme-btn" data-theme-choice="newyear" onclick="setAppTheme('newyear')" title="New Year's theme">&#x1F389; New Year's</button>
-      <button type="button" class="theme-btn" data-theme-choice="july4" onclick="setAppTheme('july4')" title="4th of July theme">&#x1F386; 4th of July</button>
     </div>
   </div>
   <input type="file" id="importFile" accept=".json" style="display:none" onchange="importBackup(event)">
@@ -1676,9 +1742,26 @@ body{
     </div>
   </div>
 </div>
-<div class="day-score-bar" style="flex-wrap:wrap;">
-  <label style="font-size:0.92rem;color:#555;font-weight:600;white-space:nowrap;">&#x2B50; Day Score:</label>
-  <div id="scoreStars" style="display:flex;gap:4px;flex-shrink:0;"></div>
+<div class="day-score-bar review-section" id="dayReviewSection" style="display:block;">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+    <strong style="font-size:0.98rem;color:#3730a3;">&#x1F916; Daily AI Review</strong>
+    <button type="button" id="aiFillDayReviewBtn" class="ai-btn" onclick="aiFillEntireDayReview(this)" style="margin:0;background:linear-gradient(135deg,#1d4ed8,#7c3aed);">&#x2728; AI Fill Day Review</button>
+  </div>
+  <div class="review-grid">
+    <div>
+      <label>Wins Today</label><textarea id="dayRevWins" placeholder="What went well today?"></textarea>
+    </div>
+    <div>
+      <label>What to Improve</label><textarea id="dayRevImprove" placeholder="Areas to work on..."></textarea>
+    </div>
+    <div>
+      <label>Focus for Tomorrow</label><textarea id="dayRevFocus" placeholder="Top priorities..."></textarea>
+    </div>
+    <div>
+      <label>Lessons Learned</label><textarea id="dayRevLessons" placeholder="Key takeaways..."></textarea>
+    </div>
+  </div>
+  <button onclick="saveDayReview()" style="background:#667eea;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-size:0.85rem;">Save Review</button>
 </div>
 </div>
 <div id="tab-weekly" class="tab-panel"><div class="panel">
@@ -3415,7 +3498,7 @@ body{
     </div>
   </div>
 </div>
-<script src="daily-planner-core.js?v=2026-10-18-1"></script>
+<script src="daily-planner-core.js?v=2026-10-18-2"></script>
 <script src="daily-planner-food-log.js?v=2026-10-18-8"></script>
 <script src="daily-planner-bible.js?v=2026-10-15-8"></script>
 <script src="daily-planner-meditation.js?v=2026-10-15-7"></script>
