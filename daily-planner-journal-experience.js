@@ -445,7 +445,7 @@ function renderJournalSchedule(){
     {time:'5:30 AM',mins:330,label:'Bible, worship & prayer',detail:faithDone+' of 4 faith practices complete',done:faithDone===4,partial:faithDone>0&&faithDone<4,tab:'bible',detailKind:'faith'},
     {time:'5:45 AM',mins:345,label:'Breakfast',detail:'Recovery meal and hydration after training',done:mealComplete('breakfast',345),tab:'nutrition'},
     {time:'6:00 AM',mins:360,label:'Work',detail:'9:30 AM – 6:00 PM',done:true,tab:'daily',skip:!(today.getDay()>=1&&today.getDay()<=5),fixed:true},
-    {time:'9:00 AM',mins:540,label:'Walk Buddy',detail:'Take Buddy for a walk',done:localStorage.getItem('schedule_walkBuddy_'+dateKey)==='1',manual:'walkBuddy'},
+    {time:'9:00 AM',mins:540,label:'Walk Buddy',detail:'Take Buddy for a walk',done:d.exDogWalk==='green',tab:'activities',linkedCheckKey:'exDogWalk'},
     {time:'12:00 PM',mins:720,label:'Water checkpoint: 32 oz',detail:'Cumulative total: reach 32 ounces by noon',done:water>=32,tab:'nutrition'},
     {time:'12:00 PM',mins:720,label:'Lunch',detail:'Midday meal and hydration',done:mealComplete('lunch',720),tab:'nutrition'},
     {time:'5:30 PM',mins:1050,label:'Dinner',detail:'Evening meal and nutrition update',done:mealComplete('dinner',1050),tab:'nutrition'},

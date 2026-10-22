@@ -79,11 +79,9 @@ function triClick(el){
   } else {
     applyTriState(el,next);
   }
-  // Marking Dog Walk done in Activities also checks off the matching "Walk
-  // Buddy" item on My Schedule (and un-checks it if Dog Walk is un-marked).
-  // Walk Buddy tracks its own done state in localStorage rather than reading
-  // this checkbox directly, so it needs this explicit bridge to stay in sync.
-  if(key==='exDogWalk')localStorage.setItem('schedule_walkBuddy_'+dk(today),next==='green'?'1':'0');
+  // Walk Buddy on My Schedule reads the Dog Walk tri-check's state (green,
+  // red, etc.) directly via linkedCheckKey, so no separate bridge write is
+  // needed here -- renderJournalSchedule() below picks it up automatically.
   save();
   updateCompactSectionCounts();
   renderDailyCheckOverview();
