@@ -445,7 +445,7 @@ function renderJournalSchedule(){
     {time:'5:30 AM',mins:330,label:'Bible, worship & prayer',detail:faithDone+' of 4 faith practices complete',done:faithDone===4,partial:faithDone>0&&faithDone<4,tab:'bible',detailKind:'faith'},
     {time:'5:45 AM',mins:345,label:'Breakfast',detail:'Recovery meal and hydration after training',done:mealComplete('breakfast',345),tab:'nutrition'},
     {time:'6:00 AM',mins:360,label:'Work',detail:'9:30 AM – 6:00 PM',done:true,tab:'daily',skip:!(today.getDay()>=1&&today.getDay()<=5),fixed:true},
-    {time:'9:00 AM',mins:540,label:'Walk Buddy',detail:'Take Buddy for a walk',done:localStorage.getItem('schedule_walkBuddy_'+dateKey)==='1',manual:'walkBuddy'},
+    {time:'9:00 AM',mins:540,label:'Walk Buddy',detail:'Take Buddy for a walk',done:d.exDogWalk==='green',tab:'activities',linkedCheckKey:'exDogWalk'},
     {time:'12:00 PM',mins:720,label:'Water checkpoint: 32 oz',detail:'Cumulative total: reach 32 ounces by noon',done:water>=32,tab:'nutrition'},
     {time:'12:00 PM',mins:720,label:'Lunch',detail:'Midday meal and hydration',done:mealComplete('lunch',720),tab:'nutrition'},
     {time:'5:30 PM',mins:1050,label:'Dinner',detail:'Evening meal and nutrition update',done:mealComplete('dinner',1050),tab:'nutrition'},
@@ -462,7 +462,7 @@ function renderJournalSchedule(){
     guitar:{time:'4:45 PM',mins:1005,label:'Guitar',detail:guitarMinutes?fmtMinsSeconds(guitarMinutes)+' logged':'Tap to log guitar practice',done:d.gaGuitar==='green',tab:'skill-log'}
   };
   ['reading','language','guitar'].forEach(function(kind){
-    if(!dueGrowthKinds.has(kind)&&localStorage.getItem(journalScheduleGrowthKey(kind,dateKey))!=='1')return;
+    if(!dueGrowthKinds.has(kind)&&localStorage.getItem(journalScheduleGrowthKey(kind,dateKey))!=='1'&&!growthScheduleSpecs[kind].done)return;
     items.push(Object.assign({id:journalScheduleGrowthId(kind),growthKind:kind},growthScheduleSpecs[kind]));
   });
   journalManualScheduleItems().filter(function(entry){return entry.date===dateKey;}).forEach(function(entry){items.push({id:'schedule-'+entry.id,time:entry.time,mins:Number(entry.mins),label:entry.title,detail:entry.note||'Manual schedule item',done:localStorage.getItem('schedule_manualSchedule_'+entry.id+'_'+dateKey)==='1',tab:'daily',manual:'manualSchedule_'+entry.id,manualCreated:true,manualItemId:entry.id});});
@@ -508,7 +508,7 @@ function renderJournalSchedule(){
     growthCards.sort(function(a,b){var aScheduled=localStorage.getItem(journalScheduleGrowthKey(a.dataset.growthKind,dateKey))==='1',bScheduled=localStorage.getItem(journalScheduleGrowthKey(b.dataset.growthKind,dateKey))==='1';return Number(bScheduled)-Number(aScheduled);});
     growthCards.forEach(function(card){card.classList.toggle('completed',!!growthComplete[card.dataset.growthKind]);growthPool.insertBefore(card,growthHelp);});
   }
-  var scheduleStatuses=journalScheduleStatuses(dateKey);items.forEach(function(item){var hasManual=Object.prototype.hasOwnProperty.call(scheduleStatuses,item.id),manual=hasManual?scheduleStatuses[item.id]:'';item.scheduleStatus=(item.detailKind||item.sleepRoutineChecklist||item.linkedCheckKey)?(item.done?'green':item.partial?'purple':journalCheckState(d,item.linkedCheckKey)==='red'?'red':''):hasManual?(manual==='blank'?'':manual):(item.done?'green':'');item.done=item.scheduleStatus==='green';item.partial=item.scheduleStatus==='purple';});
+  var scheduleStatuses=journalScheduleStatuses(dateKey);items.forEach(function(item){var hasManual=Object.prototype.hasOwnProperty.call(scheduleStatuses,item.id),manual=hasManual?scheduleStatuses[item.id]:'';item.scheduleStatus=(item.detailKind||item.sleepRoutineChecklist||item.linkedCheckKey||item.manual)?(item.done?'green':item.partial?'purple':journalCheckState(d,item.linkedCheckKey)==='red'?'red':''):hasManual?(manual==='blank'?'':manual):(item.done?'green':'');item.done=item.scheduleStatus==='green';item.partial=item.scheduleStatus==='purple';});
   var trackable=items.filter(function(item){return !item.fixed;});
   var complete=trackable.filter(function(item){return item.done;}).length,next=-1;
   if(isSelectedToday){for(var i=0;i<items.length;i++){if(!items[i].fixed&&!items[i].done&&items[i].mins>=currentMinutes){next=i;break;}}if(next<0)next=items.findIndex(function(item){return !item.fixed&&!item.done;});}
@@ -535,7 +535,7 @@ function renderJournalSchedule(){
   // Every scheduled Growth card opens the same structured Schedule / Log form.
   body.querySelectorAll('.journal-schedule-item').forEach(function(card){var growthItem=_journalScheduleItemsById[card.dataset.scheduleId];if(growthItem&&growthItem.growthKind)card.onclick=function(){journalOpenGrowthLog(growthItem.growthKind);};});
   body.querySelectorAll('.journal-schedule-item').forEach(function(card){var partialItem=_journalScheduleItemsById[card.dataset.scheduleId],partialCheck=card.querySelector('.journal-schedule-check');if(partialItem&&partialItem.partial&&!partialItem.done&&!partialItem.fixed){card.classList.add('partial');if(partialCheck)partialCheck.innerHTML='&#x2713;';}});
-  body.querySelectorAll('.journal-schedule-item').forEach(function(card){var item=_journalScheduleItemsById[card.dataset.scheduleId],check=card.querySelector('.journal-schedule-check');if(item&&check&&!item.fixed){check.removeAttribute('onclick');check.title='Tap: green complete, red not completed, then clear';check.onclick=function(event){journalScheduleCycleStatus(event,item.id);};if(item.scheduleStatus==='red'){card.classList.add('red');check.innerHTML='&#x2713;';}}if(!item||item.manualCreated||item.growthKind)return;var actions=card.querySelector('.journal-schedule-actions');if(actions)actions.insertAdjacentHTML('beforeend','<span class="journal-schedule-remove" role="button" tabindex="0" onclick="journalDeleteScheduleItem(event,\''+escHtml(item.id)+'\')">Delete</span>');});
+  body.querySelectorAll('.journal-schedule-item').forEach(function(card){var item=_journalScheduleItemsById[card.dataset.scheduleId],check=card.querySelector('.journal-schedule-check');if(item&&check&&!item.fixed){check.removeAttribute('onclick');if(item.manual&&item.manual!=='eveningPlanning'){check.title='Tap to mark complete / not complete';check.onclick=function(event){event.preventDefault();event.stopPropagation();_journalScheduleSuppressClick=Date.now()+600;journalToggleScheduleManual(item.manual);};}else{check.title='Tap: green complete, red not completed, then clear';check.onclick=function(event){journalScheduleCycleStatus(event,item.id);};}if(item.scheduleStatus==='red'){card.classList.add('red');check.innerHTML='&#x2713;';}}if(!item||item.manualCreated||item.growthKind)return;var actions=card.querySelector('.journal-schedule-actions');if(actions)actions.insertAdjacentHTML('beforeend','<span class="journal-schedule-remove" role="button" tabindex="0" onclick="journalDeleteScheduleItem(event,\''+escHtml(item.id)+'\')">Delete</span>');});
 }
 function renderJournalHome(){
   var grid=document.getElementById('journalHomeGrid');if(!grid){renderJournalSchedule();return;}

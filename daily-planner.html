@@ -6,8 +6,8 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-10-15-62">
-<script src="theme-switcher.js"></script>
+<meta name="app-build" content="2026-10-15-82">
+<script src="theme-switcher.js?v=2026-10-21-1"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#ff6b00">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -697,7 +697,79 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;paddi
 }
 #hmSidebar.open{transform:translateX(0);}
 
-.hm-fireworks{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;}
+.hm-fx{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;display:none;}
+html[data-theme="halloween"] .hm-fx-halloween{display:block;}
+html[data-theme="thanksgiving"] .hm-fx-thanksgiving{display:block;}
+html[data-theme="christmas"] .hm-fx-christmas{display:block;}
+html[data-theme="newyear"] .hm-fx-newyear{display:block;}
+html[data-theme="july4"] .hm-fx-july4{display:block;}
+html[data-theme="winter"] .hm-fx-winter{display:block;}
+html[data-theme="spring"] .hm-fx-spring{display:block;}
+
+/* Halloween theme: bats drifting across the sidebar. */
+.hm-fx-halloween .hm-bat{position:absolute;left:-10%;font-size:1.2rem;opacity:0;filter:drop-shadow(0 1px 3px rgba(0,0,0,.5));animation:hmBatFly 6s linear infinite;}
+.hm-fx-halloween .bat1{top:10%; animation-delay:0s;}
+.hm-fx-halloween .bat2{top:28%; animation-delay:1.6s; font-size:1rem;}
+.hm-fx-halloween .bat3{top:50%; animation-delay:3.1s;}
+.hm-fx-halloween .bat4{top:66%; animation-delay:4.4s; font-size:1.1rem;}
+.hm-fx-halloween .bat5{top:8%;  animation-delay:2.3s; font-size:0.9rem;}
+.hm-fx-halloween .bat6{top:82%; animation-delay:5.2s;}
+@keyframes hmBatFly{
+  0%{opacity:0; transform:translate(0,0) rotate(0deg);}
+  8%{opacity:.85;}
+  50%{transform:translate(130px,-14px) rotate(-6deg);}
+  92%{opacity:.85;}
+  100%{opacity:0; transform:translate(260px,6px) rotate(6deg);}
+}
+
+/* Thanksgiving theme: falling autumn leaves. */
+.hm-fx-thanksgiving .hm-leaf{position:absolute;top:-8%;font-size:1.1rem;opacity:0;animation:hmLeafFall 7s linear infinite;}
+.hm-fx-thanksgiving .leaf1{left:10%; animation-delay:0s;}
+.hm-fx-thanksgiving .leaf2{left:28%; animation-delay:1.2s; font-size:0.95rem;}
+.hm-fx-thanksgiving .leaf3{left:46%; animation-delay:2.6s;}
+.hm-fx-thanksgiving .leaf4{left:62%; animation-delay:3.8s; font-size:1rem;}
+.hm-fx-thanksgiving .leaf5{left:78%; animation-delay:0.6s;}
+.hm-fx-thanksgiving .leaf6{left:90%; animation-delay:4.9s; font-size:0.9rem;}
+@keyframes hmLeafFall{
+  0%{opacity:0; transform:translate(0,0) rotate(0deg);}
+  8%{opacity:.9;}
+  50%{transform:translate(18px,55vh) rotate(130deg);}
+  92%{opacity:.85;}
+  100%{opacity:0; transform:translate(-14px,112vh) rotate(260deg);}
+}
+
+/* Christmas theme: falling snow. */
+.hm-fx-christmas .hm-snow{position:absolute;top:-8%;color:#fff;text-shadow:0 0 4px rgba(255,255,255,.8);opacity:0;animation:hmSnowFall 8s linear infinite;}
+.hm-fx-christmas .snow1{left:8%;  font-size:0.9rem; animation-delay:0s;}
+.hm-fx-christmas .snow2{left:24%; font-size:1.2rem; animation-delay:1.3s;}
+.hm-fx-christmas .snow3{left:40%; font-size:0.8rem; animation-delay:2.7s;}
+.hm-fx-christmas .snow4{left:58%; font-size:1.1rem; animation-delay:4.1s;}
+.hm-fx-christmas .snow5{left:74%; font-size:0.9rem; animation-delay:0.9s;}
+.hm-fx-christmas .snow6{left:90%; font-size:1rem;   animation-delay:5.5s;}
+@keyframes hmSnowFall{
+  0%{opacity:0; transform:translate(0,0);}
+  8%{opacity:.95;}
+  50%{transform:translate(10px,55vh);}
+  92%{opacity:.8;}
+  100%{opacity:0; transform:translate(-8px,112vh);}
+}
+
+/* New Year's theme: colorful confetti tumbling down. */
+.hm-fx-newyear .hm-confetti{position:absolute;top:-8%;width:7px;height:12px;opacity:0;animation:hmConfettiFall 6.5s linear infinite;}
+.hm-fx-newyear .confetti1{left:10%; background:#ffc107; animation-delay:0s;}
+.hm-fx-newyear .confetti2{left:26%; background:#ffffff; width:6px;height:10px; animation-delay:1.1s;}
+.hm-fx-newyear .confetti3{left:42%; background:#6ea8ff; animation-delay:2.4s;}
+.hm-fx-newyear .confetti4{left:58%; background:#ffc107; width:8px;height:13px; animation-delay:3.6s;}
+.hm-fx-newyear .confetti5{left:74%; background:#ff5f6e; animation-delay:0.7s;}
+.hm-fx-newyear .confetti6{left:90%; background:#ffffff; width:6px;height:11px; animation-delay:4.8s;}
+@keyframes hmConfettiFall{
+  0%{opacity:0; transform:translate(0,0) rotate(0deg);}
+  8%{opacity:.95;}
+  50%{transform:translate(22px,55vh) rotate(200deg);}
+  92%{opacity:.85;}
+  100%{opacity:0; transform:translate(-18px,112vh) rotate(380deg);}
+}
+
 .hm-fw{
   position:absolute;
   border-radius:50%;
@@ -727,6 +799,24 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;paddi
   70%{opacity:0;transform:scale(1.4) rotate(28deg);}
   100%{opacity:0;transform:scale(1.4) rotate(28deg);}
 }
+
+/* Winter theme: falling snow. */
+.hm-fx-winter .hm-snow{position:absolute;top:-8%;color:#fff;text-shadow:0 0 4px rgba(255,255,255,.8);opacity:0;animation:hmSnowFall 8s linear infinite;}
+.hm-fx-winter .snow1{left:8%;  font-size:0.9rem; animation-delay:0s;}
+.hm-fx-winter .snow2{left:24%; font-size:1.2rem; animation-delay:1.3s;}
+.hm-fx-winter .snow3{left:40%; font-size:0.8rem; animation-delay:2.7s;}
+.hm-fx-winter .snow4{left:58%; font-size:1.1rem; animation-delay:4.1s;}
+.hm-fx-winter .snow5{left:74%; font-size:0.9rem; animation-delay:0.9s;}
+.hm-fx-winter .snow6{left:90%; font-size:1rem;   animation-delay:5.5s;}
+
+/* Spring theme: falling flower petals. */
+.hm-fx-spring .hm-petal{position:absolute;top:-8%;font-size:1.1rem;opacity:0;animation:hmLeafFall 7s linear infinite;}
+.hm-fx-spring .petal1{left:10%; animation-delay:0s;}
+.hm-fx-spring .petal2{left:28%; animation-delay:1.2s; font-size:0.95rem;}
+.hm-fx-spring .petal3{left:46%; animation-delay:2.6s;}
+.hm-fx-spring .petal4{left:62%; animation-delay:3.8s; font-size:1rem;}
+.hm-fx-spring .petal5{left:78%; animation-delay:0.6s;}
+.hm-fx-spring .petal6{left:90%; animation-delay:4.9s; font-size:0.9rem;}
 
 .hm-sidebar-header{
   position:relative;
@@ -820,6 +910,7 @@ textarea{line-height:1.55;}
 .v26-quiet-btn{border:1px solid var(--line);background:#fff;color:#465066;border-radius:9px;padding:7px 10px;cursor:pointer;font:600 .8rem inherit;}
 .v26-quiet-btn:hover{border-color:#c9c9f5;background:#f7f7ff;color:var(--brand);}
 .v26-weather{display:inline-flex;align-items:center;gap:4px;border:1px solid #cfe0da;background:#f7fbf9;color:#31564b;border-radius:9px;padding:7px 9px;font-size:.76rem;font-weight:750;white-space:nowrap;}
+.v26-focus-pair{display:flex;align-items:center;gap:7px;flex-wrap:wrap;row-gap:6px;min-width:0;}
 .v26-save{display:flex;align-items:center;gap:6px;white-space:nowrap;}
 .v26-save-dot{width:7px;height:7px;border-radius:50%;background:#22a06b;box-shadow:0 0 0 3px rgba(34,160,107,.12);}
 .v26-toast{position:fixed;right:22px;bottom:22px;z-index:3000;background:#172033;color:#fff;padding:10px 14px;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.22);font-size:.84rem;opacity:0;transform:translateY(10px);pointer-events:none;transition:.2s;}
@@ -844,7 +935,8 @@ body.v26-compact .journal-col textarea{height:70px;}
   .header .date-nav button{justify-self:center;}
   .header #currentDate{min-width:0;font-size:.78rem;white-space:nowrap;text-align:center;}
   .header-control-stack{flex:0 0 100%;width:100%}
-  .header-actions{width:100%;gap:6px}
+  .header-actions{width:100%;gap:6px;flex-wrap:wrap;}
+  .v26-focus-pair{display:contents;}
   .header-status-row{gap:7px;flex-wrap:wrap}
   .v26-toolbar{padding:8px 10px;display:flex;flex-wrap:wrap;align-items:center;gap:7px}
   .v26-toolbar .v26-label{display:none}
@@ -1002,8 +1094,8 @@ html{scroll-padding-top:190px;}
 @media(max-width:430px){#tab-daily .journal-home{width:calc(100% - 20px)!important;}}
 
 /* Seasonal themes — each block only applies when html[data-theme] matches.
-   The base :root above is the "original" theme; switching themes just swaps
-   these custom properties, and every rule below reads them via var(). */
+   The base :root above is the default/fallback look; switching themes just
+   swaps these custom properties, and every rule below reads them via var(). */
 html[data-theme="halloween"]{
   --ink:#1a0a2e;
   --muted:#6b6075;
@@ -1046,6 +1138,20 @@ html[data-theme="christmas"]{
   --brand2-rgb:194,24,7;
   --grad-start:#05140c;
 }
+html[data-theme="newyear"]{
+  --ink:#1a1a2e;
+  --muted:#6b6b80;
+  --line:#e8e2cf;
+  --surface:#ffffff;
+  --canvas:#faf8f0;
+  --brand:#14142b;
+  --brand2:#ffc107;
+  --focus:0 0 0 3px rgba(255,193,7,.28);
+  --ink-rgb:26,26,46;
+  --brand-rgb:20,20,43;
+  --brand2-rgb:255,193,7;
+  --grad-start:#07070f;
+}
 html[data-theme="july4"]{
   --ink:#0a1f44;
   --muted:#5b6b85;
@@ -1059,6 +1165,34 @@ html[data-theme="july4"]{
   --brand-rgb:30,58,138;
   --brand2-rgb:220,38,38;
   --grad-start:#030a1f;
+}
+html[data-theme="winter"]{
+  --ink:#0f1f2e;
+  --muted:#5b7184;
+  --line:#dce8f0;
+  --surface:#ffffff;
+  --canvas:#f2f8fb;
+  --brand:#0c4a6e;
+  --brand2:#38bdf8;
+  --focus:0 0 0 3px rgba(56,189,248,.28);
+  --ink-rgb:15,31,46;
+  --brand-rgb:12,74,110;
+  --brand2-rgb:56,189,248;
+  --grad-start:#041624;
+}
+html[data-theme="spring"]{
+  --ink:#1a2e1a;
+  --muted:#6b8060;
+  --line:#e1f0d9;
+  --surface:#ffffff;
+  --canvas:#f5fbf0;
+  --brand:#15803d;
+  --brand2:#f472b6;
+  --focus:0 0 0 3px rgba(244,114,182,.28);
+  --ink-rgb:26,46,26;
+  --brand-rgb:21,128,61;
+  --brand2-rgb:244,114,182;
+  --grad-start:#06210f;
 }
 .theme-switcher-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px;}
 .theme-btn{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.42);color:#fff;border-radius:999px;padding:5px 12px;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;transition:background .15s ease,border-color .15s ease,box-shadow .15s ease;}
@@ -1315,13 +1449,61 @@ body{
 <!-- Sidebar overlay + panel (outside container so fixed positioning works) -->
 <div id="hmOverlay" onclick="closeHamburger()"></div>
 <nav id="hmSidebar">
-  <div class="hm-fireworks" aria-hidden="true">
+  <div class="hm-fx hm-fx-halloween" aria-hidden="true">
+    <span class="hm-bat bat1">&#x1F987;</span>
+    <span class="hm-bat bat2">&#x1F987;</span>
+    <span class="hm-bat bat3">&#x1F987;</span>
+    <span class="hm-bat bat4">&#x1F987;</span>
+    <span class="hm-bat bat5">&#x1F987;</span>
+    <span class="hm-bat bat6">&#x1F987;</span>
+  </div>
+  <div class="hm-fx hm-fx-thanksgiving" aria-hidden="true">
+    <span class="hm-leaf leaf1">&#x1F342;</span>
+    <span class="hm-leaf leaf2">&#x1F343;</span>
+    <span class="hm-leaf leaf3">&#x1F342;</span>
+    <span class="hm-leaf leaf4">&#x1F343;</span>
+    <span class="hm-leaf leaf5">&#x1F342;</span>
+    <span class="hm-leaf leaf6">&#x1F343;</span>
+  </div>
+  <div class="hm-fx hm-fx-christmas" aria-hidden="true">
+    <span class="hm-snow snow1">&#x2744;&#xFE0F;</span>
+    <span class="hm-snow snow2">&#x2744;&#xFE0F;</span>
+    <span class="hm-snow snow3">&#x2744;&#xFE0F;</span>
+    <span class="hm-snow snow4">&#x2744;&#xFE0F;</span>
+    <span class="hm-snow snow5">&#x2744;&#xFE0F;</span>
+    <span class="hm-snow snow6">&#x2744;&#xFE0F;</span>
+  </div>
+  <div class="hm-fx hm-fx-newyear" aria-hidden="true">
+    <span class="hm-confetti confetti1"></span>
+    <span class="hm-confetti confetti2"></span>
+    <span class="hm-confetti confetti3"></span>
+    <span class="hm-confetti confetti4"></span>
+    <span class="hm-confetti confetti5"></span>
+    <span class="hm-confetti confetti6"></span>
+  </div>
+  <div class="hm-fx hm-fx-july4" aria-hidden="true">
     <span class="hm-fw fw1"></span>
     <span class="hm-fw fw2"></span>
     <span class="hm-fw fw3"></span>
     <span class="hm-fw fw4"></span>
     <span class="hm-fw fw5"></span>
     <span class="hm-fw fw6"></span>
+  </div>
+  <div class="hm-fx hm-fx-winter" aria-hidden="true">
+    <span class="hm-snow snow1">&#x2744;&#xFE0F;</span>
+    <span class="hm-snow snow2">&#x2744;&#xFE0F;</span>
+    <span class="hm-snow snow3">&#x2744;&#xFE0F;</span>
+    <span class="hm-snow snow4">&#x2744;&#xFE0F;</span>
+    <span class="hm-snow snow5">&#x2744;&#xFE0F;</span>
+    <span class="hm-snow snow6">&#x2744;&#xFE0F;</span>
+  </div>
+  <div class="hm-fx hm-fx-spring" aria-hidden="true">
+    <span class="hm-petal petal1">&#x1F338;</span>
+    <span class="hm-petal petal2">&#x1F338;</span>
+    <span class="hm-petal petal3">&#x1F338;</span>
+    <span class="hm-petal petal4">&#x1F338;</span>
+    <span class="hm-petal petal5">&#x1F338;</span>
+    <span class="hm-petal petal6">&#x1F338;</span>
   </div>
   <div class="hm-sidebar-header">More Tabs</div>
   <button id="hm-activities" class="hm-nav-btn" onclick="hmSwitch('activities',event)">&#x1F3C3; Activities</button>
@@ -1368,17 +1550,19 @@ body{
           <button type="button" onclick="openSettings();closeHeaderTools()">&#x2699;&#xFE0F; Settings</button>
         </div>
       </details>
-      <div class="v26-focus-pair" style="display:flex;align-items:center;gap:7px;flex-wrap:nowrap;">
+      <div class="v26-focus-pair">
         <button class="v26-quiet-btn v26-focus-btn" type="button" onclick="v26ToggleFocus()" id="v26FocusBtn" title="Hide distractions (F)">Focus</button>
         <span class="v26-weather" id="meridianWeather" title="Current temperature for Meridian, Idaho">&#x1F321;&#xFE0F; Meridian &mdash;&deg;</span>
+        <select id="themeSelect" class="v26-weather" style="cursor:pointer;width:52px;max-width:52px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" onchange="setAppTheme(this.value)" aria-label="App theme" title="App theme">
+          <option value="halloween">&#x1F383;</option>
+          <option value="thanksgiving">&#x1F983; Thanksgiving</option>
+          <option value="christmas">&#x1F384; Christmas</option>
+          <option value="newyear">&#x1F389; New Year's</option>
+          <option value="winter">&#x2744;&#xFE0F; Winter</option>
+          <option value="spring">&#x1F338; Spring</option>
+          <option value="july4">&#x1F386; 4th of July</option>
+        </select>
       </div>
-    </div>
-    <div class="theme-switcher-row" role="group" aria-label="App theme">
-      <button type="button" class="theme-btn" data-theme-choice="original" onclick="setAppTheme('original')" title="Original theme">&#x1F9ED; Original</button>
-      <button type="button" class="theme-btn" data-theme-choice="halloween" onclick="setAppTheme('halloween')" title="Halloween theme">&#x1F383; Halloween</button>
-      <button type="button" class="theme-btn" data-theme-choice="thanksgiving" onclick="setAppTheme('thanksgiving')" title="Thanksgiving theme">&#x1F983; Thanksgiving</button>
-      <button type="button" class="theme-btn" data-theme-choice="christmas" onclick="setAppTheme('christmas')" title="Christmas theme">&#x1F384; Christmas</button>
-      <button type="button" class="theme-btn" data-theme-choice="july4" onclick="setAppTheme('july4')" title="4th of July theme">&#x1F386; 4th of July</button>
     </div>
   </div>
   <input type="file" id="importFile" accept=".json" style="display:none" onchange="importBackup(event)">
@@ -1560,9 +1744,26 @@ body{
     </div>
   </div>
 </div>
-<div class="day-score-bar" style="flex-wrap:wrap;">
-  <label style="font-size:0.92rem;color:#555;font-weight:600;white-space:nowrap;">&#x2B50; Day Score:</label>
-  <div id="scoreStars" style="display:flex;gap:4px;flex-shrink:0;"></div>
+<div class="day-score-bar review-section" id="dayReviewSection" style="display:block;">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+    <strong style="font-size:0.98rem;color:#3730a3;">&#x1F916; Daily AI Review</strong>
+    <button type="button" id="aiFillDayReviewBtn" class="ai-btn" onclick="aiFillEntireDayReview(this)" style="margin:0;background:linear-gradient(135deg,#1d4ed8,#7c3aed);">&#x2728; AI Fill Day Review</button>
+  </div>
+  <div class="review-grid">
+    <div>
+      <label>Wins Today</label><textarea id="dayRevWins" placeholder="What went well today?"></textarea>
+    </div>
+    <div>
+      <label>What to Improve</label><textarea id="dayRevImprove" placeholder="Areas to work on..."></textarea>
+    </div>
+    <div>
+      <label>Focus for Tomorrow</label><textarea id="dayRevFocus" placeholder="Top priorities..."></textarea>
+    </div>
+    <div>
+      <label>Lessons Learned</label><textarea id="dayRevLessons" placeholder="Key takeaways..."></textarea>
+    </div>
+  </div>
+  <button onclick="saveDayReview()" style="background:#667eea;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-size:0.85rem;">Save Review</button>
 </div>
 </div>
 <div id="tab-weekly" class="tab-panel"><div class="panel">
@@ -2900,6 +3101,14 @@ body{
     <div id="calorieAdvisorResult" style="background:rgba(255,255,255,.82);border:1px solid #bbf7d0;border-radius:9px;padding:10px 12px;color:#14532d;font-size:.8rem;line-height:1.55;"></div>
     <div style="font-size:.64rem;color:#78716c;margin-top:7px;">Estimate only. It uses your logged Activities and current weight when available; medical conditions and individual metabolism can change your needs.</div>
   </div>
+  <div id="preRunMealIdeas" style="display:none;background:linear-gradient(135deg,#eff6ff,#f5f3ff);border:1px solid #93c5fd;border-radius:12px;padding:13px 14px;margin-bottom:16px;box-shadow:0 1px 3px rgba(30,58,138,.18),0 8px 16px rgba(30,58,138,.22);">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:7px;">
+      <div id="preRunMealIdeasTitle" style="font-size:.9rem;font-weight:800;color:#1e3a8a;">🍽️ Pre-Run Meal Ideas</div>
+      <button type="button" onclick="shuffleMealIdeas()" style="background:#1e3a8a;color:#fff;border:0;border-radius:7px;padding:6px 10px;font-size:.72rem;font-weight:800;cursor:pointer;">🔀 Shuffle</button>
+    </div>
+    <div style="font-size:.68rem;color:#475569;margin-bottom:9px;line-height:1.35;">Built from your Healthy 7+ foods to help fuel tomorrow's workout.</div>
+    <div id="preRunMealIdeasBody" style="display:grid;gap:8px;"></div>
+  </div>
   <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:16px;width:100%;">
     <label title="Take a photo of the Nutrition Facts and ingredients" style="flex:1 1 0;min-width:88px;text-align:center;white-space:nowrap;background:#e67e22;color:#fff;border:none;padding:6px 3px;border-radius:6px;font-size:0.67rem;font-weight:700;cursor:pointer;">&#x1F4F7; Camera<input type="file" id="foodLabelCamera" accept="image/*" capture="environment" style="display:none" onchange="scanFoodLabel(event)"></label>
     <label title="Upload an existing photo or screenshot of Nutrition Facts and ingredients" style="flex:1 1 0;min-width:88px;text-align:center;white-space:nowrap;background:#c2650f;color:#fff;border:none;padding:6px 3px;border-radius:6px;font-size:0.67rem;font-weight:700;cursor:pointer;">&#x1F5BC; Upload<input type="file" id="foodLabelScan" accept="image/*" style="display:none" onchange="scanFoodLabel(event)"></label>
@@ -3042,8 +3251,6 @@ body{
   <!-- Macro totals bar -->
   <div id="macroTotalsBar" style="display:block;background:#f8f9fa;border:1px solid #e9ecef;border-radius:8px;padding:8px 10px;margin-bottom:16px;font-size:0.8rem;box-shadow:0 1px 3px rgba(15,23,42,.16),0 8px 16px rgba(15,23,42,.2),0 26px 48px rgba(15,23,42,.24);">
     <div style="font-weight:700;color:#555;margin-bottom:4px;">Daily Totals</div>
-    <button type="button" onclick="removeDuplicateFoodItems(this)" style="width:100%;margin:0 0 8px;background:#fff7ed;color:#9a3412;border:1px solid #fdba74;border-radius:6px;padding:7px;font-size:.74rem;font-weight:800;cursor:pointer;">🧹 Remove Duplicate Foods</button>
-    <div id="dedupeFoodStatus" role="status" aria-live="polite" style="display:none;font-size:.7rem;font-weight:700;line-height:1.35;margin:0 2px 8px;"></div>
     <div id="macroRatioWrap" style="margin-top:8px;padding-top:7px;border-top:1px dashed #dcdcdc;">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:5px;">
         <div><strong style="font-size:0.86rem;color:#334155;">Daily Macro Ratio</strong><div id="macroTrainingLabel" style="font-size:0.7rem;color:#475569;margin-top:2px;">Rest-day target</div><div id="performanceFuelNote" style="display:none;font-size:0.68rem;color:#1e40af;margin-top:4px;line-height:1.35;"></div></div>
@@ -3058,13 +3265,10 @@ body{
         <div id="macroRatioEditorTotal" style="font-size:.66rem;color:#64748b;margin-top:5px;">Total must equal 100%.</div>
         <div style="display:flex;gap:6px;margin-top:7px;"><button type="button" onclick="saveCustomMacroRatio()" style="flex:1;border:0;background:#0f766e;color:#fff;border-radius:6px;padding:6px;font-size:.7rem;font-weight:800;">Save Ratio</button><button type="button" onclick="useAutomaticMacroRatio()" style="flex:1;border:1px solid #cbd5e1;background:#fff;color:#475569;border-radius:6px;padding:6px;font-size:.7rem;font-weight:800;">Use Automatic</button></div>
       </div>
-      <div style="height:9px;border-radius:999px;overflow:hidden;background:#e2e8f0;display:flex;" aria-label="Daily macronutrient calorie ratio">
-        <span id="ratioProtBar" style="width:0%;background:#dc2626;"></span><span id="ratioCarbsBar" style="width:0%;background:#d97706;"></span><span id="ratioFatBar" style="width:0%;background:#2563eb;"></span>
-      </div>
       <div class="macro-target-grid">
-        <div class="macro-target-card" style="border-color:#fecaca;"><strong style="color:#991b1b;">Protein</strong><div><span id="targetActualProt">0%</span> <small>/ <span id="targetProt">25%</span> target</small></div><p><span id="remainProt">0g</span> remaining</p><span id="statusProt" class="macro-status low">Low</span></div>
-        <div class="macro-target-card" style="border-color:#fde047;"><strong style="color:#a16207;">Carbs</strong><div><span id="targetActualCarbs">0%</span> <small>/ <span id="targetCarbs">45%</span> target</small></div><p><span id="remainCarbs">0g</span> remaining</p><span id="statusCarbs" class="macro-status low">Low</span></div>
-        <div class="macro-target-card" style="border-color:#bfdbfe;"><strong style="color:#1e40af;">Fat</strong><div><span id="targetActualFat">0%</span> <small>/ <span id="targetFat">30%</span> target</small></div><p><span id="remainFat">0g</span> remaining</p><span id="statusFat" class="macro-status low">Low</span></div>
+        <div class="macro-target-card" role="button" tabindex="0" aria-label="Protein - tap to see contributing foods" onclick="showMicroSourceBreakdown('prot','Protein','g')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showMicroSourceBreakdown('prot','Protein','g');}" style="border-color:#fecaca;cursor:pointer;"><strong style="color:#991b1b;">Protein</strong><div><span id="targetActualProt">0%</span> <small>/ <span id="targetProt">25%</span> target</small></div><p><span id="remainProt">0g</span> remaining</p><span id="statusProt" class="macro-status low">Low</span> <span style="color:#cbd5e1;font-size:.62rem;">&rsaquo;</span></div>
+        <div class="macro-target-card" role="button" tabindex="0" aria-label="Carbs - tap to see contributing foods" onclick="showMicroSourceBreakdown('carbs','Carbs','g')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showMicroSourceBreakdown('carbs','Carbs','g');}" style="border-color:#fde047;cursor:pointer;"><strong style="color:#a16207;">Carbs</strong><div><span id="targetActualCarbs">0%</span> <small>/ <span id="targetCarbs">45%</span> target</small></div><p><span id="remainCarbs">0g</span> remaining</p><span id="statusCarbs" class="macro-status low">Low</span> <span style="color:#cbd5e1;font-size:.62rem;">&rsaquo;</span></div>
+        <div class="macro-target-card" role="button" tabindex="0" aria-label="Fat - tap to see contributing foods" onclick="showMicroSourceBreakdown('fat','Fat','g')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showMicroSourceBreakdown('fat','Fat','g');}" style="border-color:#bfdbfe;cursor:pointer;"><strong style="color:#1e40af;">Fat</strong><div><span id="targetActualFat">0%</span> <small>/ <span id="targetFat">30%</span> target</small></div><p><span id="remainFat">0g</span> remaining</p><span id="statusFat" class="macro-status low">Low</span> <span style="color:#cbd5e1;font-size:.62rem;">&rsaquo;</span></div>
       </div>
       <details class="macro-meal-details">
         <summary>Meal Macro Distribution</summary>
@@ -3104,16 +3308,8 @@ body{
       <span>&#x1F969; <strong id="totProt">0</strong>g protein</span>
       <span>&#x1F9C8; <strong id="totFat">0</strong>g fat</span>
       <span>&#x1F35E; <strong id="totCarbs">0</strong>g carbs</span>
-      <span>&#x1F4A7; <strong id="totWater">—</strong> water</span>
     </div>
     <div id="calorieOverIndicator" role="status" aria-live="polite" style="display:none;margin-top:8px;border:1px solid #fca5a5;border-radius:8px;background:#fee2e2;color:#991b1b;padding:8px 10px;font-size:.8rem;font-weight:900;"></div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;padding-top:6px;border-top:1px dashed #dcdcdc;font-size:0.74rem;color:#666;">
-      <span>&#x1FA78; <strong id="totIron">0</strong>mg iron</span>
-      <span>&#x1F9B4; <strong id="totCalcium">0</strong>mg calcium</span>
-      <span>&#x2600;&#xFE0F; <strong id="totVitD">0</strong>mcg vitamin D</span>
-      <span>&#x1F4AA; <strong id="totMagnesium">0</strong>mg magnesium</span>
-      <span>&#x26A1; <strong id="totVitB12">0</strong>mcg vitamin B12</span>
-    </div>
     <div id="topMicroQuality" style="display:none;margin-top:8px;padding:8px 9px;background:#fff;border:1px solid #dbe3ec;border-radius:8px;">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.76rem;font-weight:800;color:#334155;margin-bottom:6px;">
         <span>Top 7 micronutrient quality</span><span id="topMicroQualityLabel">—</span>
@@ -3122,7 +3318,7 @@ body{
         <span id="topMicroQualityMarker" style="position:absolute;top:50%;left:0%;width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #0f172a;box-sizing:border-box;transform:translate(-50%,-50%);box-shadow:0 1px 3px rgba(15,23,42,.35);"></span>
       </div>
       <div id="topMicroQualityNote" style="font-size:.66rem;color:#64748b;line-height:1.35;margin-top:5px;">Iron, calcium, vitamin D, magnesium, vitamin B12, sodium, and potassium target coverage</div>
-      <div id="topMicroBreakdown" style="display:grid;gap:7px;margin-top:9px;padding-top:8px;border-top:1px dashed #dbe3ec;"></div>
+      <div id="topMicroBreakdown" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:9px;padding-top:8px;border-top:1px dashed #dbe3ec;"></div>
     </div>
     <details style="margin-top:6px;padding-bottom:6px;">
       <summary style="cursor:pointer;font-size:.72rem;color:#64748b;font-weight:800;">Micronutrient Details</summary>
@@ -3304,15 +3500,15 @@ body{
     </div>
   </div>
 </div>
-<script src="daily-planner-core.js?v=2026-10-18-1"></script>
-<script src="daily-planner-food-log.js?v=2026-10-18-3"></script>
-<script src="daily-planner-bible.js?v=2026-10-15-7"></script>
+<script src="daily-planner-core.js?v=2026-10-18-2-wb2"></script>
+<script src="daily-planner-food-log.js?v=2026-10-18-8"></script>
+<script src="daily-planner-bible.js?v=2026-10-15-8"></script>
 <script src="daily-planner-meditation.js?v=2026-10-15-7"></script>
 <script src="daily-planner-journal-archive.js?v=2026-10-15-6"></script>
 <script src="daily-planner-file-uploads.js?v=2026-10-15-6"></script>
 <script src="daily-planner-shoe-tracker.js?v=2026-10-15-6"></script>
-<script src="daily-planner-misc.js?v=2026-10-15-36"></script>
-<script src="daily-planner-journal-experience.js?v=2026-10-15-7"></script>
+<script src="daily-planner-misc.js?v=2026-10-15-36-pd1"></script>
+<script src="daily-planner-journal-experience.js?v=2026-10-15-8-wb1-wb2"></script>
 <script src="master-backup-shared.js?v=2026-10-15-7"></script>
 <script src="daily-planner-storage-qol.js?v=2026-10-15-7"></script>
 <button class="journal-float-top" id="journalFloatTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">&#x2191; Top</button>

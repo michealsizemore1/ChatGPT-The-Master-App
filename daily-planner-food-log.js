@@ -1056,6 +1056,7 @@ function removeDuplicateFoodItems(button,statusId){
   renderFoodItems();save();
   if(typeof renderFoodLibrarySearch==='function')renderFoodLibrarySearch();
   if(button)button.disabled=false;
+  status=document.getElementById(statusId);
   var total=removedToday+removedFavs;
   if(status){
     status.style.display='block';
@@ -1124,6 +1125,7 @@ function nutritionHardWorkoutForDate(date){
   if(/\blong\s+run\b|\bhalf\s+marathon\b|\bmarathon\b/.test(text))return'long';
   if(/\bintervals?\b|\brepeats?\b|\bspeed\s*work\b|\btrack\s+(?:workout|session)\b|\bhill\s+repeats?\b/.test(text))return'interval';
   if(/\btempo\b|\bthreshold\b/.test(text))return'tempo';
+  if(/\bquality\b/.test(text))return'quality';
   return'';
 }
 function nutritionPerformancePreset(dateKey){
@@ -1134,8 +1136,9 @@ function nutritionPerformancePreset(dateKey){
   var table={
     long:{prior:{calories:3200,prot:19,carbs:63,fat:18},day:{calories:3300,prot:20,carbs:60,fat:20}},
     tempo:{prior:{calories:2800,prot:20,carbs:60,fat:20},day:{calories:2900,prot:22,carbs:55,fat:23}},
-    interval:{prior:{calories:2800,prot:20,carbs:60,fat:20},day:{calories:2950,prot:21,carbs:56,fat:23}}
-  },target=table[workout][phase],weight=calorieAdvisorLatestWeight(dateKey||dk(today))||185,scaledCalories=Math.round((target.calories*(weight/185))/25)*25,names={long:'Long Run',tempo:'Tempo Run',interval:'Interval Run'};
+    interval:{prior:{calories:2800,prot:20,carbs:60,fat:20},day:{calories:2950,prot:21,carbs:56,fat:23}},
+    quality:{prior:{calories:2800,prot:20,carbs:60,fat:20},day:{calories:2900,prot:22,carbs:55,fat:23}}
+  },target=table[workout][phase],weight=calorieAdvisorLatestWeight(dateKey||dk(today))||185,scaledCalories=Math.round((target.calories*(weight/185))/25)*25,names={long:'Long Run',tempo:'Tempo Run',interval:'Interval Run',quality:'Quality Run'};
   return{workout:workout,phase:phase,calories:scaledCalories,prot:target.prot,carbs:target.carbs,fat:target.fat,label:phase==='day'?'Today: '+names[workout]+' — Training & Recovery Target':'Tomorrow: '+names[workout]+' — Pre-Fueling Target'};
 }
 
@@ -1144,7 +1147,7 @@ function runnerMacroTarget(){
   var planSummary=typeof journalTodayTrainingSummary==='function'?journalTodayTrainingSummary():'',activityText=workouts.map(function(a){return [a.title,a.type].filter(Boolean).join(' ');}).join(' '),text=(activityText||planSummary||'').toLowerCase();
   var longest=workouts.reduce(function(max,a){return Math.max(max,parseFloat(a.distance)||0);},0),target={prot:20,carbs:50,fat:30,label:'Rest / recovery day'};
   if(/race|long run|marathon|half marathon/.test(text)||longest>=8)target={prot:18,carbs:65,fat:17,label:'Long-run / race-day target'};
-  else if(/tempo|interval|speed|threshold|track|hill repeat/.test(text))target={prot:20,carbs:60,fat:20,label:'Speed / quality-workout target'};
+  else if(/tempo|interval|speed|threshold|track|hill repeat|quality/.test(text))target={prot:20,carbs:60,fat:20,label:'Speed / quality-workout target'};
   else if(/run|cycle|bike|strength|weight|cross.train/.test(text)||activities.length)target={prot:20,carbs:55,fat:25,label:'Training-day target'};
   var performance=nutritionPerformancePreset(dateKey);if(performance)target={prot:performance.prot,carbs:performance.carbs,fat:performance.fat,label:performance.label};
   var custom=macroRatioSettings();if(custom.enabled&&Number(custom.prot)+Number(custom.carbs)+Number(custom.fat)===100)target={prot:Number(custom.prot),carbs:Number(custom.carbs),fat:Number(custom.fat),label:'Custom macro target'};
@@ -1265,11 +1268,10 @@ function updateMacroTotals(){
       if(microQualityTrack)microQualityTrack.setAttribute('aria-valuenow',microScore.toFixed(1));
       if(microQualityNote)microQualityNote.textContent='Targets for a 53-year-old male distance runner: iron 14mg · calcium 1,000mg · vitamin D 15mcg · magnesium 420mg · vitamin B12 2.4mcg · sodium 2,300–4,000mg · potassium 3,400mg · lowest today: '+weakest.name+' '+Math.round(weakest.value)+weakest.unit;
       if(microBreakdown)microBreakdown.innerHTML=priorityMicros.map(function(n){
-        var pct=n.target?Math.max(0,n.value/n.target*100):0,capped=Math.min(100,pct),status=(n.max&&n.value>n.max)?'High':pct>=100?'Met':pct>=75?'Close':'Low';
+        var pct=n.target?Math.max(0,n.value/n.target*100):0,status=(n.max&&n.value>n.max)?'High':pct>=100?'Met':pct>=75?'Close':'Low';
         var statusColor=status==='Met'?'#166534':(status==='Close'||status==='High')?'#92400e':'#991b1b';
-        var barColor=status==='Met'?'#16a34a':(status==='Close'||status==='High')?'#f59e0b':'#dc2626';
         var shownValue=n.unit==='mg'&&n.value>=100?Math.round(n.value).toLocaleString():Math.round(n.value*10)/10;
-        return '<div role="button" tabindex="0" aria-label="'+n.name+' - tap to see contributing foods" onclick="showMicroSourceBreakdown(\''+n.field+'\',\''+n.name+'\',\''+n.unit+'\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();showMicroSourceBreakdown(\''+n.field+'\',\''+n.name+'\',\''+n.unit+'\');}" style="cursor:pointer;"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.69rem;color:#475569;margin-bottom:3px;"><strong>'+n.name+'</strong><span>'+shownValue+n.unit+' / '+n.target.toLocaleString()+(n.max?'–'+n.max.toLocaleString():'')+n.unit+' · '+Math.round(pct)+'% · <strong style="color:'+statusColor+'">'+status+'</strong> <span style="color:#cbd5e1;">›</span></span></div><div role="progressbar" aria-label="'+n.name+' daily target completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+Math.round(pct)+'" style="height:8px;border-radius:999px;background:#e5e7eb;overflow:hidden;"><span style="display:block;width:'+capped+'%;height:100%;background:'+barColor+';border-radius:999px;"></span></div></div>';
+        return '<div role="button" tabindex="0" aria-label="'+n.name+' - tap to see contributing foods" onclick="showMicroSourceBreakdown(\''+n.field+'\',\''+n.name+'\',\''+n.unit+'\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();showMicroSourceBreakdown(\''+n.field+'\',\''+n.name+'\',\''+n.unit+'\');}" style="cursor:pointer;background:#fff;border:1px solid '+statusColor+'33;border-radius:9px;padding:8px;min-width:0;"><div style="font-size:.72rem;font-weight:800;color:#334155;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+n.name+'</div><div style="font-size:.86rem;font-weight:900;color:#1e293b;font-variant-numeric:tabular-nums;">'+shownValue+n.unit+' <span style="font-size:.6rem;font-weight:700;color:#64748b;">/ '+n.target.toLocaleString()+(n.max?'–'+n.max.toLocaleString():'')+n.unit+'</span></div><div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:5px;"><span style="display:inline-block;border-radius:999px;padding:2px 7px;font-size:.62rem;font-weight:800;background:'+statusColor+'1a;color:'+statusColor+';white-space:nowrap;">'+Math.round(pct)+'% · '+status+'</span><span style="color:#cbd5e1;font-size:.68rem;">›</span></div></div>';
       }).join('');
     }
   }
@@ -1280,6 +1282,7 @@ function updateMacroTotals(){
   var wEl=document.getElementById('totWater');
   if(wEl)wEl.textContent=waterOz?waterOz+' oz':'—';
   if(document.getElementById('calorieAdvisorResult'))calculateDailyCalorieTarget();
+  if(typeof renderPreRunMealIdeas==='function')renderPreRunMealIdeas();
 }
 
 function calorieAdvisorSettings(){
@@ -1417,10 +1420,15 @@ function importHealthyFoodsFromSavedNutrition(force){
   saved=saved.concat(window._foodLog||[]);
   var latestByName={};
   saved.forEach(function(item){var key=String(item&&item.name||'').trim().toLowerCase();if(key)latestByName[key]=item;});
+  // Tally which meal slot each food name was logged under across every saved
+  // entry (not just the latest), so the dominant slot can be used to sort
+  // foods into breakfast/lunch/dinner suggestions.
+  var mealCountsByName={};
+  saved.forEach(function(item){var key=String(item&&item.name||'').trim().toLowerCase(),mealKey=item&&item.meal;if(!key||!mealKey)return;var counts=mealCountsByName[key]||(mealCountsByName[key]={});counts[mealKey]=(counts[mealKey]||0)+1;});
   var rebuilt=[];
   Object.keys(latestByName).forEach(function(key){
     var item=latestByName[key];inferFoodMacroSources(item);var quality=runnerFoodQuality(item);if(quality.score<7||quality.confidence==='Low')return;
-    var copy={name:String(item.name).trim(),cal:item.cal,prot:item.prot,fat:item.fat,carbs:item.carbs,fiber:item.fiber,sugar:item.sugar,sodium:item.sodium,servingLabel:item.servingLabel||'1 serving',servings:parseFloat(item.servings)||1,proteinSource:item.proteinSource||'',carbSource:item.carbSource||'',fatSource:item.fatSource||'',barcode:item.barcode||'',imageUrl:item.imageUrl||'',imageData:item.imageData||'',score:quality.score,label:quality.label,confidence:quality.confidence,confidencePct:quality.confidencePct,updatedAt:new Date().toISOString()};
+    var copy={name:String(item.name).trim(),cal:item.cal,prot:item.prot,fat:item.fat,carbs:item.carbs,fiber:item.fiber,sugar:item.sugar,sodium:item.sodium,servingLabel:item.servingLabel||'1 serving',servings:parseFloat(item.servings)||1,proteinSource:item.proteinSource||'',carbSource:item.carbSource||'',fatSource:item.fatSource||'',barcode:item.barcode||'',imageUrl:item.imageUrl||'',imageData:item.imageData||'',score:quality.score,label:quality.label,confidence:quality.confidence,confidencePct:quality.confidencePct,mealCounts:mealCountsByName[key]||{},updatedAt:new Date().toISOString()};
     MICRO_FIELDS.forEach(function(field){copy[field]=item[field]!=null?item[field]:null;});rebuilt.push(copy);
   });
   saveHealthyFoods(rebuilt.sort(function(a,b){return (b.score||0)-(a.score||0)||a.name.localeCompare(b.name);}));
@@ -1431,11 +1439,63 @@ function captureHealthyFoods(log){
     if(!item||!String(item.name||'').trim())return;
     var quality=runnerFoodQuality(item),key=String(item.name).trim().toLowerCase(),idx=healthy.findIndex(function(food){return String(food.name||'').trim().toLowerCase()===key;});
     if(quality.score<7||quality.confidence==='Low'){if(idx>=0){healthy.splice(idx,1);changed=true;}return;}
-    var copy={name:String(item.name).trim(),cal:item.cal,prot:item.prot,fat:item.fat,carbs:item.carbs,fiber:item.fiber,sugar:item.sugar,sodium:item.sodium,servingLabel:item.servingLabel||'1 serving',servings:parseFloat(item.servings)||1,proteinSource:item.proteinSource||'',carbSource:item.carbSource||'',fatSource:item.fatSource||'',barcode:item.barcode||'',imageUrl:item.imageUrl||'',imageData:item.imageData||'',score:quality.score,label:quality.label,confidence:quality.confidence,confidencePct:quality.confidencePct,updatedAt:new Date().toISOString()};
+    var mealCounts=Object.assign({},(idx>=0&&healthy[idx].mealCounts)||{});
+    var mealKey=item.meal||'';if(mealKey)mealCounts[mealKey]=(mealCounts[mealKey]||0)+1;
+    var copy={name:String(item.name).trim(),cal:item.cal,prot:item.prot,fat:item.fat,carbs:item.carbs,fiber:item.fiber,sugar:item.sugar,sodium:item.sodium,servingLabel:item.servingLabel||'1 serving',servings:parseFloat(item.servings)||1,proteinSource:item.proteinSource||'',carbSource:item.carbSource||'',fatSource:item.fatSource||'',barcode:item.barcode||'',imageUrl:item.imageUrl||'',imageData:item.imageData||'',score:quality.score,label:quality.label,confidence:quality.confidence,confidencePct:quality.confidencePct,mealCounts:mealCounts,updatedAt:new Date().toISOString()};
     MICRO_FIELDS.forEach(function(field){copy[field]=item[field]!=null?item[field]:null;});
     if(idx<0)healthy.push(copy);else healthy[idx]=copy;changed=true;
   });
   if(changed)saveHealthyFoods(healthy.sort(function(a,b){return (b.score||0)-(a.score||0)||a.name.localeCompare(b.name);}));
+}
+// ── Pre-Run Meal Ideas (built from Healthy 7+ foods, shown the day before a
+// quality workout or long run) ──
+function healthyFoodMealSlot(food){
+  var counts=food&&food.mealCounts,best='',bestCount=0;
+  if(counts){['breakfast','lunch','dinner'].forEach(function(m){var c=counts[m]||0;if(c>bestCount){bestCount=c;best=m;}});}
+  return best;
+}
+function mealIdeasRng(seedStr){
+  var h=0;
+  for(var i=0;i<seedStr.length;i++){h=(h*31+seedStr.charCodeAt(i))>>>0;}
+  return function(){h=(h*1664525+1013904223)>>>0;return h/4294967296;};
+}
+function seededShuffle(arr,rng){
+  var a=arr.slice();
+  for(var i=a.length-1;i>0;i--){var j=Math.floor(rng()*(i+1));var tmp=a[i];a[i]=a[j];a[j]=tmp;}
+  return a;
+}
+function pickMealIdeaFoods(mealSlot,rng,exclude){
+  var all=getHealthyFoods().filter(function(f){return exclude.indexOf(String(f.name||'').toLowerCase())===-1;});
+  var matched=all.filter(function(f){return healthyFoodMealSlot(f)===mealSlot;});
+  var anyMeal=all.filter(function(f){return healthyFoodMealSlot(f)==='';});
+  var other=all.filter(function(f){var slot=healthyFoodMealSlot(f);return slot&&slot!==mealSlot;});
+  var combined=seededShuffle(matched,rng).concat(seededShuffle(anyMeal,rng)).concat(seededShuffle(other,rng));
+  return combined.slice(0,2);
+}
+function mealIdeasNonceKey(dateKey){return 'meal_ideas_nonce_'+dateKey;}
+function getMealIdeasNonce(dateKey){return parseInt(localStorage.getItem(mealIdeasNonceKey(dateKey))||'0',10)||0;}
+function shuffleMealIdeas(){
+  var dateKey=dk(today);
+  localStorage.setItem(mealIdeasNonceKey(dateKey),String(getMealIdeasNonce(dateKey)+1));
+  renderPreRunMealIdeas();
+  if(typeof v26Toast==='function')v26Toast('New meal ideas shuffled in');
+}
+function renderPreRunMealIdeas(){
+  var card=document.getElementById('preRunMealIdeas');if(!card)return;
+  var performance=typeof nutritionPerformancePreset==='function'?nutritionPerformancePreset(dk(today)):null;
+  if(!performance||performance.phase!=='prior'){card.style.display='none';return;}
+  card.style.display='block';
+  var names={long:'Long Run',tempo:'Tempo Run',interval:'Interval Run',quality:'Quality Run'},title=document.getElementById('preRunMealIdeasTitle');
+  if(title)title.textContent='🍽️ Tomorrow: '+names[performance.workout]+' — Meal Ideas';
+  var dateKey=dk(today),nonce=getMealIdeasNonce(dateKey),exclude=[];
+  var slots=[{key:'breakfast',label:'🌅 Breakfast'},{key:'lunch',label:'🥗 Lunch'},{key:'dinner',label:'🍽️ Dinner'}];
+  var body=document.getElementById('preRunMealIdeasBody');
+  if(body)body.innerHTML=slots.map(function(slot){
+    var rng=mealIdeasRng(dateKey+'|'+slot.key+'|'+nonce),picks=pickMealIdeaFoods(slot.key,rng,exclude);
+    picks.forEach(function(f){exclude.push(String(f.name||'').toLowerCase());});
+    var itemsHtml=picks.length?picks.map(function(f){return '<div>'+escHtml(f.name)+' <span style="color:#64748b;">· '+Math.round(f.cal||0)+' cal</span></div>';}).join(''):'<div style="color:#94a3b8;">Log a few more healthy foods to get ideas here.</div>';
+    return '<div style="background:#fff;border:1px solid #c7d2fe;border-radius:9px;padding:8px 10px;"><strong style="display:block;font-size:.76rem;color:#1e3a8a;margin-bottom:4px;">'+slot.label+'</strong><div style="font-size:.76rem;color:#334155;line-height:1.5;">'+itemsHtml+'</div></div>';
+  }).join('');
 }
 function applyFoodSort(list){
   var sortBy=(document.getElementById('favSortBy')||{value:''}).value;
@@ -1483,7 +1543,7 @@ function renderFavsList(){
   updateFavoriteFoodsCount(favs.length);
   var q=(document.getElementById('favSearch')||{value:''}).value.toLowerCase().trim();
   var filtered=q?favs.filter(function(f){return f.name.toLowerCase().includes(q);}):favs;filtered=applyFoodSort(filtered);
-  var photoHelp='<div style="font-size:.68rem;color:#64748b;margin:0 0 6px;">Use 📷 Take for the camera or 🖼 Choose for a picture already on your phone.</div><button onclick="rescanHealthyFoodsAndImages(this,\'favoriteRescanStatus\')" style="width:100%;margin:0 0 5px;background:#fff7ed;color:#9a3412;border:1px solid #fdba74;border-radius:6px;padding:7px;font-size:.74rem;font-weight:800;cursor:pointer;">↻ Rescan foods & barcode pictures</button><div id="favoriteRescanStatus" role="status" aria-live="polite" style="display:none;font-size:.7rem;font-weight:700;line-height:1.35;margin:0 2px 7px;"></div>';
+  var photoHelp='<div style="font-size:.68rem;color:#64748b;margin:0 0 6px;">Use 📷 Take for the camera or 🖼 Choose for a picture already on your phone.</div><button onclick="rescanHealthyFoodsAndImages(this,\'favoriteRescanStatus\')" style="width:100%;margin:0 0 5px;background:#fff7ed;color:#9a3412;border:1px solid #fdba74;border-radius:6px;padding:7px;font-size:.74rem;font-weight:800;cursor:pointer;">↻ Rescan foods & barcode pictures</button><div id="favoriteRescanStatus" role="status" aria-live="polite" style="display:none;font-size:.7rem;font-weight:700;line-height:1.35;margin:0 2px 7px;"></div><button type="button" onclick="removeDuplicateFoodItems(this)" style="width:100%;margin:0 0 5px;background:#fff7ed;color:#9a3412;border:1px solid #fdba74;border-radius:6px;padding:7px;font-size:.74rem;font-weight:800;cursor:pointer;">🧹 Remove Duplicate Foods</button><div id="dedupeFoodStatus" role="status" aria-live="polite" style="display:none;font-size:.7rem;font-weight:700;line-height:1.35;margin:0 2px 7px;"></div>';
   if(!filtered.length){el.innerHTML=photoHelp+'<div style="font-size:0.8rem;color:#bbb;text-align:center;padding:12px;">No favorites yet. Add items from your food log with ⭐</div>';return;}
   var target=(document.getElementById('favTargetMeal')||{value:'breakfast'}).value;
   el.innerHTML=photoHelp+filtered.map(function(f,i){

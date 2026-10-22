@@ -79,11 +79,9 @@ function triClick(el){
   } else {
     applyTriState(el,next);
   }
-  // Marking Dog Walk done in Activities also checks off the matching "Walk
-  // Buddy" item on My Schedule (and un-checks it if Dog Walk is un-marked).
-  // Walk Buddy tracks its own done state in localStorage rather than reading
-  // this checkbox directly, so it needs this explicit bridge to stay in sync.
-  if(key==='exDogWalk')localStorage.setItem('schedule_walkBuddy_'+dk(today),next==='green'?'1':'0');
+  // Walk Buddy on My Schedule reads the Dog Walk tri-check's state (green,
+  // red, etc.) directly via linkedCheckKey, so no separate bridge write is
+  // needed here -- renderJournalSchedule() below picks it up automatically.
   save();
   updateCompactSectionCounts();
   renderDailyCheckOverview();
@@ -775,7 +773,7 @@ function load(){
     sportsDrinksOz=d.sportsDrinksOz||0;updateSportsDrinksDisplay();
     otherLiquidsOz=d.otherLiquidsOz||0;updateOtherLiquidsDisplay();
     autoSportsDrinksOz=d.autoSportsDrinksOz||0;autoOtherLiquidsOz=d.autoOtherLiquidsOz||0;
-    scoreVal=d.score||0;buildStars();
+    scoreVal=d.score||0;buildStars();renderDayReview();
   }catch(e){console.error('load fields:',e);}
   attachListeners();
   attachAllFieldUndos();
@@ -2632,6 +2630,44 @@ function aiFillEntireReview(btn){
       var result=JSON.parse(cleaned),map={wins:'revWins',improve:'revImprove',focus:'revFocus',lessons:'revLessons'};
       Object.keys(map).forEach(function(key){var el=document.getElementById(map[key]);if(el&&result[key]!=null){el.value=String(result[key]).trim();el.dispatchEvent(new Event('input'));}});
       saveReview();v26Toast('Weekly Review filled and saved');
+    }catch(e){alert('The AI response could not be placed into the Review fields. Please try again.');}
+    btn.disabled=false;btn.innerHTML=original;
+  },function(err){btn.disabled=false;btn.innerHTML=original;alert('AI error: '+err);});
+}
+function getDayJournalText(d){
+  const raw=localStorage.getItem('planner_'+dk(d));if(!raw)return'';
+  const dd=JSON.parse(raw),parts=[];
+  ['jAccomplish','jNotes','jImprov','jGratitude','jIssues','jRunLog','spMeditationText'].forEach(function(k){if(dd[k])parts.push(dd[k]);});
+  return parts.join(' | ');
+}
+function renderDayReview(){
+  const raw=localStorage.getItem('dayreview_'+dk(today)),rv=raw?JSON.parse(raw):{};
+  ['dayRevWins','dayRevImprove','dayRevFocus','dayRevLessons'].forEach(function(id){const e=document.getElementById(id);if(e)e.value=rv[id]||'';});
+}
+function saveDayReview(){
+  const d={};['dayRevWins','dayRevImprove','dayRevFocus','dayRevLessons'].forEach(function(id){const e=document.getElementById(id);if(e)d[id]=e.value;});
+  localStorage.setItem('dayreview_'+dk(today),JSON.stringify(d));
+  const btn=document.querySelector('[onclick="saveDayReview()"]');
+  if(btn){btn.textContent='Saved!';btn.style.background='#27ae60';setTimeout(function(){btn.textContent='Save Review';btn.style.background='#667eea';},2000);}
+}
+function aiFillEntireDayReview(btn){
+  if(!journalAIKey()){alert('Add your Anthropic API key in Settings first.');return;}
+  const dayLabel=today.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric',year:'numeric'});
+  const journal=getDayJournalText(today);
+  const current=['dayRevWins','dayRevImprove','dayRevFocus','dayRevLessons'].map(function(id){var el=document.getElementById(id);return el&&el.value.trim()?id+': '+el.value.trim():'';}).filter(Boolean).join('\n');
+  const prompt='You are completing a personal daily review for '+dayLabel+'. Use only the supplied journal entry and existing review notes. Return ONLY one valid JSON object with exactly these four string keys:\n'
+    +'{"wins":"","improve":"","focus":"","lessons":""}\n\n'
+    +'Writing requirements:\n- wins: 1-3 specific achievements or positive moments from today\n- improve: 1-3 constructive, realistic improvements\n- focus: 1-2 specific priorities for tomorrow\n- lessons: 1-3 concise takeaways from today\n'
+    +'Use short bullet-style lines inside each string. Do not invent events or accomplishments. If information is limited, acknowledge that briefly and make cautious suggestions.\n\n'
+    +'DAILY JOURNAL:\n'+(journal||'No written journal notes available for today')+'\n\nEXISTING REVIEW NOTES:\n'+(current||'None');
+  const original=btn.innerHTML;btn.disabled=true;btn.innerHTML='&#x23F3; Filling Review...';
+  aiCall(prompt,2000,function(text){
+    try{
+      var cleaned=String(text||'').trim().replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'');
+      var start=cleaned.indexOf('{'),end=cleaned.lastIndexOf('}');if(start>=0&&end>=start)cleaned=cleaned.slice(start,end+1);
+      var result=JSON.parse(cleaned),map={wins:'dayRevWins',improve:'dayRevImprove',focus:'dayRevFocus',lessons:'dayRevLessons'};
+      Object.keys(map).forEach(function(key){var el=document.getElementById(map[key]);if(el&&result[key]!=null){el.value=String(result[key]).trim();el.dispatchEvent(new Event('input'));}});
+      saveDayReview();v26Toast('Day Review filled and saved');
     }catch(e){alert('The AI response could not be placed into the Review fields. Please try again.');}
     btn.disabled=false;btn.innerHTML=original;
   },function(err){btn.disabled=false;btn.innerHTML=original;alert('AI error: '+err);});
