@@ -2002,21 +2002,24 @@ function renderActivities(){
     try{
       var prev=new Date(dateKey+'T00:00:00');
       prev.setDate(prev.getDate()-1);
-      var raw=localStorage.getItem('planner_'+dk(prev));
-      if(raw){
-        var pd=JSON.parse(raw);
-        var log=Array.isArray(pd.foodLog)?pd.foodLog:[];
-        var cal=log.reduce(function(sum,x){return sum+(parseFloat(x.cal)||0);},0)||parseFloat(pd.nuCalVal)||0;
-        if(cal>0){
-          var prot=log.reduce(function(sum,x){return sum+(parseFloat(x.prot)||0);},0)||parseFloat(pd.nuProtVal)||0;
-          var carbs=log.reduce(function(sum,x){return sum+(parseFloat(x.carbs)||0);},0)||parseFloat(pd.nuCarbsVal)||0;
-          var fat=log.reduce(function(sum,x){return sum+(parseFloat(x.fat)||0);},0)||parseFloat(pd.nuFatVal)||0;
-          result={cal:cal};
-          if(prot+carbs+fat>0){
-            result.protPct=Math.round(prot*4/cal*100);
-            result.carbsPct=Math.round(carbs*4/cal*100);
-            result.fatPct=Math.round(fat*9/cal*100);
-          }
+      // Reuse the app's own canonical per-day nutrition totals (getNuDay, in
+      // daily-planner-core.js) instead of re-summing the food log here. That
+      // function already multiplies each item's calories/macros by its
+      // logged servings count (and falls back through the old food_<date>
+      // key and the legacy hidden nuCalVal/etc. fields the same way the
+      // Nutrition tab and Weekly summary do) -- this local copy was missing
+      // the servings multiplier entirely, so any multi-serving food item
+      // silently undercounted (or overcounted, for <1 servings) that day's
+      // calories and macro split shown here on the Activities feed.
+      var nu=getNuDay(dk(prev));
+      var cal=nu&&nu.cal>0?nu.cal:0;
+      if(cal>0){
+        var prot=nu.prot,carbs=nu.carbs,fat=nu.fat;
+        result={cal:cal};
+        if(prot+carbs+fat>0){
+          result.protPct=Math.round(prot*4/cal*100);
+          result.carbsPct=Math.round(carbs*4/cal*100);
+          result.fatPct=Math.round(fat*9/cal*100);
         }
       }
     }catch(e){}
