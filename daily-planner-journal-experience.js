@@ -462,7 +462,7 @@ function renderJournalSchedule(){
     guitar:{time:'4:45 PM',mins:1005,label:'Guitar',detail:guitarMinutes?fmtMinsSeconds(guitarMinutes)+' logged':'Tap to log guitar practice',done:d.gaGuitar==='green',tab:'skill-log'}
   };
   ['reading','language','guitar'].forEach(function(kind){
-    if(!dueGrowthKinds.has(kind)&&localStorage.getItem(journalScheduleGrowthKey(kind,dateKey))!=='1')return;
+    if(!dueGrowthKinds.has(kind)&&localStorage.getItem(journalScheduleGrowthKey(kind,dateKey))!=='1'&&!growthScheduleSpecs[kind].done)return;
     items.push(Object.assign({id:journalScheduleGrowthId(kind),growthKind:kind},growthScheduleSpecs[kind]));
   });
   journalManualScheduleItems().filter(function(entry){return entry.date===dateKey;}).forEach(function(entry){items.push({id:'schedule-'+entry.id,time:entry.time,mins:Number(entry.mins),label:entry.title,detail:entry.note||'Manual schedule item',done:localStorage.getItem('schedule_manualSchedule_'+entry.id+'_'+dateKey)==='1',tab:'daily',manual:'manualSchedule_'+entry.id,manualCreated:true,manualItemId:entry.id});});
