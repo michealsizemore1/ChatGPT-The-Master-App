@@ -376,7 +376,7 @@ async function updateMeridianWeather(){
     var data=await response.json(),current=data&&data.current;
     if(!current||!Number.isFinite(Number(current.temperature_2m)))throw new Error('Weather unavailable');
     var rainChance=data&&data.daily&&Array.isArray(data.daily.precipitation_probability_max)?Number(data.daily.precipitation_probability_max[0]):NaN;
-    var rainLabel=Number.isFinite(rainChance)?' \u2022 \u2614 '+Math.round(rainChance)+'%':'';
+    var rainLabel=(Number.isFinite(rainChance)&&window.innerWidth>700)?' \u2022 \u2614 '+Math.round(rainChance)+'%':'';
     display.innerHTML=meridianWeatherIcon(Number(current.weather_code))+' Meridian '+Math.round(Number(current.temperature_2m))+'&deg;'+rainLabel;
     display.title='Current temperature for Meridian, Idaho'+(Number.isFinite(rainChance)?' \u2022 Today\u2019s chance of precipitation: '+Math.round(rainChance)+'%':'')+(current.time?' \u2022 Updated '+current.time.replace('T',' '):'')+' \u2022 Weather: Open-Meteo';
   }catch(error){
