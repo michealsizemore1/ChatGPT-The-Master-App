@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-10-15-86">
+<meta name="app-build" content="2026-10-15-87">
 <script src="theme-switcher.js?v=2026-10-21-1"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#ff6b00">
@@ -114,9 +114,6 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;paddi
 .summary-table th{background:#667eea;color:white;padding:6px 8px;text-align:left;white-space:nowrap;}
 .summary-table td{padding:5px 8px;border-bottom:1px solid #f0f0f0;white-space:nowrap;}
 .summary-table tr:last-child td{font-weight:700;background:#f8f9fa;}
-.day-score-heading{text-align:center;}
-.day-score-table{max-width:760px;margin-left:auto;margin-right:auto;}
-.day-score-table th,.day-score-table td{text-align:center!important;width:50%!important;}
 @media(max-width:768px){
   .summary-table th:last-child,.summary-table td:last-child{width:100%;}
 }
@@ -1787,7 +1784,6 @@ body{
   </div>
   <div id="aiWeeklyBox" class="ai-box"></div>
   <div id="wDigest" class="week-digest"></div>
-  <h2 class="day-score-heading">Day Score</h2><div id="wDayScore"></div>
   <h2>Growth / Skills <small style="font-size:.62rem;font-weight:500;color:#64748b;">Language and Guitar</small></h2><div id="wGrowth"></div><h2>Fitness <small style="font-size:.62rem;font-weight:500;color:#64748b;">From Activities and Steps</small></h2><div id="wFitness"></div><h2>Wellness</h2><div id="wWellness"></div>
 <h2>Nutrition</h2><div id="wNutrition"></div>
 <h2>Micronutrients</h2><div id="wNutritionMicro"></div>
@@ -1814,14 +1810,13 @@ body{
     <div class="heatmap-dow">S</div>
   </div>
 </div>
-  <h2 class="day-score-heading">Day Score</h2><div id="mDayScore"></div>
 <h2>Growth</h2><div id="mGrowth"></div><h2>Fitness</h2><div id="mFitness"></div><h2>Wellness</h2><div id="mWellness"></div>
 <h2>Nutrition</h2><div id="mNutrition"></div>
 <h2>Micronutrients</h2><div id="mNutritionMicro"></div>
 <h2>Spirituality</h2><div id="mSpirituality"></div>
 
 </div></div>
-<div id="tab-yearly" class="tab-panel"><div class="panel"><div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px;"><div class="week-nav" style="margin-bottom:0;"><button onclick="changeYearOff(-1)">&#8249; Prev</button><span id="yearLabel"></span><button onclick="changeYearOff(1)">Next &#8250;</button></div></div><h2 class="day-score-heading">Day Score</h2><div id="yDayScore"></div>
+<div id="tab-yearly" class="tab-panel"><div class="panel"><div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px;"><div class="week-nav" style="margin-bottom:0;"><button onclick="changeYearOff(-1)">&#8249; Prev</button><span id="yearLabel"></span><button onclick="changeYearOff(1)">Next &#8250;</button></div></div>
 <h2>Growth</h2><div id="yGrowth"></div><h2>Fitness</h2><div id="yFitness"></div><h2>Wellness</h2><div id="yWellness"></div>
 <h2>Nutrition</h2><div id="yNutrition"></div>
 <h2>Micronutrients</h2><div id="yNutritionMicro"></div>
@@ -3500,7 +3495,7 @@ body{
     </div>
   </div>
 </div>
-<script src="daily-planner-core.js?v=2026-10-18-2-wb2"></script>
+<script src="daily-planner-core.js?v=2026-10-18-2-wb2-noscore"></script>
 <script src="daily-planner-food-log.js?v=2026-10-18-8"></script>
 <script src="daily-planner-bible.js?v=2026-10-15-8"></script>
 <script src="daily-planner-meditation.js?v=2026-10-15-7"></script>
