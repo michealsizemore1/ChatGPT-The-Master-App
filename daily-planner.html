@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-10-15-85">
+<meta name="app-build" content="2026-10-15-86">
 <script src="theme-switcher.js?v=2026-10-21-1"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#ff6b00">
@@ -915,10 +915,6 @@ textarea{line-height:1.55;}
 .v26-save-dot{width:7px;height:7px;border-radius:50%;background:#22a06b;box-shadow:0 0 0 3px rgba(34,160,107,.12);}
 .v26-toast{position:fixed;right:22px;bottom:22px;z-index:3000;background:#172033;color:#fff;padding:10px 14px;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.22);font-size:.84rem;opacity:0;transform:translateY(10px);pointer-events:none;transition:.2s;}
 .v26-toast.show{opacity:1;transform:translateY(0);}
-body.v26-focus .tabs-wrapper,body.v26-focus #tabNotesBar,body.v26-focus #aiToolbar,body.v26-focus #streakBar,body.v26-focus #todayWorkoutCard,body.v26-focus .header>:not(h1):not(.date-nav):not(.header-control-stack),body.v26-focus .header-actions>:not(.v26-focus-pair),body.v26-focus .header-status-row{display:none!important;}
-body.v26-focus .container{max-width:none;}
-body.v26-focus .v26-toolbar{justify-content:flex-end;}
-body.v26-focus .v26-focus-btn{background:#ededff;color:var(--brand);border-color:#c9c9f5;}
 body.v26-comfortable .section,body.v26-comfortable .journaling-section{padding-top:24px;padding-bottom:24px;}
 body.v26-compact .section,body.v26-compact .journaling-section{padding-top:10px;padding-bottom:10px;}
 body.v26-compact .task-row,body.v26-compact .priority-item{margin-bottom:2px;min-height:28px;}
@@ -1556,7 +1552,6 @@ body{
         </div>
       </details>
       <div class="v26-focus-pair">
-        <button class="v26-quiet-btn v26-focus-btn" type="button" onclick="v26ToggleFocus()" id="v26FocusBtn" title="Hide distractions (F)">Focus</button>
         <span class="v26-weather" id="meridianWeather" title="Current temperature for Meridian, Idaho">&#x1F321;&#xFE0F; Meridian &mdash;&deg;</span>
         <select id="themeSelect" class="v26-weather" style="cursor:pointer;width:52px;max-width:52px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" onchange="setAppTheme(this.value)" aria-label="App theme" title="App theme">
           <option value="halloween">&#x1F383;</option>
@@ -3515,7 +3510,7 @@ body{
 <script src="daily-planner-misc.js?v=2026-10-15-36-pd1"></script>
 <script src="daily-planner-journal-experience.js?v=2026-10-15-8-wb1-wb2"></script>
 <script src="master-backup-shared.js?v=2026-10-15-7"></script>
-<script src="daily-planner-storage-qol.js?v=2026-10-15-7-wthr2"></script>
+<script src="daily-planner-storage-qol.js?v=2026-10-15-7-nofocus"></script>
 <button class="journal-float-top" id="journalFloatTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">&#x2191; Top</button>
 <div id="v26Toast" class="v26-toast" role="status" aria-live="polite"></div>
 </body>
