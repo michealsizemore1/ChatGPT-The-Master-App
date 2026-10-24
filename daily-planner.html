@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-10-15-91">
+<meta name="app-build" content="2026-10-15-92">
 <script src="theme-switcher.js?v=2026-10-21-1"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#ff6b00">
@@ -1741,29 +1741,6 @@ body{
     </div>
   </div>
 </div>
-<div class="journaling-section">
-  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
-    <strong style="font-size:0.98rem;color:#3730a3;">&#x270D;&#xFE0F; Daily Journal</strong>
-  </div>
-  <div class="journal-grid">
-    <div class="journal-col">
-      <label for="jAccomplish">&#x1F3C6; Accomplishments</label>
-      <textarea id="jAccomplish" placeholder="What did you accomplish today?"></textarea>
-    </div>
-    <div class="journal-col">
-      <label for="jImprov">&#x1F4A1; Improvements</label>
-      <textarea id="jImprov" placeholder="What could have gone better?"></textarea>
-    </div>
-    <div class="journal-col">
-      <label for="jGratitude">&#x1F64F; Gratitude</label>
-      <textarea id="jGratitude" placeholder="What are you grateful for today?"></textarea>
-    </div>
-    <div class="journal-col">
-      <label for="jNotes">&#x1F4DD; Ideas</label>
-      <textarea id="jNotes" placeholder="Any ideas, thoughts, or notes..."></textarea>
-    </div>
-  </div>
-</div>
 <div class="day-score-bar review-section" id="dayReviewSection" style="display:block;">
   <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
     <strong style="font-size:0.98rem;color:#3730a3;">&#x1F916; Daily AI Review</strong>
@@ -1784,6 +1761,12 @@ body{
     </div>
   </div>
   <button onclick="saveDayReview()" style="background:#667eea;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-size:0.85rem;">Save Review</button>
+</div>
+<div class="journaling-section">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+    <strong style="font-size:0.98rem;color:#3730a3;">&#x270D;&#xFE0F; Daily Journal</strong>
+  </div>
+  <textarea id="jNotes" placeholder="Write whatever's on your mind today..." style="width:100%;min-height:140px;border:1px solid #e9ecef;border-radius:6px;padding:8px;font-size:0.95rem;resize:vertical;outline:none;font-family:inherit;box-sizing:border-box;"></textarea>
 </div>
 </div>
 <div id="tab-weekly" class="tab-panel"><div class="panel">
