@@ -236,6 +236,75 @@ const MICRO_META={
 // conversion is needed except sodium, which OFF reports in grams.
 const OFF_NUTRIENT_KEY={fiber:'fiber',sugar:'sugars',sodium:'sodium',vitA:'vitamin-a',vitC:'vitamin-c',vitD:'vitamin-d',calcium:'calcium',iron:'iron',potassium:'potassium',caffeine:'caffeine',magnesium:'magnesium',vitB12:'vitamin-b12',vitE:'vitamin-e',vitK:'vitamin-k',vitB1:'vitamin-b1',vitB2:'vitamin-b2',vitB3:'vitamin-pp',vitB6:'vitamin-b6',folate:'folates',biotin:'biotin',vitB5:'pantothenic-acid',phosphorus:'phosphorus',iodine:'iodine',zinc:'zinc',selenium:'selenium',copper:'copper',manganese:'manganese',chromium:'chromium',molybdenum:'molybdenum',chloride:'chloride'};
 
+// ── AI micronutrient enrichment for already-saved favorites/meals ──
+// Lets the user backfill the newer micronutrient fields (or any missing
+// field) on foods that were saved before those fields existed, without
+// re-scanning or re-adding them. Only ever fills fields that are currently
+// null/undefined -- never touches a field that already has a real value,
+// including an intentional 0.
+function missingMicroFields(item){
+  return MICRO_FIELDS.filter(function(f){return item[f]==null;});
+}
+function aiEstimateMicros(name,servingLabel,fields,cal,prot,fat,carbs){
+  if(!fields||!fields.length)return Promise.resolve({});
+  var key=journalAIKey();
+  if(!key)return Promise.reject(new Error('Add your Anthropic API key in Settings first.'));
+  var schema=fields.map(function(f){return '"'+f+'": '+MICRO_META[f].label+' in '+MICRO_META[f].unit+' per serving as a plain number';}).join('\n- ');
+  var refs=[cal?Math.round(cal)+' calories':'',prot?prot+'g protein':'',fat?fat+'g fat':'',carbs?carbs+'g carbs':''].filter(Boolean).join(', ');
+  var prompt='Estimate nutrition values for this specific food: '+name+(servingLabel?' ('+servingLabel+')':'')+'.\n'
+    +(refs?'For reference, this serving has about '+refs+'.\n':'')
+    +'Respond with ONLY a single JSON object -- no markdown, no code fences, no explanation, nothing else before or after. The JSON must have these exact keys:\n'
+    +'- '+schema+'\n'
+    +'Use your best nutritional knowledge for realistic values. All numeric values must be numbers, not strings. Use 0 only when a value is genuinely negligible or absent, never to mean unknown.';
+  return fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'x-api-key':key,'anthropic-version':'2023-06-01','content-type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1000,messages:[{role:'user',content:prompt}]})
+  }).then(function(r){return r.json();}).then(function(data){
+    var text=(data.content&&data.content[0]&&data.content[0].text)||'';
+    var m=text.match(/\{[\s\S]*\}/);
+    if(!m)throw new Error('Could not parse AI response.');
+    var parsed=JSON.parse(m[0]);
+    var result={};
+    fields.forEach(function(f){result[f]=(parsed[f]!==undefined&&parsed[f]!==null)?parsed[f]:0;});
+    return result;
+  });
+}
+function enrichFavoriteNutrients(idx,btn){
+  var favs=getFavorites();var f=favs[idx];if(!f)return;
+  var missing=missingMicroFields(f);
+  if(!missing.length){alert('"'+f.name+'" already has every tracked nutrient filled in.');return;}
+  var orig=btn?btn.innerHTML:'';if(btn){btn.disabled=true;btn.innerHTML='\u23F3';}
+  aiEstimateMicros(f.name,f.servingLabel,missing,f.cal,f.prot,f.fat,f.carbs).then(function(values){
+    missing.forEach(function(k){f[k]=values[k];});
+    saveFavorites(favs);
+    renderFavsList();
+  }).catch(function(err){
+    alert('Could not enrich "'+f.name+'": '+err.message);
+    if(btn){btn.disabled=false;btn.innerHTML=orig;}
+  });
+}
+function enrichMealNutrients(mealIdx,btn){
+  var meals=getSavedMeals();var m=meals[mealIdx];if(!m)return;
+  var entries=m.items.map(function(it){return {it:it,missing:missingMicroFields(it)};}).filter(function(x){return x.missing.length;});
+  if(!entries.length){alert('"'+m.name+'" already has every tracked nutrient filled in for all items.');return;}
+  if(btn)btn.disabled=true;
+  var chain=Promise.resolve(),failed=0;
+  entries.forEach(function(entry,n){
+    chain=chain.then(function(){
+      if(btn)btn.innerHTML='\u23F3 '+(n+1)+'/'+entries.length;
+      return aiEstimateMicros(entry.it.name,entry.it.servingLabel,entry.missing,entry.it.cal,entry.it.prot,entry.it.fat,entry.it.carbs).then(function(values){
+        entry.missing.forEach(function(k){entry.it[k]=values[k];});
+      }).catch(function(){failed++;});
+    });
+  });
+  chain.then(function(){
+    saveSavedMeals(meals);
+    renderMealsList();
+    if(failed)alert('Enriched '+(entries.length-failed)+' of '+entries.length+' items in "'+m.name+'". '+failed+' failed -- check your AI key/usage and try again.');
+  });
+}
+
 // Quick-add product database for the Sports Nutrition section: full current
 // GU Energy and SiS (Science in Sport) product lines (gels, chews, bars,
 // drink mixes/electrolyte tabs, recovery drinks). Values are per labeled
@@ -1569,6 +1638,7 @@ function renderFavsList(){
   var target=(document.getElementById('favTargetMeal')||{value:'breakfast'}).value;
   el.innerHTML=photoHelp+filtered.map(function(f,i){
     var origIdx=favs.indexOf(f);
+    var missingCount=missingMicroFields(f).length;
     return '<div style="padding:5px 0;border-bottom:1px solid #f5f5f5;font-size:0.82rem;">'
       +'<div style="display:flex;align-items:center;gap:6px;">'
         +foodThumbnailHtml(f,'favorite',origIdx)+'<div style="flex:1;min-width:0;">'
@@ -1576,6 +1646,7 @@ function renderFavsList(){
           +'<div style="color:#888;font-size:0.75rem;">'+(f.cal?'🔥'+f.cal+' ':'')+''+(f.prot?'🥩'+f.prot+'g ':'')+''+(f.carbs?'🍞'+f.carbs+'g ':'')+''+(f.fat?'🥑'+f.fat+'g':'')+'</div>'
         +'</div>'
         +'<button onclick="loadFavoriteItem('+origIdx+')" style="background:#e67e22;color:#fff;border:none;border-radius:5px;padding:4px 9px;font-size:0.78rem;cursor:pointer;">+ Add</button>'
+        +'<button '+(missingCount?('onclick="enrichFavoriteNutrients('+origIdx+',this)"'):'disabled')+' title="'+(missingCount?('Fill in '+missingCount+' missing nutrient value'+(missingCount===1?'':'s')+' using AI'):'All tracked nutrients are filled in')+'" style="background:'+(missingCount?'#eef2ff':'#f1f5f9')+';color:'+(missingCount?'#4338ca':'#94a3b8')+';border:1px solid '+(missingCount?'#c7d2fe':'#e2e8f0')+';border-radius:5px;padding:4px 7px;font-size:0.72rem;cursor:'+(missingCount?'pointer':'default')+';white-space:nowrap;">🧪'+(missingCount?' '+missingCount:'')+'</button>'
         +'<button onclick="deleteFavorite('+origIdx+')" style="background:none;border:1px solid #f5c6cb;border-radius:4px;cursor:pointer;font-size:0.72rem;padding:2px 5px;color:#e74c3c;">✕</button>'
       +'</div>'
       +foodThumbnailButtonsHtml('favorite',origIdx)
@@ -1641,6 +1712,7 @@ function renderMealsList(){
   if(!meals.length){el.innerHTML='<div style="font-size:0.8rem;color:#bbb;text-align:center;padding:12px;">No saved meals yet. Log a full day of food then tap "Save Meal".</div>';return;}
   el.innerHTML=meals.map(function(m,i){
     var cal=m.items.reduce(function(a,x){return a+(parseFloat(x.cal)||0);},0);
+    var totalMissing=m.items.reduce(function(a,it){return a+missingMicroFields(it).length;},0);
     var macros={prot:0,carbs:0,fat:0},micros={};
     MICRO_FIELDS.forEach(function(field){micros[field]=0;});
     m.items.forEach(function(item){
@@ -1673,6 +1745,7 @@ function renderMealsList(){
           +'<option value="supplements"'+(m.category==='supplements'?' selected':'')+'>💊 Supplements</option>'
         +'</select>'
         +'<button onclick="loadMeal('+i+')" style="background:#2980b9;color:#fff;border:none;border-radius:5px;padding:4px 9px;font-size:0.78rem;cursor:pointer;">Load</button>'
+        +'<button '+(totalMissing?('onclick="enrichMealNutrients('+i+',this)"'):'disabled')+' title="'+(totalMissing?('Fill in '+totalMissing+' missing nutrient value'+(totalMissing===1?'':'s')+' across this meal using AI'):'All tracked nutrients are filled in for every item')+'" style="background:'+(totalMissing?'#eef2ff':'#f1f5f9')+';color:'+(totalMissing?'#4338ca':'#94a3b8')+';border:1px solid '+(totalMissing?'#c7d2fe':'#e2e8f0')+';border-radius:5px;padding:4px 8px;font-size:0.72rem;cursor:'+(totalMissing?'pointer':'default')+';white-space:nowrap;">🧪'+(totalMissing?' '+totalMissing:'')+'</button>'
       +'</div>'
     +'</div>';
   }).join('');
