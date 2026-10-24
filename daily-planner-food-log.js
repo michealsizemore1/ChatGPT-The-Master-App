@@ -196,7 +196,7 @@ function applyFoodServingUnit(id,unit){
 }
 
 // Micronutrient fields tracked per food item, in addition to cal/prot/fat/carbs
-const MICRO_FIELDS=['fiber','sugar','sodium','vitA','vitC','vitD','calcium','iron','potassium','caffeine','magnesium','vitB12'];
+const MICRO_FIELDS=['fiber','sugar','sodium','vitA','vitC','vitD','calcium','iron','potassium','caffeine','magnesium','vitB12','vitE','vitK','vitB1','vitB2','vitB3','vitB6','folate','biotin','vitB5','phosphorus','iodine','zinc','selenium','copper','manganese','chromium','molybdenum','chloride'];
 const MICRO_META={
   fiber:{label:'Fiber',unit:'g',icon:'🌾',elId:'totFiber'},
   sugar:{label:'Sugar',unit:'g',icon:'🍬',elId:'totSugar'},
@@ -209,8 +209,32 @@ const MICRO_META={
   potassium:{label:'Potassium',unit:'mg',icon:'🍌',elId:'totPotassium'},
   caffeine:{label:'Caffeine',unit:'mg',icon:'☕',elId:'totCaffeine'},
   magnesium:{label:'Magnesium',unit:'mg',icon:'💪',elId:'totMagnesium'},
-  vitB12:{label:'Vit B12',unit:'mcg',icon:'⚡',elId:'totVitB12'}
+  vitB12:{label:'Vit B12',unit:'mcg',icon:'⚡',elId:'totVitB12'},
+  vitE:{label:'Vit E',unit:'mg',icon:'🌻',elId:'totVitE'},
+  vitK:{label:'Vit K',unit:'mcg',icon:'🥬',elId:'totVitK'},
+  vitB1:{label:'Vit B1 (Thiamin)',unit:'mg',icon:'🌰',elId:'totVitB1'},
+  vitB2:{label:'Vit B2 (Riboflavin)',unit:'mg',icon:'🥛',elId:'totVitB2'},
+  vitB3:{label:'Vit B3 (Niacin)',unit:'mg',icon:'🍗',elId:'totVitB3'},
+  vitB6:{label:'Vit B6',unit:'mg',icon:'🥔',elId:'totVitB6'},
+  folate:{label:'Folate',unit:'mcg',icon:'🥦',elId:'totFolate'},
+  biotin:{label:'Biotin',unit:'mcg',icon:'🥚',elId:'totBiotin'},
+  vitB5:{label:'Vit B5 (Pantothenic Acid)',unit:'mg',icon:'🍄',elId:'totVitB5'},
+  phosphorus:{label:'Phosphorus',unit:'mg',icon:'🐟',elId:'totPhosphorus'},
+  iodine:{label:'Iodine',unit:'mcg',icon:'🦐',elId:'totIodine'},
+  zinc:{label:'Zinc',unit:'mg',icon:'🦪',elId:'totZinc'},
+  selenium:{label:'Selenium',unit:'mcg',icon:'🥜',elId:'totSelenium'},
+  copper:{label:'Copper',unit:'mg',icon:'🍫',elId:'totCopper'},
+  manganese:{label:'Manganese',unit:'mg',icon:'🍚',elId:'totManganese'},
+  chromium:{label:'Chromium',unit:'mcg',icon:'🧄',elId:'totChromium'},
+  molybdenum:{label:'Molybdenum',unit:'mcg',icon:'🫘',elId:'totMolybdenum'},
+  chloride:{label:'Chloride',unit:'mg',icon:'🧃',elId:'totChloride'}
 };
+// Maps our MICRO_FIELDS names to Open Food Facts' nutrient taxonomy IDs
+// (world.openfoodfacts.org/data/taxonomies/nutrients.json), used by the
+// barcode lookup below. Verified against OFF's own declared per-nutrient
+// units -- every one of these already matches MICRO_META's unit, so no
+// conversion is needed except sodium, which OFF reports in grams.
+const OFF_NUTRIENT_KEY={fiber:'fiber',sugar:'sugars',sodium:'sodium',vitA:'vitamin-a',vitC:'vitamin-c',vitD:'vitamin-d',calcium:'calcium',iron:'iron',potassium:'potassium',caffeine:'caffeine',magnesium:'magnesium',vitB12:'vitamin-b12',vitE:'vitamin-e',vitK:'vitamin-k',vitB1:'vitamin-b1',vitB2:'vitamin-b2',vitB3:'vitamin-pp',vitB6:'vitamin-b6',folate:'folates',biotin:'biotin',vitB5:'pantothenic-acid',phosphorus:'phosphorus',iodine:'iodine',zinc:'zinc',selenium:'selenium',copper:'copper',manganese:'manganese',chromium:'chromium',molybdenum:'molybdenum',chloride:'chloride'};
 
 // Quick-add product database for the Sports Nutrition section: full current
 // GU Energy and SiS (Science in Sport) product lines (gels, chews, bars,
@@ -790,49 +814,46 @@ function aiSearchFood(){
   if(!key){alert('Please enter your AI key in Settings first.');return;}
   var resultsDiv=document.getElementById('aiFoodResults');
   if(resultsDiv){resultsDiv.style.display='block';resultsDiv.innerHTML='<div style="color:#666;font-size:0.82rem;padding:4px;">&#x23F3; Searching...</div>';}
+  // Built from MICRO_FIELDS/MICRO_META so every tracked micronutrient is
+  // requested automatically -- adding a nutrient to MICRO_META is enough
+  // to have this search path pick it up too, no separate list to maintain.
+  var microSchema=MICRO_FIELDS.map(function(f){return '"'+f+'": '+MICRO_META[f].label+' in '+MICRO_META[f].unit+' per serving as a plain number';}).join('\n- ');
   var prompt='Return nutrition facts for: '+q+'\n'
-    +'Format each food/serving as a single line: NAME | CALORIES cal | PROTEINg protein | FATg fat | CARBSg carbs | FIBERg fiber | SUGARg sugar | SODIUMmg sodium | VITAmcg vitA | VITCmg vitC | VITDmcg vitD | CALCIUMmg calcium | IRONmg iron | POTASSIUMmg potassium | MAGNESIUMmg magnesium | VITB12mcg vitB12\n'
-    +'Use your best nutritional knowledge for realistic values, including fiber, sugar, sodium, vitamins and minerals. Use 0 for a value only if it is genuinely negligible.\n'
-    +'Include 1-3 common serving sizes if relevant. Be concise. No extra text.';
+    +'Respond with ONLY a single JSON object -- no markdown, no code fences, no explanation, nothing else before or after. The JSON must be {"foods":[...]}  with 1 to 3 entries (one per common serving size, if relevant). Each entry must have these exact keys:\n'
+    +'- "name": the food name, including the serving size if relevant (for example "Banana, medium")\n'
+    +'- "servingLabel": the serving size as a short string (for example "1 medium (118g)")\n'
+    +'- "cal": Calories per serving as a plain number\n'
+    +'- "prot": Protein grams per serving as a plain number\n'
+    +'- "fat": Total Fat grams per serving as a plain number\n'
+    +'- "carbs": Total Carbohydrate grams per serving as a plain number\n'
+    +'- '+microSchema+'\n'
+    +'Use your best nutritional knowledge for realistic values, including every listed micronutrient -- do not skip any of them. All numeric values must be numbers, not strings. Use 0 only when a value is genuinely negligible or absent, never to mean unknown.';
   fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
     headers:{'x-api-key':key,'anthropic-version':'2023-06-01','content-type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
-    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:600,messages:[{role:'user',content:prompt}]})
+    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:2000,messages:[{role:'user',content:prompt}]})
   }).then(function(r){return r.json();}).then(function(data){
-    var text=(data.content&&data.content[0]&&data.content[0].text)||'';
+    if(data.error)throw new Error(data.error.message);
+    var text=(data.content&&data.content[0]&&data.content[0].text||'').trim();
     if(!text){if(resultsDiv)resultsDiv.innerHTML='<div style="color:#e74c3c;font-size:0.82rem;">No results.</div>';return;}
-    var lines=text.split('\n').map(function(l){return l.trim();}).filter(function(l){return l.includes('|');});
-    if(!lines.length){if(resultsDiv)resultsDiv.innerHTML='<div style="color:#e74c3c;font-size:0.82rem;">Could not parse results.</div>';return;}
+    var parsed;
+    try{parsed=JSON.parse(text);}catch(e){
+      var m=text.match(/\{[\s\S]*\}/);
+      if(m){try{parsed=JSON.parse(m[0]);}catch(e2){}}
+    }
+    var foods=(parsed&&parsed.foods)||[];
+    if(!foods.length){if(resultsDiv)resultsDiv.innerHTML='<div style="color:#e74c3c;font-size:0.82rem;">Could not parse results.</div>';return;}
     // Store parsed items in window cache to avoid onclick quoting issues
     window._aiFoodCache=[];
     var html='<div style="display:flex;flex-direction:column;gap:5px;">';
-    lines.forEach(function(line,idx){
-      var parts=line.split('|').map(function(p){return p.trim();});
-      var name=parts[0]||'';
-      var cal=0,prot=0,fat=0,carbs=0,fiber=0,sugar=0,sodium=0,vitA=0,vitC=0,vitD=0,calcium=0,iron=0,potassium=0,magnesium=0,vitB12=0;
-      parts.forEach(function(p){
-        var m;
-        if((m=p.match(/(\d+(?:\.\d+)?)\s*cal/i)))cal=parseFloat(m[1]);
-        else if((m=p.match(/(\d+(?:\.\d+)?)g?\s*protein/i)))prot=parseFloat(m[1]);
-        else if((m=p.match(/(\d+(?:\.\d+)?)g?\s*fat/i)))fat=parseFloat(m[1]);
-        else if((m=p.match(/(\d+(?:\.\d+)?)g?\s*carb/i)))carbs=parseFloat(m[1]);
-        else if((m=p.match(/(\d+(?:\.\d+)?)g?\s*fiber/i)))fiber=parseFloat(m[1]);
-        else if((m=p.match(/(\d+(?:\.\d+)?)g?\s*sugar/i)))sugar=parseFloat(m[1]);
-        else if((m=p.match(/(\d+(?:\.\d+)?)\s*mg?\s*sodium/i)))sodium=parseFloat(m[1]);
-        else if((m=p.match(/(\d+(?:\.\d+)?)\s*mcg?\s*vit\s*a/i)))vitA=parseFloat(m[1]);
-        else if((m=p.match(/(\d+(?:\.\d+)?)\s*mg?\s*vit\s*c/i)))vitC=parseFloat(m[1]);
-        else if((m=p.match(/(\d+(?:\.\d+)?)\s*mcg?\s*vit\s*d/i)))vitD=parseFloat(m[1]);
-        else if((m=p.match(/(\d+(?:\.\d+)?)\s*mg?\s*calcium/i)))calcium=parseFloat(m[1]);
-        else if((m=p.match(/(\d+(?:\.\d+)?)\s*mg?\s*iron/i)))iron=parseFloat(m[1]);
-        else if((m=p.match(/(\d+(?:\.\d+)?)\s*mg?\s*potassium/i)))potassium=parseFloat(m[1]);
-        else if((m=p.match(/(\d+(?:\.\d+)?)\s*mg?\s*magnesium/i)))magnesium=parseFloat(m[1]);
-        else if((m=p.match(/(\d+(?:\.\d+)?)\s*mcg?\s*vit\s*b\s*12/i)))vitB12=parseFloat(m[1]);
-      });
-      window._aiFoodCache.push({name:name,cal:cal,prot:prot,fat:fat,carbs:carbs,fiber:fiber,sugar:sugar,sodium:sodium,vitA:vitA,vitC:vitC,vitD:vitD,calcium:calcium,iron:iron,potassium:potassium,magnesium:magnesium,vitB12:vitB12});
-      var summary=[cal?cal+' cal':'',prot?prot+'g pro':'',fat?fat+'g fat':'',carbs?carbs+'g carb':'',fiber?fiber+'g fiber':'',sodium?sodium+'mg Na':''].filter(Boolean).join(' · ');
+    foods.forEach(function(f,idx){
+      var item={name:String(f.name||q),servingLabel:String(f.servingLabel||'1 serving'),cal:f.cal||0,prot:f.prot||0,fat:f.fat||0,carbs:f.carbs||0};
+      MICRO_FIELDS.forEach(function(mf){item[mf]=(f[mf]!==undefined&&f[mf]!==null&&f[mf]!==0)?f[mf]:0;});
+      window._aiFoodCache.push(item);
+      var summary=[item.cal?item.cal+' cal':'',item.prot?item.prot+'g pro':'',item.fat?item.fat+'g fat':'',item.carbs?item.carbs+'g carb':'',item.fiber?item.fiber+'g fiber':'',item.sodium?item.sodium+'mg Na':''].filter(Boolean).join(' · ');
       html+='<div style="display:flex;justify-content:space-between;align-items:center;background:#fff;border:1px solid #ddd;border-radius:7px;padding:6px 10px;gap:8px;">'
         +'<div style="flex:1;min-width:0;">'
-        +'<div style="font-weight:600;font-size:0.83rem;color:#222;">'+escHtml(name)+'</div>'
+        +'<div style="font-weight:600;font-size:0.83rem;color:#222;">'+escHtml(item.name)+'</div>'
         +(summary?'<div style="font-size:0.77rem;color:#666;">'+escHtml(summary)+'</div>':'')
         +'</div>'
         +'<button onclick="aiAddFoodByIndex('+idx+')" '
@@ -1803,7 +1824,8 @@ function lookupFoodBarcode(scannedCode){
   var fields='code,product_name,brands,serving_size,nutriments,ingredients_text,categories,image_front_small_url,image_front_url,image_url';
   fetch('https://world.openfoodfacts.org/api/v2/product/'+encodeURIComponent(code)+'.json?fields='+encodeURIComponent(fields)).then(function(response){if(!response.ok)throw new Error('Product lookup failed');return response.json();}).then(function(data){
     if(!data||data.status!==1||!data.product)throw new Error('This barcode was not found');var product=data.product,n=product.nutriments||{},hasServing=['energy-kcal','proteins','fat','carbohydrates'].some(function(key){return n[key+'_serving']!==undefined;});
-    var food={name:[product.product_name,product.brands].filter(Boolean).join(' — ')||'Barcode '+code,barcode:code,servingLabel:hasServing&&product.serving_size?'per '+product.serving_size:'per 100 g',cal:barcodeNutrient(n,'energy-kcal'),prot:barcodeNutrient(n,'proteins'),fat:barcodeNutrient(n,'fat'),carbs:barcodeNutrient(n,'carbohydrates'),fiber:barcodeNutrient(n,'fiber'),sugar:barcodeNutrient(n,'sugars'),sodium:(function(){var value=barcodeNutrient(n,'sodium');return value===null?null:Math.round(value*1000);})(),ingredientsText:product.ingredients_text||'',categoriesText:product.categories||'',imageUrl:product.image_front_small_url||product.image_front_url||product.image_url||'',source:'barcode'};
+    var food={name:[product.product_name,product.brands].filter(Boolean).join(' — ')||'Barcode '+code,barcode:code,servingLabel:hasServing&&product.serving_size?'per '+product.serving_size:'per 100 g',cal:barcodeNutrient(n,'energy-kcal'),prot:barcodeNutrient(n,'proteins'),fat:barcodeNutrient(n,'fat'),carbs:barcodeNutrient(n,'carbohydrates'),ingredientsText:product.ingredients_text||'',categoriesText:product.categories||'',imageUrl:product.image_front_small_url||product.image_front_url||product.image_url||'',source:'barcode'};
+    MICRO_FIELDS.forEach(function(f){var offKey=OFF_NUTRIENT_KEY[f];if(!offKey)return;var value=barcodeNutrient(n,offKey);if(f==='folate'&&value===null)value=barcodeNutrient(n,'vitamin-b9');if(f==='sodium'&&value!==null)value=Math.round(value*1000);food[f]=value;});
     inferFoodMacroSources(food);if(!food.sourceConfidence){food.sourceConfidence='Low';food.sourceMethod='Needs review';}
     closeBarcodeScanner();showPendingFood(food,'Barcode Product Found');
   }).catch(function(error){barcodeStatus(error.message+'. You can scan the nutrition label instead or enter the food manually.',true);});
@@ -1827,7 +1849,7 @@ function scanFoodLabel(ev){
         max_tokens:400,
         messages:[{role:'user',content:[
           {type:'image',source:{type:'base64',media_type:mtype,data:b64}},
-          {type:'text',text:'Read this nutrition information image carefully — it may be a photo of a food package label, or a screenshot from a nutrition app, recipe site, or restaurant menu. Extract the per-serving Nutrition Facts, any visible product or food name, and the complete visible ingredient list (leave ingredientsText empty if the image does not show one, such as most app/menu screenshots). Use the ingredients to classify the dominant source of ALL THREE macros for a runner: protein (lean/plant versus higher-fat/processed), carbohydrates (complex/fiber-rich versus simple/refined), and fat (unsaturated versus saturated/trans). Respond with ONLY a single JSON object — no markdown, no code fences, no explanation, nothing else before or after. The JSON must have these exact keys:\n- "name": the product or food name visible anywhere on the label/package (use "Scanned Food" if not visible)\n- "ingredientsText": the complete ingredient list exactly as visible (use an empty string if it is not visible; do not guess)\n- "proteinSource": use "support" for lean/plant, "limit" for higher-fat/processed, or "unknown" when not supported by visible evidence\n- "carbSource": use "support" for complex/fiber-rich, "limit" for simple/refined, or "unknown" when not supported by visible evidence\n- "fatSource": use "support" for unsaturated, "limit" for saturated/trans, or "unknown" when not supported by visible evidence\n- "cal": Calories per serving as a plain number\n- "prot": Protein grams per serving as a plain number\n- "fat": Total Fat grams per serving as a plain number\n- "carbs": Total Carbohydrate grams per serving as a plain number\n- "fiber": Dietary Fiber grams per serving as a plain number\n- "sugar": Total Sugars grams per serving as a plain number\n- "sodium": Sodium milligrams per serving as a plain number\n- "vitA": Vitamin A in mcg per serving as a plain number\n- "vitC": Vitamin C in mg per serving as a plain number\n- "vitD": Vitamin D in mcg per serving as a plain number\n- "calcium": Calcium in mg per serving as a plain number\n- "iron": Iron in mg per serving as a plain number\n- "potassium": Potassium in mg per serving as a plain number\n- "magnesium": Magnesium in mg per serving as a plain number\n- "vitB12": Vitamin B12 in mcg per serving as a plain number\n- "caffeine": Caffeine milligrams per serving as a plain number (use 0 for items with no caffeine, which is most foods)\nAll numeric values must be numbers, not strings. Use 0 if a numeric value cannot be read from the label. Never invent missing ingredients or classifications. Output the JSON object only.'}
+          {type:'text',text:'Read this nutrition information image carefully — it may be a photo of a food package label, or a screenshot from a nutrition app, recipe site, or restaurant menu. Extract the per-serving Nutrition Facts, any visible product or food name, and the complete visible ingredient list (leave ingredientsText empty if the image does not show one, such as most app/menu screenshots). Use the ingredients to classify the dominant source of ALL THREE macros for a runner: protein (lean/plant versus higher-fat/processed), carbohydrates (complex/fiber-rich versus simple/refined), and fat (unsaturated versus saturated/trans). Respond with ONLY a single JSON object — no markdown, no code fences, no explanation, nothing else before or after. The JSON must have these exact keys:\n- "name": the product or food name visible anywhere on the label/package (use "Scanned Food" if not visible)\n- "ingredientsText": the complete ingredient list exactly as visible (use an empty string if it is not visible; do not guess)\n- "proteinSource": use "support" for lean/plant, "limit" for higher-fat/processed, or "unknown" when not supported by visible evidence\n- "carbSource": use "support" for complex/fiber-rich, "limit" for simple/refined, or "unknown" when not supported by visible evidence\n- "fatSource": use "support" for unsaturated, "limit" for saturated/trans, or "unknown" when not supported by visible evidence\n- "cal": Calories per serving as a plain number\n- "prot": Protein grams per serving as a plain number\n- "fat": Total Fat grams per serving as a plain number\n- "carbs": Total Carbohydrate grams per serving as a plain number\n- "fiber": Dietary Fiber grams per serving as a plain number\n- "sugar": Total Sugars grams per serving as a plain number\n- "sodium": Sodium milligrams per serving as a plain number\n- "vitA": Vitamin A in mcg per serving as a plain number\n- "vitC": Vitamin C in mg per serving as a plain number\n- "vitD": Vitamin D in mcg per serving as a plain number\n- "calcium": Calcium in mg per serving as a plain number\n- "iron": Iron in mg per serving as a plain number\n- "potassium": Potassium in mg per serving as a plain number\n- "magnesium": Magnesium in mg per serving as a plain number\n- "vitB12": Vitamin B12 in mcg per serving as a plain number\n- "caffeine": Caffeine milligrams per serving as a plain number (use 0 for items with no caffeine, which is most foods)\n- "vitE": Vitamin E in mg per serving as a plain number\n- "vitK": Vitamin K in mcg per serving as a plain number\n- "vitB1": Vitamin B1 (Thiamin) in mg per serving as a plain number\n- "vitB2": Vitamin B2 (Riboflavin) in mg per serving as a plain number\n- "vitB3": Vitamin B3 (Niacin) in mg per serving as a plain number\n- "vitB6": Vitamin B6 in mg per serving as a plain number\n- "folate": Folate in mcg per serving as a plain number\n- "biotin": Biotin in mcg per serving as a plain number\n- "vitB5": Vitamin B5 (Pantothenic Acid) in mg per serving as a plain number\n- "phosphorus": Phosphorus in mg per serving as a plain number\n- "iodine": Iodine in mcg per serving as a plain number\n- "zinc": Zinc in mg per serving as a plain number\n- "selenium": Selenium in mcg per serving as a plain number\n- "copper": Copper in mg per serving as a plain number\n- "manganese": Manganese in mg per serving as a plain number\n- "chromium": Chromium in mcg per serving as a plain number\n- "molybdenum": Molybdenum in mcg per serving as a plain number\n- "chloride": Chloride in mg per serving as a plain number\nAll numeric values must be numbers, not strings. Use 0 if a numeric value cannot be read from the label. Never invent missing ingredients or classifications. Output the JSON object only.'}
           ,{type:'text',text:'Also include a string key named "servingLabel" containing the exact serving size printed on the label, including its unit (for example, "1 cup (240 mL)" or "30 g"). Use "1 serving" only when the serving size cannot be read.'}
         ]}]
       })
