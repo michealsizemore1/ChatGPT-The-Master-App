@@ -313,6 +313,66 @@ function enrichMealNutrients(mealIdx,btn){
   });
 }
 
+// Bulk versions: enrich every favorite, or every item across every saved
+// meal, in one tap instead of one button press per food. Same AI key, same
+// only-fill-what's-missing rule, just run one food at a time in sequence
+// (rather than in parallel) so a slow or rate-limited response doesn't pile
+// up a burst of simultaneous requests.
+function enrichAllFavorites(btn){
+  var favs=getFavorites();
+  var entries=favs.map(function(f){return {f:f,missing:missingNutrientFields(f)};}).filter(function(x){return x.missing.length;});
+  if(!entries.length){alert('Every favorite already has every tracked nutrient filled in.');return;}
+  if(!confirm('Enrich '+entries.length+' favorite'+(entries.length===1?'':'s')+' using AI? This runs one at a time and may take a little while.'))return;
+  if(btn)btn.disabled=true;
+  var orig=btn?btn.innerHTML:'';
+  var chain=Promise.resolve(),failed=0;
+  entries.forEach(function(entry,n){
+    chain=chain.then(function(){
+      if(btn)btn.innerHTML='\u23F3 Enriching '+(n+1)+'/'+entries.length+'\u2026';
+      return aiEstimateNutrients(entry.f.name,entry.f.servingLabel,entry.missing,entry.f.cal,entry.f.prot,entry.f.fat,entry.f.carbs).then(function(values){
+        entry.missing.forEach(function(k){entry.f[k]=values[k];});
+      }).catch(function(){failed++;});
+    });
+  });
+  chain.then(function(){
+    saveFavorites(favs);
+    renderFavsList();
+    alert('Enriched '+(entries.length-failed)+' of '+entries.length+' favorites.'+(failed?(' '+failed+' failed -- check your AI key/usage and try again.'):''));
+  }).catch(function(){
+    if(btn){btn.disabled=false;btn.innerHTML=orig;}
+  });
+}
+function enrichAllMeals(btn){
+  var meals=getSavedMeals();
+  var entries=[];
+  meals.forEach(function(m){
+    m.items.forEach(function(it){
+      var missing=missingNutrientFields(it);
+      if(missing.length)entries.push({it:it,missing:missing});
+    });
+  });
+  if(!entries.length){alert('Every saved meal already has every tracked nutrient filled in for all items.');return;}
+  if(!confirm('Enrich '+entries.length+' food item'+(entries.length===1?'':'s')+' across your saved meals using AI? This runs one at a time and may take a little while.'))return;
+  if(btn)btn.disabled=true;
+  var orig=btn?btn.innerHTML:'';
+  var chain=Promise.resolve(),failed=0;
+  entries.forEach(function(entry,n){
+    chain=chain.then(function(){
+      if(btn)btn.innerHTML='\u23F3 Enriching '+(n+1)+'/'+entries.length+'\u2026';
+      return aiEstimateNutrients(entry.it.name,entry.it.servingLabel,entry.missing,entry.it.cal,entry.it.prot,entry.it.fat,entry.it.carbs).then(function(values){
+        entry.missing.forEach(function(k){entry.it[k]=values[k];});
+      }).catch(function(){failed++;});
+    });
+  });
+  chain.then(function(){
+    saveSavedMeals(meals);
+    renderMealsList();
+    alert('Enriched '+(entries.length-failed)+' of '+entries.length+' items across your saved meals.'+(failed?(' '+failed+' failed -- check your AI key/usage and try again.'):''));
+  }).catch(function(){
+    if(btn){btn.disabled=false;btn.innerHTML=orig;}
+  });
+}
+
 // Quick-add product database for the Sports Nutrition section: full current
 // GU Energy and SiS (Science in Sport) product lines (gels, chews, bars,
 // drink mixes/electrolyte tabs, recovery drinks). Values are per labeled
@@ -1641,7 +1701,8 @@ function renderFavsList(){
   updateFavoriteFoodsCount(favs.length);
   var q=(document.getElementById('favSearch')||{value:''}).value.toLowerCase().trim();
   var filtered=q?favs.filter(function(f){return f.name.toLowerCase().includes(q);}):favs;filtered=applyFoodSort(filtered);
-  var photoHelp='<div style="font-size:.68rem;color:#64748b;margin:0 0 6px;">Use 📷 Take for the camera or 🖼 Choose for a picture already on your phone.</div><button onclick="rescanHealthyFoodsAndImages(this,\'favoriteRescanStatus\')" style="width:100%;margin:0 0 5px;background:#fff7ed;color:#9a3412;border:1px solid #fdba74;border-radius:6px;padding:7px;font-size:.74rem;font-weight:800;cursor:pointer;">↻ Rescan foods & barcode pictures</button><div id="favoriteRescanStatus" role="status" aria-live="polite" style="display:none;font-size:.7rem;font-weight:700;line-height:1.35;margin:0 2px 7px;"></div><button type="button" onclick="removeDuplicateFoodItems(this)" style="width:100%;margin:0 0 5px;background:#fff7ed;color:#9a3412;border:1px solid #fdba74;border-radius:6px;padding:7px;font-size:.74rem;font-weight:800;cursor:pointer;">🧹 Remove Duplicate Foods</button><div id="dedupeFoodStatus" role="status" aria-live="polite" style="display:none;font-size:.7rem;font-weight:700;line-height:1.35;margin:0 2px 7px;"></div>';
+  var favNeedCount=favs.filter(function(f){return missingNutrientFields(f).length>0;}).length;
+  var photoHelp='<div style="font-size:.68rem;color:#64748b;margin:0 0 6px;">Use 📷 Take for the camera or 🖼 Choose for a picture already on your phone.</div><button type="button" '+(favNeedCount?('onclick="enrichAllFavorites(this)"'):'disabled')+' style="width:100%;margin:0 0 5px;background:'+(favNeedCount?'#eef2ff':'#f1f5f9')+';color:'+(favNeedCount?'#4338ca':'#94a3b8')+';border:1px solid '+(favNeedCount?'#c7d2fe':'#e2e8f0')+';border-radius:6px;padding:7px;font-size:.74rem;font-weight:800;cursor:'+(favNeedCount?'pointer':'default')+';">🧪 Enrich All Favorites'+(favNeedCount?' ('+favNeedCount+' need it)':' (all complete)')+'</button>'+'<button onclick="rescanHealthyFoodsAndImages(this,\'favoriteRescanStatus\')" style="width:100%;margin:0 0 5px;background:#fff7ed;color:#9a3412;border:1px solid #fdba74;border-radius:6px;padding:7px;font-size:.74rem;font-weight:800;cursor:pointer;">↻ Rescan foods & barcode pictures</button><div id="favoriteRescanStatus" role="status" aria-live="polite" style="display:none;font-size:.7rem;font-weight:700;line-height:1.35;margin:0 2px 7px;"></div><button type="button" onclick="removeDuplicateFoodItems(this)" style="width:100%;margin:0 0 5px;background:#fff7ed;color:#9a3412;border:1px solid #fdba74;border-radius:6px;padding:7px;font-size:.74rem;font-weight:800;cursor:pointer;">🧹 Remove Duplicate Foods</button><div id="dedupeFoodStatus" role="status" aria-live="polite" style="display:none;font-size:.7rem;font-weight:700;line-height:1.35;margin:0 2px 7px;"></div>';
   if(!filtered.length){el.innerHTML=photoHelp+'<div style="font-size:0.8rem;color:#bbb;text-align:center;padding:12px;">No favorites yet. Add items from your food log with ⭐</div>';return;}
   var target=(document.getElementById('favTargetMeal')||{value:'breakfast'}).value;
   el.innerHTML=photoHelp+filtered.map(function(f,i){
@@ -1718,7 +1779,9 @@ function renderMealsList(){
   var el=document.getElementById('mealsList');if(!el)return;
   var meals=getSavedMeals();
   if(!meals.length){el.innerHTML='<div style="font-size:0.8rem;color:#bbb;text-align:center;padding:12px;">No saved meals yet. Log a full day of food then tap "Save Meal".</div>';return;}
-  el.innerHTML=meals.map(function(m,i){
+  var mealsNeedCount=0;meals.forEach(function(m){m.items.forEach(function(it){if(missingNutrientFields(it).length>0)mealsNeedCount++;});});
+  var bulkMealsBtn='<button type="button" '+(mealsNeedCount?('onclick="enrichAllMeals(this)"'):'disabled')+' style="width:100%;margin:0 0 8px;background:'+(mealsNeedCount?'#eef2ff':'#f1f5f9')+';color:'+(mealsNeedCount?'#4338ca':'#94a3b8')+';border:1px solid '+(mealsNeedCount?'#c7d2fe':'#e2e8f0')+';border-radius:6px;padding:7px;font-size:.74rem;font-weight:800;cursor:'+(mealsNeedCount?'pointer':'default')+';">🧪 Enrich All Saved Meals'+(mealsNeedCount?' ('+mealsNeedCount+' items need it)':' (all complete)')+'</button>';
+  el.innerHTML=bulkMealsBtn+meals.map(function(m,i){
     var cal=m.items.reduce(function(a,x){return a+(parseFloat(x.cal)||0);},0);
     var totalMissing=m.items.reduce(function(a,it){return a+missingNutrientFields(it).length;},0);
     var macros={prot:0,carbs:0,fat:0},micros={};
