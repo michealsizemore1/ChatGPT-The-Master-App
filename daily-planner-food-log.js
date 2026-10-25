@@ -278,6 +278,15 @@ function aiEstimateNutrients(name,servingLabel,fields,cal,prot,fat,carbs){
     return result;
   });
 }
+// Records which fields on a favorite/meal-item were filled in by the AI
+// Enrich feature (as opposed to coming from a real scan, AI Food Search, or
+// manual entry) so the UI can mark them as estimates rather than presenting
+// them as if they were sourced data. Merges with anything already marked.
+function markEstimated(obj,fields){
+  var set=obj.aiEstimatedFields||[];
+  fields.forEach(function(k){if(set.indexOf(k)===-1)set.push(k);});
+  obj.aiEstimatedFields=set;
+}
 function enrichFavoriteNutrients(idx,btn){
   var favs=getFavorites();var f=favs[idx];if(!f)return;
   var missing=missingNutrientFields(f);
@@ -285,6 +294,7 @@ function enrichFavoriteNutrients(idx,btn){
   var orig=btn?btn.innerHTML:'';if(btn){btn.disabled=true;btn.innerHTML='\u23F3';}
   aiEstimateNutrients(f.name,f.servingLabel,missing,f.cal,f.prot,f.fat,f.carbs).then(function(values){
     missing.forEach(function(k){f[k]=values[k];});
+    markEstimated(f,missing);
     saveFavorites(favs);
     renderFavsList();
   }).catch(function(err){
@@ -303,6 +313,7 @@ function enrichMealNutrients(mealIdx,btn){
       if(btn)btn.innerHTML='\u23F3 '+(n+1)+'/'+entries.length;
       return aiEstimateNutrients(entry.it.name,entry.it.servingLabel,entry.missing,entry.it.cal,entry.it.prot,entry.it.fat,entry.it.carbs).then(function(values){
         entry.missing.forEach(function(k){entry.it[k]=values[k];});
+        markEstimated(entry.it,entry.missing);
       }).catch(function(){failed++;});
     });
   });
@@ -331,6 +342,7 @@ function enrichAllFavorites(btn){
       if(btn)btn.innerHTML='\u23F3 Enriching '+(n+1)+'/'+entries.length+'\u2026';
       return aiEstimateNutrients(entry.f.name,entry.f.servingLabel,entry.missing,entry.f.cal,entry.f.prot,entry.f.fat,entry.f.carbs).then(function(values){
         entry.missing.forEach(function(k){entry.f[k]=values[k];});
+        markEstimated(entry.f,entry.missing);
       }).catch(function(){failed++;});
     });
   });
@@ -361,6 +373,7 @@ function enrichAllMeals(btn){
       if(btn)btn.innerHTML='\u23F3 Enriching '+(n+1)+'/'+entries.length+'\u2026';
       return aiEstimateNutrients(entry.it.name,entry.it.servingLabel,entry.missing,entry.it.cal,entry.it.prot,entry.it.fat,entry.it.carbs).then(function(values){
         entry.missing.forEach(function(k){entry.it[k]=values[k];});
+        markEstimated(entry.it,entry.missing);
       }).catch(function(){failed++;});
     });
   });
@@ -1713,6 +1726,7 @@ function renderFavsList(){
         +foodThumbnailHtml(f,'favorite',origIdx)+'<div style="flex:1;min-width:0;">'
           +'<div style="font-weight:600;">'+escHtml(f.name)+'</div>'
           +'<div style="color:#888;font-size:0.75rem;">'+(f.cal?'🔥'+f.cal+' ':'')+''+(f.prot?'🥩'+f.prot+'g ':'')+''+(f.carbs?'🍞'+f.carbs+'g ':'')+''+(f.fat?'🥑'+f.fat+'g':'')+'</div>'
+          +((f.aiEstimatedFields&&f.aiEstimatedFields.length)?('<div style="color:#4338ca;font-size:0.66rem;font-weight:700;margin-top:1px;" title="These values were estimated by AI, not pulled from a verified source">✨ '+f.aiEstimatedFields.length+' AI-estimated value'+(f.aiEstimatedFields.length===1?'':'s')+'</div>'):'')
         +'</div>'
         +'<button onclick="loadFavoriteItem('+origIdx+')" style="background:#e67e22;color:#fff;border:none;border-radius:5px;padding:4px 9px;font-size:0.78rem;cursor:pointer;">+ Add</button>'
         +'<button '+(missingCount?('onclick="enrichFavoriteNutrients('+origIdx+',this)"'):'disabled')+' title="'+(missingCount?('Fill in '+missingCount+' missing nutrient value'+(missingCount===1?'':'s')+' using AI'):'All tracked nutrients are filled in')+'" style="background:'+(missingCount?'#eef2ff':'#f1f5f9')+';color:'+(missingCount?'#4338ca':'#94a3b8')+';border:1px solid '+(missingCount?'#c7d2fe':'#e2e8f0')+';border-radius:5px;padding:4px 7px;font-size:0.72rem;cursor:'+(missingCount?'pointer':'default')+';white-space:nowrap;">🧪'+(missingCount?' '+missingCount:'')+'</button>'
@@ -1729,6 +1743,7 @@ function loadFavoriteItem(idx){
   if(!window._foodLog)window._foodLog=[];
   var favItem={id:'f'+Date.now(),meal:target,name:f.name,cal:f.cal,prot:f.prot,fat:f.fat,carbs:f.carbs,servingLabel:f.servingLabel||'1 serving',servings:parseFloat(f.servings)||1,proteinSource:f.proteinSource||'',carbSource:f.carbSource||'',fatSource:f.fatSource||'',imageUrl:f.imageUrl||'',imageData:f.imageData||''};
   MICRO_FIELDS.forEach(function(fld){favItem[fld]=f[fld]!=null?f[fld]:null;});
+  if(f.aiEstimatedFields&&f.aiEstimatedFields.length)favItem.aiEstimatedFields=f.aiEstimatedFields.slice();
   window._foodLog.push(favItem);
   _setMealOpen(target,true);
   renderFoodItems();save();
@@ -1784,6 +1799,8 @@ function renderMealsList(){
   el.innerHTML=bulkMealsBtn+meals.map(function(m,i){
     var cal=m.items.reduce(function(a,x){return a+(parseFloat(x.cal)||0);},0);
     var totalMissing=m.items.reduce(function(a,it){return a+missingNutrientFields(it).length;},0);
+    var mealEstCount=m.items.reduce(function(a,it){return a+((it.aiEstimatedFields&&it.aiEstimatedFields.length)||0);},0);
+    var estimatedFieldSet={};m.items.forEach(function(it){(it.aiEstimatedFields||[]).forEach(function(f){estimatedFieldSet[f]=true;});});
     var macros={prot:0,carbs:0,fat:0},micros={};
     MICRO_FIELDS.forEach(function(field){micros[field]=0;});
     m.items.forEach(function(item){
@@ -1796,14 +1813,14 @@ function renderMealsList(){
       +[['Calories',Math.round(cal),'cal'],['Protein',Math.round(macros.prot*10)/10,'g'],['Carbs',Math.round(macros.carbs*10)/10,'g'],['Fat',Math.round(macros.fat*10)/10,'g']].map(function(n){return '<div style="background:#fff7e8;border-radius:5px;padding:4px 2px;text-align:center;"><strong style="display:block;font-size:0.76rem;color:#7a4b00;">'+n[1]+' '+n[2]+'</strong><span style="font-size:0.64rem;color:#777;">'+n[0]+'</span></div>';}).join('')
       +'</div>';
     var microHtml='<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;margin:0 0 6px;">'
-      +MICRO_FIELDS.map(function(field){var meta=MICRO_META[field],value=Math.round(micros[field]*10)/10;return '<div style="background:#f7faf7;border-radius:4px;padding:3px 4px;font-size:0.65rem;color:#526052;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><span>'+meta.label+'</span> <strong>'+(value||'—')+(value?' '+meta.unit:'')+'</strong></div>';}).join('')
+      +MICRO_FIELDS.map(function(field){var meta=MICRO_META[field],value=Math.round(micros[field]*10)/10,est=estimatedFieldSet[field]&&value;return '<div style="background:#f7faf7;border-radius:4px;padding:3px 4px;font-size:0.65rem;color:#526052;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><span>'+meta.label+'</span> <strong>'+(value||'—')+(value?' '+meta.unit:'')+'</strong>'+(est?' <span style="color:#4338ca;" title="Includes an AI-estimated value, not pulled from a verified source">✨</span>':'')+'</div>';}).join('')
       +'</div>';
     return '<div style="padding:6px 0;border-bottom:1px solid #f5f5f5;">'
       +'<div style="display:flex;align-items:center;gap:6px;">'
         +'<div style="flex:1;font-weight:600;font-size:0.85rem;">'+escHtml(m.name)+'</div>'
         +'<button onclick="deleteMeal('+i+')" style="background:none;border:1px solid #f5c6cb;border-radius:4px;cursor:pointer;font-size:0.72rem;padding:2px 5px;color:#e74c3c;">✕</button>'
       +'</div>'
-      +'<div style="font-size:0.75rem;color:#888;margin-bottom:4px;">'+m.items.length+' items'+(cal?' · ~'+Math.round(cal)+' cal':'')+'</div>'
+      +'<div style="font-size:0.75rem;color:#888;margin-bottom:4px;">'+m.items.length+' items'+(cal?' · ~'+Math.round(cal)+' cal':'')+(mealEstCount?' · <span style="color:#4338ca;font-weight:700;" title="These values were estimated by AI, not pulled from a verified source">✨ '+mealEstCount+' AI-estimated value'+(mealEstCount===1?'':'s')+'</span>':'')+'</div>'
       +macroHtml+microHtml
       +'<div style="display:flex;gap:4px;align-items:center;">'
         +'<select id="mealTarget_'+i+'" style="flex:1;border:1px solid #e9c87b;border-radius:5px;padding:3px 5px;font-size:0.75rem;">'
@@ -1830,6 +1847,7 @@ function loadMeal(idx){
   m.items.forEach(function(it){
     var loadedItem={id:'f'+Date.now()+'_'+Math.random().toString(36).slice(2,5),meal:target,name:it.name,cal:it.cal,prot:it.prot,fat:it.fat,carbs:it.carbs,servingLabel:it.servingLabel||'1 serving',servings:parseFloat(it.servings)||1,proteinSource:it.proteinSource||'',carbSource:it.carbSource||'',fatSource:it.fatSource||'',imageUrl:it.imageUrl||'',imageData:it.imageData||''};
     MICRO_FIELDS.forEach(function(f){loadedItem[f]=it[f]!=null?it[f]:null;});
+    if(it.aiEstimatedFields&&it.aiEstimatedFields.length)loadedItem.aiEstimatedFields=it.aiEstimatedFields.slice();
     window._foodLog.push(loadedItem);
   });
   _setMealOpen(target,true);
