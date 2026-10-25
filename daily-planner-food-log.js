@@ -236,26 +236,34 @@ const MICRO_META={
 // conversion is needed except sodium, which OFF reports in grams.
 const OFF_NUTRIENT_KEY={fiber:'fiber',sugar:'sugars',sodium:'sodium',vitA:'vitamin-a',vitC:'vitamin-c',vitD:'vitamin-d',calcium:'calcium',iron:'iron',potassium:'potassium',caffeine:'caffeine',magnesium:'magnesium',vitB12:'vitamin-b12',vitE:'vitamin-e',vitK:'vitamin-k',vitB1:'vitamin-b1',vitB2:'vitamin-b2',vitB3:'vitamin-pp',vitB6:'vitamin-b6',folate:'folates',biotin:'biotin',vitB5:'pantothenic-acid',phosphorus:'phosphorus',iodine:'iodine',zinc:'zinc',selenium:'selenium',copper:'copper',manganese:'manganese',chromium:'chromium',molybdenum:'molybdenum',chloride:'chloride'};
 
-// ── AI micronutrient enrichment for already-saved favorites/meals ──
-// Lets the user backfill the newer micronutrient fields (or any missing
-// field) on foods that were saved before those fields existed, without
-// re-scanning or re-adding them. Only ever fills fields that are currently
-// null/undefined -- never touches a field that already has a real value,
-// including an intentional 0.
-function missingMicroFields(item){
-  return MICRO_FIELDS.filter(function(f){return item[f]==null;});
+// ── AI nutrient enrichment for already-saved favorites/meals ──
+// Lets the user backfill missing nutrient fields -- macros (calories,
+// protein, fat, carbs) AND micronutrients -- on foods that were saved
+// before those fields existed or were left blank, without re-scanning or
+// re-adding them. Only ever fills fields that are currently null/undefined
+// -- never touches a field that already has a real value, including an
+// intentional 0. The AI is explicitly told to use its real nutritional
+// knowledge and only report 0 when a value is genuinely negligible or
+// absent for that specific food, never to mean "I don't know" -- so a
+// micronutrient only gets filled in with a real estimate, not a guess
+// fabricated just to fill the field.
+var MACRO_META={cal:{label:'Calories',unit:''},prot:{label:'Protein',unit:'g'},fat:{label:'Fat',unit:'g'},carbs:{label:'Carbs',unit:'g'}};
+var MACRO_FIELDS=['cal','prot','fat','carbs'];
+function nutrientMeta(f){return MACRO_META[f]||MICRO_META[f];}
+function missingNutrientFields(item){
+  return MACRO_FIELDS.concat(MICRO_FIELDS).filter(function(f){return item[f]==null;});
 }
-function aiEstimateMicros(name,servingLabel,fields,cal,prot,fat,carbs){
+function aiEstimateNutrients(name,servingLabel,fields,cal,prot,fat,carbs){
   if(!fields||!fields.length)return Promise.resolve({});
   var key=journalAIKey();
   if(!key)return Promise.reject(new Error('Add your Anthropic API key in Settings first.'));
-  var schema=fields.map(function(f){return '"'+f+'": '+MICRO_META[f].label+' in '+MICRO_META[f].unit+' per serving as a plain number';}).join('\n- ');
+  var schema=fields.map(function(f){var meta=nutrientMeta(f);return '"'+f+'": '+meta.label+(meta.unit?' in '+meta.unit:'')+' per serving as a plain number';}).join('\n- ');
   var refs=[cal?Math.round(cal)+' calories':'',prot?prot+'g protein':'',fat?fat+'g fat':'',carbs?carbs+'g carbs':''].filter(Boolean).join(', ');
   var prompt='Estimate nutrition values for this specific food: '+name+(servingLabel?' ('+servingLabel+')':'')+'.\n'
     +(refs?'For reference, this serving has about '+refs+'.\n':'')
     +'Respond with ONLY a single JSON object -- no markdown, no code fences, no explanation, nothing else before or after. The JSON must have these exact keys:\n'
     +'- '+schema+'\n'
-    +'Use your best nutritional knowledge for realistic values. All numeric values must be numbers, not strings. Use 0 only when a value is genuinely negligible or absent, never to mean unknown.';
+    +'Use your best nutritional knowledge for realistic values specific to this food. All numeric values must be numbers, not strings. Use 0 only when a value is genuinely negligible or absent for this food, never to mean unknown.';
   return fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
     headers:{'x-api-key':key,'anthropic-version':'2023-06-01','content-type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
@@ -272,10 +280,10 @@ function aiEstimateMicros(name,servingLabel,fields,cal,prot,fat,carbs){
 }
 function enrichFavoriteNutrients(idx,btn){
   var favs=getFavorites();var f=favs[idx];if(!f)return;
-  var missing=missingMicroFields(f);
+  var missing=missingNutrientFields(f);
   if(!missing.length){alert('"'+f.name+'" already has every tracked nutrient filled in.');return;}
   var orig=btn?btn.innerHTML:'';if(btn){btn.disabled=true;btn.innerHTML='\u23F3';}
-  aiEstimateMicros(f.name,f.servingLabel,missing,f.cal,f.prot,f.fat,f.carbs).then(function(values){
+  aiEstimateNutrients(f.name,f.servingLabel,missing,f.cal,f.prot,f.fat,f.carbs).then(function(values){
     missing.forEach(function(k){f[k]=values[k];});
     saveFavorites(favs);
     renderFavsList();
@@ -286,14 +294,14 @@ function enrichFavoriteNutrients(idx,btn){
 }
 function enrichMealNutrients(mealIdx,btn){
   var meals=getSavedMeals();var m=meals[mealIdx];if(!m)return;
-  var entries=m.items.map(function(it){return {it:it,missing:missingMicroFields(it)};}).filter(function(x){return x.missing.length;});
+  var entries=m.items.map(function(it){return {it:it,missing:missingNutrientFields(it)};}).filter(function(x){return x.missing.length;});
   if(!entries.length){alert('"'+m.name+'" already has every tracked nutrient filled in for all items.');return;}
   if(btn)btn.disabled=true;
   var chain=Promise.resolve(),failed=0;
   entries.forEach(function(entry,n){
     chain=chain.then(function(){
       if(btn)btn.innerHTML='\u23F3 '+(n+1)+'/'+entries.length;
-      return aiEstimateMicros(entry.it.name,entry.it.servingLabel,entry.missing,entry.it.cal,entry.it.prot,entry.it.fat,entry.it.carbs).then(function(values){
+      return aiEstimateNutrients(entry.it.name,entry.it.servingLabel,entry.missing,entry.it.cal,entry.it.prot,entry.it.fat,entry.it.carbs).then(function(values){
         entry.missing.forEach(function(k){entry.it[k]=values[k];});
       }).catch(function(){failed++;});
     });
@@ -1638,7 +1646,7 @@ function renderFavsList(){
   var target=(document.getElementById('favTargetMeal')||{value:'breakfast'}).value;
   el.innerHTML=photoHelp+filtered.map(function(f,i){
     var origIdx=favs.indexOf(f);
-    var missingCount=missingMicroFields(f).length;
+    var missingCount=missingNutrientFields(f).length;
     return '<div style="padding:5px 0;border-bottom:1px solid #f5f5f5;font-size:0.82rem;">'
       +'<div style="display:flex;align-items:center;gap:6px;">'
         +foodThumbnailHtml(f,'favorite',origIdx)+'<div style="flex:1;min-width:0;">'
@@ -1712,7 +1720,7 @@ function renderMealsList(){
   if(!meals.length){el.innerHTML='<div style="font-size:0.8rem;color:#bbb;text-align:center;padding:12px;">No saved meals yet. Log a full day of food then tap "Save Meal".</div>';return;}
   el.innerHTML=meals.map(function(m,i){
     var cal=m.items.reduce(function(a,x){return a+(parseFloat(x.cal)||0);},0);
-    var totalMissing=m.items.reduce(function(a,it){return a+missingMicroFields(it).length;},0);
+    var totalMissing=m.items.reduce(function(a,it){return a+missingNutrientFields(it).length;},0);
     var macros={prot:0,carbs:0,fat:0},micros={};
     MICRO_FIELDS.forEach(function(field){micros[field]=0;});
     m.items.forEach(function(item){
