@@ -142,7 +142,7 @@ function renderPersonalMacroMeals(){
   var matches=buildPersonalMacroMeals();
   window._personalMacroMeals=matches;
   if(!matches.length){
-    wrap.innerHTML='<div style="font-size:.76rem;color:#78716c;padding:2px 0 14px;">No close matches yet — log a few foods or star some as Favorites (⭐) and this section will build 20/60/20 combinations from your own foods automatically.</div>';
+    wrap.innerHTML='<div style="font-size:.76rem;color:#78716c;padding:2px 0 14px;">No close matches yet — log a few foods or star some into your Food Database (⭐) and this section will build 20/60/20 combinations from your own foods automatically.</div>';
     return;
   }
   var mealOptions=MEALS.map(function(m){return '<option value="'+m+'">'+(MEAL_LABELS[m]||m).replace(/^[^\w]+/,'')+'</option>';}).join('');
@@ -359,8 +359,8 @@ function enrichMealNutrients(mealIdx,btn){
 function enrichAllFavorites(btn){
   var favs=getFavorites();
   var entries=favs.map(function(f){return {f:f,missing:enrichableFields(f)};}).filter(function(x){return x.missing.length;});
-  if(!entries.length){alert('Nothing to enrich -- every favorite is either complete or marked as a restaurant food.');return;}
-  if(!confirm('Enrich '+entries.length+' favorite'+(entries.length===1?'':'s')+' using AI? This runs one at a time and may take a little while.'))return;
+  if(!entries.length){alert('Nothing to enrich -- everything in your Food Database is either complete or marked as a restaurant food.');return;}
+  if(!confirm('Enrich '+entries.length+' food'+(entries.length===1?'':'s')+' using AI? This runs one at a time and may take a little while.'))return;
   if(btn)btn.disabled=true;
   var orig=btn?btn.innerHTML:'';
   var chain=Promise.resolve(),failed=0;
@@ -376,7 +376,7 @@ function enrichAllFavorites(btn){
   chain.then(function(){
     saveFavorites(favs);
     renderFavsList();
-    alert('Enriched '+(entries.length-failed)+' of '+entries.length+' favorites.'+(failed?(' '+failed+' failed -- check your AI key/usage and try again.'):''));
+    alert('Enriched '+(entries.length-failed)+' of '+entries.length+' foods.'+(failed?(' '+failed+' failed -- check your AI key/usage and try again.'):''));
   }).catch(function(){
     if(btn){btn.disabled=false;btn.innerHTML=orig;}
   });
@@ -430,9 +430,9 @@ function undoFavoriteEstimate(idx,btn){
 function undoAllFavoritesEstimates(btn){
   var favs=getFavorites();
   var affected=favs.filter(function(f){return (f.aiEstimatedFields||[]).length>0;});
-  if(!affected.length){alert('No AI-estimated values to undo across your favorites.');return;}
+  if(!affected.length){alert('No AI-estimated values to undo across your Food Database.');return;}
   var total=affected.reduce(function(a,f){return a+f.aiEstimatedFields.length;},0);
-  if(!confirm('Remove '+total+' AI-estimated value'+(total===1?'':'s')+' across '+affected.length+' favorite'+(affected.length===1?'':'s')+'? This cannot be undone.'))return;
+  if(!confirm('Remove '+total+' AI-estimated value'+(total===1?'':'s')+' across '+affected.length+' food'+(affected.length===1?'':'s')+'? This cannot be undone.'))return;
   affected.forEach(function(f){
     f.aiEstimatedFields.forEach(function(k){f[k]=null;});
     f.aiEstimatedFields=[];
@@ -883,7 +883,7 @@ function renderFoodItems(){
         nameInp.onchange=(function(id){return function(){updateFoodField(id,'name',this.value);};})(it.id);
 
         var favBtn=document.createElement('button');
-        favBtn.title='Favorite'; favBtn.textContent='⭐';
+        favBtn.title='Save to Food Database'; favBtn.textContent='⭐';
         favBtn.style.cssText='background:'+(isFavItem?'#f39c12':'#ddd')+';color:#fff;border:none;border-radius:5px;width:26px;height:26px;cursor:pointer;font-size:0.78rem;flex-shrink:0;';
         favBtn.onclick=(function(id){return function(){saveFoodAsFavorite(id);};})(it.id);
 
@@ -1283,7 +1283,7 @@ function backfillSavedFoodBarcodeImages(skipRender){
 function rescanHealthyFoodsAndImages(button,statusId){
   statusId=statusId||'healthyRescanStatus';
   if(button){button.disabled=true;button.textContent='⏳ Scanning saved foods and pictures…';button.style.opacity='.72';}
-  var status=document.getElementById(statusId);if(status){status.style.display='block';status.style.color='#475569';status.textContent='Checking every saved Nutrition day, Favorite, and available barcode picture…';}
+  var status=document.getElementById(statusId);if(status){status.style.display='block';status.style.color='#475569';status.textContent='Checking every saved Nutrition day, Food Database entry, and available barcode picture…';}
   window._healthyFoodsImported=false;importHealthyFoodsFromSavedNutrition(true);
   backfillSavedFoodBarcodeImages(true).then(function(imagesFound){
     renderHealthyFoodsList();renderFavsList();var done=document.getElementById(statusId),count=getHealthyFoods().length;if(done){done.style.display='block';done.style.color='#166534';done.textContent='✓ Rescan complete: '+count+' healthy food'+(count===1?'':'s')+' found · '+imagesFound+' barcode picture'+(imagesFound===1?'':'s')+' added.';}
@@ -1320,7 +1320,7 @@ function removeDuplicateFoodItems(button,statusId){
     status.style.color=total?'#166534':'#475569';
     var parts=[];
     if(removedToday)parts.push(removedToday+' from the food log');
-    if(removedFavs)parts.push(removedFavs+' from Favorites');
+    if(removedFavs)parts.push(removedFavs+' from your Food Database');
     status.textContent=total?('✓ Removed '+total+' duplicate'+(total===1?'':'s')+' - '+parts.join(', ')+'.'):'No duplicate foods found on this device - everything already looks unique.';
   }
 }
@@ -1626,17 +1626,17 @@ function saveFoodAsFavorite(itemId){
   if(!item){alert('Item not found.');return;}
   var favs=getFavorites();
   var exists=favs.some(function(f){return f.name.toLowerCase()===item.name.toLowerCase();});
-  if(exists){if(!confirm('"'+item.name+'" is already in favorites. Add again?'))return;}
+  if(exists){if(!confirm('"'+item.name+'" is already in your Food Database. Add again?'))return;}
   var fav={name:item.name,cal:item.cal,prot:item.prot,fat:item.fat,carbs:item.carbs,servingLabel:item.servingLabel||'1 serving',servings:parseFloat(item.servings)||1,proteinSource:item.proteinSource||'',carbSource:item.carbSource||'',fatSource:item.fatSource||'',barcode:item.barcode||'',imageUrl:item.imageUrl||'',imageData:item.imageData||''};
   MICRO_FIELDS.forEach(function(f){fav[f]=item[f]!=null?item[f]:null;});
   fav.restaurant=isRestaurantFood(item);
   favs.push(fav);saveFavorites(favs);
-  alert('⭐ "'+item.name+'" saved to favorites!');
+  alert('⭐ "'+item.name+'" saved to your Food Database!');
   renderFavsList();
 }
 
 function addFavorite(){
-  var name=prompt('Favorite food name:','');if(!name||!name.trim())return;
+  var name=prompt('Food name:','');if(!name||!name.trim())return;
   var cal=prompt('Calories:','');var prot=prompt('Protein g:','');
   var fat=prompt('Fat g:','');var carbs=prompt('Carbs g:','');
   var favs=getFavorites();
@@ -1804,7 +1804,7 @@ function renderFavsList(){
   var favNeedCount=favs.filter(function(f){return enrichableFields(f).length>0;}).length;
   var favEstCount=favs.filter(function(f){return (f.aiEstimatedFields||[]).length>0;}).length;
   var photoHelp='<div style="font-size:.68rem;color:#64748b;margin:0 0 6px;">Use 📷 Take for the camera or 🖼 Choose for a picture already on your phone.</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin:0 0 6px;"><button type="button" '+(favNeedCount?('onclick="enrichAllFavorites(this)"'):'disabled')+' style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:54px;border-radius:8px;font-weight:800;text-align:center;line-height:1.15;background:'+(favNeedCount?'#eef2ff':'#f1f5f9')+';color:'+(favNeedCount?'#4338ca':'#94a3b8')+';border:1px solid '+(favNeedCount?'#c7d2fe':'#e2e8f0')+';cursor:'+(favNeedCount?'pointer':'default')+';"><span style="font-size:1.05rem;">🧪</span><span style="font-size:.66rem;">Enrich All</span><span style="font-size:.58rem;font-weight:700;opacity:.85;">'+(favNeedCount?'('+favNeedCount+' need it)':'(all complete)')+'</span></button><button type="button" '+(favEstCount?('onclick="undoAllFavoritesEstimates(this)"'):'disabled')+' style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:54px;border-radius:8px;font-weight:800;text-align:center;line-height:1.15;background:'+(favEstCount?'#fff1f2':'#f1f5f9')+';color:'+(favEstCount?'#be123c':'#94a3b8')+';border:1px solid '+(favEstCount?'#fecdd3':'#e2e8f0')+';cursor:'+(favEstCount?'pointer':'default')+';"><span style="font-size:1.05rem;">↩️</span><span style="font-size:.66rem;">Undo All</span><span style="font-size:.58rem;font-weight:700;opacity:.85;">'+(favEstCount?'('+favEstCount+' food'+(favEstCount===1?'':'s')+')':'(none yet)')+'</span></button><button type="button" onclick="rescanHealthyFoodsAndImages(this,\'favoriteRescanStatus\')" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:54px;border-radius:8px;font-weight:800;text-align:center;line-height:1.15;background:#fff7ed;color:#9a3412;border:1px solid #fdba74;cursor:pointer;"><span style="font-size:1.05rem;">↻</span><span style="font-size:.66rem;">Rescan Foods</span></button><button type="button" onclick="removeDuplicateFoodItems(this)" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:54px;border-radius:8px;font-weight:800;text-align:center;line-height:1.15;background:#fff7ed;color:#9a3412;border:1px solid #fdba74;cursor:pointer;"><span style="font-size:1.05rem;">🧹</span><span style="font-size:.66rem;">Remove Dupes</span></button></div><div id="favoriteRescanStatus" role="status" aria-live="polite" style="display:none;font-size:.7rem;font-weight:700;line-height:1.35;margin:0 2px 7px;"></div><div id="dedupeFoodStatus" role="status" aria-live="polite" style="display:none;font-size:.7rem;font-weight:700;line-height:1.35;margin:0 2px 7px;"></div>';
-  if(!filtered.length){el.innerHTML=photoHelp+'<div style="font-size:0.8rem;color:#bbb;text-align:center;padding:12px;">No favorites yet. Add items from your food log with ⭐</div>';return;}
+  if(!filtered.length){el.innerHTML=photoHelp+'<div style="font-size:0.8rem;color:#bbb;text-align:center;padding:12px;">Nothing in your Food Database yet. Add items from your food log with ⭐</div>';return;}
   var target=(document.getElementById('favTargetMeal')||{value:'breakfast'}).value;
   el.innerHTML=photoHelp+filtered.map(function(f,i){
     var origIdx=favs.indexOf(f);
