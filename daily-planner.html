@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-10-15-103">
+<meta name="app-build" content="2026-10-15-104">
 <script src="theme-switcher.js?v=2026-10-21-1"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#ff6b00">
@@ -632,6 +632,36 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;paddi
 .meal-header>.meal-right{display:flex;align-items:center;gap:5px;flex-shrink:0;}
 .meal-subtotal{font-size:0.72rem;color:#888;white-space:nowrap;}
 .meal-chevron{font-size:0.8rem;color:#aaa;transition:transform .2s;min-width:12px;}
+
+/* ── Halloween section colors (differentiates each meal section in the Nutrition tab) ── */
+.meal-section[data-meal="breakfast"]{border-left-color:#e67e22;}
+.meal-section[data-meal="breakfast"] .meal-header{background:#fff6ea;}
+.meal-section[data-meal="breakfast"] .meal-header:hover{background:#ffe9cc;}
+.meal-section[data-meal="breakfast"] .meal-add-btn{background:#e67e22;}
+.meal-section[data-meal="lunch"]{border-left-color:#16a34a;}
+.meal-section[data-meal="lunch"] .meal-header{background:#eefdf3;}
+.meal-section[data-meal="lunch"] .meal-header:hover{background:#d7f7e3;}
+.meal-section[data-meal="lunch"] .meal-add-btn{background:#16a34a;}
+.meal-section[data-meal="dinner"]{border-left-color:#7c3aed;}
+.meal-section[data-meal="dinner"] .meal-header{background:#f6f1ff;}
+.meal-section[data-meal="dinner"] .meal-header:hover{background:#ece0ff;}
+.meal-section[data-meal="dinner"] .meal-add-btn{background:#7c3aed;}
+.meal-section[data-meal="snack"]{border-left-color:#b91c1c;}
+.meal-section[data-meal="snack"] .meal-header{background:#fef2f2;}
+.meal-section[data-meal="snack"] .meal-header:hover{background:#fde0e0;}
+.meal-section[data-meal="snack"] .meal-add-btn{background:#b91c1c;}
+.meal-section[data-meal="liquids"]{border-left-color:#0d9488;}
+.meal-section[data-meal="liquids"] .meal-header{background:#effcfa;}
+.meal-section[data-meal="liquids"] .meal-header:hover{background:#d3f5ef;}
+.meal-section[data-meal="liquids"] .meal-add-btn{background:#0d9488;}
+.meal-section[data-meal="sports"]{border-left-color:#d97706;}
+.meal-section[data-meal="sports"] .meal-header{background:#fff8ec;}
+.meal-section[data-meal="sports"] .meal-header:hover{background:#ffecc7;}
+.meal-section[data-meal="sports"] .meal-add-btn{background:#d97706;}
+.meal-section[data-meal="supplements"]{border-left-color:#3f3f46;}
+.meal-section[data-meal="supplements"] .meal-header{background:#f5f5f6;}
+.meal-section[data-meal="supplements"] .meal-header:hover{background:#e4e4e7;}
+.meal-section[data-meal="supplements"] .meal-add-btn{background:#3f3f46;}
 .meal-chevron.open{transform:rotate(90deg);}
 /* Meditation Tab */
 .medit-preset{background:#f3f4f6;border:1px solid #d1d5db;border-radius:6px;padding:4px 9px;font-size:0.78rem;cursor:pointer;color:#374151;font-weight:600;transition:background .15s,border-color .15s;}
@@ -3154,40 +3184,40 @@ body{
       </div>
     </div>
     <div class="meal-section" id="ms-liquids" data-meal="liquids">
-      <div class="meal-header" onclick="toggleMealSection('liquids')" style="border-left-color:#3498db;">
-        <span>💧 Liquids</span><div class="meal-right"><span class="meal-subtotal" id="st-liquids" style="font-size:0.75rem;color:#888;"></span><button onclick="event.stopPropagation();saveMealFromSection('liquids')" class="meal-action-btn" title="Save meal" aria-label="Save liquids meal">&#x1F4BE;</button><button onclick="event.stopPropagation();addFoodItem('liquids')" class="meal-add-btn" style="background:#3498db;">+ Add</button><span class="meal-chevron" id="chev-liquids">▸</span></div>
+      <div class="meal-header" onclick="toggleMealSection('liquids')">
+        <span>💧 Liquids</span><div class="meal-right"><span class="meal-subtotal" id="st-liquids" style="font-size:0.75rem;color:#888;"></span><button onclick="event.stopPropagation();saveMealFromSection('liquids')" class="meal-action-btn" title="Save meal" aria-label="Save liquids meal">&#x1F4BE;</button><button onclick="event.stopPropagation();addFoodItem('liquids')" class="meal-add-btn">+ Add</button><span class="meal-chevron" id="chev-liquids">▸</span></div>
       </div>
       <div class="meal-body" id="mb-liquids" style="display:none;"><div id="foodList-liquids"></div>
         <div style="padding:6px 8px 8px;"><textarea id="mnotes-liquids" rows="1" placeholder="Liquids notes..." oninput="save()" style="width:100%;border:1px solid #e9ecef;border-radius:5px;padding:4px 8px;font-size:0.78rem;resize:vertical;font-family:inherit;box-sizing:border-box;background:#fafafa;color:#555;"></textarea></div>
       </div>
     </div>
     <div class="meal-section" id="ms-sports" data-meal="sports">
-      <div class="meal-header" onclick="toggleMealSection('sports')" style="border-left-color:#27ae60;">
-        <span>💪 Sports Nutrition</span><div class="meal-right"><span class="meal-subtotal" id="st-sports" style="font-size:0.75rem;color:#888;"></span><button onclick="event.stopPropagation();saveMealFromSection('sports')" class="meal-action-btn" title="Save meal" aria-label="Save sports nutrition meal">&#x1F4BE;</button><button onclick="event.stopPropagation();addFoodItem('sports')" class="meal-add-btn" style="background:#27ae60;">+ Add</button><span class="meal-chevron" id="chev-sports">▸</span></div>
+      <div class="meal-header" onclick="toggleMealSection('sports')">
+        <span>💪 Sports Nutrition</span><div class="meal-right"><span class="meal-subtotal" id="st-sports" style="font-size:0.75rem;color:#888;"></span><button onclick="event.stopPropagation();saveMealFromSection('sports')" class="meal-action-btn" title="Save meal" aria-label="Save sports nutrition meal">&#x1F4BE;</button><button onclick="event.stopPropagation();addFoodItem('sports')" class="meal-add-btn">+ Add</button><span class="meal-chevron" id="chev-sports">▸</span></div>
       </div>
       <div class="meal-body" id="mb-sports" style="display:none;"><div id="foodList-sports"></div>
-        <div style="padding:8px;margin:4px 8px 0;background:#eafaf0;border:1px solid #bbe8cc;border-radius:7px;">
-          <div style="font-size:0.78rem;font-weight:800;color:#1a7a40;margin-bottom:6px;">&#x26A1; Sports Nutrition Quick Add</div>
+        <div style="padding:8px;margin:4px 8px 0;background:#fff8ec;border:1px solid #fbd38d;border-radius:7px;">
+          <div style="font-size:0.78rem;font-weight:800;color:#b45309;margin-bottom:6px;">&#x26A1; Sports Nutrition Quick Add</div>
           <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:5px;">
-            <select id="gusisBrandFilter" onchange="renderGusisPicker()" style="flex:1;min-width:90px;border:1px solid #9fd8b3;border-radius:5px;padding:5px 6px;font-size:0.78rem;background:#fff;">
+            <select id="gusisBrandFilter" onchange="renderGusisPicker()" style="flex:1;min-width:90px;border:1px solid #fbd38d;border-radius:5px;padding:5px 6px;font-size:0.78rem;background:#fff;">
               <option value="">All Brands</option>
               <option value="GU">GU Energy</option>
               <option value="SiS">SiS</option>
               <option value="Premier Protein">Premier Protein</option>
             </select>
-            <select id="gusisCategoryFilter" onchange="renderGusisPicker()" style="flex:1;min-width:110px;border:1px solid #9fd8b3;border-radius:5px;padding:5px 6px;font-size:0.78rem;background:#fff;"><option value="">All Types</option></select>
+            <select id="gusisCategoryFilter" onchange="renderGusisPicker()" style="flex:1;min-width:110px;border:1px solid #fbd38d;border-radius:5px;padding:5px 6px;font-size:0.78rem;background:#fff;"><option value="">All Types</option></select>
           </div>
-          <select id="gusisProductSelect" onchange="gusisUpdatePreview()" style="width:100%;border:1px solid #9fd8b3;border-radius:5px;padding:6px 7px;font-size:0.8rem;background:#fff;margin-bottom:5px;box-sizing:border-box;"></select>
-          <div id="gusisPreview" style="font-size:0.7rem;color:#2f7d50;margin-bottom:6px;min-height:1em;"></div>
-          <button type="button" onclick="gusisQuickAdd()" style="width:100%;background:#27ae60;color:#fff;border:none;border-radius:6px;padding:7px;font-size:0.8rem;font-weight:700;cursor:pointer;">+ Add to Sports Nutrition</button>
-          <div id="gusisAddFlash" style="display:none;margin-top:5px;color:#16a34a;font-size:0.78rem;font-weight:700;"></div>
+          <select id="gusisProductSelect" onchange="gusisUpdatePreview()" style="width:100%;border:1px solid #fbd38d;border-radius:5px;padding:6px 7px;font-size:0.8rem;background:#fff;margin-bottom:5px;box-sizing:border-box;"></select>
+          <div id="gusisPreview" style="font-size:0.7rem;color:#b45309;margin-bottom:6px;min-height:1em;"></div>
+          <button type="button" onclick="gusisQuickAdd()" style="width:100%;background:#d97706;color:#fff;border:none;border-radius:6px;padding:7px;font-size:0.8rem;font-weight:700;cursor:pointer;">+ Add to Sports Nutrition</button>
+          <div id="gusisAddFlash" style="display:none;margin-top:5px;color:#b45309;font-size:0.78rem;font-weight:700;"></div>
         </div>
         <div style="padding:6px 8px 8px;"><textarea id="mnotes-sports" rows="1" placeholder="Sports nutrition notes..." oninput="save()" style="width:100%;border:1px solid #e9ecef;border-radius:5px;padding:4px 8px;font-size:0.78rem;resize:vertical;font-family:inherit;box-sizing:border-box;background:#fafafa;color:#555;"></textarea><div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;"><button onclick="openCopyMealToDate('sports')" class="meal-action-btn">&#x1F4C5; Copy to Date</button></div></div>
       </div>
     </div>
     <div class="meal-section" id="ms-supplements" data-meal="supplements">
-      <div class="meal-header" onclick="toggleMealSection('supplements')" style="border-left-color:#8e44ad;">
-        <span>💊 Supplements</span><div class="meal-right"><span class="meal-subtotal" id="st-supplements" style="font-size:0.75rem;color:#888;"></span><button onclick="event.stopPropagation();saveMealFromSection('supplements')" class="meal-action-btn" title="Save meal" aria-label="Save supplements">&#x1F4BE;</button><button onclick="event.stopPropagation();addFoodItem('supplements')" class="meal-add-btn" style="background:#8e44ad;">+ Add</button><span class="meal-chevron" id="chev-supplements">▸</span></div>
+      <div class="meal-header" onclick="toggleMealSection('supplements')">
+        <span>💊 Supplements</span><div class="meal-right"><span class="meal-subtotal" id="st-supplements" style="font-size:0.75rem;color:#888;"></span><button onclick="event.stopPropagation();saveMealFromSection('supplements')" class="meal-action-btn" title="Save meal" aria-label="Save supplements">&#x1F4BE;</button><button onclick="event.stopPropagation();addFoodItem('supplements')" class="meal-add-btn">+ Add</button><span class="meal-chevron" id="chev-supplements">▸</span></div>
       </div>
       <div class="meal-body" id="mb-supplements" style="display:none;"><div id="foodList-supplements"></div>
         <div style="padding:6px 8px 8px;"><textarea id="mnotes-supplements" rows="1" placeholder="Supplement notes (dose, timing)..." oninput="save()" style="width:100%;border:1px solid #e9ecef;border-radius:5px;padding:4px 8px;font-size:0.78rem;resize:vertical;font-family:inherit;box-sizing:border-box;background:#fafafa;color:#555;"></textarea><div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;"><button onclick="openCopyMealToDate('supplements')" class="meal-action-btn">&#x1F4C5; Copy to Date</button></div></div>
