@@ -2632,11 +2632,27 @@ function aiFillEntireReview(btn){
     btn.disabled=false;btn.innerHTML=original;
   },function(err){btn.disabled=false;btn.innerHTML=original;alert('AI error: '+err);});
 }
+function getDayActivityNotesText(d){
+  const dateKey=dk(d);
+  function normalizedDate(value){const text=String(value||'').trim(),match=text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);if(match)return match[3]+'-'+match[1].padStart(2,'0')+'-'+match[2].padStart(2,'0');return text.slice(0,10);}
+  return getActivities().filter(function(a){
+    if(!a||normalizedDate(a.date)!==dateKey)return false;
+    return !!(String(a.notes||'').trim()||String(a.injuryReport||'').trim());
+  }).map(function(a){
+    const label=a.title||a.type||'Workout',parts=[];
+    if(String(a.notes||'').trim())parts.push(label+' notes: '+String(a.notes).trim());
+    if(String(a.injuryReport||'').trim())parts.push(label+' injury report: '+String(a.injuryReport).trim());
+    return parts.join('\n');
+  }).join('\n');
+}
 function getDayJournalText(d){
-  const raw=localStorage.getItem('planner_'+dk(d));if(!raw)return'';
-  const dd=JSON.parse(raw),parts=[];
-  ['jAccomplish','jNotes','jImprov','jGratitude','jIssues','jRunLog','spMeditationText'].forEach(function(k){if(dd[k])parts.push(dd[k]);});
-  return parts.join(' | ');
+  const raw=localStorage.getItem('planner_'+dk(d));
+  const dd=raw?JSON.parse(raw):{},parts=[];
+  const labeled={jNotes:'Daily Journal',spMeditationText:'Meditation notes',spDailyBreadText:'Daily Bread / verse notes',jAccomplish:'Accomplishments',jImprov:'What to improve',jGratitude:'Gratitude',jIssues:'Issues',jRunLog:'Run log','mnotes-breakfast':'Breakfast notes','mnotes-lunch':'Lunch notes','mnotes-dinner':'Dinner notes','mnotes-snack':'Snack notes','mnotes-liquids':'Liquids notes','mnotes-sports':'Sports nutrition notes','mnotes-supplements':'Supplement notes'};
+  Object.keys(labeled).forEach(function(k){if(dd[k]&&String(dd[k]).trim())parts.push(labeled[k]+': '+String(dd[k]).trim());});
+  const actText=getDayActivityNotesText(d);
+  if(actText)parts.push(actText);
+  return parts.join('\n');
 }
 function renderDayReview(){
   const raw=localStorage.getItem('dayreview_'+dk(today)),rv=raw?JSON.parse(raw):{};
