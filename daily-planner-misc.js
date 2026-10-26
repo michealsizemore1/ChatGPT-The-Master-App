@@ -955,6 +955,13 @@ function renderTrainingZonesPanel(){
     if(tzUpdatedRaw){
       var tzUpdatedDate=new Date(tzUpdatedRaw);
       if(!isNaN(tzUpdatedDate.getTime()))tzUpdatedSuffix=' \u00b7 Updated '+tzUpdatedDate.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    }else{
+      var tzAutoMonthRaw=localStorage.getItem('resting_hr_auto_update_month')||'';
+      var tzV2Match=tzAutoMonthRaw.match(/^(\d{4})-(\d{2}):resthr-v2$/);
+      if(tzV2Match){
+        var tzApproxDate=new Date(Number(tzV2Match[1]),Number(tzV2Match[2])-1,1);
+        tzUpdatedSuffix=' \u00b7 Updated '+tzApproxDate.toLocaleDateString('en-US',{month:'short',year:'numeric'});
+      }
     }
     hrSubEl.textContent='Max HR '+maxHR+' bpm \u00b7 Resting HR '+restHR+' bpm'+tzUpdatedSuffix;
   }
