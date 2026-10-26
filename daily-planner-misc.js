@@ -810,11 +810,12 @@ function saveMaxHRAndRender(){const v=document.getElementById('hrMaxInput').valu
 function getMaxHR(){const stored=parseFloat(localStorage.getItem('max_hr_value'));return stored>0?stored:174;}
 function saveRestHRAndRender(){const v=document.getElementById('restHrInput').value;localStorage.setItem('resting_hr_value',v||'');renderActivities();refreshTrainingZonesInAllPlans();}
 function getRestingHR(){const stored=parseFloat(localStorage.getItem('resting_hr_value'));return stored>0?stored:55;}
-// 30-day trailing average of the Wellness tab's daily Pulse entries
-// (wPulseVal on each planner_<date> record), used as the Resting HR input
-// to the Karvonen zone math. Returns null if nothing was logged in the
-// window, so callers can leave the stored value untouched rather than
-// overwriting it with a meaningless number.
+// 30-day trailing average of the Wellness tab's daily Resting HR entries
+// (wRestHRVal on each planner_<date> record -- the dedicated Resting HR
+// field, not the casual Pulse reading taken alongside blood pressure), used
+// as the Resting HR input to the Karvonen zone math. Returns null if nothing
+// was logged in the window, so callers can leave the stored value untouched
+// rather than overwriting it with a meaningless number.
 function computeTrailing30DayRestingHR(){
   var vals=[],now=new Date();
   for(var i=0;i<30;i++){
@@ -823,8 +824,8 @@ function computeTrailing30DayRestingHR(){
     if(!raw)continue;
     try{
       var dd=JSON.parse(raw);
-      var p=parseFloat(dd.wPulseVal);
-      if(p>0)vals.push(p);
+      var r=parseFloat(dd.wRestHRVal);
+      if(r>0)vals.push(r);
     }catch(e){}
   }
   if(!vals.length)return null;
@@ -833,14 +834,18 @@ function computeTrailing30DayRestingHR(){
 }
 // Runs once per calendar month (tracked via resting_hr_auto_update_month):
 // on the first app load on or after the 1st, recomputes Resting HR from the
-// trailing 30 days of logged Pulse data and saves it. If no Pulse data has
-// been logged yet this month, the month is NOT marked done, so this keeps
-// checking on every load until data shows up -- it never gives up partway
-// through the month, and never overwrites a real value with nothing.
+// trailing 30 days of logged Resting HR data and saves it. If no Resting HR
+// data has been logged yet this month, the month is NOT marked done, so this
+// keeps checking on every load until data shows up -- it never gives up
+// partway through the month, and never overwrites a real value with nothing.
+// The ":resthr-v2" marker forces exactly one recompute under the corrected
+// Resting-HR source even in a browser that already auto-updated this same
+// month under the old Pulse-based logic, so it doesn't silently sit on a
+// wrong value until next month.
 function autoUpdateRestingHRIfNewMonth(){
   try{
     var now=new Date();
-    var monthKey=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+    var monthKey=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+':resthr-v2';
     if(localStorage.getItem('resting_hr_auto_update_month')===monthKey)return;
     var avg=computeTrailing30DayRestingHR();
     if(avg==null)return;
