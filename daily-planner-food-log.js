@@ -1545,19 +1545,30 @@ function updateMacroTotals(){
     else {
       // Targets for a 53-year-old male distance runner (US Dietary Reference Intakes, men 51-70).
       // Iron uses the endurance-athlete adjustment (RDA 8mg x ~1.7). Sodium is a floor for
-      // sweat losses with a ceiling: above 4,000mg shows as High.
+      // sweat losses with a ceiling: above 4,000mg shows as High. Magnesium (483mg, ~15%
+      // above the 420mg RDA -- Nielsen & Lukaski, Magnesium Research 2006: strenuous
+      // exercise raises requirements 10-20%) and Zinc (15mg, USDA ARS athletic-performance
+      // figure vs the 11mg RDA) are also athlete-adjusted. Sugar's ceiling floats above the
+      // 36g AHA added-sugar limit by however much Sports Nutrition fueling (gels/drinks) was
+      // logged that day -- that's deliberate carbohydrate fueling, not "added sugar" to
+      // limit. Caffeine's 400mg ceiling is deliberately left as a real safety limit, not
+      // athlete-adjusted: a single race-day dose can legitimately push a day's total higher
+      // by design (ISSN pre-exercise dosing), which should read as a deliberate choice, not
+      // get silently permitted by raising the ceiling.
+      var sportsSugar=log.reduce(function(sum,x){if(x.meal==='sports'){var s=parseFloat(x.servings)||1;sum+=(parseFloat(x.sugar)||0)*s;}return sum;},0);
+      var sugarCeiling=36+sportsSugar;
       var priorityMicros=[
         {name:'Iron',field:'iron',value:totals.iron||0,target:14,unit:'mg'},
         {name:'Calcium',field:'calcium',value:totals.calcium||0,target:1000,unit:'mg'},
         {name:'Vitamin D',field:'vitD',value:totals.vitD||0,target:15,unit:'mcg'},
-        {name:'Magnesium',field:'magnesium',value:totals.magnesium||0,target:420,unit:'mg'},
+        {name:'Magnesium',field:'magnesium',value:totals.magnesium||0,target:483,unit:'mg'},
         {name:'Vitamin B12',field:'vitB12',value:totals.vitB12||0,target:2.4,unit:'mcg'},
         {name:'Sodium',field:'sodium',value:totals.sodium||0,target:2300,max:4000,unit:'mg'},
         {name:'Potassium',field:'potassium',value:totals.potassium||0,target:3400,unit:'mg'},
-        {name:'Zinc',field:'zinc',value:totals.zinc||0,target:11,unit:'mg'},
+        {name:'Zinc',field:'zinc',value:totals.zinc||0,target:15,unit:'mg'},
         {name:'Vitamin C',field:'vitC',value:totals.vitC||0,target:90,unit:'mg'},
         {name:'Fiber',field:'fiber',value:totals.fiber||0,target:28,unit:'g'},
-        {name:'Sugar',field:'sugar',value:totals.sugar||0,target:36,max:36,unit:'g'},
+        {name:'Sugar',field:'sugar',value:totals.sugar||0,target:sugarCeiling,max:sugarCeiling,unit:'g'},
         {name:'Caffeine',field:'caffeine',value:totals.caffeine||0,target:400,max:400,unit:'mg'}
       ];
       var completion=priorityMicros.map(function(n){if(n.max&&n.value>n.max)return Math.max(0,1-(n.value-n.max)/n.max);return Math.max(0,Math.min(1,n.value/n.target));});
@@ -1568,7 +1579,7 @@ function updateMacroTotals(){
       if(microQualityLabel)microQualityLabel.textContent=microScore.toFixed(1)+'/10 · '+microLabel;
       if(microQualityMarker)microQualityMarker.style.left=Math.max(0,Math.min(100,(microScore-1)/9*100))+'%';
       if(microQualityTrack)microQualityTrack.setAttribute('aria-valuenow',microScore.toFixed(1));
-      if(microQualityNote)microQualityNote.textContent='Targets for a 53-year-old male distance runner: iron 14mg · calcium 1,000mg · vitamin D 15mcg · magnesium 420mg · vitamin B12 2.4mcg · sodium 2,300–4,000mg · potassium 3,400mg · zinc 11mg · vitamin C 90mg · fiber 28g · sugar ≤36g · caffeine ≤400mg · lowest today: '+weakest.name+' '+Math.round(weakest.value)+weakest.unit;
+      if(microQualityNote)microQualityNote.textContent='Targets for a 53-year-old male distance runner: iron 14mg · calcium 1,000mg · vitamin D 15mcg · magnesium 483mg · vitamin B12 2.4mcg · sodium 2,300–4,000mg · potassium 3,400mg · zinc 15mg · vitamin C 90mg · fiber 28g · sugar ≤'+Math.round(sugarCeiling)+'g'+(sportsSugar>0?' (36g + '+Math.round(sportsSugar)+'g fueling today)':'')+' · caffeine ≤400mg (a single race-day dose can push this higher by design, not a red flag) · lowest today: '+weakest.name+' '+Math.round(weakest.value)+weakest.unit;
       if(microBreakdown)microBreakdown.innerHTML=priorityMicros.map(function(n){
         var pct=n.target?Math.max(0,n.value/n.target*100):0,status=(n.max&&n.value>n.max)?'High':pct>=100?'Met':pct>=75?'Close':'Low';
         var statusColor=status==='Met'?'#166534':(status==='Close'||status==='High')?'#92400e':'#991b1b';
