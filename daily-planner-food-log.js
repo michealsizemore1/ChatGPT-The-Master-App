@@ -1561,7 +1561,10 @@ function updateMacroTotals(){
         {name:'Magnesium',field:'magnesium',value:totals.magnesium||0,target:420,unit:'mg'},
         {name:'Vitamin B12',field:'vitB12',value:totals.vitB12||0,target:2.4,unit:'mcg'},
         {name:'Sodium',field:'sodium',value:totals.sodium||0,target:2300,max:4000,unit:'mg'},
-        {name:'Potassium',field:'potassium',value:totals.potassium||0,target:3400,unit:'mg'}
+        {name:'Potassium',field:'potassium',value:totals.potassium||0,target:3400,unit:'mg'},
+        {name:'Chloride',field:'chloride',value:totals.chloride||0,target:2000,unit:'mg'},
+        {name:'Zinc',field:'zinc',value:totals.zinc||0,target:11,unit:'mg'},
+        {name:'Vitamin C',field:'vitC',value:totals.vitC||0,target:90,unit:'mg'}
       ];
       var completion=priorityMicros.map(function(n){if(n.max&&n.value>n.max)return Math.max(0,1-(n.value-n.max)/n.max);return Math.max(0,Math.min(1,n.value/n.target));});
       var averageCompletion=completion.reduce(function(sum,n){return sum+n;},0)/completion.length;
@@ -1571,7 +1574,7 @@ function updateMacroTotals(){
       if(microQualityLabel)microQualityLabel.textContent=microScore.toFixed(1)+'/10 · '+microLabel;
       if(microQualityMarker)microQualityMarker.style.left=Math.max(0,Math.min(100,(microScore-1)/9*100))+'%';
       if(microQualityTrack)microQualityTrack.setAttribute('aria-valuenow',microScore.toFixed(1));
-      if(microQualityNote)microQualityNote.textContent='Targets for a 53-year-old male distance runner: iron 14mg · calcium 1,000mg · vitamin D 15mcg · magnesium 420mg · vitamin B12 2.4mcg · sodium 2,300–4,000mg · potassium 3,400mg · lowest today: '+weakest.name+' '+Math.round(weakest.value)+weakest.unit;
+      if(microQualityNote)microQualityNote.textContent='Targets for a 53-year-old male distance runner: iron 14mg · calcium 1,000mg · vitamin D 15mcg · magnesium 420mg · vitamin B12 2.4mcg · sodium 2,300–4,000mg · potassium 3,400mg · chloride 2,000mg · zinc 11mg · vitamin C 90mg · lowest today: '+weakest.name+' '+Math.round(weakest.value)+weakest.unit;
       if(microBreakdown)microBreakdown.innerHTML=priorityMicros.map(function(n){
         var pct=n.target?Math.max(0,n.value/n.target*100):0,status=(n.max&&n.value>n.max)?'High':pct>=100?'Met':pct>=75?'Close':'Low';
         var statusColor=status==='Met'?'#166534':(status==='Close'||status==='High')?'#92400e':'#991b1b';
