@@ -2648,8 +2648,43 @@ function getDayActivityNotesText(d){
 function getDayJournalText(d){
   const raw=localStorage.getItem('planner_'+dk(d));
   const dd=raw?JSON.parse(raw):{},parts=[];
-  const labeled={jNotes:'Daily Journal',spMeditationText:'Meditation notes',spDailyBreadText:'Daily Bread / verse notes',jAccomplish:'Accomplishments',jImprov:'What to improve',jGratitude:'Gratitude',jIssues:'Issues',jRunLog:'Run log','mnotes-breakfast':'Breakfast notes','mnotes-lunch':'Lunch notes','mnotes-dinner':'Dinner notes','mnotes-snack':'Snack notes','mnotes-liquids':'Liquids notes','mnotes-sports':'Sports nutrition notes','mnotes-supplements':'Supplement notes'};
+  const labeled={jNotes:'Daily Journal',spMeditationText:'Meditation notes',spDailyBreadText:'Daily Bread / verse notes',jAccomplish:'Accomplishments',jImprov:'What to improve',jGratitude:'Gratitude',jIssues:'Issues',jRunLog:'Run log','mnotes-breakfast':'Breakfast notes','mnotes-lunch':'Lunch notes','mnotes-dinner':'Dinner notes','mnotes-snack':'Snack notes','mnotes-liquids':'Liquids notes','mnotes-sports':'Sports nutrition notes','mnotes-supplements':'Supplement notes','wBPVal':'Blood pressure','wPulseVal':'Pulse','wRestHRVal':'Resting heart rate','wMedsVal':'Medications','wWghtVal':'Weight','wSleepVal':'Sleep','gaAudiobookText':"Today's listening",'gaAudiobookTime':'Listening time'};
   Object.keys(labeled).forEach(function(k){if(dd[k]&&String(dd[k]).trim())parts.push(labeled[k]+': '+String(dd[k]).trim());});
+  // Bible / Sermon Notes tab is stored separately under its own bible_<date> key,
+  // not in the planner_ blob above -- pull its substantive fields in directly.
+  try{
+    const braw=localStorage.getItem('bible_'+dk(d));
+    if(braw){
+      const b=JSON.parse(braw)||{},bParts=[];
+      if(b.sermonTitle)bParts.push('Sermon Title: '+b.sermonTitle);
+      if(b.sermonSpeaker)bParts.push('Speaker: '+b.sermonSpeaker);
+      if(b.scripture)bParts.push('Scripture: '+b.scripture);
+      if(b.keyVerse)bParts.push('Key Verse: '+b.keyVerse);
+      if(b.theme)bParts.push('Theme: '+b.theme);
+      if(b.sermonNotes)bParts.push('Sermon Notes: '+b.sermonNotes);
+      if(b.notes)bParts.push('Notes: '+b.notes);
+      if(b.application)bParts.push('Application: '+b.application);
+      if(b.prayer)bParts.push('Prayer: '+b.prayer);
+      if(bParts.length)parts.push('Bible/Sermon: '+bParts.join(' | '));
+    }
+  }catch(ignore){}
+  // Habits (Habits 2) are tracked in their own global habits2_state key, keyed
+  // per date by habit id -- not in the planner_ blob either.
+  try{
+    const hraw=localStorage.getItem('habits2_state');
+    const hState=hraw?JSON.parse(hraw):null;
+    if(hState&&Array.isArray(hState.habits)&&hState.logs){
+      const dayLogs=hState.logs[dk(d)]||{};
+      const hLines=hState.habits.map(function(hb){
+        const log=dayLogs[hb.id];
+        if(!log)return null;
+        const done=(log.status==='done')||Number(log.value)>=Number(hb.target||1);
+        const st=done?'done':log.status==='partial'?'partial':log.status==='skip'?'skipped':'logged';
+        return hb.name+': '+st+(log.value?' ('+log.value+')':'');
+      }).filter(Boolean);
+      if(hLines.length)parts.push('Habits: '+hLines.join(', '));
+    }
+  }catch(ignore){}
   const actText=getDayActivityNotesText(d);
   if(actText)parts.push(actText);
   return parts.join('\n');
