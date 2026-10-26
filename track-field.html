@@ -311,7 +311,7 @@ html{font-size:14px}
 
 <script src="version-check.js"></script>
 <script>
-const APP_VERSION='2026-10-22-1';
+const APP_VERSION='2026-10-26-1';
 checkForNewerAppVersion(APP_VERSION, 'tf');
 
 // [name, country, ranking score, 2026 season best]  "rd" marks a road time used where there is no track mark.
@@ -373,7 +373,7 @@ const ULTRA={
  men:{
   '50K':[['Frederic Tranchand','FRA',944,'35-39'],['Daniel Pattis','ITA',940,'23-34'],['Cristian Minoggio','ITA',933,'40-44'],['Andrzej Witek','POL',932,'23-34'],['Francesco Puppi','ITA',930,'23-34'],['Nashon Kiplimo','KEN',925,'23-34'],['William Boffelli','ITA',923,'23-34'],['Rongchao Gu','CHN',920,'35-39'],['Tao Luo','CHN',918,'23-34'],['Jim Walmsley','USA',917,'35-39']],
   '100K':[['Cristian Minoggio','ITA',945,'40-44'],['Ben Dhiman','USA',941,'23-34'],['Louison Coiffet','FRA',937,'23-34'],['Jim Walmsley','USA',930,'35-39'],['Francesco Puppi','ITA',928,'23-34'],['Andreas Reiterer','ITA',927,'23-34'],['Rongchao Gu','CHN',927,'35-39'],['Jonathan Albon','GBR',926,'35-39'],['Hannes Namberger','GER',926,'35-39'],['Jianjian Yang','CHN',923,'23-34']],
-  '100M':[['Ben Dhiman','USA',962,'23-34'],['Caleb Olson','USA',945,'23-34'],['Baptiste Chassagne','FRA',936,'23-34'],['Vincent Bouillard','FRA',933,'23-34'],['Thomas Evans','GBR',932,'23-34'],['Francesco Puppi','ITA',927,'23-34'],['Virgile Moriset','FRA',925,'23-34'],['Ryan Montgomery','USA',924,'23-34'],['Ludovic Pommeret','FRA',923,'50-54'],['Chris Myers','USA',923,'23-34']]
+  '100M':[['Ben Dhiman','USA',962,'23-34'],['Caleb Olson','USA',945,'23-34'],['Hugo Deck','FRA',937,'23-34'],['Baptiste Chassagne','FRA',936,'23-34'],['Vincent Bouillard','FRA',933,'23-34'],['Thomas Evans','GBR',932,'23-34'],['Francesco Puppi','ITA',927,'23-34'],['Virgile Moriset','FRA',925,'23-34'],['Ryan Montgomery','USA',924,'23-34'],['Ludovic Pommeret','FRA',923,'50-54']]
  },
  women:{
   '50K':[['Miao Yao','CHN',823,'23-34'],['Tove Alexandersson','SWE',818,'23-34'],['Judith Wyder','SUI',817,'35-39'],['Ikram Rharsalla Laktab','ESP',811,'23-34'],['Maude Mathys','SUI',804,'35-39'],['Nuria Gil Clapera','ESP',796,'23-34'],['Ida Amelie Robsahm','NOR',796,'23-34'],['Yngvild Kaspersen','NOR',795,'23-34'],['Mar\u00eda Teresa La Chica Lho\u00ebst','ESP',790,'23-34'],['Sara Alonso','ESP',789,'23-34']],
@@ -472,10 +472,10 @@ const ENTRIES={
  }
 };
 const ENTRIES_PENDING=[
- ['New York City Marathon','Nov 1','Professional field set Aug 19 (Obiri and Kipruto defend); Sifan Hassan and Fiona O’Keeffe withdrew 14 Oct with illness and injury, leaving Mantz, Talbi and debutant Weini Kelati to headline the US contingent. Full start list with marks and the race-day timetable still to come — NYRR had not yet confirmed 2026 pro/wheelchair start times as of 15 Oct.']
+ ['New York City Marathon','Nov 1','Professional field set Aug 19 (Obiri and Kipruto defend); Sifan Hassan and Fiona O’Keeffe withdrew 14 Oct with illness and injury, leaving Mantz, Talbi and debutant Weini Kelati to headline the US contingent. Pro start times are now confirmed for Sunday (women 8:35 AM, men 9:05 AM Eastern), but NYRR’s bib-numbered elite list, wheelchair/handcycle times and wave schedule remain unpublished as of 25 Oct.']
 ];
 const UPCOMING=[
- {d:'Nov 1',y:'2026',name:'New York City Marathon',where:'New York, USA',detail:'Defending champions Hellen Obiri and Benson Kipruto headline after Sifan Hassan withdrew 14 Oct with an illness; American record holder Conner Mantz and Zouhair Talbi lead the US charge, and Weini Kelati makes her marathon debut. Five boroughs and the largest field in the sport; clocks go back the same morning, so the start lands at 6:00 AM once Mountain Time returns to standard.',watch:'ESPN2 and ABC &middot; 6:00 AM MST',tag:'Marathon major',cls:'major',links:[['Official site','https://www.nyrr.org/tcsnycmarathon'],['Professional field announced','https://citiusmag.com/articles/new-york-city-marathon-2026-professional-elite-field-obiri-kipruto-hassan-mantz-talbi-mcclain-kelati']]},
+ {d:'Nov 1',y:'2026',name:'New York City Marathon',where:'New York, USA',detail:'Defending champions Hellen Obiri and Benson Kipruto headline after Sifan Hassan withdrew 14 Oct with an illness and Fiona O’Keeffe scratched with injury; American record holder Conner Mantz faces Zouhair Talbi’s faster personal best, and Weini Kelati debuts off an American record half marathon. Pro women start at 8:35 AM and pro men at 9:05 AM Eastern (6:35/7:05 AM Mountain); the 50th running also tweaks the Bronx routing between miles 20 and 21.',watch:'ESPN2 and ABC &middot; 6:00 AM MST',tag:'Marathon major',cls:'major',links:[['Official site','https://www.nyrr.org/tcsnycmarathon'],['Professional field announced','https://citiusmag.com/articles/new-york-city-marathon-2026-professional-elite-field-obiri-kipruto-hassan-mantz-talbi-mcclain-kelati'],['Race week: 10 things to know','https://www.ibtimes.com.au/new-york-city-marathon-2026-what-know-1877351']]},
  {d:'Dec 6',y:'2026',name:'Shanghai Marathon',where:'Shanghai, China',detail:'A candidate race under assessment to join the majors in 2027.',watch:'Broadcast details not yet announced',tag:'Candidate major',cls:'',links:[['Race details & schedule','https://www.watchathletics.com/schedule/watchlive/11238'],['Bid to join the World Marathon Majors','https://marathonhandbook.com/shanghai-marathon-is-one-race-away-from-joining-the-worlds-most-exclusive-running-club/']]},
  {d:'Dec 6',y:'2026',name:'Valencia Marathon',where:'Valencia, Spain',detail:'One of the fastest courses in the world — Agnes Ngetich’s half marathon and 10km world bests have both come on these roads.',watch:'Broadcast details not yet announced',tag:'Elite race',cls:'',links:[['Official site','https://www.valenciaciudaddelrunning.com/en/marathon/'],['Kejelcha and Tesfay lead elite lineup','https://www.valenciaciudaddelrunning.com/en/kejelcha-tesfay-lead-elite-lineup-big-ambitions-valencia-marathon-2026/']]},
  {d:'Mar 7',y:'2027',name:'Tokyo Marathon',where:'Tokyo, Japan',detail:'The newest of the six World Marathon Majors and the first big race of the 2027 season.',watch:'Broadcast details not yet announced',tag:'Marathon major',cls:'major',links:[['Official site','https://www.marathon.tokyo/en/'],['Prize money raised, field expanded for 2027','https://marathonhandbook.com/tokyo-marathon-pushes-champion-prize-to-170000-and-expands-field-to-40000-for-2027/']]},
@@ -490,42 +490,42 @@ const DL_SEASON=[
 ];
 
 // Section news. [ISO date, headline, publisher, url, one-line summary]
-// Checked 19 October 2026; the twice-weekly refresh replaces these.
-const NEWS_CHECKED='2026-10-22';
+// Checked 26 October 2026; the twice-weekly refresh replaces these.
+const NEWS_CHECKED='2026-10-26';
 const NEWS={
  track:[
+  ['2026-10-22','Diamond League season review recaps Russell’s and Dos Santos’s world records','Diamond League','https://www.diamondleague.com/part-v-world-records-on-the-final-straight/','Part five of the 2026 retrospective revisits Masai Russell’s 100m hurdles and Alison Dos Santos’s 400m hurdles world records from the August stops in Lausanne, Silesia and Zurich.'],
   ['2026-10-19','Wanda Diamond League confirms 2027 discipline allocation','Diamond League','https://www.diamondleague.com/discipline-allocation-confirmed-for-2027-wanda-diamond-league/','The 2027 circuit confirmed which of its 15 meetings — from Doha’s 7 May opener to the Zurich final on 25–26 August — will stage each event on the Road to the Final.'],
   ['2026-10-15','Olympic 800m champion Athing Mu announces she is pregnant','LetsRun.com','https://www.letsrun.com/news/2026/10/olympic-800m-champion-athing-mu-announces-she-is-pregnant-what-does-it-mean-for-la-2028/','Mu, who has not raced since August 2025 and split with coach Bobby Kersee last year, announced on Instagram that she is expecting her first child, leaving her path to LA 2028 uncertain.'],
-  ['2026-10-15','Diamond League season review revisits Wanyonyi’s and Kerr’s world records','Diamond League','https://www.diamondleague.com/part-iv-first-world-records-fall-in-monaco-and-london/','Part four of the 2026 season retrospective recaps Emmanuel Wanyonyi’s and Josh Kerr’s world records from the Eugene, Monaco and London stops in July.'],
   ['2026-10-12','Wanda Diamond League publishes 2027 calendar','Diamond League','https://www.diamondleague.com/wanda-diamond-league-publishes-2027-calendar/','The 2027 season opens in Doha on 7 May and closes with a two-day final in Zurich on 25–26 August, with Shanghai/Keqiao, Xiamen, Rome, Rabat, Oslo, Stockholm, Paris, Eugene, Monaco, Lausanne, London, Silesia and Brussels filling out the 15-meeting calendar.']
  ],
  road:[
-  ['2026-10-18','Diriba and Berhanu take the Amsterdam Marathon','World Athletics','https://worldathletics.org/competitions/world-athletics-label-road-races/news/amsterdam-marathon-2026-diriba-berhanu','Buze Diriba ran a course-record 2:16:12 and Lemi Berhanu won a tight men’s race in 2:03:33, both finishing clear of fast all-Ethiopian and Kenyan chase packs.'],
-  ['2026-10-14','Galen Rupp breaks American masters marathon record in Chicago','LetsRun.com','https://www.letsrun.com/news/2026/10/galen-rupp-isnt-done-inside-his-rebuilt-stride-a-20655-masters-record-and-the-path-to-la-2028/','Rupp, 40, ran 2:06:55 for 11th place at Chicago to smash Elkanah Kibet’s American masters record, a sign of life after several lean years and a possible path to a fifth Olympic team in 2028.'],
-  ['2026-10-11','Kipruto and Feysa claim second Majors titles in Chicago','World Marathon Majors','https://www.worldmarathonmajors.com/content-hub/kipruto-and-feysa-claim-second-majors-titles','Amos Kipruto ran a personal-best 2:01:09 and Hawi Feysa defended her title in 2:13:33 at the Bank of America Chicago Marathon, where Catherine Debrunner also set a wheelchair world record.'],
-  ['2026-10-11','Kipchoge wins Melbourne Marathon in a course record at 41','Watch Athletics','https://www.watchathletics.com/article/13846/eliud-kipchoge-wins-melbourne-marathon-in-course-record-of-2-09-10','Eliud Kipchoge won the third stop of his seven-continent World Tour in 2:09:10, with Camille French taking the women’s race in 2:28:25.']
+  ['2026-10-25','Chepkirui and Kwizera win a record-chasing Valencia Half Marathon','World Athletics','https://worldathletics.org/competitions/world-athletics-label-road-races/news/valencia-half-marathon-chepkirui-kwizera','Sheila Chepkirui won in 1:03:51 and Rodrigue Kwizera in 58:03; Yaseen Abdalla’s 59:12 beat the US record but doesn’t count since he races for Sudan, and Kwizera’s time misses a European record while his transfer of allegiance to Spain is still pending.'],
+  ['2026-10-23','Olympic and world marathon champion Peres Jepchirchir provisionally suspended for EPO','LetsRun.com','https://www.letsrun.com/news/2026/10/another-titan-falls-what-olympic-champion-peres-jepchirchirs-epo-ban-means-for-the-sport/','The Athletics Integrity Unit flagged a sample taken before her Sydney Marathon win, putting that title in jeopardy and making her the tenth World Marathon Majors champion suspended since 2017.'],
+  ['2026-10-22','USATF rejects two Olympic Trials-qualifying marathon times over a sanctioning technicality','LetsRun.com','https://www.letsrun.com/news/2026/10/they-ran-under-the-olympic-marathon-trials-standards-usatf-says-their-times-dont-count/','Caitlin McGinley and Spencer Friske both ran under the standard at the Baystate Marathon, but USATF says the race wasn’t sanctioned this year — even though it accepted a 2023 qualifier from the same event.'],
+  ['2026-10-18','Diriba and Berhanu take the Amsterdam Marathon','World Athletics','https://worldathletics.org/competitions/world-athletics-label-road-races/news/amsterdam-marathon-2026-diriba-berhanu','Buze Diriba ran a course-record 2:16:12 and Lemi Berhanu won a tight men’s race in 2:03:33, both finishing clear of fast all-Ethiopian and Kenyan chase packs.']
  ],
  ultra:[
-  ['2026-10-18','Puppi and Młynarczyk win the Grand Trail des Templiers','iRunFar','https://www.irunfar.com/2026-grand-trail-des-templiers-results','Francesco Puppi ran 6:32:20, just off the course record, and Martyna Młynarczyk set a women’s course record of 7:41:18 at the 80.4km race in Millau, France.'],
-  ['2026-10-12','Engelhard sweeps both races as the Mountain Running World Cup wraps in Québec','iRunFar','https://www.irunfar.com/this-week-in-running-october-12-2026','Nina Engelhard won both the uphill and up-and-down races at the Défi des Couleurs finale, while Philemon Kiriago and Meikael Beaudoin-Rousseau took the men’s up-and-down and uphill titles.'],
-  ['2026-10-05','Dalton smashes the Perpetua Coast 50k course record at the USATF trail championships','iRunFar','https://www.irunfar.com/this-week-in-running-october-5-2026','Anna Dalton won the USATF 50km Trail Championships in Yachats, Oregon in 4:29, nine minutes inside the old course record, with Dylan Flewelling taking the men’s title in 3:50.']
+  ['2026-10-22','Geerts and Steyaert break the backyard ultra world record together','iRunFar','https://www.irunfar.com/merijn-geerts-ivo-steyaert-backyard-ultra-record-2026','The Belgian pair each completed 124 laps (516.7 miles) at the Big Dog’s Backyard Ultra World Team Championships, breaking Phil Gore’s 119-lap individual record.'],
+  ['2026-10-19','Hugo Deck’s Diagonale des Fous win headlines a loaded ultra weekend','iRunFar','https://www.irunfar.com/this-week-in-running-october-19-2026','Deck won La Réunion’s 180km Diagonale des Fous in 22:54:19 and Ruth Croft took the women’s race in 27:13:23, among results from Millau’s Templiers races and Portugal’s ITRA European Championships recapped in iRunFar’s weekly roundup.'],
+  ['2026-10-18','Puppi and Młynarczyk win the Grand Trail des Templiers','iRunFar','https://www.irunfar.com/2026-grand-trail-des-templiers-results','Francesco Puppi ran 6:32:20, just off the course record, and Martyna Młynarczyk set a women’s course record of 7:41:18 at the 80.4km race in Millau, France.']
  ],
  entries:[
-  ['2026-10-14','Galen Rupp breaks American masters marathon record in Chicago','LetsRun.com','https://www.letsrun.com/news/2026/10/galen-rupp-isnt-done-inside-his-rebuilt-stride-a-20655-masters-record-and-the-path-to-la-2028/','Rupp, who finished 11th in this field in 2:06:55, broke Elkanah Kibet’s American masters record at 40 years old — his fastest marathon in five years.'],
-  ['2026-10-13','Chicago Marathon Winners & Losers: adidas Dominates, Galen Rupp Turns Back the Clock, Clayton Young Impresses','LetsRun.com','https://www.letsrun.com/news/2026/10/chicago-marathon-winners-losers-adidas-dominates-galen-rupp-turns-back-the-clock-clayton-young-impresses/','LetsRun’s post-race analysis credits adidas’s sweep of both podiums, Rupp’s masters run, and a gritty Clayton Young effort on a torn hamstring.'],
-  ['2026-10-11','Results: Chicago Marathon 2026','Watch Athletics','https://www.watchathletics.com/article/13845/results-chicago-marathon-2026','Full results show Tadese Takele Bikila and Milkesa Mengesha completing the men’s podium behind Kipruto, and debutant Emma Grace Hurley running the fastest first marathon ever by an American woman to finish 7th.']
+  ['2026-10-25','NYC Marathon race week: pro start times confirmed, Bronx course tweak for the 50th running','IBTimes','https://www.ibtimes.com.au/new-york-city-marathon-2026-what-know-1877351','Professional women start at 8:35 AM and professional men at 9:05 AM Eastern on Sunday, with miles 20–21 in the Bronx now a more direct five-turn routing instead of seven.'],
+  ['2026-10-23','American preview: Mantz and Talbi renew their rivalry, Kelati debuts off an American record','FloTrack','https://www.flotrack.org/articles/16279560-nyc-marathon-american-preview-mantz-kelati-mcclain','Conner Mantz’s American record (2:04:43) meets Zouhair Talbi’s faster personal best (2:03:45), while Weini Kelati — off a 1:06:04 American record half marathon — makes her marathon debut.'],
+  ['2026-10-14','Hassan and O’Keeffe withdraw from New York City Marathon','Canadian Running Magazine','https://runningmagazine.ca/the-scene/olympic-champion-sifan-hassan-withdraws-from-tcs-new-york-city-marathon/','Olympic champion Sifan Hassan is out with an illness that disrupted training, and American Fiona O’Keeffe has also scratched with injury, trimming the field for the Nov 1 finale to the Marathon Majors season.']
  ],
  calendar:[
+  ['2026-10-25','New York City Marathon race week: start times set for the season’s last major','IBTimes','https://www.ibtimes.com.au/new-york-city-marathon-2026-what-know-1877351','Pro women go off at 8:35 AM and pro men at 9:05 AM Eastern on Sunday, as the 50th running tweaks its Bronx routing between miles 20 and 21.'],
   ['2026-10-15','Coe and President Ruto reaffirm plans for Nairobi 2029','World Athletics','https://worldathletics.org/news/press-releases/coe-president-ruto-kenya-2029-world-championships','World Athletics president Sebastian Coe and Kenyan president William Ruto reaffirmed their commitment to the 2029 World Championships in Nairobi — the first held in Africa — during a visit to Eldoret, with Kasarani stadium upgrades already underway.'],
-  ['2026-10-14','Hassan and O’Keeffe withdraw from New York City Marathon','Canadian Running Magazine','https://runningmagazine.ca/the-scene/olympic-champion-sifan-hassan-withdraws-from-tcs-new-york-city-marathon/','Olympic champion Sifan Hassan is out with an illness that disrupted training, and American Fiona O’Keeffe has also scratched with injury, trimming the field for the Nov 1 finale to the Marathon Majors season.'],
-  ['2026-10-11','Kipruto and Feysa claim second Majors titles as Chicago wraps a loaded fall weekend','World Marathon Majors','https://www.worldmarathonmajors.com/content-hub/kipruto-and-feysa-claim-second-majors-titles','Chicago’s results — and Kipchoge’s course record in Melbourne the same day — leave New York, on Nov 1, as the year’s last major.']
+  ['2026-10-14','Hassan and O’Keeffe withdraw from New York City Marathon','Canadian Running Magazine','https://runningmagazine.ca/the-scene/olympic-champion-sifan-hassan-withdraws-from-tcs-new-york-city-marathon/','Olympic champion Sifan Hassan is out with an illness that disrupted training, and American Fiona O’Keeffe has also scratched with injury, trimming the field for the Nov 1 finale to the Marathon Majors season.']
  ]
 };
 
 // World records. [event, mark, athlete, country, venue, date, note]
 // Track and road from the World Athletics world-record tables; ultra from the IAU record lists.
-// Both read 19 October 2026.
-const RECORDS_CHECKED='2026-10-22';
+// Both read 26 October 2026.
+const RECORDS_CHECKED='2026-10-26';
 const RECORDS={
  track:{
   men:[
@@ -533,7 +533,7 @@ const RECORDS={
    ['200m','19.19','Usain Bolt','JAM','Berlin','20 Aug 2009',''],
    ['400m','43.03','Wayde van Niekerk','RSA','Rio de Janeiro','14 Aug 2016',''],
    ['800m','1:40.91','David Rudisha','KEN','London','9 Aug 2012',''],
-   ['1000m','2:11.83','Emmanuel Wanyonyi','KEN','Monaco','10 Jul 2026','previous record Noah Ngeny 2:11.96, Rieti, 5 Sep 1999','pending'],
+   ['1000m','2:11.83','Emmanuel Wanyonyi','KEN','Monaco','10 Jul 2026','previous record Noah Ngeny 2:11.96, Rieti, 5 Sep 1999'],
    ['1500m','3:26.00','Hicham El Guerrouj','MAR','Rome','14 Jul 1998',''],
    ['Mile','3:42.66','Josh Kerr','GBR','London','18 Jul 2026','previous record Hicham El Guerrouj 3:43.13, Rome, 7 Jul 1999','pending'],
    ['2000m','4:43.13','Jakob Ingebrigtsen','NOR','Brussels','8 Sep 2023',''],
