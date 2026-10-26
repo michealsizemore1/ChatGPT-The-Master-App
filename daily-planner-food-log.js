@@ -565,7 +565,17 @@ const GUSIS_PRODUCTS=[
   {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Vanilla',serving:'1 shake (11 fl oz)',cal:160,carbs:4,prot:30,fat:3,sodium:230,potassium:0,caffeine:0},
   {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Caramel',serving:'1 shake (11 fl oz)',cal:160,carbs:2,prot:30,fat:3,sodium:350,potassium:0,caffeine:0},
   {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Cookies and Cream',serving:'1 shake (11 fl oz)',cal:160,carbs:4,prot:30,fat:3,sodium:220,potassium:0,caffeine:0},
-  {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Chocolate Peanut Butter',serving:'1 shake (11 fl oz)',cal:160,carbs:5,prot:30,fat:3,sodium:380,potassium:0,caffeine:0}
+  {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Chocolate Peanut Butter',serving:'1 shake (11 fl oz)',cal:160,carbs:5,prot:30,fat:3,sodium:380,potassium:0,caffeine:0},
+  {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Café Latte',serving:'1 shake (11 fl oz)',cal:160,carbs:4,prot:30,fat:3,sodium:260,potassium:0,caffeine:0},
+  {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Cookie Dough',serving:'1 shake (11 fl oz)',cal:160,carbs:3,prot:30,fat:3,sodium:330,potassium:0,caffeine:0},
+  {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Cinnamon Roll',serving:'1 shake (11 fl oz)',cal:160,carbs:3,prot:30,fat:3,sodium:230,potassium:0,caffeine:0},
+  {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Cake Batter',serving:'1 shake (11 fl oz)',cal:160,carbs:4,prot:30,fat:3,sodium:370,potassium:0,caffeine:0},
+  {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Peaches & Cream',serving:'1 shake (11 fl oz)',cal:160,carbs:3,prot:30,fat:3,sodium:230,potassium:0,caffeine:0},
+  {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Strawberries & Cream',serving:'1 shake (11 fl oz)',cal:160,carbs:3,prot:30,fat:3,sodium:230,potassium:0,caffeine:0},
+  {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Bananas & Cream',serving:'1 shake (11 fl oz)',cal:160,carbs:4,prot:30,fat:3,sodium:230,potassium:0,caffeine:0},
+  {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Lemon Bar',serving:'1 shake (11 fl oz)',cal:160,carbs:3,prot:30,fat:3,sodium:250,potassium:0,caffeine:0},
+  {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Orange Cream Swirl (Limited Edition)',serving:'1 shake (11 fl oz)',cal:160,carbs:3,prot:30,fat:3,sodium:250,potassium:0,caffeine:0},
+  {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Pumpkin Spice (Limited Time)',serving:'1 shake (11 fl oz)',cal:160,carbs:2,prot:30,fat:3,sodium:230,potassium:0,caffeine:0}
 ];
 
 function gusisLinesFor(brand){
