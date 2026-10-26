@@ -806,9 +806,9 @@ function setChartMode(m){actChartMode=m;document.getElementById('chartMiBtn').cl
 function saveCPAndRender(){const v=document.getElementById('cpInput').value;localStorage.setItem('cp_value',v||'');renderActivities();}
 function getCP(){return parseFloat(localStorage.getItem('cp_value'))||0;}
 function powerZone(p,cp){if(!cp||!p)return null;const r=p/cp;if(r<0.55)return{z:'Z1',cls:'z1'};if(r<0.75)return{z:'Z2',cls:'z2'};if(r<0.90)return{z:'Z3',cls:'z3'};if(r<1.05)return{z:'Z4',cls:'z4'};return{z:'Z5',cls:'z5'};}
-function saveMaxHRAndRender(){const v=document.getElementById('hrMaxInput').value;localStorage.setItem('max_hr_value',v||'');renderActivities();refreshTrainingZonesInAllPlans();}
+function saveMaxHRAndRender(){const v=document.getElementById('hrMaxInput').value;localStorage.setItem('max_hr_value',v||'');localStorage.setItem('training_zones_updated_at',new Date().toISOString());renderActivities();refreshTrainingZonesInAllPlans();}
 function getMaxHR(){const stored=parseFloat(localStorage.getItem('max_hr_value'));return stored>0?stored:174;}
-function saveRestHRAndRender(){const v=document.getElementById('restHrInput').value;localStorage.setItem('resting_hr_value',v||'');renderActivities();refreshTrainingZonesInAllPlans();}
+function saveRestHRAndRender(){const v=document.getElementById('restHrInput').value;localStorage.setItem('resting_hr_value',v||'');localStorage.setItem('training_zones_updated_at',new Date().toISOString());renderActivities();refreshTrainingZonesInAllPlans();}
 function getRestingHR(){const stored=parseFloat(localStorage.getItem('resting_hr_value'));return stored>0?stored:55;}
 // 30-day trailing average of the Wellness tab's daily Resting HR entries
 // (wRestHRVal on each planner_<date> record -- the dedicated Resting HR
@@ -851,6 +851,7 @@ function autoUpdateRestingHRIfNewMonth(){
     if(avg==null)return;
     localStorage.setItem('resting_hr_value',String(avg));
     localStorage.setItem('resting_hr_auto_update_month',monthKey);
+    localStorage.setItem('training_zones_updated_at',now.toISOString());
     var el=document.getElementById('restHrInput');if(el)el.value=avg;
     if(typeof renderActivities==='function')renderActivities();
     refreshTrainingZonesInAllPlans();
@@ -949,7 +950,14 @@ function renderTrainingZonesPanel(){
   var hrEl=document.getElementById('hrZonesTable');
   var pwEl=document.getElementById('powerZonesTable');
   var hrSubEl=document.getElementById('hrZonesSub');
-  if(hrSubEl)hrSubEl.textContent='Max HR '+maxHR+' bpm \u00b7 Resting HR '+restHR+' bpm';
+  if(hrSubEl){
+    var tzUpdatedRaw=localStorage.getItem('training_zones_updated_at'),tzUpdatedSuffix='';
+    if(tzUpdatedRaw){
+      var tzUpdatedDate=new Date(tzUpdatedRaw);
+      if(!isNaN(tzUpdatedDate.getTime()))tzUpdatedSuffix=' \u00b7 Updated '+tzUpdatedDate.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    }
+    hrSubEl.textContent='Max HR '+maxHR+' bpm \u00b7 Resting HR '+restHR+' bpm'+tzUpdatedSuffix;
+  }
   if(hrEl){
     hrEl.innerHTML=getCVDZones().map(function(zi){
       var range=zi.hi<220?(zi.lo+'\u2013'+zi.hi+' bpm'):(zi.lo+'+ bpm');
