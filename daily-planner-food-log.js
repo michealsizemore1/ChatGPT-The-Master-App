@@ -653,6 +653,54 @@ function gusisQuickAdd(){
   if(flash){flash.textContent='✓ Added '+p.flavor+' to Sports Nutrition';flash.style.display='block';setTimeout(function(){flash.style.display='none';},2500);}
 }
 
+// ── Supplements Quick Add ─────────────────────────────────────────────────
+// Label nutrition facts, entered from the official Nature Made Supplement
+// Facts panels (naturemade.com / retailer product pages), not AI-estimated.
+const SUPPLEMENT_PRODUCTS=[
+  {brand:'Nature Made',name:'Multi For Him 50+ (USP Verified)',serving:'1 tablet',cal:0,carbs:0,prot:0,fat:0,vitA:750,vitC:180,vitD:25,vitE:27,vitK:80,vitB1:1.5,vitB2:1.7,vitB3:20,vitB6:6,vitB12:25,folate:665,biotin:30,vitB5:10,calcium:160,iodine:150,magnesium:100,zinc:15,selenium:105,copper:2,manganese:4,chromium:120,molybdenum:75},
+  {brand:'Nature Made',name:'Magnesium Oxide 250mg',serving:'1 tablet',cal:0,carbs:0,prot:0,fat:0,magnesium:250},
+  {brand:'Nature Made',name:'Iron 65mg (Ferrous Sulfate)',serving:'1 tablet',cal:0,carbs:0,prot:0,fat:0,iron:65}
+];
+function renderSupplementPicker(){
+  var sel=document.getElementById('suppProductSelect');
+  if(!sel)return;
+  var curVal=sel.value;
+  sel.innerHTML=SUPPLEMENT_PRODUCTS.map(function(p,idx){return '<option value="'+idx+'">'+escHtml(p.brand+' '+p.name)+'</option>';}).join('');
+  if(curVal!==''&&SUPPLEMENT_PRODUCTS[parseInt(curVal,10)])sel.value=curVal;
+  supplementUpdatePreview();
+}
+function supplementUpdatePreview(){
+  var sel=document.getElementById('suppProductSelect'),prev=document.getElementById('suppPreview');
+  if(!sel||!prev)return;
+  var p=SUPPLEMENT_PRODUCTS[parseInt(sel.value,10)];
+  if(!p){prev.textContent='';return;}
+  var bits=[p.serving,p.cal+' cal'];
+  MICRO_FIELDS.forEach(function(f){
+    if(p[f]){var meta=nutrientMeta(f);bits.push((meta?meta.label:f)+' '+p[f]+(meta?meta.unit:''));}
+  });
+  prev.textContent=bits.join(' · ');
+}
+function supplementQuickAdd(){
+  var sel=document.getElementById('suppProductSelect');
+  if(!sel||sel.value==='')return;
+  var p=SUPPLEMENT_PRODUCTS[parseInt(sel.value,10)];
+  if(!p)return;
+  var item={
+    id:'f'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+    meal:'supplements',name:p.brand+' '+p.name,servingLabel:p.serving,servings:1,
+    cal:p.cal||null,prot:p.prot||null,fat:p.fat||null,carbs:p.carbs||null
+  };
+  MICRO_FIELDS.forEach(function(f){item[f]=(p[f]!==undefined&&p[f]!==null&&p[f]!==0)?p[f]:null;});
+  if(!window._foodLog)window._foodLog=[];
+  window._foodLog.push(item);
+  _setMealOpen('supplements',true);
+  renderFoodItems();save();
+  if(typeof v26Toast==='function')v26Toast('Added '+item.name+' to Supplements');
+  var flash=document.getElementById('suppAddFlash');
+  if(flash){flash.textContent='✓ Added '+p.name+' to Supplements';flash.style.display='block';setTimeout(function(){flash.style.display='none';},2500);}
+}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',renderSupplementPicker);}else{renderSupplementPicker();}
+
 function _mkMacroCell(labelTxt, field, val, highlight, itemId){
   var lbl=document.createElement('label');
   lbl.style.cssText='font-size:0.68rem;color:'+(highlight?'#e67e22':'#888')+(highlight?';font-weight:700':'')+';display:flex;flex-direction:column;align-items:center;gap:1px;';
