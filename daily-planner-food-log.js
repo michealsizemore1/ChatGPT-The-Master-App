@@ -142,7 +142,7 @@ function renderPersonalMacroMeals(){
   var matches=buildPersonalMacroMeals();
   window._personalMacroMeals=matches;
   if(!matches.length){
-    wrap.innerHTML='<div style="font-size:.76rem;color:#78716c;padding:2px 0 14px;">No close matches yet — log a few foods or star some as Favorites (⭐) and this section will build 20/60/20 combinations from your own foods automatically.</div>';
+    wrap.innerHTML='<div style="font-size:.76rem;color:#78716c;padding:2px 0 14px;">No close matches yet — log a few foods or star some into your Food Database (⭐) and this section will build 20/60/20 combinations from your own foods automatically.</div>';
     return;
   }
   var mealOptions=MEALS.map(function(m){return '<option value="'+m+'">'+(MEAL_LABELS[m]||m).replace(/^[^\w]+/,'')+'</option>';}).join('');
@@ -196,12 +196,11 @@ function applyFoodServingUnit(id,unit){
 }
 
 // Micronutrient fields tracked per food item, in addition to cal/prot/fat/carbs
-const MICRO_FIELDS=['fiber','sugar','sodium','vitA','vitC','vitD','calcium','iron','potassium','caffeine','magnesium','vitB12'];
+const MICRO_FIELDS=['fiber','sugar','sodium','vitC','vitD','calcium','iron','potassium','caffeine','magnesium','vitB12','zinc'];
 const MICRO_META={
   fiber:{label:'Fiber',unit:'g',icon:'🌾',elId:'totFiber'},
   sugar:{label:'Sugar',unit:'g',icon:'🍬',elId:'totSugar'},
   sodium:{label:'Sodium',unit:'mg',icon:'🧂',elId:'totSodium'},
-  vitA:{label:'Vit A',unit:'mcg',icon:'🥕',elId:'totVitA'},
   vitC:{label:'Vit C',unit:'mg',icon:'🍊',elId:'totVitC'},
   vitD:{label:'Vit D',unit:'mcg',icon:'☀️',elId:'totVitD'},
   calcium:{label:'Calcium',unit:'mg',icon:'🦴',elId:'totCalcium'},
@@ -209,8 +208,250 @@ const MICRO_META={
   potassium:{label:'Potassium',unit:'mg',icon:'🍌',elId:'totPotassium'},
   caffeine:{label:'Caffeine',unit:'mg',icon:'☕',elId:'totCaffeine'},
   magnesium:{label:'Magnesium',unit:'mg',icon:'💪',elId:'totMagnesium'},
-  vitB12:{label:'Vit B12',unit:'mcg',icon:'⚡',elId:'totVitB12'}
+  vitB12:{label:'Vit B12',unit:'mcg',icon:'⚡',elId:'totVitB12'},
+  zinc:{label:'Zinc',unit:'mg',icon:'🦪',elId:'totZinc'}
 };
+// Maps our MICRO_FIELDS names to Open Food Facts' nutrient taxonomy IDs
+// (world.openfoodfacts.org/data/taxonomies/nutrients.json), used by the
+// barcode lookup below. Verified against OFF's own declared per-nutrient
+// units -- every one of these already matches MICRO_META's unit, so no
+// conversion is needed except sodium, which OFF reports in grams.
+const OFF_NUTRIENT_KEY={fiber:'fiber',sugar:'sugars',sodium:'sodium',vitC:'vitamin-c',vitD:'vitamin-d',calcium:'calcium',iron:'iron',potassium:'potassium',caffeine:'caffeine',magnesium:'magnesium',vitB12:'vitamin-b12',zinc:'zinc'};
+
+// ── AI nutrient enrichment for already-saved favorites/meals ──
+// Lets the user backfill missing nutrient fields -- macros (calories,
+// protein, fat, carbs) AND micronutrients -- on foods that were saved
+// before those fields existed or were left blank, without re-scanning or
+// re-adding them. Only ever fills fields that are currently null/undefined
+// -- never touches a field that already has a real value, including an
+// intentional 0. The AI is explicitly told to use its real nutritional
+// knowledge and only report 0 when a value is genuinely negligible or
+// absent for that specific food, never to mean "I don't know" -- so a
+// micronutrient only gets filled in with a real estimate, not a guess
+// fabricated just to fill the field.
+var MACRO_META={cal:{label:'Calories',unit:''},prot:{label:'Protein',unit:'g'},fat:{label:'Fat',unit:'g'},carbs:{label:'Carbs',unit:'g'}};
+var MACRO_FIELDS=['cal','prot','fat','carbs'];
+function nutrientMeta(f){return MACRO_META[f]||MICRO_META[f];}
+function missingNutrientFields(item){
+  return MACRO_FIELDS.concat(MICRO_FIELDS).filter(function(f){return item[f]==null;});
+}
+// Best-effort chain-name match used as a fallback for foods that never got
+// an explicit restaurant flag (legacy favorites/meals from before this
+// feature, or anything added without going through a path that sets it).
+// Each entry is pre-normalized: lowercase, letters/digits only.
+var RESTAURANT_CHAINS=['mcdonalds','burgerking','wendys','chickfila','tacobell','chipotle','subway','panera','starbucks','dunkin','kfc','popeyes','pizzahut','dominos','papajohns','littlecaesars','fiveguys','innout','shakeshack','sonic','arbys','jimmyjohns','jerseymikes','pandaexpress','qdoba','moes','wingstop','buffalowildwings','applebees','chilis','olivegarden','redlobster','outback','texasroadhouse','crackerbarrel','ihop','dennys','wafflehouse','culvers','whataburger','raisingcanes','zaxbys','bojangles','carlsjr','hardees','dairyqueen','baskinrobbins','coldstone','smoothieking','jambajuice','noodlescompany','chuys','elpolloloco','steaknshake','whitecastle','checkers','rallys','captainds','longjohnsilvers','tacojohns','cornerbakery','firehousesubs','potbelly','jasondeli'];
+function looksLikeRestaurantFood(name){
+  if(!name)return false;
+  var n=String(name).toLowerCase().replace(/[^a-z0-9]/g,'');
+  return RESTAURANT_CHAINS.some(function(c){return n.indexOf(c)!==-1;});
+}
+// Effective restaurant status for a food: an explicit true/false flag (set
+// manually via the 🍽️ toggle, or automatically when the item was added)
+// always wins; only legacy items with no flag at all fall back to a
+// best-effort name match.
+function isRestaurantFood(item){
+  if(!item)return false;
+  if(typeof item.restaurant==='boolean')return item.restaurant;
+  return looksLikeRestaurantFood(item.name);
+}
+// Fields Enrich is actually allowed to fill in. Same as missingNutrientFields
+// except restaurant foods always report none -- AI estimates are especially
+// unreliable without a menu or verified nutrition source to check against,
+// so Enrich (single-item and bulk) simply has nothing to do for them.
+function enrichableFields(item){
+  return isRestaurantFood(item)?[]:missingNutrientFields(item);
+}
+function aiEstimateNutrients(name,servingLabel,fields,cal,prot,fat,carbs){
+  if(!fields||!fields.length)return Promise.resolve({});
+  var key=journalAIKey();
+  if(!key)return Promise.reject(new Error('Add your Anthropic API key in Settings first.'));
+  var schema=fields.map(function(f){var meta=nutrientMeta(f);return '"'+f+'": '+meta.label+(meta.unit?' in '+meta.unit:'')+' per serving as a plain number';}).join('\n- ');
+  var refs=[cal?Math.round(cal)+' calories':'',prot?prot+'g protein':'',fat?fat+'g fat':'',carbs?carbs+'g carbs':''].filter(Boolean).join(', ');
+  var prompt='Estimate nutrition values for this specific food: '+name+(servingLabel?' ('+servingLabel+')':'')+'.\n'
+    +(refs?'For reference, this serving has about '+refs+'.\n':'')
+    +'Respond with ONLY a single JSON object -- no markdown, no code fences, no explanation, nothing else before or after. The JSON must have these exact keys:\n'
+    +'- '+schema+'\n'
+    +'Use your best nutritional knowledge for realistic values specific to this food. All numeric values must be numbers, not strings. Use 0 only when a value is genuinely negligible or absent for this food, never to mean unknown.';
+  return fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'x-api-key':key,'anthropic-version':'2023-06-01','content-type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1000,messages:[{role:'user',content:prompt}]})
+  }).then(function(r){return r.json();}).then(function(data){
+    var text=(data.content&&data.content[0]&&data.content[0].text)||'';
+    var m=text.match(/\{[\s\S]*\}/);
+    if(!m)throw new Error('Could not parse AI response.');
+    var parsed=JSON.parse(m[0]);
+    var result={};
+    fields.forEach(function(f){result[f]=(parsed[f]!==undefined&&parsed[f]!==null)?parsed[f]:0;});
+    return result;
+  });
+}
+// Records which fields on a favorite/meal-item were filled in by the AI
+// Enrich feature (as opposed to coming from a real scan, AI Food Search, or
+// manual entry) so the UI can mark them as estimates rather than presenting
+// them as if they were sourced data. Merges with anything already marked.
+function markEstimated(obj,fields){
+  var set=obj.aiEstimatedFields||[];
+  fields.forEach(function(k){if(set.indexOf(k)===-1)set.push(k);});
+  obj.aiEstimatedFields=set;
+}
+function enrichFavoriteNutrients(idx,btn){
+  var favs=getFavorites();var f=favs[idx];if(!f)return;
+  if(isRestaurantFood(f)){alert('"'+f.name+'" is marked as a restaurant food, so Enrich skips it. Tap the \ud83c\udf7d\ufe0f button first if you want to enrich it anyway.');return;}
+  var missing=missingNutrientFields(f);
+  if(!missing.length){alert('"'+f.name+'" already has every tracked nutrient filled in.');return;}
+  var orig=btn?btn.innerHTML:'';if(btn){btn.disabled=true;btn.innerHTML='\u23F3';}
+  aiEstimateNutrients(f.name,f.servingLabel,missing,f.cal,f.prot,f.fat,f.carbs).then(function(values){
+    missing.forEach(function(k){f[k]=values[k];});
+    markEstimated(f,missing);
+    saveFavorites(favs);
+    renderFavsList();
+  }).catch(function(err){
+    alert('Could not enrich "'+f.name+'": '+err.message);
+    if(btn){btn.disabled=false;btn.innerHTML=orig;}
+  });
+}
+function enrichMealNutrients(mealIdx,btn){
+  var meals=getSavedMeals();var m=meals[mealIdx];if(!m)return;
+  var entries=m.items.map(function(it){return {it:it,missing:enrichableFields(it)};}).filter(function(x){return x.missing.length;});
+  if(!entries.length){alert('"'+m.name+'" already has every tracked nutrient filled in for all items.');return;}
+  if(btn)btn.disabled=true;
+  var chain=Promise.resolve(),failed=0;
+  entries.forEach(function(entry,n){
+    chain=chain.then(function(){
+      if(btn)btn.innerHTML='\u23F3 '+(n+1)+'/'+entries.length;
+      return aiEstimateNutrients(entry.it.name,entry.it.servingLabel,entry.missing,entry.it.cal,entry.it.prot,entry.it.fat,entry.it.carbs).then(function(values){
+        entry.missing.forEach(function(k){entry.it[k]=values[k];});
+        markEstimated(entry.it,entry.missing);
+      }).catch(function(){failed++;});
+    });
+  });
+  chain.then(function(){
+    saveSavedMeals(meals);
+    renderMealsList();
+    if(failed)alert('Enriched '+(entries.length-failed)+' of '+entries.length+' items in "'+m.name+'". '+failed+' failed -- check your AI key/usage and try again.');
+  });
+}
+
+// Bulk versions: enrich every favorite, or every item across every saved
+// meal, in one tap instead of one button press per food. Same AI key, same
+// only-fill-what's-missing rule, just run one food at a time in sequence
+// (rather than in parallel) so a slow or rate-limited response doesn't pile
+// up a burst of simultaneous requests.
+function enrichAllFavorites(btn){
+  var favs=getFavorites();
+  var entries=favs.map(function(f){return {f:f,missing:enrichableFields(f)};}).filter(function(x){return x.missing.length;});
+  if(!entries.length){alert('Nothing to enrich -- everything in your Food Database is either complete or marked as a restaurant food.');return;}
+  if(!confirm('Enrich '+entries.length+' food'+(entries.length===1?'':'s')+' using AI? This runs one at a time and may take a little while.'))return;
+  if(btn)btn.disabled=true;
+  var orig=btn?btn.innerHTML:'';
+  var chain=Promise.resolve(),failed=0;
+  entries.forEach(function(entry,n){
+    chain=chain.then(function(){
+      if(btn)btn.innerHTML='\u23F3 Enriching '+(n+1)+'/'+entries.length+'\u2026';
+      return aiEstimateNutrients(entry.f.name,entry.f.servingLabel,entry.missing,entry.f.cal,entry.f.prot,entry.f.fat,entry.f.carbs).then(function(values){
+        entry.missing.forEach(function(k){entry.f[k]=values[k];});
+        markEstimated(entry.f,entry.missing);
+      }).catch(function(){failed++;});
+    });
+  });
+  chain.then(function(){
+    saveFavorites(favs);
+    renderFavsList();
+    alert('Enriched '+(entries.length-failed)+' of '+entries.length+' foods.'+(failed?(' '+failed+' failed -- check your AI key/usage and try again.'):''));
+  }).catch(function(){
+    if(btn){btn.disabled=false;btn.innerHTML=orig;}
+  });
+}
+function enrichAllMeals(btn){
+  var meals=getSavedMeals();
+  var entries=[];
+  meals.forEach(function(m){
+    m.items.forEach(function(it){
+      var missing=enrichableFields(it);
+      if(missing.length)entries.push({it:it,missing:missing});
+    });
+  });
+  if(!entries.length){alert('Nothing to enrich -- every item across your saved meals is either complete or marked as a restaurant food.');return;}
+  if(!confirm('Enrich '+entries.length+' food item'+(entries.length===1?'':'s')+' across your saved meals using AI? This runs one at a time and may take a little while.'))return;
+  if(btn)btn.disabled=true;
+  var orig=btn?btn.innerHTML:'';
+  var chain=Promise.resolve(),failed=0;
+  entries.forEach(function(entry,n){
+    chain=chain.then(function(){
+      if(btn)btn.innerHTML='\u23F3 Enriching '+(n+1)+'/'+entries.length+'\u2026';
+      return aiEstimateNutrients(entry.it.name,entry.it.servingLabel,entry.missing,entry.it.cal,entry.it.prot,entry.it.fat,entry.it.carbs).then(function(values){
+        entry.missing.forEach(function(k){entry.it[k]=values[k];});
+        markEstimated(entry.it,entry.missing);
+      }).catch(function(){failed++;});
+    });
+  });
+  chain.then(function(){
+    saveSavedMeals(meals);
+    renderMealsList();
+    alert('Enriched '+(entries.length-failed)+' of '+entries.length+' items across your saved meals.'+(failed?(' '+failed+' failed -- check your AI key/usage and try again.'):''));
+  }).catch(function(){
+    if(btn){btn.disabled=false;btn.innerHTML=orig;}
+  });
+}
+
+// Undo versions: clear whatever the Enrich feature filled in (tracked via
+// aiEstimatedFields), reverting those specific fields back to null so the
+// food reads as "missing" that data again, exactly as it did before being
+// enriched. Never touches a field that wasn't AI-estimated.
+function undoFavoriteEstimate(idx,btn){
+  var favs=getFavorites();var f=favs[idx];if(!f)return;
+  var fields=f.aiEstimatedFields||[];
+  if(!fields.length){alert('Nothing to undo for "'+f.name+'".');return;}
+  if(!confirm('Remove the '+fields.length+' AI-estimated value'+(fields.length===1?'':'s')+' from "'+f.name+'"? This cannot be undone.'))return;
+  fields.forEach(function(k){f[k]=null;});
+  f.aiEstimatedFields=[];
+  saveFavorites(favs);
+  renderFavsList();
+}
+function undoAllFavoritesEstimates(btn){
+  var favs=getFavorites();
+  var affected=favs.filter(function(f){return (f.aiEstimatedFields||[]).length>0;});
+  if(!affected.length){alert('No AI-estimated values to undo across your Food Database.');return;}
+  var total=affected.reduce(function(a,f){return a+f.aiEstimatedFields.length;},0);
+  if(!confirm('Remove '+total+' AI-estimated value'+(total===1?'':'s')+' across '+affected.length+' food'+(affected.length===1?'':'s')+'? This cannot be undone.'))return;
+  affected.forEach(function(f){
+    f.aiEstimatedFields.forEach(function(k){f[k]=null;});
+    f.aiEstimatedFields=[];
+  });
+  saveFavorites(favs);
+  renderFavsList();
+}
+function undoMealEstimate(mealIdx,btn){
+  var meals=getSavedMeals();var m=meals[mealIdx];if(!m)return;
+  var count=m.items.reduce(function(a,it){return a+((it.aiEstimatedFields&&it.aiEstimatedFields.length)||0);},0);
+  if(!count){alert('Nothing to undo for "'+m.name+'".');return;}
+  if(!confirm('Remove '+count+' AI-estimated value'+(count===1?'':'s')+' from "'+m.name+'"? This cannot be undone.'))return;
+  m.items.forEach(function(it){
+    (it.aiEstimatedFields||[]).forEach(function(k){it[k]=null;});
+    it.aiEstimatedFields=[];
+  });
+  saveSavedMeals(meals);
+  renderMealsList();
+}
+function undoAllMealsEstimates(btn){
+  var meals=getSavedMeals();
+  var total=0,affectedMeals=0;
+  meals.forEach(function(m){
+    var mealTotal=m.items.reduce(function(a,it){return a+((it.aiEstimatedFields&&it.aiEstimatedFields.length)||0);},0);
+    if(mealTotal>0){affectedMeals++;total+=mealTotal;}
+  });
+  if(!total){alert('No AI-estimated values to undo across your saved meals.');return;}
+  if(!confirm('Remove '+total+' AI-estimated value'+(total===1?'':'s')+' across '+affectedMeals+' meal'+(affectedMeals===1?'':'s')+'? This cannot be undone.'))return;
+  meals.forEach(function(m){
+    m.items.forEach(function(it){
+      (it.aiEstimatedFields||[]).forEach(function(k){it[k]=null;});
+      it.aiEstimatedFields=[];
+    });
+  });
+  saveSavedMeals(meals);
+  renderMealsList();
+}
 
 // Quick-add product database for the Sports Nutrition section: full current
 // GU Energy and SiS (Science in Sport) product lines (gels, chews, bars,
@@ -323,7 +564,17 @@ const GUSIS_PRODUCTS=[
   {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Vanilla',serving:'1 shake (11 fl oz)',cal:160,carbs:4,prot:30,fat:3,sodium:230,potassium:0,caffeine:0},
   {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Caramel',serving:'1 shake (11 fl oz)',cal:160,carbs:2,prot:30,fat:3,sodium:350,potassium:0,caffeine:0},
   {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Cookies and Cream',serving:'1 shake (11 fl oz)',cal:160,carbs:4,prot:30,fat:3,sodium:220,potassium:0,caffeine:0},
-  {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Chocolate Peanut Butter',serving:'1 shake (11 fl oz)',cal:160,carbs:5,prot:30,fat:3,sodium:380,potassium:0,caffeine:0}
+  {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Chocolate Peanut Butter',serving:'1 shake (11 fl oz)',cal:160,carbs:5,prot:30,fat:3,sodium:380,potassium:0,caffeine:0},
+  {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Café Latte',serving:'1 shake (11 fl oz)',cal:160,carbs:4,prot:30,fat:3,sodium:260,potassium:0,caffeine:0},
+  {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Cookie Dough',serving:'1 shake (11 fl oz)',cal:160,carbs:3,prot:30,fat:3,sodium:330,potassium:0,caffeine:0},
+  {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Cinnamon Roll',serving:'1 shake (11 fl oz)',cal:160,carbs:3,prot:30,fat:3,sodium:230,potassium:0,caffeine:0},
+  {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Cake Batter',serving:'1 shake (11 fl oz)',cal:160,carbs:4,prot:30,fat:3,sodium:370,potassium:0,caffeine:0},
+  {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Peaches & Cream',serving:'1 shake (11 fl oz)',cal:160,carbs:3,prot:30,fat:3,sodium:230,potassium:0,caffeine:0},
+  {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Strawberries & Cream',serving:'1 shake (11 fl oz)',cal:160,carbs:3,prot:30,fat:3,sodium:230,potassium:0,caffeine:0},
+  {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Bananas & Cream',serving:'1 shake (11 fl oz)',cal:160,carbs:4,prot:30,fat:3,sodium:230,potassium:0,caffeine:0},
+  {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Lemon Bar',serving:'1 shake (11 fl oz)',cal:160,carbs:3,prot:30,fat:3,sodium:250,potassium:0,caffeine:0},
+  {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Orange Cream Swirl (Limited Edition)',serving:'1 shake (11 fl oz)',cal:160,carbs:3,prot:30,fat:3,sodium:250,potassium:0,caffeine:0},
+  {brand:'Premier Protein',line:'Premier Protein Shake',flavor:'Pumpkin Spice (Limited Time)',serving:'1 shake (11 fl oz)',cal:160,carbs:2,prot:30,fat:3,sodium:230,potassium:0,caffeine:0}
 ];
 
 function gusisLinesFor(brand){
@@ -393,6 +644,54 @@ function gusisQuickAdd(){
   var flash=document.getElementById('gusisAddFlash');
   if(flash){flash.textContent='✓ Added '+p.flavor+' to Sports Nutrition';flash.style.display='block';setTimeout(function(){flash.style.display='none';},2500);}
 }
+
+// ── Supplements Quick Add ─────────────────────────────────────────────────
+// Label nutrition facts, entered from the official Nature Made Supplement
+// Facts panels (naturemade.com / retailer product pages), not AI-estimated.
+const SUPPLEMENT_PRODUCTS=[
+  {brand:'Nature Made',name:'Multi For Him 50+ (USP Verified)',serving:'1 tablet',cal:0,carbs:0,prot:0,fat:0,vitA:750,vitC:180,vitD:25,vitE:27,vitK:80,vitB1:1.5,vitB2:1.7,vitB3:20,vitB6:6,vitB12:25,folate:665,biotin:30,vitB5:10,calcium:160,iodine:150,magnesium:100,zinc:15,selenium:105,copper:2,manganese:4,chromium:120,molybdenum:75},
+  {brand:'Nature Made',name:'Magnesium Oxide 250mg',serving:'1 tablet',cal:0,carbs:0,prot:0,fat:0,magnesium:250},
+  {brand:'Nature Made',name:'Iron 65mg (Ferrous Sulfate)',serving:'1 tablet',cal:0,carbs:0,prot:0,fat:0,iron:65}
+];
+function renderSupplementPicker(){
+  var sel=document.getElementById('suppProductSelect');
+  if(!sel)return;
+  var curVal=sel.value;
+  sel.innerHTML=SUPPLEMENT_PRODUCTS.map(function(p,idx){return '<option value="'+idx+'">'+escHtml(p.brand+' '+p.name)+'</option>';}).join('');
+  if(curVal!==''&&SUPPLEMENT_PRODUCTS[parseInt(curVal,10)])sel.value=curVal;
+  supplementUpdatePreview();
+}
+function supplementUpdatePreview(){
+  var sel=document.getElementById('suppProductSelect'),prev=document.getElementById('suppPreview');
+  if(!sel||!prev)return;
+  var p=SUPPLEMENT_PRODUCTS[parseInt(sel.value,10)];
+  if(!p){prev.textContent='';return;}
+  var bits=[p.serving,p.cal+' cal'];
+  MICRO_FIELDS.forEach(function(f){
+    if(p[f]){var meta=nutrientMeta(f);bits.push((meta?meta.label:f)+' '+p[f]+(meta?meta.unit:''));}
+  });
+  prev.textContent=bits.join(' · ');
+}
+function supplementQuickAdd(){
+  var sel=document.getElementById('suppProductSelect');
+  if(!sel||sel.value==='')return;
+  var p=SUPPLEMENT_PRODUCTS[parseInt(sel.value,10)];
+  if(!p)return;
+  var item={
+    id:'f'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+    meal:'supplements',name:p.brand+' '+p.name,servingLabel:p.serving,servings:1,
+    cal:p.cal||null,prot:p.prot||null,fat:p.fat||null,carbs:p.carbs||null
+  };
+  MICRO_FIELDS.forEach(function(f){item[f]=(p[f]!==undefined&&p[f]!==null&&p[f]!==0)?p[f]:null;});
+  if(!window._foodLog)window._foodLog=[];
+  window._foodLog.push(item);
+  _setMealOpen('supplements',true);
+  renderFoodItems();save();
+  if(typeof v26Toast==='function')v26Toast('Added '+item.name+' to Supplements');
+  var flash=document.getElementById('suppAddFlash');
+  if(flash){flash.textContent='✓ Added '+p.name+' to Supplements';flash.style.display='block';setTimeout(function(){flash.style.display='none';},2500);}
+}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',renderSupplementPicker);}else{renderSupplementPicker();}
 
 function _mkMacroCell(labelTxt, field, val, highlight, itemId){
   var lbl=document.createElement('label');
@@ -624,7 +923,7 @@ function renderFoodItems(){
         nameInp.onchange=(function(id){return function(){updateFoodField(id,'name',this.value);};})(it.id);
 
         var favBtn=document.createElement('button');
-        favBtn.title='Favorite'; favBtn.textContent='⭐';
+        favBtn.title='Save to Food Database'; favBtn.textContent='⭐';
         favBtn.style.cssText='background:'+(isFavItem?'#f39c12':'#ddd')+';color:#fff;border:none;border-radius:5px;width:26px;height:26px;cursor:pointer;font-size:0.78rem;flex-shrink:0;';
         favBtn.onclick=(function(id){return function(){saveFoodAsFavorite(id);};})(it.id);
 
@@ -790,49 +1089,46 @@ function aiSearchFood(){
   if(!key){alert('Please enter your AI key in Settings first.');return;}
   var resultsDiv=document.getElementById('aiFoodResults');
   if(resultsDiv){resultsDiv.style.display='block';resultsDiv.innerHTML='<div style="color:#666;font-size:0.82rem;padding:4px;">&#x23F3; Searching...</div>';}
+  // Built from MICRO_FIELDS/MICRO_META so every tracked micronutrient is
+  // requested automatically -- adding a nutrient to MICRO_META is enough
+  // to have this search path pick it up too, no separate list to maintain.
+  var microSchema=MICRO_FIELDS.map(function(f){return '"'+f+'": '+MICRO_META[f].label+' in '+MICRO_META[f].unit+' per serving as a plain number';}).join('\n- ');
   var prompt='Return nutrition facts for: '+q+'\n'
-    +'Format each food/serving as a single line: NAME | CALORIES cal | PROTEINg protein | FATg fat | CARBSg carbs | FIBERg fiber | SUGARg sugar | SODIUMmg sodium | VITAmcg vitA | VITCmg vitC | VITDmcg vitD | CALCIUMmg calcium | IRONmg iron | POTASSIUMmg potassium | MAGNESIUMmg magnesium | VITB12mcg vitB12\n'
-    +'Use your best nutritional knowledge for realistic values, including fiber, sugar, sodium, vitamins and minerals. Use 0 for a value only if it is genuinely negligible.\n'
-    +'Include 1-3 common serving sizes if relevant. Be concise. No extra text.';
+    +'Respond with ONLY a single JSON object -- no markdown, no code fences, no explanation, nothing else before or after. The JSON must be {"foods":[...]}  with 1 to 3 entries (one per common serving size, if relevant). Each entry must have these exact keys:\n'
+    +'- "name": the food name, including the serving size if relevant (for example "Banana, medium")\n'
+    +'- "servingLabel": the serving size as a short string (for example "1 medium (118g)")\n'
+    +'- "cal": Calories per serving as a plain number\n'
+    +'- "prot": Protein grams per serving as a plain number\n'
+    +'- "fat": Total Fat grams per serving as a plain number\n'
+    +'- "carbs": Total Carbohydrate grams per serving as a plain number\n'
+    +'- '+microSchema+'\n'
+    +'Use your best nutritional knowledge for realistic values, including every listed micronutrient -- do not skip any of them. All numeric values must be numbers, not strings. Use 0 only when a value is genuinely negligible or absent, never to mean unknown.';
   fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
     headers:{'x-api-key':key,'anthropic-version':'2023-06-01','content-type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
-    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:600,messages:[{role:'user',content:prompt}]})
+    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:2000,messages:[{role:'user',content:prompt}]})
   }).then(function(r){return r.json();}).then(function(data){
-    var text=(data.content&&data.content[0]&&data.content[0].text)||'';
+    if(data.error)throw new Error(data.error.message);
+    var text=(data.content&&data.content[0]&&data.content[0].text||'').trim();
     if(!text){if(resultsDiv)resultsDiv.innerHTML='<div style="color:#e74c3c;font-size:0.82rem;">No results.</div>';return;}
-    var lines=text.split('\n').map(function(l){return l.trim();}).filter(function(l){return l.includes('|');});
-    if(!lines.length){if(resultsDiv)resultsDiv.innerHTML='<div style="color:#e74c3c;font-size:0.82rem;">Could not parse results.</div>';return;}
+    var parsed;
+    try{parsed=JSON.parse(text);}catch(e){
+      var m=text.match(/\{[\s\S]*\}/);
+      if(m){try{parsed=JSON.parse(m[0]);}catch(e2){}}
+    }
+    var foods=(parsed&&parsed.foods)||[];
+    if(!foods.length){if(resultsDiv)resultsDiv.innerHTML='<div style="color:#e74c3c;font-size:0.82rem;">Could not parse results.</div>';return;}
     // Store parsed items in window cache to avoid onclick quoting issues
     window._aiFoodCache=[];
     var html='<div style="display:flex;flex-direction:column;gap:5px;">';
-    lines.forEach(function(line,idx){
-      var parts=line.split('|').map(function(p){return p.trim();});
-      var name=parts[0]||'';
-      var cal=0,prot=0,fat=0,carbs=0,fiber=0,sugar=0,sodium=0,vitA=0,vitC=0,vitD=0,calcium=0,iron=0,potassium=0,magnesium=0,vitB12=0;
-      parts.forEach(function(p){
-        var m;
-        if((m=p.match(/(\d+(?:\.\d+)?)\s*cal/i)))cal=parseFloat(m[1]);
-        else if((m=p.match(/(\d+(?:\.\d+)?)g?\s*protein/i)))prot=parseFloat(m[1]);
-        else if((m=p.match(/(\d+(?:\.\d+)?)g?\s*fat/i)))fat=parseFloat(m[1]);
-        else if((m=p.match(/(\d+(?:\.\d+)?)g?\s*carb/i)))carbs=parseFloat(m[1]);
-        else if((m=p.match(/(\d+(?:\.\d+)?)g?\s*fiber/i)))fiber=parseFloat(m[1]);
-        else if((m=p.match(/(\d+(?:\.\d+)?)g?\s*sugar/i)))sugar=parseFloat(m[1]);
-        else if((m=p.match(/(\d+(?:\.\d+)?)\s*mg?\s*sodium/i)))sodium=parseFloat(m[1]);
-        else if((m=p.match(/(\d+(?:\.\d+)?)\s*mcg?\s*vit\s*a/i)))vitA=parseFloat(m[1]);
-        else if((m=p.match(/(\d+(?:\.\d+)?)\s*mg?\s*vit\s*c/i)))vitC=parseFloat(m[1]);
-        else if((m=p.match(/(\d+(?:\.\d+)?)\s*mcg?\s*vit\s*d/i)))vitD=parseFloat(m[1]);
-        else if((m=p.match(/(\d+(?:\.\d+)?)\s*mg?\s*calcium/i)))calcium=parseFloat(m[1]);
-        else if((m=p.match(/(\d+(?:\.\d+)?)\s*mg?\s*iron/i)))iron=parseFloat(m[1]);
-        else if((m=p.match(/(\d+(?:\.\d+)?)\s*mg?\s*potassium/i)))potassium=parseFloat(m[1]);
-        else if((m=p.match(/(\d+(?:\.\d+)?)\s*mg?\s*magnesium/i)))magnesium=parseFloat(m[1]);
-        else if((m=p.match(/(\d+(?:\.\d+)?)\s*mcg?\s*vit\s*b\s*12/i)))vitB12=parseFloat(m[1]);
-      });
-      window._aiFoodCache.push({name:name,cal:cal,prot:prot,fat:fat,carbs:carbs,fiber:fiber,sugar:sugar,sodium:sodium,vitA:vitA,vitC:vitC,vitD:vitD,calcium:calcium,iron:iron,potassium:potassium,magnesium:magnesium,vitB12:vitB12});
-      var summary=[cal?cal+' cal':'',prot?prot+'g pro':'',fat?fat+'g fat':'',carbs?carbs+'g carb':'',fiber?fiber+'g fiber':'',sodium?sodium+'mg Na':''].filter(Boolean).join(' · ');
+    foods.forEach(function(f,idx){
+      var item={name:String(f.name||q),servingLabel:String(f.servingLabel||'1 serving'),cal:f.cal||0,prot:f.prot||0,fat:f.fat||0,carbs:f.carbs||0};
+      MICRO_FIELDS.forEach(function(mf){item[mf]=(f[mf]!==undefined&&f[mf]!==null&&f[mf]!==0)?f[mf]:0;});
+      window._aiFoodCache.push(item);
+      var summary=[item.cal?item.cal+' cal':'',item.prot?item.prot+'g pro':'',item.fat?item.fat+'g fat':'',item.carbs?item.carbs+'g carb':'',item.fiber?item.fiber+'g fiber':'',item.sodium?item.sodium+'mg Na':''].filter(Boolean).join(' · ');
       html+='<div style="display:flex;justify-content:space-between;align-items:center;background:#fff;border:1px solid #ddd;border-radius:7px;padding:6px 10px;gap:8px;">'
         +'<div style="flex:1;min-width:0;">'
-        +'<div style="font-weight:600;font-size:0.83rem;color:#222;">'+escHtml(name)+'</div>'
+        +'<div style="font-weight:600;font-size:0.83rem;color:#222;">'+escHtml(item.name)+'</div>'
         +(summary?'<div style="font-size:0.77rem;color:#666;">'+escHtml(summary)+'</div>':'')
         +'</div>'
         +'<button onclick="aiAddFoodByIndex('+idx+')" '
@@ -854,7 +1150,8 @@ function aiAddFoodByIndex(idx){
   var item={
     id:'f'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
     meal:meal,name:item_data.name,servingLabel:item_data.servingLabel||'1 serving',servings:1,
-    cal:item_data.cal||null,prot:item_data.prot||null,fat:item_data.fat||null,carbs:item_data.carbs||null
+    cal:item_data.cal||null,prot:item_data.prot||null,fat:item_data.fat||null,carbs:item_data.carbs||null,
+    restaurant:looksLikeRestaurantFood(item_data.name)
   };
   MICRO_FIELDS.forEach(function(f){item[f]=item_data[f]||null;});
   if(!window._foodLog)window._foodLog=[];
@@ -1026,7 +1323,7 @@ function backfillSavedFoodBarcodeImages(skipRender){
 function rescanHealthyFoodsAndImages(button,statusId){
   statusId=statusId||'healthyRescanStatus';
   if(button){button.disabled=true;button.textContent='⏳ Scanning saved foods and pictures…';button.style.opacity='.72';}
-  var status=document.getElementById(statusId);if(status){status.style.display='block';status.style.color='#475569';status.textContent='Checking every saved Nutrition day, Favorite, and available barcode picture…';}
+  var status=document.getElementById(statusId);if(status){status.style.display='block';status.style.color='#475569';status.textContent='Checking every saved Nutrition day, Food Database entry, and available barcode picture…';}
   window._healthyFoodsImported=false;importHealthyFoodsFromSavedNutrition(true);
   backfillSavedFoodBarcodeImages(true).then(function(imagesFound){
     renderHealthyFoodsList();renderFavsList();var done=document.getElementById(statusId),count=getHealthyFoods().length;if(done){done.style.display='block';done.style.color='#166534';done.textContent='✓ Rescan complete: '+count+' healthy food'+(count===1?'':'s')+' found · '+imagesFound+' barcode picture'+(imagesFound===1?'':'s')+' added.';}
@@ -1063,7 +1360,7 @@ function removeDuplicateFoodItems(button,statusId){
     status.style.color=total?'#166534':'#475569';
     var parts=[];
     if(removedToday)parts.push(removedToday+' from the food log');
-    if(removedFavs)parts.push(removedFavs+' from Favorites');
+    if(removedFavs)parts.push(removedFavs+' from your Food Database');
     status.textContent=total?('✓ Removed '+total+' duplicate'+(total===1?'':'s')+' - '+parts.join(', ')+'.'):'No duplicate foods found on this device - everything already looks unique.';
   }
 }
@@ -1248,15 +1545,31 @@ function updateMacroTotals(){
     else {
       // Targets for a 53-year-old male distance runner (US Dietary Reference Intakes, men 51-70).
       // Iron uses the endurance-athlete adjustment (RDA 8mg x ~1.7). Sodium is a floor for
-      // sweat losses with a ceiling: above 4,000mg shows as High.
+      // sweat losses with a ceiling: above 4,000mg shows as High. Magnesium (483mg, ~15%
+      // above the 420mg RDA -- Nielsen & Lukaski, Magnesium Research 2006: strenuous
+      // exercise raises requirements 10-20%) and Zinc (15mg, USDA ARS athletic-performance
+      // figure vs the 11mg RDA) are also athlete-adjusted. Sugar's ceiling floats above the
+      // 36g AHA added-sugar limit by however much Sports Nutrition fueling (gels/drinks) was
+      // logged that day -- that's deliberate carbohydrate fueling, not "added sugar" to
+      // limit. Caffeine's 400mg ceiling is deliberately left as a real safety limit, not
+      // athlete-adjusted: a single race-day dose can legitimately push a day's total higher
+      // by design (ISSN pre-exercise dosing), which should read as a deliberate choice, not
+      // get silently permitted by raising the ceiling.
+      var sportsSugar=log.reduce(function(sum,x){if(x.meal==='sports'){var s=parseFloat(x.servings)||1;sum+=(parseFloat(x.sugar)||0)*s;}return sum;},0);
+      var sugarCeiling=36+sportsSugar;
       var priorityMicros=[
         {name:'Iron',field:'iron',value:totals.iron||0,target:14,unit:'mg'},
         {name:'Calcium',field:'calcium',value:totals.calcium||0,target:1000,unit:'mg'},
         {name:'Vitamin D',field:'vitD',value:totals.vitD||0,target:15,unit:'mcg'},
-        {name:'Magnesium',field:'magnesium',value:totals.magnesium||0,target:420,unit:'mg'},
+        {name:'Magnesium',field:'magnesium',value:totals.magnesium||0,target:483,unit:'mg'},
         {name:'Vitamin B12',field:'vitB12',value:totals.vitB12||0,target:2.4,unit:'mcg'},
         {name:'Sodium',field:'sodium',value:totals.sodium||0,target:2300,max:4000,unit:'mg'},
-        {name:'Potassium',field:'potassium',value:totals.potassium||0,target:3400,unit:'mg'}
+        {name:'Potassium',field:'potassium',value:totals.potassium||0,target:3400,unit:'mg'},
+        {name:'Zinc',field:'zinc',value:totals.zinc||0,target:15,unit:'mg'},
+        {name:'Vitamin C',field:'vitC',value:totals.vitC||0,target:90,unit:'mg'},
+        {name:'Fiber',field:'fiber',value:totals.fiber||0,target:28,unit:'g'},
+        {name:'Sugar',field:'sugar',value:totals.sugar||0,target:sugarCeiling,max:sugarCeiling,unit:'g'},
+        {name:'Caffeine',field:'caffeine',value:totals.caffeine||0,target:400,max:400,unit:'mg'}
       ];
       var completion=priorityMicros.map(function(n){if(n.max&&n.value>n.max)return Math.max(0,1-(n.value-n.max)/n.max);return Math.max(0,Math.min(1,n.value/n.target));});
       var averageCompletion=completion.reduce(function(sum,n){return sum+n;},0)/completion.length;
@@ -1266,12 +1579,12 @@ function updateMacroTotals(){
       if(microQualityLabel)microQualityLabel.textContent=microScore.toFixed(1)+'/10 · '+microLabel;
       if(microQualityMarker)microQualityMarker.style.left=Math.max(0,Math.min(100,(microScore-1)/9*100))+'%';
       if(microQualityTrack)microQualityTrack.setAttribute('aria-valuenow',microScore.toFixed(1));
-      if(microQualityNote)microQualityNote.textContent='Targets for a 53-year-old male distance runner: iron 14mg · calcium 1,000mg · vitamin D 15mcg · magnesium 420mg · vitamin B12 2.4mcg · sodium 2,300–4,000mg · potassium 3,400mg · lowest today: '+weakest.name+' '+Math.round(weakest.value)+weakest.unit;
+      if(microQualityNote)microQualityNote.textContent='Targets for a 53-year-old male distance runner: iron 14mg · calcium 1,000mg · vitamin D 15mcg · magnesium 483mg · vitamin B12 2.4mcg · sodium 2,300–4,000mg · potassium 3,400mg · zinc 15mg · vitamin C 90mg · fiber 28g · sugar ≤'+Math.round(sugarCeiling)+'g'+(sportsSugar>0?' (36g + '+Math.round(sportsSugar)+'g fueling today)':'')+' · caffeine ≤400mg (a single race-day dose can push this higher by design, not a red flag) · lowest today: '+weakest.name+' '+Math.round(weakest.value)+weakest.unit;
       if(microBreakdown)microBreakdown.innerHTML=priorityMicros.map(function(n){
         var pct=n.target?Math.max(0,n.value/n.target*100):0,status=(n.max&&n.value>n.max)?'High':pct>=100?'Met':pct>=75?'Close':'Low';
         var statusColor=status==='Met'?'#166534':(status==='Close'||status==='High')?'#92400e':'#991b1b';
         var shownValue=n.unit==='mg'&&n.value>=100?Math.round(n.value).toLocaleString():Math.round(n.value*10)/10;
-        return '<div role="button" tabindex="0" aria-label="'+n.name+' - tap to see contributing foods" onclick="showMicroSourceBreakdown(\''+n.field+'\',\''+n.name+'\',\''+n.unit+'\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();showMicroSourceBreakdown(\''+n.field+'\',\''+n.name+'\',\''+n.unit+'\');}" style="cursor:pointer;background:#fff;border:1px solid '+statusColor+'33;border-radius:9px;padding:8px;min-width:0;"><div style="font-size:.72rem;font-weight:800;color:#334155;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+n.name+'</div><div style="font-size:.86rem;font-weight:900;color:#1e293b;font-variant-numeric:tabular-nums;">'+shownValue+n.unit+' <span style="font-size:.6rem;font-weight:700;color:#64748b;">/ '+n.target.toLocaleString()+(n.max?'–'+n.max.toLocaleString():'')+n.unit+'</span></div><div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:5px;"><span style="display:inline-block;border-radius:999px;padding:2px 7px;font-size:.62rem;font-weight:800;background:'+statusColor+'1a;color:'+statusColor+';white-space:nowrap;">'+Math.round(pct)+'% · '+status+'</span><span style="color:#cbd5e1;font-size:.68rem;">›</span></div></div>';
+        return '<div role="button" tabindex="0" aria-label="'+n.name+' - tap to see contributing foods" onclick="showMicroSourceBreakdown(\''+n.field+'\',\''+n.name+'\',\''+n.unit+'\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();showMicroSourceBreakdown(\''+n.field+'\',\''+n.name+'\',\''+n.unit+'\');}" style="cursor:pointer;background:#fff;border:1px solid '+statusColor+'33;border-radius:9px;padding:8px;min-width:0;"><div style="font-size:.72rem;font-weight:800;color:#334155;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+n.name+'</div><div style="font-size:.86rem;font-weight:900;color:#1e293b;font-variant-numeric:tabular-nums;">'+shownValue+n.unit+' <span style="font-size:.6rem;font-weight:700;color:#64748b;">/ '+n.target.toLocaleString()+(n.max?'–'+n.max.toLocaleString():'')+n.unit+'</span></div><div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:5px;"><span style="display:inline-block;border-radius:999px;padding:3px 8px;font-size:.74rem;font-weight:800;background:'+statusColor+'1a;color:'+statusColor+';white-space:nowrap;">'+Math.round(pct)+'% · '+status+'</span><span style="color:#cbd5e1;font-size:.68rem;">›</span></div></div>';
       }).join('');
     }
   }
@@ -1369,20 +1682,21 @@ function saveFoodAsFavorite(itemId){
   if(!item){alert('Item not found.');return;}
   var favs=getFavorites();
   var exists=favs.some(function(f){return f.name.toLowerCase()===item.name.toLowerCase();});
-  if(exists){if(!confirm('"'+item.name+'" is already in favorites. Add again?'))return;}
+  if(exists){if(!confirm('"'+item.name+'" is already in your Food Database. Add again?'))return;}
   var fav={name:item.name,cal:item.cal,prot:item.prot,fat:item.fat,carbs:item.carbs,servingLabel:item.servingLabel||'1 serving',servings:parseFloat(item.servings)||1,proteinSource:item.proteinSource||'',carbSource:item.carbSource||'',fatSource:item.fatSource||'',barcode:item.barcode||'',imageUrl:item.imageUrl||'',imageData:item.imageData||''};
   MICRO_FIELDS.forEach(function(f){fav[f]=item[f]!=null?item[f]:null;});
+  fav.restaurant=isRestaurantFood(item);
   favs.push(fav);saveFavorites(favs);
-  alert('⭐ "'+item.name+'" saved to favorites!');
+  alert('⭐ "'+item.name+'" saved to your Food Database!');
   renderFavsList();
 }
 
 function addFavorite(){
-  var name=prompt('Favorite food name:','');if(!name||!name.trim())return;
+  var name=prompt('Food name:','');if(!name||!name.trim())return;
   var cal=prompt('Calories:','');var prot=prompt('Protein g:','');
   var fat=prompt('Fat g:','');var carbs=prompt('Carbs g:','');
   var favs=getFavorites();
-  favs.push({name:name.trim(),cal:cal.trim()?parseFloat(cal)||null:null,prot:prot.trim()?parseFloat(prot)||null:null,fat:fat.trim()?parseFloat(fat)||null:null,carbs:carbs.trim()?parseFloat(carbs)||null:null});
+  favs.push({name:name.trim(),cal:cal.trim()?parseFloat(cal)||null:null,prot:prot.trim()?parseFloat(prot)||null:null,fat:fat.trim()?parseFloat(fat)||null:null,carbs:carbs.trim()?parseFloat(carbs)||null:null,restaurant:looksLikeRestaurantFood(name.trim())});
   saveFavorites(favs);renderFavsList();
 }
 
@@ -1543,18 +1857,26 @@ function renderFavsList(){
   updateFavoriteFoodsCount(favs.length);
   var q=(document.getElementById('favSearch')||{value:''}).value.toLowerCase().trim();
   var filtered=q?favs.filter(function(f){return f.name.toLowerCase().includes(q);}):favs;filtered=applyFoodSort(filtered);
-  var photoHelp='<div style="font-size:.68rem;color:#64748b;margin:0 0 6px;">Use 📷 Take for the camera or 🖼 Choose for a picture already on your phone.</div><button onclick="rescanHealthyFoodsAndImages(this,\'favoriteRescanStatus\')" style="width:100%;margin:0 0 5px;background:#fff7ed;color:#9a3412;border:1px solid #fdba74;border-radius:6px;padding:7px;font-size:.74rem;font-weight:800;cursor:pointer;">↻ Rescan foods & barcode pictures</button><div id="favoriteRescanStatus" role="status" aria-live="polite" style="display:none;font-size:.7rem;font-weight:700;line-height:1.35;margin:0 2px 7px;"></div><button type="button" onclick="removeDuplicateFoodItems(this)" style="width:100%;margin:0 0 5px;background:#fff7ed;color:#9a3412;border:1px solid #fdba74;border-radius:6px;padding:7px;font-size:.74rem;font-weight:800;cursor:pointer;">🧹 Remove Duplicate Foods</button><div id="dedupeFoodStatus" role="status" aria-live="polite" style="display:none;font-size:.7rem;font-weight:700;line-height:1.35;margin:0 2px 7px;"></div>';
-  if(!filtered.length){el.innerHTML=photoHelp+'<div style="font-size:0.8rem;color:#bbb;text-align:center;padding:12px;">No favorites yet. Add items from your food log with ⭐</div>';return;}
+  var favNeedCount=favs.filter(function(f){return enrichableFields(f).length>0;}).length;
+  var favEstCount=favs.filter(function(f){return (f.aiEstimatedFields||[]).length>0;}).length;
+  var photoHelp='<div style="font-size:.68rem;color:#64748b;margin:0 0 6px;">Use 📷 Take for the camera or 🖼 Choose for a picture already on your phone.</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin:0 0 6px;"><button type="button" '+(favNeedCount?('onclick="enrichAllFavorites(this)"'):'disabled')+' style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:54px;border-radius:8px;font-weight:800;text-align:center;line-height:1.15;background:'+(favNeedCount?'#eef2ff':'#f1f5f9')+';color:'+(favNeedCount?'#4338ca':'#94a3b8')+';border:1px solid '+(favNeedCount?'#c7d2fe':'#e2e8f0')+';cursor:'+(favNeedCount?'pointer':'default')+';"><span style="font-size:1.05rem;">🧪</span><span style="font-size:.66rem;">Enrich All</span><span style="font-size:.58rem;font-weight:700;opacity:.85;">'+(favNeedCount?'('+favNeedCount+' need it)':'(all complete)')+'</span></button><button type="button" '+(favEstCount?('onclick="undoAllFavoritesEstimates(this)"'):'disabled')+' style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:54px;border-radius:8px;font-weight:800;text-align:center;line-height:1.15;background:'+(favEstCount?'#fff1f2':'#f1f5f9')+';color:'+(favEstCount?'#be123c':'#94a3b8')+';border:1px solid '+(favEstCount?'#fecdd3':'#e2e8f0')+';cursor:'+(favEstCount?'pointer':'default')+';"><span style="font-size:1.05rem;">↩️</span><span style="font-size:.66rem;">Undo All</span><span style="font-size:.58rem;font-weight:700;opacity:.85;">'+(favEstCount?'('+favEstCount+' food'+(favEstCount===1?'':'s')+')':'(none yet)')+'</span></button><button type="button" onclick="rescanHealthyFoodsAndImages(this,\'favoriteRescanStatus\')" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:54px;border-radius:8px;font-weight:800;text-align:center;line-height:1.15;background:#fff7ed;color:#9a3412;border:1px solid #fdba74;cursor:pointer;"><span style="font-size:1.05rem;">↻</span><span style="font-size:.66rem;">Rescan Foods</span></button><button type="button" onclick="removeDuplicateFoodItems(this)" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:54px;border-radius:8px;font-weight:800;text-align:center;line-height:1.15;background:#fff7ed;color:#9a3412;border:1px solid #fdba74;cursor:pointer;"><span style="font-size:1.05rem;">🧹</span><span style="font-size:.66rem;">Remove Dupes</span></button></div><div id="favoriteRescanStatus" role="status" aria-live="polite" style="display:none;font-size:.7rem;font-weight:700;line-height:1.35;margin:0 2px 7px;"></div><div id="dedupeFoodStatus" role="status" aria-live="polite" style="display:none;font-size:.7rem;font-weight:700;line-height:1.35;margin:0 2px 7px;"></div>';
+  if(!filtered.length){el.innerHTML=photoHelp+'<div style="font-size:0.8rem;color:#bbb;text-align:center;padding:12px;">Nothing in your Food Database yet. Add items from your food log with ⭐</div>';return;}
   var target=(document.getElementById('favTargetMeal')||{value:'breakfast'}).value;
   el.innerHTML=photoHelp+filtered.map(function(f,i){
     var origIdx=favs.indexOf(f);
+    var isRestaurant=isRestaurantFood(f);
+    var missingCount=isRestaurant?0:missingNutrientFields(f).length;
     return '<div style="padding:5px 0;border-bottom:1px solid #f5f5f5;font-size:0.82rem;">'
       +'<div style="display:flex;align-items:center;gap:6px;">'
         +foodThumbnailHtml(f,'favorite',origIdx)+'<div style="flex:1;min-width:0;">'
           +'<div style="font-weight:600;">'+escHtml(f.name)+'</div>'
           +'<div style="color:#888;font-size:0.75rem;">'+(f.cal?'🔥'+f.cal+' ':'')+''+(f.prot?'🥩'+f.prot+'g ':'')+''+(f.carbs?'🍞'+f.carbs+'g ':'')+''+(f.fat?'🥑'+f.fat+'g':'')+'</div>'
+          +((f.aiEstimatedFields&&f.aiEstimatedFields.length)?('<div style="color:#4338ca;font-size:0.66rem;font-weight:700;margin-top:1px;" title="These values were estimated by AI, not pulled from a verified source">✨ '+f.aiEstimatedFields.length+' AI-estimated value'+(f.aiEstimatedFields.length===1?'':'s')+'</div>'):'')
         +'</div>'
         +'<button onclick="loadFavoriteItem('+origIdx+')" style="background:#e67e22;color:#fff;border:none;border-radius:5px;padding:4px 9px;font-size:0.78rem;cursor:pointer;">+ Add</button>'
+        +'<button onclick="toggleFavoriteRestaurant('+origIdx+')" title="'+(isRestaurant?'Marked as a restaurant food -- Enrich skips it. Tap to unmark.':'Tap to mark as a restaurant food so Enrich skips it')+'" style="background:'+(isRestaurant?'#fff7ed':'#f8fafc')+';color:'+(isRestaurant?'#9a3412':'#94a3b8')+';border:1px solid '+(isRestaurant?'#fdba74':'#e2e8f0')+';border-radius:5px;padding:4px 7px;font-size:0.72rem;cursor:pointer;white-space:nowrap;">🍽️</button>'
+        +'<button '+(missingCount?('onclick="enrichFavoriteNutrients('+origIdx+',this)"'):'disabled')+' title="'+(isRestaurant?'Restaurant food -- Enrich skips it':(missingCount?('Fill in '+missingCount+' missing nutrient value'+(missingCount===1?'':'s')+' using AI'):'All tracked nutrients are filled in'))+'" style="background:'+(missingCount?'#eef2ff':'#f1f5f9')+';color:'+(missingCount?'#4338ca':'#94a3b8')+';border:1px solid '+(missingCount?'#c7d2fe':'#e2e8f0')+';border-radius:5px;padding:4px 7px;font-size:0.72rem;cursor:'+(missingCount?'pointer':'default')+';white-space:nowrap;">🧪'+(missingCount?' '+missingCount:'')+'</button>'
+        +((f.aiEstimatedFields&&f.aiEstimatedFields.length)?('<button onclick="undoFavoriteEstimate('+origIdx+',this)" title="Undo the '+f.aiEstimatedFields.length+' AI-estimated value'+(f.aiEstimatedFields.length===1?'':'s')+'" style="background:#fff1f2;color:#be123c;border:1px solid #fecdd3;border-radius:5px;padding:4px 7px;font-size:0.72rem;cursor:pointer;white-space:nowrap;">↩️</button>'):'')
         +'<button onclick="deleteFavorite('+origIdx+')" style="background:none;border:1px solid #f5c6cb;border-radius:4px;cursor:pointer;font-size:0.72rem;padding:2px 5px;color:#e74c3c;">✕</button>'
       +'</div>'
       +foodThumbnailButtonsHtml('favorite',origIdx)
@@ -1568,11 +1890,19 @@ function loadFavoriteItem(idx){
   if(!window._foodLog)window._foodLog=[];
   var favItem={id:'f'+Date.now(),meal:target,name:f.name,cal:f.cal,prot:f.prot,fat:f.fat,carbs:f.carbs,servingLabel:f.servingLabel||'1 serving',servings:parseFloat(f.servings)||1,proteinSource:f.proteinSource||'',carbSource:f.carbSource||'',fatSource:f.fatSource||'',imageUrl:f.imageUrl||'',imageData:f.imageData||''};
   MICRO_FIELDS.forEach(function(fld){favItem[fld]=f[fld]!=null?f[fld]:null;});
+  if(f.aiEstimatedFields&&f.aiEstimatedFields.length)favItem.aiEstimatedFields=f.aiEstimatedFields.slice();
+  favItem.restaurant=isRestaurantFood(f);
   window._foodLog.push(favItem);
   _setMealOpen(target,true);
   renderFoodItems();save();
 }
 
+function toggleFavoriteRestaurant(idx){
+  var favs=getFavorites();var f=favs[idx];if(!f)return;
+  f.restaurant=!isRestaurantFood(f);
+  saveFavorites(favs);
+  renderFavsList();
+}
 function deleteFavorite(idx){
   var favs=getFavorites();favs.splice(idx,1);saveFavorites(favs);renderFavsList();
 }
@@ -1598,6 +1928,7 @@ function confirmSaveMeal(){
   meals.push({name:name,category:category,items:log.map(function(x){
     var it={name:x.name,cal:x.cal,prot:x.prot,fat:x.fat,carbs:x.carbs,servingLabel:x.servingLabel||'1 serving',servings:parseFloat(x.servings)||1,proteinSource:x.proteinSource||'',carbSource:x.carbSource||'',fatSource:x.fatSource||'',imageUrl:x.imageUrl||'',imageData:x.imageData||''};
     MICRO_FIELDS.forEach(function(f){it[f]=x[f]!=null?x[f]:null;});
+    it.restaurant=isRestaurantFood(x);
     return it;
   })});
   saveSavedMeals(meals);
@@ -1618,8 +1949,14 @@ function renderMealsList(){
   var el=document.getElementById('mealsList');if(!el)return;
   var meals=getSavedMeals();
   if(!meals.length){el.innerHTML='<div style="font-size:0.8rem;color:#bbb;text-align:center;padding:12px;">No saved meals yet. Log a full day of food then tap "Save Meal".</div>';return;}
-  el.innerHTML=meals.map(function(m,i){
+  var mealsNeedCount=0;meals.forEach(function(m){m.items.forEach(function(it){if(enrichableFields(it).length>0)mealsNeedCount++;});});
+  var mealsEstCount=0;meals.forEach(function(m){m.items.forEach(function(it){if((it.aiEstimatedFields||[]).length>0)mealsEstCount++;});});
+  var bulkMealsBtn='<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin:0 0 8px;"><button type="button" '+(mealsNeedCount?('onclick="enrichAllMeals(this)"'):'disabled')+' style="background:'+(mealsNeedCount?'#eef2ff':'#f1f5f9')+';color:'+(mealsNeedCount?'#4338ca':'#94a3b8')+';border:1px solid '+(mealsNeedCount?'#c7d2fe':'#e2e8f0')+';border-radius:6px;padding:7px 4px;font-size:.7rem;font-weight:800;cursor:'+(mealsNeedCount?'pointer':'default')+';text-align:center;">🧪 Enrich All'+(mealsNeedCount?' ('+mealsNeedCount+')':' (done)')+'</button><button type="button" '+(mealsEstCount?('onclick="undoAllMealsEstimates(this)"'):'disabled')+' style="background:'+(mealsEstCount?'#fff1f2':'#f1f5f9')+';color:'+(mealsEstCount?'#be123c':'#94a3b8')+';border:1px solid '+(mealsEstCount?'#fecdd3':'#e2e8f0')+';border-radius:6px;padding:7px 4px;font-size:.7rem;font-weight:800;cursor:'+(mealsEstCount?'pointer':'default')+';text-align:center;">↩️ Undo All'+(mealsEstCount?' ('+mealsEstCount+')':' (none)')+'</button></div>';
+  el.innerHTML=bulkMealsBtn+meals.map(function(m,i){
     var cal=m.items.reduce(function(a,x){return a+(parseFloat(x.cal)||0);},0);
+    var totalMissing=m.items.reduce(function(a,it){return a+enrichableFields(it).length;},0);
+    var mealEstCount=m.items.reduce(function(a,it){return a+((it.aiEstimatedFields&&it.aiEstimatedFields.length)||0);},0);
+    var estimatedFieldSet={};m.items.forEach(function(it){(it.aiEstimatedFields||[]).forEach(function(f){estimatedFieldSet[f]=true;});});
     var macros={prot:0,carbs:0,fat:0},micros={};
     MICRO_FIELDS.forEach(function(field){micros[field]=0;});
     m.items.forEach(function(item){
@@ -1632,14 +1969,14 @@ function renderMealsList(){
       +[['Calories',Math.round(cal),'cal'],['Protein',Math.round(macros.prot*10)/10,'g'],['Carbs',Math.round(macros.carbs*10)/10,'g'],['Fat',Math.round(macros.fat*10)/10,'g']].map(function(n){return '<div style="background:#fff7e8;border-radius:5px;padding:4px 2px;text-align:center;"><strong style="display:block;font-size:0.76rem;color:#7a4b00;">'+n[1]+' '+n[2]+'</strong><span style="font-size:0.64rem;color:#777;">'+n[0]+'</span></div>';}).join('')
       +'</div>';
     var microHtml='<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;margin:0 0 6px;">'
-      +MICRO_FIELDS.map(function(field){var meta=MICRO_META[field],value=Math.round(micros[field]*10)/10;return '<div style="background:#f7faf7;border-radius:4px;padding:3px 4px;font-size:0.65rem;color:#526052;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><span>'+meta.label+'</span> <strong>'+(value||'—')+(value?' '+meta.unit:'')+'</strong></div>';}).join('')
+      +MICRO_FIELDS.map(function(field){var meta=MICRO_META[field],value=Math.round(micros[field]*10)/10,est=estimatedFieldSet[field]&&value;return '<div style="background:#f7faf7;border-radius:4px;padding:3px 4px;font-size:0.65rem;color:#526052;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><span>'+meta.label+'</span> <strong>'+(value||'—')+(value?' '+meta.unit:'')+'</strong>'+(est?' <span style="color:#4338ca;" title="Includes an AI-estimated value, not pulled from a verified source">✨</span>':'')+'</div>';}).join('')
       +'</div>';
     return '<div style="padding:6px 0;border-bottom:1px solid #f5f5f5;">'
       +'<div style="display:flex;align-items:center;gap:6px;">'
         +'<div style="flex:1;font-weight:600;font-size:0.85rem;">'+escHtml(m.name)+'</div>'
         +'<button onclick="deleteMeal('+i+')" style="background:none;border:1px solid #f5c6cb;border-radius:4px;cursor:pointer;font-size:0.72rem;padding:2px 5px;color:#e74c3c;">✕</button>'
       +'</div>'
-      +'<div style="font-size:0.75rem;color:#888;margin-bottom:4px;">'+m.items.length+' items'+(cal?' · ~'+Math.round(cal)+' cal':'')+'</div>'
+      +'<div style="font-size:0.75rem;color:#888;margin-bottom:4px;">'+m.items.length+' items'+(cal?' · ~'+Math.round(cal)+' cal':'')+(mealEstCount?' · <span style="color:#4338ca;font-weight:700;" title="These values were estimated by AI, not pulled from a verified source">✨ '+mealEstCount+' AI-estimated value'+(mealEstCount===1?'':'s')+'</span>':'')+'</div>'
       +macroHtml+microHtml
       +'<div style="display:flex;gap:4px;align-items:center;">'
         +'<select id="mealTarget_'+i+'" style="flex:1;border:1px solid #e9c87b;border-radius:5px;padding:3px 5px;font-size:0.75rem;">'
@@ -1652,6 +1989,8 @@ function renderMealsList(){
           +'<option value="supplements"'+(m.category==='supplements'?' selected':'')+'>💊 Supplements</option>'
         +'</select>'
         +'<button onclick="loadMeal('+i+')" style="background:#2980b9;color:#fff;border:none;border-radius:5px;padding:4px 9px;font-size:0.78rem;cursor:pointer;">Load</button>'
+        +'<button '+(totalMissing?('onclick="enrichMealNutrients('+i+',this)"'):'disabled')+' title="'+(totalMissing?('Fill in '+totalMissing+' missing nutrient value'+(totalMissing===1?'':'s')+' across this meal using AI'):'All tracked nutrients are filled in for every item')+'" style="background:'+(totalMissing?'#eef2ff':'#f1f5f9')+';color:'+(totalMissing?'#4338ca':'#94a3b8')+';border:1px solid '+(totalMissing?'#c7d2fe':'#e2e8f0')+';border-radius:5px;padding:4px 8px;font-size:0.72rem;cursor:'+(totalMissing?'pointer':'default')+';white-space:nowrap;">🧪'+(totalMissing?' '+totalMissing:'')+'</button>'
+        +(mealEstCount?('<button onclick="undoMealEstimate('+i+',this)" title="Undo the '+mealEstCount+' AI-estimated value'+(mealEstCount===1?'':'s')+' in this meal" style="background:#fff1f2;color:#be123c;border:1px solid #fecdd3;border-radius:5px;padding:4px 8px;font-size:0.72rem;cursor:pointer;white-space:nowrap;">↩️</button>'):'')
       +'</div>'
     +'</div>';
   }).join('');
@@ -1665,6 +2004,8 @@ function loadMeal(idx){
   m.items.forEach(function(it){
     var loadedItem={id:'f'+Date.now()+'_'+Math.random().toString(36).slice(2,5),meal:target,name:it.name,cal:it.cal,prot:it.prot,fat:it.fat,carbs:it.carbs,servingLabel:it.servingLabel||'1 serving',servings:parseFloat(it.servings)||1,proteinSource:it.proteinSource||'',carbSource:it.carbSource||'',fatSource:it.fatSource||'',imageUrl:it.imageUrl||'',imageData:it.imageData||''};
     MICRO_FIELDS.forEach(function(f){loadedItem[f]=it[f]!=null?it[f]:null;});
+    if(it.aiEstimatedFields&&it.aiEstimatedFields.length)loadedItem.aiEstimatedFields=it.aiEstimatedFields.slice();
+    loadedItem.restaurant=isRestaurantFood(it);
     window._foodLog.push(loadedItem);
   });
   _setMealOpen(target,true);
@@ -1803,7 +2144,8 @@ function lookupFoodBarcode(scannedCode){
   var fields='code,product_name,brands,serving_size,nutriments,ingredients_text,categories,image_front_small_url,image_front_url,image_url';
   fetch('https://world.openfoodfacts.org/api/v2/product/'+encodeURIComponent(code)+'.json?fields='+encodeURIComponent(fields)).then(function(response){if(!response.ok)throw new Error('Product lookup failed');return response.json();}).then(function(data){
     if(!data||data.status!==1||!data.product)throw new Error('This barcode was not found');var product=data.product,n=product.nutriments||{},hasServing=['energy-kcal','proteins','fat','carbohydrates'].some(function(key){return n[key+'_serving']!==undefined;});
-    var food={name:[product.product_name,product.brands].filter(Boolean).join(' — ')||'Barcode '+code,barcode:code,servingLabel:hasServing&&product.serving_size?'per '+product.serving_size:'per 100 g',cal:barcodeNutrient(n,'energy-kcal'),prot:barcodeNutrient(n,'proteins'),fat:barcodeNutrient(n,'fat'),carbs:barcodeNutrient(n,'carbohydrates'),fiber:barcodeNutrient(n,'fiber'),sugar:barcodeNutrient(n,'sugars'),sodium:(function(){var value=barcodeNutrient(n,'sodium');return value===null?null:Math.round(value*1000);})(),ingredientsText:product.ingredients_text||'',categoriesText:product.categories||'',imageUrl:product.image_front_small_url||product.image_front_url||product.image_url||'',source:'barcode'};
+    var food={name:[product.product_name,product.brands].filter(Boolean).join(' — ')||'Barcode '+code,barcode:code,servingLabel:hasServing&&product.serving_size?'per '+product.serving_size:'per 100 g',cal:barcodeNutrient(n,'energy-kcal'),prot:barcodeNutrient(n,'proteins'),fat:barcodeNutrient(n,'fat'),carbs:barcodeNutrient(n,'carbohydrates'),ingredientsText:product.ingredients_text||'',categoriesText:product.categories||'',imageUrl:product.image_front_small_url||product.image_front_url||product.image_url||'',source:'barcode'};
+    MICRO_FIELDS.forEach(function(f){var offKey=OFF_NUTRIENT_KEY[f];if(!offKey)return;var value=barcodeNutrient(n,offKey);if(f==='folate'&&value===null)value=barcodeNutrient(n,'vitamin-b9');if(f==='sodium'&&value!==null)value=Math.round(value*1000);food[f]=value;});
     inferFoodMacroSources(food);if(!food.sourceConfidence){food.sourceConfidence='Low';food.sourceMethod='Needs review';}
     closeBarcodeScanner();showPendingFood(food,'Barcode Product Found');
   }).catch(function(error){barcodeStatus(error.message+'. You can scan the nutrition label instead or enter the food manually.',true);});
@@ -1827,7 +2169,7 @@ function scanFoodLabel(ev){
         max_tokens:400,
         messages:[{role:'user',content:[
           {type:'image',source:{type:'base64',media_type:mtype,data:b64}},
-          {type:'text',text:'Read this nutrition information image carefully — it may be a photo of a food package label, or a screenshot from a nutrition app, recipe site, or restaurant menu. Extract the per-serving Nutrition Facts, any visible product or food name, and the complete visible ingredient list (leave ingredientsText empty if the image does not show one, such as most app/menu screenshots). Use the ingredients to classify the dominant source of ALL THREE macros for a runner: protein (lean/plant versus higher-fat/processed), carbohydrates (complex/fiber-rich versus simple/refined), and fat (unsaturated versus saturated/trans). Respond with ONLY a single JSON object — no markdown, no code fences, no explanation, nothing else before or after. The JSON must have these exact keys:\n- "name": the product or food name visible anywhere on the label/package (use "Scanned Food" if not visible)\n- "ingredientsText": the complete ingredient list exactly as visible (use an empty string if it is not visible; do not guess)\n- "proteinSource": use "support" for lean/plant, "limit" for higher-fat/processed, or "unknown" when not supported by visible evidence\n- "carbSource": use "support" for complex/fiber-rich, "limit" for simple/refined, or "unknown" when not supported by visible evidence\n- "fatSource": use "support" for unsaturated, "limit" for saturated/trans, or "unknown" when not supported by visible evidence\n- "cal": Calories per serving as a plain number\n- "prot": Protein grams per serving as a plain number\n- "fat": Total Fat grams per serving as a plain number\n- "carbs": Total Carbohydrate grams per serving as a plain number\n- "fiber": Dietary Fiber grams per serving as a plain number\n- "sugar": Total Sugars grams per serving as a plain number\n- "sodium": Sodium milligrams per serving as a plain number\n- "vitA": Vitamin A in mcg per serving as a plain number\n- "vitC": Vitamin C in mg per serving as a plain number\n- "vitD": Vitamin D in mcg per serving as a plain number\n- "calcium": Calcium in mg per serving as a plain number\n- "iron": Iron in mg per serving as a plain number\n- "potassium": Potassium in mg per serving as a plain number\n- "magnesium": Magnesium in mg per serving as a plain number\n- "vitB12": Vitamin B12 in mcg per serving as a plain number\nAll numeric values must be numbers, not strings. Use 0 if a numeric value cannot be read from the label. Never invent missing ingredients or classifications. Output the JSON object only.'}
+          {type:'text',text:'Read this nutrition information image carefully — it may be a photo of a food package label, or a screenshot from a nutrition app, recipe site, or restaurant menu. Extract the per-serving Nutrition Facts, any visible product or food name, and the complete visible ingredient list (leave ingredientsText empty if the image does not show one, such as most app/menu screenshots). Use the ingredients to classify the dominant source of ALL THREE macros for a runner: protein (lean/plant versus higher-fat/processed), carbohydrates (complex/fiber-rich versus simple/refined), and fat (unsaturated versus saturated/trans). Respond with ONLY a single JSON object — no markdown, no code fences, no explanation, nothing else before or after. The JSON must have these exact keys:\n- "name": the product or food name visible anywhere on the label/package (use "Scanned Food" if not visible)\n- "ingredientsText": the complete ingredient list exactly as visible (use an empty string if it is not visible; do not guess)\n- "proteinSource": use "support" for lean/plant, "limit" for higher-fat/processed, or "unknown" when not supported by visible evidence\n- "carbSource": use "support" for complex/fiber-rich, "limit" for simple/refined, or "unknown" when not supported by visible evidence\n- "fatSource": use "support" for unsaturated, "limit" for saturated/trans, or "unknown" when not supported by visible evidence\n- "cal": Calories per serving as a plain number\n- "prot": Protein grams per serving as a plain number\n- "fat": Total Fat grams per serving as a plain number\n- "carbs": Total Carbohydrate grams per serving as a plain number\n- "fiber": Dietary Fiber grams per serving as a plain number\n- "sugar": Total Sugars grams per serving as a plain number\n- "sodium": Sodium milligrams per serving as a plain number\n- "vitC": Vitamin C in mg per serving as a plain number\n- "vitD": Vitamin D in mcg per serving as a plain number\n- "calcium": Calcium in mg per serving as a plain number\n- "iron": Iron in mg per serving as a plain number\n- "potassium": Potassium in mg per serving as a plain number\n- "magnesium": Magnesium in mg per serving as a plain number\n- "vitB12": Vitamin B12 in mcg per serving as a plain number\n- "caffeine": Caffeine milligrams per serving as a plain number (use 0 for items with no caffeine, which is most foods)\n- "zinc": Zinc in mg per serving as a plain number\nAll numeric values must be numbers, not strings. Use 0 if a numeric value cannot be read from the label. Never invent missing ingredients or classifications. Output the JSON object only.'}
           ,{type:'text',text:'Also include a string key named "servingLabel" containing the exact serving size printed on the label, including its unit (for example, "1 cup (240 mL)" or "30 g"). Use "1 serving" only when the serving size cannot be read.'}
         ]}]
       })

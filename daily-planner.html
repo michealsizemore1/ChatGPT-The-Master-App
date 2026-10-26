@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-10-15-82">
+<meta name="app-build" content="2026-10-15-116">
 <script src="theme-switcher.js?v=2026-10-21-1"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#ff6b00">
@@ -114,9 +114,6 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;paddi
 .summary-table th{background:#667eea;color:white;padding:6px 8px;text-align:left;white-space:nowrap;}
 .summary-table td{padding:5px 8px;border-bottom:1px solid #f0f0f0;white-space:nowrap;}
 .summary-table tr:last-child td{font-weight:700;background:#f8f9fa;}
-.day-score-heading{text-align:center;}
-.day-score-table{max-width:760px;margin-left:auto;margin-right:auto;}
-.day-score-table th,.day-score-table td{text-align:center!important;width:50%!important;}
 @media(max-width:768px){
   .summary-table th:last-child,.summary-table td:last-child{width:100%;}
 }
@@ -635,6 +632,36 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;paddi
 .meal-header>.meal-right{display:flex;align-items:center;gap:5px;flex-shrink:0;}
 .meal-subtotal{font-size:0.72rem;color:#888;white-space:nowrap;}
 .meal-chevron{font-size:0.8rem;color:#aaa;transition:transform .2s;min-width:12px;}
+
+/* ── Halloween section colors (differentiates each meal section in the Nutrition tab) ── */
+.meal-section[data-meal="breakfast"]{border-left-color:#e67e22;}
+.meal-section[data-meal="breakfast"] .meal-header{background:#fff6ea;}
+.meal-section[data-meal="breakfast"] .meal-header:hover{background:#ffe9cc;}
+.meal-section[data-meal="breakfast"] .meal-add-btn{background:#e67e22;}
+.meal-section[data-meal="lunch"]{border-left-color:#16a34a;}
+.meal-section[data-meal="lunch"] .meal-header{background:#eefdf3;}
+.meal-section[data-meal="lunch"] .meal-header:hover{background:#d7f7e3;}
+.meal-section[data-meal="lunch"] .meal-add-btn{background:#16a34a;}
+.meal-section[data-meal="dinner"]{border-left-color:#7c3aed;}
+.meal-section[data-meal="dinner"] .meal-header{background:#f6f1ff;}
+.meal-section[data-meal="dinner"] .meal-header:hover{background:#ece0ff;}
+.meal-section[data-meal="dinner"] .meal-add-btn{background:#7c3aed;}
+.meal-section[data-meal="snack"]{border-left-color:#b91c1c;}
+.meal-section[data-meal="snack"] .meal-header{background:#fef2f2;}
+.meal-section[data-meal="snack"] .meal-header:hover{background:#fde0e0;}
+.meal-section[data-meal="snack"] .meal-add-btn{background:#b91c1c;}
+.meal-section[data-meal="liquids"]{border-left-color:#0d9488;}
+.meal-section[data-meal="liquids"] .meal-header{background:#effcfa;}
+.meal-section[data-meal="liquids"] .meal-header:hover{background:#d3f5ef;}
+.meal-section[data-meal="liquids"] .meal-add-btn{background:#0d9488;}
+.meal-section[data-meal="sports"]{border-left-color:#d97706;}
+.meal-section[data-meal="sports"] .meal-header{background:#fff8ec;}
+.meal-section[data-meal="sports"] .meal-header:hover{background:#ffecc7;}
+.meal-section[data-meal="sports"] .meal-add-btn{background:#d97706;}
+.meal-section[data-meal="supplements"]{border-left-color:#3f3f46;}
+.meal-section[data-meal="supplements"] .meal-header{background:#f5f5f6;}
+.meal-section[data-meal="supplements"] .meal-header:hover{background:#e4e4e7;}
+.meal-section[data-meal="supplements"] .meal-add-btn{background:#3f3f46;}
 .meal-chevron.open{transform:rotate(90deg);}
 /* Meditation Tab */
 .medit-preset{background:#f3f4f6;border:1px solid #d1d5db;border-radius:6px;padding:4px 9px;font-size:0.78rem;cursor:pointer;color:#374151;font-weight:600;transition:background .15s,border-color .15s;}
@@ -915,10 +942,6 @@ textarea{line-height:1.55;}
 .v26-save-dot{width:7px;height:7px;border-radius:50%;background:#22a06b;box-shadow:0 0 0 3px rgba(34,160,107,.12);}
 .v26-toast{position:fixed;right:22px;bottom:22px;z-index:3000;background:#172033;color:#fff;padding:10px 14px;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.22);font-size:.84rem;opacity:0;transform:translateY(10px);pointer-events:none;transition:.2s;}
 .v26-toast.show{opacity:1;transform:translateY(0);}
-body.v26-focus .tabs-wrapper,body.v26-focus #tabNotesBar,body.v26-focus #aiToolbar,body.v26-focus #streakBar,body.v26-focus #todayWorkoutCard,body.v26-focus .header>:not(h1):not(.date-nav):not(.header-control-stack),body.v26-focus .header-actions>:not(.v26-focus-pair),body.v26-focus .header-status-row{display:none!important;}
-body.v26-focus .container{max-width:none;}
-body.v26-focus .v26-toolbar{justify-content:flex-end;}
-body.v26-focus .v26-focus-btn{background:#ededff;color:var(--brand);border-color:#c9c9f5;}
 body.v26-comfortable .section,body.v26-comfortable .journaling-section{padding-top:24px;padding-bottom:24px;}
 body.v26-compact .section,body.v26-compact .journaling-section{padding-top:10px;padding-bottom:10px;}
 body.v26-compact .task-row,body.v26-compact .priority-item{margin-bottom:2px;min-height:28px;}
@@ -937,6 +960,8 @@ body.v26-compact .journal-col textarea{height:70px;}
   .header-control-stack{flex:0 0 100%;width:100%}
   .header-actions{width:100%;gap:6px;flex-wrap:wrap;}
   .v26-focus-pair{display:contents;}
+  #themeSelect{order:1;}
+  #meridianWeather{order:2;}
   .header-status-row{gap:7px;flex-wrap:wrap}
   .v26-toolbar{padding:8px 10px;display:flex;flex-wrap:wrap;align-items:center;gap:7px}
   .v26-toolbar .v26-label{display:none}
@@ -1322,6 +1347,9 @@ body{
   max-width:none!important;
   box-sizing:border-box;
 }
+@media(max-width:768px){
+  #tab-bible > div:first-child{padding-left:4px!important;padding-right:4px!important;}
+}
 .tab-panel .section,
 .tab-panel .journaling-section,
 .tab-panel .review-section,
@@ -1551,7 +1579,6 @@ body{
         </div>
       </details>
       <div class="v26-focus-pair">
-        <button class="v26-quiet-btn v26-focus-btn" type="button" onclick="v26ToggleFocus()" id="v26FocusBtn" title="Hide distractions (F)">Focus</button>
         <span class="v26-weather" id="meridianWeather" title="Current temperature for Meridian, Idaho">&#x1F321;&#xFE0F; Meridian &mdash;&deg;</span>
         <select id="themeSelect" class="v26-weather" style="cursor:pointer;width:52px;max-width:52px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" onchange="setAppTheme(this.value)" aria-label="App theme" title="App theme">
           <option value="halloween">&#x1F383;</option>
@@ -1765,6 +1792,12 @@ body{
   </div>
   <button onclick="saveDayReview()" style="background:#667eea;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-size:0.85rem;">Save Review</button>
 </div>
+<div class="journaling-section">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+    <strong style="font-size:0.98rem;color:#3730a3;">&#x270D;&#xFE0F; Daily Journal</strong>
+  </div>
+  <textarea id="jNotes" placeholder="Write whatever's on your mind today..." style="width:100%;min-height:140px;border:1px solid #e9ecef;border-radius:6px;padding:8px;font-size:0.95rem;resize:vertical;outline:none;font-family:inherit;box-sizing:border-box;"></textarea>
+</div>
 </div>
 <div id="tab-weekly" class="tab-panel"><div class="panel">
   <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
@@ -1787,7 +1820,6 @@ body{
   </div>
   <div id="aiWeeklyBox" class="ai-box"></div>
   <div id="wDigest" class="week-digest"></div>
-  <h2 class="day-score-heading">Day Score</h2><div id="wDayScore"></div>
   <h2>Growth / Skills <small style="font-size:.62rem;font-weight:500;color:#64748b;">Language and Guitar</small></h2><div id="wGrowth"></div><h2>Fitness <small style="font-size:.62rem;font-weight:500;color:#64748b;">From Activities and Steps</small></h2><div id="wFitness"></div><h2>Wellness</h2><div id="wWellness"></div>
 <h2>Nutrition</h2><div id="wNutrition"></div>
 <h2>Micronutrients</h2><div id="wNutritionMicro"></div>
@@ -1814,14 +1846,13 @@ body{
     <div class="heatmap-dow">S</div>
   </div>
 </div>
-  <h2 class="day-score-heading">Day Score</h2><div id="mDayScore"></div>
 <h2>Growth</h2><div id="mGrowth"></div><h2>Fitness</h2><div id="mFitness"></div><h2>Wellness</h2><div id="mWellness"></div>
 <h2>Nutrition</h2><div id="mNutrition"></div>
 <h2>Micronutrients</h2><div id="mNutritionMicro"></div>
 <h2>Spirituality</h2><div id="mSpirituality"></div>
 
 </div></div>
-<div id="tab-yearly" class="tab-panel"><div class="panel"><div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px;"><div class="week-nav" style="margin-bottom:0;"><button onclick="changeYearOff(-1)">&#8249; Prev</button><span id="yearLabel"></span><button onclick="changeYearOff(1)">Next &#8250;</button></div></div><h2 class="day-score-heading">Day Score</h2><div id="yDayScore"></div>
+<div id="tab-yearly" class="tab-panel"><div class="panel"><div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px;"><div class="week-nav" style="margin-bottom:0;"><button onclick="changeYearOff(-1)">&#8249; Prev</button><span id="yearLabel"></span><button onclick="changeYearOff(1)">Next &#8250;</button></div></div>
 <h2>Growth</h2><div id="yGrowth"></div><h2>Fitness</h2><div id="yFitness"></div><h2>Wellness</h2><div id="yWellness"></div>
 <h2>Nutrition</h2><div id="yNutrition"></div>
 <h2>Micronutrients</h2><div id="yNutritionMicro"></div>
@@ -2715,6 +2746,7 @@ body{
     <div class="section" style="border:1px solid #f0f0f0;border-radius:10px;">
       <div class="task-row"><div class="tri-check" data-key="wBP" onclick="triClick(this)"></div><label>BP:</label><input type="text" id="wBPVal" placeholder="120/80"></div>
       <div class="task-row sub-row"><label for="wPulseVal">&#x1F493; Pulse:</label><input type="text" id="wPulseVal" placeholder="bpm"></div>
+      <div class="task-row sub-row"><label for="wRestHRVal">&#x1FAC0; Resting HR:</label><input type="text" id="wRestHRVal" placeholder="bpm"></div>
       <div class="task-row"><div class="tri-check" data-key="wMeds" onclick="triClick(this)"></div><label>Meds:</label><input type="text" id="wMedsVal" placeholder="HCTZ, Rosuvastatin..."></div>
       <div class="task-row"><div class="tri-check" data-key="wWght" onclick="triClick(this)"></div><label>Weight:</label><input type="text" id="wWghtVal" placeholder="lbs"></div>
       <div class="task-row"><div class="tri-check" data-key="wSleep" onclick="triClick(this)"></div><label>Sleep:</label><input type="text" id="wSleepVal" placeholder="hrs (e.g. 7.5 or 6:30)"></div>
@@ -3152,42 +3184,49 @@ body{
       </div>
     </div>
     <div class="meal-section" id="ms-liquids" data-meal="liquids">
-      <div class="meal-header" onclick="toggleMealSection('liquids')" style="border-left-color:#3498db;">
-        <span>💧 Liquids</span><div class="meal-right"><span class="meal-subtotal" id="st-liquids" style="font-size:0.75rem;color:#888;"></span><button onclick="event.stopPropagation();saveMealFromSection('liquids')" class="meal-action-btn" title="Save meal" aria-label="Save liquids meal">&#x1F4BE;</button><button onclick="event.stopPropagation();addFoodItem('liquids')" class="meal-add-btn" style="background:#3498db;">+ Add</button><span class="meal-chevron" id="chev-liquids">▸</span></div>
+      <div class="meal-header" onclick="toggleMealSection('liquids')">
+        <span>💧 Liquids</span><div class="meal-right"><span class="meal-subtotal" id="st-liquids" style="font-size:0.75rem;color:#888;"></span><button onclick="event.stopPropagation();saveMealFromSection('liquids')" class="meal-action-btn" title="Save meal" aria-label="Save liquids meal">&#x1F4BE;</button><button onclick="event.stopPropagation();addFoodItem('liquids')" class="meal-add-btn">+ Add</button><span class="meal-chevron" id="chev-liquids">▸</span></div>
       </div>
       <div class="meal-body" id="mb-liquids" style="display:none;"><div id="foodList-liquids"></div>
         <div style="padding:6px 8px 8px;"><textarea id="mnotes-liquids" rows="1" placeholder="Liquids notes..." oninput="save()" style="width:100%;border:1px solid #e9ecef;border-radius:5px;padding:4px 8px;font-size:0.78rem;resize:vertical;font-family:inherit;box-sizing:border-box;background:#fafafa;color:#555;"></textarea></div>
       </div>
     </div>
     <div class="meal-section" id="ms-sports" data-meal="sports">
-      <div class="meal-header" onclick="toggleMealSection('sports')" style="border-left-color:#27ae60;">
-        <span>💪 Sports Nutrition</span><div class="meal-right"><span class="meal-subtotal" id="st-sports" style="font-size:0.75rem;color:#888;"></span><button onclick="event.stopPropagation();saveMealFromSection('sports')" class="meal-action-btn" title="Save meal" aria-label="Save sports nutrition meal">&#x1F4BE;</button><button onclick="event.stopPropagation();addFoodItem('sports')" class="meal-add-btn" style="background:#27ae60;">+ Add</button><span class="meal-chevron" id="chev-sports">▸</span></div>
+      <div class="meal-header" onclick="toggleMealSection('sports')">
+        <span>💪 Sports Nutrition</span><div class="meal-right"><span class="meal-subtotal" id="st-sports" style="font-size:0.75rem;color:#888;"></span><button onclick="event.stopPropagation();saveMealFromSection('sports')" class="meal-action-btn" title="Save meal" aria-label="Save sports nutrition meal">&#x1F4BE;</button><button onclick="event.stopPropagation();addFoodItem('sports')" class="meal-add-btn">+ Add</button><span class="meal-chevron" id="chev-sports">▸</span></div>
       </div>
       <div class="meal-body" id="mb-sports" style="display:none;"><div id="foodList-sports"></div>
-        <div style="padding:8px;margin:4px 8px 0;background:#eafaf0;border:1px solid #bbe8cc;border-radius:7px;">
-          <div style="font-size:0.78rem;font-weight:800;color:#1a7a40;margin-bottom:6px;">&#x26A1; Sports Nutrition Quick Add</div>
+        <div style="padding:8px;margin:4px 8px 0;background:#fff8ec;border:1px solid #fbd38d;border-radius:7px;">
+          <div style="font-size:0.78rem;font-weight:800;color:#b45309;margin-bottom:6px;">&#x26A1; Sports Nutrition Quick Add</div>
           <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:5px;">
-            <select id="gusisBrandFilter" onchange="renderGusisPicker()" style="flex:1;min-width:90px;border:1px solid #9fd8b3;border-radius:5px;padding:5px 6px;font-size:0.78rem;background:#fff;">
+            <select id="gusisBrandFilter" onchange="renderGusisPicker()" style="flex:1;min-width:90px;border:1px solid #fbd38d;border-radius:5px;padding:5px 6px;font-size:0.78rem;background:#fff;">
               <option value="">All Brands</option>
               <option value="GU">GU Energy</option>
               <option value="SiS">SiS</option>
               <option value="Premier Protein">Premier Protein</option>
             </select>
-            <select id="gusisCategoryFilter" onchange="renderGusisPicker()" style="flex:1;min-width:110px;border:1px solid #9fd8b3;border-radius:5px;padding:5px 6px;font-size:0.78rem;background:#fff;"><option value="">All Types</option></select>
+            <select id="gusisCategoryFilter" onchange="renderGusisPicker()" style="flex:1;min-width:110px;border:1px solid #fbd38d;border-radius:5px;padding:5px 6px;font-size:0.78rem;background:#fff;"><option value="">All Types</option></select>
           </div>
-          <select id="gusisProductSelect" onchange="gusisUpdatePreview()" style="width:100%;border:1px solid #9fd8b3;border-radius:5px;padding:6px 7px;font-size:0.8rem;background:#fff;margin-bottom:5px;box-sizing:border-box;"></select>
-          <div id="gusisPreview" style="font-size:0.7rem;color:#2f7d50;margin-bottom:6px;min-height:1em;"></div>
-          <button type="button" onclick="gusisQuickAdd()" style="width:100%;background:#27ae60;color:#fff;border:none;border-radius:6px;padding:7px;font-size:0.8rem;font-weight:700;cursor:pointer;">+ Add to Sports Nutrition</button>
-          <div id="gusisAddFlash" style="display:none;margin-top:5px;color:#16a34a;font-size:0.78rem;font-weight:700;"></div>
+          <select id="gusisProductSelect" onchange="gusisUpdatePreview()" style="width:100%;border:1px solid #fbd38d;border-radius:5px;padding:6px 7px;font-size:0.8rem;background:#fff;margin-bottom:5px;box-sizing:border-box;"></select>
+          <div id="gusisPreview" style="font-size:0.7rem;color:#b45309;margin-bottom:6px;min-height:1em;"></div>
+          <button type="button" onclick="gusisQuickAdd()" style="width:100%;background:#d97706;color:#fff;border:none;border-radius:6px;padding:7px;font-size:0.8rem;font-weight:700;cursor:pointer;">+ Add to Sports Nutrition</button>
+          <div id="gusisAddFlash" style="display:none;margin-top:5px;color:#b45309;font-size:0.78rem;font-weight:700;"></div>
         </div>
         <div style="padding:6px 8px 8px;"><textarea id="mnotes-sports" rows="1" placeholder="Sports nutrition notes..." oninput="save()" style="width:100%;border:1px solid #e9ecef;border-radius:5px;padding:4px 8px;font-size:0.78rem;resize:vertical;font-family:inherit;box-sizing:border-box;background:#fafafa;color:#555;"></textarea><div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;"><button onclick="openCopyMealToDate('sports')" class="meal-action-btn">&#x1F4C5; Copy to Date</button></div></div>
       </div>
     </div>
     <div class="meal-section" id="ms-supplements" data-meal="supplements">
-      <div class="meal-header" onclick="toggleMealSection('supplements')" style="border-left-color:#8e44ad;">
-        <span>💊 Supplements</span><div class="meal-right"><span class="meal-subtotal" id="st-supplements" style="font-size:0.75rem;color:#888;"></span><button onclick="event.stopPropagation();saveMealFromSection('supplements')" class="meal-action-btn" title="Save meal" aria-label="Save supplements">&#x1F4BE;</button><button onclick="event.stopPropagation();addFoodItem('supplements')" class="meal-add-btn" style="background:#8e44ad;">+ Add</button><span class="meal-chevron" id="chev-supplements">▸</span></div>
+      <div class="meal-header" onclick="toggleMealSection('supplements')">
+        <span>💊 Supplements</span><div class="meal-right"><span class="meal-subtotal" id="st-supplements" style="font-size:0.75rem;color:#888;"></span><button onclick="event.stopPropagation();saveMealFromSection('supplements')" class="meal-action-btn" title="Save meal" aria-label="Save supplements">&#x1F4BE;</button><button onclick="event.stopPropagation();addFoodItem('supplements')" class="meal-add-btn">+ Add</button><span class="meal-chevron" id="chev-supplements">▸</span></div>
       </div>
       <div class="meal-body" id="mb-supplements" style="display:none;"><div id="foodList-supplements"></div>
+        <div style="padding:8px;margin:4px 8px 0;background:#f5f5f6;border:1px solid #d4d4d8;border-radius:7px;">
+          <div style="font-size:0.78rem;font-weight:800;color:#3f3f46;margin-bottom:6px;">&#x1F48A; Supplements Quick Add</div>
+          <select id="suppProductSelect" onchange="supplementUpdatePreview()" style="width:100%;border:1px solid #d4d4d8;border-radius:5px;padding:6px 7px;font-size:0.8rem;background:#fff;margin-bottom:5px;box-sizing:border-box;"></select>
+          <div id="suppPreview" style="font-size:0.7rem;color:#3f3f46;margin-bottom:6px;min-height:1em;"></div>
+          <button type="button" onclick="supplementQuickAdd()" style="width:100%;background:#3f3f46;color:#fff;border:none;border-radius:6px;padding:7px;font-size:0.8rem;font-weight:700;cursor:pointer;">+ Add to Supplements</button>
+          <div id="suppAddFlash" style="display:none;margin-top:5px;color:#3f3f46;font-size:0.78rem;font-weight:700;"></div>
+        </div>
         <div style="padding:6px 8px 8px;"><textarea id="mnotes-supplements" rows="1" placeholder="Supplement notes (dose, timing)..." oninput="save()" style="width:100%;border:1px solid #e9ecef;border-radius:5px;padding:4px 8px;font-size:0.78rem;resize:vertical;font-family:inherit;box-sizing:border-box;background:#fafafa;color:#555;"></textarea><div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;"><button onclick="openCopyMealToDate('supplements')" class="meal-action-btn">&#x1F4C5; Copy to Date</button></div></div>
       </div>
     </div>
@@ -3197,7 +3236,7 @@ body{
   <!-- Favorites / Meals panel -->
   <div id="favMealPanel" style="display:block;background:#fffdf5;border:1px solid #f0c080;border-radius:10px;padding:10px 12px;margin-bottom:16px;box-shadow:0 1px 3px rgba(154,105,20,.18),0 8px 16px rgba(154,105,20,.22),0 26px 48px rgba(154,105,20,.26);">
     <div style="display:flex;gap:8px;margin-bottom:8px;">
-      <button onclick="showFavTab('favs')" id="favTabBtn" style="flex:1;background:#f39c12;color:#fff;border:none;padding:5px;border-radius:6px;font-size:0.8rem;cursor:pointer;font-weight:700;">⭐ Favorites (<span id="favoriteFoodsCount">0</span>)</button>
+      <button onclick="showFavTab('favs')" id="favTabBtn" style="flex:1;background:#f39c12;color:#fff;border:none;padding:5px;border-radius:6px;font-size:0.8rem;cursor:pointer;font-weight:700;">⭐ Food Database (<span id="favoriteFoodsCount">0</span>)</button>
       <button onclick="showFavTab('healthy')" id="healthyTabBtn" style="flex:1;background:#e9ecef;color:#555;border:none;padding:5px;border-radius:6px;font-size:0.8rem;cursor:pointer;font-weight:700;">✅ Healthy 7+ (<span id="healthyFoodsCount">0</span>)</button>
       <button onclick="showFavTab('meals')" id="mealTabBtn" style="flex:1;background:#e9ecef;color:#555;border:none;padding:5px;border-radius:6px;font-size:0.8rem;cursor:pointer;">🍲 Saved Meals</button>
     </div>
@@ -3276,7 +3315,7 @@ body{
       </details>
       <style>
         .macro-source-details,.macro-meal-details{margin-top:9px;border-top:1px dashed #d8dee8;padding-top:7px}.macro-source-details>summary,.macro-meal-details>summary{cursor:pointer;color:#475569;font-size:.74rem;font-weight:800;list-style-position:inside}.source-detail-grid>div>div:first-child{display:none!important}.source-detail-grid>div>div:last-child{height:auto!important}
-        .macro-target-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:8px}.macro-target-card{min-width:0;background:#fff;border:1px solid #e2e8f0;border-radius:9px;padding:8px}.macro-target-card>strong{display:block;font-size:.8rem}.macro-target-card>div{font-size:.9rem;font-weight:900;margin-top:3px;font-variant-numeric:tabular-nums}.macro-target-card small{font-size:.6rem;color:#64748b}.macro-target-card p{font-size:.67rem;font-weight:700;color:#64748b;margin:4px 0}.macro-status{display:inline-block;border-radius:999px;padding:2px 7px;font-size:.62rem;font-weight:800}.macro-status.on{background:#dcfce7;color:#166534}.macro-status.low{background:#fef3c7;color:#92400e}.macro-status.high{background:#fee2e2;color:#991b1b}.meal-macro-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:8px}.meal-macro-chip{min-height:55px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f8fafc;border:1px solid #e2e8f0;border-radius:9px;padding:7px 6px;text-align:center;font-size:.69rem;font-weight:750;line-height:1.35;color:#475569;font-variant-numeric:tabular-nums}.meal-macro-chip strong{display:block;margin-bottom:2px;color:#1e293b;font-size:.75rem}@media(max-width:430px){.macro-target-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.macro-target-card{min-height:91px;padding:8px 5px}.macro-target-card:last-child{grid-column:auto}.macro-target-card>strong{font-size:.8rem}.macro-target-card>div{font-size:.88rem;margin-top:4px}.macro-target-card small{font-size:.61rem;margin-top:1px}.macro-target-card p{font-size:.69rem;margin:5px 0}.macro-status{padding:2px 7px;font-size:.62rem}.meal-macro-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.meal-macro-chip{min-height:60px;padding:8px 6px;font-size:.74rem;line-height:1.4}.meal-macro-chip strong{font-size:.82rem;margin-bottom:2px}}
+        .macro-target-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:8px}.macro-target-card{min-width:0;background:#fff;border:1px solid #e2e8f0;border-radius:9px;padding:8px}.macro-target-card>strong{display:block;font-size:.72rem}.macro-target-card>div{font-size:.86rem;font-weight:900;margin-top:3px;font-variant-numeric:tabular-nums}.macro-target-card small{font-size:.6rem;color:#64748b}.macro-target-card p{font-size:.67rem;font-weight:700;color:#64748b;margin:4px 0}.macro-status{display:inline-block;border-radius:999px;padding:3px 8px;font-size:.74rem;font-weight:800}.macro-status.on{background:#dcfce7;color:#166534}.macro-status.low{background:#fef3c7;color:#92400e}.macro-status.high{background:#fee2e2;color:#991b1b}.meal-macro-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:8px}.meal-macro-chip{min-height:55px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f8fafc;border:1px solid #e2e8f0;border-radius:9px;padding:7px 6px;text-align:center;font-size:.69rem;font-weight:750;line-height:1.35;color:#475569;font-variant-numeric:tabular-nums}.meal-macro-chip strong{display:block;margin-bottom:2px;color:#1e293b;font-size:.75rem}@media(max-width:430px){.macro-target-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.macro-target-card{min-height:91px;padding:8px 5px}.macro-target-card:last-child{grid-column:auto}.macro-target-card>strong{font-size:.72rem}.macro-target-card>div{font-size:.86rem;margin-top:4px}.macro-target-card small{font-size:.6rem;margin-top:1px}.macro-target-card p{font-size:.69rem;margin:5px 0}.macro-status{padding:3px 8px;font-size:.74rem}.meal-macro-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.meal-macro-chip{min-height:60px;padding:8px 6px;font-size:.74rem;line-height:1.4}.meal-macro-chip strong{font-size:.82rem;margin-bottom:2px}}
         #ratioCarbsBar { background:#eab308 !important; }
         #macroRatioWrap div:has(> #ratioCarbs) { color:#a16207 !important; }
         #macroRatioWrap div:has(> #ratioCarbs) + div { border-color:#fde047 !important; }
@@ -3321,17 +3360,31 @@ body{
       <div id="topMicroBreakdown" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:9px;padding-top:8px;border-top:1px dashed #dbe3ec;"></div>
     </div>
     <details style="margin-top:6px;padding-bottom:6px;">
-      <summary style="cursor:pointer;font-size:.72rem;color:#64748b;font-weight:800;">Micronutrient Details</summary>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:7px;font-size:0.74rem;color:#666;">
-      <span>&#x1F33E; <strong id="totFiber">0</strong>g fiber</span>
-      <span>&#x1F36C; <strong id="totSugar">0</strong>g sugar</span>
-      <span>&#x1F9C2; <strong id="totSodium">0</strong>mg sodium</span>
-      <span>&#x1F955; <strong id="totVitA">0</strong>mcg vit A</span>
-      <span>&#x1F34A; <strong id="totVitC">0</strong>mg vit C</span>
-      <span>&#x1F34C; <strong id="totPotassium">0</strong>mg potassium</span>
-      <span>&#x2615; <strong id="totCaffeine">0</strong>mg caffeine</span>
-      </div>
-      <div style="font-size:.62rem;color:#94a3b8;margin-top:5px;line-height:1.35;">These totals are only as complete as the nutrition information available for each logged food.</div>
+      <summary style="cursor:pointer;font-size:.72rem;color:#64748b;font-weight:800;">Nutrient Interactions</summary>
+      <div style="font-size:.62rem;color:#94a3b8;margin:7px 0 6px;line-height:1.35;">How these 12 can affect each other -- mostly meal-timing or supplement-dose issues, not a concern from food alone.</div>
+      <table style="width:100%;border-collapse:collapse;font-size:.72rem;">
+        <thead>
+          <tr style="background:#eef2f7;">
+            <th style="text-align:left;padding:5px 7px;color:#334155;font-weight:800;border-bottom:1px solid #dbe3ec;">Nutrients</th>
+            <th style="text-align:left;padding:5px 7px;color:#334155;font-weight:800;border-bottom:1px solid #dbe3ec;">Interaction</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;font-weight:700;color:#334155;vertical-align:top;">Calcium + Iron</td><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;color:#475569;">Calcium blocks iron absorption when eaten together. Take iron-rich food or a supplement 2+ hours apart from calcium.</td></tr>
+          <tr><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;font-weight:700;color:#334155;vertical-align:top;">Sodium &rarr; Calcium</td><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;color:#475569;">High sodium increases how much calcium is lost in urine. A long-term bone-health concern, not an immediate one.</td></tr>
+          <tr><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;font-weight:700;color:#334155;vertical-align:top;">Magnesium &rarr; Potassium</td><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;color:#475569;">Low magnesium makes it hard for the kidneys to retain potassium. Low potassium that won't correct on its own often means magnesium needs fixing first.</td></tr>
+          <tr><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;font-weight:700;color:#334155;vertical-align:top;">Calcium + Magnesium</td><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;color:#475569;">Share gut absorption pathways. High-dose supplements of one can modestly reduce absorption of the other; minor from food alone.</td></tr>
+          <tr><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;font-weight:700;color:#334155;vertical-align:top;">Vitamin D + Calcium</td><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;color:#475569;">Vitamin D improves calcium absorption. A helpful pairing, not a conflict.</td></tr>
+          <tr><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;font-weight:700;color:#334155;vertical-align:top;">Magnesium &rarr; Vitamin D</td><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;color:#475569;">Magnesium is needed to activate vitamin D. Low magnesium can blunt vitamin D's effectiveness even when vitamin D intake looks fine.</td></tr>
+          <tr><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;font-weight:700;color:#334155;vertical-align:top;">Vitamin C + Iron</td><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;color:#475569;">Vitamin C improves absorption of plant-based (non-heme) iron when eaten together. Pair iron-rich meals with a vitamin C-rich food for better uptake.</td></tr>
+          <tr><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;font-weight:700;color:#334155;vertical-align:top;">Zinc + Iron</td><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;color:#475569;">High-dose iron supplements (25mg+) can reduce zinc absorption when taken together. Space iron and zinc supplements a few hours apart; iron from fortified food isn't a concern.</td></tr>
+          <tr><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;font-weight:700;color:#334155;vertical-align:top;">Fiber &rarr; Iron, Zinc</td><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;color:#475569;">Phytates in whole grains, beans, and nuts bind iron and zinc, reducing absorption from high-fiber plant meals. Not a concern as part of a varied diet overall.</td></tr>
+          <tr><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;font-weight:700;color:#334155;vertical-align:top;">Caffeine &rarr; Calcium</td><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;color:#475569;">Caffeine modestly increases calcium loss in urine, roughly offset by 1-2 tablespoons of milk per cup. Not established as a bone-health risk if calcium intake is otherwise adequate.</td></tr>
+          <tr><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;font-weight:700;color:#334155;vertical-align:top;">Caffeine &rarr; Iron</td><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;color:#475569;">Coffee and tea can cut non-heme (plant-based) iron absorption by roughly 60-80% when drunk with a meal. Wait 1-2 hours after iron-rich food before coffee or tea.</td></tr>
+          <tr><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;font-weight:700;color:#334155;vertical-align:top;">Vitamin B12</td><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;color:#475569;">No meaningful interaction with the other eleven nutrients at normal intake levels.</td></tr>
+          <tr><td style="padding:6px 7px;font-weight:700;color:#334155;vertical-align:top;">Sugar</td><td style="padding:6px 7px;color:#475569;">No meaningful absorption interaction with the other tracked nutrients -- tracked separately as a diet-quality marker, not a mineral/vitamin interaction.</td></tr>
+        </tbody>
+      </table>
     </details>
   </div>
   <!-- AI Fuel insight box -->
@@ -3442,7 +3495,7 @@ body{
       <div style="font-size:.72rem;color:#78716c;margin-bottom:10px;line-height:1.4;">Whole-food meals calculated so their calories break down to roughly 20% protein, 60% carbs and 20% fat — a high-carb split. Each has a real gram amount and a rough kitchen measure; small amounts (a teaspoon, a few grams) are normal since they're solved to hit the ratio exactly.</div>
       <div style="border-top:1px solid #e2e8f0;margin-bottom:10px;padding-top:10px;">
         <strong style="font-size:.8rem;color:#166534;">⭐ From Your Foods</strong>
-        <div style="font-size:.68rem;color:#78716c;margin:2px 0 8px;line-height:1.35;">Closest 20/60/20 matches built from your Favorites and Healthy 7+ list, in addition to the AI ideas below.</div>
+        <div style="font-size:.68rem;color:#78716c;margin:2px 0 8px;line-height:1.35;">Closest 20/60/20 matches built from your Food Database and Healthy 7+ list, in addition to the AI ideas below.</div>
         <div id="macroMealsPersonalList"></div>
       </div>
       <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;">
@@ -3500,8 +3553,8 @@ body{
     </div>
   </div>
 </div>
-<script src="daily-planner-core.js?v=2026-10-18-2-wb2"></script>
-<script src="daily-planner-food-log.js?v=2026-10-18-8"></script>
+<script src="daily-planner-core.js?v=2026-10-26-1-dayreviewfull"></script>
+<script src="daily-planner-food-log.js?v=2026-10-26-6-runnertune"></script>
 <script src="daily-planner-bible.js?v=2026-10-15-8"></script>
 <script src="daily-planner-meditation.js?v=2026-10-15-7"></script>
 <script src="daily-planner-journal-archive.js?v=2026-10-15-6"></script>
@@ -3510,7 +3563,7 @@ body{
 <script src="daily-planner-misc.js?v=2026-10-15-36-pd1"></script>
 <script src="daily-planner-journal-experience.js?v=2026-10-15-8-wb1-wb2"></script>
 <script src="master-backup-shared.js?v=2026-10-15-7"></script>
-<script src="daily-planner-storage-qol.js?v=2026-10-15-7"></script>
+<script src="daily-planner-storage-qol.js?v=2026-10-15-7-nofocus"></script>
 <button class="journal-float-top" id="journalFloatTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">&#x2191; Top</button>
 <div id="v26Toast" class="v26-toast" role="status" aria-live="polite"></div>
 </body>

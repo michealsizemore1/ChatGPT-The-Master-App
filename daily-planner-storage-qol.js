@@ -447,12 +447,6 @@ function v26GoToday(){
   window.scrollTo({top:0,behavior:'smooth'});
   v26Toast('Showing today — '+today.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}));
 }
-function v26ToggleFocus(){
-  var on=document.body.classList.toggle('v26-focus');
-  localStorage.setItem('v26_focus',on?'1':'0');
-  var b=document.getElementById('v26FocusBtn');if(b)b.textContent=on?'Exit focus':'Focus';
-  v26Toast(on?'Focus mode on':'Focus mode off');
-}
 function v26ToggleDensity(){
   var compact=document.body.classList.contains('v26-compact');
   document.body.classList.toggle('v26-compact',!compact);
@@ -476,7 +470,6 @@ window.addEventListener('DOMContentLoaded',function(){
   arrangeActivityTrainingCards();
   relocateDashboardCharts();
   makeHabitsInformational();
-  if(localStorage.getItem('v26_focus')==='1'){document.body.classList.add('v26-focus');var f=document.getElementById('v26FocusBtn');if(f)f.textContent='Exit focus';}
   var density=localStorage.getItem('v26_density')||'compact';
   document.body.classList.add(density==='roomy'?'v26-comfortable':'v26-compact');
   var d=document.getElementById('v26DensityBtn');if(d){d.textContent=density==='roomy'?'Relaxed':'Tight';d.title=density==='roomy'?'Relaxed spacing adds breathing room between journal sections. Click for tight spacing.':'Tight spacing fits more journal content on screen. Click for relaxed spacing.';d.setAttribute('aria-label',density==='roomy'?'Page spacing: Relaxed. Click for tight spacing.':'Page spacing: Tight. Click for relaxed spacing.');d.setAttribute('aria-pressed',density==='compact'?'true':'false');}
@@ -487,8 +480,6 @@ window.addEventListener('DOMContentLoaded',function(){
   document.addEventListener('change',v26SavedFeedback,{passive:true});
   document.addEventListener('keydown',function(e){
     var tag=(e.target&&e.target.tagName)||'';var typing=/INPUT|TEXTAREA|SELECT/.test(tag);
-    if(!typing&&e.key.toLowerCase()==='f'){e.preventDefault();v26ToggleFocus();}
     if(!typing&&e.key.toLowerCase()==='t'){e.preventDefault();v26GoToday();}
-    if(e.key==='Escape'&&document.body.classList.contains('v26-focus'))v26ToggleFocus();
   });
 });

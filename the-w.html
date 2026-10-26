@@ -29,7 +29,7 @@
 <script src="version-check.js"></script>
 <script>
 const SEASON=2026, API='https://site.api.espn.com/apis/site/v2/sports/basketball/wnba';
-const APP_VERSION='2026-09-06-4';
+const APP_VERSION='2026-09-06-5';
 checkForNewerAppVersion(APP_VERSION, 'thew');
 
 const REAL_IDS={ATL:'20',CHI:'19',CON:'18',DAL:'3',GS:'129689',IND:'5',LV:'17',LA:'6',MIN:'8',NY:'9',PHX:'11',POR:'132052',SEA:'14',TOR:'131935',WSH:'16'};
@@ -196,8 +196,8 @@ function renderRankingsPage(){
 }
 function scoreCardsHtml(events){
   return events.map(e=>{
-    const c=e.competitions?.[0]||{},status=e.status?.type?.shortDetail||e.status?.type?.description||mtTime(e.date),comps=(c.competitors||[]).slice().sort((a,b)=>a.homeAway==='away'?-1:1);
-    return `<article class="score-card"><div class="score-head"><span>${esc(status)}</span><span>${esc(network(e))}</span></div>${comps.map(x=>`<div class="score-team"><img src="${esc(x.team?.logo||'')}" alt=""><strong>${esc(x.team?.displayName||'TBD')}</strong><b>${esc(scoreOf(x))}</b></div>`).join('')}${c.status?.type?.completed?'<div class="stats"><div class="stat"><b>Final</b><span>STATUS</span></div><div class="stat"><b>'+esc(c.venue?.fullName||'—')+'</b><span>ARENA</span></div><div class="stat"><b>'+esc(c.attendance||'—')+'</b><span>ATTENDANCE</span></div></div>':''}</article>`;
+    const c=e.competitions?.[0]||{},status=e.status?.type?.shortDetail||e.status?.type?.description||mtTime(e.date),comps=(c.competitors||[]).slice().sort((a,b)=>a.homeAway==='away'?-1:1),id=String(e.id),expanded=state.openGame===id;
+    return `<article class="score-card"><div class="score-head"><span>${esc(status)}</span><span>${esc(network(e))}</span></div>${comps.map(x=>`<div class="score-team"><img src="${esc(x.team?.logo||'')}" alt=""><strong>${esc(x.team?.displayName||'TBD')}</strong><b>${esc(scoreOf(x))}</b></div>`).join('')}${c.status?.type?.completed?'<div class="stats"><div class="stat"><b>Final</b><span>STATUS</span></div><div class="stat"><b>'+esc(c.venue?.fullName||'—')+'</b><span>ARENA</span></div><div class="stat"><b>'+esc(c.attendance||'—')+'</b><span>ATTENDANCE</span></div></div>':''}<div class="score-tap" role="button" tabindex="0" data-game-click="${esc(id)}">${expanded?'Hide box score ↑':'View box score ↓'}</div><div id="game-stats-${esc(id)}" class="game-stats ${expanded?'':'hide'}">${expanded?gameDetailsBoxHtml():''}</div></article>`;
   }).join('');
 }
 async function loadScores(){
