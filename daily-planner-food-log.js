@@ -196,7 +196,7 @@ function applyFoodServingUnit(id,unit){
 }
 
 // Micronutrient fields tracked per food item, in addition to cal/prot/fat/carbs
-const MICRO_FIELDS=['fiber','sugar','sodium','vitC','vitD','calcium','iron','potassium','caffeine','magnesium','vitB12','zinc','chloride'];
+const MICRO_FIELDS=['fiber','sugar','sodium','vitC','vitD','calcium','iron','potassium','caffeine','magnesium','vitB12','zinc'];
 const MICRO_META={
   fiber:{label:'Fiber',unit:'g',icon:'🌾',elId:'totFiber'},
   sugar:{label:'Sugar',unit:'g',icon:'🍬',elId:'totSugar'},
@@ -209,15 +209,14 @@ const MICRO_META={
   caffeine:{label:'Caffeine',unit:'mg',icon:'☕',elId:'totCaffeine'},
   magnesium:{label:'Magnesium',unit:'mg',icon:'💪',elId:'totMagnesium'},
   vitB12:{label:'Vit B12',unit:'mcg',icon:'⚡',elId:'totVitB12'},
-  zinc:{label:'Zinc',unit:'mg',icon:'🦪',elId:'totZinc'},
-  chloride:{label:'Chloride',unit:'mg',icon:'🧃',elId:'totChloride'}
+  zinc:{label:'Zinc',unit:'mg',icon:'🦪',elId:'totZinc'}
 };
 // Maps our MICRO_FIELDS names to Open Food Facts' nutrient taxonomy IDs
 // (world.openfoodfacts.org/data/taxonomies/nutrients.json), used by the
 // barcode lookup below. Verified against OFF's own declared per-nutrient
 // units -- every one of these already matches MICRO_META's unit, so no
 // conversion is needed except sodium, which OFF reports in grams.
-const OFF_NUTRIENT_KEY={fiber:'fiber',sugar:'sugars',sodium:'sodium',vitC:'vitamin-c',vitD:'vitamin-d',calcium:'calcium',iron:'iron',potassium:'potassium',caffeine:'caffeine',magnesium:'magnesium',vitB12:'vitamin-b12',zinc:'zinc',chloride:'chloride'};
+const OFF_NUTRIENT_KEY={fiber:'fiber',sugar:'sugars',sodium:'sodium',vitC:'vitamin-c',vitD:'vitamin-d',calcium:'calcium',iron:'iron',potassium:'potassium',caffeine:'caffeine',magnesium:'magnesium',vitB12:'vitamin-b12',zinc:'zinc'};
 
 // ── AI nutrient enrichment for already-saved favorites/meals ──
 // Lets the user backfill missing nutrient fields -- macros (calories,
@@ -1555,7 +1554,6 @@ function updateMacroTotals(){
         {name:'Vitamin B12',field:'vitB12',value:totals.vitB12||0,target:2.4,unit:'mcg'},
         {name:'Sodium',field:'sodium',value:totals.sodium||0,target:2300,max:4000,unit:'mg'},
         {name:'Potassium',field:'potassium',value:totals.potassium||0,target:3400,unit:'mg'},
-        {name:'Chloride',field:'chloride',value:totals.chloride||0,target:2000,unit:'mg'},
         {name:'Zinc',field:'zinc',value:totals.zinc||0,target:11,unit:'mg'},
         {name:'Vitamin C',field:'vitC',value:totals.vitC||0,target:90,unit:'mg'},
         {name:'Fiber',field:'fiber',value:totals.fiber||0,target:28,unit:'g'},
@@ -1570,7 +1568,7 @@ function updateMacroTotals(){
       if(microQualityLabel)microQualityLabel.textContent=microScore.toFixed(1)+'/10 · '+microLabel;
       if(microQualityMarker)microQualityMarker.style.left=Math.max(0,Math.min(100,(microScore-1)/9*100))+'%';
       if(microQualityTrack)microQualityTrack.setAttribute('aria-valuenow',microScore.toFixed(1));
-      if(microQualityNote)microQualityNote.textContent='Targets for a 53-year-old male distance runner: iron 14mg · calcium 1,000mg · vitamin D 15mcg · magnesium 420mg · vitamin B12 2.4mcg · sodium 2,300–4,000mg · potassium 3,400mg · chloride 2,000mg · zinc 11mg · vitamin C 90mg · fiber 28g · sugar ≤36g · caffeine ≤400mg · lowest today: '+weakest.name+' '+Math.round(weakest.value)+weakest.unit;
+      if(microQualityNote)microQualityNote.textContent='Targets for a 53-year-old male distance runner: iron 14mg · calcium 1,000mg · vitamin D 15mcg · magnesium 420mg · vitamin B12 2.4mcg · sodium 2,300–4,000mg · potassium 3,400mg · zinc 11mg · vitamin C 90mg · fiber 28g · sugar ≤36g · caffeine ≤400mg · lowest today: '+weakest.name+' '+Math.round(weakest.value)+weakest.unit;
       if(microBreakdown)microBreakdown.innerHTML=priorityMicros.map(function(n){
         var pct=n.target?Math.max(0,n.value/n.target*100):0,status=(n.max&&n.value>n.max)?'High':pct>=100?'Met':pct>=75?'Close':'Low';
         var statusColor=status==='Met'?'#166534':(status==='Close'||status==='High')?'#92400e':'#991b1b';
@@ -2160,7 +2158,7 @@ function scanFoodLabel(ev){
         max_tokens:400,
         messages:[{role:'user',content:[
           {type:'image',source:{type:'base64',media_type:mtype,data:b64}},
-          {type:'text',text:'Read this nutrition information image carefully — it may be a photo of a food package label, or a screenshot from a nutrition app, recipe site, or restaurant menu. Extract the per-serving Nutrition Facts, any visible product or food name, and the complete visible ingredient list (leave ingredientsText empty if the image does not show one, such as most app/menu screenshots). Use the ingredients to classify the dominant source of ALL THREE macros for a runner: protein (lean/plant versus higher-fat/processed), carbohydrates (complex/fiber-rich versus simple/refined), and fat (unsaturated versus saturated/trans). Respond with ONLY a single JSON object — no markdown, no code fences, no explanation, nothing else before or after. The JSON must have these exact keys:\n- "name": the product or food name visible anywhere on the label/package (use "Scanned Food" if not visible)\n- "ingredientsText": the complete ingredient list exactly as visible (use an empty string if it is not visible; do not guess)\n- "proteinSource": use "support" for lean/plant, "limit" for higher-fat/processed, or "unknown" when not supported by visible evidence\n- "carbSource": use "support" for complex/fiber-rich, "limit" for simple/refined, or "unknown" when not supported by visible evidence\n- "fatSource": use "support" for unsaturated, "limit" for saturated/trans, or "unknown" when not supported by visible evidence\n- "cal": Calories per serving as a plain number\n- "prot": Protein grams per serving as a plain number\n- "fat": Total Fat grams per serving as a plain number\n- "carbs": Total Carbohydrate grams per serving as a plain number\n- "fiber": Dietary Fiber grams per serving as a plain number\n- "sugar": Total Sugars grams per serving as a plain number\n- "sodium": Sodium milligrams per serving as a plain number\n- "vitC": Vitamin C in mg per serving as a plain number\n- "vitD": Vitamin D in mcg per serving as a plain number\n- "calcium": Calcium in mg per serving as a plain number\n- "iron": Iron in mg per serving as a plain number\n- "potassium": Potassium in mg per serving as a plain number\n- "magnesium": Magnesium in mg per serving as a plain number\n- "vitB12": Vitamin B12 in mcg per serving as a plain number\n- "caffeine": Caffeine milligrams per serving as a plain number (use 0 for items with no caffeine, which is most foods)\n- "zinc": Zinc in mg per serving as a plain number\n- "chloride": Chloride in mg per serving as a plain number\nAll numeric values must be numbers, not strings. Use 0 if a numeric value cannot be read from the label. Never invent missing ingredients or classifications. Output the JSON object only.'}
+          {type:'text',text:'Read this nutrition information image carefully — it may be a photo of a food package label, or a screenshot from a nutrition app, recipe site, or restaurant menu. Extract the per-serving Nutrition Facts, any visible product or food name, and the complete visible ingredient list (leave ingredientsText empty if the image does not show one, such as most app/menu screenshots). Use the ingredients to classify the dominant source of ALL THREE macros for a runner: protein (lean/plant versus higher-fat/processed), carbohydrates (complex/fiber-rich versus simple/refined), and fat (unsaturated versus saturated/trans). Respond with ONLY a single JSON object — no markdown, no code fences, no explanation, nothing else before or after. The JSON must have these exact keys:\n- "name": the product or food name visible anywhere on the label/package (use "Scanned Food" if not visible)\n- "ingredientsText": the complete ingredient list exactly as visible (use an empty string if it is not visible; do not guess)\n- "proteinSource": use "support" for lean/plant, "limit" for higher-fat/processed, or "unknown" when not supported by visible evidence\n- "carbSource": use "support" for complex/fiber-rich, "limit" for simple/refined, or "unknown" when not supported by visible evidence\n- "fatSource": use "support" for unsaturated, "limit" for saturated/trans, or "unknown" when not supported by visible evidence\n- "cal": Calories per serving as a plain number\n- "prot": Protein grams per serving as a plain number\n- "fat": Total Fat grams per serving as a plain number\n- "carbs": Total Carbohydrate grams per serving as a plain number\n- "fiber": Dietary Fiber grams per serving as a plain number\n- "sugar": Total Sugars grams per serving as a plain number\n- "sodium": Sodium milligrams per serving as a plain number\n- "vitC": Vitamin C in mg per serving as a plain number\n- "vitD": Vitamin D in mcg per serving as a plain number\n- "calcium": Calcium in mg per serving as a plain number\n- "iron": Iron in mg per serving as a plain number\n- "potassium": Potassium in mg per serving as a plain number\n- "magnesium": Magnesium in mg per serving as a plain number\n- "vitB12": Vitamin B12 in mcg per serving as a plain number\n- "caffeine": Caffeine milligrams per serving as a plain number (use 0 for items with no caffeine, which is most foods)\n- "zinc": Zinc in mg per serving as a plain number\nAll numeric values must be numbers, not strings. Use 0 if a numeric value cannot be read from the label. Never invent missing ingredients or classifications. Output the JSON object only.'}
           ,{type:'text',text:'Also include a string key named "servingLabel" containing the exact serving size printed on the label, including its unit (for example, "1 cup (240 mL)" or "30 g"). Use "1 serving" only when the serving size cannot be read.'}
         ]}]
       })
