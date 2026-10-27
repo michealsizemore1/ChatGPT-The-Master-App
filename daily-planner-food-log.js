@@ -831,6 +831,10 @@ function isCaffeinatedBeverageName(name){
   var n=String(name||'').toLowerCase();
   return /\b(coffee|espresso|latte|cappuccino|mocha|americano|cold\s*brew|black\s*tea|green\s*tea|energy\s*drinks?|red\s*bull|monster(?:\s*energy)?|celsius|bang\s*energy|rockstar|reign|ghost\s*energy|c4\s*energy|alani\s*nu)\b/.test(n);
 }
+function isCaffeinatedBeverage(x){
+  if(isCaffeinatedBeverageName(x&&x.name))return true;
+  return (parseFloat(x&&x.caffeine)||0)>0;
+}
 function lookupGusisServingOz(name){
   if(typeof GUSIS_PRODUCTS==='undefined'||!GUSIS_PRODUCTS.length)return 0;
   var n=String(name||'').toLowerCase();
@@ -846,7 +850,7 @@ function liquidOzForMeal(meal){
   var total=0;
   log.forEach(function(x){
     if(x.meal!==meal)return;
-    if(isCaffeinatedBeverageName(x.name))return;
+    if(isCaffeinatedBeverage(x))return;
     var s=parseFloat(x.servings)||1;
     var oz=parseFluidOzFromServingLabel(x.servingLabel);
     if(!oz){
