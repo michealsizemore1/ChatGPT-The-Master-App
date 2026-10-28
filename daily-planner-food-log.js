@@ -1585,7 +1585,7 @@ function updateMacroTotals(){
       if(microQualityMarker)microQualityMarker.style.left=Math.max(0,Math.min(100,(microScore-1)/9*100))+'%';
       if(microQualityTrack)microQualityTrack.setAttribute('aria-valuenow',microScore.toFixed(1));
       if(microQualityNote)microQualityNote.textContent='Targets for a 53-year-old male distance runner: iron 14mg · calcium 1,000mg · vitamin D 15mcg · magnesium 483mg · vitamin B12 2.4mcg · sodium 2,300–4,000mg · potassium 3,400mg · zinc 15mg · vitamin C 90mg · fiber 28g · sugar ≤'+Math.round(sugarCeiling)+'g'+(sportsSugar>0?' (36g + '+Math.round(sportsSugar)+'g fueling today)':'')+' · caffeine ≤400mg (a single race-day dose can push this higher by design, not a red flag) · lowest today: '+weakest.name+' '+Math.round(weakest.value)+weakest.unit;
-      if(microBreakdown)microBreakdown.innerHTML=priorityMicros.map(function(n){
+      if(microBreakdown)microBreakdown.innerHTML=priorityMicros.map(function(n){var p=n.target?Math.max(0,n.value/n.target*100):0,st=(n.max&&n.value>n.max)?'High':p>=100?'Met':p>=75?'Close':'Low';return {n:n,rank:{Low:0,High:1,Close:2,Met:3}[st],pct:p};}).sort(function(a,b){return a.rank-b.rank||a.pct-b.pct;}).map(function(x){return x.n;}).map(function(n){
         var pct=n.target?Math.max(0,n.value/n.target*100):0,status=(n.max&&n.value>n.max)?'High':pct>=100?'Met':pct>=75?'Close':'Low';
         var statusColor=status==='Met'?'#166534':status==='Close'?'#92400e':status==='High'?'#92400e':'#991b1b';
         var statusBadgeBg=status==='Close'?'#fef3c7':statusColor+'1a';
