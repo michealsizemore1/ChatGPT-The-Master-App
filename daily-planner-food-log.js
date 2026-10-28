@@ -651,7 +651,8 @@ function gusisQuickAdd(){
 const SUPPLEMENT_PRODUCTS=[
   {brand:'Nature Made',name:'Multi For Him 50+ (USP Verified)',serving:'1 tablet',cal:0,carbs:0,prot:0,fat:0,vitA:750,vitC:180,vitD:25,vitE:27,vitK:80,vitB1:1.5,vitB2:1.7,vitB3:20,vitB6:6,vitB12:25,folate:665,biotin:30,vitB5:10,calcium:160,iodine:150,magnesium:100,zinc:15,selenium:105,copper:2,manganese:4,chromium:120,molybdenum:75},
   {brand:'Nature Made',name:'Magnesium Oxide 250mg',serving:'1 tablet',cal:0,carbs:0,prot:0,fat:0,magnesium:250},
-  {brand:'Nature Made',name:'Iron 65mg (Ferrous Sulfate)',serving:'1 tablet',cal:0,carbs:0,prot:0,fat:0,iron:65}
+  {brand:'Nature Made',name:'Iron 65mg (Ferrous Sulfate)',serving:'1 tablet',cal:0,carbs:0,prot:0,fat:0,iron:65},
+  {brand:'Pure Encapsulations',name:'Potassium Magnesium (citrate)',serving:'1 capsule',cal:0,carbs:0,prot:0,fat:0,potassium:140,magnesium:70}
 ];
 function renderSupplementPicker(){
   var sel=document.getElementById('suppProductSelect');
