@@ -171,6 +171,7 @@ function toggleAddActivity(){
   document.getElementById('actSaveBtn').textContent='Save Activity';
   clearActForm();
   document.getElementById('actDate').value=dk(new Date());
+  syncActWeightFromWellness();
   handleActTypeChange();
   f.style.display='block';
   setTimeout(()=>document.getElementById('actTitle').focus(),50);
@@ -339,8 +340,28 @@ function parseDurationSecLoose(s){
   m=s.match(/^(\d+(?:\.\d+)?)\s*(?:min|minutes?|m)$/i);if(m)return Math.round(parseFloat(m[1])*60);
   var n=parseFloat(s);return(isNaN(n)||n<=0)?0:Math.round(n*60);
 }
-function getActWeightKg(){
-  var lbs=parseFloat(localStorage.getItem('act_weight_lbs'))||160;
+// Weight logged in the Wellness tab for a given day (or the most recent
+// day before it, up to 30 days back). Returns 0 if nothing is logged.
+function wellnessWeightForDate(dateKey){
+  if(!dateKey)return 0;
+  for(var offset=0;offset<30;offset++){
+    var d=new Date(dateKey+'T12:00:00');if(isNaN(d))return 0;d.setDate(d.getDate()-offset);
+    try{var w=parseFloat(JSON.parse(localStorage.getItem('planner_'+dk(d))||'{}').wWghtVal);if(w>70&&w<600)return w;}catch(e){}
+  }
+  return 0;
+}
+// Keeps the activity form's "Your weight" field in step with the Wellness
+// weight for the activity's date, so calorie estimates use that day's weight.
+function syncActWeightFromWellness(){
+  var dateEl=document.getElementById('actDate');
+  var w=wellnessWeightForDate((dateEl&&dateEl.value)||dk(new Date()));
+  if(!w)return;
+  localStorage.setItem('act_weight_lbs',String(w));
+  var el=document.getElementById('actUserWeight');if(el)el.value=w;
+  if(typeof updateActCaloriesPlaceholder==='function')updateActCaloriesPlaceholder();
+}
+function getActWeightKg(dateKey){
+  var lbs=wellnessWeightForDate(dateKey)||parseFloat(localStorage.getItem('act_weight_lbs'))||160;
   return lbs*0.453592;
 }
 function estimateCalories(a){
@@ -349,7 +370,7 @@ function estimateCalories(a){
   if(!hours)return 0;
   var type=a.type||'Run';
   if(type==='Rest Day')return 0;
-  var weightKg=getActWeightKg();
+  var weightKg=getActWeightKg(a.date);
   var distMi=parseFloat(a.distance)||0;
   var speedMph=distMi>0?distMi/hours:0;
   var met=5;
@@ -383,6 +404,7 @@ function updateActCaloriesPlaceholder(){
   if(typeNow==='Rest Day'){calEl.placeholder='0';return;}
   var est=estimateCalories({
     type:typeNow,
+    date:document.getElementById('actDate').value,
     distance:parseFloat(document.getElementById('actDistance').value)||0,
     duration:(document.getElementById('actDuration').value||'').trim(),
     power:parseFloat(document.getElementById('actPower').value)||0,
@@ -490,6 +512,7 @@ function editActivity(id){
   document.getElementById('actFormTitle').textContent='✏️ Edit Activity';
   document.getElementById('actSaveBtn').textContent='Save Changes';
   document.getElementById('actDate').value=act.date||'';
+  syncActWeightFromWellness();
   document.getElementById('actType').value=act.type||'Run';
   document.getElementById('actTitle').value=act.title||'';
   document.getElementById('actDistance').value=act.distance||'';

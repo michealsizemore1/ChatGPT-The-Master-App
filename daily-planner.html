@@ -2460,7 +2460,7 @@ body{
       <span>lbs — used only to auto-estimate Calories when you leave that field blank</span>
     </div>
     <div class="act-form-grid">
-      <div><label class="act-label">Date</label><input type="date" id="actDate" class="act-input"></div>
+      <div><label class="act-label">Date</label><input type="date" id="actDate" class="act-input" onchange="syncActWeightFromWellness()"></div>
       <div><label class="act-label">Type</label>
         <select id="actType" class="act-input" onchange="handleActTypeChange()">
           <option value="Run">Run</option><option value="Ride">Ride</option>
@@ -2489,7 +2489,7 @@ body{
         </select>
       </div>
     </div>
-    <script>document.getElementById('actUserWeight').value=localStorage.getItem('act_weight_lbs')||'';</script>
+    <script>document.getElementById('actUserWeight').value=localStorage.getItem('act_weight_lbs')||'';window.addEventListener('load',function(){var w=document.getElementById('wWghtVal');if(w)w.addEventListener('change',function(){setTimeout(syncActWeightFromWellness,0);});try{syncActWeightFromWellness();}catch(e){}});</script>
     <div><label class="act-label">Notes</label><textarea id="actNotes" class="act-input" style="height:90px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Consolas,'Liberation Mono',Menlo,monospace;font-size:0.8rem;" placeholder="Any notes..."></textarea></div>
     <div style="margin-top:9px;"><label class="act-label">Injury Report</label><textarea id="actInjuryReport" class="act-input" style="height:60px;resize:vertical;font-family:inherit;" placeholder="Pain, soreness, location, severity, or changes during the workout..."></textarea></div>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px;">
@@ -3560,7 +3560,7 @@ body{
 <script src="daily-planner-journal-archive.js?v=2026-10-15-6"></script>
 <script src="daily-planner-file-uploads.js?v=2026-10-15-6"></script>
 <script src="daily-planner-shoe-tracker.js?v=2026-10-15-6"></script>
-<script src="daily-planner-misc.js?v=2026-10-26-3-zonesupdatedfallback"></script>
+<script src="daily-planner-misc.js?v=2026-10-28-1-wellnessweight"></script>
 <script src="daily-planner-journal-experience.js?v=2026-10-15-8-wb1-wb2"></script>
 <script src="master-backup-shared.js?v=2026-10-15-7"></script>
 <script src="daily-planner-storage-qol.js?v=2026-10-15-7-nofocus"></script>
