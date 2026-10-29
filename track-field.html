@@ -240,9 +240,9 @@ html{font-size:14px}
 
   <section id="entriesView" class="hide">
     <div class="hero">
-      <div class="eyebrow">Bank of America Chicago Marathon &middot; Oct 11 &middot; Final results</div>
-      <div class="hero-row"><h1>Entries</h1><div class="stamp">RESULTS <b>11 OCT 2026</b></div></div>
-      <p class="source">Amos Kipruto ran away from a loaded field to win in a personal-best 2:01:09, with defending champion Jacob Kiplimo fading to 4th (2:04:18) behind Tadese Takele Bikila (2:02:56) and Milkesa Mengesha (2:03:46). Hawi Feysa defended her title in 2:13:33, holding off Sharon Lokedi (2:14:07) and Brigid Kosgei (2:14:55). Full results and wheelchair times &mdash; Catherine Debrunner&rsquo;s 1:33:16 world record among them &mdash; are at <a href="https://www.chicagomarathon.com/runners/race-results/" target="_blank" rel="noopener">chicagomarathon.com</a>.</p>
+      <div class="eyebrow">TCS New York City Marathon &middot; Nov 1 &middot; Elite start list</div>
+      <div class="hero-row"><h1>Entries</h1><div class="stamp">STARTS <b>1 NOV 2026</b></div></div>
+      <p class="source">Hellen Obiri goes for a third New York title after Sifan Hassan (illness), Fiona O&rsquo;Keeffe (hamstring surgery) and 2022 world champion Gotytom Gebreslase all withdrew, leaving Sheila Chepkirui as the only other sub-2:19 woman in the field. Benson Kipruto defends the men&rsquo;s title against a wide-open field topped by debutant Andreas Almgren, the reigning world half marathon champion and the bettors&rsquo; favorite. Live results, and wheelchair and handcycle times, will be at <a href="https://results.nyrr.org/" target="_blank" rel="noopener">results.nyrr.org</a> once the race starts.</p>
     </div>
     <div class="panel">
       <div class="controls">
@@ -254,9 +254,9 @@ html{font-size:14px}
       <div id="entriesList"></div>
     </div>
     <div class="section-card" style="margin-top:18px">
-      <div class="eyebrow">Grant Park &middot; Oct 11</div>
+      <div class="eyebrow">Staten Island to Central Park &middot; Nov 1</div>
       <h2>Meet timetable</h2>
-      <p class="note">The professional start, men and women together, plus the wheelchair, handcycle and mass-participation waves, as run on race day. Mountain Time first, Chicago local time underneath. Replays aired on Peacock and NBC 5 Chicago.</p>
+      <p class="note">The professional start, women then men, plus the wheelchair, handcycle and mass-participation waves, as run on race day. Mountain Time first, New York local time underneath. Live on ESPN2 and WABC-TV, with ABC&rsquo;s finish-line show in the afternoon.</p>
       <div class="tt-head">
         <div class="seg" id="ttDays" role="tablist" aria-label="Day"></div>
         <span class="sortlabel">Show</span>
@@ -311,7 +311,7 @@ html{font-size:14px}
 
 <script src="version-check.js"></script>
 <script>
-const APP_VERSION='2026-10-26-1';
+const APP_VERSION='2026-10-29-1';
 checkForNewerAppVersion(APP_VERSION, 'tf');
 
 // [name, country, ranking score, 2026 season best]  "rd" marks a road time used where there is no track mark.
@@ -381,25 +381,26 @@ const ULTRA={
   '100M':[['Katie Schide','USA',830,'23-34'],['Jennifer Lichter','USA',830,'23-34'],['Courtney Dauwalter','USA',828,'40-44'],['Riley Brady','USA',817,'23-34'],['Antonina Iushina','RUS',816,'23-34'],['Tara Dower','USA',812,'23-34'],['Marianne Hogan','CAN',809,'35-39'],['Fuzhao Xiang','CHN',806,'23-34'],['Caitlin Fielder','NZL',805,'23-34'],["Blandine L'Hirondel",'FRA',803,'35-39']]
  }
 };
-// Chicago Marathon final results (men and women); race run 11 Oct 2026.
-// [name, country, finish time, personal best entering the race, world rank (blank; not meaningful for results)]
+// TCS New York City Marathon elite start list (men and women); race runs 1 Nov 2026.
+// [name, country, season best (same as PB unless noted), personal best, world rank (blank where not given)]
 const ENTRY_EVENTS=['Marathon'];
-// Elite start only; men and women start together. Chicago sits on CDT (UTC-5), one hour ahead of Denver's MDT (UTC-6) for these dates.
+// Elite start only; women go off 30 minutes before men. New York sits on EST (UTC-5), two hours ahead of Denver's MST (UTC-7) for these dates.
 const TIMETABLE=[
- {label:'Sunday 11 October',short:'Sun 11 Oct',rows:[
-  ['07:20','Wheelchair (men)'],['07:21','Wheelchair (women)'],['07:23','Handcycle'],
-  ['07:30','Men’s Marathon','men/Marathon'],['07:30','Women’s Marathon','women/Marathon'],
-  ['07:32','High Performance Running Program'],['07:35','Wave 1'],['08:00','Wave 2'],['08:35','Wave 3']
+ {label:'Sunday 1 November',short:'Sun 1 Nov',rows:[
+  ['08:00','Wheelchair (men)'],['08:02','Wheelchair (women)'],['08:22','Handcycle & para divisions'],
+  ['08:35','Women’s Marathon','women/Marathon'],['09:05','Men’s Marathon','men/Marathon'],
+  ['09:10','Wave 1'],['09:45','Wave 2'],['10:20','Wave 3'],['10:55','Wave 4'],['11:30','Wave 5']
  ]}
 ];
-const ENTRY_MEET_CITY='Chicago';
-const ENTRY_RESULTS_URL='https://www.chicagomarathon.com/runners/race-results/';
-const ENTRY_RESULTS_LABEL='chicagomarathon.com';
+const ENTRY_MEET_CITY='New York';
+const ENTRY_RESULTS_URL='https://results.nyrr.org/';
+const ENTRY_RESULTS_LABEL='results.nyrr.org';
 // Elite marathon finishers arrive roughly two to two-and-a-half hours after the gun, so the
 // live window needs a much longer buffer than a track meet's last race; Brussels used 40 minutes.
 const ENTRY_LIVE_BUFFER_MIN=180;
-// Chicago sits on CDT (UTC-5); Denver is on MDT (UTC-6) for these dates, so Chicago local time is one hour ahead of Mountain.
-const ENTRY_UTC_OFFSET_HOURS=-5, MOUNTAIN_UTC_OFFSET_HOURS=-6, ENTRY_MEET_MONTH_INDEX=9; // Chicago CDT, Denver MDT, October (0-based)
+// Daylight saving time ends at 2am local on race morning, so both New York (EST, UTC-5) and
+// Denver (MST, UTC-7) are already on standard time by the 8:35am ET gun -- a flat two-hour gap.
+const ENTRY_UTC_OFFSET_HOURS=-5, MOUNTAIN_UTC_OFFSET_HOURS=-7, ENTRY_MEET_MONTH_INDEX=10; // New York EST, Denver MST, November (0-based)
 function toMountain(hhmm){const diff=ENTRY_UTC_OFFSET_HOURS-MOUNTAIN_UTC_OFFSET_HOURS,p=hhmm.split(':'),H=(+p[0]+24-diff)%24;return `${H%12||12}:${p[1]} ${H>=12?'PM':'AM'}`}
 // Men's and women's championship or major races count as finals; support races render dimmed.
 function isFinalEvent(n){return /^(Men|Women)/.test(n)&&!/Invitational|T63|T54/.test(n)}
@@ -407,7 +408,7 @@ function isFinalEvent(n){return /^(Men|Women)/.test(n)&&!/Invitational|T63|T54/.
 // No public results feed exists for this meet, so "live" here means an honest, purely time-driven
 // read of the schedule: which event is on right now, and which have already finished, computed
 // straight from each device's own clock against the published start times, never a guessed result.
-// The meet runs CDT (UTC-5), so a row's real UTC instant is its local time plus five hours, dated
+// The meet runs EST (UTC-5), so a row's real UTC instant is its local time plus five hours, dated
 // against the day the TIMETABLE entry belongs to.
 function ttRowDateUTC(dayIndex,hhmm){
  const day=TIMETABLE[dayIndex],dom=+(day.label.match(/(\d+)/)||[])[1]||(4+dayIndex);
@@ -456,26 +457,27 @@ function renderTtBanner(){
  if(phase.kind==='after'){el.innerHTML=`<div class="tt-live-banner off"><b>Final complete</b> Full results at <a href="${ENTRY_RESULTS_URL}" target="_blank" rel="noopener">${esc(ENTRY_RESULTS_LABEL)}</a></div>`;return}
  if(phase.kind==='gap'){el.innerHTML=`<div class="tt-live-banner off"><b>Between sessions</b> ${esc(phase.label)}${phase.ms?' &middot; '+esc(ttFmtCountdown(phase.ms)):''}</div>`;return}
  const row=TIMETABLE[phase.day].rows[phase.idx];
- el.innerHTML=`<div class="tt-live-banner"><span class="dot"></span><b>Live now</b> ${esc(row[1])}<span class="tt-live-time">${esc(toMountain(row[0]))} MDT</span></div>`;
+ el.innerHTML=`<div class="tt-live-banner"><span class="dot"></span><b>Live now</b> ${esc(row[1])}<span class="tt-live-time">${esc(toMountain(row[0]))} MST</span></div>`;
 }
 // Each start list takes its time straight from the timetable, so the two can never disagree.
 const ENTRY_WHEN=(()=>{const out={men:{},women:{}};
  TIMETABLE.forEach(d=>d.rows.forEach(([t,n,key])=>{if(!key)return;const g=key.split('/')[0],ev=key.split('/')[1];
-  out[g][ev]=`${d.short} · ${toMountain(t)} MDT`}));
+  out[g][ev]=`${d.short} · ${toMountain(t)} MST`}));
  return out})();
 const ENTRIES={
  men:{
-  'Marathon':[['Amos Kipruto','KEN','2:01:09','2:01:39',''],['Tadese Takele Bikila','ETH','2:02:56','2:03:23',''],['Milkesa Mengesha','ETH','2:03:46','2:03:17',''],['Jacob Kiplimo','UGA','2:04:18','2:00:28',''],['Boki Diriba','ETH','2:05:01','2:06:26',''],['Daniel Mateiko','KEN','2:05:23','2:03:44',''],['Clayton Young','USA','2:05:23','2:05:41',''],['Charles Hicks','USA','2:05:35','2:04:35',''],['Akira Akasaki','JPN','2:05:48','2:06:15',''],['Vincent Mauri','USA','2:06:46','2:05:54','']]
+  'Marathon':[['Benson Kipruto','KEN','2:02:16','2:02:16',''],['Deresa Geleta','ETH','2:02:38','2:02:38',''],['Cybrian Kotut','KEN','2:03:22','2:03:22',''],['Zouhair Talbi','USA','2:03:45','2:03:45',''],['Abdi Nageeye','NED','2:04:20','2:04:20',''],['Geoffrey Kamworor','KEN','2:04:23','2:04:23',''],['Conner Mantz','USA','2:04:43','2:04:43',''],['Kengo Suzuki','JPN','2:04:56','2:04:56',''],['Yemaneberhan Crippa','ITA','2:05:18','2:05:18',''],['Edward Cheserek','KEN','2:05:24','2:05:24',''],['Ryota Kondo','JPN','2:05:39','2:05:39',''],['Ryan Ford','USA','2:05:46','2:05:46',''],['Joe Klecker','USA','2:05:56','2:05:56',''],['Peter Lynch','IRL','2:06:08','2:06:08',''],['Patrick Dever','GBR','2:06:18','2:06:18',''],['Haftu Strintzos','AUS','2:06:20','2:06:20',''],['Jack Rowe','GBR','2:07:47','2:07:47',''],['Kamohelo Mofolo','LES','2:08:50','2:08:50',''],['Sam Chelanga','USA','2:08:50','2:08:50',''],['JP Flavin','USA','2:09:17','2:09:17',''],['Turner Wiley','USA','2:09:27','2:09:27',''],['Andrew Colley','USA','2:09:33','2:09:33',''],['Robert Miranda','USA','2:09:40','2:09:40',''],['Joel Reichow','USA','2:09:56','2:09:56',''],['Aidan Troutner','USA','2:10:23','2:10:23',''],['Stephen Jones','USA','2:11:17','2:11:17',''],['Mo Bati','USA','2:12:29','2:12:29',''],['Aidan Reed','USA','2:13:58','2:13:58',''],['Owen Ritz','USA','2:14:19','2:14:19',''],['James Nipperess','AUS','2:15:03','2:15:03',''],['Merga Gemeda','USA','2:15:12','2:15:12',''],['Alec Baldwin','USA','2:15:38','2:15:38',''],['Ryan Cutter','USA','2:17:24','2:17:24',''],['Andreas Almgren','SWE','Debut','Debut',''],['Patrick Kiprop','KEN','Debut','Debut',''],['Ahmed Muhumed','USA','Debut','Debut','']]
  },
  women:{
-  'Marathon':[['Hawi Feysa','ETH','2:13:33','2:14:57',''],['Sharon Lokedi','KEN','2:14:07','2:17:22',''],['Brigid Kosgei','KEN','2:14:55','2:14:04',''],['Mary Ngugi Cooper','KEN','2:17:23','2:19:26',''],['Joan Kilimo','KEN','2:18:38','2:18:40',''],['Isobel Batt-Doyle','AUS','2:20:38','2:22:59',''],['Emma Grace Hurley','USA','2:20:47','Debut',''],['Degitu Azimeraw','ETH','2:21:00','2:17:58',''],['Magdalyne Masai','KEN','2:21:11','2:18:58',''],['Loice Chemnung','KEN','2:21:19','2:18:24','']]
+  'Marathon':[['Hellen Obiri','KEN','2:15:53','2:15:53',''],['Sheila Chepkirui','KEN','2:17:29','2:17:29',''],['Viola Cheptoo','KEN','2:19:05','2:19:05',''],['Edna Kiplagat','KEN','2:19:50','2:19:50',''],['Mercy Chelangat','KEN','2:20:30','2:20:30',''],['Jessica McClain','USA','2:20:49','2:20:49',''],['Annie Frisbie','USA','2:22:00','2:22:00',''],['Fabienne Königstein','GER','2:22:17','2:22:17',''],['Carrie Ellwood','USA','2:22:53','2:22:53',''],['Giovanna Epis','ITA','2:23:46','2:23:46',''],['Rie Kawauchi','JPN','2:24:16','2:24:16',''],['Amanda Vestri','USA','2:24:49','2:24:49',''],['Lauren Hagans','USA','2:25:47','2:25:47',''],['Julia Paternain','URU','2:25:47','2:25:47',''],['Phily Bowden','GBR','2:25:57','2:25:57',''],['Paige Wood','USA','2:26:02','2:26:02',''],['Steph Bruce','USA','2:27:47','2:27:47',''],['Roberta Groner','USA','2:29:09','2:29:09',''],['Mica Rivera Wood','PER','2:29:13','2:29:13',''],['Megan O’Neil','USA','2:31:31','2:31:31',''],['Monica Hebner','USA','2:32:40','2:32:40',''],['Brooke Starn','USA','2:35:22','2:35:22',''],['Alosha Southern','USA','2:36:10','2:36:10',''],['Keelah Barger','USA','2:36:13','2:36:13',''],['Maddie Block','USA','2:36:25','2:36:25',''],['Cailie Hughes','USA','Debut','Debut',''],['Weini Kelati','USA','Debut','Debut','']]
  }
 };
 const ENTRIES_PENDING=[
- ['New York City Marathon','Nov 1','Professional field set Aug 19 (Obiri and Kipruto defend); Sifan Hassan and Fiona O’Keeffe withdrew 14 Oct with illness and injury, leaving Mantz, Talbi and debutant Weini Kelati to headline the US contingent. Pro start times are now confirmed for Sunday (women 8:35 AM, men 9:05 AM Eastern), but NYRR’s bib-numbered elite list, wheelchair/handcycle times and wave schedule remain unpublished as of 25 Oct.']
+ ['Shanghai Marathon','Dec 6','Elite field announced closer to race day.'],
+ ['Valencia Marathon','Dec 6','Elite field usually announced in November; Kejelcha and Tesfay already confirmed to lead the lineup.']
 ];
 const UPCOMING=[
- {d:'Nov 1',y:'2026',name:'New York City Marathon',where:'New York, USA',detail:'Defending champions Hellen Obiri and Benson Kipruto headline after Sifan Hassan withdrew 14 Oct with an illness and Fiona O’Keeffe scratched with injury; American record holder Conner Mantz faces Zouhair Talbi’s faster personal best, and Weini Kelati debuts off an American record half marathon. Pro women start at 8:35 AM and pro men at 9:05 AM Eastern (6:35/7:05 AM Mountain); the 50th running also tweaks the Bronx routing between miles 20 and 21.',watch:'ESPN2 and ABC &middot; 6:00 AM MST',tag:'Marathon major',cls:'major',links:[['Official site','https://www.nyrr.org/tcsnycmarathon'],['Professional field announced','https://citiusmag.com/articles/new-york-city-marathon-2026-professional-elite-field-obiri-kipruto-hassan-mantz-talbi-mcclain-kelati'],['Race week: 10 things to know','https://www.ibtimes.com.au/new-york-city-marathon-2026-what-know-1877351']]},
+ {d:'Nov 1',y:'2026',name:'New York City Marathon',where:'New York, USA',detail:'Defending champion Hellen Obiri goes for a third title after Sifan Hassan, Fiona O’Keeffe and 2022 world champion Gotytom Gebreslase all withdrew, leaving the thinnest field of any 2026 major. Benson Kipruto defends the men’s title against debutant Andreas Almgren, the reigning world half marathon champion and betting favorite; Conner Mantz returns from injury and American record holder Weini Kelati debuts. Pro women start at 8:35 AM and pro men at 9:05 AM Eastern (6:35/7:05 AM Mountain); the 50th running also tweaks the Bronx routing between miles 20 and 21.',watch:'ESPN2 and ABC &middot; 6:00 AM MST',tag:'Marathon major',cls:'major',links:[['Official site','https://www.nyrr.org/tcsnycmarathon'],['Men’s preview: Almgren vs. Kipruto','https://www.letsrun.com/news/2026/10/2026-nyc-marathon-mens-preview-can-a-former-800m-guy-from-sweden-actually-win-or-does-benson-kipruto-repeat/'],['Women’s preview: Obiri chases a third title','https://www.letsrun.com/news/2026/10/2026-nyc-marathon-womens-preview-with-an-ultra-thin-field-can-weini-kelati-or-jess-mcclain-end-the-8-year-american-podium-drought/']]},
  {d:'Dec 6',y:'2026',name:'Shanghai Marathon',where:'Shanghai, China',detail:'A candidate race under assessment to join the majors in 2027.',watch:'Broadcast details not yet announced',tag:'Candidate major',cls:'',links:[['Race details & schedule','https://www.watchathletics.com/schedule/watchlive/11238'],['Bid to join the World Marathon Majors','https://marathonhandbook.com/shanghai-marathon-is-one-race-away-from-joining-the-worlds-most-exclusive-running-club/']]},
  {d:'Dec 6',y:'2026',name:'Valencia Marathon',where:'Valencia, Spain',detail:'One of the fastest courses in the world — Agnes Ngetich’s half marathon and 10km world bests have both come on these roads.',watch:'Broadcast details not yet announced',tag:'Elite race',cls:'',links:[['Official site','https://www.valenciaciudaddelrunning.com/en/marathon/'],['Kejelcha and Tesfay lead elite lineup','https://www.valenciaciudaddelrunning.com/en/kejelcha-tesfay-lead-elite-lineup-big-ambitions-valencia-marathon-2026/']]},
  {d:'Mar 7',y:'2027',name:'Tokyo Marathon',where:'Tokyo, Japan',detail:'The newest of the six World Marathon Majors and the first big race of the 2027 season.',watch:'Broadcast details not yet announced',tag:'Marathon major',cls:'major',links:[['Official site','https://www.marathon.tokyo/en/'],['Prize money raised, field expanded for 2027','https://marathonhandbook.com/tokyo-marathon-pushes-champion-prize-to-170000-and-expands-field-to-40000-for-2027/']]},
@@ -490,42 +492,43 @@ const DL_SEASON=[
 ];
 
 // Section news. [ISO date, headline, publisher, url, one-line summary]
-// Checked 26 October 2026; the twice-weekly refresh replaces these.
-const NEWS_CHECKED='2026-10-26';
+// Checked 29 October 2026; the twice-weekly refresh replaces these.
+const NEWS_CHECKED='2026-10-29';
 const NEWS={
  track:[
-  ['2026-10-22','Diamond League season review recaps Russell’s and Dos Santos’s world records','Diamond League','https://www.diamondleague.com/part-v-world-records-on-the-final-straight/','Part five of the 2026 retrospective revisits Masai Russell’s 100m hurdles and Alison Dos Santos’s 400m hurdles world records from the August stops in Lausanne, Silesia and Zurich.'],
-  ['2026-10-19','Wanda Diamond League confirms 2027 discipline allocation','Diamond League','https://www.diamondleague.com/discipline-allocation-confirmed-for-2027-wanda-diamond-league/','The 2027 circuit confirmed which of its 15 meetings — from Doha’s 7 May opener to the Zurich final on 25–26 August — will stage each event on the Road to the Final.'],
-  ['2026-10-15','Olympic 800m champion Athing Mu announces she is pregnant','LetsRun.com','https://www.letsrun.com/news/2026/10/olympic-800m-champion-athing-mu-announces-she-is-pregnant-what-does-it-mean-for-la-2028/','Mu, who has not raced since August 2025 and split with coach Bobby Kersee last year, announced on Instagram that she is expecting her first child, leaving her path to LA 2028 uncertain.'],
-  ['2026-10-12','Wanda Diamond League publishes 2027 calendar','Diamond League','https://www.diamondleague.com/wanda-diamond-league-publishes-2027-calendar/','The 2027 season opens in Doha on 7 May and closes with a two-day final in Zurich on 25–26 August, with Shanghai/Keqiao, Xiamen, Rome, Rabat, Oslo, Stockholm, Paris, Eugene, Monaco, Lausanne, London, Silesia and Brussels filling out the 15-meeting calendar.']
+  ['2026-10-29','2026 Season Review Part VI: drama, records and new champions in Brussels','Diamond League','https://www.diamondleague.com/part-vi-drama-records-and-new-champions-in-brussels/','The season-ending retrospective recaps the Brussels Diamond League Final, where Chase Jackson and Collen Kebinatshipi set meeting records and 21 athletes won their first Diamond League titles.'],
+  ['2026-10-26','The record-breaking rise of Audrey Werro','Diamond League','https://www.diamondleague.com/the-record-breaking-rise-of-audrey-werro/','The Swiss 800m runner swept European and Diamond League titles with near-record times in 2026, and is now favoured to end Jarmila Kratochvílová’s 43-year-old world record.'],
+  ['2026-10-19','Wanda Diamond League confirms 2027 discipline allocation','Diamond League','https://www.diamondleague.com/discipline-allocation-confirmed-for-2027-wanda-diamond-league/','The 2027 circuit confirmed which of its 15 meetings — from Doha’s 7 May opener to the Zurich final on 25–26 August — will stage each event on the Road to the Final.']
  ],
  road:[
+  ['2026-10-28','Claudio Berardelli Unfiltered: Jepchirchir’s doping, Sawe’s sub-2, and Wanyonyi’s future','LetsRun.com','https://www.letsrun.com/news/2026/10/claudio-berardelli-unfiltered-jepchirchirs-doping-sawes-sub-2-and-wanyonyis-800-1500-future/','Coach Claudio Berardelli says “justice has been done” on training-mate Peres Jepchirchir’s EPO case and reveals that world record holder Sabastian Sawe was drug-tested every three days during his sub-2-hour marathon build.'],
+  ['2026-10-25','Dörfel stuns with 2:20:46 debut as Dinki and Yimer win in Frankfurt','Athletics Weekly','https://athleticsweekly.com/news/dorfel-stuns-with-22046-debut-as-dinki-and-yimer-win-in-frankfurt-1040013812/','Birhanu Dinki and Tigist Yimer won the Mainova Frankfurt Marathon as German debutant Blanka Dörfel ran 2:20:46, the fastest ever marathon debut by a German woman.'],
   ['2026-10-25','Chepkirui and Kwizera win a record-chasing Valencia Half Marathon','World Athletics','https://worldathletics.org/competitions/world-athletics-label-road-races/news/valencia-half-marathon-chepkirui-kwizera','Sheila Chepkirui won in 1:03:51 and Rodrigue Kwizera in 58:03; Yaseen Abdalla’s 59:12 beat the US record but doesn’t count since he races for Sudan, and Kwizera’s time misses a European record while his transfer of allegiance to Spain is still pending.'],
-  ['2026-10-23','Olympic and world marathon champion Peres Jepchirchir provisionally suspended for EPO','LetsRun.com','https://www.letsrun.com/news/2026/10/another-titan-falls-what-olympic-champion-peres-jepchirchirs-epo-ban-means-for-the-sport/','The Athletics Integrity Unit flagged a sample taken before her Sydney Marathon win, putting that title in jeopardy and making her the tenth World Marathon Majors champion suspended since 2017.'],
-  ['2026-10-22','USATF rejects two Olympic Trials-qualifying marathon times over a sanctioning technicality','LetsRun.com','https://www.letsrun.com/news/2026/10/they-ran-under-the-olympic-marathon-trials-standards-usatf-says-their-times-dont-count/','Caitlin McGinley and Spencer Friske both ran under the standard at the Baystate Marathon, but USATF says the race wasn’t sanctioned this year — even though it accepted a 2023 qualifier from the same event.'],
-  ['2026-10-18','Diriba and Berhanu take the Amsterdam Marathon','World Athletics','https://worldathletics.org/competitions/world-athletics-label-road-races/news/amsterdam-marathon-2026-diriba-berhanu','Buze Diriba ran a course-record 2:16:12 and Lemi Berhanu won a tight men’s race in 2:03:33, both finishing clear of fast all-Ethiopian and Kenyan chase packs.']
+  ['2026-10-23','Olympic and world marathon champion Peres Jepchirchir provisionally suspended for EPO','LetsRun.com','https://www.letsrun.com/news/2026/10/another-titan-falls-what-olympic-champion-peres-jepchirchirs-epo-ban-means-for-the-sport/','The Athletics Integrity Unit flagged a sample taken before her Sydney Marathon win, putting that title in jeopardy and making her the tenth World Marathon Majors champion suspended since 2017.']
  ],
  ultra:[
+  ['2026-10-26','Golden Trail World Series finale in Muju: Elazzaoui’s third straight title, Kolbeinsdóttir’s surprise win','iRunFar','https://www.irunfar.com/this-week-in-running-october-26-2026','Elhousine Elazzaoui topped a rainy, technical Muju Trail Grand Finale to claim his third consecutive series title, while Iceland’s Andrea Kolbeinsdóttir won the women’s race by almost six minutes; Frédéric Tranchand also set a course record at Spain’s Sobrescobio Skyrace.'],
   ['2026-10-22','Geerts and Steyaert break the backyard ultra world record together','iRunFar','https://www.irunfar.com/merijn-geerts-ivo-steyaert-backyard-ultra-record-2026','The Belgian pair each completed 124 laps (516.7 miles) at the Big Dog’s Backyard Ultra World Team Championships, breaking Phil Gore’s 119-lap individual record.'],
-  ['2026-10-19','Hugo Deck’s Diagonale des Fous win headlines a loaded ultra weekend','iRunFar','https://www.irunfar.com/this-week-in-running-october-19-2026','Deck won La Réunion’s 180km Diagonale des Fous in 22:54:19 and Ruth Croft took the women’s race in 27:13:23, among results from Millau’s Templiers races and Portugal’s ITRA European Championships recapped in iRunFar’s weekly roundup.'],
-  ['2026-10-18','Puppi and Młynarczyk win the Grand Trail des Templiers','iRunFar','https://www.irunfar.com/2026-grand-trail-des-templiers-results','Francesco Puppi ran 6:32:20, just off the course record, and Martyna Młynarczyk set a women’s course record of 7:41:18 at the 80.4km race in Millau, France.']
+  ['2026-10-19','Hugo Deck’s Diagonale des Fous win headlines a loaded ultra weekend','iRunFar','https://www.irunfar.com/this-week-in-running-october-19-2026','Deck won La Réunion’s 180km Diagonale des Fous in 22:54:19 and Ruth Croft took the women’s race in 27:13:23, among results from Millau’s Templiers races and Portugal’s ITRA European Championships recapped in iRunFar’s weekly roundup.']
  ],
  entries:[
-  ['2026-10-25','NYC Marathon race week: pro start times confirmed, Bronx course tweak for the 50th running','IBTimes','https://www.ibtimes.com.au/new-york-city-marathon-2026-what-know-1877351','Professional women start at 8:35 AM and professional men at 9:05 AM Eastern on Sunday, with miles 20–21 in the Bronx now a more direct five-turn routing instead of seven.'],
-  ['2026-10-23','American preview: Mantz and Talbi renew their rivalry, Kelati debuts off an American record','FloTrack','https://www.flotrack.org/articles/16279560-nyc-marathon-american-preview-mantz-kelati-mcclain','Conner Mantz’s American record (2:04:43) meets Zouhair Talbi’s faster personal best (2:03:45), while Weini Kelati — off a 1:06:04 American record half marathon — makes her marathon debut.'],
-  ['2026-10-14','Hassan and O’Keeffe withdraw from New York City Marathon','Canadian Running Magazine','https://runningmagazine.ca/the-scene/olympic-champion-sifan-hassan-withdraws-from-tcs-new-york-city-marathon/','Olympic champion Sifan Hassan is out with an illness that disrupted training, and American Fiona O’Keeffe has also scratched with injury, trimming the field for the Nov 1 finale to the Marathon Majors season.']
+  ['2026-10-29','NYC Marathon scoop: doping “blood bath” coming in Ethiopia? Plus Almgren’s confidence, Mantz’s ambitions','LetsRun.com','https://www.letsrun.com/news/2026/10/nyc-marathon-scoop-doping-blood-bath-coming-in-ethiopia-plus-almgrens-confidence-mantzs-ambitions-and-more/','At Thursday’s pre-race press conference the AIU banned three more Ethiopians, including 1500m runner Mosisa Siyoum for eight years, as a source warns bigger doping news is still coming; Obiri and Paternain spoke on the fallout from Jepchirchir’s ban.'],
+  ['2026-10-28','2026 NYC Marathon Men’s Preview: can a former 800m guy from Sweden actually win?','LetsRun.com','https://www.letsrun.com/news/2026/10/2026-nyc-marathon-mens-preview-can-a-former-800m-guy-from-sweden-actually-win-or-does-benson-kipruto-repeat/','With no sub-2:02 man in the field, debutant Andreas Almgren (58:06 world half champion) is the Kalshi betting favorite over defending champion Benson Kipruto, who is chasing the first repeat NYC title since 2013.'],
+  ['2026-10-28','2026 NYC Marathon Women’s Preview: can Kelati or McClain end the 8-year American podium drought?','LetsRun.com','https://www.letsrun.com/news/2026/10/2026-nyc-marathon-womens-preview-with-an-ultra-thin-field-can-weini-kelati-or-jess-mcclain-end-the-8-year-american-podium-drought/','Hellen Obiri is favored for a third NYC title in the shallowest field of any 2026 major after Gebreslase joined Hassan and O’Keeffe on the withdrawal list, while debutant Weini Kelati and Jess McClain target the first US podium since 2018.'],
+  ['2026-10-28','Race-day guide: start times, TV coverage and runner tracking','MarathonGuide.com','https://marathonguide.com/news/mgarticles/new-york-city-marathon-2026-race-day-guide-to-start-times-tv-coverage-and-runner-tracking/','Wheelchairs go off at 8:00/8:02 AM, women at 8:35 and men at 9:05 Eastern, with five mass waves through 11:30; ESPN2 and WABC-TV carry the race live and clocks fall back an hour overnight.']
  ],
  calendar:[
   ['2026-10-25','New York City Marathon race week: start times set for the season’s last major','IBTimes','https://www.ibtimes.com.au/new-york-city-marathon-2026-what-know-1877351','Pro women go off at 8:35 AM and pro men at 9:05 AM Eastern on Sunday, as the 50th running tweaks its Bronx routing between miles 20 and 21.'],
   ['2026-10-15','Coe and President Ruto reaffirm plans for Nairobi 2029','World Athletics','https://worldathletics.org/news/press-releases/coe-president-ruto-kenya-2029-world-championships','World Athletics president Sebastian Coe and Kenyan president William Ruto reaffirmed their commitment to the 2029 World Championships in Nairobi — the first held in Africa — during a visit to Eldoret, with Kasarani stadium upgrades already underway.'],
-  ['2026-10-14','Hassan and O’Keeffe withdraw from New York City Marathon','Canadian Running Magazine','https://runningmagazine.ca/the-scene/olympic-champion-sifan-hassan-withdraws-from-tcs-new-york-city-marathon/','Olympic champion Sifan Hassan is out with an illness that disrupted training, and American Fiona O’Keeffe has also scratched with injury, trimming the field for the Nov 1 finale to the Marathon Majors season.']
+  ['2026-10-12','Wanda Diamond League publishes 2027 calendar','Diamond League','https://www.diamondleague.com/wanda-diamond-league-publishes-2027-calendar/','The 2027 season opens in Doha on 7 May and closes with a two-day final in Zurich on 25–26 August, with Shanghai/Keqiao, Xiamen, Rome, Rabat, Oslo, Stockholm, Paris, Eugene, Monaco, Lausanne, London, Silesia and Brussels filling out the 15-meeting calendar.']
  ]
 };
 
 // World records. [event, mark, athlete, country, venue, date, note]
 // Track and road from the World Athletics world-record tables; ultra from the IAU record lists.
-// Both read 26 October 2026.
-const RECORDS_CHECKED='2026-10-26';
+// Both read 29 October 2026 (full men's and women's tables on both sites cross-checked
+// against the entries below; no changes for the events tracked here).
+const RECORDS_CHECKED='2026-10-29';
 const RECORDS={
  track:{
   men:[
@@ -706,7 +709,7 @@ function renderTimetable(){
     const actions=[];
     if(key)actions.push(`<button class="tt-link" data-entry="${esc(key)}">Start list</button>`);
     if(status==='final')actions.push(`<a class="tt-result-link" href="${ENTRY_RESULTS_URL}" target="_blank" rel="noopener">Result &#8599;</a>`);
-    return`<div class="tt-row${isFinalEvent(n)?'':' support'}${status==='live'?' is-live':''}"><div class="t">${esc(toMountain(t))}<span class="tz">MDT</span><small>${esc(t)} ${esc(ENTRY_MEET_CITY)}</small></div><div class="e">${esc(n)}${badge}</div><div class="tt-actions">${actions.join('')}</div></div>`;
+    return`<div class="tt-row${isFinalEvent(n)?'':' support'}${status==='live'?' is-live':''}"><div class="t">${esc(toMountain(t))}<span class="tz">MST</span><small>${esc(t)} ${esc(ENTRY_MEET_CITY)}</small></div><div class="e">${esc(n)}${badge}</div><div class="tt-actions">${actions.join('')}</div></div>`;
   }).join('');
   $$('#ttDays button').forEach(b=>b.onclick=()=>{ttState.day=+b.dataset.day;renderTimetable()});
   $$('#ttScope button').forEach(b=>b.onclick=()=>{ttState.scope=b.dataset.scope;$$('#ttScope button').forEach(x=>x.classList.toggle('active',x===b));renderTimetable()});
