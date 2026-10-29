@@ -651,7 +651,8 @@ function gusisQuickAdd(){
 const SUPPLEMENT_PRODUCTS=[
   {brand:'Nature Made',name:'Multi For Him 50+ (USP Verified)',serving:'1 tablet',cal:0,carbs:0,prot:0,fat:0,vitA:750,vitC:180,vitD:25,vitE:27,vitK:80,vitB1:1.5,vitB2:1.7,vitB3:20,vitB6:6,vitB12:25,folate:665,biotin:30,vitB5:10,calcium:160,iodine:150,magnesium:100,zinc:15,selenium:105,copper:2,manganese:4,chromium:120,molybdenum:75},
   {brand:'Nature Made',name:'Magnesium Oxide 250mg',serving:'1 tablet',cal:0,carbs:0,prot:0,fat:0,magnesium:250},
-  {brand:'Nature Made',name:'Iron 65mg (Ferrous Sulfate)',serving:'1 tablet',cal:0,carbs:0,prot:0,fat:0,iron:65}
+  {brand:'Nature Made',name:'Iron 65mg (Ferrous Sulfate)',serving:'1 tablet',cal:0,carbs:0,prot:0,fat:0,iron:65},
+  {brand:'Pure Encapsulations',name:'Potassium Magnesium (citrate)',serving:'1 capsule',cal:0,carbs:0,prot:0,fat:0,potassium:140,magnesium:70}
 ];
 function renderSupplementPicker(){
   var sel=document.getElementById('suppProductSelect');
@@ -831,6 +832,10 @@ function isCaffeinatedBeverageName(name){
   var n=String(name||'').toLowerCase();
   return /\b(coffee|espresso|latte|cappuccino|mocha|americano|cold\s*brew|black\s*tea|green\s*tea|energy\s*drinks?|red\s*bull|monster(?:\s*energy)?|celsius|bang\s*energy|rockstar|reign|ghost\s*energy|c4\s*energy|alani\s*nu)\b/.test(n);
 }
+function isCaffeinatedBeverage(x){
+  if(isCaffeinatedBeverageName(x&&x.name))return true;
+  return (parseFloat(x&&x.caffeine)||0)>0;
+}
 function lookupGusisServingOz(name){
   if(typeof GUSIS_PRODUCTS==='undefined'||!GUSIS_PRODUCTS.length)return 0;
   var n=String(name||'').toLowerCase();
@@ -846,7 +851,7 @@ function liquidOzForMeal(meal){
   var total=0;
   log.forEach(function(x){
     if(x.meal!==meal)return;
-    if(isCaffeinatedBeverageName(x.name))return;
+    if(isCaffeinatedBeverage(x))return;
     var s=parseFloat(x.servings)||1;
     var oz=parseFluidOzFromServingLabel(x.servingLabel);
     if(!oz){
@@ -1580,11 +1585,12 @@ function updateMacroTotals(){
       if(microQualityMarker)microQualityMarker.style.left=Math.max(0,Math.min(100,(microScore-1)/9*100))+'%';
       if(microQualityTrack)microQualityTrack.setAttribute('aria-valuenow',microScore.toFixed(1));
       if(microQualityNote)microQualityNote.textContent='Targets for a 53-year-old male distance runner: iron 14mg · calcium 1,000mg · vitamin D 15mcg · magnesium 483mg · vitamin B12 2.4mcg · sodium 2,300–4,000mg · potassium 3,400mg · zinc 15mg · vitamin C 90mg · fiber 28g · sugar ≤'+Math.round(sugarCeiling)+'g'+(sportsSugar>0?' (36g + '+Math.round(sportsSugar)+'g fueling today)':'')+' · caffeine ≤400mg (a single race-day dose can push this higher by design, not a red flag) · lowest today: '+weakest.name+' '+Math.round(weakest.value)+weakest.unit;
-      if(microBreakdown)microBreakdown.innerHTML=priorityMicros.map(function(n){
+      if(microBreakdown)microBreakdown.innerHTML=priorityMicros.map(function(n){var p=n.target?Math.max(0,n.value/n.target*100):0,st=(n.max&&n.value>n.max)?'High':p>=100?'Met':p>=75?'Close':'Low';return {n:n,rank:{Low:0,High:1,Close:2,Met:3}[st],pct:p};}).sort(function(a,b){return a.rank-b.rank||a.pct-b.pct;}).map(function(x){return x.n;}).map(function(n){
         var pct=n.target?Math.max(0,n.value/n.target*100):0,status=(n.max&&n.value>n.max)?'High':pct>=100?'Met':pct>=75?'Close':'Low';
-        var statusColor=status==='Met'?'#166534':(status==='Close'||status==='High')?'#92400e':'#991b1b';
+        var statusColor=status==='Met'?'#166534':status==='Close'?'#92400e':status==='High'?'#dc2626':'#991b1b';
+        var statusBadgeBg=status==='Close'?'#fef3c7':status==='High'?'#dc2626':statusColor+'1a',statusTextColor=status==='High'?'#fff':statusColor;
         var shownValue=n.unit==='mg'&&n.value>=100?Math.round(n.value).toLocaleString():Math.round(n.value*10)/10;
-        return '<div role="button" tabindex="0" aria-label="'+n.name+' - tap to see contributing foods" onclick="showMicroSourceBreakdown(\''+n.field+'\',\''+n.name+'\',\''+n.unit+'\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();showMicroSourceBreakdown(\''+n.field+'\',\''+n.name+'\',\''+n.unit+'\');}" style="cursor:pointer;background:#fff;border:1px solid '+statusColor+'33;border-radius:9px;padding:8px;min-width:0;"><div style="font-size:.72rem;font-weight:800;color:#334155;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+n.name+'</div><div style="font-size:.86rem;font-weight:900;color:#1e293b;font-variant-numeric:tabular-nums;">'+shownValue+n.unit+' <span style="font-size:.6rem;font-weight:700;color:#64748b;">/ '+n.target.toLocaleString()+(n.max?'–'+n.max.toLocaleString():'')+n.unit+'</span></div><div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:5px;"><span style="display:inline-block;border-radius:999px;padding:3px 8px;font-size:.74rem;font-weight:800;background:'+statusColor+'1a;color:'+statusColor+';white-space:nowrap;">'+Math.round(pct)+'% · '+status+'</span><span style="color:#cbd5e1;font-size:.68rem;">›</span></div></div>';
+        return '<div role="button" tabindex="0" aria-label="'+n.name+' - tap to see contributing foods" onclick="showMicroSourceBreakdown(\''+n.field+'\',\''+n.name+'\',\''+n.unit+'\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();showMicroSourceBreakdown(\''+n.field+'\',\''+n.name+'\',\''+n.unit+'\');}" style="cursor:pointer;background:#fff;border:1px solid '+statusColor+'33;border-radius:9px;padding:8px;min-width:0;"><div style="font-size:.72rem;font-weight:800;color:#334155;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+n.name+'</div><div style="font-size:.86rem;font-weight:900;color:#1e293b;font-variant-numeric:tabular-nums;">'+shownValue+n.unit+' <span style="font-size:.6rem;font-weight:700;color:#64748b;">/ '+n.target.toLocaleString()+(n.max?'–'+n.max.toLocaleString():'')+n.unit+'</span></div><div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:5px;"><span style="display:inline-block;border-radius:999px;padding:3px 8px;font-size:.74rem;font-weight:800;background:'+statusBadgeBg+';color:'+statusTextColor+';white-space:nowrap;">'+Math.round(pct)+'% · '+status+'</span><span style="color:#cbd5e1;font-size:.68rem;">›</span></div></div>';
       }).join('');
     }
   }
