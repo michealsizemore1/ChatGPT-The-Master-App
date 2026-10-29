@@ -839,11 +839,19 @@ function getRestingHR(){const stored=parseFloat(localStorage.getItem('resting_hr
 // as the Resting HR input to the Karvonen zone math. Returns null if nothing
 // was logged in the window, so callers can leave the stored value untouched
 // rather than overwriting it with a meaningless number.
+// RESTING_HR_FLOOR_DATE never lets the window reach earlier than this date,
+// so earlier/unreliable readings (e.g. from before the user started logging
+// real Resting HR values consistently) never factor in. Once 30+ days have
+// passed since the floor date this is a no-op and the window behaves exactly
+// like a normal trailing 30 days again -- no future cleanup needed.
+var RESTING_HR_FLOOR_DATE='2026-10-28';
 function computeTrailing30DayRestingHR(){
   var vals=[],now=new Date();
   for(var i=0;i<30;i++){
     var d=new Date(now);d.setDate(now.getDate()-i);
-    var raw=localStorage.getItem('planner_'+dk(d));
+    var dateKey=dk(d);
+    if(dateKey<RESTING_HR_FLOOR_DATE)continue;
+    var raw=localStorage.getItem('planner_'+dateKey);
     if(!raw)continue;
     try{
       var dd=JSON.parse(raw);
@@ -861,14 +869,15 @@ function computeTrailing30DayRestingHR(){
 // data has been logged yet this month, the month is NOT marked done, so this
 // keeps checking on every load until data shows up -- it never gives up
 // partway through the month, and never overwrites a real value with nothing.
-// The ":resthr-v2" marker forces exactly one recompute under the corrected
-// Resting-HR source even in a browser that already auto-updated this same
-// month under the old Pulse-based logic, so it doesn't silently sit on a
-// wrong value until next month.
+// The ":resthr-v2" marker forced exactly one recompute under the corrected
+// Resting-HR source (dedicated field, not the casual Pulse reading); the
+// ":resthr-v3" marker forces one more recompute so the new RESTING_HR_FLOOR_DATE
+// (only use Resting HR data from Oct 28, 2026 forward) takes effect on the
+// very next load, instead of waiting for the 1st of next month.
 function autoUpdateRestingHRIfNewMonth(){
   try{
     var now=new Date();
-    var monthKey=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+':resthr-v2';
+    var monthKey=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+':resthr-v3';
     if(localStorage.getItem('resting_hr_auto_update_month')===monthKey)return;
     var avg=computeTrailing30DayRestingHR();
     if(avg==null)return;
