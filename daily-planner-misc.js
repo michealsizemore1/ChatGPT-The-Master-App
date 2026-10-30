@@ -1579,7 +1579,7 @@ function calcRacePredictor(acts){
   var baseDistance=parseFloat(best.distance)||0;
   var baseTimeSec=bestPaceSec*baseDistance;
   if(!baseDistance||!baseTimeSec){wrap.style.display='none';return;}
-  var targets=[{label:'5K',mi:3.10686},{label:'10K',mi:6.21371},{label:'Half',mi:13.1094},{label:'Marathon',mi:26.2188}];
+  var targets=[{label:'Mile',mi:1},{label:'2 Mile',mi:2},{label:'5K',mi:3.10686},{label:'10K',mi:6.21371},{label:'Half',mi:13.1094},{label:'Marathon',mi:26.2188}];
   // fadePct: engineering-estimate fatigue/fueling allowance on top of Riegel,
   // growing with distance (see comment block above for sourcing).
   var ultraTargets=[
