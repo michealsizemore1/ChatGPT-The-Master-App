@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-10-29-1">
+<meta name="app-build" content="2026-10-30-1">
 <script src="theme-switcher.js?v=2026-10-21-1"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#ff6b00">
@@ -1250,6 +1250,16 @@ html[data-theme="christmas"] .header{
     radial-gradient(circle at 14% 65%,rgba(var(--brand2-rgb),.18) 0 2px,transparent 3px),
     radial-gradient(circle at 20% 30%,rgba(var(--brand2-rgb),.16) 0 2px,transparent 3px),
     linear-gradient(120deg,var(--grad-start) 0%,var(--brand) 58%,var(--brand2) 100%);
+}
+/* Christmas theme: cozy snowy backdrop behind the Nutrition tab -- the same
+   gently falling snow as the header, over a warm-firelight-to-night-sky glow
+   so the white flakes stay visible; content cards keep their own opaque
+   backgrounds, so nothing readable sits directly on this backdrop. */
+html[data-theme="christmas"] #tab-nutrition{
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 120 120%22 width=%22120%22 height=%22120%22%3E%3Cg fill=%22%23fff%22 fill-opacity=%22.7%22%3E%3Cg%3E%3Ccircle cx=%2239.6%22 cy=%2218.1%22 r=%220.8%22/%3E%3Ccircle cx=%2210.4%22 cy=%2264.3%22 r=%221.2%22/%3E%3Ccircle cx=%2269.6%22 cy=%22109.2%22 r=%221%22/%3E%3Ccircle cx=%226.3%22 cy=%2252.0%22 r=%220.8%22/%3E%3Ccircle cx=%2229.9%22 cy=%2266.1%22 r=%220.8%22/%3E%3Ccircle cx=%2297.9%22 cy=%2214.9%22 r=%221%22/%3E%3Ccircle cx=%2275.2%22 cy=%2270.0%22 r=%220.8%22/%3E%3Ccircle cx=%2268.9%22 cy=%2247.6%22 r=%221%22/%3E%3Ccircle cx=%227.4%22 cy=%22103.0%22 r=%221.2%22/%3E%3Ccircle cx=%2250.6%22 cy=%2264.9%22 r=%221.2%22/%3E%3Ccircle cx=%2267.0%22 cy=%2281.8%22 r=%220.8%22/%3E%3Ccircle cx=%2269.5%22 cy=%2276.7%22 r=%221.2%22/%3E%3Ccircle cx=%2213.3%22 cy=%2285.5%22 r=%220.8%22/%3E%3Ccircle cx=%2273.8%22 cy=%2259.6%22 r=%221.5%22/%3E%3Ccircle cx=%2292.2%22 cy=%2255.9%22 r=%221.5%22/%3E%3Ccircle cx=%2243.9%22 cy=%2229.8%22 r=%221%22/%3E%3Cg transform=%22translate(0 -120)%22%3E%3Ccircle cx=%2239.6%22 cy=%2218.1%22 r=%220.8%22/%3E%3Ccircle cx=%2210.4%22 cy=%2264.3%22 r=%221.2%22/%3E%3Ccircle cx=%2269.6%22 cy=%22109.2%22 r=%221%22/%3E%3Ccircle cx=%226.3%22 cy=%2252.0%22 r=%220.8%22/%3E%3Ccircle cx=%2229.9%22 cy=%2266.1%22 r=%220.8%22/%3E%3Ccircle cx=%2297.9%22 cy=%2214.9%22 r=%221%22/%3E%3Ccircle cx=%2275.2%22 cy=%2270.0%22 r=%220.8%22/%3E%3Ccircle cx=%2268.9%22 cy=%2247.6%22 r=%221%22/%3E%3Ccircle cx=%227.4%22 cy=%22103.0%22 r=%221.2%22/%3E%3Ccircle cx=%2250.6%22 cy=%2264.9%22 r=%221.2%22/%3E%3Ccircle cx=%2267.0%22 cy=%2281.8%22 r=%220.8%22/%3E%3Ccircle cx=%2269.5%22 cy=%2276.7%22 r=%221.2%22/%3E%3Ccircle cx=%2213.3%22 cy=%2285.5%22 r=%220.8%22/%3E%3Ccircle cx=%2273.8%22 cy=%2259.6%22 r=%221.5%22/%3E%3Ccircle cx=%2292.2%22 cy=%2255.9%22 r=%221.5%22/%3E%3Ccircle cx=%2243.9%22 cy=%2229.8%22 r=%221%22/%3E%3C/g%3E %3CanimateTransform attributeName=%22transform%22 type=%22translate%22 values=%220 0;0 120%22 dur=%229s%22 repeatCount=%22indefinite%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") 0 0/110px 110px repeat,
+    radial-gradient(ellipse 150% 65% at 50% 100%,rgba(255,183,77,.22) 0%,transparent 62%),
+    linear-gradient(180deg,var(--grad-start) 0%,var(--brand) 58%,#0b2e1a 100%);
 }
 /* Thanksgiving theme: harvest moon with geese, falling leaves, and a farm with a barn, haystacks, pumpkins and a cornfield. */
 html[data-theme="thanksgiving"] .header{
