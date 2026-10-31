@@ -318,7 +318,7 @@ function formatActivityNotesHtml(notes){
 }
 
 function clearActForm(){
-  ['actDate','actType','actTitle','actDistance','actDuration','actPace','actPower','actHR','actCadence','actCalories','actElevGain','actTemp','actHumidity','actAQI','actExecScore','actRouteUrl','actNotes','actInjuryReport'].forEach(id=>{
+  ['actDate','actType','actTitle','actDistance','actDuration','actPace','actPower','actHR','actCadence','actCalories','actElevGain','actTemp','actHumidity','actWind','actAQI','actExecScore','actRouteUrl','actNotes','actInjuryReport'].forEach(id=>{
     const e=document.getElementById(id);if(e)e.value='';
   });
   document.getElementById('actSource').value='manual';
@@ -412,7 +412,7 @@ function updateActCaloriesPlaceholder(){
   });
   calEl.placeholder=est>0?('~'+est+' (auto)'):'0';
 }
-var ACT_REST_DAY_FIELDS=['actTitle','actDistance','actDuration','actPace','actPower','actHR','actCadence','actCalories','actElevGain','actTemp','actHumidity','actAQI','actExecScore','actRouteUrl','actNotes','actInjuryReport'];
+var ACT_REST_DAY_FIELDS=['actTitle','actDistance','actDuration','actPace','actPower','actHR','actCadence','actCalories','actElevGain','actTemp','actHumidity','actWind','actAQI','actExecScore','actRouteUrl','actNotes','actInjuryReport'];
 function handleActTypeChange(){
   var typeEl=document.getElementById('actType');if(!typeEl)return;
   var isRestDay=typeEl.value==='Rest Day';
@@ -453,6 +453,7 @@ function getActFormValues(){
     injuryReport:(document.getElementById('actInjuryReport').value||'').trim(),
     temp:(document.getElementById('actTemp').value||'').trim(),
     humidity:Math.max(0,Math.min(100,parseFloat(document.getElementById('actHumidity').value)||0)),
+    wind:Math.max(0,Math.min(150,Math.round((parseFloat(document.getElementById('actWind').value)||0)*10)/10)),
     aqi:Math.max(0,Math.min(500,parseInt(document.getElementById('actAQI').value,10)||0)),
     execScore:parseFloat(document.getElementById('actExecScore').value)||0,
     routeUrl:skillSafeLink((document.getElementById('actRouteUrl').value||'').trim()),
@@ -525,6 +526,7 @@ function editActivity(id){
   document.getElementById('actElevGain').value=act.elevGain||'';
   document.getElementById('actTemp').value=act.temp||'';
   document.getElementById('actHumidity').value=act.humidity||'';
+  document.getElementById('actWind').value=act.wind||'';
   document.getElementById('actAQI').value=act.aqi||'';
   document.getElementById('actExecScore').value=act.execScore||'';
   document.getElementById('actRouteUrl').value=act.routeUrl||'';
@@ -749,6 +751,7 @@ function printActivities(){
     var cond=[];
     if(a.temp)cond.push(a.temp+'°F');
     if(a.humidity)cond.push(a.humidity+'% humidity');
+    if(a.wind)cond.push(a.wind+' mph wind');
     if(a.aqi)cond.push('AQI '+a.aqi);
     if(a.temp&&a.pace){
       var hh=heatHumidityImpact(a.temp,a.humidity,parsePace(a.pace));
@@ -2192,6 +2195,7 @@ function renderActivities(){
     }
     if(a.temp)condStats.push('<span class="act-stat">&#x1F321;&#xFE0F; <strong>'+a.temp+'</strong>°F</span>');
     if(a.humidity)condStats.push('<span class="act-stat">&#x1F4A7; Humidity <strong>'+a.humidity+'</strong>%</span>');
+    if(a.wind)condStats.push('<span class="act-stat">&#x1F4A8; Wind <strong>'+a.wind+'</strong> mph</span>');
     if(a.aqi)condStats.push('<span class="act-stat">&#x1F32C;&#xFE0F; AQI <strong>'+a.aqi+'</strong></span>');
     if(a.temp&&a.pace){
       var hhImpact=heatHumidityImpact(a.temp,a.humidity,parsePace(a.pace));
