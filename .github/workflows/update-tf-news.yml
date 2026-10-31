@@ -1,0 +1,35 @@
+name: Update track & field news
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Every 6 hours.
+    - cron: "41 */6 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: tf-news
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the app
+        uses: actions/checkout@v5
+
+      - name: Refresh track & field news
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          python3 scripts/update_tf_news.py
+          if git status --porcelain -- data/tf-news.json | grep -q .; then
+            git add data/tf-news.json
+            git commit -m "Update track & field news"
+            git pull --rebase origin main
+            git push
+          else
+            echo "Track & field news unchanged."
+          fi
