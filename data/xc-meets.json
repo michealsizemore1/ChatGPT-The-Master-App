@@ -1,0 +1,151 @@
+{
+  "updatedAt": "2026-10-31T16:55:06+00:00",
+  "source": "Google News searches for cross country meet results",
+  "page": "https://michealsizemore1.github.io/ChatGPT-The-Master-App/cross-country.html",
+  "meets": [
+    {
+      "name": "Gans Creek Classic",
+      "start": "2026-09-25",
+      "end": "2026-09-25",
+      "where": "Columbia, MO (host: Missouri)"
+    },
+    {
+      "name": "Cowboy Jamboree",
+      "start": "2026-09-26",
+      "end": "2026-09-26",
+      "where": "Stillwater, OK (host: Oklahoma State)"
+    },
+    {
+      "name": "Joe Piane Notre Dame Invitational & Paul Short Run",
+      "start": "2026-10-02",
+      "end": "2026-10-02",
+      "where": "Notre Dame, IN · Bethlehem, PA"
+    },
+    {
+      "name": "Nuttycombe Wisconsin Invitational",
+      "start": "2026-10-09",
+      "end": "2026-10-09",
+      "where": "Madison, WI (host: Wisconsin)",
+      "watch": "FloTrack"
+    },
+    {
+      "name": "Pre-Nationals & IC4A/ECAC Championships",
+      "start": "2026-10-16",
+      "end": "2026-10-16",
+      "where": "Terre Haute, IN · New York"
+    },
+    {
+      "name": "Conference Championships",
+      "start": "2026-10-29",
+      "end": "2026-11-01",
+      "where": "Nationwide",
+      "watch": "Big 12 & Big Sky on ESPN+, ACC on ACC Network, SEC on SEC Network, Big Ten on B1G+"
+    },
+    {
+      "name": "NCAA Regional Championships",
+      "start": "2026-11-13",
+      "end": "2026-11-13",
+      "where": "Nine regional sites nationwide",
+      "watch": "FloTrack"
+    },
+    {
+      "name": "NCAA Division I Championships",
+      "start": "2026-11-21",
+      "end": "2026-11-21",
+      "where": "Terre Haute, IN (host: Indiana State)",
+      "watch": "ESPNU + FloTrack"
+    }
+  ],
+  "results": [
+    {
+      "date": "2026-10-31",
+      "headline": "CIAC boys cross country championships: Haddam-Killingworth claims 3rd straight Class SS crown",
+      "source": "New Haven Register",
+      "url": "https://news.google.com/rss/articles/CBMitAFBVV95cUxQWWp4Y2RPTVdPcWFsOVFDNEoxa201cklDeUlnOUo3OUFXQjlEVjhqUGhMN0ZvcnY1RkRReHRHMWMtVXZDR2ItUU9hUkx6b1hJblowWVBqMXZ3UmxNTUlHLWVXem5Vcjhsbk5Rb3FYVTZfYXo0bzZmUWRpNm5pSGx3aVZnYjJabndtdFlIbUNOSTZwM2lsQV9BeTNvX0g4bU1jbGd5X0NDT3RVZ19rRmRPaDhKZUg?oc=5"
+    },
+    {
+      "date": "2026-10-31",
+      "headline": "Jane Hedengren dominates to lead No. 1 BYU to fourth straight Big 12 Women's Cross Country title",
+      "source": "World-Track",
+      "url": "https://news.google.com/rss/articles/CBMioAFBVV95cUxPQnFYcnRhM0xGNlRDRlJHekpGam9qXzZlTFVjbld0bE90cWZNTHBHcGJjd2RnS1VfMWFUT2lqYTdqSUhVMUlrSlBrMnd2M2l6UEI2LVotTW1zbFR1MjVwcHMxLXdjOFVPNzVkdkl1eTY5RU9GODhjOWcxVm4zWHJKcWMwMlA4SktsTnVVZktsMEJ6bjNnTGhfdzB1c0JBV1hv?oc=5"
+    },
+    {
+      "date": "2026-10-31",
+      "headline": "MEET DAY INFO: NJAC Cross Country Championships",
+      "source": "New Jersey Athletic Conference",
+      "url": "https://news.google.com/rss/articles/CBMilAFBVV95cUxQTW1LQzJub01IeG1uQUxibVZlanZKLUZHWDVOWU91alpkU3Z6dWxDcHd0Y05tQzdMMmotWExOT0w3cTRJVF9JX2JGTGNEZXVPMDdCT085QWMtaUJSRXlEOWppczd2U3NpXy10OWRlcF83MVBFc1VoWDJ6cXdqd1hUemNNVHdydUZBZUlFSlF5VC0xUTZK?oc=5"
+    },
+    {
+      "date": "2026-10-31",
+      "headline": "County Soccer Teams Advance as Cross Country State Titles Go on the Line",
+      "source": "Q96.1",
+      "url": "https://news.google.com/rss/articles/CBMickFVX3lxTE5fdnhNNDZQcUdoTk5pSzQ1czNEeGJpVkczSFV6SnBZS3VWcUF4R0hudjFna2ZYOWhQYXc0OHZXVzZEVW9aMDRNRVd3LXc2eTBCcUFLV3FVczdUanRMSEczX3RJWDdpNU9mSWQzNW8ySmx1UQ?oc=5"
+    },
+    {
+      "date": "2026-10-31",
+      "headline": "Cross country sectionals, 2026: Results, recaps & photos for Saturday, Oct. 31",
+      "source": "NJ.com",
+      "url": "https://news.google.com/rss/articles/CBMivAFBVV95cUxOdnJER1liRFRHT1F1MWpfTHVJQm9RMU5Da0RqSnoxaGZhbG5zYXRhMktiSHIxVHdMcnZLWTVWSGoxT0RJblhFTld2dGZtTkRyZDdWTllyYmZaNHZhUUxMY2I0Q19OUW5tSEM0aW53a0tRZFZDZzhXWmV6VEhQendXMHMyWTNMT3JLRkFhMExIQWM1NFB5VEhleUJmUC1yU1d2RGpMTDBkN1VNVUg1eG5KdVJkM1NESFZpYkdCTw?oc=5"
+    },
+    {
+      "date": "2026-10-31",
+      "headline": "Kansas City Piper High School Results at Kansas State Cross Country Championships 1A-4A",
+      "source": "MileSplit United States",
+      "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxPa21RNkp1VlJZdDU2WVE3VjUyRm5pUXNFM3k2dDB5NDc3LXpmOUxOclpORmVPeUt3UG5fMVdfb0dGb2hsNEZSMjRXTHhncThqcXFIREE4Z2JGQ0tzOWE2VmlDZlZoRElqQ2Q2T2ZQSXhNd1g1bW1JbGZDNTd5dlFuOVRrNTJWWDNiSUVTWHptcl81RG5DdTE2S0pjODV4LVh6V0NvbVJXMFhTM1lEUGxNeQ?oc=5"
+    },
+    {
+      "date": "2026-10-31",
+      "headline": "Colonels Compete in SLC XC Championships",
+      "source": "Nicholls State University Athletics",
+      "url": "https://news.google.com/rss/articles/CBMiqgFBVV95cUxOeEVPendRYUNjR0N0OEdzS0czbTBIcUkxYXdtVFV2TnAxcnFncldzRWZidW41bEtSMDh0eU4zZE11LUhTSWo1Y1JqU1ZZR29OVDRsM3FXWGl0ZFlUVy1zNlRUanM0U1YwdWtidVZLSENsblVJTGk5MDZDT3BPaGNSV1hrRFl4ZHg3NEFkWlZsWkkxNk5ReEl0QXVZTnZIbnpMMkRNZmxZSkEtdw?oc=5"
+    },
+    {
+      "date": "2026-10-31",
+      "headline": "Record-Setting Day for the Eagles at the OVC Cross Country Championships",
+      "source": "Morehead State University Athletics",
+      "url": "https://news.google.com/rss/articles/CBMixwFBVV95cUxOZ0ExNTBkZmpUUGdYc2Y4WDlHc1kxRVg5NUhXU2FnLVR5c3BaYnFRSnlhMXp2RmJRTmU0QmM3WmtQd19zTnAtX3JxLWRsanZCdXR6NmxlS09JbVd1TVlSb21aamp0MldLWjNkbnVUdEtyOG5qdnpaN3Fkd21RNkRhejhSdG15VlJZb0VDajZxaGlvWjg1T3hTVHh6RTVyV29EZnBtUHFlSXppWXdzMS1VZWkzYU1fcTRUSVUyUEFwLUFtdC1lNUhV?oc=5"
+    },
+    {
+      "date": "2026-10-31",
+      "headline": "ACC cross country championships 2026 results: No. 10 Wake Forest men, No. 2 NC State women win",
+      "source": "World-Track",
+      "url": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxPR3pWLTM5Wnhzc0UwRi1JZUpXd1IxeF9yUXJFYUwzaVlFODdfUWJ2OTA5djBwMU9vZG9WZFlQb3JxVlExbzRkZXRtMVhWcG1uWGxIZDR0Q1BnNkdOczF0TFdoMnpKLWFidm94dWgtdklXZmZ4ZXZBbEpBQmlobUdEcTJqLXNoVXV3LUJCenlnTTBPcmtubnpscFZYQXBWWlczV2stRU9sYUpPNTR1dzAtbDVJcnYwUzdrVkUteGhmbFc?oc=5"
+    },
+    {
+      "date": "2026-10-31",
+      "headline": "Bobcats secure pair of runner-up finishes at Big Sky Cross Country Championships",
+      "source": "SWX Local Sports",
+      "url": "https://news.google.com/rss/articles/CBMikAJBVV95cUxQMVJtZWc5UTAzZGtGLTJmbXZXREVNVFQ5RXl2eTNqTU4tbmxhamdQT1Y5SGFVYWV2bjVLRG9fcnJobFI5enB1TVc3Ym16TmdzMlRtdzdqNW9kR1RPV00xWXF4VVdKUXZoTk5RNUE5VzBTdjlEQXBocnNhcC11aFY0UldzOTlrWWVTcVlGSExVbDN5bVBJa2c3MWNjY19TSENpQW9PUmt0clBKMDE5QkFkT09XUTRIS1pKMVRGU1pfNmFWcDMzVEdiR1Y2aWxZSjB1dERINzRucGw4X2NmMHRhWGIybDcteGM2WFR3VGVaNng5TzlNTWZPUG1IdFdXUU9xZ3BLdnNHYVlLdGY2REdDWQ?oc=5"
+    },
+    {
+      "date": "2026-10-31",
+      "headline": "Results: Alabama sweeps SEC cross country titles; Kiplagat, Cheruiyot win individual crowns",
+      "source": "World-Track",
+      "url": "https://news.google.com/rss/articles/CBMilwFBVV95cUxNRnU2aHJBMFR2eWNwbDJpUnNHOEEzd2l3RXU0UEZfeDRTOWRYdGpFWTlQV3ZwTXJ4SWN0Rm4tUVNheWZHRVFhblJocFlUbFYwMXRyR3dHR2U5Z0s2eGllUVhBakdhVURfcWotMDBzX0Y4bW5oS0gyb0JYdldLaU54SFBGd3RBOUFRUGFvQ1RRTHdHS3ZsX0RB?oc=5"
+    },
+    {
+      "date": "2026-10-31",
+      "headline": "2026 State Cross Country Results",
+      "source": "KCII Radio",
+      "url": "https://news.google.com/rss/articles/CBMiekFVX3lxTE5EaUgybmhDWVFZVGdzRXlZd3NuQnRDT1h2SWpHSXJtY0lRdkc4T0VnNEJpbFlSNFJILWN2emxfS0pQYnJWaThjcWFMQ2VQQWcycFQ0LXNDeGMzTHdjM2pVX1dHVFYtUEVmSFY2bms0eGdZOUJOaG9rdFdR?oc=5"
+    },
+    {
+      "date": "2026-10-30",
+      "headline": "Alabama sweeps 2026 SEC Cross Country Championships",
+      "source": "Southeastern Conference",
+      "url": "https://news.google.com/rss/articles/CBMilAFBVV95cUxNNEtwS29xNmVQMWRHY3BwaXFmZWV6dHY2YlJsSEFkSVZBOVpIaldEcWo3N3EyRGJiMDl6RkdwUUFUbTFqOGdEeUVIOV9CNHNlMl84YVI0WTAyU3lpblh0Z2MyeXZ0OEVQVnlXc1FocUI2MU9ndVJ3NWJIUlZoZXBNLW9scWVVQVh0RDhMLW91enc2UEEx?oc=5"
+    },
+    {
+      "date": "2026-10-30",
+      "headline": "Roadrunners headed for 2026 American Conference Cross Country Championships",
+      "source": "UTSA Athletics",
+      "url": "https://news.google.com/rss/articles/CBMirwFBVV95cUxQT1M4cmhfQ2RXNldXOEJaVU5DdURock9laXRIQlJNV3E1UElQWm9hbVhvRl9GbGR4T1lpQ1lvcXNJOWVDcEd4bUpXNm5wTWwtSWRfRHo4RTVOLVlqVlVGenlYS1g3a211YW8xR3NEcGhiYkxXZ25yNWotbDU3SHZmUy05c0NkN0J3OUdXRi1hZDhXNDExR09td2ZSSWplc3QzT1dWc0RvVFZJTUwzMjlB?oc=5"
+    },
+    {
+      "date": "2026-10-30",
+      "headline": "A Decade of Winning: HPU Women's Cross Country Continues Reign",
+      "source": "High Point University Athletics",
+      "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxOb3k0eFB4Q0hEMy1hOERDbU9sN01vX2VlWGplSDhHY01GR2FZYTBZX3NfdmFoNEFaSkNWN0tmbURFczJCT21JUkJmRVpQWjVYLWJZR3JhN1VEd3V2X3ljTUdLQkhwemltTUQ0WUprVFVLVXNkOEthNkVzZ0dmZFBzN1ZYOXRVT2J0MndkYkNNLVBmcWxyUzFrTmUweFBUR3hxWTZfQk5ZNERYdDdXcC1QUQ?oc=5"
+    }
+  ]
+}
