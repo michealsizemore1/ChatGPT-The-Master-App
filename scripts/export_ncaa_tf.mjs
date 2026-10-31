@@ -41,13 +41,31 @@ const NEXT = [
   { name: "NCAA Outdoor Championships", start: "2027-06-09", end: "2027-06-12", where: "Eugene, OR (Hayward Field)" },
 ];
 
+/**
+ * Every event winner comes from data/ncaa-tf-champions-2026.json (the page only
+ * lists standout runners from top-10 teams). Notes from the page's PERFORMANCES
+ * (collegiate records, relay legs, etc.) are merged in where the json has none.
+ */
+function champions() {
+  const list = JSON.parse(readFileSync(resolve(root, "data", "ncaa-tf-champions-2026.json"), "utf8")).champions;
+  const pageEvent = (p) =>
+    p.event.startsWith("Hurdles") ? (p.gender === "men" ? "110m Hurdles" : "100m Hurdles") : p.event;
+  const pageNotes = new Map(
+    grab("PERFORMANCES")
+      .filter((p) => p.place === 1 && p.note)
+      .map((p) => [`${p.gender}|${pageEvent(p)}`, p.note.replace(/^1[01]0m hurdles,?\s*/i, "")]),
+  );
+  return list.map((c) => {
+    const note = c.note || pageNotes.get(`${c.gender}|${c.event}`) || "";
+    return { ...c, ...(note ? { note } : {}) };
+  });
+}
+
 const out = {
   season: "2026 NCAA Division I Outdoor Championships",
   page: "https://michealsizemore1.github.io/ChatGPT-The-Master-App/ncaa-track-field.html",
   standings: { men: standings(grab("STAND_MEN")), women: standings(grab("STAND_WOMEN")) },
-  champions: grab("PERFORMANCES")
-    .filter((p) => p.place === 1)
-    .map(({ event, gender, name, team, mark, note }) => ({ event, gender, name, team, mark, ...(note ? { note } : {}) })),
+  champions: champions(),
   championships: NEXT,
   calendar: grab("PATTERN").map(({ d, name, where }) => ({ when: `${d} 2027`, name, where })),
 };

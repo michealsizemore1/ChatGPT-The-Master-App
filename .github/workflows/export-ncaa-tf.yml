@@ -7,6 +7,7 @@ on:
     paths:
       - ncaa-track-field.html
       - scripts/export_ncaa_tf.mjs
+      - data/ncaa-tf-champions-2026.json
 
 permissions:
   contents: write

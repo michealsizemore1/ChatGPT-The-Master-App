@@ -110,105 +110,312 @@
   },
   "champions": [
     {
-      "event": "100m",
       "gender": "men",
+      "event": "100m",
       "name": "Kanyinsola Ajayi",
       "team": "Auburn",
       "mark": "9.72"
     },
     {
-      "event": "200m",
       "gender": "men",
+      "event": "200m",
       "name": "Jaiden Reid",
       "team": "LSU",
       "mark": "19.63",
       "note": "collegiate record"
     },
     {
-      "event": "200m",
-      "gender": "women",
-      "name": "Adaejah Hodge",
-      "team": "Georgia",
-      "mark": "21.68",
-      "note": "collegiate record"
-    },
-    {
-      "event": "400m",
-      "gender": "women",
-      "name": "Dejanea Oakley",
-      "team": "Georgia",
-      "mark": "48.79",
-      "note": "collegiate record"
-    },
-    {
-      "event": "800m",
-      "gender": "women",
-      "name": "Sanu Jallow",
-      "team": "Arkansas",
-      "mark": "1:56.85",
-      "note": "collegiate record"
-    },
-    {
-      "event": "1500m",
       "gender": "men",
+      "event": "400m",
+      "name": "Samuel Ogazi",
+      "team": "Alabama",
+      "mark": "43.38"
+    },
+    {
+      "gender": "men",
+      "event": "800m",
+      "name": "Colin Sahlman",
+      "team": "Northern Arizona",
+      "mark": "1:44.22"
+    },
+    {
+      "gender": "men",
+      "event": "1500m",
       "name": "Simeon Birnbaum",
       "team": "Oregon",
       "mark": "3:36.05"
     },
     {
-      "event": "Hurdles (100m/110m)",
       "gender": "men",
+      "event": "5000m",
+      "name": "Habtom Samuel",
+      "team": "New Mexico",
+      "mark": "13:38.93",
+      "note": "also won the 10,000m"
+    },
+    {
+      "gender": "men",
+      "event": "10,000m",
+      "name": "Habtom Samuel",
+      "team": "New Mexico",
+      "mark": "27:51.31",
+      "note": "also won the 5000m"
+    },
+    {
+      "gender": "men",
+      "event": "110m Hurdles",
       "name": "Ja’Kobe Tharp",
       "team": "Auburn",
-      "mark": "12.90",
-      "note": "110m hurdles"
+      "mark": "12.90"
     },
     {
-      "event": "Hurdles (100m/110m)",
-      "gender": "women",
-      "name": "Aaliyah McCormick",
-      "team": "Oregon",
-      "mark": "12.47",
-      "note": "100m hurdles, defending champion"
-    },
-    {
-      "event": "3000m Steeplechase",
       "gender": "men",
+      "event": "400m Hurdles",
+      "name": "Vance Nilsson",
+      "team": "Florida",
+      "mark": "48.06"
+    },
+    {
+      "gender": "men",
+      "event": "3000m Steeplechase",
       "name": "Geoffrey Kirwa",
       "team": "Louisville",
       "mark": "8:17.46"
     },
     {
-      "event": "4×100 Relay",
       "gender": "men",
+      "event": "4×100 Relay",
       "name": "Tennessee",
       "team": "Tennessee",
       "mark": "37.98",
       "note": "Folson, Howell, McCallum, Clark — school record, first title since 1983"
     },
     {
-      "event": "4×100 Relay",
-      "gender": "women",
-      "name": "USC",
-      "team": "USC",
-      "mark": "41.58",
-      "note": "DeFrand, Brahe-Pedersen, Whyte, Selby — defending champions, school record"
-    },
-    {
-      "event": "4×400 Relay",
       "gender": "men",
+      "event": "4×400 Relay",
       "name": "Georgia",
       "team": "Georgia",
       "mark": "2:57.93",
       "note": "edged LSU by 0.03"
     },
     {
-      "event": "4×400 Relay",
+      "gender": "men",
+      "event": "High Jump",
+      "name": "Kimani Jack",
+      "team": "Georgia",
+      "mark": "2.28m"
+    },
+    {
+      "gender": "men",
+      "event": "Pole Vault",
+      "name": "Dyson Wicker",
+      "team": "Nebraska",
+      "mark": "5.85m"
+    },
+    {
+      "gender": "men",
+      "event": "Long Jump",
+      "name": "Tafadzwa Chikomba",
+      "team": "Kansas State",
+      "mark": "8.37m"
+    },
+    {
+      "gender": "men",
+      "event": "Triple Jump",
+      "name": "Selva Prabhu",
+      "team": "Kansas State",
+      "mark": "16.92m"
+    },
+    {
+      "gender": "men",
+      "event": "Shot Put",
+      "name": "Ben Smith",
+      "team": "Oregon",
+      "mark": "21.04m"
+    },
+    {
+      "gender": "men",
+      "event": "Discus",
+      "name": "Ralford Mullings",
+      "team": "Oklahoma",
+      "mark": "65.81m"
+    },
+    {
+      "gender": "men",
+      "event": "Hammer",
+      "name": "Angelos Mantzouranis",
+      "team": "Minnesota",
+      "mark": "75.78m"
+    },
+    {
+      "gender": "men",
+      "event": "Javelin",
+      "name": "Chinecherem Prosper Nnamdi",
+      "team": "Texas A&M",
+      "mark": "82.26m"
+    },
+    {
+      "gender": "men",
+      "event": "Decathlon",
+      "name": "Ben Barton",
+      "team": "BYU",
+      "mark": "8,169 pts",
+      "note": "BYU's first decathlon champion since 1981"
+    },
+    {
       "gender": "women",
+      "event": "100m",
+      "name": "Shenese Walker",
+      "team": "Florida State",
+      "mark": "10.88"
+    },
+    {
+      "gender": "women",
+      "event": "200m",
+      "name": "Adaejah Hodge",
+      "team": "Georgia",
+      "mark": "21.68",
+      "note": "collegiate record"
+    },
+    {
+      "gender": "women",
+      "event": "400m",
+      "name": "Dejanea Oakley",
+      "team": "Georgia",
+      "mark": "48.79",
+      "note": "collegiate record"
+    },
+    {
+      "gender": "women",
+      "event": "800m",
+      "name": "Sanu Jallow",
+      "team": "Arkansas",
+      "mark": "1:56.85",
+      "note": "collegiate record"
+    },
+    {
+      "gender": "women",
+      "event": "1500m",
+      "name": "Rosemary Longisa",
+      "team": "Washington State",
+      "mark": "4:12.10"
+    },
+    {
+      "gender": "women",
+      "event": "5000m",
+      "name": "Marion Jepngetich",
+      "team": "New Mexico",
+      "mark": "15:13.01"
+    },
+    {
+      "gender": "women",
+      "event": "10,000m",
+      "name": "Mercyline Kirwa",
+      "team": "Iowa State",
+      "mark": "31:54.88"
+    },
+    {
+      "gender": "women",
+      "event": "100m Hurdles",
+      "name": "Aaliyah McCormick",
+      "team": "Oregon",
+      "mark": "12.47",
+      "note": "defending champion"
+    },
+    {
+      "gender": "women",
+      "event": "400m Hurdles",
+      "name": "Akala Garrett",
+      "team": "South Carolina",
+      "mark": "53.32"
+    },
+    {
+      "gender": "women",
+      "event": "3000m Steeplechase",
+      "name": "Taylor Lovell",
+      "team": "BYU",
+      "mark": "9:21.03"
+    },
+    {
+      "gender": "women",
+      "event": "4×100 Relay",
+      "name": "USC",
+      "team": "USC",
+      "mark": "41.58",
+      "note": "DeFrand, Brahe-Pedersen, Whyte, Selby — defending champions, school record"
+    },
+    {
+      "gender": "women",
+      "event": "4×400 Relay",
       "name": "Arkansas",
       "team": "Arkansas",
       "mark": "3:18.88",
       "note": "Butler, Batista, Brown, Jallow — #2 all-time collegiate"
+    },
+    {
+      "gender": "women",
+      "event": "High Jump",
+      "name": "Temitope Adeshina",
+      "team": "Texas Tech",
+      "mark": "1.96m"
+    },
+    {
+      "gender": "women",
+      "event": "Pole Vault",
+      "name": "Amanda Moll",
+      "team": "Washington",
+      "mark": "4.84m"
+    },
+    {
+      "gender": "women",
+      "event": "Long Jump",
+      "name": "Alyssa Jones",
+      "team": "Stanford",
+      "mark": "7.06m"
+    },
+    {
+      "gender": "women",
+      "event": "Triple Jump",
+      "name": "Shantae Foreman",
+      "team": "Clemson",
+      "mark": "14.24m"
+    },
+    {
+      "gender": "women",
+      "event": "Shot Put",
+      "name": "Axelina Johansson",
+      "team": "Nebraska",
+      "mark": "19.92m"
+    },
+    {
+      "gender": "women",
+      "event": "Discus",
+      "name": "Alida van Daalen",
+      "team": "Florida",
+      "mark": "65.98m",
+      "note": "meet record"
+    },
+    {
+      "gender": "women",
+      "event": "Hammer",
+      "name": "Elisabet Rut Runarsdottir",
+      "team": "Texas State",
+      "mark": "73.19m"
+    },
+    {
+      "gender": "women",
+      "event": "Javelin",
+      "name": "McKyla Van Der Westhuizen",
+      "team": "Rice",
+      "mark": "60.87m"
+    },
+    {
+      "gender": "women",
+      "event": "Heptathlon",
+      "name": "Sofia Cosculluela",
+      "team": "Washington",
+      "mark": "6,182 pts",
+      "note": "school record"
     }
   ],
   "championships": [
