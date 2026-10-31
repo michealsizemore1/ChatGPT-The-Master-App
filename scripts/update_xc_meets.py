@@ -49,7 +49,12 @@ RESULT_WORDS = (
     "sweep", "runner-up", "place", "finish", "results", "top-", "top ", "repeat",
     "defend", "victory", "victorious", "first", "second", "third",
 )
-SKIP_WORDS = ("preview", "schedule", "how to watch", "what to know", "set to", "heads to", "ahead of")
+SKIP_WORDS = ("preview", "schedule", "how to watch", "what to know", "set to", "heads to", "ahead of",
+              "headed", "meet day", "info:")
+# The Cross Country app covers college; drop high school coverage.
+HIGH_SCHOOL_WORDS = ("high school", "boys", "girls", "class ", "sectional", "state cross country",
+                     "state title", "1a", "2a", "3a", "4a", "5a", "6a", "ciac", "cif ", "ihsaa",
+                     "uil", "district", "county", "milesplit")
 
 # The 2026 meet calendar, matching the Meets tab on cross-country.html.
 MEETS = [
@@ -100,7 +105,8 @@ def looks_like_result(title: str) -> bool:
     t = " " + title.lower()
     return (any(w in t for w in XC_WORDS)
             and any(w in t for w in RESULT_WORDS)
-            and not any(w in t for w in SKIP_WORDS))
+            and not any(w in t for w in SKIP_WORDS)
+            and not any(w in t for w in HIGH_SCHOOL_WORDS))
 
 
 def build_results() -> list[dict]:
@@ -119,6 +125,8 @@ def build_results() -> list[dict]:
     picked: list[dict] = []
     for item in pool:
         key = norm_key(item["title"])
+        if any(w in item["source"].lower() for w in HIGH_SCHOOL_WORDS):
+            continue
         if key in seen or per_source.get(item["source"], 0) >= MAX_PER_SOURCE:
             continue
         seen.add(key)
