@@ -30,10 +30,11 @@ QUERIES = [
     "USTFCCCA track and field",
 ]
 
-TF_WORDS = ("track and field", "track & field", "track & cross", "t&f", "indoor season",
-            "outdoor season", "ncaa indoor", "ncaa outdoor", "ustfccca", "hayward field",
-            "sprinter", "hurdler", "collegiate record")
-SKIP_WORDS = ("cross country championship", "xc championship", "obituary", "tickets on sale")
+TF_WORDS = ("track and field", "track & field", "t&f", "indoor season", "outdoor season",
+            "ncaa indoor", "ncaa outdoor", "hayward field", "sprinter", "hurdler", "collegiate record")
+# Fall coverage is mostly cross country even when it says "track": skip anything XC-flavored.
+XC_WORDS = ("cross country", "cross counry", " xc", "gans creek", "athlete of the week")
+SKIP_WORDS = ("obituary", "tickets on sale")
 
 
 def keep(title: str, source: str) -> bool:
@@ -41,7 +42,7 @@ def keep(title: str, source: str) -> bool:
     s = source.lower()
     if not any(w in t for w in TF_WORDS):
         return False
-    if "cross country" in t and "track" not in t:
+    if any(w in t for w in XC_WORDS):
         return False
     if any(w in t for w in SKIP_WORDS):
         return False
