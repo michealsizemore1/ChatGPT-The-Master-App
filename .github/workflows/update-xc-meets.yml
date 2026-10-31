@@ -1,0 +1,35 @@
+name: Update XC meets
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Every 3 hours, so meet results reach the widget the same day.
+    - cron: "23 */3 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: xc-meets
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the app
+        uses: actions/checkout@v5
+
+      - name: Refresh XC meets
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          python3 scripts/update_xc_meets.py
+          if git status --porcelain -- data/xc-meets.json | grep -q .; then
+            git add data/xc-meets.json
+            git commit -m "Update XC meets"
+            git pull --rebase origin main
+            git push
+          else
+            echo "XC meets unchanged."
+          fi
