@@ -1,0 +1,255 @@
+{
+  "season": "2026 NCAA Division I Outdoor Championships",
+  "page": "https://michealsizemore1.github.io/ChatGPT-The-Master-App/ncaa-track-field.html",
+  "standings": {
+    "men": [
+      {
+        "rank": 1,
+        "team": "Arkansas",
+        "points": 56
+      },
+      {
+        "rank": 2,
+        "team": "Georgia",
+        "points": 49
+      },
+      {
+        "rank": 3,
+        "team": "Tennessee",
+        "points": 46
+      },
+      {
+        "rank": 4,
+        "team": "LSU",
+        "points": 42
+      },
+      {
+        "rank": 5,
+        "team": "Oregon",
+        "points": 40
+      },
+      {
+        "rank": 6,
+        "team": "Auburn",
+        "points": 33
+      },
+      {
+        "rank": 7,
+        "team": "Louisville",
+        "points": 32
+      },
+      {
+        "rank": 8,
+        "team": "Kansas State",
+        "points": 30
+      },
+      {
+        "rank": 9,
+        "team": "Nebraska",
+        "points": 28
+      },
+      {
+        "rank": 10,
+        "team": "USC",
+        "points": 27
+      }
+    ],
+    "women": [
+      {
+        "rank": 1,
+        "team": "Georgia",
+        "points": 50
+      },
+      {
+        "rank": 2,
+        "team": "Florida",
+        "points": 43,
+        "flag": "†"
+      },
+      {
+        "rank": 3,
+        "team": "Arkansas",
+        "points": 38
+      },
+      {
+        "rank": 4,
+        "team": "Oregon",
+        "points": 36
+      },
+      {
+        "rank": 5,
+        "team": "USC",
+        "points": 32
+      },
+      {
+        "rank": 6,
+        "team": "Iowa State",
+        "points": 30
+      },
+      {
+        "rank": 7,
+        "team": "Washington",
+        "points": 28
+      },
+      {
+        "rank": 8,
+        "team": "Illinois",
+        "points": 27
+      },
+      {
+        "rank": 8,
+        "team": "Nebraska",
+        "points": 27
+      },
+      {
+        "rank": 10,
+        "team": "LSU",
+        "points": 24
+      }
+    ]
+  },
+  "champions": [
+    {
+      "event": "100m",
+      "gender": "men",
+      "name": "Kanyinsola Ajayi",
+      "team": "Auburn",
+      "mark": "9.72"
+    },
+    {
+      "event": "200m",
+      "gender": "men",
+      "name": "Jaiden Reid",
+      "team": "LSU",
+      "mark": "19.63",
+      "note": "collegiate record"
+    },
+    {
+      "event": "200m",
+      "gender": "women",
+      "name": "Adaejah Hodge",
+      "team": "Georgia",
+      "mark": "21.68",
+      "note": "collegiate record"
+    },
+    {
+      "event": "400m",
+      "gender": "women",
+      "name": "Dejanea Oakley",
+      "team": "Georgia",
+      "mark": "48.79",
+      "note": "collegiate record"
+    },
+    {
+      "event": "800m",
+      "gender": "women",
+      "name": "Sanu Jallow",
+      "team": "Arkansas",
+      "mark": "1:56.85",
+      "note": "collegiate record"
+    },
+    {
+      "event": "1500m",
+      "gender": "men",
+      "name": "Simeon Birnbaum",
+      "team": "Oregon",
+      "mark": "3:36.05"
+    },
+    {
+      "event": "Hurdles (100m/110m)",
+      "gender": "men",
+      "name": "Ja’Kobe Tharp",
+      "team": "Auburn",
+      "mark": "12.90",
+      "note": "110m hurdles"
+    },
+    {
+      "event": "Hurdles (100m/110m)",
+      "gender": "women",
+      "name": "Aaliyah McCormick",
+      "team": "Oregon",
+      "mark": "12.47",
+      "note": "100m hurdles, defending champion"
+    },
+    {
+      "event": "3000m Steeplechase",
+      "gender": "men",
+      "name": "Geoffrey Kirwa",
+      "team": "Louisville",
+      "mark": "8:17.46"
+    },
+    {
+      "event": "4×100 Relay",
+      "gender": "men",
+      "name": "Tennessee",
+      "team": "Tennessee",
+      "mark": "37.98",
+      "note": "Folson, Howell, McCallum, Clark — school record, first title since 1983"
+    },
+    {
+      "event": "4×100 Relay",
+      "gender": "women",
+      "name": "USC",
+      "team": "USC",
+      "mark": "41.58",
+      "note": "DeFrand, Brahe-Pedersen, Whyte, Selby — defending champions, school record"
+    },
+    {
+      "event": "4×400 Relay",
+      "gender": "men",
+      "name": "Georgia",
+      "team": "Georgia",
+      "mark": "2:57.93",
+      "note": "edged LSU by 0.03"
+    },
+    {
+      "event": "4×400 Relay",
+      "gender": "women",
+      "name": "Arkansas",
+      "team": "Arkansas",
+      "mark": "3:18.88",
+      "note": "Butler, Batista, Brown, Jallow — #2 all-time collegiate"
+    }
+  ],
+  "championships": [
+    {
+      "name": "NCAA Indoor Championships",
+      "start": "2027-03-12",
+      "end": "2027-03-13",
+      "where": "Fayetteville, AR (host: Arkansas)"
+    },
+    {
+      "name": "NCAA Outdoor Championships",
+      "start": "2027-06-09",
+      "end": "2027-06-12",
+      "where": "Eugene, OR (Hayward Field)"
+    }
+  ],
+  "calendar": [
+    {
+      "when": "Late Feb 2027",
+      "name": "Conference indoor championships",
+      "where": "Nationwide"
+    },
+    {
+      "when": "Mar 12–13 2027",
+      "name": "NCAA Indoor Championships",
+      "where": "Fayetteville, AR (host: Arkansas)"
+    },
+    {
+      "when": "Mid-May 2027",
+      "name": "Conference outdoor championships",
+      "where": "Nationwide"
+    },
+    {
+      "when": "Late May 2027",
+      "name": "NCAA East/West First Round",
+      "where": "Nine regional sites nationwide"
+    },
+    {
+      "when": "Jun 9–12 2027",
+      "name": "NCAA Outdoor Championships",
+      "where": "Eugene, OR (Hayward Field)"
+    }
+  ]
+}

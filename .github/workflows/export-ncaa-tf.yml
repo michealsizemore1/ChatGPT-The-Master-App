@@ -1,0 +1,38 @@
+name: Export NCAA track & field data
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ncaa-track-field.html
+      - scripts/export_ncaa_tf.mjs
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ncaa-tf-export
+  cancel-in-progress: false
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Export widget data from the page
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          node scripts/export_ncaa_tf.mjs
+          if git status --porcelain -- data/ncaa-tf.json | grep -q .; then
+            git add data/ncaa-tf.json
+            git commit -m "Export NCAA track & field widget data"
+            git pull --rebase origin main
+            git push
+          else
+            echo "No change."
+          fi
