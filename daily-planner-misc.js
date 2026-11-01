@@ -3462,6 +3462,10 @@ function importWatchRunsFromLink(){
         var keep=acts[idx];
         ['distance','duration','pace','power','heartRate','cadence'].forEach(function(k){if(r[k])keep[k]=r[k];});
         if(r.routeUrl&&!keep.routeUrl)keep.routeUrl=r.routeUrl;
+        // Stryd extras fill in blanks only, so hand-entered values are never overwritten.
+        ['elevGain','temp','humidity','airPower','rss'].forEach(function(k){if(r[k]&&!keep[k])keep[k]=r[k];});
+        // Notes written by the watch app get refreshed; notes you edited by hand are kept.
+        if(r.notes&&(!keep.notes||keep.notes.indexOf('Recorded on Galaxy Watch')!==-1))keep.notes=r.notes;
         updated++;
       }
     });
