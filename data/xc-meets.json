@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-01T16:08:10+00:00",
+  "updatedAt": "2026-11-01T22:11:36+00:00",
   "source": "Google News searches for cross country meet results",
   "page": "https://michealsizemore1.github.io/ChatGPT-The-Master-App/cross-country.html",
   "meets": [
@@ -59,9 +59,27 @@
   "results": [
     {
       "date": "2026-11-01",
-      "headline": "Six CVC Cross Country Teams Qualify for State Championships",
+      "headline": "St. Norbert women’s cross country wins NACC championship, men second",
+      "source": "WTAQ",
+      "url": "https://news.google.com/rss/articles/CBMiTEFVX3lxTE9nQlh4RllfVFhVLWwzU3RFTzFUVTdoekM4dFBvTFBTOEtUZmdDUXVNXzBLTFRxdkJyeElENjBlbnJPM1B3RlNBclhMYkI?oc=5"
+    },
+    {
+      "date": "2026-11-01",
+      "headline": "Women's Cross Country Places Five on All-NJAC Teams, Coaching Staff Wins Major Award",
+      "source": "The College of New Jersey Athletics",
+      "url": "https://news.google.com/rss/articles/CBMixwFBVV95cUxNX1VCeFRxNzlFZDNRZzFyeUxQcEVwc1VpQ0NvZ2N0RUVNb0JpRS1PaFB6ejFxcEl3UHU2UExoVm9sVWlpV3dJdVFtNlI4YndoU1ZNa09KRFdTaGFhbVNULTVEU2s2Yk0yWl9rMVRTVHY2ZWdmRWQ3blVqdnh4OVA0UmJpdkN3R29xTmMtbExkeXpOOGpkR0dqXzEyVzhoVllYY20wemJiNmgyY3RNU3VvZ1ZfSUpGRm1sWk9wSUZyZHhFeWlOdm1R?oc=5"
+    },
+    {
+      "date": "2026-11-01",
+      "headline": "Six CVC cross country teams, 14 individual runners advance to state championships",
       "source": "Chagrin Valley Conference",
       "url": "https://news.google.com/rss/articles/CBMivgFBVV95cUxORXRfM1ZzWWc2OEpJZ0VBR3JidXVqQnI5Y3hXWGozTDV4c0lndmQyMjgwcm5vaTBnMDVyVVIyRnB6THdpWTl2RU1PWm4yemRIWVJmY2dxcXQ1NF9EVnpCTnE4aFdmQWJ5Rjl3LUFaT2hMOUlha05xQ25ZZUs5ZmtRN09JSDJyQ2hvb1A2UGRMbXoxV0RRZFpod2c0V2tPODVzMU10amI3c3dobWRDbjdGM092U0R0RTJNQ05xSHpn?oc=5"
+    },
+    {
+      "date": "2026-11-01",
+      "headline": "EPCC women win regional cross country team championship",
+      "source": "Fort Worth Star-Telegram",
+      "url": "https://news.google.com/rss/articles/CBMiakFVX3lxTE1wc3JRc29ucG5DREpPUS1obUxLbWN4WGNULWlGSTRxcmdxSU1saENMcjJaMkdwZTFlbWZSNm44WkJtVG5BSmdLWk1ucE9WeWlocFJ2b0R1NFo3RHVrR2FYY3JTcnZBdmNrYVE?oc=5"
     },
     {
       "date": "2026-11-01",
@@ -74,6 +92,18 @@
       "headline": "Christopher Newport team, Batten’s Zar run to conference women’s cross country titles",
       "source": "The Virginian-Pilot",
       "url": "https://news.google.com/rss/articles/CBMivwFBVV95cUxPUkxfUktKVVN0djdmUHZEbzRGYmJpZ0M3UFhjSG1HSTluR2R4bWRaMTJ1OUw0Tklmam41QVNESWV6TG1uVUdoNTRWTDBmWXFIa0NSUW02RHVlMm9jU2F3TTI5VE5JbnBQTk9MdW5Vd1ZpVkxRb0ZDeHpjYmZEd1JOdXBpX2JpRnFXam5EamJ5aUk1cmdiU0NmWjJuY0JyXzNJWE5CMUxOYnNPRnBnTTl0WVR4TlVBZ0NCVTZ0QnB6UQ?oc=5"
+    },
+    {
+      "date": "2026-11-01",
+      "headline": "Men's, Women's Cross Country Places 2nd at ODAC Championships",
+      "source": "Lynchburg Athletics",
+      "url": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxQelBSblNvX1RrcVdxQzd0MjhiOFlmdm9QUEg4U1hGM2Z4Y1duUy1XNkpYeTVTZThzdEh1cm5SZGZXVFVSRGdERklBSmRuV1haaDRLUlI1SXhHaVVLVlR1OHNXQllBUHdtYWVxZlBBN2tfVi0zNTZBSTNfWjBYYngxMlpmOHBBc1QxenJrSGRnZzdydW42U2FuMWdobGlSb0MxR01CNmdtanloWHM?oc=5"
+    },
+    {
+      "date": "2026-11-01",
+      "headline": "Hartford Men's Cross Country Brings Home the Conference of New England Championship",
+      "source": "University of Hartford Athletics",
+      "url": "https://news.google.com/rss/articles/CBMiyAFBVV95cUxNbGJQZnFFV1FMZ3RIOTRPYzJHSC0tckJnWkVBUHhaUjJPSDR6NEZzRGhRMDdRYlZVTVVCYzJRRE9ocnhwWnZ4dzlZSENHaDhOeWJtT1pWTG5qUW8zd3VhX2Y2U0xOZG5JbWFSN0p0MG1wQ21FVmQ3ZlBjX1V3Qk1JSGQ3aFo3QnpZaUVob0xmazR5OTU0ZzZta3p3TDVZTjVoS2g4dF8xTURKcXc0WjZsa2swN203bGlBaG83WGZsUnQwSFhWemxfUQ?oc=5"
     },
     {
       "date": "2026-11-01",
@@ -116,36 +146,6 @@
       "headline": "Bearcats Wrap Up Big 12 XC Championships in Stillwater",
       "source": "University of Cincinnati Athletics",
       "url": "https://news.google.com/rss/articles/CBMimAFBVV95cUxOWUc1b3pHajBISUxjLVczd2JJN29sbE1TVnhpTl9jNngtdGwyU3ZIcG41cDFFRmtPaVZ6VEI4LUVVaWtkUjRlYVdnb0ItUmluQU1aYVlSUUtaaExINXJ2czE0Q180RlBNS0liQVpVUVphS1RoWndvNXpvMkltbXFhejRmR0hBTFFoNmRQTFoxMnVlUGZtZ1JlYw?oc=5"
-    },
-    {
-      "date": "2026-10-31",
-      "headline": "Women First To Finish at PAC Cross Country Championships, Men Third Overall",
-      "source": "Saint Francis University Athletics",
-      "url": "https://news.google.com/rss/articles/CBMi2AFBVV95cUxPOXlOVXpEb1VCU3I1a3BhMU04VzNwUU0zSk82bXJRV19tWUllXzMwdk5kTVNXN2hQMHJVRnY5eng3TFdvV0J5dXBYTkZFQVhqUHhseHBNOWdxRnRYZXpZTVNKS0pMbzJCU2VIUkMzZkYzSEgxUjhzakNhYnlVa214b3E4RENWOXZKc0lNenN5UVhPcktzOVg3QnRwZ1QyQ2pVaUI1QUs4YVlRWXpMd3U2SjMzOWlHSXFZSjE0dU93V0dZMVFNdnFxZXUzS2RyRVAxNTBDS0libk0?oc=5"
-    },
-    {
-      "date": "2026-10-31",
-      "headline": "2026 CCIW Women’s Cross Country Championship: Cardinals Run to 10th Title",
-      "source": "CCIW",
-      "url": "https://news.google.com/rss/articles/CBMirgFBVV95cUxNRFBaQ0RZVXd6MjAzYk0xaFhPYmQzWDAxU25nendOTTdZV1JlX2JnaUdLbVBZa0VOLVlWRFdodl9jNUhzZ2FwSFBheEFfa21oblh5cDNaZXM3d2o3NVlYSlR2UFdJZmJrVjVqNHdjcW5XYTlaemk4Tk16M0NHcE9pR2EyYVhNWThSNFdXTHd2UXQ3QnR4UGZncDBNak5hc09kTGhFM1AtY1EtNmU3Z0E?oc=5"
-    },
-    {
-      "date": "2026-10-31",
-      "headline": "Local teams shine at D6 cross country championships",
-      "source": "Indiana Gazette Online",
-      "url": "https://news.google.com/rss/articles/CBMi1gFBVV95cUxNeDd3ZnNfZlRTTkR2LS1hX21ISG80N0U4bjVHdGlUT2VvUnEtVjNUSHI0aVUyYW5ERTRSWXNOaHdBVmRyY2R6VmlOR3gxdHNMUTNmVHJZUHZUaS04M3RQV291dG5kQ3EzRjNaRGtNQmpBcHFTNlJjc05ZRDVJYnlmYXpjWG5fb3VUTl9OMWVZOXNRMHBQbnVEZUFONHRjMzNVY1V3Mm1FLUs1NkNkOTVyczBOb3FaTTRUWXJzdVYzLUd5TjJTUF9Tckw2a1RxQURJb29LRkNB?oc=5"
-    },
-    {
-      "date": "2026-10-31",
-      "headline": "Photos: Nassau cross country championships",
-      "source": "Newsday",
-      "url": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxPSy10VE00Zmlxbk5adTQzN19hT1BmTlNLejNqZGdTY0ZLbXRweVZqc0UxanVqVUZMT25WUzlXNG12VGF2NUxxNzNWZlJPd1hIZWhMQWRQa1FTTV9kdXBnN05FN3dQcENral94T0FOZWdwQ1RNMUZ0ZUp0a0lHWkpWNjhFWjZudmNNLWpJQndlTENhdDR1ZjllbDBPaXpTejF3WEVCXzl6ZHJJV0k?oc=5"
-    },
-    {
-      "date": "2026-10-31",
-      "headline": "Princeton Women, Harvard Men Claim Titles at Ivy League Heptagonal Cross Country Championships",
-      "source": "IvyLeagueSports.com",
-      "url": "https://news.google.com/rss/articles/CBMi6wFBVV95cUxQbm9GY2VNQzZGYmNxQ0s0VkZxa2ozVG1PVWtvdnBFZm1Ga01GNC1tOFdMUU15Z19ZMVZoT2l5ZUxuLUE3dnNUNGFwajdWUTNJZG5VTVlXZTNsVEVON2JaLWV6UzJYaFpoVHZBNXlIMXgwZ3ZIN2F5YzVuczc4OFpmSUdBdlFGbUlHcDVCc213RWFhTUR5X2dFb2FzUGl6S1YweWVPZ0lZZUZwYXBCOGRVNzRGODRmTmppRkR6Nk1oUVc1S3E2a0VTZW5nZDdQMFhZeDZmX0VKNlVNZmRWQ0xFcUhTQU1nMjBYTk5Z?oc=5"
     }
   ]
 }
