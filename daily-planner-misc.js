@@ -483,7 +483,7 @@ function saveActivity(){
   try{renderActivities();}catch(err){console.error('renderActivities error:',err);if(typeof v26Toast==='function')v26Toast('Activity saved, but the list view had a display error.');}
 }
 function actSourceLabel(s){
-  var map={manual:'Manual',garmin:'Garmin',stryd:'Stryd',strava:'Strava',gear2:'Gear Tracker II',screenshot:'Screenshot'};
+  var map={manual:'Manual',garmin:'Garmin',stryd:'Stryd',strava:'Strava',gear2:'Gear Tracker II',screenshot:'Screenshot',watch:'Galaxy Watch'};
   s=(s||'manual').toLowerCase();
   return map[s]||(s.charAt(0).toUpperCase()+s.slice(1));
 }
@@ -3430,3 +3430,49 @@ function loadAllTabNotes(){
 }
 
 /* ===== Journal experience module: home, preferences, navigation, reliability ===== */
+
+// ── Runs from the Galaxy Watch Run app ──
+// The phone's Running section opens this page as daily-planner.html#watchruns=<base64url JSON>.
+// Each run carries a stable id (its start time), so sending the same run twice never duplicates it.
+function importWatchRunsFromLink(){
+  var m=(location.hash||'').match(/[#&]watchruns=([A-Za-z0-9_-]+)/);
+  if(!m)return;
+  var runs;
+  try{
+    var b64=m[1].replace(/-/g,'+').replace(/_/g,'/');while(b64.length%4)b64+='=';
+    var bin=atob(b64),bytes=new Uint8Array(bin.length);
+    for(var i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+    runs=JSON.parse(new TextDecoder().decode(bytes));
+  }catch(e){alert('Could not read the runs sent from the watch app: '+e.message);return;}
+  if(!Array.isArray(runs)||!runs.length)return;
+  var tries=0;
+  (function waitForActivities(){
+    // Activities load asynchronously from on-device storage; wait for them first.
+    if(!Array.isArray(_activitiesLargeCache)&&tries++<60){setTimeout(waitForActivities,250);return;}
+    var acts=getActivities().slice(),added=0,updated=0;
+    runs.forEach(function(r){
+      if(!r||!r.id||!r.date)return;
+      if(!r.calories&&typeof estimateCalories==='function'){
+        try{r.calories=estimateCalories({type:r.type||'Run',distance:r.distance||0,duration:r.duration||'',power:r.power||0,elevGain:r.elevGain||0});}catch(ignore){}
+      }
+      var idx=acts.findIndex(function(a){return String(a.id)===String(r.id);});
+      if(idx===-1){acts.push(r);added++;}
+      else{
+        // Keep anything added by hand (notes, weather, Air Power…); refresh watch-recorded numbers.
+        var keep=acts[idx];
+        ['distance','duration','pace','power','heartRate','cadence'].forEach(function(k){if(r[k])keep[k]=r[k];});
+        if(r.routeUrl&&!keep.routeUrl)keep.routeUrl=r.routeUrl;
+        updated++;
+      }
+    });
+    saveActivities(acts);
+    try{renderActivities();}catch(ignore2){}
+    try{history.replaceState(null,'',location.pathname+location.search);}catch(ignore3){}
+    try{hmSwitch('activities');}catch(ignore4){}
+    var msg=added?(added+' watch run'+(added===1?'':'s')+' added to Activities'):'Those runs were already in Activities';
+    if(updated&&added)msg+=' ('+updated+' already there)';
+    if(typeof v26Toast==='function')v26Toast(msg);else alert(msg);
+  })();
+}
+window.addEventListener('load',function(){setTimeout(importWatchRunsFromLink,300);});
+window.addEventListener('hashchange',importWatchRunsFromLink);
