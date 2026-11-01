@@ -3480,3 +3480,22 @@ function importWatchRunsFromLink(){
 }
 window.addEventListener('load',function(){setTimeout(importWatchRunsFromLink,300);});
 window.addEventListener('hashchange',importWatchRunsFromLink);
+
+// ── Send a training plan to the phone's Running app (and from there to the watch) ──
+// Opens scoresrun://localhost/plan#<base64url {date: that day's plan text}> — the Running app
+// turns each day into a guided workout. Only today and later are sent.
+function sendPlanToRunningApp(which){
+  var key=which==='upcoming'?'upcoming_training_plan':'current_training_plan';
+  var plan=null;try{plan=JSON.parse(localStorage.getItem(key)||'null');}catch(e){}
+  if(!plan||!plan.text){alert('No plan to send.');return;}
+  var schedule=plan.schedule&&Object.keys(plan.schedule).length?plan.schedule:buildUploadedTrainingSchedule(plan.text,plan.startDate||dk(new Date()),plan.weeks||1).schedule;
+  var today=dk(new Date()),days={},count=0;
+  Object.keys(schedule||{}).sort().forEach(function(date){if(date>=today&&schedule[date]){days[date]=String(schedule[date]).slice(0,1500);count++;}});
+  if(!count){alert('This plan has no dated days from today on. Use "Add Dates" first so each day has a date.');return;}
+  var bytes=new TextEncoder().encode(JSON.stringify(days)),bin='';
+  for(var i=0;i<bytes.length;i++)bin+=String.fromCharCode(bytes[i]);
+  var b64=btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  if(typeof v26Toast==='function')v26Toast('Opening the Running app with '+count+' days…');
+  // Opens the phone app; does nothing on a computer without it.
+  window.location.href='scoresrun://localhost/plan#'+b64;
+}
