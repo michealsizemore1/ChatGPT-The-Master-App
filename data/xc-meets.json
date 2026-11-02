@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-02T06:25:43+00:00",
+  "updatedAt": "2026-11-02T19:36:23+00:00",
   "source": "Google News searches for cross country meet results",
   "page": "https://michealsizemore1.github.io/ChatGPT-The-Master-App/cross-country.html",
   "meets": [
@@ -58,10 +58,16 @@
   ],
   "results": [
     {
-      "date": "2026-11-01",
+      "date": "2026-11-02",
+      "headline": "Louisiana women's cross country wins 2026 Sun Belt Conference Championship",
+      "source": "The Daily Advertiser | Lafayette, Louisiana",
+      "url": "https://news.google.com/rss/articles/CBMi5gFBVV95cUxPUWVGaHhsbUxYMVdpdzBKSU01YXQ3MU9tYlpldnJTOFdKd3ptY1g2c2ZYMUlmYVVGZEdmdEhvcGtzVXFZYXZpUElwUnFoeWpFNnhIVE1sdThpNDlaS2x0WVFQVmcwSE8xWktJYV90eHRMQVRMaTlWQ09xWGR3STFpdmtvenBab0ppR3hHYlR5N2xwTzFsMkk4bGpEbUhSeXpXMnR0MDZGd2t4aGZvdEpIT0N3RFlYZUlkeTNka3dKQmU1NkZWeVpwSS1QT3BKRjFteWxqaHo0eHc3dkFjRjY1OWx6SlpBdw?oc=5"
+    },
+    {
+      "date": "2026-11-02",
       "headline": "St. Norbert women’s cross country wins NACC championship, men second",
-      "source": "WTAQ",
-      "url": "https://news.google.com/rss/articles/CBMiTEFVX3lxTE9nQlh4RllfVFhVLWwzU3RFTzFUVTdoekM4dFBvTFBTOEtUZmdDUXVNXzBLTFRxdkJyeElENjBlbnJPM1B3RlNBclhMYkI?oc=5"
+      "source": "Y100 WNCY",
+      "url": "https://news.google.com/rss/articles/CBMiTEFVX3lxTE5YdDhUeXRrRlM4b21aU2ZOV081bUpCcGI5cW1NNnNOZFJ3X0lRRjVNRXNnZXRKT0hoVUgxUWlpRjBHVFEzZkJHYW84RHU?oc=5"
     },
     {
       "date": "2026-11-01",
@@ -89,27 +95,15 @@
     },
     {
       "date": "2026-11-01",
-      "headline": "Men's cross country places eighth in NESCAC championships at Middlebury",
-      "source": "Hamilton College",
-      "url": "https://news.google.com/rss/articles/CBMi2AFBVV95cUxPZG1YT013ZnNSeE9Na0dmUVRXQ0hCNy1mSFB0dkhBajVNb2FTZjZxN0RCMnE4RnVQS1ZwS1cxYm9MRTY4WmJ4Y1lVNGhfdEhTMGd3WFBsZVUtSHlUWHIwVHp4c1ZMczRTUWJuMEgxNUttUDJKZFdZOTVGdEs0Smc0V29jQkNJaERtTHdmdm5LUjZmRG03eExTWFA4a0VKNUhvSW1wWVhQbGxkTmRSZ3lTZUJFeTV5eWRVc0VTYnBrY3F6TFF5eHNzd1BkUnYzM0t4QmMxTjR5LVA?oc=5"
-    },
-    {
-      "date": "2026-11-01",
       "headline": "Mosher Wins NEWMAC Crown as No. 25 WPI Takes Second at Men’s Conference XC Championship",
       "source": "Worcester Polytechnic Institute",
       "url": "https://news.google.com/rss/articles/CBMi3wFBVV95cUxQdDFmNllyZDFid0g3ajc3SFMyd3VLNjZjV3Btd3Rod3RUdVJYUzNjTzVyVTVvNE10eEVrUTdRQnpMMi00RnAwTHhhSTFwS3NOdGdrV2lzbzloQldSMHFtdUdpRWgxb1ZaNnU3cW5yNTdlbFdMNDBjWFJ2SnpjbXd4d0Zpem1RZFpVRnotYktYSFVla0RWbjMyNU81YzdtUU5PWDAyUy1GOGg3RTRBQUV4N0htdmRkbkEwc3RvMnFtZ0tVQ0tyemdDaDloV2g2ZTJFcGc0Tk0zamdRY1k3d2M0?oc=5"
     },
     {
-      "date": "2026-11-01",
-      "headline": "Aagaard '30 leads women's cross country in her first NESCAC championship",
-      "source": "Hamilton College",
-      "url": "https://news.google.com/rss/articles/CBMi2wFBVV95cUxQMi00dnhNLVVBY1p2TW1hYlZLZU1uZmZFWV9ZNGxvdmxySTZQLXU1XzRZWmhpTWlpWnZHMy1ublRXdEdUdmJGZHU0TVk5cmtzSGJGc05rRXd6aVU5ZjRmd3dnUDdlTGV5SGVjYU4zRUZJZ081SExBMFBaT3JveWhsZmNvR2x3VERPdDJMRFFhM0RnUTM2S1V1SURkQ3czZDdkcElvdWZOaTlRVUF5SWVqZklYVnJKY1htX1pabFZKUjhCSmFMRGh3Yzk5UllIaXdYX3MwQWFyNFNYV2M?oc=5"
-    },
-    {
-      "date": "2026-11-01",
-      "headline": "Licklider earns All-UAA XC honors with 13th-place finish, as men take sixth",
-      "source": "Brandeis Athletics",
-      "url": "https://news.google.com/rss/articles/CBMi2AFBVV95cUxPWk1xWHVpY19KbGtMRG83YngxcGp3SzhIM2FYX2Y3eWpVUktOQkZqSE1XTTF6bDF4ZW5idXJUZU1WZ0dyNzYzbjN5aFQzYUc2WjQxbTBMYVdCQWxOWF9YWEw5QjhnVTJMOUVaSnkwOWtJRmpRLWxhMlBQSHZBU3hNM2RaNkVQSDB3dDJoQjJXMjNmV195c0U3dWo4MHU2SzNCZ0h2YlFaUklFOTdGMEx5cF9MM2g4V0hXZjVaUUQ3cnc0SUN5bllVUlBGdTNTNUtfb0h1dS1WaVA?oc=5"
+      "date": "2026-10-31",
+      "headline": "Tulane Cross Country Programs Capture American Conference Titles",
+      "source": "Yahoo Sports",
+      "url": "https://news.google.com/rss/articles/CBMijwFBVV95cUxQZFdmbnJMX09sQ2ozMTI4YmF6YVEtOHhyYkZYcjRjRnJfMTJvQ2Y1M2czdy15TzV0NjJzYmMxMkpnS0Z2NnFjNHFxRXZWb1NENVRYcTh0QzlMbjRkUlJ4RjJBdWh1eVBzWkNRcmRjWFFFVkF1NV9CUDBCVVRDcElQU1YyREIxZG9qOTFuQ2d3RQ?oc=5"
     },
     {
       "date": "2026-10-31",
@@ -122,12 +116,6 @@
       "headline": "Bearcats Wrap Up Big 12 XC Championships in Stillwater",
       "source": "University of Cincinnati Athletics",
       "url": "https://news.google.com/rss/articles/CBMimAFBVV95cUxOWUc1b3pHajBISUxjLVczd2JJN29sbE1TVnhpTl9jNngtdGwyU3ZIcG41cDFFRmtPaVZ6VEI4LUVVaWtkUjRlYVdnb0ItUmluQU1aYVlSUUtaaExINXJ2czE0Q180RlBNS0liQVpVUVphS1RoWndvNXpvMkltbXFhejRmR0hBTFFoNmRQTFoxMnVlUGZtZ1JlYw?oc=5"
-    },
-    {
-      "date": "2026-10-31",
-      "headline": "Women First To Finish at PAC Cross Country Championships, Men Third Overall",
-      "source": "Saint Francis University Athletics",
-      "url": "https://news.google.com/rss/articles/CBMi2AFBVV95cUxPOXlOVXpEb1VCU3I1a3BhMU04VzNwUU0zSk82bXJRV19tWUllXzMwdk5kTVNXN2hQMHJVRnY5eng3TFdvV0J5dXBYTkZFQVhqUHhseHBNOWdxRnRYZXpZTVNKS0pMbzJCU2VIUkMzZkYzSEgxUjhzakNhYnlVa214b3E4RENWOXZKc0lNenN5UVhPcktzOVg3QnRwZ1QyQ2pVaUI1QUs4YVlRWXpMd3U2SjMzOWlHSXFZSjE0dU93V0dZMVFNdnFxZXUzS2RyRVAxNTBDS0libk0?oc=5"
     },
     {
       "date": "2026-10-31",
@@ -146,6 +134,18 @@
       "headline": "Photos: Nassau cross country championships",
       "source": "Newsday",
       "url": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxPSy10VE00Zmlxbk5adTQzN19hT1BmTlNLejNqZGdTY0ZLbXRweVZqc0UxanVqVUZMT25WUzlXNG12VGF2NUxxNzNWZlJPd1hIZWhMQWRQa1FTTV9kdXBnN05FN3dQcENral94T0FOZWdwQ1RNMUZ0ZUp0a0lHWkpWNjhFWjZudmNNLWpJQndlTENhdDR1ZjllbDBPaXpTejF3WEVCXzl6ZHJJV0k?oc=5"
+    },
+    {
+      "date": "2026-10-31",
+      "headline": "Colin Kurtz leads way, BC High wins Catholic Conference cross country title",
+      "source": "MassLive.com",
+      "url": "https://news.google.com/rss/articles/CBMiyAFBVV95cUxOLWVmcTJJS3ZXbW1nNmxwUDFNVUV1NnhyQ1gxRDZ5U2pBWDVHSms4b1BxY29HTWpqeHRPWUZOOE1MR2YwUXVQMm1RZW1fdjQ5M0lhNGNHVnlYcWlqMDZLZk1BMGlkNlJKUFlna0hLTXdkQjlBVFM0cTVmZzZ2VXNGM1pWa2tub20tYTdwVlM1Z0Y3LWJ0dEo2ZlhpMzhqQUN3THFocEx2VzFLVVNadGsxalVpNDlOSWM4cEx4dUEyRUVXVDh0dWZtVw?oc=5"
+    },
+    {
+      "date": "2026-10-31",
+      "headline": "Tulane Sweeps Team, Individual Titles At 2026 American Cross Country Championships",
+      "source": "American Conference",
+      "url": "https://news.google.com/rss/articles/CBMixAFBVV95cUxQSWhVclF2OU5YMW9FNi1RZDVTTWdqc3JsdFZSZ21tMUVEWkZSR3oyTFRQMEMyVTlpeThNYmQxNndTUzk1R1ZtV0RlLVpGQ0RhakV5ZEpfVTI0aFduY2JRNjZyQy1HTUstM2JXbHpPbUpKaEpOZFo2QmFCYVpTRFVRbmF5VnhpTF95YUJuVVdPeVR5VWpmRldlTzZ0aG56TFFhMmxvODlCVzVBRUhDOHBCUnFQYXNiOTFWTW9WNGh3MEhDX1ZG?oc=5"
     }
   ]
 }
