@@ -318,7 +318,7 @@ function formatActivityNotesHtml(notes){
 }
 
 function clearActForm(){
-  ['actDate','actType','actTitle','actDistance','actDuration','actPace','actPower','actHR','actCadence','actCalories','actElevGain','actTemp','actHumidity','actAQI','actExecScore','actRouteUrl','actNotes','actInjuryReport'].forEach(id=>{
+  ['actDate','actType','actTitle','actDistance','actDuration','actPace','actPower','actAirPower','actHR','actCadence','actCalories','actElevGain','actTemp','actHumidity','actAQI','actExecScore','actRouteUrl','actNotes','actInjuryReport'].forEach(id=>{
     const e=document.getElementById(id);if(e)e.value='';
   });
   document.getElementById('actSource').value='manual';
@@ -412,7 +412,7 @@ function updateActCaloriesPlaceholder(){
   });
   calEl.placeholder=est>0?('~'+est+' (auto)'):'0';
 }
-var ACT_REST_DAY_FIELDS=['actTitle','actDistance','actDuration','actPace','actPower','actHR','actCadence','actCalories','actElevGain','actTemp','actHumidity','actAQI','actExecScore','actRouteUrl','actNotes','actInjuryReport'];
+var ACT_REST_DAY_FIELDS=['actTitle','actDistance','actDuration','actPace','actPower','actAirPower','actHR','actCadence','actCalories','actElevGain','actTemp','actHumidity','actAQI','actExecScore','actRouteUrl','actNotes','actInjuryReport'];
 function handleActTypeChange(){
   var typeEl=document.getElementById('actType');if(!typeEl)return;
   var isRestDay=typeEl.value==='Rest Day';
@@ -453,6 +453,7 @@ function getActFormValues(){
     injuryReport:(document.getElementById('actInjuryReport').value||'').trim(),
     temp:(document.getElementById('actTemp').value||'').trim(),
     humidity:Math.max(0,Math.min(100,parseFloat(document.getElementById('actHumidity').value)||0)),
+    airPower:Math.max(0,Math.min(100,Math.round((parseFloat(document.getElementById('actAirPower').value)||0)*10)/10)),
     aqi:Math.max(0,Math.min(500,parseInt(document.getElementById('actAQI').value,10)||0)),
     execScore:parseFloat(document.getElementById('actExecScore').value)||0,
     routeUrl:skillSafeLink((document.getElementById('actRouteUrl').value||'').trim()),
@@ -482,7 +483,7 @@ function saveActivity(){
   try{renderActivities();}catch(err){console.error('renderActivities error:',err);if(typeof v26Toast==='function')v26Toast('Activity saved, but the list view had a display error.');}
 }
 function actSourceLabel(s){
-  var map={manual:'Manual',garmin:'Garmin',stryd:'Stryd',strava:'Strava',gear2:'Gear Tracker II',screenshot:'Screenshot'};
+  var map={manual:'Manual',garmin:'Garmin',stryd:'Stryd',strava:'Strava',gear2:'Gear Tracker II',screenshot:'Screenshot',watch:'Galaxy Watch'};
   s=(s||'manual').toLowerCase();
   return map[s]||(s.charAt(0).toUpperCase()+s.slice(1));
 }
@@ -525,6 +526,7 @@ function editActivity(id){
   document.getElementById('actElevGain').value=act.elevGain||'';
   document.getElementById('actTemp').value=act.temp||'';
   document.getElementById('actHumidity').value=act.humidity||'';
+  document.getElementById('actAirPower').value=act.airPower||act.wind||''; // "wind" = early name for Air Power
   document.getElementById('actAQI').value=act.aqi||'';
   document.getElementById('actExecScore').value=act.execScore||'';
   document.getElementById('actRouteUrl').value=act.routeUrl||'';
@@ -749,6 +751,7 @@ function printActivities(){
     var cond=[];
     if(a.temp)cond.push(a.temp+'°F');
     if(a.humidity)cond.push(a.humidity+'% humidity');
+    if(a.airPower||a.wind)cond.push((a.airPower||a.wind)+'% air power');
     if(a.aqi)cond.push('AQI '+a.aqi);
     if(a.temp&&a.pace){
       var hh=heatHumidityImpact(a.temp,a.humidity,parsePace(a.pace));
@@ -1579,7 +1582,7 @@ function calcRacePredictor(acts){
   var baseDistance=parseFloat(best.distance)||0;
   var baseTimeSec=bestPaceSec*baseDistance;
   if(!baseDistance||!baseTimeSec){wrap.style.display='none';return;}
-  var targets=[{label:'5K',mi:3.10686},{label:'10K',mi:6.21371},{label:'Half',mi:13.1094},{label:'Marathon',mi:26.2188}];
+  var targets=[{label:'Mile',mi:1},{label:'2 Mile',mi:2},{label:'5K',mi:3.10686},{label:'10K',mi:6.21371},{label:'Half',mi:13.1094},{label:'Marathon',mi:26.2188}];
   // fadePct: engineering-estimate fatigue/fueling allowance on top of Riegel,
   // growing with distance (see comment block above for sourcing).
   var ultraTargets=[
@@ -2172,6 +2175,7 @@ function renderActivities(){
     if(a.pace)perfStats.push('<span class="act-stat">&#x1F3C3; <strong>'+a.pace+'</strong>/mi</span>');
     if(a.power){var zone=powerZone(a.power,cp);var zb=zone?'<span class="zone-badge '+zone.cls+'">'+zone.z+'</span>':'';perfStats.push('<span class="act-stat">&#x26A1; <strong>'+a.power+'</strong>W'+zb+'</span>');}
     if(a.heartRate){var hzone=hrZone(a.heartRate,maxHR);var hzb=hzone?'<span class="zone-badge '+hzone.cls+'">'+hzone.z+'</span>':'';perfStats.push('<span class="act-stat">&#x2764; <strong>'+a.heartRate+'</strong> bpm'+hzb+'</span>');}
+    var airPct=a.airPower||a.wind;if(airPct)perfStats.push('<span class="act-stat" title="Share of running power spent overcoming air resistance">&#x1F4A8; Air Power <strong>'+airPct+'</strong>%</span>');
     if(a.cadence)perfStats.push('<span class="act-stat">&#x1F9B5; <strong>'+a.cadence+'</strong> spm</span>');
     if(a.calories)perfStats.push('<span class="act-stat">&#x1F525; <strong>'+a.calories+'</strong> cal</span>');
     if(a.elevGain)perfStats.push('<span class="act-stat">&#x26F0; <strong>'+a.elevGain+'</strong> ft</span>');
@@ -3426,3 +3430,72 @@ function loadAllTabNotes(){
 }
 
 /* ===== Journal experience module: home, preferences, navigation, reliability ===== */
+
+// ── Runs from the Galaxy Watch Run app ──
+// The phone's Running section opens this page as daily-planner.html#watchruns=<base64url JSON>.
+// Each run carries a stable id (its start time), so sending the same run twice never duplicates it.
+function importWatchRunsFromLink(){
+  var m=(location.hash||'').match(/[#&]watchruns=([A-Za-z0-9_-]+)/);
+  if(!m)return;
+  var runs;
+  try{
+    var b64=m[1].replace(/-/g,'+').replace(/_/g,'/');while(b64.length%4)b64+='=';
+    var bin=atob(b64),bytes=new Uint8Array(bin.length);
+    for(var i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+    runs=JSON.parse(new TextDecoder().decode(bytes));
+  }catch(e){alert('Could not read the runs sent from the watch app: '+e.message);return;}
+  if(!Array.isArray(runs)||!runs.length)return;
+  var tries=0;
+  (function waitForActivities(){
+    // Activities load asynchronously from on-device storage; wait for them first.
+    if(!Array.isArray(_activitiesLargeCache)&&tries++<60){setTimeout(waitForActivities,250);return;}
+    var acts=getActivities().slice(),added=0,updated=0;
+    runs.forEach(function(r){
+      if(!r||!r.id||!r.date)return;
+      if(!r.calories&&typeof estimateCalories==='function'){
+        try{r.calories=estimateCalories({type:r.type||'Run',distance:r.distance||0,duration:r.duration||'',power:r.power||0,elevGain:r.elevGain||0});}catch(ignore){}
+      }
+      var idx=acts.findIndex(function(a){return String(a.id)===String(r.id);});
+      if(idx===-1){acts.push(r);added++;}
+      else{
+        // Keep anything added by hand (notes, weather, Air Power…); refresh watch-recorded numbers.
+        var keep=acts[idx];
+        ['distance','duration','pace','power','heartRate','cadence'].forEach(function(k){if(r[k])keep[k]=r[k];});
+        if(r.routeUrl&&!keep.routeUrl)keep.routeUrl=r.routeUrl;
+        // Stryd extras fill in blanks only, so hand-entered values are never overwritten.
+        ['elevGain','temp','humidity','airPower','rss'].forEach(function(k){if(r[k]&&!keep[k])keep[k]=r[k];});
+        // Notes written by the watch app get refreshed; notes you edited by hand are kept.
+        if(r.notes&&(!keep.notes||keep.notes.indexOf('Recorded on Galaxy Watch')!==-1))keep.notes=r.notes;
+        updated++;
+      }
+    });
+    saveActivities(acts);
+    try{renderActivities();}catch(ignore2){}
+    try{history.replaceState(null,'',location.pathname+location.search);}catch(ignore3){}
+    try{hmSwitch('activities');}catch(ignore4){}
+    var msg=added?(added+' watch run'+(added===1?'':'s')+' added to Activities'):'Those runs were already in Activities';
+    if(updated&&added)msg+=' ('+updated+' already there)';
+    if(typeof v26Toast==='function')v26Toast(msg);else alert(msg);
+  })();
+}
+window.addEventListener('load',function(){setTimeout(importWatchRunsFromLink,300);});
+window.addEventListener('hashchange',importWatchRunsFromLink);
+
+// ── Send a training plan to the phone's Running app (and from there to the watch) ──
+// Opens scoresrun://localhost/plan#<base64url {date: that day's plan text}> — the Running app
+// turns each day into a guided workout. Only today and later are sent.
+function sendPlanToRunningApp(which){
+  var key=which==='upcoming'?'upcoming_training_plan':'current_training_plan';
+  var plan=null;try{plan=JSON.parse(localStorage.getItem(key)||'null');}catch(e){}
+  if(!plan||!plan.text){alert('No plan to send.');return;}
+  var schedule=plan.schedule&&Object.keys(plan.schedule).length?plan.schedule:buildUploadedTrainingSchedule(plan.text,plan.startDate||dk(new Date()),plan.weeks||1).schedule;
+  var today=dk(new Date()),days={},count=0;
+  Object.keys(schedule||{}).sort().forEach(function(date){if(date>=today&&schedule[date]){days[date]=String(schedule[date]).slice(0,1500);count++;}});
+  if(!count){alert('This plan has no dated days from today on. Use "Add Dates" first so each day has a date.');return;}
+  var bytes=new TextEncoder().encode(JSON.stringify(days)),bin='';
+  for(var i=0;i<bytes.length;i++)bin+=String.fromCharCode(bytes[i]);
+  var b64=btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  if(typeof v26Toast==='function')v26Toast('Opening the Running app with '+count+' days…');
+  // Opens the phone app; does nothing on a computer without it.
+  window.location.href='scoresrun://localhost/plan#'+b64;
+}

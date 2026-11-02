@@ -1207,6 +1207,9 @@ function renderRunMetrics(){
   function aqiCategory(value){return value<=50?'Good':value<=100?'Moderate':value<=150?'Unhealthy for sensitive groups':value<=200?'Unhealthy':value<=300?'Very unhealthy':'Hazardous';}
   var humidityValues=acts.map(function(a){return Number(a.humidity);}).filter(function(value){return Number.isFinite(value)&&value>0;});
   var avgHumidity=humidityValues.length?Math.round(humidityValues.reduce(function(sum,value){return sum+value;},0)/humidityValues.length):0;
+  // Air Power: % of running power spent overcoming air resistance (Stryd). "wind" was its first field name.
+  var airValues=acts.map(function(a){return Number(a.airPower||a.wind);}).filter(function(value){return Number.isFinite(value)&&value>0;});
+  var avgAir=airValues.length?Math.round(airValues.reduce(function(sum,value){return sum+value;},0)/airValues.length*10)/10:0;
 
   function metBox(icon,label,val,sub){
     return '<div style="background:#fff;border:1px solid #f5cba7;border-radius:8px;padding:10px 12px;min-width:130px;flex:1;">'
@@ -1246,6 +1249,7 @@ function renderRunMetrics(){
     +metBox('&#x23F1;','Avg Pace',avgPace?fmtPace(avgPace)+'/mi':'-','per run')
     +metBox('&#x1F4D0;','Avg Distance',avgDist.toFixed(2)+' mi','per run')
     +metBox('&#x1F9B5;','Average Cadence',avgCadence?avgCadence+' spm':'-',avgCadence?cadenceCount+' run'+(cadenceCount!==1?'s':'')+' averaged':'No cadence recorded yet')
+    +metBox('&#x1F4A8;','Average Air Power',avgAir?avgAir+'%':'-',avgAir?'of running power &bull; '+airValues.length+' run'+(airValues.length!==1?'s':''):'No air power recorded yet')
     +metBox('&#x1F32C;&#xFE0F;','Average AQI',avgAQI||'-',avgAQI?aqiCategory(avgAQI)+' &bull; '+aqiValues.length+' recorded workout'+(aqiValues.length!==1?'s':''):'No AQI recorded yet')
     +metBox('&#x1F4A7;','Average Humidity',avgHumidity?avgHumidity+'%':'-',avgHumidity?humidityValues.length+' recorded workout'+(humidityValues.length!==1?'s':''):'No humidity recorded yet')
     +metBox('&#x23F3;','Total Time',totalDurSec?fmtSecs(totalDurSec):'-','all runs')

@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-10-29-1">
+<meta name="app-build" content="2026-11-01-1-naturalsugar">
 <script src="theme-switcher.js?v=2026-10-21-1"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#ff6b00">
@@ -1241,6 +1241,13 @@ body{
 }
 .header h1{color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35);}
 /* Christmas theme: falling snow, Santa's sleigh across the moon, and a snowy village with twinkling lights. */
+/* Christmas theme: gently falling snow over a warm firelight-to-night-sky glow. */
+/* Christmas theme: a cozy room with a Christmas tree, firelight glow, and
+   a paned window looking out on pine trees with snow actually falling
+   (the falling-snow is an SVG pattern fill clipped to just the window
+   rect, so it never spills over the warm interior side). Original
+   illustration, not a photo. */
+/* Christmas theme: falling snow, Santa's sleigh across the moon, and a snowy village with twinkling lights. */
 html[data-theme="christmas"] .header{
   background:
     url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 120 120%22 width=%22120%22 height=%22120%22%3E%3Cg fill=%22%23fff%22 fill-opacity=%22.7%22%3E%3Cg%3E%3Ccircle cx=%2239.6%22 cy=%2218.1%22 r=%220.8%22/%3E%3Ccircle cx=%2210.4%22 cy=%2264.3%22 r=%221.2%22/%3E%3Ccircle cx=%2269.6%22 cy=%22109.2%22 r=%221%22/%3E%3Ccircle cx=%226.3%22 cy=%2252.0%22 r=%220.8%22/%3E%3Ccircle cx=%2229.9%22 cy=%2266.1%22 r=%220.8%22/%3E%3Ccircle cx=%2297.9%22 cy=%2214.9%22 r=%221%22/%3E%3Ccircle cx=%2275.2%22 cy=%2270.0%22 r=%220.8%22/%3E%3Ccircle cx=%2268.9%22 cy=%2247.6%22 r=%221%22/%3E%3Ccircle cx=%227.4%22 cy=%22103.0%22 r=%221.2%22/%3E%3Ccircle cx=%2250.6%22 cy=%2264.9%22 r=%221.2%22/%3E%3Ccircle cx=%2267.0%22 cy=%2281.8%22 r=%220.8%22/%3E%3Ccircle cx=%2269.5%22 cy=%2276.7%22 r=%221.2%22/%3E%3Ccircle cx=%2213.3%22 cy=%2285.5%22 r=%220.8%22/%3E%3Ccircle cx=%2273.8%22 cy=%2259.6%22 r=%221.5%22/%3E%3Ccircle cx=%2292.2%22 cy=%2255.9%22 r=%221.5%22/%3E%3Ccircle cx=%2243.9%22 cy=%2229.8%22 r=%221%22/%3E%3Cg transform=%22translate(0 -120)%22%3E%3Ccircle cx=%2239.6%22 cy=%2218.1%22 r=%220.8%22/%3E%3Ccircle cx=%2210.4%22 cy=%2264.3%22 r=%221.2%22/%3E%3Ccircle cx=%2269.6%22 cy=%22109.2%22 r=%221%22/%3E%3Ccircle cx=%226.3%22 cy=%2252.0%22 r=%220.8%22/%3E%3Ccircle cx=%2229.9%22 cy=%2266.1%22 r=%220.8%22/%3E%3Ccircle cx=%2297.9%22 cy=%2214.9%22 r=%221%22/%3E%3Ccircle cx=%2275.2%22 cy=%2270.0%22 r=%220.8%22/%3E%3Ccircle cx=%2268.9%22 cy=%2247.6%22 r=%221%22/%3E%3Ccircle cx=%227.4%22 cy=%22103.0%22 r=%221.2%22/%3E%3Ccircle cx=%2250.6%22 cy=%2264.9%22 r=%221.2%22/%3E%3Ccircle cx=%2267.0%22 cy=%2281.8%22 r=%220.8%22/%3E%3Ccircle cx=%2269.5%22 cy=%2276.7%22 r=%221.2%22/%3E%3Ccircle cx=%2213.3%22 cy=%2285.5%22 r=%220.8%22/%3E%3Ccircle cx=%2273.8%22 cy=%2259.6%22 r=%221.5%22/%3E%3Ccircle cx=%2292.2%22 cy=%2255.9%22 r=%221.5%22/%3E%3Ccircle cx=%2243.9%22 cy=%2229.8%22 r=%221%22/%3E%3C/g%3E %3CanimateTransform attributeName=%22transform%22 type=%22translate%22 values=%220 0;0 120%22 dur=%229s%22 repeatCount=%22indefinite%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") 0 0/120px 120px repeat,
@@ -2214,6 +2221,7 @@ html[data-theme="halloween"] .header{
         <button class="tp-action-btn" id="tpPersistDatesBtn" style="background:#2c3e50;color:white;" onclick="addDatesToSchedule('current')">&#x1F4C5; Add Dates</button>
         <button class="tp-action-btn" style="background:#667eea;color:white;" onclick="openAdjustPlan()">&#x270F; Adjust</button>
         <button class="tp-action-btn" style="background:#27ae60;color:white;" onclick="archivePlan()">&#x1F4E6; Archive</button>
+        <button class="tp-action-btn" style="background:#d4e635;color:#121a17;" onclick="sendPlanToRunningApp('current')" title="Send this plan's dated workouts to the Running app on your phone and watch">&#x231A; Send plan to Running app</button>
         <button class="tp-action-btn" style="background:#e74c3c;color:white;" onclick="deletePlan()">&#x1F5D1; Delete</button>
       </div>
     </div>
@@ -2241,6 +2249,7 @@ html[data-theme="halloween"] .header{
         <button class="tp-action-btn" style="background:#667eea;color:white;" onclick="openAdjustPlan('upcoming')">&#x270F; Adjust</button>
         <button class="tp-action-btn" id="tpUpcomingArchiveBtn" style="background:#27ae60;color:white;" onclick="archivePlan('upcoming')">&#x1F4E6; Archive</button>
         <button class="tp-action-btn" style="background:#2980b9;color:white;" onclick="makeUpcomingPlanActive()">&#x25B6; Make Active Now</button>
+        <button class="tp-action-btn" style="background:#d4e635;color:#121a17;" onclick="sendPlanToRunningApp('upcoming')" title="Send this plan's dated workouts to the Running app on your phone and watch">&#x231A; Send plan to Running app</button>
         <button class="tp-action-btn" style="background:#e74c3c;color:white;" onclick="deleteUpcomingPlan()">&#x1F5D1; Delete</button>
       </div>
     </div>
@@ -2506,6 +2515,7 @@ html[data-theme="halloween"] .header{
       <div><label class="act-label">Time (MM:SS, H:MM:SS, or minutes)</label><input type="text" id="actDuration" class="act-input" placeholder="32:15 or 1:32:15 or 32 min" title="Enter MM:SS for under an hour, H:MM:SS for over an hour, or a plain number of minutes" oninput="updateActCaloriesPlaceholder()"></div>
       <div><label class="act-label">Avg Pace (MM:SS/mi)</label><input type="text" id="actPace" class="act-input" placeholder="8:30"></div>
       <div><label class="act-label">Avg Power (W)</label><input type="number" id="actPower" class="act-input" placeholder="0" oninput="updateActCaloriesPlaceholder()"></div>
+      <div><label class="act-label">Air Power (%)</label><input type="number" id="actAirPower" class="act-input" placeholder="e.g. 2.8" min="0" max="100" step="0.1" inputmode="decimal" title="Stryd Air Power: the percentage of your running power spent overcoming air resistance"></div>
       <div><label class="act-label">Avg HR (bpm)</label><input type="number" id="actHR" class="act-input" placeholder="0"></div>
       <div><label class="act-label">Cadence (spm)</label><input type="number" id="actCadence" class="act-input" placeholder="0"></div>
       <div><label class="act-label">Calories</label><input type="number" id="actCalories" class="act-input" placeholder="0" oninput="updateActCaloriesPlaceholder()" title="Leave blank to auto-estimate from distance/duration/power"></div>
@@ -2517,7 +2527,7 @@ html[data-theme="halloween"] .header{
       <div><label class="act-label">Run Map / Route Link</label><input type="url" id="actRouteUrl" class="act-input" inputmode="url" placeholder="Garmin, Strava, Google Maps, etc."></div>
       <div><label class="act-label">Source</label>
         <select id="actSource" class="act-input">
-          <option value="manual">Manual</option><option value="garmin">Garmin</option><option value="stryd">Stryd</option><option value="strava">Strava</option><option value="gear2">Gear Tracker II</option><option value="screenshot">Screenshot (AI)</option>
+          <option value="manual">Manual</option><option value="garmin">Garmin</option><option value="stryd">Stryd</option><option value="strava">Strava</option><option value="gear2">Gear Tracker II</option><option value="watch">Galaxy Watch</option><option value="screenshot">Screenshot (AI)</option>
         </select>
       </div>
     </div>
@@ -3586,13 +3596,13 @@ html[data-theme="halloween"] .header{
   </div>
 </div>
 <script src="daily-planner-core.js?v=2026-10-26-1-dayreviewfull"></script>
-<script src="daily-planner-food-log.js?v=2026-10-28-3-highred"></script>
-<script src="daily-planner-bible.js?v=2026-10-15-8"></script>
+<script src="daily-planner-food-log.js?v=2026-11-01-1-naturalsugar"></script>
+<script src="daily-planner-bible.js?v=2026-10-31-2-airpower"></script>
 <script src="daily-planner-meditation.js?v=2026-10-15-7"></script>
 <script src="daily-planner-journal-archive.js?v=2026-10-15-6"></script>
 <script src="daily-planner-file-uploads.js?v=2026-10-15-6"></script>
 <script src="daily-planner-shoe-tracker.js?v=2026-10-15-6"></script>
-<script src="daily-planner-misc.js?v=2026-10-29-1-resthrfloor"></script>
+<script src="daily-planner-misc.js?v=2026-11-01-sendplan"></script>
 <script src="daily-planner-journal-experience.js?v=2026-10-15-8-wb1-wb2"></script>
 <script src="master-backup-shared.js?v=2026-10-15-7"></script>
 <script src="daily-planner-storage-qol.js?v=2026-10-15-7-nofocus"></script>

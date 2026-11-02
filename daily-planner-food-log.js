@@ -836,6 +836,27 @@ function isCaffeinatedBeverage(x){
   if(isCaffeinatedBeverageName(x&&x.name))return true;
   return (parseFloat(x&&x.caffeine)||0)>0;
 }
+// Naturally occurring sugar in whole fruit and plain dairy (fructose, lactose)
+// is not what nutrition guidance means by "added sugar." The FDA label and
+// AHA/WHO limits are specifically about added/free sugars -- WHO's definition
+// explicitly excludes sugars intrinsic to whole fruit, vegetables, and milk.
+// A banana plus a glass of plain milk should not read as a sugar problem the
+// same way a candy bar does. This mirrors the existing raisin/dried-fruit
+// exemption already used in runnerFoodQuality() above, extended to fresh
+// fruit and plain dairy and reused for the sugar ceiling below. Flavored or
+// sweetened versions (chocolate milk, fruit snacks, juice, ice cream, etc.)
+// are deliberately excluded -- those commonly carry real added sugar on top
+// of the natural sugar, and should still count toward the limit.
+function isNaturalSugarFood(item){
+  var text=[item&&item.name,item&&item.ingredientsText,item&&item.categoriesText].filter(Boolean).join(' ').toLowerCase();
+  if(!text)return false;
+  var addedSugarFlag=/\b(chocolate|vanilla|caramel|cookie|cookies|flavored|flavoured|sweetened|sweet cream|ice cream|milkshake|shake|pudding|syrup|candy|yogurt covered|fruit snack|fruit leather|fruit roll|juice|nectar|smoothie|jam|jelly|preserves?|in syrup|honey)\b/.test(text);
+  if(addedSugarFlag)return false;
+  var freshFruit=/\b(banana|bananas|apple|apples|orange|oranges|grape|grapes|berry|berries|strawberry|strawberries|blueberry|blueberries|raspberry|raspberries|blackberry|blackberries|melon|watermelon|cantaloupe|honeydew|mango|mangoes|pineapple|kiwi|peach|peaches|plum|plums|cherry|cherries|pear|pears|grapefruit|apricot|apricots|pomegranate|nectarine|tangerine|clementine|fruit salad)\b/.test(text);
+  var driedFruit=/\b(raisin|raisins|unsweetened dried fruit|dried apricot|dried mango|dried fig|figs?)\b/.test(text);
+  var plainDairy=/\b(milk|yogurt|kefir|cottage cheese)\b/.test(text);
+  return freshFruit||driedFruit||plainDairy;
+}
 function lookupGusisServingOz(name){
   if(typeof GUSIS_PRODUCTS==='undefined'||!GUSIS_PRODUCTS.length)return 0;
   var n=String(name||'').toLowerCase();
@@ -1556,12 +1577,15 @@ function updateMacroTotals(){
       // figure vs the 11mg RDA) are also athlete-adjusted. Sugar's ceiling floats above the
       // 36g AHA added-sugar limit by however much Sports Nutrition fueling (gels/drinks) was
       // logged that day -- that's deliberate carbohydrate fueling, not "added sugar" to
-      // limit. Caffeine's 400mg ceiling is deliberately left as a real safety limit, not
+      // limit -- and by however much came from whole fruit or plain dairy (see
+      // isNaturalSugarFood() above), which nutrition guidance doesn't count as added/free
+      // sugar either. Caffeine's 400mg ceiling is deliberately left as a real safety limit, not
       // athlete-adjusted: a single race-day dose can legitimately push a day's total higher
       // by design (ISSN pre-exercise dosing), which should read as a deliberate choice, not
       // get silently permitted by raising the ceiling.
       var sportsSugar=log.reduce(function(sum,x){if(x.meal==='sports'){var s=parseFloat(x.servings)||1;sum+=(parseFloat(x.sugar)||0)*s;}return sum;},0);
-      var sugarCeiling=36+sportsSugar;
+      var naturalSugar=log.reduce(function(sum,x){if(isNaturalSugarFood(x)){var s=parseFloat(x.servings)||1;sum+=(parseFloat(x.sugar)||0)*s;}return sum;},0);
+      var sugarCeiling=36+sportsSugar+naturalSugar;
       var priorityMicros=[
         {name:'Iron',field:'iron',value:totals.iron||0,target:14,unit:'mg'},
         {name:'Calcium',field:'calcium',value:totals.calcium||0,target:1000,unit:'mg'},
@@ -1584,7 +1608,8 @@ function updateMacroTotals(){
       if(microQualityLabel)microQualityLabel.textContent=microScore.toFixed(1)+'/10 · '+microLabel;
       if(microQualityMarker)microQualityMarker.style.left=Math.max(0,Math.min(100,(microScore-1)/9*100))+'%';
       if(microQualityTrack)microQualityTrack.setAttribute('aria-valuenow',microScore.toFixed(1));
-      if(microQualityNote)microQualityNote.textContent='Targets for a 53-year-old male distance runner: iron 14mg · calcium 1,000mg · vitamin D 15mcg · magnesium 483mg · vitamin B12 2.4mcg · sodium 2,300–4,000mg · potassium 3,400mg · zinc 15mg · vitamin C 90mg · fiber 28g · sugar ≤'+Math.round(sugarCeiling)+'g'+(sportsSugar>0?' (36g + '+Math.round(sportsSugar)+'g fueling today)':'')+' · caffeine ≤400mg (a single race-day dose can push this higher by design, not a red flag) · lowest today: '+weakest.name+' '+Math.round(weakest.value)+weakest.unit;
+      var sugarCeilingNote=(sportsSugar>0||naturalSugar>0)?' (36g'+(sportsSugar>0?' + '+Math.round(sportsSugar)+'g fueling':'')+(naturalSugar>0?' + '+Math.round(naturalSugar)+'g fruit/dairy':'')+' today)':'';
+      if(microQualityNote)microQualityNote.textContent='Targets for a 53-year-old male distance runner: iron 14mg · calcium 1,000mg · vitamin D 15mcg · magnesium 483mg · vitamin B12 2.4mcg · sodium 2,300–4,000mg · potassium 3,400mg · zinc 15mg · vitamin C 90mg · fiber 28g · sugar ≤'+Math.round(sugarCeiling)+'g'+sugarCeilingNote+' · caffeine ≤400mg (a single race-day dose can push this higher by design, not a red flag) · lowest today: '+weakest.name+' '+Math.round(weakest.value)+weakest.unit;
       if(microBreakdown)microBreakdown.innerHTML=priorityMicros.map(function(n){var p=n.target?Math.max(0,n.value/n.target*100):0,st=(n.max&&n.value>n.max)?'High':p>=100?'Met':p>=75?'Close':'Low';return {n:n,rank:{Low:0,High:1,Close:2,Met:3}[st],pct:p};}).sort(function(a,b){return a.rank-b.rank||a.pct-b.pct;}).map(function(x){return x.n;}).map(function(n){
         var pct=n.target?Math.max(0,n.value/n.target*100):0,status=(n.max&&n.value>n.max)?'High':pct>=100?'Met':pct>=75?'Close':'Low';
         var statusColor=status==='Met'?'#166534':status==='Close'?'#92400e':status==='High'?'#dc2626':'#991b1b';
