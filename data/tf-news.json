@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-01T22:25:47+00:00",
+  "updatedAt": "2026-11-02T06:49:38+00:00",
   "source": "Google News searches for college track & field",
   "news": [
     {
@@ -16,9 +16,21 @@
     },
     {
       "date": "2026-10-21",
+      "headline": "Kansas Track and Field Announces 2026-27 Schedule - University of Kansas",
+      "source": "Kansas Jayhawks",
+      "url": "https://news.google.com/rss/articles/CBMiowFBVV95cUxPNmU1TVZFbjZ2a0xXZWwtQS14ZHJuLUZudFcySHBka3hXU3V3VmhKcWMzZHRJVk9YT2cxSExwSG5wTnpyZ0g5anVJeTN1ZHhJeWhzTk5qZFFOV0VUQ0lzQU1PbnFIdUtoWVhYY2lBYk0xSDJRV3huNk82RHZVR2Y5c3N0RlRfQUZ1amJyTlZHbDhKSlU3VDBOZG5vblhLcGRiUU1r?oc=5"
+    },
+    {
+      "date": "2026-10-21",
       "headline": "Florida Track & Field Announces 2027 Schedule",
       "source": "Florida Gators",
       "url": "https://news.google.com/rss/articles/CBMiowFBVV95cUxNaVQyZlJlRVNFYkFWT0xyZE1FaWMwT2R1cDROTjJhX1dnU0Nvd1hJczIwODJwQW5UbndhVGRjRVZyZ0gzajkyM1RBTUJteE9ISFU5MXZIdVEwNVJtd1hxUnR2cExxOXFJMnBacm9wWTFiYkNVUjJPVjVZRU5EQzF3Ym9aWWsyT2pYdHJIY2tJOFd4REIyMFFES0YyV2VVLWMwcTdF?oc=5"
+    },
+    {
+      "date": "2026-10-19",
+      "headline": "Track & Field Releases 2026-27 Slate - Florida State University",
+      "source": "Seminoles.com",
+      "url": "https://news.google.com/rss/articles/CBMimAFBVV95cUxPQ2Mya3RRQVpENHVOMjA3RUtyT2F3aVBYTXVhUDJJS216VkoydzBBcTIyZUJJeVlaWGtxRDYyM3RrOHpkUVBRb2lwdzF1Wk1iWXNLZi1yc0tRMENqdHpDWnlreG1HSnItU3JJbGFBck9RTWNROFRfNDNrTGw1bG5STUx1a3l0NU1makpMX3lrWGNqYk5jM0xBcw?oc=5"
     }
   ]
 }
