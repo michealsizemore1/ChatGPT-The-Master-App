@@ -2559,6 +2559,21 @@ function loadUpcomingPlan(){
   if(body)body.textContent=reflowPlanText(plan.text)||'(No plan text)';
   var upcomingPdfBtn=document.getElementById('tpUpcomingPdfBtn');
   if(upcomingPdfBtn)upcomingPdfBtn.style.display=plan.pdfDataUrl?'inline-block':'none';
+  // An "Upcoming" plan only ever appears on the Activities card or Daily
+  // calendar after it's been promoted to Active with "Make Active Now" --
+  // a plan just sitting here past its own start date silently shows
+  // nothing anywhere else, which looks like the whole feature broke. Make
+  // that state impossible to miss instead of letting it pass quietly.
+  var overdueBanner=document.getElementById('tpUpcomingOverdueBanner');
+  if(overdueBanner){
+    var overdue=plan.startDate&&plan.startDate<=dk(_realToday);
+    if(overdue){
+      overdueBanner.style.display='block';
+      overdueBanner.textContent='\u26A0\uFE0F This plan was set to start '+fmtPlanDate(plan.startDate)+', which has passed, but it\'s still sitting here as Upcoming -- your Activities card and Daily calendar won\'t show any of its workouts until you tap \u25B6 Make Active Now below.';
+    } else {
+      overdueBanner.style.display='none';
+    }
+  }
 }
 // Inserts (or refreshes) a standard reference "TRAINING ZONES" section
 // (McMillan-style pace zones, with heart-rate ranges and what each zone is
