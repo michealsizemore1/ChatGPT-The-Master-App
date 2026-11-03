@@ -483,7 +483,7 @@ function saveActivity(){
   try{renderActivities();}catch(err){console.error('renderActivities error:',err);if(typeof v26Toast==='function')v26Toast('Activity saved, but the list view had a display error.');}
 }
 function actSourceLabel(s){
-  var map={manual:'Manual',garmin:'Garmin',stryd:'Stryd',strava:'Strava',gear2:'Gear Tracker II',screenshot:'Screenshot',watch:'Galaxy Watch'};
+  var map={manual:'Manual',garmin:'Garmin',stryd:'Stryd',strava:'Strava',gear2:'Gear Tracker II',screenshot:'Screenshot',watch:'BeyondStride'};
   s=(s||'manual').toLowerCase();
   return map[s]||(s.charAt(0).toUpperCase()+s.slice(1));
 }
@@ -491,7 +491,7 @@ function cycleActSource(id){
   var acts=getActivities();
   var act=acts.find(function(a){return a.id===id;});
   if(!act)return;
-  var sources=['manual','garmin','stryd','strava','gear2'];
+  var sources=['manual','garmin','stryd','gear2'];
   var cur=(act.source||'manual').toLowerCase();
   var next=sources[(sources.indexOf(cur)+1)%sources.length];
   act.source=next;
