@@ -491,7 +491,7 @@ function cycleActSource(id){
   var acts=getActivities();
   var act=acts.find(function(a){return a.id===id;});
   if(!act)return;
-  var sources=['manual','garmin','stryd','gear2'];
+  var sources=['manual','garmin','stryd','gear2','watch'];
   var cur=(act.source||'manual').toLowerCase();
   var next=sources[(sources.indexOf(cur)+1)%sources.length];
   act.source=next;
@@ -2276,7 +2276,7 @@ function renderActivities(){
       +'</div>'
       +'<div style="display:flex;align-items:center;gap:5px;margin-top:8px;flex-wrap:wrap;">'
       +'<span style="font-size:0.72rem;color:#888;font-weight:600;">Source:</span>'
-      +['manual','garmin','stryd','gear2'].map(function(s){var cur=(a.source||'manual')===s;return'<button onclick="event.stopPropagation();setActSource('+a.id+',\''+s+'\')" style="font-size:0.72rem;padding:3px 9px;border-radius:10px;border:1px solid '+(cur?'#667eea':'#ddd')+';background:'+(cur?'#667eea':'#fff')+';color:'+(cur?'#fff':'#888')+';cursor:pointer;font-weight:'+(cur?'700':'400')+';">'+actSourceLabel(s)+'</button>';}).join('')
+      +['manual','garmin','stryd','gear2','watch'].map(function(s){var cur=(a.source||'manual')===s;return'<button onclick="event.stopPropagation();setActSource('+a.id+',\''+s+'\')" style="font-size:0.72rem;padding:3px 9px;border-radius:10px;border:1px solid '+(cur?'#667eea':'#ddd')+';background:'+(cur?'#667eea':'#fff')+';color:'+(cur?'#fff':'#888')+';cursor:pointer;font-weight:'+(cur?'700':'400')+';">'+actSourceLabel(s)+'</button>';}).join('')
       +'</div>'
       +'<div style="display:flex;gap:4px;margin-top:6px;">'
       +journalBtn
