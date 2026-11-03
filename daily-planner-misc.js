@@ -3510,7 +3510,7 @@ function sendPlanToRunningApp(which){
   var bytes=new TextEncoder().encode(JSON.stringify(days)),bin='';
   for(var i=0;i<bytes.length;i++)bin+=String.fromCharCode(bytes[i]);
   var b64=btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-  if(typeof v26Toast==='function')v26Toast('Opening the Running app with '+count+' days…');
+  if(typeof v26Toast==='function')v26Toast('Opening BeyondStride with '+count+' days…');
   // Opens the phone app; does nothing on a computer without it.
   window.location.href='scoresrun://localhost/plan#'+b64;
 }
