@@ -444,7 +444,7 @@ function renderJournalSchedule(){
     {time:'8:20 AM',mins:500,label:'Wellness check and water',detail:wellnessRecorded+' of 4 wellness items complete',done:wellnessRecorded===4,partial:wellnessRecorded>0&&wellnessRecorded<4,tab:'wellness',detailKind:'wellness'},
     {time:'8:30 AM',mins:510,label:'Bible, worship & prayer',detail:faithDone+' of 4 faith practices complete',done:faithDone===4,partial:faithDone>0&&faithDone<4,tab:'bible',detailKind:'faith'},
     {time:'8:45 AM',mins:525,label:'Breakfast',detail:'Recovery meal and hydration after training',done:mealComplete('breakfast',345),tab:'nutrition'},
-    {time:'9:00 AM',mins:540,label:'Work',detail:'9:30 AM – 6:00 PM',done:true,tab:'daily',skip:!(today.getDay()>=1&&today.getDay()<=5),fixed:true},
+    {time:'9:30 AM',mins:570,label:'Work',detail:'9:30 AM – 6:00 PM',done:true,tab:'daily',skip:!(today.getDay()>=1&&today.getDay()<=5),fixed:true},
     {time:'12:00 PM',mins:720,label:'Walk Buddy',detail:'Take Buddy for a walk',done:d.exDogWalk==='green',tab:'activities',linkedCheckKey:'exDogWalk'},
     {time:'3:00 PM',mins:900,label:'Water checkpoint: 32 oz',detail:'Cumulative total: reach 32 ounces by noon',done:water>=32,tab:'nutrition'},
     {time:'3:00 PM',mins:900,label:'Lunch',detail:'Midday meal and hydration',done:mealComplete('lunch',720),tab:'nutrition'},
