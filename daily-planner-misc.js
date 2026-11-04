@@ -3486,6 +3486,8 @@ function importWatchRunsFromLink(){
         var keep=acts[idx];
         ['distance','duration','pace','power','heartRate','cadence'].forEach(function(k){if(r[k])keep[k]=r[k];});
         if(r.routeUrl&&!keep.routeUrl)keep.routeUrl=r.routeUrl;
+        // An automatic name ("Evening Run") is replaced by the planned workout's name; a name you typed is kept.
+        if(r.title&&(!keep.title||/^(Morning|Afternoon|Evening|Night) Run$/.test(keep.title)))keep.title=r.title;
         // Stryd extras and weather (temp, humidity, AQI) fill in blanks only, so hand-entered values are never overwritten.
         ['elevGain','temp','humidity','aqi','airPower','rss'].forEach(function(k){if(r[k]&&!keep[k])keep[k]=r[k];});
         // Notes written by the watch app get refreshed; notes you edited by hand are kept.
