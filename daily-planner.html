@@ -506,7 +506,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;paddi
 .act-load-lbl{font-size:0.62rem;color:#999;}
 .zone-badge{display:inline-block;font-size:0.68rem;font-weight:700;padding:1px 6px;border-radius:8px;margin-left:5px;color:white;}
 .z1{background:#5dade2;}.z2{background:#58d68d;}.z3{background:#f4d03f;color:#555;}.z4{background:#e67e22;}.z5{background:#e74c3c;}
-.act-note-edit{width:100%;border:1px solid #ffd5a8;border-radius:5px;padding:5px;font-size:0.8rem;font-family:ui-monospace,SFMono-Regular,Consolas,'Liberation Mono',Menlo,monospace;resize:vertical;min-height:40px;background:#fffdf8;outline:none;margin-top:6px;}
+.act-note-edit{width:100%;border:1px solid #ffd5a8;border-radius:5px;padding:5px;font-size:0.82rem;font-family:inherit;line-height:1.45;field-sizing:content;max-height:520px;resize:vertical;min-height:40px;background:#fffdf8;outline:none;margin-top:6px;}
 .act-journal-btn{font-size:0.72rem;padding:3px 8px;border-radius:10px;border:none;background:#667eea;color:white;cursor:pointer;white-space:nowrap;}
 .act-note-btn{font-size:0.72rem;padding:3px 8px;border-radius:10px;border:none;background:#f0f0f0;color:#555;cursor:pointer;}
 
@@ -2533,7 +2533,7 @@ html[data-theme="halloween"] .header{
       </div>
     </div>
     <script>document.getElementById('actUserWeight').value=localStorage.getItem('act_weight_lbs')||'';window.addEventListener('load',function(){var w=document.getElementById('wWghtVal');if(w)w.addEventListener('change',function(){setTimeout(syncActWeightFromWellness,0);});try{syncActWeightFromWellness();}catch(e){}});</script>
-    <div><label class="act-label">Notes</label><textarea id="actNotes" class="act-input" style="height:90px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Consolas,'Liberation Mono',Menlo,monospace;font-size:0.8rem;" placeholder="Any notes..."></textarea></div>
+    <div><label class="act-label">Notes</label><textarea id="actNotes" class="act-input" style="height:90px;resize:vertical;font-family:inherit;font-size:0.85rem;line-height:1.45;" placeholder="Any notes..." oninput="this.style.height='auto';this.style.height=Math.min(Math.max(this.scrollHeight+4,90),520)+'px'"></textarea></div>
     <div style="margin-top:9px;"><label class="act-label">Injury Report</label><textarea id="actInjuryReport" class="act-input" style="height:60px;resize:vertical;font-family:inherit;" placeholder="Pain, soreness, location, severity, or changes during the workout..."></textarea></div>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px;">
       <button onclick="cancelAddActivity()" style="background:#f0f0f0;color:#555;border:none;padding:7px 14px;border-radius:6px;cursor:pointer;font-size:0.88rem;">Cancel</button>

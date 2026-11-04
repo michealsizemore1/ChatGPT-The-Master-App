@@ -308,6 +308,14 @@ function fillActivityFormFromScan(parts, statusEl, splits){
 
 function formatActivityNotesHtml(notes){
   notes=String(notes||'');
+  // BeyondStride notes: short sections with ALL-CAPS headings. Show headings bold, one fact per line.
+  if(/^[A-Z][A-Z0-9 ():@.\-]{3,}$/m.test(notes)&&notes.indexOf('Recorded on Galaxy Watch')!==-1){
+    return notes.split('\n').filter(function(l){return l.trim()!=='';}).map(function(l){
+      var t=l.trim();
+      if(/^[A-Z][A-Z0-9 ():@.\-]{3,}$/.test(t))return '<strong style="display:block;margin-top:8px;color:#334155;font-size:0.74rem;letter-spacing:0.04em;">'+escHtml(t)+'</strong>';
+      return escHtml(t);
+    }).join('\n');
+  }
   var marker='Mile splits:';
   var idx=notes.indexOf(marker);
   if(idx===-1)return escHtml(notes);
@@ -531,6 +539,7 @@ function editActivity(id){
   document.getElementById('actExecScore').value=act.execScore||'';
   document.getElementById('actRouteUrl').value=act.routeUrl||'';
   document.getElementById('actNotes').value=act.notes||'';
+  (function(ta){ta.style.height='auto';ta.style.height=Math.min(Math.max(ta.scrollHeight+4,90),520)+'px';})(document.getElementById('actNotes'));
   document.getElementById('actInjuryReport').value=act.injuryReport||'';
   document.getElementById('actSource').value=act.source||'manual';
   handleActTypeChange();
