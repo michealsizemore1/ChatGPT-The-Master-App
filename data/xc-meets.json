@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-04T01:28:40+00:00",
+  "updatedAt": "2026-11-04T11:11:30+00:00",
   "source": "Google News searches for cross country meet results",
   "page": "https://michealsizemore1.github.io/ChatGPT-The-Master-App/cross-country.html",
   "meets": [
@@ -58,16 +58,22 @@
   ],
   "results": [
     {
+      "date": "2026-11-04",
+      "headline": "NAU ROUNDUP: Cross Country sweeps Big Sky Championships at Buffalo Park",
+      "source": "Havasu News",
+      "url": "https://news.google.com/rss/articles/CBMi_gFBVV95cUxOS3Q3dVpoZi1EblVhZ0pocXhWbzl5Z2cxUW83dXBqOTVKSWcyd3pjbllJOGo5QlhWdkpfc0xDZFN2RTRQRExXbm1ibWpCQWxabFJmNFhKTFk5a3Z2VHV1YzVYbU5vdThUdFlHWjFhLVZxMVU5YlU1REJtQW9lRzBkbXpyVmlpTUJ6dTI3cDVfX1doVEpzbEZ1ek5KY3ZtQzd5ZU5UekNmOXZZdG5lM0F1RU9KVndFUE9EcURVUEhBd1hja2UtZlNmcW92RnZza2d0enY4dFVUcmtKOE5ZSmRkVVNVRzI4R2xDOWNnckpzOTgtLVRxMkt2NFV5dXBRQQ?oc=5"
+    },
+    {
+      "date": "2026-11-04",
+      "headline": "Cross country - Check out results of the Section 9 championships",
+      "source": "Times Herald-Record",
+      "url": "https://news.google.com/rss/articles/CBMiygFBVV95cUxQTHE1alFVMlRsY3E4ZmFBSkdTMTZvZ3RPaEtjcDlLUWgwOWNfQzRyTkppSElNQThyYnR5dHoyTVhGOHdyTXNzNWExTTVSUXRpU0haU1gwWXBlWFVfX21LUEpwcFFXZUFnWE9XcFpJd2FBakZKazhpY2lRdDlpTUphU21FSkgyc19kc2VrbHg1UEgxRHQ1RS1DTEtaTlV5V3NLQ25XczhmZ0p1STlKaDRkNWlCMDJtSS1LcDRTOUJqSTMtM3I1NmRNS2x3?oc=5"
+    },
+    {
       "date": "2026-11-03",
       "headline": "Tulane Men’s Cross Country Captures Top 25 Ranking After Championship Sweep",
       "source": "Yahoo Sports",
       "url": "https://news.google.com/rss/articles/CBMiigFBVV95cUxQSnVmZGp5b19HWlZCUkpUZ2tvTXp1aDcwWDRJbHM5Y2p2c3hyekVyaTl5UFVRMVQzZ3NaTjF4TjNKLXNyYUdHbWdHZGZOdnVvdWlVem5neWpJSFhuTGZneHFTd2VqYVFhX0ZEMUR1NHRPOHk0SU1QajBNeHlGbEJLMm1pcE55amtzTVE?oc=5"
-    },
-    {
-      "date": "2026-11-03",
-      "headline": "Cross country - Check out results of the Section 9 championships",
-      "source": "Times Herald-Record",
-      "url": "https://news.google.com/rss/articles/CBMiygFBVV95cUxQTHE1alFVMlRsY3E4ZmFBSkdTMTZvZ3RPaEtjcDlLUWgwOWNfQzRyTkppSElNQThyYnR5dHoyTVhGOHdyTXNzNWExTTVSUXRpU0haU1gwWXBlWFVfX21LUEpwcFFXZUFnWE9XcFpJd2FBakZKazhpY2lRdDlpTUphU21FSkgyc19kc2VrbHg1UEgxRHQ1RS1DTEtaTlV5V3NLQ25XczhmZ0p1STlKaDRkNWlCMDJtSS1LcDRTOUJqSTMtM3I1NmRNS2x3?oc=5"
     },
     {
       "date": "2026-11-03",
@@ -92,12 +98,6 @@
       "headline": "Foreign runners took 95% of the top-10 spots at SEC cross country. In the Big Ten, 75% were Americans.",
       "source": "LetsRun.com",
       "url": "https://news.google.com/rss/articles/CBMi0AFBVV95cUxPVGxpYk9ZRm8tNktRYmF3OF9rYlFZeG01T1QyaWI4SlBXYjh0cHFHVnRzTS12dzFhSTh1UHNLU1hlRFZIbF90RkRIVTVnR01KblN6YXJ0bXJuT1F6M010eHoxNmVCRUM4NmlMbVluMEdfT0lfckhabW9BcnR2WS1mLXJGVlVBaEJzZHhFek1Ealk2aGpYWi1zMG1GNktHUkI3S3ZUT3hpU2h5MUhybm9ZcXk5OTRjeEhtcHNlMUNQZzl6UjdwUG1XVXFpN0xUV1df?oc=5"
-    },
-    {
-      "date": "2026-11-03",
-      "headline": "Here’s how LSU’s cross country teams fared at the SEC Championship meet",
-      "source": "The Reveille, LSU's student newspaper",
-      "url": "https://news.google.com/rss/articles/CBMitgFBVV95cUxQSHluOW5qUXpteXk4NEpYWjlEalplRHNkSGVZU0FiRjJwaTdQaXB0OU1Ca202SzRPa1pUOTMtRVI1Y1BaWnNjaGozdDBwUG5ERDkyby1oTW5pWkJUenFPWFFMY2VEaUZSZ3NyVmFwTHBXM2M4ZlBXTk1uN3hpOGhKczRQRzAwZ2FSYmZzX29LMWhGZkNNODFjQ09Rb0NocHh0SUpmRnR4azN5QUU3MTNMSUpWZ3dUUQ?oc=5"
     },
     {
       "date": "2026-11-03",
@@ -131,21 +131,21 @@
     },
     {
       "date": "2026-11-01",
-      "headline": "Men's cross country places eighth in NESCAC championships at Middlebury",
-      "source": "Hamilton College",
-      "url": "https://news.google.com/rss/articles/CBMi2AFBVV95cUxPZG1YT013ZnNSeE9Na0dmUVRXQ0hCNy1mSFB0dkhBajVNb2FTZjZxN0RCMnE4RnVQS1ZwS1cxYm9MRTY4WmJ4Y1lVNGhfdEhTMGd3WFBsZVUtSHlUWHIwVHp4c1ZMczRTUWJuMEgxNUttUDJKZFdZOTVGdEs0Smc0V29jQkNJaERtTHdmdm5LUjZmRG03eExTWFA4a0VKNUhvSW1wWVhQbGxkTmRSZ3lTZUJFeTV5eWRVc0VTYnBrY3F6TFF5eHNzd1BkUnYzM0t4QmMxTjR5LVA?oc=5"
+      "headline": "Santiago, Nelson, Coaching Staff Claim Major Awards, Six Men's Cross Country Runners Earn All-Conference Honors",
+      "source": "The College of New Jersey Athletics",
+      "url": "https://news.google.com/rss/articles/CBMi6AFBVV95cUxNaDhMNnk0Zm9JR1h0OW5xMmxJRkJuWTNpVkIxZUhDOFNpdEtOck9tM211RFUxZ192V0dXSFEyNkRGM1YzVDlBOXNmYWhyZ2hPQjBKaXpWWTlNWTh6TU9YUmJldEQ0NnhWcTlmRUlYX3htWDVha19jNlJwWGdnSzhwVlQyRDBNMFFFOEYyOUZ5a3NUbmVkSmJpandsQVB4Sl9ZZ2l6OWwzcGQ0aDdLQWlYd3RQT0hBRmYwSm03dGNZVmhRQWp6aFo1Mk9GNUJHVXBXUU9CcWZaV1FIMTRMMXFhU2lGZWdzd1ZC?oc=5"
     },
     {
       "date": "2026-11-01",
-      "headline": "Aagaard '30 leads women's cross country in her first NESCAC championship",
-      "source": "Hamilton College",
-      "url": "https://news.google.com/rss/articles/CBMi2wFBVV95cUxQMi00dnhNLVVBY1p2TW1hYlZLZU1uZmZFWV9ZNGxvdmxySTZQLXU1XzRZWmhpTWlpWnZHMy1ublRXdEdUdmJGZHU0TVk5cmtzSGJGc05rRXd6aVU5ZjRmd3dnUDdlTGV5SGVjYU4zRUZJZ081SExBMFBaT3JveWhsZmNvR2x3VERPdDJMRFFhM0RnUTM2S1V1SURkQ3czZDdkcElvdWZOaTlRVUF5SWVqZklYVnJKY1htX1pabFZKUjhCSmFMRGh3Yzk5UllIaXdYX3MwQWFyNFNYV2M?oc=5"
+      "headline": "Women's Cross Country Places Five on All-NJAC Teams, Coaching Staff Wins Major Award",
+      "source": "The College of New Jersey Athletics",
+      "url": "https://news.google.com/rss/articles/CBMixwFBVV95cUxNX1VCeFRxNzlFZDNRZzFyeUxQcEVwc1VpQ0NvZ2N0RUVNb0JpRS1PaFB6ejFxcEl3UHU2UExoVm9sVWlpV3dJdVFtNlI4YndoU1ZNa09KRFdTaGFhbVNULTVEU2s2Yk0yWl9rMVRTVHY2ZWdmRWQ3blVqdnh4OVA0UmJpdkN3R29xTmMtbExkeXpOOGpkR0dqXzEyVzhoVllYY20wemJiNmgyY3RNU3VvZ1ZfSUpGRm1sWk9wSUZyZHhFeWlOdm1R?oc=5"
     },
     {
-      "date": "2026-10-31",
-      "headline": "Men’s Cross Country Wins 2026 Big 12 Championships - University of Colorado Athletics",
-      "source": "University of Colorado Athletics",
-      "url": "https://news.google.com/rss/articles/CBMijgFBVV95cUxQcUdId1hVYm5QTjY0Q0MzbkZBX2kyaFh0cWxCVlVjbVRDR25ya3RJVXZIcDJJYnFtNEROblFpckpmSWtyd2ozQ0VNQmxXRV9ZU1ZjZnh4dTZpTmVmRXozNFpOYUtpNFd4WmN6ZFJJYW5oYnpqVkJObkVCc1hmcDBVOURaVG9oX2RGclFKdXJB?oc=5"
+      "date": "2026-11-01",
+      "headline": "Six CVC cross country teams, 14 individual runners advance to state championships",
+      "source": "Chagrin Valley Conference",
+      "url": "https://news.google.com/rss/articles/CBMivgFBVV95cUxORXRfM1ZzWWc2OEpJZ0VBR3JidXVqQnI5Y3hXWGozTDV4c0lndmQyMjgwcm5vaTBnMDVyVVIyRnB6THdpWTl2RU1PWm4yemRIWVJmY2dxcXQ1NF9EVnpCTnE4aFdmQWJ5Rjl3LUFaT2hMOUlha05xQ25ZZUs5ZmtRN09JSDJyQ2hvb1A2UGRMbXoxV0RRZFpod2c0V2tPODVzMU10amI3c3dobWRDbjdGM092U0R0RTJNQ05xSHpn?oc=5"
     }
   ]
 }
