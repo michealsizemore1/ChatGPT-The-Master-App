@@ -260,7 +260,7 @@ function journalGrowthDetailText(name,resource,link,notes,time){
 var _journalGrowthLogKind='';
 function journalOpenGrowthLog(kind){
   _journalGrowthLogKind=kind;var modal=document.getElementById('journalGrowthLogModal');if(!modal)return;
-  var names={language:'Language',guitar:'Guitar',reading:'Audiobook'},categories={language:'Language',guitar:'Guitar',reading:'Reading / Audiobook'},startTimes={reading:'13:45',language:'16:00',guitar:'16:45'};
+  var names={language:'Language',guitar:'Guitar',reading:'Audiobook'},categories={language:'Language',guitar:'Guitar',reading:'Reading / Audiobook'},startTimes={reading:'16:45',language:'19:00',guitar:'19:45'};
   var dateKey=dk(today),saved=journalGrowthSavedDetails(kind,dateKey),savedMins=journalScheduleParseTime(saved.time),savedClock=savedMins===null?'':String(Math.floor(savedMins/60)).padStart(2,'0')+':'+String(savedMins%60).padStart(2,'0');
   document.getElementById('journalGrowthLogTitle').textContent='Schedule / Log '+(names[kind]||'Growth / Skill');
   document.getElementById('journalGrowthLogCategory').value=categories[kind]||'Guitar';document.getElementById('journalGrowthLogTime').value=saved.loggedTime||'';document.getElementById('journalGrowthLogDate').value=dateKey;document.getElementById('journalGrowthLogStartTime').value=savedClock||startTimes[kind]||'19:00';document.getElementById('journalGrowthLogName').value=saved.name||saved.label||'';document.getElementById('journalGrowthLogResource').value=saved.resource||(kind==='reading'?'Audiobook':'');document.getElementById('journalGrowthLogLink').value=saved.link||'';document.getElementById('journalGrowthLogNotes').value=saved.notes||'';modal.style.display='flex';
@@ -436,30 +436,30 @@ function renderJournalSchedule(){
   var runToday=(!restDay&&!!training&&!/strength/i.test(training)&&!/cross[- ]training/i.test(training))||getActivities().some(function(a){return a&&a.date===dateKey&&a.type==='Run';});
   // Today's training is slotted in the evening (after Dinner); the label/detail/done
   // logic below still pulls live from the actual training plan for the day.
-  var trainingStartMins=1080;
+  var trainingStartMins=1260;
   var items=[
-    {time:'5:00 AM',mins:300,label:'Review priorities, goals, calendar, email and schedule',detail:'Check complete after your morning review',done:!!d.reviewCheck,tab:'daily',checkId:'reviewCheck'},
-    {time:'5:05 AM',mins:305,label:'Personal Hygiene',detail:'Shower, brush teeth, get ready for the day',done:localStorage.getItem('schedule_personalHygiene_'+dateKey)==='1',manual:'personalHygiene'},
-    {time:'5:15 AM',mins:315,label:'Meditation',detail:journalMeditationTodayLine(),done:d.spMeditation==='green',tab:'meditate',detailKind:'meditation',linkedCheckKey:'spMeditation'},
-    {time:'5:20 AM',mins:320,label:'Wellness check and water',detail:wellnessRecorded+' of 4 wellness items complete',done:wellnessRecorded===4,partial:wellnessRecorded>0&&wellnessRecorded<4,tab:'wellness',detailKind:'wellness'},
-    {time:'5:30 AM',mins:330,label:'Bible, worship & prayer',detail:faithDone+' of 4 faith practices complete',done:faithDone===4,partial:faithDone>0&&faithDone<4,tab:'bible',detailKind:'faith'},
-    {time:'5:45 AM',mins:345,label:'Breakfast',detail:'Recovery meal and hydration after training',done:mealComplete('breakfast',345),tab:'nutrition'},
-    {time:'6:00 AM',mins:360,label:'Work',detail:'9:30 AM – 6:00 PM',done:true,tab:'daily',skip:!(today.getDay()>=1&&today.getDay()<=5),fixed:true},
-    {time:'9:00 AM',mins:540,label:'Walk Buddy',detail:'Take Buddy for a walk',done:d.exDogWalk==='green',tab:'activities',linkedCheckKey:'exDogWalk'},
-    {time:'12:00 PM',mins:720,label:'Water checkpoint: 32 oz',detail:'Cumulative total: reach 32 ounces by noon',done:water>=32,tab:'nutrition'},
-    {time:'12:00 PM',mins:720,label:'Lunch',detail:'Midday meal and hydration',done:mealComplete('lunch',720),tab:'nutrition'},
-    {time:'5:30 PM',mins:1050,label:'Dinner',detail:'Evening meal and nutrition update',done:mealComplete('dinner',1050),tab:'nutrition'},
+    {time:'8:00 AM',mins:480,label:'Review priorities, goals, calendar, email and schedule',detail:'Check complete after your morning review',done:!!d.reviewCheck,tab:'daily',checkId:'reviewCheck'},
+    {time:'8:05 AM',mins:485,label:'Personal Hygiene',detail:'Shower, brush teeth, get ready for the day',done:localStorage.getItem('schedule_personalHygiene_'+dateKey)==='1',manual:'personalHygiene'},
+    {time:'8:15 AM',mins:495,label:'Meditation',detail:journalMeditationTodayLine(),done:d.spMeditation==='green',tab:'meditate',detailKind:'meditation',linkedCheckKey:'spMeditation'},
+    {time:'8:20 AM',mins:500,label:'Wellness check and water',detail:wellnessRecorded+' of 4 wellness items complete',done:wellnessRecorded===4,partial:wellnessRecorded>0&&wellnessRecorded<4,tab:'wellness',detailKind:'wellness'},
+    {time:'8:30 AM',mins:510,label:'Bible, worship & prayer',detail:faithDone+' of 4 faith practices complete',done:faithDone===4,partial:faithDone>0&&faithDone<4,tab:'bible',detailKind:'faith'},
+    {time:'8:45 AM',mins:525,label:'Breakfast',detail:'Recovery meal and hydration after training',done:mealComplete('breakfast',345),tab:'nutrition'},
+    {time:'9:00 AM',mins:540,label:'Work',detail:'9:30 AM – 6:00 PM',done:true,tab:'daily',skip:!(today.getDay()>=1&&today.getDay()<=5),fixed:true},
+    {time:'12:00 PM',mins:720,label:'Walk Buddy',detail:'Take Buddy for a walk',done:d.exDogWalk==='green',tab:'activities',linkedCheckKey:'exDogWalk'},
+    {time:'3:00 PM',mins:900,label:'Water checkpoint: 32 oz',detail:'Cumulative total: reach 32 ounces by noon',done:water>=32,tab:'nutrition'},
+    {time:'3:00 PM',mins:900,label:'Lunch',detail:'Midday meal and hydration',done:mealComplete('lunch',720),tab:'nutrition'},
+    {time:'8:30 PM',mins:1230,label:'Dinner',detail:'Evening meal and nutrition update',done:mealComplete('dinner',1050),tab:'nutrition'},
     {time:journalMinsToClock(trainingStartMins),mins:trainingStartMins,label:restDay?'Rest day — no training scheduled':'Today’s training',detail:restDay?'Automatically complete because no workout is scheduled':training,done:activityDone,tab:'activities'},
-    {time:'8:30 PM',mins:1230,label:'Prepare priorities for tomorrow',detail:'Close the day intentionally',done:localStorage.getItem('schedule_eveningPlanning_'+dateKey)==='1'||!!d.prepJournalCheck,tab:'daily',manual:'eveningPlanning'}
+    {time:'11:30 PM',mins:1410,label:'Prepare priorities for tomorrow',detail:'Close the day intentionally',done:localStorage.getItem('schedule_eveningPlanning_'+dateKey)==='1'||!!d.prepJournalCheck,tab:'daily',manual:'eveningPlanning'}
   ].filter(function(item){return !item.skip;});
   // Growth habits are placed directly onto My Schedule on the days selected in Habits. A manually
   // scheduled activity is also retained even when it is not a normal habit day. Defaults are staggered
-  // between 1:00 PM and 4:45 PM; opening Schedule / Log still lets the user choose a different time.
+  // between 4:00 PM and 7:45 PM; opening Schedule / Log still lets the user choose a different time.
   var dueGrowthKinds=new Set(journalGrowthHabitKindsForDate(dateKey));
   var growthScheduleSpecs={
-    reading:{time:'1:45 PM',mins:825,label:'Audiobook',detail:readingMinutes?fmtMinsSeconds(readingMinutes)+' logged':'Tap Schedule / Log to add listening time',done:readingMinutes>0||d.gaAudiobook==='green',tab:'library',linkedCheckKey:'gaAudiobook'},
-    language:{time:'4:00 PM',mins:960,label:'Language Practice',detail:languageMinutes?fmtMinsSeconds(languageMinutes)+' logged':'Tap to log the language session',done:d.gaLanguage==='green',tab:'skill-log'},
-    guitar:{time:'4:45 PM',mins:1005,label:'Guitar',detail:guitarMinutes?fmtMinsSeconds(guitarMinutes)+' logged':'Tap to log guitar practice',done:d.gaGuitar==='green',tab:'skill-log'}
+    reading:{time:'4:45 PM',mins:1005,label:'Audiobook',detail:readingMinutes?fmtMinsSeconds(readingMinutes)+' logged':'Tap Schedule / Log to add listening time',done:readingMinutes>0||d.gaAudiobook==='green',tab:'library',linkedCheckKey:'gaAudiobook'},
+    language:{time:'7:00 PM',mins:1140,label:'Language Practice',detail:languageMinutes?fmtMinsSeconds(languageMinutes)+' logged':'Tap to log the language session',done:d.gaLanguage==='green',tab:'skill-log'},
+    guitar:{time:'7:45 PM',mins:1185,label:'Guitar',detail:guitarMinutes?fmtMinsSeconds(guitarMinutes)+' logged':'Tap to log guitar practice',done:d.gaGuitar==='green',tab:'skill-log'}
   };
   ['reading','language','guitar'].forEach(function(kind){
     if(!dueGrowthKinds.has(kind)&&localStorage.getItem(journalScheduleGrowthKey(kind,dateKey))!=='1'&&!growthScheduleSpecs[kind].done)return;
