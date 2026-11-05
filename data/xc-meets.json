@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-04T19:53:33+00:00",
+  "updatedAt": "2026-11-05T01:30:08+00:00",
   "source": "Google News searches for cross country meet results",
   "page": "https://michealsizemore1.github.io/ChatGPT-The-Master-App/cross-country.html",
   "meets": [
@@ -58,6 +58,30 @@
   ],
   "results": [
     {
+      "date": "2026-11-05",
+      "headline": "2026 SPC Fall Championships results: Football, cross country, volleyball and field hockey",
+      "source": "Dallas News",
+      "url": "https://news.google.com/rss/articles/CBMivAFBVV95cUxOTmppNWRoZ0xSaEo2SDF6OWNwcXhxandSbWdaMkM0cHpKUTY0bzJ1OF8xRWFLanh5VW9JV015blkyNUthMS1UdTJqTnQxRzl6ay1LNkZVdWhaQTVOeXlqT1lxNDRDbzRHTUZzNUpMam1aU0xRenJEMkFTLVZhVGVrLWROaXl0RFYyaFpsaVFCWWxfSmVDcjhYd2VwMUhHNHdsUll1TVNXYjBWY0ZBdFlTa1VPUWhwanA0eUJ5bA?oc=5"
+    },
+    {
+      "date": "2026-11-04",
+      "headline": "Oregon Ducks B1G Conference Championship Cross Country Recap",
+      "source": "Yahoo Sports",
+      "url": "https://news.google.com/rss/articles/CBMikwFBVV95cUxQTl8wUy0zWHFjRndqV1J3MmFjNk9sQzI2SzZ2bzBLY29NemZNUVpFblFhOUk0RHBoaFJVX1BwOElTVmlUTm1keUZ2T1dCY3Q3aVA1S3F1UHFuVDUtam1IV0FXbXhHLU52NGY0dDZ4b1lwbE4wMjVDNXJDX2JJUHRHelRkXzA1OXNuTlZEX1dqOVFRQzQ?oc=5"
+    },
+    {
+      "date": "2026-11-04",
+      "headline": "Oregon’s Schumacher Wins Men’s Cross Country Coach of the Year",
+      "source": "Big Ten Conference",
+      "url": "https://news.google.com/rss/articles/CBMioAFBVV95cUxQRDg1Ui00T2FGOVNWN2lTT0hhT1V6dGMta1c5Zkl6WllSMTdmTUFYVFYxOHo3cmJpengtQU9ZUFZHd1JyeW1UbWpmV09LZmN5bHN3VVNWeW5RWDJpdUxBZnFyenZOWFZuRkFvbk1VcWd1U01GZmgyaUZqNjdwTW9OMlNqUzExS3ZLbVh5YTlRWlNIUWJ0RS1WMkNRUHR2RkhB?oc=5"
+    },
+    {
+      "date": "2026-11-04",
+      "headline": "Paul Smith's men's XC win conference team title",
+      "source": "The Daily Gazette",
+      "url": "https://news.google.com/rss/articles/CBMixwFBVV95cUxPeF9NRG1ka1Y2RHdpN0k4blRDRUJpcnVQbzNVNHpzRTk4QTg4ODhWZzFxcFFpZzBFeUZ6aVU1UGpuZ09lY1hIajhJajA2SlBSSjJRbk9ObGVkN3lvdzFEZU1ob0dvWUxOdGNoRE00UEFLNjlzRHFwZ2dzQTNhR1BNTDQtSWRhQVp1OXhpZFVRQ21PUklyZ1ZzamJvRGtYMjdyVXhsR1VacmFSMXdSZ0FMUk1QWjJwYTd5SzkwTkNDX2Flb29sWVIw?oc=5"
+    },
+    {
       "date": "2026-11-04",
       "headline": "Elon women’s cross country claims CAA championship for 2nd straight year",
       "source": "Elon News Network",
@@ -65,9 +89,15 @@
     },
     {
       "date": "2026-11-04",
-      "headline": "Louisiana women's cross country wins 2026 Sun Belt Conference Championship",
-      "source": "Yahoo Sports",
-      "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxQaUdaVDJ1SjBlYnhjQkZKdUdzZWpFQXdwNTR0cXppSU8zbkZOdG5KSHFzUWV3bE96ZzFYVzZ5Nm8yTnhaZ3FxQXBWQUxiVjBIUlJEWC1oVUpqTmRzVXUxLWtKc2lFZ3V0WnJqV1NiWHpST2xCd2NiSG9mc2hDa0NHa1pXVTNYUEwxZTlVXw?oc=5"
+      "headline": "Dublin Juvenile Uneven Age Cross Country Championships",
+      "source": "Raheny Shamrock Athletic Club",
+      "url": "https://news.google.com/rss/articles/CBMiSkFVX3lxTE9YdHNnakp2a1FPLWRNRWVaMkNablFZa0RFWTQ2MnhZbTZlcWJTNlpsRkxSU1ZWUjJDMmlyS3ZmRzZvMVFydFEwOFR3?oc=5"
+    },
+    {
+      "date": "2026-11-04",
+      "headline": "NAU ROUNDUP: Cross Country sweeps Big Sky Championships at Buffalo Park",
+      "source": "Havasu News",
+      "url": "https://news.google.com/rss/articles/CBMi_gFBVV95cUxOS3Q3dVpoZi1EblVhZ0pocXhWbzl5Z2cxUW83dXBqOTVKSWcyd3pjbllJOGo5QlhWdkpfc0xDZFN2RTRQRExXbm1ibWpCQWxabFJmNFhKTFk5a3Z2VHV1YzVYbU5vdThUdFlHWjFhLVZxMVU5YlU1REJtQW9lRzBkbXpyVmlpTUJ6dTI3cDVfX1doVEpzbEZ1ek5KY3ZtQzd5ZU5UekNmOXZZdG5lM0F1RU9KVndFUE9EcURVUEhBd1hja2UtZlNmcW92RnZza2d0enY4dFVUcmtKOE5ZSmRkVVNVRzI4R2xDOWNnckpzOTgtLVRxMkt2NFV5dXBRQQ?oc=5"
     },
     {
       "date": "2026-11-04",
@@ -89,9 +119,9 @@
     },
     {
       "date": "2026-11-03",
-      "headline": "GU men's cross country wins Pac-12 Championship during inaugural season",
-      "source": "The Gonzaga Bulletin",
-      "url": "https://news.google.com/rss/articles/CBMi8AFBVV95cUxOVE9ORkcxZU5tam9OaDdTMXc5Nmo5QTlJWFFiVl9YTGNsaFpVaWZCcDhNa2VYaF9peE9uV0JkMmRGcmRjV3RLRkxzRnRRWDJLOGJZV2tORWowY29PbU11anZvdFViT2Q3Z0Q0QXNVVl81bVJzaWlMSW5hckMwbzlaWnBGZXl0M3VxOW1iaUo3MlV3N1NGUEtyTlJqRFJJaENhWmhNUjhuWTRJdUdPZ25QOWd6RW5qdVkzS2JRX1ZVa05PQUFiRXRjcFgteUhLQ2dGZVFnVGZGRExLVldLcG4xUlZVWTd0LW9OTHdfUGZGMkY?oc=5"
+      "headline": "WC cross country wins conference title, places third at regionals",
+      "source": "Weatherford Democrat",
+      "url": "https://news.google.com/rss/articles/CBMi7gFBVV95cUxNT3BQRWdhV1Q2S0hpdERPMUZWWnB6akM3MHVJTDY0ZjAtdl9tYlAzX2pQMDd3NmhSTmpXaHFXR0lxeXQyRjEySTZ0eVJwRWp6MzlEdFEwRnZlaHNpOXY5RDdhdUxIdXNwLUhQMEg1cG9LMTgzVm51TVEzaEtlUnNKdFNkUl9VcXlzb3RRUjNuQUxJM2VtYnNNMzNDMS1ibXVhR1B5ZmJTOXVPQVhEaFZ0QldRMnN4SUVWaUdNQkNXNEtVa3VjOE14OUc2eXdydWNZM2RaV3hVMjJ1Sjg0Ylg5NXl4OUN0SmlCN3Z1bnpn?oc=5"
     },
     {
       "date": "2026-11-03",
@@ -101,51 +131,21 @@
     },
     {
       "date": "2026-11-03",
-      "headline": "Here’s how LSU’s cross country teams fared at the SEC Championship meet",
-      "source": "The Reveille, LSU's student newspaper",
-      "url": "https://news.google.com/rss/articles/CBMitgFBVV95cUxQSHluOW5qUXpteXk4NEpYWjlEalplRHNkSGVZU0FiRjJwaTdQaXB0OU1Ca202SzRPa1pUOTMtRVI1Y1BaWnNjaGozdDBwUG5ERDkyby1oTW5pWkJUenFPWFFMY2VEaUZSZ3NyVmFwTHBXM2M4ZlBXTk1uN3hpOGhKczRQRzAwZ2FSYmZzX29LMWhGZkNNODFjQ09Rb0NocHh0SUpmRnR4azN5QUU3MTNMSUpWZ3dUUQ?oc=5"
+      "headline": "WSU cross country wins multiple titles at Pac-12 Tournament",
+      "source": "The Daily Evergreen",
+      "url": "https://news.google.com/rss/articles/CBMikAFBVV95cUxPNTlIcWhVaXRYbWJaRko0TTJKdkp3YUpmd2lDcHV4UG5xZW1DWkpuXzYzOE95THlScEZKSV91R2htTVRwSWJlT1FlSnNpRDNpMG0zdUlfeEhuaHZMU25EQXlKOGRMcmxUQnM4RzJ4QnQ3aHJ0emY0MzlvYXp1QUw2SmlnWWJxX2pYV2F3TFhyY1g?oc=5"
+    },
+    {
+      "date": "2026-11-03",
+      "headline": "St. Francis women win PAC cross country title; Forest Hills graduate helps Geneva men repeat",
+      "source": "The Tribune-Democrat",
+      "url": "https://news.google.com/rss/articles/CBMigAJBVV95cUxPUGFmVjljZWdDV196bG5udkI3dlR1ZXpCekdDelNmOExXUXdack8zZEo4cVc3WmtNTUV6amhyLVl2SG5yMVd2Yzl0X1c3Nm0zaHR3ck1NTFhvMXVZVzhFclJkUlZ3NkRYZHpQTDRaYVc5OVozMVdyRVRmbzdnc01Ecjd0SGt3TFlVcVBUMVg0c0FyNUVPUHFkZEpIdXJnX2hxZjliUWVQRzFCSXRNZEQ4ZFRLaDNTcUQteWhQTURlV0ZKcUE3VEJSRUJnVVRMRHIza2ZjMzNxNU9pTVQ0bW5mSFZqT3lMcnhFQ0FiWWRDVmRxV3Z4UGM5Wng5NjNaWXFX?oc=5"
     },
     {
       "date": "2026-11-03",
       "headline": "10 Takeaways from cross country conference championships before regionals",
       "source": "NCAA.com",
       "url": "https://news.google.com/rss/articles/CBMixAFBVV95cUxPVW50UjRKX1NSZkNSTm9WRWVsRmNtcGJYMHlaelgwXzJZS05sd0ZDZGgwMi14c0x5V0tIbm5ja29zSGVSQ2VLTkd1V2xQQTEyRmNRcjhySVdVM09DcDV1T2RkMVVsdjUyaUE5THJUNWNRN3hsTk1PaGR2QU10YWp0b0hlM3F5bTkwb2h5YVZ6b21sU1NKYkdJRVotREJ2d3pBZnBrQUF2bUFnekUxd3BtRnhsSUJyTUZjSnIyZlRXZ2RVNkNU0gHKAUFVX3lxTE1DYXJ3b3pvb0N0Y0pOUHZnYWJRNjB6UkZSZ1RvTUk5QklUUFJwMTB0dnRNTGhBMEw0YkZoVmh2ZDZWLTFNVk40dF9pRHB2STZ1NWhKZVZqTTFESDVaNXRxcUdXREtCTFVRUkV1VmYxenhCT3ZYNTAxTm1oZUd2N1o0MDZXSTFZdmMyYkZMODZvZXlQS2EteDhPenYzOFdHSEhYQlBOMkxLV3lFOVc0ZS1TcTNneTU2MmxXQ3RKaU9CSXpVa0k0QV9oa0E?oc=5"
-    },
-    {
-      "date": "2026-11-02",
-      "headline": "Jane Hedengren, BYU women win Big 12 cross country conference championship; BYU men place third",
-      "source": "Deseret News",
-      "url": "https://news.google.com/rss/articles/CBMisgFBVV95cUxQSlEwaGxDRFkycjMxLVdxTk9sWlBDZndvSGFmdl8yazlNc3hHb1VLTDR1VE9uaUZVYjluZ0VXOVU4alpuQl9wemIyRldoWndrcDdvaWtmQXRoQzJkbGxqWGVnSEpidWVtaVVSTzdQTEpFRVU3WnNsbVpfZU04d2R6Q0lsSUdGb1FZcVBhdkEya2hqbzh6MktNdVVEVnRpRlRYQWNISFdjeVRrUWRtaWtJSjd3?oc=5"
-    },
-    {
-      "date": "2026-11-01",
-      "headline": "Men's cross country places eighth in NESCAC championships at Middlebury",
-      "source": "Hamilton College",
-      "url": "https://news.google.com/rss/articles/CBMi2AFBVV95cUxPZG1YT013ZnNSeE9Na0dmUVRXQ0hCNy1mSFB0dkhBajVNb2FTZjZxN0RCMnE4RnVQS1ZwS1cxYm9MRTY4WmJ4Y1lVNGhfdEhTMGd3WFBsZVUtSHlUWHIwVHp4c1ZMczRTUWJuMEgxNUttUDJKZFdZOTVGdEs0Smc0V29jQkNJaERtTHdmdm5LUjZmRG03eExTWFA4a0VKNUhvSW1wWVhQbGxkTmRSZ3lTZUJFeTV5eWRVc0VTYnBrY3F6TFF5eHNzd1BkUnYzM0t4QmMxTjR5LVA?oc=5"
-    },
-    {
-      "date": "2026-11-01",
-      "headline": "Aagaard '30 leads women's cross country in her first NESCAC championship",
-      "source": "Hamilton College",
-      "url": "https://news.google.com/rss/articles/CBMi2wFBVV95cUxQMi00dnhNLVVBY1p2TW1hYlZLZU1uZmZFWV9ZNGxvdmxySTZQLXU1XzRZWmhpTWlpWnZHMy1ublRXdEdUdmJGZHU0TVk5cmtzSGJGc05rRXd6aVU5ZjRmd3dnUDdlTGV5SGVjYU4zRUZJZ081SExBMFBaT3JveWhsZmNvR2x3VERPdDJMRFFhM0RnUTM2S1V1SURkQ3czZDdkcElvdWZOaTlRVUF5SWVqZklYVnJKY1htX1pabFZKUjhCSmFMRGh3Yzk5UllIaXdYX3MwQWFyNFNYV2M?oc=5"
-    },
-    {
-      "date": "2026-10-31",
-      "headline": "Men’s Cross Country Wins 2026 Big 12 Championships - University of Colorado Athletics",
-      "source": "University of Colorado Athletics",
-      "url": "https://news.google.com/rss/articles/CBMijgFBVV95cUxQcUdId1hVYm5QTjY0Q0MzbkZBX2kyaFh0cWxCVlVjbVRDR25ya3RJVXZIcDJJYnFtNEROblFpckpmSWtyd2ozQ0VNQmxXRV9ZU1ZjZnh4dTZpTmVmRXozNFpOYUtpNFd4WmN6ZFJJYW5oYnpqVkJObkVCc1hmcDBVOURaVG9oX2RGclFKdXJB?oc=5"
-    },
-    {
-      "date": "2026-10-31",
-      "headline": "Women First To Finish at PAC Cross Country Championships, Men Third Overall",
-      "source": "Saint Francis University Athletics",
-      "url": "https://news.google.com/rss/articles/CBMi2AFBVV95cUxPOXlOVXpEb1VCU3I1a3BhMU04VzNwUU0zSk82bXJRV19tWUllXzMwdk5kTVNXN2hQMHJVRnY5eng3TFdvV0J5dXBYTkZFQVhqUHhseHBNOWdxRnRYZXpZTVNKS0pMbzJCU2VIUkMzZkYzSEgxUjhzakNhYnlVa214b3E4RENWOXZKc0lNenN5UVhPcktzOVg3QnRwZ1QyQ2pVaUI1QUs4YVlRWXpMd3U2SjMzOWlHSXFZSjE0dU93V0dZMVFNdnFxZXUzS2RyRVAxNTBDS0libk0?oc=5"
-    },
-    {
-      "date": "2026-10-31",
-      "headline": "Tulane Sweeps Team, Individual Titles At 2026 American Cross Country Championships",
-      "source": "American Conference",
-      "url": "https://news.google.com/rss/articles/CBMixAFBVV95cUxQSWhVclF2OU5YMW9FNi1RZDVTTWdqc3JsdFZSZ21tMUVEWkZSR3oyTFRQMEMyVTlpeThNYmQxNndTUzk1R1ZtV0RlLVpGQ0RhakV5ZEpfVTI0aFduY2JRNjZyQy1HTUstM2JXbHpPbUpKaEpOZFo2QmFCYVpTRFVRbmF5VnhpTF95YUJuVVdPeVR5VWpmRldlTzZ0aG56TFFhMmxvODlCVzVBRUhDOHBCUnFQYXNiOTFWTW9WNGh3MEhDX1ZG?oc=5"
     }
   ]
 }
