@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-06T11:09:00+00:00",
+  "updatedAt": "2026-11-06T19:31:42+00:00",
   "source": "Google News searches for cross country meet results",
   "page": "https://michealsizemore1.github.io/ChatGPT-The-Master-App/cross-country.html",
   "meets": [
@@ -59,6 +59,18 @@
   "results": [
     {
       "date": "2026-11-06",
+      "headline": "Live results and updates: 2026 Frontier Conference Women’s Cross Country Championship",
+      "source": "World-Track",
+      "url": "https://news.google.com/rss/articles/CBMisgFBVV95cUxQVWZoZnRacUxvYzFiYWM4WTFfcDN2WklYM2hnYkVPbFBpMm5wSENfdXY1cFNzU2FGdXhOemhTZUlNSUY0WWQ2cVo1UU56QmlrbEctRFNSeFUzczhGaWc2OUlKeTM3dFRZQ0tkMFp6U01aYTlWMDJZa3hyMjJXTGJyU1g5YXUyVWcySHJYVXVYUVlSdlROeld1bGIyVGUtRXh3OEVoMTZZcUs4QzgtYm9wMmtR?oc=5"
+    },
+    {
+      "date": "2026-11-06",
+      "headline": "Cross country posts mixed results at Patriot League Championships, earns 2 All-League selections",
+      "source": "The Lafayette – The Oldest College Newspaper in Pennsylvania",
+      "url": "https://news.google.com/rss/articles/CBMi8gFBVV95cUxQTldGUUlQUDBRMlE0VnI4UjRzcmdLeXJmc09aWGJSWHlnbkE3OE0wek1ESjRpeEh2ZGdmb3ZsV3BHdGhmYTBKNFJUd01tOEUtMnVpQ3c4RWVqUENiVmhQWkp5TzlJS2dLWndjbmMxX1kteHhwUXRFNEVBNXlqOWVtUWJjbHNSLWREZkZ6QjUzV1djQVRfc0w1dThrUk1WaUZKeTRXcE91NWlabTVTZDRRLXhLVFRpTi1FcjRZWDZRU3JMM0VLZ2pYWDdvVXZ3TWY5Wi1vOUUzRU5QZkN2RUdFTlo2bkozdGxGRXkyNjJaSEhkQQ?oc=5"
+    },
+    {
+      "date": "2026-11-06",
       "headline": "Ithaca's Bercuvitz, Corning's Lawson winners at Section 4 XC meet",
       "source": "Star-Gazette",
       "url": "https://news.google.com/rss/articles/CBMi0gFBVV95cUxOR0VnU1hfWVg4bTR4WjdLYnFZeHFKN3BFNVhMbzhDLXZRdlRHUzl0XzUwZDh1anBBTkNUWkdudFU4WFg0X2pQVUNqWFNDZDU5ME9OeW8wVmVfT0xrSWJIWXMteVp5aUh3VzM2QzZFY0hjR1hNRTBaSGp1SHJ2MnZLLVJSUkFIbGxEeUdsdTA0R1VtSEVVN2tmSk1LTTZrR21WSk5fQ2U2Ry1GTktEUUJQY3NiX0hGMDkyekx4ZFI2R05oNnVvRlM3ZWNoWlZwcGR6SGc?oc=5"
@@ -71,27 +83,15 @@
     },
     {
       "date": "2026-11-05",
-      "headline": "2026 SPC Fall Championships results: Football, cross country, volleyball and field hockey",
-      "source": "Dallas News",
-      "url": "https://news.google.com/rss/articles/CBMivAFBVV95cUxOTmppNWRoZ0xSaEo2SDF6OWNwcXhxandSbWdaMkM0cHpKUTY0bzJ1OF8xRWFLanh5VW9JV015blkyNUthMS1UdTJqTnQxRzl6ay1LNkZVdWhaQTVOeXlqT1lxNDRDbzRHTUZzNUpMam1aU0xRenJEMkFTLVZhVGVrLWROaXl0RFYyaFpsaVFCWWxfSmVDcjhYd2VwMUhHNHdsUll1TVNXYjBWY0ZBdFlTa1VPUWhwanA0eUJ5bA?oc=5"
+      "headline": "Augusta Cross Country Teams Set For Peach Belt Championships Nov. 7",
+      "source": "Augusta University Athletics",
+      "url": "https://news.google.com/rss/articles/CBMiyAFBVV95cUxNSEtSNkgxUUdwTEdFc3pRdjR2dzFKV29vV0hPNmlTU1dTeDc1aF93YWJTOUtseW1WQXBIS2tjVkhoQXJtWnVfN0pfbjVCM1RvbjkzcENyV2xfdFhMeVlSSjF2aWxxM0RVSVBtNXdvRzF5UWhnX1hVZmFIWW9XMEh1SlJ2VGVMejRUd21US1F1UVRVbF81MnhxQjRndG5vbkducWxUSXg4blNOX3NNcE5YRDRxRDFTTDEzN2VtWmtJSWNPVEFIQ19TeQ?oc=5"
     },
     {
       "date": "2026-11-04",
       "headline": "Oregon Ducks B1G Conference Championship Cross Country Recap",
       "source": "Yahoo Sports",
       "url": "https://news.google.com/rss/articles/CBMikwFBVV95cUxQTl8wUy0zWHFjRndqV1J3MmFjNk9sQzI2SzZ2bzBLY29NemZNUVpFblFhOUk0RHBoaFJVX1BwOElTVmlUTm1keUZ2T1dCY3Q3aVA1S3F1UHFuVDUtam1IV0FXbXhHLU52NGY0dDZ4b1lwbE4wMjVDNXJDX2JJUHRHelRkXzA1OXNuTlZEX1dqOVFRQzQ?oc=5"
-    },
-    {
-      "date": "2026-11-04",
-      "headline": "Oregon’s Schumacher Wins Men’s Cross Country Coach of the Year",
-      "source": "Big Ten Conference",
-      "url": "https://news.google.com/rss/articles/CBMioAFBVV95cUxQRDg1Ui00T2FGOVNWN2lTT0hhT1V6dGMta1c5Zkl6WllSMTdmTUFYVFYxOHo3cmJpengtQU9ZUFZHd1JyeW1UbWpmV09LZmN5bHN3VVNWeW5RWDJpdUxBZnFyenZOWFZuRkFvbk1VcWd1U01GZmgyaUZqNjdwTW9OMlNqUzExS3ZLbVh5YTlRWlNIUWJ0RS1WMkNRUHR2RkhB?oc=5"
-    },
-    {
-      "date": "2026-11-04",
-      "headline": "Northwestern's Miller Wins Women’s Cross Country Coach of the Year",
-      "source": "Big Ten Conference",
-      "url": "https://news.google.com/rss/articles/CBMiqgFBVV95cUxOT3RqOVZDRUxnRHZxOWxYc0NzWUxZZ1ZlRUdiaGhKWmN1NVoxMFl6V3Fld1lyNi1ieDhZN3JFd0xDQmxEM3RSMzJJV1VHRUZWY1VNZDlWMDZoSGRzWF8xUnd3QWhFRy1acTFsN1hCRXRfY0ZZcEw0NGJUYXkzQzFzbGNqMC1ia2FSMkg4UUFpV1lmUjFSajBKNkVudGlMZFNTb25kdi1DalBpUQ?oc=5"
     },
     {
       "date": "2026-11-04",
@@ -113,12 +113,6 @@
     },
     {
       "date": "2026-11-03",
-      "headline": "Behrend cross country teams win AMCC championships",
-      "source": "The Pennsylvania State University",
-      "url": "https://news.google.com/rss/articles/CBMilgFBVV95cUxQc256eU90MEN0U3RQUlBuR2FMM0FrMzN1ME9xYm5ETWEyOE9LMTJ5Nmo4dHo2OEpWMkM5WWZxTVdhQmdwWXQ3ZEVCUzF5a3YySHRTS0RuVVJLaUFZaG00aHowQzlJMTIzUzVyVXhzM2RQemN0T2hxRURyUGlRbExDNC1vbGs0dENvSHRFamEyM1EzVEhUcHc?oc=5"
-    },
-    {
-      "date": "2026-11-03",
       "headline": "10 Takeaways from cross country conference championships before regionals",
       "source": "NCAA.com",
       "url": "https://news.google.com/rss/articles/CBMixAFBVV95cUxPVW50UjRKX1NSZkNSTm9WRWVsRmNtcGJYMHlaelgwXzJZS05sd0ZDZGgwMi14c0x5V0tIbm5ja29zSGVSQ2VLTkd1V2xQQTEyRmNRcjhySVdVM09DcDV1T2RkMVVsdjUyaUE5THJUNWNRN3hsTk1PaGR2QU10YWp0b0hlM3F5bTkwb2h5YVZ6b21sU1NKYkdJRVotREJ2d3pBZnBrQUF2bUFnekUxd3BtRnhsSUJyTUZjSnIyZlRXZ2RVNkNU0gHKAUFVX3lxTE1DYXJ3b3pvb0N0Y0pOUHZnYWJRNjB6UkZSZ1RvTUk5QklUUFJwMTB0dnRNTGhBMEw0YkZoVmh2ZDZWLTFNVk40dF9pRHB2STZ1NWhKZVZqTTFESDVaNXRxcUdXREtCTFVRUkV1VmYxenhCT3ZYNTAxTm1oZUd2N1o0MDZXSTFZdmMyYkZMODZvZXlQS2EteDhPenYzOFdHSEhYQlBOMkxLV3lFOVc0ZS1TcTNneTU2MmxXQ3RKaU9CSXpVa0k0QV9oa0E?oc=5"
@@ -127,19 +121,13 @@
       "date": "2026-11-02",
       "headline": "Jane Hedengren, BYU women win Big 12 cross country conference championship; BYU men place third",
       "source": "Deseret News",
-      "url": "https://news.google.com/rss/articles/CBMisgFBVV95cUxQSlEwaGxDRFkycjMxLVdxTk9sWlBDZndvSGFmdl8yazlNc3hHb1VLTDR1VE9uaUZVYjluZ0VXOVU4alpuQl9wemIyRldoWndrcDdvaWtmQXRoQzJkbGxqWGVnSEpidWVtaVVSTzdQTEpFRVU3WnNsbVpfZU04d2R6Q0lsSUdGb1FZcVBhdkEya2hqbzh6MktNdVVEVnRpRlRYQWNISFdjeVRrUWRtaWtJSjd3?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMiS0FVX3lxTE9zOXBjb05NX1B4a2pObHVkX3Atcm9PLUxvelJvZlJOV1hFNEcwUkRCbWtUbk1yMEFXVGNXSHFrQjQ4UkRQMWJPeEt3aw?oc=5"
     },
     {
       "date": "2026-11-02",
       "headline": "Louisiana women's cross country wins 2026 Sun Belt Conference Championship",
       "source": "Yahoo Sports",
       "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxQaUdaVDJ1SjBlYnhjQkZKdUdzZWpFQXdwNTR0cXppSU8zbkZOdG5KSHFzUWV3bE96ZzFYVzZ5Nm8yTnhaZ3FxQXBWQUxiVjBIUlJEWC1oVUpqTmRzVXUxLWtKc2lFZ3V0WnJqV1NiWHpST2xCd2NiSG9mc2hDa0NHa1pXVTNYUEwxZTlVXw?oc=5"
-    },
-    {
-      "date": "2026-10-31",
-      "headline": "Cross Country Teams Started the Postseason in Big 12 Championship",
-      "source": "Kansas State University Athletics",
-      "url": "https://news.google.com/rss/articles/CBMirwFBVV95cUxNb2s1ZDg2NFdkZGV2XzFWMkY1ZUIyYWdsVENRdU81ZW1YN3Z0amlfa29pRmNtUnBPMDBVZ2IyUDg1VjYtbFZZVXU3TWpxWll4aWRoMmthQ0JBYWhvQUdSSGViRGE0Q2lpN09FZDY1bEVUUnVfU0xiel93bnRqUzlORm9Ndkp0d3o2WTdCbnJES194ek1WQ3NQT1BNbHk4UWVaOFM2by1hdTdsREpDMlkw?oc=5"
     },
     {
       "date": "2026-10-30",
