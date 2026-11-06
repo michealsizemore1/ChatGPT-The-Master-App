@@ -3505,6 +3505,14 @@ function importWatchRunsFromLink(){
   })();
 }
 window.addEventListener('load',function(){setTimeout(importWatchRunsFromLink,300);});
+// ── BeyondStride's Nutrition tab opens daily-planner.html#tab=nutrition: jump straight to that tab ──
+function openTabFromLink(){
+  var m=(location.hash||'').match(/[#&]tab=([a-z0-9]+)/);
+  if(!m||typeof hmSwitch!=='function')return;
+  try{hmSwitch(m[1],null);window.scrollTo(0,0);}catch(e){}
+}
+window.addEventListener('load',function(){setTimeout(openTabFromLink,350);});
+window.addEventListener('hashchange',openTabFromLink);
 window.addEventListener('hashchange',importWatchRunsFromLink);
 
 // ── Send a training plan to BeyondStride on the phone (and from there to the watch) ──
