@@ -308,6 +308,14 @@ function fillActivityFormFromScan(parts, statusEl, splits){
 
 function formatActivityNotesHtml(notes){
   notes=String(notes||'');
+  // BeyondStride notes: short sections with ALL-CAPS headings. Show headings bold, one fact per line.
+  if(/^[A-Z][A-Z0-9 ():@.\-]{3,}$/m.test(notes)&&notes.indexOf('Recorded on Galaxy Watch')!==-1){
+    return notes.split('\n').filter(function(l){return l.trim()!=='';}).map(function(l){
+      var t=l.trim();
+      if(/^[A-Z][A-Z0-9 ():@.\-]{3,}$/.test(t))return '<strong style="display:block;margin-top:8px;color:#334155;font-size:0.74rem;letter-spacing:0.04em;">'+escHtml(t)+'</strong>';
+      return escHtml(t);
+    }).join('\n');
+  }
   var marker='Mile splits:';
   var idx=notes.indexOf(marker);
   if(idx===-1)return escHtml(notes);
@@ -483,7 +491,7 @@ function saveActivity(){
   try{renderActivities();}catch(err){console.error('renderActivities error:',err);if(typeof v26Toast==='function')v26Toast('Activity saved, but the list view had a display error.');}
 }
 function actSourceLabel(s){
-  var map={manual:'Manual',garmin:'Garmin',stryd:'Stryd',strava:'Strava',gear2:'Gear Tracker II',screenshot:'Screenshot',watch:'Galaxy Watch'};
+  var map={manual:'Manual',garmin:'Garmin',stryd:'Stryd',strava:'Strava',gear2:'Gear Tracker II',screenshot:'Screenshot',watch:'BeyondStride'};
   s=(s||'manual').toLowerCase();
   return map[s]||(s.charAt(0).toUpperCase()+s.slice(1));
 }
@@ -491,7 +499,7 @@ function cycleActSource(id){
   var acts=getActivities();
   var act=acts.find(function(a){return a.id===id;});
   if(!act)return;
-  var sources=['manual','garmin','stryd','strava','gear2'];
+  var sources=['manual','garmin','stryd','gear2','watch'];
   var cur=(act.source||'manual').toLowerCase();
   var next=sources[(sources.indexOf(cur)+1)%sources.length];
   act.source=next;
@@ -531,6 +539,7 @@ function editActivity(id){
   document.getElementById('actExecScore').value=act.execScore||'';
   document.getElementById('actRouteUrl').value=act.routeUrl||'';
   document.getElementById('actNotes').value=act.notes||'';
+  (function(ta){ta.style.height='auto';ta.style.height=Math.min(Math.max(ta.scrollHeight+4,90),520)+'px';})(document.getElementById('actNotes'));
   document.getElementById('actInjuryReport').value=act.injuryReport||'';
   document.getElementById('actSource').value=act.source||'manual';
   handleActTypeChange();
@@ -2276,7 +2285,7 @@ function renderActivities(){
       +'</div>'
       +'<div style="display:flex;align-items:center;gap:5px;margin-top:8px;flex-wrap:wrap;">'
       +'<span style="font-size:0.72rem;color:#888;font-weight:600;">Source:</span>'
-      +['manual','garmin','stryd','strava','gear2'].map(function(s){var cur=(a.source||'manual')===s;return'<button onclick="event.stopPropagation();setActSource('+a.id+',\''+s+'\')" style="font-size:0.72rem;padding:3px 9px;border-radius:10px;border:1px solid '+(cur?'#667eea':'#ddd')+';background:'+(cur?'#667eea':'#fff')+';color:'+(cur?'#fff':'#888')+';cursor:pointer;font-weight:'+(cur?'700':'400')+';">'+actSourceLabel(s)+'</button>';}).join('')
+      +['manual','garmin','stryd','gear2','watch'].map(function(s){var cur=(a.source||'manual')===s;return'<button onclick="event.stopPropagation();setActSource('+a.id+',\''+s+'\')" style="font-size:0.72rem;padding:3px 9px;border-radius:10px;border:1px solid '+(cur?'#667eea':'#ddd')+';background:'+(cur?'#667eea':'#fff')+';color:'+(cur?'#fff':'#888')+';cursor:pointer;font-weight:'+(cur?'700':'400')+';">'+actSourceLabel(s)+'</button>';}).join('')
       +'</div>'
       +'<div style="display:flex;gap:4px;margin-top:6px;">'
       +journalBtn
@@ -2559,6 +2568,21 @@ function loadUpcomingPlan(){
   if(body)body.textContent=reflowPlanText(plan.text)||'(No plan text)';
   var upcomingPdfBtn=document.getElementById('tpUpcomingPdfBtn');
   if(upcomingPdfBtn)upcomingPdfBtn.style.display=plan.pdfDataUrl?'inline-block':'none';
+  // An "Upcoming" plan only ever appears on the Activities card or Daily
+  // calendar after it's been promoted to Active with "Make Active Now" --
+  // a plan just sitting here past its own start date silently shows
+  // nothing anywhere else, which looks like the whole feature broke. Make
+  // that state impossible to miss instead of letting it pass quietly.
+  var overdueBanner=document.getElementById('tpUpcomingOverdueBanner');
+  if(overdueBanner){
+    var overdue=plan.startDate&&plan.startDate<=dk(_realToday);
+    if(overdue){
+      overdueBanner.style.display='block';
+      overdueBanner.textContent='\u26A0\uFE0F This plan was set to start '+fmtPlanDate(plan.startDate)+', which has passed, but it\'s still sitting here as Upcoming -- your Activities card and Daily calendar won\'t show any of its workouts until you tap \u25B6 Make Active Now below.';
+    } else {
+      overdueBanner.style.display='none';
+    }
+  }
 }
 // Inserts (or refreshes) a standard reference "TRAINING ZONES" section
 // (McMillan-style pace zones, with heart-rate ranges and what each zone is
@@ -3462,8 +3486,10 @@ function importWatchRunsFromLink(){
         var keep=acts[idx];
         ['distance','duration','pace','power','heartRate','cadence'].forEach(function(k){if(r[k])keep[k]=r[k];});
         if(r.routeUrl&&!keep.routeUrl)keep.routeUrl=r.routeUrl;
-        // Stryd extras fill in blanks only, so hand-entered values are never overwritten.
-        ['elevGain','temp','humidity','airPower','rss'].forEach(function(k){if(r[k]&&!keep[k])keep[k]=r[k];});
+        // An automatic name ("Evening Run") is replaced by the planned workout's name; a name you typed is kept.
+        if(r.title&&(!keep.title||/^(Morning|Afternoon|Evening|Night) Run$/.test(keep.title)))keep.title=r.title;
+        // Stryd extras and weather (temp, humidity, AQI) fill in blanks only, so hand-entered values are never overwritten.
+        ['elevGain','temp','humidity','aqi','airPower','rss'].forEach(function(k){if(r[k]&&!keep[k])keep[k]=r[k];});
         // Notes written by the watch app get refreshed; notes you edited by hand are kept.
         if(r.notes&&(!keep.notes||keep.notes.indexOf('Recorded on Galaxy Watch')!==-1))keep.notes=r.notes;
         updated++;
@@ -3495,7 +3521,7 @@ function sendPlanToRunningApp(which){
   var bytes=new TextEncoder().encode(JSON.stringify(days)),bin='';
   for(var i=0;i<bytes.length;i++)bin+=String.fromCharCode(bytes[i]);
   var b64=btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-  if(typeof v26Toast==='function')v26Toast('Opening the Running app with '+count+' days…');
+  if(typeof v26Toast==='function')v26Toast('Opening BeyondStride with '+count+' days…');
   // Opens the phone app; does nothing on a computer without it.
   window.location.href='scoresrun://localhost/plan#'+b64;
 }
