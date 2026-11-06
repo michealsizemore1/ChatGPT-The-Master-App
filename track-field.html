@@ -311,7 +311,7 @@ html{font-size:14px}
 
 <script src="version-check.js"></script>
 <script>
-const APP_VERSION='2026-11-02-1';
+const APP_VERSION='2026-11-06-1';
 checkForNewerAppVersion(APP_VERSION, 'tf');
 
 // [name, country, ranking score, 2026 season best]  "rd" marks a road time used where there is no track mark.
@@ -371,9 +371,9 @@ const ULTRA_NOTES={
 // [name, country, ITRA index, age group]
 const ULTRA={
  men:{
-  '50K':[['Frederic Tranchand','FRA',944,'35-39'],['Daniel Pattis','ITA',940,'23-34'],['Cristian Minoggio','ITA',933,'40-44'],['Andrzej Witek','POL',932,'23-34'],['Francesco Puppi','ITA',930,'23-34'],['Nashon Kiplimo','KEN',925,'23-34'],['William Boffelli','ITA',923,'23-34'],['Rongchao Gu','CHN',920,'35-39'],['Tao Luo','CHN',918,'23-34'],['Jim Walmsley','USA',917,'35-39']],
+  '50K':[['Frederic Tranchand','FRA',944,'35-39'],['Cristian Minoggio','ITA',940,'40-44'],['Daniel Pattis','ITA',940,'23-34'],['Andrzej Witek','POL',932,'23-34'],['Francesco Puppi','ITA',930,'23-34'],['Nashon Kiplimo','KEN',925,'23-34'],['William Boffelli','ITA',923,'23-34'],['Rongchao Gu','CHN',920,'35-39'],['Tao Luo','CHN',918,'23-34'],['Jim Walmsley','USA',917,'35-39']],
   '100K':[['Cristian Minoggio','ITA',945,'40-44'],['Ben Dhiman','USA',941,'23-34'],['Louison Coiffet','FRA',937,'23-34'],['Jim Walmsley','USA',930,'35-39'],['Francesco Puppi','ITA',928,'23-34'],['Andreas Reiterer','ITA',927,'23-34'],['Rongchao Gu','CHN',927,'35-39'],['Jonathan Albon','GBR',926,'35-39'],['Hannes Namberger','GER',926,'35-39'],['Jianjian Yang','CHN',923,'23-34']],
-  '100M':[['Ben Dhiman','USA',962,'23-34'],['Caleb Olson','USA',945,'23-34'],['Hugo Deck','FRA',937,'23-34'],['Baptiste Chassagne','FRA',936,'23-34'],['Vincent Bouillard','FRA',933,'23-34'],['Thomas Evans','GBR',932,'23-34'],['Francesco Puppi','ITA',927,'23-34'],['Virgile Moriset','FRA',925,'23-34'],['Ryan Montgomery','USA',924,'23-34'],['Ludovic Pommeret','FRA',923,'50-54']]
+  '100M':[['Ben Dhiman','USA',962,'23-34'],['Caleb Olson','USA',944,'23-34'],['Hugo Deck','FRA',937,'23-34'],['Baptiste Chassagne','FRA',936,'23-34'],['Vincent Bouillard','FRA',933,'23-34'],['Thomas Evans','GBR',932,'23-34'],['Francesco Puppi','ITA',927,'23-34'],['Virgile Moriset','FRA',925,'23-34'],['Ryan Montgomery','USA',924,'23-34'],['Ludovic Pommeret','FRA',923,'50-54']]
  },
  women:{
   '50K':[['Miao Yao','CHN',823,'23-34'],['Tove Alexandersson','SWE',818,'23-34'],['Judith Wyder','SUI',817,'35-39'],['Ikram Rharsalla Laktab','ESP',811,'23-34'],['Maude Mathys','SUI',804,'35-39'],['Nuria Gil Clapera','ESP',796,'23-34'],['Ida Amelie Robsahm','NOR',796,'23-34'],['Yngvild Kaspersen','NOR',795,'23-34'],['Mar\u00eda Teresa La Chica Lho\u00ebst','ESP',790,'23-34'],['Sara Alonso','ESP',789,'23-34']],
@@ -492,12 +492,12 @@ const DL_SEASON=[
 
 // Section news. [ISO date, headline, publisher, url, one-line summary]
 // Checked 2 November 2026; the twice-weekly refresh replaces these.
-const NEWS_CHECKED='2026-11-02';
+const NEWS_CHECKED='2026-11-06';
 const NEWS={
  track:[
+  ['2026-11-03','Patience pays off for new king of the hurdles Dos Santos','Diamond League','https://www.diamondleague.com/patience-pays-off-for-new-king-of-the-hurdles-dos-santos/','Alison dos Santos broke the 400m hurdles world record with 45.80 in Zurich, beat rival Karsten Warholm in all five of their Diamond League meetings this season, and claimed his third Diamond League title.'],
   ['2026-10-29','2026 Season Review Part VI: drama, records and new champions in Brussels','Diamond League','https://www.diamondleague.com/part-vi-drama-records-and-new-champions-in-brussels/','The season-ending retrospective recaps the Brussels Diamond League Final, where Chase Jackson and Collen Kebinatshipi set meeting records and 21 athletes won their first Diamond League titles.'],
-  ['2026-10-26','The record-breaking rise of Audrey Werro','Diamond League','https://www.diamondleague.com/the-record-breaking-rise-of-audrey-werro/','The Swiss 800m runner swept European and Diamond League titles with near-record times in 2026, and is now favoured to end Jarmila Kratochvílová’s 43-year-old world record.'],
-  ['2026-10-19','Wanda Diamond League confirms 2027 discipline allocation','Diamond League','https://www.diamondleague.com/discipline-allocation-confirmed-for-2027-wanda-diamond-league/','The 2027 circuit confirmed which of its 15 meetings — from Doha’s 7 May opener to the Zurich final on 25–26 August — will stage each event on the Road to the Final.']
+  ['2026-10-26','The record-breaking rise of Audrey Werro','Diamond League','https://www.diamondleague.com/the-record-breaking-rise-of-audrey-werro/','The Swiss 800m runner swept European and Diamond League titles with near-record times in 2026, and is now favoured to end Jarmila Kratochvílová’s 43-year-old world record.']
  ],
  road:[
   ['2026-11-01','Almgren stuns in NYC debut as Chepkirui denies Obiri a third title','Marathon Journal','https://marathonjournal.com/2026-new-york-city-marathon-results/','The Swede out-kicked Yemaneberhan Crippa and Kamohelo Mofolo to win New York in 2:06:01 as defending champion Benson Kipruto faded to fourth, while Sheila Chepkirui (2:24:36) held off a fast-closing Jessica McClain and Hellen Obiri.'],
@@ -510,6 +510,7 @@ const NEWS={
   ['2026-10-22','Geerts and Steyaert break the backyard ultra world record together','iRunFar','https://www.irunfar.com/merijn-geerts-ivo-steyaert-backyard-ultra-record-2026','The Belgian pair each completed 124 laps (516.7 miles) at the Big Dog’s Backyard Ultra World Team Championships, breaking Phil Gore’s 119-lap individual record.']
  ],
  entries:[
+  ['2026-11-03','24-year-old charity runner Rachel Apa dies after collapsing near the NYC Marathon finish','WSB-TV','https://www.wsbtv.com/sports/woman-running-nyc/3TZ4OJ2N6MZJVIFVIWLZKPIYKY/','The Pennsylvania runner, racing her first New York City Marathon to raise money for Parkinson’s research, collapsed about two miles from the finish and died later at a hospital.'],
   ['2026-11-01','Almgren stuns in NYC debut as Chepkirui denies Obiri a third title','Marathon Journal','https://marathonjournal.com/2026-new-york-city-marathon-results/','The Swede out-kicked Yemaneberhan Crippa and Kamohelo Mofolo to win in 2:06:01 as defending champion Benson Kipruto faded to fourth, while Sheila Chepkirui (2:24:36) held off Jessica McClain and Hellen Obiri.'],
   ['2026-11-01','McClain’s runner-up finish ends an eight-year US podium drought','Yahoo Sports','https://sports.yahoo.com/articles/york-city-marathon-2026-results-162826825.html','Jessica McClain’s 2:24:42 — six seconds back — is the first American women’s podium finish in New York since Shalane Flanagan’s 2018 bronze.'],
   ['2026-11-01','Hug and Debrunner sweep the wheelchair races','FloTrack','https://www.flotrack.org/articles/16339972-2026-nyc-marathon-live-updates-results-winners','Marcel Hug won an eighth men’s wheelchair title in 1:28:14, edging Daniel Romanchuk by just over a second, while Catherine Debrunner’s 1:40:02 fell about 30 seconds shy of her own course record.']
@@ -525,7 +526,7 @@ const NEWS={
 // Track and road from the World Athletics world-record tables; ultra from the IAU record lists.
 // Both read 29 October 2026 (full men's and women's tables on both sites cross-checked
 // against the entries below; no changes for the events tracked here).
-const RECORDS_CHECKED='2026-10-29';
+const RECORDS_CHECKED='2026-11-06';
 const RECORDS={
  track:{
   men:[
