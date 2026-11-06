@@ -38,6 +38,24 @@
       if(items.length<60)items.push({meal:m,name:String(x.name||'').slice(0,60),cal:Math.round(num(x.cal)*s),prot:r1(num(x.prot)*s),carbs:r1(num(x.carbs)*s),fat:r1(num(x.fat)*s)});
     });
     Object.keys(t).forEach(function(k){t[k]=k==='cal'||k==='sodium'||k==='caffeine'?Math.round(t[k]):r1(t[k]);});
+    // Micronutrients: same list, targets and 1–10 score as the Nutrition tab's "Top micronutrient quality".
+    var M={};['iron','calcium','vitD','magnesium','vitB12','potassium','zinc','vitC'].forEach(function(f){M[f]=0;});
+    var sportsSugar=0,naturalSugar=0;
+    (log||[]).forEach(function(x){var s=num(x.servings)||1;Object.keys(M).forEach(function(f){M[f]+=num(x[f])*s;});
+      if(x.meal==='sports')sportsSugar+=num(x.sugar)*s;
+      try{if(typeof isNaturalSugarFood==='function'&&isNaturalSugarFood(x))naturalSugar+=num(x.sugar)*s;}catch(e){}});
+    var sugarCeiling=Math.round(36+sportsSugar+naturalSugar);
+    var micros=[
+      ['Iron','iron',M.iron,14,0,'mg'],['Calcium','calcium',M.calcium,1000,0,'mg'],['Vitamin D','vitD',M.vitD,15,0,'mcg'],
+      ['Magnesium','magnesium',M.magnesium,483,0,'mg'],['Vitamin B12','vitB12',M.vitB12,2.4,0,'mcg'],['Sodium','sodium',t.sodium,2300,4000,'mg'],
+      ['Potassium','potassium',M.potassium,3400,0,'mg'],['Zinc','zinc',M.zinc,15,0,'mg'],['Vitamin C','vitC',M.vitC,90,0,'mg'],
+      ['Fiber','fiber',t.fiber,28,0,'g'],['Sugar','sugar',t.sugar,sugarCeiling,sugarCeiling,'g'],['Caffeine','caffeine',t.caffeine,400,400,'mg']
+    ].map(function(m){return{n:m[0],f:m[1],v:r1(m[2]),t:m[3],mx:m[4],u:m[5]};});
+    if((log||[]).length){
+      var comp=micros.map(function(m){if(m.mx&&m.v>m.mx)return Math.max(0,1-(m.v-m.mx)/m.mx);return Math.max(0,Math.min(1,m.v/m.t));});
+      t.microScore=r1(1+comp.reduce(function(a,b){return a+b;},0)/comp.length*9);
+    }
+    t.micros=micros;
     Object.keys(meals).forEach(function(k){meals[k]=Math.round(meals[k]);});
     t.meals=meals;t.items=items;t.count=(log||[]).length;
     return t;
