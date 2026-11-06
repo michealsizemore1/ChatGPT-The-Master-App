@@ -3507,8 +3507,8 @@ function importWatchRunsFromLink(){
 window.addEventListener('load',function(){setTimeout(importWatchRunsFromLink,300);});
 window.addEventListener('hashchange',importWatchRunsFromLink);
 
-// ── Send a training plan to the phone's Running app (and from there to the watch) ──
-// Opens scoresrun://localhost/plan#<base64url {date: that day's plan text}> — the Running app
+// ── Send a training plan to BeyondStride on the phone (and from there to the watch) ──
+// Opens beyondstride://localhost/plan#<base64url {date: that day's plan text}> — BeyondStride
 // turns each day into a guided workout. Only today and later are sent.
 function sendPlanToRunningApp(which){
   var key=which==='upcoming'?'upcoming_training_plan':'current_training_plan';
@@ -3523,5 +3523,5 @@ function sendPlanToRunningApp(which){
   var b64=btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
   if(typeof v26Toast==='function')v26Toast('Opening BeyondStride with '+count+' days…');
   // Opens the phone app; does nothing on a computer without it.
-  window.location.href='scoresrun://localhost/plan#'+b64;
+  window.location.href='beyondstride://localhost/plan#'+b64;
 }
