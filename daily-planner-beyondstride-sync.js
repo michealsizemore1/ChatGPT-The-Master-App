@@ -193,6 +193,18 @@
       scheduleLibrary();
       return;
     }
+    // A food or saved meal deleted in BeyondStride (✕): remove the first one with that name.
+    if(f==='libDelete'){
+      var dx=e.x||{},nm=String(dx.name||'');if(!nm)return;
+      try{
+        var get={fav:getFavorites,healthy:getHealthyFoods,meals:getSavedMeals}[dx.list],put={fav:saveFavorites,healthy:saveHealthyFoods,meals:saveSavedMeals}[dx.list];
+        if(!get||!put)return;
+        var arr=get()||[],i=arr.findIndex(function(x){return x&&x.name===nm;});
+        if(i>=0){arr.splice(i,1);put(arr);}
+        try{if(typeof renderFoodLibrarySearch==='function')renderFoodLibrarySearch();}catch(err){}
+      }catch(err){}
+      return;
+    }
     // Calorie-target settings changed in BeyondStride.
     if(f==='calSettings'){
       var cx=e.x||{};
