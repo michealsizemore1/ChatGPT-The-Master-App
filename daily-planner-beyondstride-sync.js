@@ -171,6 +171,8 @@
     var date=String(e.date||''),f=e.f,viewed=typeof today!=='undefined'&&dk(today)===date;
     if(!/^\d{4}-\d{2}-\d{2}$/.test(date))return;
     if(f==='actSave'||f==='actDel'){applyActivity(e);return;}
+    if(f==='actSettings'){applyActSettings(e);return;}
+    if(f==='shoeSave'||f==='shoeDel'){applyShoe(e);return;}
     if(f==='foodAdd'||f==='foodEdit'||f==='foodDel'){applyFood(e,date,viewed);return;}
     // A meal saved in BeyondStride (💾): add it to Saved Meals.
     if(f==='mealSave'){
@@ -372,8 +374,16 @@
       var o={};for(var k in v){if(!Object.prototype.hasOwnProperty.call(v,k))continue;var c=clean(v[k],depth+1);if(c===undefined)continue;o[String(k).replace(/[.$#\[\]\/]/g,'_')||'_']=c;}return o;
     }
     var list=acts.map(function(a){var o={};for(var k in a){var v=a[k];if(v===''||v==null||v===0)continue;var c=clean(v,1);if(c===undefined)continue;o[String(k).replace(/[.$#\[\]\/]/g,'_')]=c;}return o;});
-    var payload={list:list,extras:actExtras(acts),settings:{cp:typeof getCP==='function'?getCP():0,maxHr:typeof getMaxHR==='function'?getMaxHR():0,restHr:typeof getRestingHR==='function'?getRestingHR():0},updated:Date.now()};
-    var cmp=JSON.stringify([payload.list,payload.extras,payload.settings]);
+    // Phase 2: zone settings, mileage goals, journal-only miles (days with no activity) and shoes.
+    var goals={};try{['week','month','year'].forEach(function(p){goals[p]=getActGoal(p)||0;});}catch(e){}
+    var zonesNote='';try{var tz=localStorage.getItem('training_zones_updated_at');if(tz){var td=new Date(tz);if(!isNaN(td.getTime()))zonesNote='Updated '+td.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}}catch(e){}
+    var exMiles={};try{var y0=new Date().getFullYear()+'-01-01',prev=new Date();prev.setDate(prev.getDate()-14);var w0=dk(prev);
+      for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(!k||k.indexOf('planner_')!==0)continue;var ds=k.slice(8);if(!(ds>=y0||ds>=w0))continue;
+        try{var dd=JSON.parse(localStorage.getItem(k));var m=parseFloat(dd&&dd.exMiles)||0;if(m)exMiles[ds]=m;}catch(e){}}}catch(e){}
+    var shoes=[];try{shoes=clean(getShoes(),1)||[];}catch(e){}
+    var payload={list:list,extras:actExtras(acts),settings:{cp:typeof getCP==='function'?getCP():0,maxHr:typeof getMaxHR==='function'?getMaxHR():0,restHr:typeof getRestingHR==='function'?getRestingHR():0,zonesNote:zonesNote},
+      goals:goals,exMiles:exMiles,shoes:shoes,updated:Date.now()};
+    var cmp=JSON.stringify([payload.list,payload.extras,payload.settings,payload.goals,payload.exMiles,payload.shoes]);
     if(cmp===actSent)return;
     var body=JSON.stringify(payload);
     actStatus({ok:null,stage:'sending',count:list.length,bytes:body.length});
@@ -385,8 +395,30 @@
   function scheduleActivities(){clearTimeout(actTimer);actTimer=setTimeout(shareActivities,3000);}
   window.beyondStrideShareActivities=shareActivities;
   function hookActivities(){
-    var fn=window.saveActivities;if(typeof fn!=='function'||fn._bs)return;
-    window.saveActivities=function(){var r=fn.apply(this,arguments);try{scheduleActivities();}catch(e){}return r;};window.saveActivities._bs=true;
+    ['saveActivities','saveShoes','saveCPAndRender','saveMaxHRAndRender','saveRestHRAndRender','saveActGoalAndRender'].forEach(function(n){
+      var fn=window[n];if(typeof fn!=='function'||fn._bs)return;
+      window[n]=function(){var r=fn.apply(this,arguments);try{scheduleActivities();}catch(e){}return r;};window[n]._bs=true;
+    });
+  }
+  // Zone settings / goals and shoes changed in BeyondStride.
+  function applyActSettings(e){
+    var x=e.x||{};
+    if(x.cp>0)localStorage.setItem('cp_value',String(x.cp));
+    if(x.maxHr>0)localStorage.setItem('max_hr_value',String(x.maxHr));
+    if(x.restHr>0)localStorage.setItem('resting_hr_value',String(x.restHr));
+    if(x.cp>0||x.maxHr>0||x.restHr>0)localStorage.setItem('training_zones_updated_at',new Date().toISOString());
+    ['week','month','year'].forEach(function(p){if(x['goal_'+p]!=null){localStorage.setItem('act_goal_'+p+'_mi',x['goal_'+p]>0?String(x['goal_'+p]):'');
+      if(p==='week'&&typeof syncWeeklyMilesGoal==='function')syncWeeklyMilesGoal(String(x['goal_'+p]||''));}});
+    ['cpInput','hrMaxInput','restHrInput','actGoal_week','actGoal_month','actGoal_year'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+    try{renderActivities();}catch(err){}
+    scheduleActivities();
+  }
+  function applyShoe(e){
+    var x=e.x||{};if(typeof getShoes!=='function'||typeof saveShoes!=='function')return;
+    var shoes=getShoes(),i=shoes.findIndex(function(s){return String(s.id)===String(x.id);});
+    if(e.f==='shoeDel'){if(i>=0)shoes.splice(i,1);}
+    else if(x.shoe){if(i>=0)shoes[i]=Object.assign(shoes[i],x.shoe);else shoes.push(x.shoe);}
+    saveShoes(shoes);try{renderShoeList();}catch(err){}
   }
   // An activity added, changed or deleted in BeyondStride.
   function applyActivity(e){
