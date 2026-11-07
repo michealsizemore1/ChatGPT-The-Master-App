@@ -341,8 +341,12 @@
     }
   }
   // Fluids/weights arrive in /inbox, foods in /foodinbox; both are applied in the order they were made.
+  // Heartbeat: BeyondStride shows "Command Center synced N min ago" from this (at most once a minute).
+  var seenAt=0;
+  function heartbeat(c){if(Date.now()-seenAt<60000)return;seenAt=Date.now();try{fetch(c.db+'/nutrition/'+encodeURIComponent(c.key)+'/ccSeen.json',{method:'PUT',body:JSON.stringify(Date.now())}).catch(function(){});}catch(e){}}
   function pullInbox(){
     var c=cfg();if(!c||inboxBusy||typeof dk!=='function')return;
+    heartbeat(c);
     inboxBusy=true;
     var root=c.db+'/nutrition/'+encodeURIComponent(c.key)+'/';
     function get(box){return fetch(root+box+'.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).then(function(o){
