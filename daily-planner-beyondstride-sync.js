@@ -99,6 +99,18 @@
       // Daily Macro Ratio target (custom ratio, or the training-day / hard-workout target).
       try{if(typeof runnerMacroTarget==='function'){var mt=runnerMacroTarget();rec.mt={prot:Number(mt.prot)||0,carbs:Number(mt.carbs)||0,fat:Number(mt.fat)||0,label:String(mt.label||''),cal:Math.round(Number(mt.calories)||0)};}}catch(e){}
     }
+    // Meal notes.
+    try{var notes={};['breakfast','lunch','dinner','snack','liquids','sports','supplements'].forEach(function(m){var v='';if(isToday){var el=document.getElementById('mnotes-'+m);v=el?el.value:'';}else if(d)v=d['mnotes-'+m]||'';if(v)notes[m]=String(v).slice(0,2000);});
+      if(Object.keys(notes).length)rec.notes=notes;}catch(e){}
+    // Pre-run meal ideas (the day before a hard workout) and the fueling note — today only, with a few shuffles.
+    if(isToday){try{var perf=typeof nutritionPerformancePreset==='function'?nutritionPerformancePreset(dateKey):null;
+      if(perf)rec.perfNote=perf.phase==='day'?'Morning workout: aim for 30–40g protein with the post-run meal, then spread the remaining protein across the day.':'Pre-fueling day: emphasize carbohydrates at lunch, dinner, and the evening snack.';
+      if(perf&&perf.phase==='prior'&&typeof pickMealIdeaFoods==='function'){
+        var names2={long:'Long Run',tempo:'Tempo Run',interval:'Interval Run',quality:'Quality Run'},n0=typeof getMealIdeasNonce==='function'?getMealIdeasNonce(dateKey):0,sets=[];
+        for(var sh=0;sh<6;sh++){var ex=[],set=[];[{key:'breakfast',label:'🌅 Breakfast'},{key:'lunch',label:'🥗 Lunch'},{key:'dinner',label:'🍽️ Dinner'}].forEach(function(sl){
+          var picks=pickMealIdeaFoods(sl.key,mealIdeasRng(dateKey+'|'+sl.key+'|'+(n0+sh)),ex);picks.forEach(function(f2){ex.push(String(f2.name||'').toLowerCase());});
+          set.push({label:sl.label,foods:picks.map(function(f2){var cf=cleanFood(f2,false);if(cf.image&&!/^https?:/.test(cf.image))delete cf.image;return cf;})});});sets.push(set);}
+        rec.prerun={title:'🍽️ Tomorrow: '+names2[perf.workout]+' — Meal Ideas',sets:sets};}}catch(e){}}
     // Run-day context for food quality (same test as runnerFoodQuality).
     try{var qd=new Date(dateKey+'T12:00:00'),qa='';try{qa=(getActivities()||[]).filter(function(a){return a&&a.date===dateKey;}).map(function(a){return [a.title,a.type,a.workout].filter(Boolean).join(' ');}).join(' ');}catch(e){}
       if(isToday){try{qa+=' '+(typeof journalTodayTrainingSummary==='function'?journalTodayTrainingSummary():'');}catch(e){}}
@@ -219,6 +231,14 @@
         ['proteinSource','carbSource','fatSource'].forEach(function(k){if(fx[k])it[k]=String(fx[k]);});
         favs.push(it);saveFavorites(favs);try{if(typeof renderFavsList==='function')renderFavsList();}catch(err){}scheduleLibrary();}catch(err){}
       return;}
+    // Daily Macro Ratio changed in BeyondStride (that day only, like Change Ratio here).
+    if(f==='macroRatio'){var mx2=e.x||{};try{localStorage.setItem(macroRatioStorageKey(date),JSON.stringify(mx2.enabled===false?{enabled:false}:{enabled:true,prot:num(mx2.prot),carbs:num(mx2.carbs),fat:num(mx2.fat)}));}catch(err){}
+      if(viewed){try{updateMacroTotals();}catch(err){}}return;}
+    // A meal's notes typed in BeyondStride.
+    if(f==='mealNote'){var nx=e.x||{},nm2=String(nx.meal||'');if(!/^(breakfast|lunch|dinner|snack|liquids|sports|supplements)$/.test(nm2))return;var nt=String(nx.text||'').slice(0,2000);
+      if(viewed){var ne=document.getElementById('mnotes-'+nm2);if(ne){ne.value=nt;try{save();}catch(err){}}}
+      else{var nkk='planner_'+date,ndd={};try{ndd=JSON.parse(localStorage.getItem(nkk)||'{}')||{};}catch(err){ndd={};}ndd['mnotes-'+nm2]=nt;localStorage.setItem(nkk,JSON.stringify(ndd));}
+      return;}
     if(f==='dayRequest'){var rq=String((e.x||{}).day||'');if(/^\d{4}-\d{2}-\d{2}$/.test(rq))shareRequestedDay(rq);return;}
     if(f==='foodAdd'||f==='foodEdit'||f==='foodDel'){applyFood(e,date,viewed);return;}
     // A meal saved in BeyondStride (💾): add it to Saved Meals.
@@ -301,7 +321,9 @@
     }else if(i<0)return;
     else if(e.f==='foodEdit'){if(x.servings!=null)log[i].servings=num(x.servings)||log[i].servings;if(x.meal)log[i].meal=x.meal;if(x.servingLabel)log[i].servingLabel=String(x.servingLabel);
       // Numbers typed in BeyondStride (per serving): every field is sent, blank ones as missing.
-      if(x.full){['cal','prot','fat','carbs'].concat(FOOD_MICROS).forEach(function(k){log[i][k]=x[k]!=null&&x[k]!==''?num(x[k]):null;});if(x.name)log[i].name=String(x.name);}}
+      if(x.full){['cal','prot','fat','carbs'].concat(FOOD_MICROS).forEach(function(k){log[i][k]=x[k]!=null&&x[k]!==''?num(x[k]):null;});if(x.name)log[i].name=String(x.name);}
+      if(x.srcSet){var chg=false;['proteinSource','carbSource','fatSource'].forEach(function(k){if(x[k]&&log[i][k]!==x[k]){log[i][k]=String(x[k]);chg=true;}});
+        if(chg){log[i].sourceClassificationAuto=false;log[i].sourceConfidence='High';log[i].sourceMethod='Manual correction';try{if(typeof rememberFoodSourceCorrection==='function')rememberFoodSourceCorrection(log[i]);}catch(err){}}}}
     else log.splice(i,1);
     if(viewed){try{renderFoodItems();}catch(err){}try{save();}catch(err){}}
     else{
