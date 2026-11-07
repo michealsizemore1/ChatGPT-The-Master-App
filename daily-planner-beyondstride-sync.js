@@ -25,6 +25,15 @@
   }
 
   function num(v){return parseFloat(v)||0;}
+  var FOOD_MICROS=['fiber','sugar','sodium','vitC','vitD','calcium','iron','potassium','caffeine','magnesium','vitB12','zinc'];
+  // A food as BeyondStride needs it (per-serving values; no photos).
+  function cleanFood(x,withId){
+    var o={name:String(x.name||'').slice(0,80),servingLabel:String(x.servingLabel||'1 serving').slice(0,40),servings:num(x.servings)||1};
+    if(withId){o.id=String(x.id||'');o.meal=x.meal||'snack';}
+    ['cal','prot','fat','carbs'].concat(FOOD_MICROS).forEach(function(f){if(x[f]!=null&&x[f]!==''&&!isNaN(parseFloat(x[f])))o[f]=r1(num(x[f]));});
+    if(x.barcode)o.barcode=String(x.barcode);
+    return o;
+  }
   function r1(v){return Math.round(v*10)/10;}
 
   // Totals for one day's food log (same math as the Nutrition tab: amount × servings).
@@ -35,7 +44,7 @@
       t.cal+=num(x.cal)*s;t.prot+=num(x.prot)*s;t.carbs+=num(x.carbs)*s;t.fat+=num(x.fat)*s;
       t.fiber+=num(x.fiber)*s;t.sugar+=num(x.sugar)*s;t.sodium+=num(x.sodium)*s;t.caffeine+=num(x.caffeine)*s;
       var m=x.meal||'other';meals[m]=(meals[m]||0)+num(x.cal)*s;
-      if(items.length<60)items.push({meal:m,name:String(x.name||'').slice(0,60),cal:Math.round(num(x.cal)*s),prot:r1(num(x.prot)*s),carbs:r1(num(x.carbs)*s),fat:r1(num(x.fat)*s)});
+      if(items.length<80)items.push({meal:m,name:String(x.name||'').slice(0,60),cal:Math.round(num(x.cal)*s),prot:r1(num(x.prot)*s),carbs:r1(num(x.carbs)*s),fat:r1(num(x.fat)*s),x:cleanFood(x,true)});
     });
     Object.keys(t).forEach(function(k){t[k]=k==='cal'||k==='sodium'||k==='caffeine'?Math.round(t[k]):r1(t[k]);});
     // Micronutrients: same list, targets and 1–10 score as the Nutrition tab's "Top micronutrient quality".
@@ -158,6 +167,7 @@
   function applyEntry(e){
     var date=String(e.date||''),f=e.f,viewed=typeof today!=='undefined'&&dk(today)===date;
     if(!/^\d{4}-\d{2}-\d{2}$/.test(date))return;
+    if(f==='foodAdd'||f==='foodEdit'||f==='foodDel'){applyFood(e,date,viewed);return;}
     var fluid={water:'waterOz',sports:'sportsDrinksOz',other:'otherLiquidsOz'}[f];
     var wfield={weight:'wWghtVal',postWeight:'wPostRunWghtVal'}[f];
     if(viewed){
@@ -173,6 +183,26 @@
     else if(wfield)d[wfield]=num(e.v)>0?String(e.v):'';
     else return;
     localStorage.setItem(key,JSON.stringify(d));
+  }
+  // Foods added, changed or removed in BeyondStride: same as doing it on this page.
+  function applyFood(e,date,viewed){
+    var x=e.x||{},log,d=null,key='planner_'+date;
+    if(viewed){log=window._foodLog=window._foodLog||[];}
+    else{try{d=JSON.parse(localStorage.getItem(key)||'{}')||{};}catch(err){d={};}log=d.foodLog=Array.isArray(d.foodLog)?d.foodLog:[];}
+    var id=String(x.id||'');if(!id)return;
+    var i=log.findIndex(function(it){return it.id===id;});
+    if(e.f==='foodAdd'){
+      if(i>=0)return;   // already here
+      var item={id:id,meal:x.meal||'snack',name:String(x.name||'Food'),servingLabel:x.servingLabel||'1 serving',servings:num(x.servings)||1};
+      ['cal','prot','fat','carbs'].concat(FOOD_MICROS).forEach(function(k){item[k]=x[k]!=null?x[k]:null;});
+      if(x.barcode)item.barcode=x.barcode;
+      try{if(typeof looksLikeRestaurantFood==='function')item.restaurant=looksLikeRestaurantFood(item.name);}catch(err){}
+      log.push(item);
+    }else if(i<0)return;
+    else if(e.f==='foodEdit'){if(x.servings!=null)log[i].servings=num(x.servings)||log[i].servings;if(x.meal)log[i].meal=x.meal;}
+    else log.splice(i,1);
+    if(viewed){try{renderFoodItems();}catch(err){}try{save();}catch(err){}}
+    else localStorage.setItem(key,JSON.stringify(d));
   }
   function pullInbox(){
     var c=cfg();if(!c||inboxBusy||typeof dk!=='function')return;
@@ -193,11 +223,32 @@
   }
   window.beyondStridePullInbox=pullInbox;
 
+  // ── Your food database for BeyondStride's Add food screen: favorites, healthy foods, saved meals ──
+  var libSent='',libTimer=null;
+  function shareLibrary(){
+    var c=cfg();if(!c)return;
+    var lib={favorites:[],healthy:[],meals:[],updated:Date.now()};
+    try{lib.favorites=(getFavorites()||[]).slice(0,500).map(function(x){return cleanFood(x,false);});}catch(e){}
+    try{lib.healthy=(getHealthyFoods()||[]).slice(0,500).map(function(x){return cleanFood(x,false);});}catch(e){}
+    try{lib.meals=(getSavedMeals()||[]).slice(0,100).map(function(m){return{name:String(m.name||'Meal'),category:m.category||'',items:(m.items||[]).slice(0,30).map(function(x){return cleanFood(x,false);})};});}catch(e){}
+    var cmp=JSON.stringify([lib.favorites,lib.healthy,lib.meals]);
+    if(cmp===libSent)return;
+    fetch(c.db+'/nutrition/'+encodeURIComponent(c.key)+'/library.json',{method:'PUT',body:JSON.stringify(lib)})
+      .then(function(r){if(r.ok)libSent=cmp;}).catch(function(){});
+  }
+  function scheduleLibrary(){clearTimeout(libTimer);libTimer=setTimeout(shareLibrary,3000);}
+  function hookLibrary(){
+    ['saveFavorites','saveHealthyFoods','saveSavedMeals'].forEach(function(n){
+      var fn=window[n];if(typeof fn!=='function'||fn._bs)return;
+      window[n]=function(){var r=fn.apply(this,arguments);try{scheduleLibrary();}catch(e){}return r;};window[n]._bs=true;
+    });
+  }
+
   window.beyondStrideShareNow=function(){shareRecent(30);};
   readLink();
   window.addEventListener('hashchange',readLink);
   window.addEventListener('load',function(){
-    hook();
+    hook();hookLibrary();setTimeout(shareLibrary,2500);
     // Catch up the last week each time the page opens (days are only sent if they changed).
     setTimeout(function(){shareRecent(7);},1500);
     // Pick up finished runs, now and every minute while the page is open.
