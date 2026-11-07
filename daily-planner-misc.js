@@ -3469,6 +3469,13 @@ function importWatchRunsFromLink(){
     runs=JSON.parse(new TextDecoder().decode(bytes));
   }catch(e){alert('Could not read the runs sent from the watch app: '+e.message);return;}
   if(!Array.isArray(runs)||!runs.length)return;
+  importWatchRuns(runs,{fromLink:true});
+}
+// Adds runs from BeyondStride to Activities (from the link above, or from the cloud — see
+// daily-planner-beyondstride-sync.js). opts.fromLink: also clear the link and open Activities.
+// opts.done(added, updated) runs after saving.
+function importWatchRuns(runs,opts){
+  opts=opts||{};
   var tries=0;
   (function waitForActivities(){
     // Activities load asynchronously from on-device storage; wait for them first.
@@ -3497,11 +3504,14 @@ function importWatchRunsFromLink(){
     });
     saveActivities(acts);
     try{renderActivities();}catch(ignore2){}
-    try{history.replaceState(null,'',location.pathname+location.search);}catch(ignore3){}
-    try{hmSwitch('activities');}catch(ignore4){}
-    var msg=added?(added+' watch run'+(added===1?'':'s')+' added to Activities'):'Those runs were already in Activities';
+    if(opts.fromLink){
+      try{history.replaceState(null,'',location.pathname+location.search);}catch(ignore3){}
+      try{hmSwitch('activities');}catch(ignore4){}
+    }
+    var msg=added?(added+' BeyondStride run'+(added===1?'':'s')+' added to Activities'):(opts.fromLink?'Those runs were already in Activities':'');
     if(updated&&added)msg+=' ('+updated+' already there)';
-    if(typeof v26Toast==='function')v26Toast(msg);else alert(msg);
+    if(msg){if(typeof v26Toast==='function')v26Toast(msg);else if(opts.fromLink)alert(msg);}
+    if(typeof opts.done==='function')opts.done(added,updated);
   })();
 }
 window.addEventListener('load',function(){setTimeout(importWatchRunsFromLink,300);});

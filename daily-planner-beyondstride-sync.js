@@ -115,6 +115,26 @@
     window.updateMacroTotals._bs=true;
   }
 
+  // ── Runs from BeyondStride, waiting in the cloud: add them to Activities, then clear them ──
+  // (BeyondStride uploads each finished run to <db>/nutrition/<key>/runs/<start>.)
+  var pulling=false;
+  function pullRuns(){
+    var c=cfg();if(!c||pulling||typeof importWatchRuns!=='function')return;
+    pulling=true;
+    var base=c.db+'/nutrition/'+encodeURIComponent(c.key)+'/runs';
+    fetch(base+'.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).then(function(o){
+      if(!o||typeof o!=='object'){pulling=false;return;}
+      var keys=Object.keys(o).filter(function(k){return o[k]&&o[k].id&&o[k].date;});
+      if(!keys.length){pulling=false;return;}
+      importWatchRuns(keys.map(function(k){return o[k];}),{done:function(){
+        // Saved: remove them from the cloud (BeyondStride sees they're gone and marks them sent).
+        Promise.all(keys.map(function(k){return fetch(base+'/'+encodeURIComponent(k)+'.json',{method:'DELETE'}).catch(function(){});}))
+          .then(function(){pulling=false;},function(){pulling=false;});
+      }});
+    }).catch(function(){pulling=false;});
+  }
+  window.beyondStridePullRuns=pullRuns;
+
   window.beyondStrideShareNow=function(){shareRecent(30);};
   readLink();
   window.addEventListener('hashchange',readLink);
@@ -122,6 +142,12 @@
     hook();
     // Catch up the last week each time the page opens (days are only sent if they changed).
     setTimeout(function(){shareRecent(7);},1500);
+    // Pick up finished runs, now and every minute while the page is open.
+    setTimeout(pullRuns,1200);
+    setInterval(function(){if(document.visibilityState==='visible')pullRuns();},60000);
   });
-  document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden'&&cfg()&&typeof today!=='undefined')shareDay(dk(today));});
+  document.addEventListener('visibilitychange',function(){
+    if(document.visibilityState==='hidden'&&cfg()&&typeof today!=='undefined')shareDay(dk(today));
+    if(document.visibilityState==='visible')pullRuns();
+  });
 })();
