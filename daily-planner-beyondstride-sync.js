@@ -204,6 +204,21 @@
     if(f==='wrnSave'){var wx=e.x||{};if(/^\d{4}-\d{2}-\d{2}$/.test(String(wx.week||''))){var wt=String(wx.text||'').trim();if(wt)localStorage.setItem('act_week_note_'+wx.week,wt);else localStorage.removeItem('act_week_note_'+wx.week);
       try{if(typeof loadWrnNote==='function')loadWrnNote();}catch(err){}scheduleActivities();}return;}
     if(f==='actImport'){applyImport(e);return;}
+    // A photo taken in BeyondStride for a food in a meal (shown as its thumbnail here too).
+    if(f==='foodPhoto'){var px=e.x||{},pid=String(px.id||''),img=String(px.image||'');if(!pid||!/^data:image\//.test(img)||img.length>60000)return;
+      var plog,pd=null,pk='planner_'+date;if(viewed){plog=window._foodLog||[];}else{try{pd=JSON.parse(localStorage.getItem(pk)||'{}')||{};}catch(err){pd={};}plog=Array.isArray(pd.foodLog)?pd.foodLog:[];}
+      var pit=plog.find(function(it){return it.id===pid;});if(!pit)return;pit.imageData=img;pit.imageUrl='';
+      if(viewed){try{renderFoodItems();}catch(err){}try{save();}catch(err){}}else localStorage.setItem(pk,JSON.stringify(pd));return;}
+    // ⭐ in BeyondStride: add a food to Favorites (the Food Database), unless one with that name is already there.
+    if(f==='favAdd'){var fx=e.x||{};if(!fx.name||typeof getFavorites!=='function')return;
+      try{var favs=getFavorites()||[],nm=String(fx.name).toLowerCase().trim();if(favs.some(function(x){return String(x&&x.name||'').toLowerCase().trim()===nm;}))return;
+        var it={name:String(fx.name).slice(0,120),servingLabel:fx.servingLabel||'1 serving',servings:1};
+        ['cal','prot','fat','carbs'].concat(FOOD_MICROS).forEach(function(k){it[k]=fx[k]!=null&&fx[k]!==''?num(fx[k]):null;});
+        if(fx.barcode)it.barcode=String(fx.barcode);
+        if(fx.image&&/^https?:/.test(fx.image))it.imageUrl=String(fx.image);else if(fx.image&&/^data:image\//.test(fx.image)&&fx.image.length<60000)it.imageData=String(fx.image);
+        ['proteinSource','carbSource','fatSource'].forEach(function(k){if(fx[k])it[k]=String(fx[k]);});
+        favs.push(it);saveFavorites(favs);try{if(typeof renderFavsList==='function')renderFavsList();}catch(err){}scheduleLibrary();}catch(err){}
+      return;}
     if(f==='dayRequest'){var rq=String((e.x||{}).day||'');if(/^\d{4}-\d{2}-\d{2}$/.test(rq))shareRequestedDay(rq);return;}
     if(f==='foodAdd'||f==='foodEdit'||f==='foodDel'){applyFood(e,date,viewed);return;}
     // A meal saved in BeyondStride (💾): add it to Saved Meals.
