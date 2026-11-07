@@ -67,8 +67,17 @@
     var log=isToday&&Array.isArray(window._foodLog)?window._foodLog:(d&&Array.isArray(d.foodLog)?d.foodLog:[]);
     if(!log.length&&!isToday)return null;
     var rec=summarize(log);
-    if(d){var w=num(d.waterOz)||(num(d.waterCount)*8);w+=num(d.sportsDrinksOz)+num(d.otherLiquidsOz);if(w)rec.waterOz=Math.round(w);
-      var wt=num(d.wWghtVal);if(wt>70&&wt<600)rec.weight=r1(wt);}
+    // Fluids (water / sports drinks / other drinks, caffeine excluded) and wake-up / post-run weight,
+    // for BeyondStride's Hydration card. Today reads the live counters and fields; older days the saved copy.
+    var wa=0,sp=0,ot=0,wt=0,pw=0;
+    if(isToday&&typeof waterOz!=='undefined'){
+      wa=num(waterOz);sp=num(typeof sportsDrinksOz!=='undefined'?sportsDrinksOz:0);ot=num(typeof otherLiquidsOz!=='undefined'?otherLiquidsOz:0);
+      var we=document.getElementById('wWghtVal'),pe=document.getElementById('wPostRunWghtVal');
+      wt=num(we&&we.value);pw=num(pe&&pe.value);
+    }else if(d){wa=num(d.waterOz)||(num(d.waterCount)*8);sp=num(d.sportsDrinksOz);ot=num(d.otherLiquidsOz);wt=num(d.wWghtVal);pw=num(d.wPostRunWghtVal);}
+    if(wa+sp+ot){rec.waterOz=Math.round(wa+sp+ot);rec.water=Math.round(wa);rec.sportsOz=Math.round(sp);rec.otherOz=Math.round(ot);}
+    if(wt>70&&wt<600)rec.weight=r1(wt);
+    if(pw>70&&pw<600)rec.postWeight=r1(pw);
     if(isToday&&typeof dailyCalorieTargetData==='function'){
       try{var c=dailyCalorieTargetData();rec.target=Math.round(c.target);rec.range=Math.round(c.range);rec.active=Math.round(c.active||0);}catch(e){}
     }
@@ -113,6 +122,12 @@
     var orig=window.updateMacroTotals;
     window.updateMacroTotals=function(){var r=orig.apply(this,arguments);try{schedule();}catch(e){}return r;};
     window.updateMacroTotals._bs=true;
+    // Fluid taps and weight fields: share those too.
+    if(typeof window.updateHydrationEstimate==='function'&&!window.updateHydrationEstimate._bs){
+      var oh=window.updateHydrationEstimate;
+      window.updateHydrationEstimate=function(){var r=oh.apply(this,arguments);try{schedule();}catch(e){}return r;};
+      window.updateHydrationEstimate._bs=true;
+    }
   }
 
   // ── Runs from BeyondStride, waiting in the cloud: add them to Activities, then clear them ──
