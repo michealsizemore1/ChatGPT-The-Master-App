@@ -1128,7 +1128,7 @@ function aiSearchFood(){
     +'- "fat": Total Fat grams per serving as a plain number\n'
     +'- "carbs": Total Carbohydrate grams per serving as a plain number\n'
     +'- '+microSchema+'\n'
-    +'Use your best nutritional knowledge for realistic values, including every listed micronutrient -- do not skip any of them. All numeric values must be numbers, not strings. Use 0 only when a value is genuinely negligible or absent, never to mean unknown.';
+    +'Use your best nutritional knowledge for realistic values, including every listed micronutrient -- do not skip any of them. All numeric values must be numbers, not strings. Use 0 only when a value is genuinely negligible or absent, never to mean unknown. Pay special attention to caffeine: for coffee, espresso, lattes, cappuccinos, mochas, americanos, cold brew, black/green tea, energy drinks, and sodas with caffeine, give a realistic non-zero milligram estimate based on typical preparation and size (for example, a standard grande espresso-based coffeehouse drink made with a double shot is roughly 150mg) -- only use 0 for caffeine if the item is explicitly labeled decaf or is a drink/food that genuinely contains none.';
   fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
     headers:{'x-api-key':key,'anthropic-version':'2023-06-01','content-type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
@@ -1152,10 +1152,15 @@ function aiSearchFood(){
       MICRO_FIELDS.forEach(function(mf){item[mf]=(f[mf]!==undefined&&f[mf]!==null&&f[mf]!==0)?f[mf]:0;});
       window._aiFoodCache.push(item);
       var summary=[item.cal?item.cal+' cal':'',item.prot?item.prot+'g pro':'',item.fat?item.fat+'g fat':'',item.carbs?item.carbs+'g carb':'',item.fiber?item.fiber+'g fiber':'',item.sodium?item.sodium+'mg Na':''].filter(Boolean).join(' · ');
-      html+='<div style="display:flex;justify-content:space-between;align-items:center;background:#fff;border:1px solid #ddd;border-radius:7px;padding:6px 10px;gap:8px;">'
+      // Safety net: the AI estimate occasionally comes back with caffeine:0 for an item that is
+      // clearly a caffeinated drink by name (e.g. a latte). Flag it so it's caught before Add
+      // rather than silently showing 0mg later, even with the stronger prompt wording above.
+      var caffeineSuspect=!item.caffeine&&isCaffeinatedBeverageName(item.name);
+      html+='<div style="display:flex;justify-content:space-between;align-items:center;background:#fff;border:1px solid '+(caffeineSuspect?'#f59e0b':'#ddd')+';border-radius:7px;padding:6px 10px;gap:8px;">'
         +'<div style="flex:1;min-width:0;">'
         +'<div style="font-weight:600;font-size:0.83rem;color:#222;">'+escHtml(item.name)+'</div>'
         +(summary?'<div style="font-size:0.77rem;color:#666;">'+escHtml(summary)+'</div>':'')
+        +(caffeineSuspect?'<div style="font-size:0.75rem;color:#b45309;font-weight:600;">&#x26A0;&#xFE0F; Caffeine came back 0mg -- this looks caffeinated, double-check before adding.</div>':'')
         +'</div>'
         +'<button onclick="aiAddFoodByIndex('+idx+')" '
         +'style="background:#4338ca;color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:0.78rem;cursor:pointer;white-space:nowrap;flex-shrink:0;">+ Add</button>'
