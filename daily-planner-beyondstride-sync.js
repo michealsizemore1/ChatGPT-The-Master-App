@@ -204,20 +204,22 @@
     if(viewed){try{renderFoodItems();}catch(err){}try{save();}catch(err){}}
     else localStorage.setItem(key,JSON.stringify(d));
   }
+  // Fluids/weights arrive in /inbox, foods in /foodinbox; both are applied in the order they were made.
   function pullInbox(){
     var c=cfg();if(!c||inboxBusy||typeof dk!=='function')return;
     inboxBusy=true;
-    var base=c.db+'/nutrition/'+encodeURIComponent(c.key)+'/inbox';
-    fetch(base+'.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).then(function(o){
-      if(!o||typeof o!=='object'){inboxBusy=false;return;}
-      var keys=Object.keys(o).filter(function(k){return o[k]&&o[k].date&&o[k].f;});
-      if(!keys.length){inboxBusy=false;return;}
-      keys.sort(function(a,b){return num(o[a].at)-num(o[b].at);});
+    var root=c.db+'/nutrition/'+encodeURIComponent(c.key)+'/';
+    function get(box){return fetch(root+box+'.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).then(function(o){
+      return o&&typeof o==='object'?Object.keys(o).filter(function(k){return o[k]&&o[k].date&&o[k].f;}).map(function(k){return{box:box,k:k,e:o[k]};}):[];}).catch(function(){return [];});}
+    Promise.all([get('inbox'),get('foodinbox')]).then(function(res){
+      var list=res[0].concat(res[1]);
+      if(!list.length){inboxBusy=false;return;}
+      list.sort(function(a,b){return num(a.e.at)-num(b.e.at);});
       var dates={};
-      keys.forEach(function(k){try{applyEntry(o[k]);dates[o[k].date]=1;}catch(x){}});
+      list.forEach(function(x){try{applyEntry(x.e);dates[x.e.date]=1;}catch(err){}});
       // Share the changed days right away, then clear the entries.
       Promise.all(Object.keys(dates).map(function(dt){var rec=dayRecord(dt);return rec?put(dt,rec):Promise.resolve();}))
-        .then(function(){return Promise.all(keys.map(function(k){return fetch(base+'/'+encodeURIComponent(k)+'.json',{method:'DELETE'}).catch(function(){});}));})
+        .then(function(){return Promise.all(list.map(function(x){return fetch(root+x.box+'/'+encodeURIComponent(x.k)+'.json',{method:'DELETE'}).catch(function(){});}));})
         .then(function(){inboxBusy=false;},function(){inboxBusy=false;});
     }).catch(function(){inboxBusy=false;});
   }
