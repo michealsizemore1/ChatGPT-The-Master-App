@@ -96,6 +96,8 @@
     if(pw>70&&pw<600)rec.postWeight=r1(pw);
     if(isToday&&typeof dailyCalorieTargetData==='function'){
       try{var c=dailyCalorieTargetData();rec.target=Math.round(c.target);rec.range=Math.round(c.range);rec.active=Math.round(c.active||0);}catch(e){}
+      // Daily Macro Ratio target (custom ratio, or the training-day / hard-workout target).
+      try{if(typeof runnerMacroTarget==='function'){var mt=runnerMacroTarget();rec.mt={prot:Number(mt.prot)||0,carbs:Number(mt.carbs)||0,fat:Number(mt.fat)||0,label:String(mt.label||''),cal:Math.round(Number(mt.calories)||0)};}}catch(e){}
     }
     // Run-day context for food quality (same test as runnerFoodQuality).
     try{var qd=new Date(dateKey+'T12:00:00'),qa='';try{qa=(getActivities()||[]).filter(function(a){return a&&a.date===dateKey;}).map(function(a){return [a.title,a.type,a.workout].filter(Boolean).join(' ');}).join(' ');}catch(e){}
