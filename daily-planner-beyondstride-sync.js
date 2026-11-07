@@ -174,6 +174,9 @@
     if(f==='actSettings'){applyActSettings(e);return;}
     if(f==='shoeSave'||f==='shoeDel'){applyShoe(e);return;}
     if(f==='planAction'){applyPlan(e);return;}
+    if(f==='wrnSave'){var wx=e.x||{};if(/^\d{4}-\d{2}-\d{2}$/.test(String(wx.week||''))){var wt=String(wx.text||'').trim();if(wt)localStorage.setItem('act_week_note_'+wx.week,wt);else localStorage.removeItem('act_week_note_'+wx.week);
+      try{if(typeof loadWrnNote==='function')loadWrnNote();}catch(err){}scheduleActivities();}return;}
+    if(f==='actImport'){applyImport(e);return;}
     if(f==='foodAdd'||f==='foodEdit'||f==='foodDel'){applyFood(e,date,viewed);return;}
     // A meal saved in BeyondStride (💾): add it to Saved Meals.
     if(f==='mealSave'){
@@ -382,9 +385,11 @@
       for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(!k||k.indexOf('planner_')!==0)continue;var ds=k.slice(8);if(!(ds>=y0||ds>=w0))continue;
         try{var dd=JSON.parse(localStorage.getItem(k));var m=parseFloat(dd&&dd.exMiles)||0;if(m)exMiles[ds]=m;}catch(e){}}}catch(e){}
     var shoes=[];try{shoes=clean(getShoes(),1)||[];}catch(e){}
+    // Phase 4: Weekly Run Notes (one per Monday).
+    var weekNotes={};try{for(var wi=0;wi<localStorage.length;wi++){var wk=localStorage.key(wi);if(wk&&wk.indexOf('act_week_note_')===0){var wv=localStorage.getItem(wk);if(wv)weekNotes[wk.slice(14)]=String(wv).slice(0,8000);}}}catch(e){}
     var payload={list:list,extras:actExtras(acts),settings:{cp:typeof getCP==='function'?getCP():0,maxHr:typeof getMaxHR==='function'?getMaxHR():0,restHr:typeof getRestingHR==='function'?getRestingHR():0,zonesNote:zonesNote},
-      goals:goals,exMiles:exMiles,shoes:shoes,updated:Date.now()};
-    var cmp=JSON.stringify([payload.list,payload.extras,payload.settings,payload.goals,payload.exMiles,payload.shoes]);
+      goals:goals,exMiles:exMiles,shoes:shoes,weekNotes:weekNotes,updated:Date.now()};
+    var cmp=JSON.stringify([payload.list,payload.extras,payload.settings,payload.goals,payload.exMiles,payload.shoes,payload.weekNotes]);
     if(cmp===actSent)return;
     var body=JSON.stringify(payload);
     actStatus({ok:null,stage:'sending',count:list.length,bytes:body.length});
@@ -501,6 +506,15 @@
     restore();
     try{initTodayWorkoutCard();}catch(err){}
     schedulePlans(800);
+  }
+  // A CSV (Garmin / Stryd / Strava) chosen in BeyondStride: imported with this page's own importer. Its message goes back as a notice.
+  function bsNotice(msg){var c=cfg();if(!c)return;try{fetch(c.db+'/nutrition/'+encodeURIComponent(c.key)+'/notice.json',{method:'PUT',body:JSON.stringify({msg:String(msg).slice(0,300),at:Date.now()})}).catch(function(){});}catch(e){}}
+  function applyImport(e){
+    var x=e.x||{};if(!x.csv||typeof importActivities!=='function')return;
+    var oc=window.confirm,oa=window.alert,said='';
+    window.confirm=function(m){said=String(m);return true;};window.alert=function(m){said=String(m);};
+    try{importActivities({target:{files:[new File([String(x.csv)],x.name||'activities.csv',{type:'text/csv'})],value:''}},x.hint||undefined);}catch(err){said='Import error: '+err.message;}
+    setTimeout(function(){window.confirm=oc;window.alert=oa;if(said)bsNotice(said);scheduleActivities();},4000);
   }
   // An activity added, changed or deleted in BeyondStride.
   function applyActivity(e){
