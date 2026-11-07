@@ -32,6 +32,10 @@
     if(withId){o.id=String(x.id||'');o.meal=x.meal||'snack';}
     ['cal','prot','fat','carbs'].concat(FOOD_MICROS).forEach(function(f){if(x[f]!=null&&x[f]!==''&&!isNaN(parseFloat(x[f])))o[f]=r1(num(x[f]));});
     if(x.barcode)o.barcode=String(x.barcode);
+    // Food quality inputs (the Nutrition tab's runnerFoodQuality): macro sources and ingredient / category text.
+    if(withId){var q=x;try{if(typeof inferFoodMacroSources==='function'&&!(x.proteinSource||x.carbSource||x.fatSource)){q=Object.assign({},x);inferFoodMacroSources(q);}}catch(e){}
+      ['proteinSource','carbSource','fatSource'].forEach(function(f){if(q[f])o[f]=String(q[f]);});
+      var qt=[x.ingredientsText,x.categoriesText].filter(Boolean).join(' ');if(qt)o.qtext=String(qt).slice(0,600);}
     // Picture: a product image link, or (database only) a small saved photo.
     if(x.imageUrl&&/^https?:/.test(x.imageUrl))o.image=String(x.imageUrl);
     else if(!withId&&x.imageData&&String(x.imageData).length<30000)o.image=String(x.imageData);
@@ -93,6 +97,11 @@
     if(isToday&&typeof dailyCalorieTargetData==='function'){
       try{var c=dailyCalorieTargetData();rec.target=Math.round(c.target);rec.range=Math.round(c.range);rec.active=Math.round(c.active||0);}catch(e){}
     }
+    // Run-day context for food quality (same test as runnerFoodQuality).
+    try{var qd=new Date(dateKey+'T12:00:00'),qa='';try{qa=(getActivities()||[]).filter(function(a){return a&&a.date===dateKey;}).map(function(a){return [a.title,a.type,a.workout].filter(Boolean).join(' ');}).join(' ');}catch(e){}
+      if(isToday){try{qa+=' '+(typeof journalTodayTrainingSummary==='function'?journalTodayTrainingSummary():'');}catch(e){}}
+      var qh=typeof nutritionHardWorkoutForDate==='function'?nutritionHardWorkoutForDate(qd):'';
+      rec.qrun=!!qh||/\b(run|race|interval|tempo|threshold|speed|track|recovery)\b/i.test(qa);if(qh)rec.qhard=qh;}catch(e){}
     rec.updated=Date.now();
     return rec;
   }
