@@ -126,6 +126,22 @@
     put(dateKey,rec).then(function(ok){if(ok)sent[dateKey]=cmp;});
   }
 
+  // Older days for BeyondStride's day-by-day Nutrition view: every saved day with food, shared once (a little at a time),
+  // and any single day BeyondStride asks for (dayRequest).
+  function backfillDays(){
+    var c=cfg();if(!c||typeof dk!=='function')return;
+    var flag='bs_days_backfill_v1:'+c.key;if(localStorage.getItem(flag))return;
+    var keys=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&/^planner_\d{4}-\d{2}-\d{2}$/.test(k)){try{var d=JSON.parse(localStorage.getItem(k));if(d&&Array.isArray(d.foodLog)&&d.foodLog.length)keys.push(k.slice(8));}catch(e){}}}
+    keys.sort().reverse();var n=0;
+    (function next(){if(n>=keys.length){localStorage.setItem(flag,String(Date.now()));return;}var dt=keys[n++];try{shareDay(dt);}catch(e){}setTimeout(next,150);})();
+  }
+  function shareRequestedDay(dateKey){
+    var rec=dayRecord(dateKey);
+    if(rec){delete sent[dateKey];shareDay(dateKey);return;}
+    var c=cfg();if(!c)return;   // nothing logged that day: say so, so BeyondStride stops waiting
+    fetch(c.db+'/nutrition/'+encodeURIComponent(c.key)+'/days/'+dateKey+'.json',{method:'PUT',body:JSON.stringify({count:0,cal:0,empty:true,updated:Date.now()})}).catch(function(){});
+  }
+
   function shareRecent(days){
     if(!cfg()||typeof dk!=='function')return;
     for(var i=0;i<days;i++){var d=new Date();d.setDate(d.getDate()-i);shareDay(dk(d));}
@@ -188,6 +204,7 @@
     if(f==='wrnSave'){var wx=e.x||{};if(/^\d{4}-\d{2}-\d{2}$/.test(String(wx.week||''))){var wt=String(wx.text||'').trim();if(wt)localStorage.setItem('act_week_note_'+wx.week,wt);else localStorage.removeItem('act_week_note_'+wx.week);
       try{if(typeof loadWrnNote==='function')loadWrnNote();}catch(err){}scheduleActivities();}return;}
     if(f==='actImport'){applyImport(e);return;}
+    if(f==='dayRequest'){var rq=String((e.x||{}).day||'');if(/^\d{4}-\d{2}-\d{2}$/.test(rq))shareRequestedDay(rq);return;}
     if(f==='foodAdd'||f==='foodEdit'||f==='foodDel'){applyFood(e,date,viewed);return;}
     // A meal saved in BeyondStride (💾): add it to Saved Meals.
     if(f==='mealSave'){
@@ -542,7 +559,7 @@
   readLink();
   window.addEventListener('hashchange',readLink);
   window.addEventListener('load',function(){
-    hook();hookLibrary();hookActivities();hookPlans();setTimeout(shareLibrary,2500);setTimeout(shareActivities,3500);setTimeout(sharePlans,4500);
+    hook();hookLibrary();hookActivities();hookPlans();setTimeout(shareLibrary,2500);setTimeout(shareActivities,3500);setTimeout(sharePlans,4500);setTimeout(backfillDays,9000);
     // Catch up the last week each time the page opens (days are only sent if they changed).
     setTimeout(function(){shareRecent(7);},1500);
     // Pick up finished runs, now and every minute while the page is open.
