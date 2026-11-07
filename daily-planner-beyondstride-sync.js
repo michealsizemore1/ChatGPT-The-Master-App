@@ -168,6 +168,29 @@
     var date=String(e.date||''),f=e.f,viewed=typeof today!=='undefined'&&dk(today)===date;
     if(!/^\d{4}-\d{2}-\d{2}$/.test(date))return;
     if(f==='foodAdd'||f==='foodEdit'||f==='foodDel'){applyFood(e,date,viewed);return;}
+    // A meal saved in BeyondStride (💾): add it to Saved Meals.
+    if(f==='mealSave'){
+      var mx=e.x||{};if(!mx.name||!Array.isArray(mx.items))return;
+      try{
+        var saved=getSavedMeals();
+        if(saved.some(function(m){return m.name===mx.name&&JSON.stringify((m.items||[]).map(function(i){return i.name;}))===JSON.stringify(mx.items.map(function(i){return i.name;}));}))return;
+        saved.push({name:String(mx.name),category:mx.category||'snack',items:mx.items.map(function(x){
+          var it={name:String(x.name||'Food'),servingLabel:x.servingLabel||'1 serving',servings:num(x.servings)||1};
+          ['cal','prot','fat','carbs'].concat(FOOD_MICROS).forEach(function(k){it[k]=x[k]!=null?x[k]:null;});return it;})});
+        saveSavedMeals(saved);
+        try{if(typeof renderMealsList==='function')renderMealsList();}catch(err){}
+      }catch(err){}
+      return;
+    }
+    // Calorie-target settings changed in BeyondStride.
+    if(f==='calSettings'){
+      var cx=e.x||{};
+      localStorage.setItem('calorie_intake_settings',JSON.stringify({base:cx.base!=null?String(cx.base):'',goal:cx.goal||'maintain',refuel:parseInt(cx.refuel||100,10)}));
+      try{if(typeof calculateDailyCalorieTarget==='function')calculateDailyCalorieTarget(false);}catch(err){}
+      try{if(typeof updateMacroTotals==='function')updateMacroTotals();}catch(err){}
+      scheduleLibrary();
+      return;
+    }
     var fluid={water:'waterOz',sports:'sportsDrinksOz',other:'otherLiquidsOz'}[f];
     var wfield={weight:'wWghtVal',postWeight:'wPostRunWghtVal'}[f];
     if(viewed){
@@ -233,14 +256,15 @@
     try{lib.favorites=(getFavorites()||[]).slice(0,500).map(function(x){return cleanFood(x,false);});}catch(e){}
     try{lib.healthy=(getHealthyFoods()||[]).slice(0,500).map(function(x){return cleanFood(x,false);});}catch(e){}
     try{lib.meals=(getSavedMeals()||[]).slice(0,100).map(function(m){return{name:String(m.name||'Meal'),category:m.category||'',items:(m.items||[]).slice(0,30).map(function(x){return cleanFood(x,false);})};});}catch(e){}
-    var cmp=JSON.stringify([lib.favorites,lib.healthy,lib.meals]);
+    try{if(typeof calorieAdvisorSettings==='function')lib.calSettings=calorieAdvisorSettings();}catch(e){}
+    var cmp=JSON.stringify([lib.favorites,lib.healthy,lib.meals,lib.calSettings]);
     if(cmp===libSent)return;
     fetch(c.db+'/nutrition/'+encodeURIComponent(c.key)+'/library.json',{method:'PUT',body:JSON.stringify(lib)})
       .then(function(r){if(r.ok)libSent=cmp;}).catch(function(){});
   }
   function scheduleLibrary(){clearTimeout(libTimer);libTimer=setTimeout(shareLibrary,3000);}
   function hookLibrary(){
-    ['saveFavorites','saveHealthyFoods','saveSavedMeals'].forEach(function(n){
+    ['saveFavorites','saveHealthyFoods','saveSavedMeals','saveCalorieAdvisorSettings'].forEach(function(n){
       var fn=window[n];if(typeof fn!=='function'||fn._bs)return;
       window[n]=function(){var r=fn.apply(this,arguments);try{scheduleLibrary();}catch(e){}return r;};window[n]._bs=true;
     });
