@@ -170,6 +170,7 @@
   function applyEntry(e){
     var date=String(e.date||''),f=e.f,viewed=typeof today!=='undefined'&&dk(today)===date;
     if(!/^\d{4}-\d{2}-\d{2}$/.test(date))return;
+    if(f==='actSave'||f==='actDel'){applyActivity(e);return;}
     if(f==='foodAdd'||f==='foodEdit'||f==='foodDel'){applyFood(e,date,viewed);return;}
     // A meal saved in BeyondStride (💾): add it to Saved Meals.
     if(f==='mealSave'){
@@ -314,11 +315,75 @@
     });
   }
 
+  // ── Activities for BeyondStride: every activity plus each card's extra lines (zones, heat, sleep, prev-day
+  //    water / food / fuel impact), worked out here with the exact same code paths the Activities tab uses. ──
+  var actSent='',actTimer=null;
+  function actExtras(acts){
+    var out={},cp=typeof getCP==='function'?getCP():0;
+    var ha={byDate:{}};try{ha=haBuildPercentMap(acts);}catch(e){}
+    var byDate={};
+    function dayCtx(date){
+      if(byDate[date])return byDate[date];var c={};
+      try{var raw=localStorage.getItem('planner_'+date);if(raw){var sd=JSON.parse(raw);var mins=parseSleepMins(sd.wSleepVal),sc=parseFloat(sd.wSleepScore)||0;
+        if(mins)c.sleepMins=Math.round(mins);if(sc)c.sleepScore=Math.round(sc);}}catch(e){}
+      try{var prev=new Date(date+'T00:00:00');prev.setDate(prev.getDate()-1);var pk=dk(prev);
+        var pr=localStorage.getItem('planner_'+pk);if(pr){var pd=JSON.parse(pr);var o=parseFloat(pd.waterOz)||(parseFloat(pd.waterCount)*8||0);if(o>0)c.prevWaterOz=Math.round(o);}
+        var nu=getNuDay(pk);if(nu&&nu.cal>0){c.prevCal=Math.round(nu.cal);if(nu.prot+nu.carbs+nu.fat>0){c.prevP=Math.round(nu.prot*4/nu.cal*100);c.prevC=Math.round(nu.carbs*4/nu.cal*100);c.prevF=Math.round(nu.fat*9/nu.cal*100);}}
+        // Fuel impact: same scoring as the Activities card (food quality stretched, minus misses vs the hard-workout target).
+        if(pr){var log=(JSON.parse(pr).foodLog)||[];if(log.length&&typeof runnerFoodQuality==='function'){
+          var saved=today,qt=0,qw=0;try{today=prev;log.forEach(function(it){try{inferFoodMacroSources(it);}catch(e){}var q=runnerFoodQuality(it);var sv=Math.max(0.01,parseFloat(it.servings)||1);var w=Math.max(0,(parseFloat(it.cal)||0)*sv)||sv;qt+=q.score*w;qw+=w;});}finally{today=saved;}
+          if(qw>0){var st=5+(qt/qw-5)*2.5,pen=0,notes=[];var preset=typeof nutritionPerformancePreset==='function'?nutritionPerformancePreset(pk):null;
+            if(preset&&preset.phase==='prior'&&c.prevCal){var off=Math.abs(c.prevCal-preset.calories)/preset.calories;if(off>0.2){pen+=Math.min(3,(off-0.2)*10);notes.push(c.prevCal+' cal vs '+preset.calories+' target');}
+              if(c.prevC!=null){var co=Math.abs(c.prevC-preset.carbs);if(co>10){pen+=Math.min(2,(co-10)/10);notes.push(c.prevC+'% carbs vs '+preset.carbs+'% target');}}}
+            var imp=Math.max(0,Math.min(10,Math.round((st-pen)*10)/10));c.fuel=imp;c.fuelLabel=imp>=9?'Excellent':imp>=7?'Good':imp>=5?'Fair':imp>=3?'Low':'Poor';
+            c.fuelNote=((preset&&preset.phase==='prior')?preset.label.replace('Tomorrow: ',''):'')+(notes.length?(preset?' · ':'')+notes.join(', '):'');}}}
+      }catch(e){}
+      byDate[date]=c;return c;
+    }
+    acts.forEach(function(a){
+      var x={};
+      try{var z=powerZone(a.power,cp);if(z)x.pz=z.z;}catch(e){}
+      try{var h=hrZone(a.heartRate);if(h)x.hz=h.z;}catch(e){}
+      try{if(a.temp&&a.pace){var hh=heatHumidityImpact(a.temp,a.humidity,parsePace(a.pace));if(hh&&hh.pctSlower>=0.5){x.hhPct=Math.round(hh.pctSlower*10)/10;x.hhSec=Math.round(hh.secSlower);x.feels=Math.round(hh.feelsLike);}}}catch(e){}
+      if(a.date&&ha.byDate&&ha.byDate[a.date]!==undefined){x.ha=ha.byDate[a.date];try{var hi=haStatusInfo(x.ha);x.haLabel=hi.label;x.haColor=hi.color;}catch(e){}}
+      if(a.date){var dc=dayCtx(a.date);for(var k in dc)x[k]=dc[k];}
+      out[String(a.id)]=x;
+    });
+    return out;
+  }
+  function shareActivities(){
+    var c=cfg();if(!c||typeof getActivities!=='function')return;
+    if(typeof _activitiesLargeCache!=='undefined'&&!Array.isArray(_activitiesLargeCache)){clearTimeout(actTimer);actTimer=setTimeout(shareActivities,1500);return;}
+    var acts=getActivities()||[];
+    var list=acts.map(function(a){var o={};for(var k in a){var v=a[k];if(v===''||v==null||v===0)continue;if(typeof v==='string'&&v.length>20000)continue;o[k]=v;}return o;});
+    var payload={list:list,extras:actExtras(acts),settings:{cp:typeof getCP==='function'?getCP():0,maxHr:typeof getMaxHR==='function'?getMaxHR():0,restHr:typeof getRestingHR==='function'?getRestingHR():0},updated:Date.now()};
+    var cmp=JSON.stringify([payload.list,payload.extras,payload.settings]);
+    if(cmp===actSent)return;
+    fetch(c.db+'/nutrition/'+encodeURIComponent(c.key)+'/activities.json',{method:'PUT',body:JSON.stringify(payload)})
+      .then(function(r){if(r.ok)actSent=cmp;}).catch(function(){});
+  }
+  function scheduleActivities(){clearTimeout(actTimer);actTimer=setTimeout(shareActivities,3000);}
+  window.beyondStrideShareActivities=shareActivities;
+  function hookActivities(){
+    var fn=window.saveActivities;if(typeof fn!=='function'||fn._bs)return;
+    window.saveActivities=function(){var r=fn.apply(this,arguments);try{scheduleActivities();}catch(e){}return r;};window.saveActivities._bs=true;
+  }
+  // An activity added, changed or deleted in BeyondStride.
+  function applyActivity(e){
+    var x=e.x||{};if(typeof getActivities!=='function'||typeof saveActivities!=='function')return;
+    var acts=getActivities().slice(),i=acts.findIndex(function(a){return String(a.id)===String(x.id);});
+    if(e.f==='actDel'){if(i<0)return;acts.splice(i,1);}
+    else{var a=x.act||{};if(!a.id)return;
+      if(i<0)acts.push(a);else{var keep=acts[i];for(var k in a)keep[k]=a[k];(x.clear||[]).forEach(function(k){delete keep[k];});}}
+    saveActivities(acts);
+    try{renderActivities();}catch(err){}
+  }
+
   window.beyondStrideShareNow=function(){shareRecent(30);};
   readLink();
   window.addEventListener('hashchange',readLink);
   window.addEventListener('load',function(){
-    hook();hookLibrary();setTimeout(shareLibrary,2500);
+    hook();hookLibrary();hookActivities();setTimeout(shareLibrary,2500);setTimeout(shareActivities,3500);
     // Catch up the last week each time the page opens (days are only sent if they changed).
     setTimeout(function(){shareRecent(7);},1500);
     // Pick up finished runs, now and every minute while the page is open.
@@ -328,6 +393,6 @@
   });
   document.addEventListener('visibilitychange',function(){
     if(document.visibilityState==='hidden'&&cfg()&&typeof today!=='undefined')shareDay(dk(today));
-    if(document.visibilityState==='visible'){pullRuns();pullInbox();}
+    if(document.visibilityState==='visible'){pullRuns();pullInbox();scheduleActivities();}
   });
 })();
