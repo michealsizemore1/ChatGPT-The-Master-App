@@ -290,7 +290,7 @@ function updateHydrationEstimate(){
   const consumedOz=(waterOz||0)+(sportsDrinksOz||0)+(otherLiquidsOz||0);
   const neededOz=Math.max(0,Math.round(targetOz-consumedOz));
   box.style.display='block';
-  box.innerHTML='&#x1F4A7; Lost <strong>'+lostLbs.toFixed(1)+' lb</strong> on the run &rarr; target <strong>~'+Math.round(targetOz)+' oz</strong> to fully rehydrate (16&ndash;24 oz per lb lost, per ACSM). You\'ve had <strong>'+Math.round(consumedOz)+' oz</strong> of fluids today (water + sports drinks + other drinks), so drink about <strong>'+neededOz+' oz more</strong>'+(neededOz===0?' — you\'re already caught up!':'')+'.';
+  box.innerHTML='&#x1F4A7; Lost <strong>'+lostLbs.toFixed(1)+' lb</strong> on the run &rarr; target <strong>~'+Math.round(targetOz)+' oz</strong> to fully rehydrate (16&ndash;24 oz per lb lost, per ACSM). You\'ve had <strong>'+Math.round(consumedOz)+' oz</strong> of fluids today (water + sports drinks + other drinks), so '+(neededOz===0?'you\'re already caught up!':'drink about <strong>'+neededOz+' oz more</strong>.');
 }
 function syncMassageMinutes(source){
   var daily=document.getElementById('dailyMassageMinutes'),activities=document.getElementById('exMassageMinutes');
