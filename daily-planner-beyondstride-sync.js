@@ -249,7 +249,9 @@
       try{if(typeof looksLikeRestaurantFood==='function')item.restaurant=looksLikeRestaurantFood(item.name);}catch(err){}
       log.push(item);
     }else if(i<0)return;
-    else if(e.f==='foodEdit'){if(x.servings!=null)log[i].servings=num(x.servings)||log[i].servings;if(x.meal)log[i].meal=x.meal;if(x.servingLabel)log[i].servingLabel=String(x.servingLabel);}
+    else if(e.f==='foodEdit'){if(x.servings!=null)log[i].servings=num(x.servings)||log[i].servings;if(x.meal)log[i].meal=x.meal;if(x.servingLabel)log[i].servingLabel=String(x.servingLabel);
+      // Numbers typed in BeyondStride (per serving): every field is sent, blank ones as missing.
+      if(x.full){['cal','prot','fat','carbs'].concat(FOOD_MICROS).forEach(function(k){log[i][k]=x[k]!=null&&x[k]!==''?num(x[k]):null;});if(x.name)log[i].name=String(x.name);}}
     else log.splice(i,1);
     if(viewed){try{renderFoodItems();}catch(err){}try{save();}catch(err){}}
     else{
