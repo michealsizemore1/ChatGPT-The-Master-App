@@ -32,6 +32,9 @@
     if(withId){o.id=String(x.id||'');o.meal=x.meal||'snack';}
     ['cal','prot','fat','carbs'].concat(FOOD_MICROS).forEach(function(f){if(x[f]!=null&&x[f]!==''&&!isNaN(parseFloat(x[f])))o[f]=r1(num(x[f]));});
     if(x.barcode)o.barcode=String(x.barcode);
+    // Picture: a product image link, or (database only) a small saved photo.
+    if(x.imageUrl&&/^https?:/.test(x.imageUrl))o.image=String(x.imageUrl);
+    else if(!withId&&x.imageData&&String(x.imageData).length<30000)o.image=String(x.imageData);
     return o;
   }
   function r1(v){return Math.round(v*10)/10;}
@@ -242,10 +245,11 @@
       var item={id:id,meal:x.meal||'snack',name:String(x.name||'Food'),servingLabel:x.servingLabel||'1 serving',servings:num(x.servings)||1};
       ['cal','prot','fat','carbs'].concat(FOOD_MICROS).forEach(function(k){item[k]=x[k]!=null?x[k]:null;});
       if(x.barcode)item.barcode=x.barcode;
+      if(x.image&&/^https?:/.test(x.image))item.imageUrl=x.image;
       try{if(typeof looksLikeRestaurantFood==='function')item.restaurant=looksLikeRestaurantFood(item.name);}catch(err){}
       log.push(item);
     }else if(i<0)return;
-    else if(e.f==='foodEdit'){if(x.servings!=null)log[i].servings=num(x.servings)||log[i].servings;if(x.meal)log[i].meal=x.meal;}
+    else if(e.f==='foodEdit'){if(x.servings!=null)log[i].servings=num(x.servings)||log[i].servings;if(x.meal)log[i].meal=x.meal;if(x.servingLabel)log[i].servingLabel=String(x.servingLabel);}
     else log.splice(i,1);
     if(viewed){try{renderFoodItems();}catch(err){}try{save();}catch(err){}}
     else localStorage.setItem(key,JSON.stringify(d));
