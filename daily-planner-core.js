@@ -280,6 +280,8 @@ function updateOtherLiquidsDisplay(){const cups=(otherLiquidsOz/8).toFixed(1);co
 function changeOtherLiquids(delta){otherLiquidsOz=Math.max(0,otherLiquidsOz+delta);updateOtherLiquidsDisplay();save();}
 // Estimate remaining fluids needed after a run, from the wake-up vs. post-run weight difference.
 // ACSM guidance: replace roughly 16-24 fl oz of fluid per lb of body weight lost during exercise; we use the 20 oz/lb midpoint.
+// Only Water Intake + Sports Nutrition Drinks count toward "already consumed" -- Other Drinks is excluded because that
+// tracker lumps coffee/tea/soda/juice into one number with no way to split out the caffeinated portion.
 function updateHydrationEstimate(){
   const box=document.getElementById('hydrationEstimateBox');if(!box)return;
   const wakeEl=document.getElementById('wWghtVal'),postEl=document.getElementById('wPostRunWghtVal');
@@ -287,10 +289,10 @@ function updateHydrationEstimate(){
   if(!wake||!post||isNaN(wake)||isNaN(post)||post>=wake){box.style.display='none';return;}
   const lostLbs=wake-post;
   const targetOz=lostLbs*20;
-  const consumedOz=(waterOz||0)+(sportsDrinksOz||0)+(otherLiquidsOz||0);
+  const consumedOz=(waterOz||0)+(sportsDrinksOz||0);
   const neededOz=Math.max(0,Math.round(targetOz-consumedOz));
   box.style.display='block';
-  box.innerHTML='&#x1F4A7; Lost <strong>'+lostLbs.toFixed(1)+' lb</strong> on the run &rarr; target <strong>~'+Math.round(targetOz)+' oz</strong> to fully rehydrate (16&ndash;24 oz per lb lost, per ACSM). You\'ve had <strong>'+Math.round(consumedOz)+' oz</strong> of fluids today (water + sports drinks + other drinks), so '+(neededOz===0?'you\'re already caught up!':'drink about <strong>'+neededOz+' oz more</strong>.');
+  box.innerHTML='&#x1F4A7; Lost <strong>'+lostLbs.toFixed(1)+' lb</strong> on the run &rarr; target <strong>~'+Math.round(targetOz)+' oz</strong> to fully rehydrate (16&ndash;24 oz per lb lost, per ACSM). You\'ve had <strong>'+Math.round(consumedOz)+' oz</strong> of water + sports drinks today, so '+(neededOz===0?'you\'re already caught up!':'drink about <strong>'+neededOz+' oz more</strong>.')+' <span style="font-size:0.75rem;color:#6b85b3;">(Other Drinks isn\'t counted — it mixes in caffeinated drinks.)</span>';
 }
 function syncMassageMinutes(source){
   var daily=document.getElementById('dailyMassageMinutes'),activities=document.getElementById('exMassageMinutes');
