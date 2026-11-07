@@ -173,6 +173,7 @@
     if(f==='actSave'||f==='actDel'){applyActivity(e);return;}
     if(f==='actSettings'){applyActSettings(e);return;}
     if(f==='shoeSave'||f==='shoeDel'){applyShoe(e);return;}
+    if(f==='planAction'){applyPlan(e);return;}
     if(f==='foodAdd'||f==='foodEdit'||f==='foodDel'){applyFood(e,date,viewed);return;}
     // A meal saved in BeyondStride (💾): add it to Saved Meals.
     if(f==='mealSave'){
@@ -420,6 +421,87 @@
     else if(x.shoe){if(i>=0)shoes[i]=Object.assign(shoes[i],x.shoe);else shoes.push(x.shoe);}
     saveShoes(shoes);try{renderShoeList();}catch(err){}
   }
+  // ── Training plans (Phase 3): active, upcoming and archived plans, plus each day's workout, for BeyondStride ──
+  var planSent='',planTimer=null;
+  function readPlan(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}
+  function planOut(p,withDays){
+    if(!p||!p.text)return null;
+    var o={text:String(p.text).slice(0,60000),display:(typeof reflowPlanText==='function'?reflowPlanText(p.text):p.text).slice(0,60000),
+      type:p.type||'',weeks:p.weeks||0,startDate:p.startDate||'',raceDate:p.raceDate||'',raceDateConfirmed:!!p.raceDateConfirmed,
+      createdAt:p.createdAt||'',adjustedAt:p.adjustedAt||'',meta:p.meta||'',hasPdf:!!p.pdfDataUrl,scheduleMode:p.scheduleMode||''};
+    // Every dated workout from 3 days ago on, for BeyondStride's "Send to watch" (same as "Send plan to BeyondStride").
+    try{var sch=p.schedule&&Object.keys(p.schedule).length?p.schedule:(typeof buildUploadedTrainingSchedule==='function'?buildUploadedTrainingSchedule(p.text,p.startDate||dk(new Date()),p.weeks||1).schedule:{});
+      var from=new Date();from.setDate(from.getDate()-3);var f0=dk(from),sc={};
+      Object.keys(sch||{}).sort().forEach(function(d){if(d>=f0&&sch[d])sc[d]=String(sch[d]).slice(0,1500);});o.schedule=sc;}catch(e){o.schedule={};}
+    // Today's workout card: the workout for each day (3 days back, 120 ahead), found the same way this page finds it.
+    if(withDays&&typeof extractWorkoutFromActivePlan==='function'){
+      var days={};
+      for(var i=-3;i<=120;i++){var d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()+i);
+        if(p.startDate&&dk(d)<p.startDate)continue;
+        try{var w=extractWorkoutFromActivePlan(p,d);if(w)days[dk(d)]=String(w).replace(/^#+\s*/gm,'').replace(/\*\*([^*]+)\*\*/g,'$1').replace(/\*([^*]+)\*/g,'$1').replace(/^---+$/gm,'').trim().slice(0,3000);}catch(e){}}
+      o.days=days;
+      try{var rd=null;if(p.raceDate&&p.raceDateConfirmed)rd=p.raceDate;if(!rd&&typeof detectRaceDateFromPlan==='function')rd=detectRaceDateFromPlan(p.text);
+        if(!rd&&p.raceDate)rd=p.raceDate;if(!rd&&p.startDate&&p.weeks){var r=new Date(p.startDate+'T00:00:00');r.setDate(r.getDate()+p.weeks*7);rd=dk(r);}o.race=rd||'';}catch(e){}
+    }
+    return o;
+  }
+  function sharePlans(){
+    var c=cfg();if(!c||typeof dk!=='function')return;
+    var arch=[];try{arch=(JSON.parse(localStorage.getItem('archived_plans')||'[]')||[]).map(function(p){return{text:String(p.text||'').slice(0,60000),display:(typeof reflowPlanText==='function'?reflowPlanText(p.text||''):(p.text||'')).slice(0,60000),
+      type:p.type||'',weeks:p.weeks||0,archivedAt:p.archivedAt||'',archivedFrom:p.archivedFrom||'current',startDate:p.startDate||''};});}catch(e){}
+    var out={current:planOut(readPlan('current_training_plan'),true),upcoming:planOut(readPlan('upcoming_training_plan'),false),archived:arch,
+      today:dk(new Date()),collapsed:localStorage.getItem('tw_collapsed')==='1'};
+    var cmp=JSON.stringify(out);if(cmp===planSent)return;
+    out.updated=Date.now();
+    fetch(c.db+'/nutrition/'+encodeURIComponent(c.key)+'/plans.json',{method:'PUT',body:JSON.stringify(out)}).then(function(r){if(r.ok)planSent=cmp;}).catch(function(){});
+  }
+  function schedulePlans(ms){clearTimeout(planTimer);planTimer=setTimeout(function(){try{sharePlans();}catch(e){}},ms||2500);}
+  window.beyondStrideSharePlans=sharePlans;
+  function hookPlans(){
+    ['loadCurrentPlan','loadUpcomingPlan','renderArchivedPlans','initTodayWorkoutCard'].forEach(function(n){
+      var fn=window[n];if(typeof fn!=='function'||fn._bs)return;
+      window[n]=function(){var r=fn.apply(this,arguments);try{schedulePlans();}catch(e){}return r;};window[n]._bs=true;
+    });
+  }
+  function clearWorkoutCaches(){var ck=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('workout_cache_')===0)ck.push(k);}ck.forEach(function(k){localStorage.removeItem(k);});}
+  // A plan button tapped in BeyondStride. You already confirmed there, so this page's "Are you sure?" is answered yes.
+  function applyPlan(e){
+    var x=e.x||{},a=x.action,which=x.which==='upcoming'?'upcoming':'current',key=which==='upcoming'?'upcoming_training_plan':'current_training_plan';
+    var oc=window.confirm,oa=window.alert;window.confirm=function(){return true;};window.alert=function(m){try{console.log('BeyondStride plan '+a+': '+m);}catch(err){}};
+    function restore(){window.confirm=oc;setTimeout(function(){window.alert=oa;},0);}
+    function findArch(){var arr=[];try{arr=JSON.parse(localStorage.getItem('archived_plans')||'[]')||[];}catch(err){}
+      var i=arr.findIndex(function(p){return (p.archivedAt||'')===(x.archivedAt||'')&&String(p.text||'').slice(0,200)===String(x.head||'');});return i;}
+    try{
+      if(a==='archive')archivePlan(which);
+      else if(a==='delete'){localStorage.removeItem(key);if(which==='upcoming')loadUpcomingPlan();else{var s=document.getElementById('tpPersistSection');if(s)s.style.display='none';loadCurrentPlan();}}
+      else if(a==='zones')addTrainingZonesToPlan(which);
+      else if(a==='dates')addDatesToSchedule(which);
+      else if(a==='activate')makeUpcomingPlanActive();
+      else if(a==='restore'){var ri=findArch();if(ri>=0)restoreArchivedPlan(ri);}
+      else if(a==='deleteArchived'){var di=findArch();if(di>=0)deleteArchivedPlan(di);}
+      else if(a==='setText'&&x.text){
+        var p=readPlan(key);if(p){p.text=String(x.text);if(x.adjusted)p.adjustedAt=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+          if(p.scheduleMode||x.rebuild){var rb=buildUploadedTrainingSchedule(p.text,p.startDate||dk(new Date()),p.weeks);p.schedule=rb.schedule;p.scheduleMode=rb.mode;p.scheduleVersion=3;}
+          savePlanRecord(key,p);if(which==='current')clearWorkoutCaches();loadCurrentPlan();loadUpcomingPlan();}}
+      else if(a==='startDate'&&x.date){var el=document.getElementById('twStartDateInput');if(el){el.value=x.date;setWorkoutStartDate();}}
+      else if(a==='raceDate'&&x.date){var el2=document.getElementById('twRaceDateInput');if(el2){el2.value=x.date;setWorkoutRaceDate();}}
+      else if(a==='collapse'){localStorage.setItem('tw_collapsed',x.on?'1':'0');}
+      else if(a==='upload'&&(x.text||x.pdf)){
+        var sd=document.getElementById('tpUploadStartDate');if(sd)sd.value=x.startDate||dk(new Date());
+        var cb=document.getElementById('tpSaveAsUpcoming');if(cb)cb.checked=!!x.upcoming;
+        var file;
+        if(x.pdf){var bin=atob(x.pdf),bytes=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);file=new File([bytes],x.name||'plan.pdf',{type:'application/pdf'});}
+        else file=new File([String(x.text)],x.name||'plan.txt',{type:'text/plain'});
+        // Reading the file is asynchronous: keep "OK" answered until it's done.
+        uploadPlanFromFile({target:{files:[file],value:''}});
+        setTimeout(restore,15000);setTimeout(function(){try{initTodayWorkoutCard();}catch(err){}schedulePlans(500);},4000);
+        return;
+      }
+    }catch(err){try{console.log('BeyondStride plan error',err);}catch(e2){}}
+    restore();
+    try{initTodayWorkoutCard();}catch(err){}
+    schedulePlans(800);
+  }
   // An activity added, changed or deleted in BeyondStride.
   function applyActivity(e){
     var x=e.x||{};if(typeof getActivities!=='function'||typeof saveActivities!=='function')return;
@@ -435,12 +517,12 @@
   readLink();
   window.addEventListener('hashchange',readLink);
   window.addEventListener('load',function(){
-    hook();hookLibrary();hookActivities();setTimeout(shareLibrary,2500);setTimeout(shareActivities,3500);
+    hook();hookLibrary();hookActivities();hookPlans();setTimeout(shareLibrary,2500);setTimeout(shareActivities,3500);setTimeout(sharePlans,4500);
     // Catch up the last week each time the page opens (days are only sent if they changed).
     setTimeout(function(){shareRecent(7);},1500);
     // Pick up finished runs, now and every minute while the page is open.
     setTimeout(pullRuns,1200);setTimeout(pullInbox,1600);
-    setInterval(function(){if(document.visibilityState==='visible')pullRuns();},60000);
+    setInterval(function(){if(document.visibilityState==='visible'){pullRuns();try{sharePlans();}catch(e){}}},60000);
     setInterval(function(){if(document.visibilityState==='visible')pullInbox();},20000);
   });
   document.addEventListener('visibilitychange',function(){
