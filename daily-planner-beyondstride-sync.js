@@ -355,12 +355,23 @@
     var c=cfg();if(!c||typeof getActivities!=='function')return;
     if(typeof _activitiesLargeCache!=='undefined'&&!Array.isArray(_activitiesLargeCache)){clearTimeout(actTimer);actTimer=setTimeout(shareActivities,1500);return;}
     var acts=getActivities()||[];
-    var list=acts.map(function(a){var o={};for(var k in a){var v=a[k];if(v===''||v==null||v===0)continue;if(typeof v==='string'&&v.length>20000)continue;o[k]=v;}return o;});
+    // Firebase refuses keys with . $ # [ ] / and the whole upload fails, so nested data is cleaned first.
+    function clean(v,depth){
+      if(v==null||typeof v==='function')return undefined;
+      if(typeof v==='number')return isFinite(v)?v:undefined;
+      if(typeof v==='string')return v.length>20000?undefined:v;
+      if(typeof v!=='object')return v;
+      if(depth>4)return undefined;
+      if(Array.isArray(v))return v.slice(0,400).map(function(x){var c=clean(x,depth+1);return c===undefined?null:c;});
+      var o={};for(var k in v){if(!Object.prototype.hasOwnProperty.call(v,k))continue;var c=clean(v[k],depth+1);if(c===undefined)continue;o[String(k).replace(/[.$#\[\]\/]/g,'_')||'_']=c;}return o;
+    }
+    var list=acts.map(function(a){var o={};for(var k in a){var v=a[k];if(v===''||v==null||v===0)continue;var c=clean(v,1);if(c===undefined)continue;o[String(k).replace(/[.$#\[\]\/]/g,'_')]=c;}return o;});
     var payload={list:list,extras:actExtras(acts),settings:{cp:typeof getCP==='function'?getCP():0,maxHr:typeof getMaxHR==='function'?getMaxHR():0,restHr:typeof getRestingHR==='function'?getRestingHR():0},updated:Date.now()};
     var cmp=JSON.stringify([payload.list,payload.extras,payload.settings]);
     if(cmp===actSent)return;
     fetch(c.db+'/nutrition/'+encodeURIComponent(c.key)+'/activities.json',{method:'PUT',body:JSON.stringify(payload)})
-      .then(function(r){if(r.ok)actSent=cmp;}).catch(function(){});
+      .then(function(r){if(r.ok)actSent=cmp;else r.text().then(function(t){console.warn('BeyondStride activities share failed',r.status,t);try{localStorage.setItem('bs_act_share_err',r.status+' '+String(t).slice(0,200));}catch(e){}});})
+      .catch(function(e){try{localStorage.setItem('bs_act_share_err',String(e));}catch(x){}});
   }
   function scheduleActivities(){clearTimeout(actTimer);actTimer=setTimeout(shareActivities,3000);}
   window.beyondStrideShareActivities=shareActivities;
