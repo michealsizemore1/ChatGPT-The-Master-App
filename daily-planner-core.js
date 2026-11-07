@@ -272,12 +272,26 @@ function jumpToDailyCheck(btn){
   },80);
 }
 
-function updateWaterDisplay(){const cups=(waterOz/8).toFixed(1);const el=document.getElementById('waterDisplay');if(el)el.textContent=waterOz+' oz ('+cups+' cups)';}
+function updateWaterDisplay(){const cups=(waterOz/8).toFixed(1);const el=document.getElementById('waterDisplay');if(el)el.textContent=waterOz+' oz ('+cups+' cups)';updateHydrationEstimate();}
 function changeWater(delta){waterOz=Math.max(0,waterOz+delta);updateWaterDisplay();save();renderJournalSchedule();}
-function updateSportsDrinksDisplay(){const cups=(sportsDrinksOz/8).toFixed(1);const el=document.getElementById('sportsDrinksDisplay');if(el)el.textContent=sportsDrinksOz+' oz ('+cups+' cups)';}
+function updateSportsDrinksDisplay(){const cups=(sportsDrinksOz/8).toFixed(1);const el=document.getElementById('sportsDrinksDisplay');if(el)el.textContent=sportsDrinksOz+' oz ('+cups+' cups)';updateHydrationEstimate();}
 function changeSportsDrinks(delta){sportsDrinksOz=Math.max(0,sportsDrinksOz+delta);updateSportsDrinksDisplay();save();}
-function updateOtherLiquidsDisplay(){const cups=(otherLiquidsOz/8).toFixed(1);const el=document.getElementById('otherLiquidsDisplay');if(el)el.textContent=otherLiquidsOz+' oz ('+cups+' cups)';}
+function updateOtherLiquidsDisplay(){const cups=(otherLiquidsOz/8).toFixed(1);const el=document.getElementById('otherLiquidsDisplay');if(el)el.textContent=otherLiquidsOz+' oz ('+cups+' cups)';updateHydrationEstimate();}
 function changeOtherLiquids(delta){otherLiquidsOz=Math.max(0,otherLiquidsOz+delta);updateOtherLiquidsDisplay();save();}
+// Estimate remaining fluids needed after a run, from the wake-up vs. post-run weight difference.
+// ACSM guidance: replace roughly 16-24 fl oz of fluid per lb of body weight lost during exercise; we use the 20 oz/lb midpoint.
+function updateHydrationEstimate(){
+  const box=document.getElementById('hydrationEstimateBox');if(!box)return;
+  const wakeEl=document.getElementById('wWghtVal'),postEl=document.getElementById('wPostRunWghtVal');
+  const wake=wakeEl?parseFloat(wakeEl.value):NaN,post=postEl?parseFloat(postEl.value):NaN;
+  if(!wake||!post||isNaN(wake)||isNaN(post)||post>=wake){box.style.display='none';return;}
+  const lostLbs=wake-post;
+  const targetOz=lostLbs*20;
+  const consumedOz=(waterOz||0)+(sportsDrinksOz||0)+(otherLiquidsOz||0);
+  const neededOz=Math.max(0,Math.round(targetOz-consumedOz));
+  box.style.display='block';
+  box.innerHTML='&#x1F4A7; Lost <strong>'+lostLbs.toFixed(1)+' lb</strong> on the run &rarr; target <strong>~'+Math.round(targetOz)+' oz</strong> to fully rehydrate (16&ndash;24 oz per lb lost, per ACSM). You\'ve had <strong>'+Math.round(consumedOz)+' oz</strong> of fluids today (water + sports drinks + other drinks), so drink about <strong>'+neededOz+' oz more</strong>'+(neededOz===0?' — you\'re already caught up!':'')+'.';
+}
 function syncMassageMinutes(source){
   var daily=document.getElementById('dailyMassageMinutes'),activities=document.getElementById('exMassageMinutes');
   if(source==='daily'&&daily&&activities)activities.value=daily.value;
@@ -288,7 +302,7 @@ function parseBP(s){if(!s)return{sys:0,dia:0};const m=s.match(/(\d+)\s*\/\s*(\d+
 function buildStars(){const ss=document.getElementById('scoreStars');if(!ss)return;ss.innerHTML='';for(let i=1;i<=5;i++){const s=document.createElement('span');s.className='star'+(i<=scoreVal?' active':'');s.textContent='★';s.onclick=()=>{scoreVal=(scoreVal===i)?i-1:i;buildStars();save();};ss.appendChild(s);}updateTodayGlance();}
 
 // All text/number fields
-const TXS=['spDailyBreadText','spMeditationText','gaAudiobookText','gaAudiobookTime','gaSkillText','gaSkillTime','wBPVal','wPulseVal','wRestHRVal','wMedsVal','wWghtVal','wSleepVal','exStrengthVal','exBikeVal','exWalkVal','exDogWalkVal','nuCalVal','nuProtVal','nuFatVal','nuCarbsVal','jAccomplish','jImprov','jGratitude','jNotes','habitIdentity','habitReflection','mnotes-breakfast','mnotes-lunch','mnotes-dinner','mnotes-snack','mnotes-liquids','mnotes-sports','mnotes-supplements'];
+const TXS=['spDailyBreadText','spMeditationText','gaAudiobookText','gaAudiobookTime','gaSkillText','gaSkillTime','wBPVal','wPulseVal','wRestHRVal','wMedsVal','wWghtVal','wPostRunWghtVal','wSleepVal','exStrengthVal','exBikeVal','exWalkVal','exDogWalkVal','nuCalVal','nuProtVal','nuFatVal','nuCarbsVal','jAccomplish','jImprov','jGratitude','jNotes','habitIdentity','habitReflection','mnotes-breakfast','mnotes-lunch','mnotes-dinner','mnotes-snack','mnotes-liquids','mnotes-sports','mnotes-supplements'];
 const NMS=['exSteps','wSleepScore','exMassageMinutes','gaFinancialVideosTime'];
 const PTIDS=['pt0','pt1','pt2','dg0','dg1','dg2'];
 
@@ -2648,7 +2662,7 @@ function getDayActivityNotesText(d){
 function getDayJournalText(d){
   const raw=localStorage.getItem('planner_'+dk(d));
   const dd=raw?JSON.parse(raw):{},parts=[];
-  const labeled={jNotes:'Daily Journal',spMeditationText:'Meditation notes',spDailyBreadText:'Daily Bread / verse notes',jAccomplish:'Accomplishments',jImprov:'What to improve',jGratitude:'Gratitude',jIssues:'Issues',jRunLog:'Run log','mnotes-breakfast':'Breakfast notes','mnotes-lunch':'Lunch notes','mnotes-dinner':'Dinner notes','mnotes-snack':'Snack notes','mnotes-liquids':'Liquids notes','mnotes-sports':'Sports nutrition notes','mnotes-supplements':'Supplement notes','wBPVal':'Blood pressure','wPulseVal':'Pulse','wRestHRVal':'Resting heart rate','wMedsVal':'Medications','wWghtVal':'Weight','wSleepVal':'Sleep','gaAudiobookText':"Today's listening",'gaAudiobookTime':'Listening time'};
+  const labeled={jNotes:'Daily Journal',spMeditationText:'Meditation notes',spDailyBreadText:'Daily Bread / verse notes',jAccomplish:'Accomplishments',jImprov:'What to improve',jGratitude:'Gratitude',jIssues:'Issues',jRunLog:'Run log','mnotes-breakfast':'Breakfast notes','mnotes-lunch':'Lunch notes','mnotes-dinner':'Dinner notes','mnotes-snack':'Snack notes','mnotes-liquids':'Liquids notes','mnotes-sports':'Sports nutrition notes','mnotes-supplements':'Supplement notes','wBPVal':'Blood pressure','wPulseVal':'Pulse','wRestHRVal':'Resting heart rate','wMedsVal':'Medications','wWghtVal':'Weight','wPostRunWghtVal':'Post-run weight','wSleepVal':'Sleep','gaAudiobookText':"Today's listening",'gaAudiobookTime':'Listening time'};
   Object.keys(labeled).forEach(function(k){if(dd[k]&&String(dd[k]).trim())parts.push(labeled[k]+': '+String(dd[k]).trim());});
   // Bible / Sermon Notes tab is stored separately under its own bible_<date> key,
   // not in the planner_ blob above -- pull its substantive fields in directly.
@@ -2895,7 +2909,7 @@ function attachAllFieldUndos(){
   var ids=['jCombined',
            'spDailyBreadText','spMeditationText',
            'gaAudiobookText','gaSkillText',
-           'wBPVal','wPulseVal','wRestHRVal','wWghtVal','wSleepVal','wMedsVal',
+           'wBPVal','wPulseVal','wRestHRVal','wWghtVal','wPostRunWghtVal','wSleepVal','wMedsVal',
            'exStrengthVal','exBikeVal','exWalkVal'];
   ids.forEach(_attachFieldUndo);
 }
