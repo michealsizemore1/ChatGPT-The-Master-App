@@ -347,7 +347,8 @@
       try{if(a.temp&&a.pace){var hh=heatHumidityImpact(a.temp,a.humidity,parsePace(a.pace));if(hh&&hh.pctSlower>=0.5){x.hhPct=Math.round(hh.pctSlower*10)/10;x.hhSec=Math.round(hh.secSlower);x.feels=Math.round(hh.feelsLike);}}}catch(e){}
       if(a.date&&ha.byDate&&ha.byDate[a.date]!==undefined){x.ha=ha.byDate[a.date];try{var hi=haStatusInfo(x.ha);x.haLabel=hi.label;x.haColor=hi.color;}catch(e){}}
       if(a.date){var dc=dayCtx(a.date);for(var k in dc)x[k]=dc[k];}
-      out[String(a.id)]=x;
+      // Firebase keys can't contain . $ # [ ] / (some imported activities have ids like 1699999999999.123).
+      out[String(a.id).replace(/[.$#\[\]\/]/g,'_')||'_']=x;
     });
     return out;
   }
