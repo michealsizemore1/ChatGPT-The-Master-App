@@ -150,6 +150,49 @@
   }
   window.beyondStridePullRuns=pullRuns;
 
+  // ── Fluids and weights entered in BeyondStride (phone or watch) ──
+  // BeyondStride posts each change to <db>/nutrition/<key>/inbox: {date, f: water|sports|other|weight|postWeight,
+  // d: oz to add (fluids) or v: lb (weights), at}. They're applied here exactly like taps on this page, the day is
+  // shared back, then the entries are removed (BeyondStride sees they're gone and switches to these totals).
+  var inboxBusy=false;
+  function applyEntry(e){
+    var date=String(e.date||''),f=e.f,viewed=typeof today!=='undefined'&&dk(today)===date;
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(date))return;
+    var fluid={water:'waterOz',sports:'sportsDrinksOz',other:'otherLiquidsOz'}[f];
+    var wfield={weight:'wWghtVal',postWeight:'wPostRunWghtVal'}[f];
+    if(viewed){
+      if(fluid){var dd=Math.round(num(e.d));if(!dd)return;
+        if(f==='water')changeWater(dd);else if(f==='sports')changeSportsDrinks(dd);else changeOtherLiquids(dd);}
+      else if(wfield){var el=document.getElementById(wfield);if(!el)return;el.value=num(e.v)>0?String(e.v):'';
+        try{updateHydrationEstimate();}catch(x){}try{save();}catch(x){}}
+      return;
+    }
+    // Another day: change its saved copy.
+    var key='planner_'+date,d={};try{d=JSON.parse(localStorage.getItem(key)||'{}')||{};}catch(x){d={};}
+    if(fluid)d[fluid]=Math.max(0,num(d[fluid])+Math.round(num(e.d)));
+    else if(wfield)d[wfield]=num(e.v)>0?String(e.v):'';
+    else return;
+    localStorage.setItem(key,JSON.stringify(d));
+  }
+  function pullInbox(){
+    var c=cfg();if(!c||inboxBusy||typeof dk!=='function')return;
+    inboxBusy=true;
+    var base=c.db+'/nutrition/'+encodeURIComponent(c.key)+'/inbox';
+    fetch(base+'.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).then(function(o){
+      if(!o||typeof o!=='object'){inboxBusy=false;return;}
+      var keys=Object.keys(o).filter(function(k){return o[k]&&o[k].date&&o[k].f;});
+      if(!keys.length){inboxBusy=false;return;}
+      keys.sort(function(a,b){return num(o[a].at)-num(o[b].at);});
+      var dates={};
+      keys.forEach(function(k){try{applyEntry(o[k]);dates[o[k].date]=1;}catch(x){}});
+      // Share the changed days right away, then clear the entries.
+      Promise.all(Object.keys(dates).map(function(dt){var rec=dayRecord(dt);return rec?put(dt,rec):Promise.resolve();}))
+        .then(function(){return Promise.all(keys.map(function(k){return fetch(base+'/'+encodeURIComponent(k)+'.json',{method:'DELETE'}).catch(function(){});}));})
+        .then(function(){inboxBusy=false;},function(){inboxBusy=false;});
+    }).catch(function(){inboxBusy=false;});
+  }
+  window.beyondStridePullInbox=pullInbox;
+
   window.beyondStrideShareNow=function(){shareRecent(30);};
   readLink();
   window.addEventListener('hashchange',readLink);
@@ -158,11 +201,12 @@
     // Catch up the last week each time the page opens (days are only sent if they changed).
     setTimeout(function(){shareRecent(7);},1500);
     // Pick up finished runs, now and every minute while the page is open.
-    setTimeout(pullRuns,1200);
+    setTimeout(pullRuns,1200);setTimeout(pullInbox,1600);
     setInterval(function(){if(document.visibilityState==='visible')pullRuns();},60000);
+    setInterval(function(){if(document.visibilityState==='visible')pullInbox();},20000);
   });
   document.addEventListener('visibilitychange',function(){
     if(document.visibilityState==='hidden'&&cfg()&&typeof today!=='undefined')shareDay(dk(today));
-    if(document.visibilityState==='visible')pullRuns();
+    if(document.visibilityState==='visible'){pullRuns();pullInbox();}
   });
 })();
