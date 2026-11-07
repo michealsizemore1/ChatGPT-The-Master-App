@@ -182,6 +182,17 @@
       }catch(err){}
       return;
     }
+    // Food Database tools tapped in BeyondStride (Enrich All, Undo All, Rescan Foods, Remove Dupes).
+    // You already confirmed in BeyondStride, so this page's own "Are you sure?" is answered yes.
+    if(f==='libAction'){
+      var act=(e.x||{}).action,fn={enrich:'enrichAllFavorites',undo:'undoAllFavoritesEstimates',rescan:'rescanHealthyFoodsAndImages',dedupe:'removeDuplicateFoodItems'}[act];
+      if(!fn||typeof window[fn]!=='function')return;
+      var oc=window.confirm,oa=window.alert;window.confirm=function(){return true;};window.alert=function(m){try{console.log('BeyondStride '+act+': '+m);}catch(err){}};
+      try{var btn=document.createElement('button');if(act==='rescan')window[fn](btn,'favoriteRescanStatus');else window[fn](btn);}catch(err){}
+      window.confirm=oc;setTimeout(function(){window.alert=oa;},0);
+      scheduleLibrary();
+      return;
+    }
     // Calorie-target settings changed in BeyondStride.
     if(f==='calSettings'){
       var cx=e.x||{};
@@ -257,7 +268,10 @@
     try{lib.healthy=(getHealthyFoods()||[]).slice(0,500).map(function(x){return cleanFood(x,false);});}catch(e){}
     try{lib.meals=(getSavedMeals()||[]).slice(0,100).map(function(m){return{name:String(m.name||'Meal'),category:m.category||'',items:(m.items||[]).slice(0,30).map(function(x){return cleanFood(x,false);})};});}catch(e){}
     try{if(typeof calorieAdvisorSettings==='function')lib.calSettings=calorieAdvisorSettings();}catch(e){}
-    var cmp=JSON.stringify([lib.favorites,lib.healthy,lib.meals,lib.calSettings]);
+    // Counts for the Enrich All / Undo All tiles.
+    try{var fv=getFavorites()||[];lib.stats={needEnrich:fv.filter(function(f){return typeof enrichableFields==='function'&&enrichableFields(f).length>0;}).length,
+      estimated:fv.filter(function(f){return (f.aiEstimatedFields||[]).length>0;}).length};}catch(e){}
+    var cmp=JSON.stringify([lib.favorites,lib.healthy,lib.meals,lib.calSettings,lib.stats]);
     if(cmp===libSent)return;
     fetch(c.db+'/nutrition/'+encodeURIComponent(c.key)+'/library.json',{method:'PUT',body:JSON.stringify(lib)})
       .then(function(r){if(r.ok)libSent=cmp;}).catch(function(){});
