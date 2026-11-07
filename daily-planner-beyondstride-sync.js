@@ -317,7 +317,7 @@
 
   // ── Activities for BeyondStride: every activity plus each card's extra lines (zones, heat, sleep, prev-day
   //    water / food / fuel impact), worked out here with the exact same code paths the Activities tab uses. ──
-  var actSent='',actTimer=null;
+  var actSent='',actTimer=null,actWaits=0;
   function actExtras(acts){
     var out={},cp=typeof getCP==='function'?getCP():0;
     var ha={byDate:{}};try{ha=haBuildPercentMap(acts);}catch(e){}
@@ -351,9 +351,14 @@
     });
     return out;
   }
+  // Small status note BeyondStride can show if Activities don't arrive.
+  function actStatus(o){var c=cfg();if(!c)return;o.at=Date.now();try{fetch(c.db+'/nutrition/'+encodeURIComponent(c.key)+'/activitiesStatus.json',{method:'PUT',body:JSON.stringify(o)}).catch(function(){});}catch(e){}}
   function shareActivities(){
-    var c=cfg();if(!c||typeof getActivities!=='function')return;
-    if(typeof _activitiesLargeCache!=='undefined'&&!Array.isArray(_activitiesLargeCache)){clearTimeout(actTimer);actTimer=setTimeout(shareActivities,1500);return;}
+    try{shareActivitiesInner();}catch(err){actStatus({ok:false,stage:'error',err:String(err&&err.stack||err).slice(0,400)});}
+  }
+  function shareActivitiesInner(){
+    var c=cfg();if(!c){return;}if(typeof getActivities!=='function'){actStatus({ok:false,stage:'no getActivities'});return;}
+    if(typeof _activitiesLargeCache!=='undefined'&&!Array.isArray(_activitiesLargeCache)){actWaits=(actWaits||0)+1;if(actWaits===8)actStatus({ok:false,stage:'waiting for activities to load'});clearTimeout(actTimer);actTimer=setTimeout(shareActivities,1500);return;}
     var acts=getActivities()||[];
     // Firebase refuses keys with . $ # [ ] / and the whole upload fails, so nested data is cleaned first.
     function clean(v,depth){
@@ -369,9 +374,12 @@
     var payload={list:list,extras:actExtras(acts),settings:{cp:typeof getCP==='function'?getCP():0,maxHr:typeof getMaxHR==='function'?getMaxHR():0,restHr:typeof getRestingHR==='function'?getRestingHR():0},updated:Date.now()};
     var cmp=JSON.stringify([payload.list,payload.extras,payload.settings]);
     if(cmp===actSent)return;
-    fetch(c.db+'/nutrition/'+encodeURIComponent(c.key)+'/activities.json',{method:'PUT',body:JSON.stringify(payload)})
-      .then(function(r){if(r.ok)actSent=cmp;else r.text().then(function(t){console.warn('BeyondStride activities share failed',r.status,t);try{localStorage.setItem('bs_act_share_err',r.status+' '+String(t).slice(0,200));}catch(e){}});})
-      .catch(function(e){try{localStorage.setItem('bs_act_share_err',String(e));}catch(x){}});
+    var body=JSON.stringify(payload);
+    actStatus({ok:null,stage:'sending',count:list.length,bytes:body.length});
+    fetch(c.db+'/nutrition/'+encodeURIComponent(c.key)+'/activities.json',{method:'PUT',body:body})
+      .then(function(r){if(r.ok){actSent=cmp;actStatus({ok:true,stage:'sent',count:list.length,bytes:body.length});}
+        else r.text().then(function(t){actStatus({ok:false,stage:'refused',status:r.status,err:String(t).slice(0,300),count:list.length,bytes:body.length});});})
+      .catch(function(e){actStatus({ok:false,stage:'network',err:String(e),count:list.length,bytes:body.length});});
   }
   function scheduleActivities(){clearTimeout(actTimer);actTimer=setTimeout(shareActivities,3000);}
   window.beyondStrideShareActivities=shareActivities;
