@@ -252,7 +252,19 @@
     else if(e.f==='foodEdit'){if(x.servings!=null)log[i].servings=num(x.servings)||log[i].servings;if(x.meal)log[i].meal=x.meal;if(x.servingLabel)log[i].servingLabel=String(x.servingLabel);}
     else log.splice(i,1);
     if(viewed){try{renderFoodItems();}catch(err){}try{save();}catch(err){}}
-    else localStorage.setItem(key,JSON.stringify(d));
+    else{
+      // Another day (or this page was left open since yesterday): keep its drink counters in step with its food,
+      // the same way syncAutoLiquidCounters() does for the day on screen.
+      try{
+        var autoOz=function(meal){var t=0;log.forEach(function(it){if(it.meal!==meal)return;if(typeof isCaffeinatedBeverage==='function'&&isCaffeinatedBeverage(it))return;
+          var oz=typeof parseFluidOzFromServingLabel==='function'?parseFluidOzFromServingLabel(it.servingLabel):0;
+          if(!oz&&typeof lookupGusisServingOz==='function')oz=lookupGusisServingOz(it.name);t+=oz*(num(it.servings)||1);});return Math.round(t);};
+        var sa=autoOz('sports'),la=autoOz('liquids');
+        d.sportsDrinksOz=Math.max(0,num(d.sportsDrinksOz)+(sa-num(d.autoSportsDrinksOz)));d.autoSportsDrinksOz=sa;
+        d.otherLiquidsOz=Math.max(0,num(d.otherLiquidsOz)+(la-num(d.autoOtherLiquidsOz)));d.autoOtherLiquidsOz=la;
+      }catch(err){}
+      localStorage.setItem(key,JSON.stringify(d));
+    }
   }
   // Fluids/weights arrive in /inbox, foods in /foodinbox; both are applied in the order they were made.
   function pullInbox(){
