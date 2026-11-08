@@ -1801,7 +1801,8 @@ function aiFillEntireReview(btn){
   const prompt='You are completing a personal weekly review for '+weekLabel+'. Use only the supplied weekly statistics, journal entries, day-by-day training / nutrition / recovery data from the BeyondStride app, and existing review notes. Return ONLY one valid JSON object with exactly these four string keys:\n'
     +'{"wins":"","improve":"","focus":"","lessons":""}\n\n'
     +'Writing requirements:\n- wins: 2-4 specific achievements or positive patterns\n- improve: 2-4 constructive, realistic improvements\n- focus: 1-3 specific priorities for next week\n- lessons: 2-4 concise takeaways from the week\n'
-    +'Use short bullet-style lines inside each string. Do not invent events or accomplishments. If information is limited, acknowledge that briefly and make cautious suggestions.\n\n'
+    +'Use short bullet-style lines inside each string. Do not invent events or accomplishments. If information is limited, acknowledge that briefly and make cautious suggestions.\n'
+    +'Use numbers exactly as written; never guess or calculate a score that is not given. When the journal and BeyondStride differ, BeyondStride is the watch / app measurement for sleep, HRV, heart rate, runs and food logged.\n\n'
     +'WEEKLY STATISTICS:\n'+(stats||'No statistics available')+'\n\nINJURY REPORT WEEKLY ROLL-UP:\n'+injuries+'\n\nDAILY JOURNAL:\n'+(journal||'No written daily notes available')+'\n\nTRAINING, NUTRITION & RECOVERY BY DAY (BeyondStride app):\n'+(bsText||'Not available')+'\n\nEXISTING REVIEW NOTES:\n'+(current||'None');
   const original=btn.innerHTML;btn.disabled=true;btn.innerHTML='&#x23F3; Filling Review...';
   aiCall(prompt,2400,function(text){
@@ -1893,7 +1894,9 @@ function aiFillEntireDayReview(btn){
   const prompt='You are completing a personal daily review for '+dayLabel+'. Use only the supplied journal entry, training / nutrition / recovery data from the BeyondStride app, and existing review notes. Return ONLY one valid JSON object with exactly these four string keys:\n'
     +'{"wins":"","improve":"","focus":"","lessons":""}\n\n'
     +'Writing requirements:\n- wins: 1-3 specific achievements or positive moments from today\n- improve: 1-3 constructive, realistic improvements\n- focus: 1-2 specific priorities for tomorrow\n- lessons: 1-3 concise takeaways from today\n'
-    +'Use short bullet-style lines inside each string. Do not invent events or accomplishments. If information is limited, acknowledge that briefly and make cautious suggestions.\n\n'
+    +'Use short bullet-style lines inside each string. Do not invent events or accomplishments. If information is limited, acknowledge that briefly and make cautious suggestions.\n'
+    +'Use numbers exactly as written; never guess or calculate a score that is not given (HRV in ms is not a readiness score). When the journal and BeyondStride give different numbers (for example sleep), BeyondStride is the watch / app measurement for sleep, HRV, heart rate, runs and food logged; mention both only if the difference matters.\n'
+    +(dk(today)===dk(new Date())?'It is now '+new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})+' and the day is not over: a planned workout not done yet is still to do today (not missed), and food totals are only so far.\n\n':'\n')
     +'DAILY JOURNAL:\n'+(journal||'No written journal notes available for today')
     +'\n\nTRAINING, NUTRITION & RECOVERY (BeyondStride app):\n'+(bsText||'Not available')+'\n\nEXISTING REVIEW NOTES:\n'+(current||'None');
   const original=btn.innerHTML;btn.disabled=true;btn.innerHTML='&#x23F3; Filling Review...';
