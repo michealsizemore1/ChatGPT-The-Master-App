@@ -1,6 +1,6 @@
 
 let today=new Date();const _realToday=new Date(today);// snapshot of actual launch date — never changes with navigation
-const charts={};let waterOz=0,sportsDrinksOz=0,otherLiquidsOz=0,autoSportsDrinksOz=0,autoOtherLiquidsOz=0,scoreVal=0,copiedDayData=null;
+const charts={};let scoreVal=0,copiedDayData=null;
 function dk(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return y+'-'+m+'-'+day;}
 function fmtD(d){return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});}
 function wkStart(off=0){const t=new Date();t.setDate(t.getDate()+off*7);const dow=(t.getDay()+6)%7;const ws=new Date(t);ws.setDate(t.getDate()-dow);ws.setHours(0,0,0,0);return ws;}
@@ -146,7 +146,7 @@ function toggleTabNotes(){
 var dailyCheckFilter='all';
 var DAILY_CHECK_TAB_NAMES={
   daily:'Daily',activities:'Activities',bible:'Bible',meditate:'Meditation',
-  wellness:'Wellness',nutrition:'Nutrition',library:'Library',
+  wellness:'Wellness',library:'Library',
   'skill-log':'Learning & Growth',habits:'Habits'
 };
 function dailyCheckLabel(el){
@@ -272,33 +272,6 @@ function jumpToDailyCheck(btn){
   },80);
 }
 
-function updateWaterDisplay(){const cups=(waterOz/8).toFixed(1);const el=document.getElementById('waterDisplay');if(el)el.textContent=waterOz+' oz ('+cups+' cups)';updateHydrationEstimate();}
-function changeWater(delta){waterOz=Math.max(0,waterOz+delta);updateWaterDisplay();save();renderJournalSchedule();}
-function updateSportsDrinksDisplay(){const cups=(sportsDrinksOz/8).toFixed(1);const el=document.getElementById('sportsDrinksDisplay');if(el)el.textContent=sportsDrinksOz+' oz ('+cups+' cups)';updateHydrationEstimate();}
-function changeSportsDrinks(delta){sportsDrinksOz=Math.max(0,sportsDrinksOz+delta);updateSportsDrinksDisplay();save();}
-function updateOtherLiquidsDisplay(){const cups=(otherLiquidsOz/8).toFixed(1);const el=document.getElementById('otherLiquidsDisplay');if(el)el.textContent=otherLiquidsOz+' oz ('+cups+' cups)';updateHydrationEstimate();}
-function changeOtherLiquids(delta){otherLiquidsOz=Math.max(0,otherLiquidsOz+delta);updateOtherLiquidsDisplay();save();}
-// Estimate remaining fluids needed after a run, from the wake-up vs. post-run weight difference.
-// ACSM guidance: replace roughly 16-24 fl oz of fluid per lb of body weight lost during exercise; we use the 20 oz/lb midpoint.
-// Counts Water + Sports Nutrition Drinks + Other Drinks, same as the app's existing "Total Liquids (excl. Caffeine)"
-// definition: caffeinated items (coffee, energy drinks, black/green tea) logged via the food log are kept out of
-// these counters automatically by syncAutoLiquidCounters()/liquidOzForMeal(). A manual +/- tap on Other Drinks has
-// no name attached, so it's counted as-is -- log caffeinated drinks via the food log for them to be excluded.
-// Renders into both hydrationEstimateBox (Wellness, next to the weight fields) and hydrationEstimateBoxNutrition
-// (Nutrition, next to the fluid trackers) so the estimate is visible wherever the person happens to be.
-function updateHydrationEstimate(){
-  const boxes=[document.getElementById('hydrationEstimateBox'),document.getElementById('hydrationEstimateBoxNutrition')].filter(Boolean);
-  if(!boxes.length)return;
-  const wakeEl=document.getElementById('wWghtVal'),postEl=document.getElementById('wPostRunWghtVal');
-  const wake=wakeEl?parseFloat(wakeEl.value):NaN,post=postEl?parseFloat(postEl.value):NaN;
-  if(!wake||!post||isNaN(wake)||isNaN(post)||post>=wake){boxes.forEach(function(b){b.style.display='none';});return;}
-  const lostLbs=wake-post;
-  const targetOz=lostLbs*20;
-  const consumedOz=(waterOz||0)+(sportsDrinksOz||0)+(otherLiquidsOz||0);
-  const neededOz=Math.max(0,Math.round(targetOz-consumedOz));
-  const html='&#x1F4A7; Lost <strong>'+lostLbs.toFixed(1)+' lb</strong> on the run &rarr; target <strong>~'+Math.round(targetOz)+' oz</strong> to fully rehydrate (16&ndash;24 oz per lb lost, per ACSM). You\'ve had <strong>'+Math.round(consumedOz)+' oz</strong> of fluids today (water + sports drinks + other drinks, excl. caffeine), so '+(neededOz===0?'you\'re already caught up!':'drink about <strong>'+neededOz+' oz more</strong>.')+' <span style="font-size:0.75rem;color:#6b85b3;">(Caffeinated drinks logged via the food log are excluded automatically; a manual Other Drinks tap is assumed non-caffeinated.)</span>';
-  boxes.forEach(function(b){b.style.display='block';b.innerHTML=html;});
-}
 function syncMassageMinutes(source){
   var daily=document.getElementById('dailyMassageMinutes'),activities=document.getElementById('exMassageMinutes');
   if(source==='daily'&&daily&&activities)activities.value=daily.value;
@@ -309,7 +282,7 @@ function parseBP(s){if(!s)return{sys:0,dia:0};const m=s.match(/(\d+)\s*\/\s*(\d+
 function buildStars(){const ss=document.getElementById('scoreStars');if(!ss)return;ss.innerHTML='';for(let i=1;i<=5;i++){const s=document.createElement('span');s.className='star'+(i<=scoreVal?' active':'');s.textContent='★';s.onclick=()=>{scoreVal=(scoreVal===i)?i-1:i;buildStars();save();};ss.appendChild(s);}updateTodayGlance();}
 
 // All text/number fields
-const TXS=['spDailyBreadText','spMeditationText','gaAudiobookText','gaAudiobookTime','gaSkillText','gaSkillTime','wBPVal','wPulseVal','wRestHRVal','wMedsVal','wWghtVal','wPostRunWghtVal','wSleepVal','exStrengthVal','exBikeVal','exWalkVal','exDogWalkVal','nuCalVal','nuProtVal','nuFatVal','nuCarbsVal','jAccomplish','jImprov','jGratitude','jNotes','habitIdentity','habitReflection','mnotes-breakfast','mnotes-lunch','mnotes-dinner','mnotes-snack','mnotes-liquids','mnotes-sports','mnotes-supplements'];
+const TXS=['spDailyBreadText','spMeditationText','gaAudiobookText','gaAudiobookTime','gaSkillText','gaSkillTime','wBPVal','wPulseVal','wRestHRVal','wMedsVal','wWghtVal','wSleepVal','exStrengthVal','exBikeVal','exWalkVal','exDogWalkVal','jAccomplish','jImprov','jGratitude','jNotes','habitIdentity','habitReflection'];
 const NMS=['exSteps','wSleepScore','exMassageMinutes','gaFinancialVideosTime'];
 const PTIDS=['pt0','pt1','pt2','dg0','dg1','dg2'];
 
@@ -326,8 +299,7 @@ function save(){
   NMS.forEach(id=>{const e=document.getElementById(id);if(e)d[id]=e.value;});
   // Priority/goal text
   PTIDS.forEach(id=>{const row=document.getElementById(id);if(row){const tx=row.querySelector('input[type=text]');if(tx)d[id+'t']=tx.value;}});
-  d.waterOz=waterOz;d.sportsDrinksOz=sportsDrinksOz;d.otherLiquidsOz=otherLiquidsOz;d.autoSportsDrinksOz=autoSportsDrinksOz;d.autoOtherLiquidsOz=autoOtherLiquidsOz;d.score=scoreVal;
-  d.foodLog=window._foodLog||[];
+  d.score=scoreVal;
   try{
     localStorage.setItem('planner_'+dk(today),JSON.stringify(d));
   }catch(saveErr){
@@ -790,48 +762,11 @@ function load(){
     NMS.forEach(id=>{const e=document.getElementById(id);if(e)e.value=d[id]||'';});
     const dailyMassage=document.getElementById('dailyMassageMinutes');if(dailyMassage)dailyMassage.value=d.exMassageMinutes||'';
     const jcEl=document.getElementById('jCombined');if(jcEl)jcEl.value=buildJournalCombined();
-    waterOz=d.waterOz||(d.waterCount?d.waterCount*8:0);updateWaterDisplay();
-    sportsDrinksOz=d.sportsDrinksOz||0;updateSportsDrinksDisplay();
-    otherLiquidsOz=d.otherLiquidsOz||0;updateOtherLiquidsDisplay();
-    autoSportsDrinksOz=d.autoSportsDrinksOz||0;autoOtherLiquidsOz=d.autoOtherLiquidsOz||0;
     scoreVal=d.score||0;buildStars();renderDayReview();
   }catch(e){console.error('load fields:',e);}
   attachListeners();
   attachAllFieldUndos();
-  window._foodLog=Array.isArray(d.foodLog)?d.foodLog:[];
-  // Migrate old food_YYYY-MM-DD storage format if new format is empty
-  if(!window._foodLog.length){
-    var oldFoodRaw=localStorage.getItem('food_'+dk(today));
-    if(oldFoodRaw){
-      try{
-        var oldItems=JSON.parse(oldFoodRaw);
-        if(Array.isArray(oldItems)&&oldItems.length){
-          window._foodLog=oldItems.map(function(it,i){
-            if(!it.id)it.id='f'+Date.now()+'_'+i;
-            return it;
-          });
-          save(); // persist in new location
-          localStorage.removeItem('food_'+dk(today)); // clean up old key
-        }
-      }catch(e){}
-    }
-  }
-  renderFoodItems();
-  try{renderGusisPicker();}catch(e){console.error('renderGusisPicker:',e);}
   try{renderStreaks();}catch(e){console.error('renderStreaks:',e);}
-  // Restore nutrition card state
-  (function(){
-    var mpBody=document.getElementById('mpBody');
-    var nutrBody=document.getElementById('nutrBody');
-    if(mpBody){
-      var mpOpen=localStorage.getItem('mp_open');
-      if(mpOpen==='0'){mpBody.style.display='none';var chev=mpBody.previousElementSibling&&mpBody.previousElementSibling.querySelector('.mp-chev');if(chev)chev.textContent='▸';}
-    }
-    if(nutrBody){
-      var nuOpen=localStorage.getItem('nu_open');
-      if(nuOpen==='0'){nutrBody.style.display='none';var chev2=nutrBody.previousElementSibling&&nutrBody.previousElementSibling.querySelector('.nu-chev');if(chev2)chev2.textContent='▸';}
-    }
-  })();
   renderJournalHome();
   // Daily checkmarks are now fully restored; refresh linked schedule counts once more.
   setTimeout(renderJournalSchedule,0);
@@ -1421,8 +1356,7 @@ function renderStreaks(){
   const DEFS=[
     {id:'stBible',  label:'📖',  tip:'Bible',    fn:d=>d.spBibleAudio==='green'},
     {id:'stPrayer', label:'🙏',  tip:'Prayer',   fn:d=>d.spAIPrayer==='green'},
-    {id:'stExercise',label:'🏃', tip:'Running',  fn:(d,dk)=>d.exRun==='green'||!!actIdx.run[dk]},
-    {id:'stWater',  label:'💧',  tip:'Water',    fn:d=>(parseFloat(d.waterOz)||parseFloat(d.waterCount)*8||0)>=64}
+    {id:'stExercise',label:'🏃', tip:'Running',  fn:(d,dk)=>d.exRun==='green'||!!actIdx.run[dk]}
   ];
   DEFS.forEach(({id,label,tip,fn})=>{
     const n=streak(fn,_streakCache);
@@ -1445,8 +1379,8 @@ function getDM(d,dateKey){
       if(a.pace&&parsePace(a.pace)){actPace+=parsePace(a.pace);actPaceN++;}
     });
   }
-  const bp=parseBP(d.wBPVal);const waterOzDay=parseFloat(d.waterOz)||(parseFloat(d.waterCount)*8||0);return{miles:actMiles,pace:actPaceN?actPace/actPaceN:0,watts:actWattsN?actWatts/actWattsN:0,time:actTime,steps:parseFloat(d.exSteps)||0,stretch:parseTimedMins(d.exStretchVal)||0,massage:parseFloat(d.exMassageMinutes)||parseTimedMins(d.exMassageVal)||0,score:parseFloat(d.score)||0,weight:parseFloat(d.wWghtVal)||0,sleep:parseSleepMins(d.wSleepVal),sleepScore:parseFloat(d.wSleepScore)||0,calories:parseFloat(d.nuCalVal)||0,water:waterOzDay,liquidsNoCaf:waterOzDay+(parseFloat(d.sportsDrinksOz)||0)+(parseFloat(d.otherLiquidsOz)||0),audiobook:journalAudiobookMinutesForDate(dateKey,d),financialVideos:parseTimedMins(d.gaFinancialVideosTime),financialVideosDone:d.gaFinancialVideos==='green'?1:0,skill:parseMins(d.gaSkillTime),skillName:d.gaSkillText||'',skillDone:d.gaSkill==='green'?1:0,bpSys:bp.sys,bpDia:bp.dia,pulse:parseFloat(d.wPulseVal)||0,restHR:parseFloat(d.wRestHRVal)||0,dogWalk:parseFloat(d.exDogWalkVal)||(d.exDogWalk==='green'?1:0),walk:parseFloat(d.exWalkVal)||(d.exWalk==='green'?1:0),headache:d.wHeadache==='green'?1:0};}
-function agg(arr){const t={miles:0,pace:0,watts:0,time:0,steps:0,stretch:0,massage:0,score:0,weight:0,sleep:0,sleepScore:0,calories:0,water:0,audiobook:0,skill:0,skillDone:0,bpSys:0,bpDia:0,pulse:0,restHR:0,dogWalk:0,walk:0,headache:0};const c={pace:0,watts:0,score:0,weight:0,sleep:0,sleepScore:0,bp:0,pulse:0,restHR:0};arr.forEach(m=>{t.miles+=m.miles;t.time+=m.time;t.steps+=m.steps;t.stretch+=(m.stretch||0);t.massage+=(m.massage||0);t.calories+=m.calories;t.water+=m.water;t.audiobook+=m.audiobook;t.skill+=m.skill||0;t.skillDone+=(m.skillDone||0);t.dogWalk+=(m.dogWalk||0);t.walk+=(m.walk||0);t.headache+=(m.headache||0);if(m.pace){t.pace+=m.pace;c.pace++;}if(m.watts){t.watts+=m.watts;c.watts++;}if(m.score){t.score+=m.score;c.score++;}if(m.weight){t.weight+=m.weight;c.weight++;}if(m.sleep){t.sleep+=m.sleep;c.sleep++;}if(m.sleepScore){t.sleepScore+=m.sleepScore;c.sleepScore++;}if(m.bpSys){t.bpSys+=m.bpSys;t.bpDia+=m.bpDia;c.bp++;}if(m.pulse){t.pulse+=m.pulse;c.pulse++;}if(m.restHR){t.restHR+=m.restHR;c.restHR++;}});return{miles:t.miles,pace:c.pace?t.pace/c.pace:0,watts:c.watts?t.watts/c.watts:0,time:t.time,steps:t.steps,stretch:t.stretch,massage:t.massage,calories:t.calories,water:t.water,score:c.score?t.score/c.score:0,weight:c.weight?t.weight/c.weight:0,sleep:c.sleep?t.sleep/c.sleep:0,sleepScore:c.sleepScore?t.sleepScore/c.sleepScore:0,audiobook:t.audiobook,skill:t.skill,skillDone:t.skillDone,bpSys:c.bp?t.bpSys/c.bp:0,bpDia:c.bp?t.bpDia/c.bp:0,pulse:c.pulse?t.pulse/c.pulse:0,restHR:c.restHR?t.restHR/c.restHR:0,dogWalk:t.dogWalk,walk:t.walk,headache:t.headache};}
+  const bp=parseBP(d.wBPVal);return{miles:actMiles,pace:actPaceN?actPace/actPaceN:0,watts:actWattsN?actWatts/actWattsN:0,time:actTime,steps:parseFloat(d.exSteps)||0,stretch:parseTimedMins(d.exStretchVal)||0,massage:parseFloat(d.exMassageMinutes)||parseTimedMins(d.exMassageVal)||0,score:parseFloat(d.score)||0,weight:parseFloat(d.wWghtVal)||0,sleep:parseSleepMins(d.wSleepVal),sleepScore:parseFloat(d.wSleepScore)||0,audiobook:journalAudiobookMinutesForDate(dateKey,d),financialVideos:parseTimedMins(d.gaFinancialVideosTime),financialVideosDone:d.gaFinancialVideos==='green'?1:0,skill:parseMins(d.gaSkillTime),skillName:d.gaSkillText||'',skillDone:d.gaSkill==='green'?1:0,bpSys:bp.sys,bpDia:bp.dia,pulse:parseFloat(d.wPulseVal)||0,restHR:parseFloat(d.wRestHRVal)||0,dogWalk:parseFloat(d.exDogWalkVal)||(d.exDogWalk==='green'?1:0),walk:parseFloat(d.exWalkVal)||(d.exWalk==='green'?1:0),headache:d.wHeadache==='green'?1:0};}
+function agg(arr){const t={miles:0,pace:0,watts:0,time:0,steps:0,stretch:0,massage:0,score:0,weight:0,sleep:0,sleepScore:0,audiobook:0,skill:0,skillDone:0,bpSys:0,bpDia:0,pulse:0,restHR:0,dogWalk:0,walk:0,headache:0};const c={pace:0,watts:0,score:0,weight:0,sleep:0,sleepScore:0,bp:0,pulse:0,restHR:0};arr.forEach(m=>{t.miles+=m.miles;t.time+=m.time;t.steps+=m.steps;t.stretch+=(m.stretch||0);t.massage+=(m.massage||0);t.audiobook+=m.audiobook;t.skill+=m.skill||0;t.skillDone+=(m.skillDone||0);t.dogWalk+=(m.dogWalk||0);t.walk+=(m.walk||0);t.headache+=(m.headache||0);if(m.pace){t.pace+=m.pace;c.pace++;}if(m.watts){t.watts+=m.watts;c.watts++;}if(m.score){t.score+=m.score;c.score++;}if(m.weight){t.weight+=m.weight;c.weight++;}if(m.sleep){t.sleep+=m.sleep;c.sleep++;}if(m.sleepScore){t.sleepScore+=m.sleepScore;c.sleepScore++;}if(m.bpSys){t.bpSys+=m.bpSys;t.bpDia+=m.bpDia;c.bp++;}if(m.pulse){t.pulse+=m.pulse;c.pulse++;}if(m.restHR){t.restHR+=m.restHR;c.restHR++;}});return{miles:t.miles,pace:c.pace?t.pace/c.pace:0,watts:c.watts?t.watts/c.watts:0,time:t.time,steps:t.steps,stretch:t.stretch,massage:t.massage,score:c.score?t.score/c.score:0,weight:c.weight?t.weight/c.weight:0,sleep:c.sleep?t.sleep/c.sleep:0,sleepScore:c.sleepScore?t.sleepScore/c.sleepScore:0,audiobook:t.audiobook,skill:t.skill,skillDone:t.skillDone,bpSys:c.bp?t.bpSys/c.bp:0,bpDia:c.bp?t.bpDia/c.bp:0,pulse:c.pulse?t.pulse/c.pulse:0,restHR:c.restHR?t.restHR/c.restHR:0,dogWalk:t.dogWalk,walk:t.walk,headache:t.headache};}
 function gRow(l,m,t){const b=t?'background:#f8f9fa;font-weight:700':'';const skillCell=m.skillDone?(t?m.skillDone+'d':'✅'):'-';return`<tr style="${b}"><td>${l}</td><td>${fmtMins(m.audiobook)}</td><td>${skillCell}</td></tr>`;}
 function fRow(l,m,t){const b=t?'background:#f8f9fa;font-weight:700':'';return`<tr style="${b}"><td>${l}</td><td>${m.miles?m.miles.toFixed(1):'-'}</td><td>${m.pace?fmtPace(m.pace):'-'}</td><td>${m.watts?Math.round(m.watts):'-'}</td><td>${fmtMins(m.time)}</td><td>${m.steps?Math.round(m.steps):'-'}</td><td>${m.dogWalk?(Math.round(m.dogWalk*10)/10)%1===0?Math.round(m.dogWalk):+(m.dogWalk.toFixed(1)):'-'}</td><td>${m.walk?(Math.round(m.walk*10)/10)%1===0?Math.round(m.walk):+(m.walk.toFixed(1)):'-'}</td></tr>`;}
 function wRow(l,m,t){const b=t?'background:#f8f9fa;font-weight:700':'';const bp=m.bpSys?Math.round(m.bpSys)+'/'+Math.round(m.bpDia):'-';return`<tr style="${b}"><td>${l}</td><td>${m.weight?m.weight.toFixed(1):'-'}</td><td>${m.sleep?fmtMins(m.sleep):'-'}</td><td>${m.sleepScore?m.sleepScore.toFixed(0):'-'}</td><td>${bp}</td><td>${m.pulse?Math.round(m.pulse):'-'}</td><td>${m.restHR?Math.round(m.restHR):'-'}</td></tr>`;}
@@ -1457,60 +1391,8 @@ fRow=function(l,m,t){const b=t?'background:#f8f9fa;font-weight:700':'';return`<t
 const wH='<table class="summary-table"><thead><tr><th>Period</th><th>Weight</th><th>Sleep</th><th>Sleep Score</th><th>Avg BP</th><th>Pulse</th><th>Resting HR</th></tr></thead><tbody>';
 function mkT(h,r,t){return h+r.join('')+t+'</tbody></table>';}
 let weekOff2=0;
-// ── Nutrition + Spirituality summary helpers ──────────────────────────────
-const nuH='<table class="summary-table"><thead><tr><th>Period</th><th>Calories</th><th>Protein (g)</th><th>Fat (g)</th><th>Carbs (g)</th><th>Water (oz)</th></tr></thead><tbody>';
-const nuMicroH='<table class="summary-table"><thead><tr><th>Period</th><th>Fiber (g)</th><th>Sugar (g)</th><th>Sodium (mg)</th><th>Vit A (mcg)</th><th>Vit C (mg)</th><th>Vit D (mcg)</th><th>Calcium (mg)</th><th>Iron (mg)</th><th>Potassium (mg)</th></tr></thead><tbody>';
+// ── Spirituality summary helpers ──────────────────────────────
 const spirH='<table class="summary-table"><thead><tr><th>Period</th><th>Meditation</th><th>Bible Audio</th><th>Worship</th><th>AI Prayer</th><th>Daily Bread</th></tr></thead><tbody>';
-
-function getNuDay(dateKey){
-  var cal=0,prot=0,fat=0,carbs=0;
-  var micro={fiber:0,sugar:0,sodium:0,vitA:0,vitC:0,vitD:0,calcium:0,iron:0,potassium:0};
-  // New format: foodLog inside planner record
-  var pr=localStorage.getItem('planner_'+dateKey);
-  if(pr){
-    var pd=JSON.parse(pr);
-    if(Array.isArray(pd.foodLog)&&pd.foodLog.length){
-      pd.foodLog.forEach(function(f){
-        var s=parseFloat(f.servings)||1;
-        cal+=(parseFloat(f.cal)||0)*s;
-        prot+=(parseFloat(f.prot)||0)*s;
-        fat+=(parseFloat(f.fat)||0)*s;
-        carbs+=(parseFloat(f.carbs)||0)*s;
-        MICRO_FIELDS.forEach(function(mf){micro[mf]+=(parseFloat(f[mf])||0)*s;});
-      });
-    }
-  }
-  // Old format: food_YYYY-MM-DD key
-  if(!cal){
-    var oldRaw=localStorage.getItem('food_'+dateKey);
-    if(oldRaw){
-      try{
-        var oldItems=JSON.parse(oldRaw);
-        if(Array.isArray(oldItems)){
-          oldItems.forEach(function(f){
-            var s=parseFloat(f.servings)||1;
-            cal+=(parseFloat(f.cal)||0)*s;
-            prot+=(parseFloat(f.prot)||0)*s;
-            fat+=(parseFloat(f.fat)||0)*s;
-            carbs+=(parseFloat(f.carbs)||0)*s;
-          });
-        }
-      }catch(e){}
-    }
-  }
-  // Legacy hidden-field fallback
-  if(!cal&&pr){
-    var pd2=JSON.parse(pr);
-    cal=parseFloat(pd2.nuCalVal)||0;
-    prot=parseFloat(pd2.nuProtVal)||0;
-    fat=parseFloat(pd2.nuFatVal)||0;
-    carbs=parseFloat(pd2.nuCarbsVal)||0;
-  }
-    // Water from planner data
-  var water=0;
-  if(pr){try{var pd3=JSON.parse(pr);water=parseFloat(pd3.waterOz)||(parseFloat(pd3.waterCount)*8)||0;}catch(e){}}
-  return{cal:cal,prot:prot,fat:fat,carbs:carbs,water:water,fiber:micro.fiber,sugar:micro.sugar,sodium:micro.sodium,vitA:micro.vitA,vitC:micro.vitC,vitD:micro.vitD,calcium:micro.calcium,iron:micro.iron,potassium:micro.potassium};
-}
 
 function getSpiritDay(dateKey){
   var pr=localStorage.getItem('planner_'+dateKey);
@@ -1524,14 +1406,6 @@ function getSpiritDay(dateKey){
   };
 }
 
-function aggNu(arr){
-  return arr.reduce(function(a,n){
-    var r={cal:a.cal+n.cal,prot:a.prot+n.prot,fat:a.fat+n.fat,carbs:a.carbs+n.carbs,water:a.water+(n.water||0)};
-    MICRO_FIELDS.forEach(function(f){r[f]=(a[f]||0)+(n[f]||0);});
-    return r;
-  },{cal:0,prot:0,fat:0,carbs:0,water:0});
-}
-
 function aggSpir(arr){
   return arr.reduce(function(a,s){
     return{
@@ -1542,31 +1416,6 @@ function aggSpir(arr){
       dailyBread: a.dailyBread+(s.hasDailyBread?1:(s.dailyBread||0))
     };
   },{meditation:0,aiPrayer:0,bibleAudio:0,worship:0,dailyBread:0});
-}
-
-function nuRow(l,n,isTot){
-  var b=isTot?'background:#f8f9fa;font-weight:700':'';
-  return '<tr style="'+b+'"><td>'+l+'</td>'
-    +'<td>'+(n.cal?Math.round(n.cal):'-')+'</td>'
-    +'<td>'+(n.prot?Math.round(n.prot):'-')+'</td>'
-    +'<td>'+(n.fat?Math.round(n.fat):'-')+'</td>'
-    +'<td>'+(n.carbs?Math.round(n.carbs):'-')+'</td>'
-    +'<td>'+(n.water?Math.round(n.water)+' oz':'-')+'</td></tr>';
-}
-
-function nuMicroRow(l,n,isTot){
-  var b=isTot?'background:#f8f9fa;font-weight:700':'';
-  var v=function(x){return x?Math.round(x):'-';};
-  return '<tr style="'+b+'"><td>'+l+'</td>'
-    +'<td>'+v(n.fiber)+'</td>'
-    +'<td>'+v(n.sugar)+'</td>'
-    +'<td>'+v(n.sodium)+'</td>'
-    +'<td>'+v(n.vitA)+'</td>'
-    +'<td>'+v(n.vitC)+'</td>'
-    +'<td>'+v(n.vitD)+'</td>'
-    +'<td>'+v(n.calcium)+'</td>'
-    +'<td>'+v(n.iron)+'</td>'
-    +'<td>'+v(n.potassium)+'</td></tr>';
 }
 
 function spirRow(l,s,isTot){
@@ -1590,39 +1439,29 @@ function spirRow(l,s,isTot){
     +'<td>'+n(s.dailyBread)+'</td></tr>';
 }
 
-function renderNutritionSpirit(dateKeys,labels,nuContainerId,spirContainerId,nuMicroContainerId){
-  var nuRows=[],spirRows=[],nuMicroRows=[],allNu=[],allSpir=[];
+function renderSpirit(dateKeys,labels,spirContainerId){
+  var spirRows=[],allSpir=[];
   dateKeys.forEach(function(keys,i){
     var arr=Array.isArray(keys)?keys:[keys];
-    var nus=arr.map(function(k){return getNuDay(k);});
     var spirs=arr.map(function(k){return getSpiritDay(k);});
-    var nu=aggNu(nus);
     var sp=aggSpir(spirs);
-    allNu.push.apply(allNu,nus);
     allSpir.push.apply(allSpir,spirs);
-    nuRows.push(nuRow(labels[i],nu));
-    nuMicroRows.push(nuMicroRow(labels[i],nu));
     if(arr.length===1){
       spirRows.push(spirRow(labels[i],spirs[0]));
     } else {
       spirRows.push(spirRow(labels[i],sp));
     }
   });
-  var totNu=aggNu(allNu);
   var totSpir=aggSpir(allSpir);
-  var nuEl=document.getElementById(nuContainerId);
   var spEl=document.getElementById(spirContainerId);
-  var nuMicroEl=nuMicroContainerId?document.getElementById(nuMicroContainerId):null;
-  if(nuEl)nuEl.innerHTML=mkT(nuH,nuRows,nuRow('TOTAL',totNu,true));
   if(spEl)spEl.innerHTML=mkT(spirH,spirRows,spirRow('TOTAL',totSpir,true));
-  if(nuMicroEl)nuMicroEl.innerHTML=mkT(nuMicroH,nuMicroRows,nuMicroRow('TOTAL',totNu,true));
 }
 
 function renderWeeklyDigest(days,tot,wDayKeys,lbls){
   var el=document.getElementById('wDigest');if(!el)return;
   var spirs=wDayKeys.map(function(k){return getSpiritDay(k);});
   var sp=aggSpir(spirs);
-  var daysLogged=days.filter(function(d){return d.score||d.miles||d.calories||d.audiobook||d.sleep;}).length;
+  var daysLogged=days.filter(function(d){return d.score||d.miles||d.audiobook||d.sleep;}).length;
   var activeDays=days.filter(function(d){return d.miles>0;}).length;
   var goals={};try{goals=JSON.parse(localStorage.getItem('weekly_goals')||'{}');}catch(ignore){}
   var goalRows=[{name:'Miles',target:Number(goals.Miles)||0,actual:tot.miles||0},{name:'Bible',target:Number(goals.Bible)||0,actual:sp.bibleAudio||0},{name:'Prayer',target:Number(goals.Prayer)||0,actual:sp.aiPrayer||0},{name:'Running',target:Number(goals.Exercise)||0,actual:activeDays},{name:'Audiobook',target:Number(goals.Audible)||0,actual:tot.audiobook||0}].filter(function(goal){return goal.target>0;});
@@ -1632,8 +1471,7 @@ function renderWeeklyDigest(days,tot,wDayKeys,lbls){
     {name:'Daily consistency',value:daysLogged/7,detail:daysLogged+' days logged'},
     {name:'Fitness',value:activeDays/7,detail:activeDays+' active days'},
     {name:'Spirituality',value:((sp.bibleAudio||0)+(sp.aiPrayer||0))/14,detail:(sp.bibleAudio||0)+' Bible and '+(sp.aiPrayer||0)+' prayer days'},
-    {name:'Wellness',value:days.filter(function(d){return d.sleep||d.weight||d.bpSys;}).length/7,detail:'wellness recorded'},
-    {name:'Nutrition',value:days.filter(function(d){return d.calories||d.water;}).length/7,detail:'nutrition recorded'}
+    {name:'Wellness',value:days.filter(function(d){return d.sleep||d.weight||d.bpSys;}).length/7,detail:'wellness recorded'}
   ];
   coverage.sort(function(a,b){return b.value-a.value;});
   var strongest=coverage[0].value?coverage[0].name+' — '+coverage[0].detail:'No clear pattern yet';
@@ -1642,7 +1480,7 @@ function renderWeeklyDigest(days,tot,wDayKeys,lbls){
   var attention=attentionGoals.length?attentionGoals[0].name+' needs '+Math.max(0,Math.round((attentionGoals[0].target-attentionGoals[0].actual)*10)/10)+' more':(weakest.value<1?weakest.name+' has the least coverage':'All tracked areas are current');
   var priorStart=new Date(wDayKeys[0]+'T12:00:00');priorStart.setDate(priorStart.getDate()-7);var priorDays=[];
   for(var p=0;p<7;p++){var pd=new Date(priorStart);pd.setDate(priorStart.getDate()+p);var pk=dk(pd),raw=localStorage.getItem('planner_'+pk);priorDays.push(getDM(raw?JSON.parse(raw):{},pk));}
-  var prior=agg(priorDays),priorLogged=priorDays.filter(function(d){return d.score||d.miles||d.calories||d.audiobook||d.sleep;}).length;
+  var prior=agg(priorDays),priorLogged=priorDays.filter(function(d){return d.score||d.miles||d.audiobook||d.sleep;}).length;
   var changes=[];
   if(tot.miles||prior.miles){var mileDiff=tot.miles-prior.miles;changes.push((mileDiff>=0?'+':'')+mileDiff.toFixed(1)+' miles');}
   if(tot.score||prior.score){var scoreDiff=tot.score-prior.score;changes.push((scoreDiff>=0?'+':'')+scoreDiff.toFixed(1)+' average score');}
@@ -1654,11 +1492,11 @@ function renderWeeklyDigest(days,tot,wDayKeys,lbls){
 function renderWeekly(){const ws=wkStart(weekOff2),days=[],lbls=[];for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);const r=localStorage.getItem('planner_'+dk(d));var _dk=dk(d);days.push(getDM(r?JSON.parse(r):{},_dk));lbls.push(d.toLocaleDateString('en-US',{weekday:'short',month:'numeric',day:'numeric'}));}const we=new Date(ws);we.setDate(ws.getDate()+6);document.getElementById('weekLabel').textContent=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' - '+we.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});const tot=agg(days);document.getElementById('wGrowth').innerHTML=mkT(gH,days.map((m,i)=>gRow(lbls[i],m)),gRow('TOTAL',tot,true));document.getElementById('wFitness').innerHTML=mkT(fH,days.map((m,i)=>fRow(lbls[i],m)),fRow('TOTAL/AVG',tot,true));document.getElementById('wWellness').innerHTML=mkT(wH,days.map((m,i)=>wRow(lbls[i],m)),wRow('TOTAL/AVG',tot,true));
   renderWeeklyGrowthTable(ws,we,days,lbls);
   renderGrowthActivityReport('wGrowth',lbls.map(function(label,i){var d=new Date(ws);d.setDate(ws.getDate()+i);return{label:label,start:dk(d),end:dk(d)};}));
-  const wDayKeys=[];for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);wDayKeys.push(dk(d));}renderNutritionSpirit(wDayKeys,lbls,'wNutrition','wSpirituality','wNutritionMicro');}
+  const wDayKeys=[];for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);wDayKeys.push(dk(d));}renderSpirit(wDayKeys,lbls,'wSpirituality');}
 function changeWeekOff(n){weekOff2+=n;renderWeekly();renderGoals();}
 let monthOff2=0;
 function renderMonthly(){const now=new Date(),ref=new Date(now.getFullYear(),now.getMonth()+monthOff2,1);const yr=ref.getFullYear(),mo=ref.getMonth(),dim=new Date(yr,mo+1,0).getDate();const wmap={};for(let d=1;d<=dim;d++){const dt=new Date(yr,mo,d);const ws=wkStartOf(dt);const k=dk(ws),dateKey=dk(dt);if(!wmap[k])wmap[k]={ws,ms:[]};const r=localStorage.getItem('planner_'+dateKey);wmap[k].ms.push(getDM(r?JSON.parse(r):{},dateKey));}document.getElementById('monthLabel').textContent=ref.toLocaleDateString('en-US',{month:'long',year:'numeric'});const wks=Object.values(wmap).sort((a,b)=>a.ws-b.ws),allM=[],gR=[],fR=[],wR=[];wks.forEach(({ws,ms})=>{const we=new Date(ws);we.setDate(ws.getDate()+6);const lb=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+'-'+we.toLocaleDateString('en-US',{day:'numeric'});const a=agg(ms);allM.push(...ms);gR.push(gRow('Wk '+lb,a));fR.push(fRow('Wk '+lb,a));wR.push(wRow('Wk '+lb,a));});const tot=agg(allM);document.getElementById('mGrowth').innerHTML=mkT(gH,gR,gRow('TOTAL',tot,true));document.getElementById('mFitness').innerHTML=mkT(fH,fR,fRow('TOTAL/AVG',tot,true));document.getElementById('mWellness').innerHTML=mkT(wH,wR,wRow('TOTAL/AVG',tot,true));
-  const mWkKeys=[],mWkLbls=[],mGrowthPeriods=[],monthStartKey=dk(new Date(yr,mo,1)),monthEndKey=dk(new Date(yr,mo,dim));wks.forEach(({ws,ms})=>{const we=new Date(ws);we.setDate(ws.getDate()+6);const lb=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+'-'+we.toLocaleDateString('en-US',{day:'numeric'});const keys=[];for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);keys.push(dk(d));}mWkKeys.push(keys);mWkLbls.push('Wk '+lb);mGrowthPeriods.push({label:'Wk '+lb,start:dk(ws)<monthStartKey?monthStartKey:dk(ws),end:dk(we)>monthEndKey?monthEndKey:dk(we)});});renderGrowthActivityReport('mGrowth',mGrowthPeriods);renderNutritionSpirit(mWkKeys,mWkLbls,'mNutrition','mSpirituality','mNutritionMicro');
+  const mWkKeys=[],mWkLbls=[],mGrowthPeriods=[],monthStartKey=dk(new Date(yr,mo,1)),monthEndKey=dk(new Date(yr,mo,dim));wks.forEach(({ws,ms})=>{const we=new Date(ws);we.setDate(ws.getDate()+6);const lb=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+'-'+we.toLocaleDateString('en-US',{day:'numeric'});const keys=[];for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);keys.push(dk(d));}mWkKeys.push(keys);mWkLbls.push('Wk '+lb);mGrowthPeriods.push({label:'Wk '+lb,start:dk(ws)<monthStartKey?monthStartKey:dk(ws),end:dk(we)>monthEndKey?monthEndKey:dk(we)});});renderGrowthActivityReport('mGrowth',mGrowthPeriods);renderSpirit(mWkKeys,mWkLbls,'mSpirituality');
   // Render heatmap
   const hmGrid=document.getElementById('hmGrid');
   const hmMonth=document.getElementById('hmMonth');
@@ -1682,10 +1520,9 @@ function renderMonthly(){const now=new Date(),ref=new Date(now.getFullYear(),now
           if(dd.spBibleAudio==='green')score++;
           if(dd.spAIPrayer==='green')score++;
           if(dd.exRun==='green'||dd.exStrength==='green'||dd.exBike==='green'||dd.exWalk==='green'||hasActivityOnDate(dStr))score++;
-          if((parseFloat(dd.waterOz)||parseFloat(dd.waterCount)*8||0)>=64)score++;
         }
         cell.classList.add('hm'+score);
-        cell.title=dt.toLocaleDateString('en-US',{month:'short',day:'numeric'})+': '+score+'/4 habits';
+        cell.title=dt.toLocaleDateString('en-US',{month:'short',day:'numeric'})+': '+score+'/3 habits';
       }
       hmGrid.appendChild(cell);
     }
@@ -1697,7 +1534,7 @@ function renderYearly(){const yr=new Date().getFullYear()+yearOff2;document.getE
   const yr2=new Date().getFullYear()+yearOff2;
   const yMoKeys=[],yMoLbls=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const yGrowthPeriods=[];for(let mi=0;mi<12;mi++){const dim=new Date(yr2,mi+1,0).getDate();const keys=[];for(let d=1;d<=dim;d++)keys.push(dk(new Date(yr2,mi,d)));yMoKeys.push(keys);yGrowthPeriods.push({label:yMoLbls[mi],start:dk(new Date(yr2,mi,1)),end:dk(new Date(yr2,mi,dim))});}
-  renderGrowthActivityReport('yGrowth',yGrowthPeriods);renderNutritionSpirit(yMoKeys,yMoLbls,'yNutrition','ySpirituality','yNutritionMicro');}
+  renderGrowthActivityReport('yGrowth',yGrowthPeriods);renderSpirit(yMoKeys,yMoLbls,'ySpirituality');}
 function changeYearOff(n){yearOff2+=n;renderYearly();}
 let dashOff2=0;
 function renderDashboard(){
@@ -1798,7 +1635,6 @@ function arrangeActivityTrainingCards(){
 function renderActivitySectionCharts(){
   renderMilesChart();
 }
-function renderNutritionSectionCharts(){renderSectionCharts('nutritionChartsGrid',[{k:'calories',l:'Calories',c:'#f39c12'},{k:'water',l:'Water',c:'#3498db'},{k:'liquidsNoCaf',l:'Total Liquids (excl. Caffeine)',c:'#16a085',help:'Water + Sports Nutrition Drinks + Other Drinks, minus coffee, energy drinks, and black/green tea. GU drink mix still counts.'}]);}
 function renderLibrarySectionCharts(){renderSectionCharts('libraryChartsGrid',[{k:'audiobook',l:'Audiobook Time',c:'#27ae60'}]);}
 function renderSkillSectionCharts(){
   var grid=document.getElementById('skillChartsGrid');if(!grid)return;
@@ -1826,13 +1662,12 @@ function renderSkillSectionCharts(){
 }
 function renderWellnessSectionCharts(){renderBPChart();renderWeightChart();}
 
-// Weekly habit trend: days-hit (0-7) for Bible / Prayer / Exercise / Water over the dashboard week.
+// Weekly habit trend: days-hit (0-7) for Bible / Prayer / Exercise over the dashboard week.
 function renderHabitStreakChart(ws){
   var habitDefs=[
     {k:'bible',   l:'Bible',    c:'#f0b429', fn:function(d,dateKey){return d.spBibleAudio==='green';}},
     {k:'prayer',  l:'Prayer',   c:'#8e44ad', fn:function(d,dateKey){return d.spAIPrayer==='green';}},
-    {k:'exercise',l:'Exercise', c:'#e67e22', fn:function(d,dateKey){return d.exRun==='green'||d.exStrength==='green'||d.exBike==='green'||d.exWalk==='green'||hasActivityOnDate(dateKey);}},
-    {k:'water',   l:'Water',    c:'#3498db', fn:function(d){return (parseFloat(d.waterOz)||parseFloat(d.waterCount)*8||0)>=64;}}
+    {k:'exercise',l:'Exercise', c:'#e67e22', fn:function(d,dateKey){return d.exRun==='green'||d.exStrength==='green'||d.exBike==='green'||d.exWalk==='green'||hasActivityOnDate(dateKey);}}
   ];
   var counts=habitDefs.map(function(){return 0;});
   for(var i=0;i<7;i++){
@@ -2092,168 +1927,6 @@ function renderMilesChart(){
 }
 
 // ── Shared AI helper ─────────────────────────────────────────────────────────
-function nextDayRunContext(){
-  var nextDate=new Date(today);nextDate.setDate(nextDate.getDate()+1);
-  var nextKey=dk(nextDate);
-  var lines=[];
-  var scheduled=getActivities().filter(function(a){
-    return a.date===nextKey&&String(a.type||'Run').toLowerCase().indexOf('run')!==-1;
-  });
-  scheduled.forEach(function(a){
-    lines.push('Scheduled activity: '+[
-      a.title||'Run',
-      a.distance?Number(a.distance).toFixed(2)+' miles':'',
-      a.duration||'',
-      a.pace?a.pace+'/mi':'',
-      a.power?a.power+' W':'',
-      a.notes||'',
-      a.injuryReport?'Injury report: '+a.injuryReport:''
-    ].filter(Boolean).join(' | '));
-  });
-  var cached=localStorage.getItem('workout_cache_'+nextKey);
-  if(cached)lines.push('Tomorrow workout details: '+cached);
-  var raw=localStorage.getItem('current_training_plan');
-  if(raw){
-    try{
-      var plan=JSON.parse(raw),text=String(plan.text||'');
-      var dayNum=0;
-      if(plan.startDate){
-        dayNum=Math.floor((new Date(nextKey+'T00:00:00')-new Date(plan.startDate+'T00:00:00'))/86400000)+1;
-      }
-      var planLines=text.split(/\r?\n/),hit=-1;
-      var dateWords=nextDate.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}).toLowerCase();
-      for(var i=0;i<planLines.length;i++){
-        var lower=planLines[i].toLowerCase();
-        if(lower.indexOf(dateWords)>=0||lower.indexOf(nextKey)>=0||(dayNum>0&&new RegExp('\\bday\\s*'+dayNum+'\\b','i').test(planLines[i]))){hit=i;break;}
-      }
-      var excerpt=hit>=0?planLines.slice(Math.max(0,hit-2),Math.min(planLines.length,hit+7)).join('\n'):text.slice(0,7000);
-      if(excerpt.trim())lines.push('Active training plan context'+(dayNum>0?' (tomorrow is plan day '+dayNum+')':'')+':\n'+excerpt);
-    }catch(e){}
-  }
-  return{date:nextDate,key:nextKey,text:lines.join('\n\n')};
-}
-function selectedDayRunContext(){
-  var runDate=new Date(today),runKey=dk(runDate),lines=[];
-  var runs=getActivities().filter(function(a){
-    return a.date===runKey&&String(a.type||'Run').toLowerCase().indexOf('run')!==-1;
-  });
-  runs.forEach(function(a){
-    lines.push('Run activity: '+[
-      a.title||'Run',
-      a.distance?Number(a.distance).toFixed(2)+' miles':'',
-      a.duration||'',
-      a.pace?a.pace+'/mi':'',
-      a.power?a.power+' W':'',
-      a.calories?a.calories+' calories':'',
-      a.elevation?a.elevation+' ft elevation gain':'',
-      a.notes||'',
-      a.injuryReport?'Injury report: '+a.injuryReport:''
-    ].filter(Boolean).join(' | '));
-  });
-  var cached=localStorage.getItem('workout_cache_'+runKey);
-  if(cached)lines.push('Scheduled workout details: '+cached);
-  var raw=localStorage.getItem('current_training_plan');
-  if(raw){
-    try{
-      var plan=JSON.parse(raw),text=String(plan.text||''),dayNum=0;
-      if(plan.startDate){
-        dayNum=Math.floor((new Date(runKey+'T00:00:00')-new Date(plan.startDate+'T00:00:00'))/86400000)+1;
-      }
-      var planLines=text.split(/\r?\n/),hit=-1;
-      var dateWords=runDate.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}).toLowerCase();
-      for(var i=0;i<planLines.length;i++){
-        var lower=planLines[i].toLowerCase();
-        if(lower.indexOf(dateWords)>=0||lower.indexOf(runKey)>=0||(dayNum>0&&new RegExp('\\bday\\s*'+dayNum+'\\b','i').test(planLines[i]))){hit=i;break;}
-      }
-      if(hit>=0){
-        var excerpt=planLines.slice(Math.max(0,hit-2),Math.min(planLines.length,hit+7)).join('\n');
-        if(excerpt.trim())lines.push('Active training plan context'+(dayNum>0?' (plan day '+dayNum+')':'')+':\n'+excerpt);
-      }
-    }catch(e){}
-  }
-  return{date:runDate,key:runKey,text:lines.join('\n\n')};
-}
-function aiRecoveryMealPlan(btn){
-  if(!journalAIKey()){
-    alert('Add your Anthropic API key in Settings first.');
-    return;
-  }
-  var context=selectedDayRunContext();
-  if(!context.text.trim()){
-    alert('No logged run or scheduled training information was found for the selected day.');
-    return;
-  }
-  var result=document.getElementById('aiMealPlanResult');
-  if(result){result.style.display='block';result.textContent='Creating recovery-focused meals for the selected run day...';}
-  aiBtnState(btn,true);
-  var dateLabel=context.date.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
-  var prompt='Create a practical same-day meal plan that supports RECOVERY from the athlete’s run on '+dateLabel+'. Use only the run information supplied below and do not invent workout facts. Emphasize ordinary foods, post-run carbohydrate and protein intake, hydration, and balanced meals appropriate to the run’s duration and difficulty. Avoid medical claims, supplements, extreme quantities, and precise calorie or macro targets unless supplied. Return ONLY valid JSON with these string fields: breakfast, lunch, dinner, snacks, sportsNutrition, rationale. Keep each meal field concise. Make sportsNutrition focus on immediate post-run recovery, fluids, and electrolytes when appropriate.\n\nRUN INFORMATION\n'+context.text;
-  aiCall(prompt,1800,function(text){
-    aiBtnState(btn,false);
-    try{
-      var clean=text.replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'').trim();
-      var first=clean.indexOf('{'),last=clean.lastIndexOf('}');
-      if(first>=0&&last>first)clean=clean.slice(first,last+1);
-      var plan=JSON.parse(clean);
-      var fields={mpBreakfast:plan.breakfast,mpLunch:plan.lunch,mpDinner:plan.dinner,mpSnack:plan.snacks,mpSports:plan.sportsNutrition};
-      Object.keys(fields).forEach(function(id){
-        var el=document.getElementById(id);
-        if(el&&fields[id]!=null){el.value=String(fields[id]);el.dispatchEvent(new Event('input',{bubbles:true}));}
-      });
-      save();
-      if(result){
-        result.textContent='Recovery meal plan prepared for '+dateLabel+'.'+(plan.rationale?'\n\nWhy this supports recovery:\n'+plan.rationale:'');
-        result.scrollIntoView({behavior:'smooth',block:'nearest'});
-      }
-    }catch(e){
-      if(result)result.textContent='The AI response could not be placed into the meal fields automatically. Response:\n\n'+text;
-    }
-  },function(message){
-    aiBtnState(btn,false);
-    if(result)result.textContent='Recovery meal plan could not be created: '+message;
-  });
-}
-function aiMealPlanForNextRun(btn){
-  if(!journalAIKey()){
-    alert('Add your Anthropic API key in Settings first.');
-    return;
-  }
-  var context=nextDayRunContext();
-  if(!context.text.trim()){
-    alert('No run or active training-plan information was found for tomorrow.');
-    return;
-  }
-  var result=document.getElementById('aiMealPlanResult');
-  if(result){result.style.display='block';result.textContent='Creating a meal plan for tomorrow’s run...';}
-  aiBtnState(btn,true);
-  var dateLabel=context.date.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
-  var prompt='Create a practical meal plan for TODAY that supports the athlete’s scheduled run TOMORROW ('+dateLabel+'). Use the workout information below. Do not invent workout facts. Emphasize ordinary foods, sensible carbohydrate availability, hydration, and recovery. Avoid medical claims, supplements, extreme quantities, and precise calorie targets unless supplied. Return ONLY valid JSON with these string fields: breakfast, lunch, dinner, snacks, sportsNutrition, rationale. Keep each meal field concise and make sportsNutrition cover tonight, pre-run, during-run only if appropriate, and post-run guidance.\n\nWORKOUT INFORMATION\n'+context.text;
-  aiCall(prompt,1800,function(text){
-    aiBtnState(btn,false);
-    try{
-      var clean=text.replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'').trim();
-      var first=clean.indexOf('{'),last=clean.lastIndexOf('}');
-      if(first>=0&&last>first)clean=clean.slice(first,last+1);
-      var plan=JSON.parse(clean);
-      var fields={mpBreakfast:plan.breakfast,mpLunch:plan.lunch,mpDinner:plan.dinner,mpSnack:plan.snacks,mpSports:plan.sportsNutrition};
-      Object.keys(fields).forEach(function(id){
-        var el=document.getElementById(id);
-        if(el&&fields[id]!=null){el.value=String(fields[id]);el.dispatchEvent(new Event('input',{bubbles:true}));}
-      });
-      save();
-      if(result){
-        result.textContent='Plan prepared for '+dateLabel+'.'+(plan.rationale?'\n\nWhy this fits tomorrow’s run:\n'+plan.rationale:'');
-        result.scrollIntoView({behavior:'smooth',block:'nearest'});
-      }
-    }catch(e){
-      if(result)result.textContent='The AI response could not be placed into the meal fields automatically. Response:\n\n'+text;
-    }
-  },function(message){
-    aiBtnState(btn,false);
-    if(result)result.textContent='Meal plan could not be created: '+message;
-  });
-}
-
 function callAI(prompt,resultDivId,maxTok){
   const el=document.getElementById(resultDivId);
   if(el){el.style.display='block';el.textContent='⏳ Thinking...';}
@@ -2669,7 +2342,7 @@ function getDayActivityNotesText(d){
 function getDayJournalText(d){
   const raw=localStorage.getItem('planner_'+dk(d));
   const dd=raw?JSON.parse(raw):{},parts=[];
-  const labeled={jNotes:'Daily Journal',spMeditationText:'Meditation notes',spDailyBreadText:'Daily Bread / verse notes',jAccomplish:'Accomplishments',jImprov:'What to improve',jGratitude:'Gratitude',jIssues:'Issues',jRunLog:'Run log','mnotes-breakfast':'Breakfast notes','mnotes-lunch':'Lunch notes','mnotes-dinner':'Dinner notes','mnotes-snack':'Snack notes','mnotes-liquids':'Liquids notes','mnotes-sports':'Sports nutrition notes','mnotes-supplements':'Supplement notes','wBPVal':'Blood pressure','wPulseVal':'Pulse','wRestHRVal':'Resting heart rate','wMedsVal':'Medications','wWghtVal':'Weight','wPostRunWghtVal':'Post-run weight','wSleepVal':'Sleep','gaAudiobookText':"Today's listening",'gaAudiobookTime':'Listening time'};
+  const labeled={jNotes:'Daily Journal',spMeditationText:'Meditation notes',spDailyBreadText:'Daily Bread / verse notes',jAccomplish:'Accomplishments',jImprov:'What to improve',jGratitude:'Gratitude',jIssues:'Issues',jRunLog:'Run log','wBPVal':'Blood pressure','wPulseVal':'Pulse','wRestHRVal':'Resting heart rate','wMedsVal':'Medications','wWghtVal':'Weight','wSleepVal':'Sleep','gaAudiobookText':"Today's listening",'gaAudiobookTime':'Listening time'};
   Object.keys(labeled).forEach(function(k){if(dd[k]&&String(dd[k]).trim())parts.push(labeled[k]+': '+String(dd[k]).trim());});
   // Bible / Sermon Notes tab is stored separately under its own bible_<date> key,
   // not in the planner_ blob above -- pull its substantive fields in directly.
@@ -2916,7 +2589,7 @@ function attachAllFieldUndos(){
   var ids=['jCombined',
            'spDailyBreadText','spMeditationText',
            'gaAudiobookText','gaSkillText',
-           'wBPVal','wPulseVal','wRestHRVal','wWghtVal','wPostRunWghtVal','wSleepVal','wMedsVal',
+           'wBPVal','wPulseVal','wRestHRVal','wWghtVal','wSleepVal','wMedsVal',
            'exStrengthVal','exBikeVal','exWalkVal'];
   ids.forEach(_attachFieldUndo);
 }

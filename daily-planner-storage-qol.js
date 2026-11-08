@@ -14,7 +14,7 @@ function journalAIKey(){
 
 // ── AI Daily Goals: scan the last 7 days for shortcomings, suggest 3 goals ──
 function journalGatherShortfalls(){
-  var totals={bible:0,prayer:0,meditation:0,stretch:0,library:0,training:0,waterSum:0,waterDays:0,mealsDays:0};
+  var totals={bible:0,prayer:0,meditation:0,stretch:0,library:0,training:0};
   var days=7;
   for(var i=days-1;i>=0;i--){
     var d=new Date();d.setDate(d.getDate()-i);var key=dk(d),row={};
@@ -24,9 +24,6 @@ function journalGatherShortfalls(){
     if(row.spMeditation==='green')totals.meditation++;
     if(row.exStretch==='green')totals.stretch++;
     if(parseTimedMins(row.gaAudiobookTime)>0||String(row.gaAudiobookText||'').trim())totals.library++;
-    var w=parseFloat(row.waterOz)||(parseFloat(row.waterCount)*8||0);
-    if(w>0){totals.waterSum+=w;totals.waterDays++;}
-    if(Array.isArray(row.foodLog)&&row.foodLog.length)totals.mealsDays++;
     try{if(hasActivityOnDate(key))totals.training++;}catch(e){}
   }
   var languageDays={};
@@ -41,9 +38,7 @@ function journalGatherShortfalls(){
     'Stretching: '+totals.stretch+'/7 days',
     'Training/workouts logged: '+totals.training+'/7 days',
     'Library learning: '+totals.library+'/7 days',
-    'Language lessons: '+Object.keys(languageDays).length+'/7 days',
-    'Meals logged: '+totals.mealsDays+'/7 days',
-    'Average water intake: '+(totals.waterDays?Math.round(totals.waterSum/totals.waterDays):0)+' oz on the '+totals.waterDays+'/7 days it was logged'
+    'Language lessons: '+Object.keys(languageDays).length+'/7 days'
   ];
   try{
     var state=h2State();

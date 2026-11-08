@@ -418,7 +418,6 @@ async function hydrateActivitiesStorage(){
     localStorage.removeItem('activities_data');
   }catch(ignore){}
   try{renderActivities();}catch(ignore2){}
-  try{refreshNutritionTargets();}catch(ignore3){}
   try{var weeklyPanel=document.getElementById('tab-weekly');if(weeklyPanel&&weeklyPanel.classList.contains('active')){renderWeekly();renderGoals();}}catch(ignoreWeekly){}
   // Habits reads activities via getActivities(), which falls back to an empty list until
   // this async IndexedDB hydration finishes. If the Habits screen already rendered before
@@ -1342,7 +1341,7 @@ function renderWeeklyGrowthTable(start,end,days,labels){
   host.innerHTML='<table class="summary-table"><thead><tr><th>Period</th><th>Financial Videos</th><th>Udemy</th><th>Gun Range</th><th>Language</th><th>Reading / Audiobook</th></tr></thead><tbody>'+rows.join('')+'</tbody></table>'+detailHtml;
 }
 
-var _hmTabs=['nutrition','habits2','meditate','bible','library','activities','wellness','file-uploads'];
+var _hmTabs=['habits2','meditate','bible','library','activities','wellness','file-uploads'];
 var _cardTabs=['weekly','monthly','yearly','dashboard'].concat(_hmTabs);
 function toggleHamburger(e){
   if(e)e.stopPropagation();
@@ -1393,7 +1392,6 @@ function switchTab(tab,e){
   if(tab==='review')renderReview();if(tab==='library'){renderLibrary();renderLibrarySectionCharts();}
   if(tab==='activities'){_actFirstLoad=true;collapseAllActs();resetActivityAdvancedPanels();loadCurrentPlan();refreshTrainingPreview();renderActivitySectionCharts();initTodayWorkoutCard();updateCompactSectionCounts();}
   if(tab==='bible')renderBibleTab();
-  if(tab==='nutrition'){renderFoodItems();renderFavsList();calculateDailyCalorieTarget();renderNutritionSectionCharts();}
   if(tab==='habits2')h2Render();
   if(tab==='meditate'){meditInitTab();}
   if(tab==='wellness'){var wdl=document.getElementById('wellnessTabDate');if(wdl)wdl.textContent=today.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});renderWellnessSectionCharts();}

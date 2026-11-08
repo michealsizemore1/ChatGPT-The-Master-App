@@ -1037,12 +1037,6 @@ async function submitAskJournal(){
     if(dd.exStretch==='green'||dd.exStretchVal)parts.push('Stretch: '+(dd.exStretchVal||'✓'));
     if(dd.exMassage==='green'||dd.exMassageVal||dd.exMassageMinutes)parts.push('Massage: '+[dd.exMassageMinutes?dd.exMassageMinutes+' min':'',dd.exMassageVal||''].filter(Boolean).join(' — ')||'✓');
     if(dd.exWalk==='green'||dd.exWalkVal)parts.push('Walk: '+(dd.exWalkVal||'✓'));
-    // Nutrition
-    if(dd.nuCalVal||dd.nuProtVal)parts.push('Nutrition — Cal: '+(dd.nuCalVal||'?')+' | Prot: '+(dd.nuProtVal||'?')+'g | Fat: '+(dd.nuFatVal||'?')+'g | Carbs: '+(dd.nuCarbsVal||'?')+'g');
-    if(dd.foodLog&&dd.foodLog.length){
-      const foods=dd.foodLog.map(function(f){return f.name+(f.cal?' ('+f.cal+' cal)':'');}).join(', ');
-      parts.push('Food Log: '+foods);
-    }
     // Priorities & Goals
     ['pt0','pt1','pt2'].forEach(function(k){if(dd[k+'t']){parts.push('Priority: '+dd[k+'t']+(dd[k+'c']==='green'?' ✓':''));}});
     ['dg0','dg1','dg2'].forEach(function(k){if(dd[k+'t']){parts.push('Daily Goal: '+dd[k+'t']+(dd[k+'c']==='green'?' ✓':''));}});
@@ -1094,7 +1088,7 @@ async function submitAskJournal(){
     const res=document.getElementById('askJournalResult');
     res.style.display='block';res.textContent='No journal data found. Start filling in your daily planner entries!';if(_ajBtn){_ajBtn.disabled=false;_ajBtn.textContent='Ask';}return;
   }
-  let prompt='You are analyzing a comprehensive personal daily planner and journal. Answer the question below using only the data provided. Be specific, cite dates, and include relevant details from any section (spirituality, wellness, exercise, nutrition, growth, journal notes, Bible study).\n\nQuestion: '+q+'\n\n';
+  let prompt='You are analyzing a comprehensive personal daily planner and journal. Answer the question below using only the data provided. Be specific, cite dates, and include relevant details from any section (spirituality, wellness, exercise, growth, journal notes, Bible study).\n\nQuestion: '+q+'\n\n';
   if(dayLines.length)prompt+='DAILY PLANNER ENTRIES (all time, newest first):\n'+dayLines.join('\n\n')+'\n\n';
   if(bibleLines.length)prompt+='BIBLE STUDY NOTES (all time):\n'+bibleLines.join('\n')+'\n\n';
   if(actLines.length)prompt+='RECORDED ACTIVITIES (all time):\n'+actLines.join('\n')+'\n\n';
@@ -1480,6 +1474,15 @@ function h2SyncFromJournal(){
     state.dismissedAuto=state.dismissedAuto||[];
     if(state.dismissedAuto.indexOf('hydration')===-1)state.dismissedAuto.push('hydration');
     localStorage.setItem('habits2_hydration_removed_v1','1');
+  }
+  // "Log Meals & Nutrition" removed — Nutrition moved to a different app. Same pattern
+  // as the hydration removal above: drop any existing habit card and record 'nutrition'
+  // in dismissedAuto so it never gets recreated.
+  if(!localStorage.getItem('habits2_nutrition_removed_v1')){
+    state.habits=state.habits.filter(function(h){return h.autoSource!=='nutrition';});
+    state.dismissedAuto=state.dismissedAuto||[];
+    if(state.dismissedAuto.indexOf('nutrition')===-1)state.dismissedAuto.push('nutrition');
+    localStorage.setItem('habits2_nutrition_removed_v1','1');
   }
   var habitRenameMap={hydration:'Reach 64 oz Water',nutrition:'Log Meals & Nutrition',training:'Follow Training Plan',steps:'Reach 10,000 Steps',library:'Read or Listen Daily',udemy:'Complete a Udemy Lesson','retirement-videos':'Watch Financial Videos'};
   state.habits.forEach(function(h){if(habitRenameMap[h.autoSource])h.name=habitRenameMap[h.autoSource];if(h.autoSource==='hydration'){h.type='count';h.target=64;h.schedule='daily';h.weeklyTarget=7;h.category='Health';h.why='Support endurance, recovery, and long-distance running with consistent hydration.';}if(h.autoSource==='steps'){h.type='count';h.target=10000;h.schedule='daily';h.weeklyTarget=7;h.category='Fitness';h.why='Build consistent daily movement by reaching 10,000 steps.';}if(h.autoSource==='udemy'){h.type='duration';h.target=20;h.category='Growth';h.why='Build consistent learning through current and future Udemy courses.';h.minimum='Complete one lesson or log at least 20 minutes';}if(h.autoSource==='retirement-videos'){h.category='Growth';h.why='Build financial knowledge through focused video learning.';}});

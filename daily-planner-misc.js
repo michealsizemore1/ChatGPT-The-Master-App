@@ -149,7 +149,6 @@ function getActivities(){
 }
 function saveActivities(a){
   _activitiesLargeCache=Array.isArray(a)?a:[];
-  try{refreshNutritionTargets();}catch(ignore0){}
   journalLargeStoreSet('activities_data',_activitiesLargeCache).then(function(){
     try{localStorage.removeItem('activities_data');}catch(ignore){}
     if(journalCloudUser&&journalCloudReady){
@@ -2032,146 +2031,6 @@ function renderActivities(){
     sleepCache[dateKey]=info;
     return info;
   }
-  var prevWaterCache={};
-  // Looks up the Nutrition-tab Water Intake logged for the calendar day
-  // BEFORE a given activity date, since hydration going into a run is what
-  // the day-before total reflects, not same-day water logged after the run.
-  function getPrevDayWaterOz(dateKey){
-    if(prevWaterCache.hasOwnProperty(dateKey))return prevWaterCache[dateKey];
-    var oz=null;
-    try{
-      var prev=new Date(dateKey+'T00:00:00');
-      prev.setDate(prev.getDate()-1);
-      var raw=localStorage.getItem('planner_'+dk(prev));
-      if(raw){
-        var pd=JSON.parse(raw);
-        var o=parseFloat(pd.waterOz)||(parseFloat(pd.waterCount)*8||0);
-        if(o>0)oz=o;
-      }
-    }catch(e){}
-    prevWaterCache[dateKey]=oz;
-    return oz;
-  }
-  var prevNutritionCache={};
-  // Looks up total calories logged for the calendar day BEFORE a given
-  // activity date -- same day-before reasoning as the hydration chip above
-  // (what you ate going into a run, not what you logged afterward). Sums
-  // the itemized Nutrition-tab food log for that day, falling back to the
-  // manually-entered daily total when there's no itemized log, matching
-  // the calorie calculation the app's own Fuel Analysis AI feature already
-  // uses (aiNutritionCorrelation, in daily-planner-food-log.js).
-  function getPrevDayNutrition(dateKey){
-    if(prevNutritionCache.hasOwnProperty(dateKey))return prevNutritionCache[dateKey];
-    var result=null;
-    try{
-      var prev=new Date(dateKey+'T00:00:00');
-      prev.setDate(prev.getDate()-1);
-      // Reuse the app's own canonical per-day nutrition totals (getNuDay, in
-      // daily-planner-core.js) instead of re-summing the food log here. That
-      // function already multiplies each item's calories/macros by its
-      // logged servings count (and falls back through the old food_<date>
-      // key and the legacy hidden nuCalVal/etc. fields the same way the
-      // Nutrition tab and Weekly summary do) -- this local copy was missing
-      // the servings multiplier entirely, so any multi-serving food item
-      // silently undercounted (or overcounted, for <1 servings) that day's
-      // calories and macro split shown here on the Activities feed.
-      var nu=getNuDay(dk(prev));
-      var cal=nu&&nu.cal>0?nu.cal:0;
-      if(cal>0){
-        var prot=nu.prot,carbs=nu.carbs,fat=nu.fat;
-        result={cal:cal};
-        if(prot+carbs+fat>0){
-          result.protPct=Math.round(prot*4/cal*100);
-          result.carbsPct=Math.round(carbs*4/cal*100);
-          result.fatPct=Math.round(fat*9/cal*100);
-        }
-      }
-    }catch(e){}
-    prevNutritionCache[dateKey]=result;
-    return result;
-  }
-  var prevFoodImpactCache={};
-  // Combines the previous day's logged food quality (reusing the exact
-  // runnerFoodQuality() scoring the Nutrition tab's own "Daily food quality"
-  // meter already uses, in daily-planner-food-log.js) with how well that
-  // day's actual calories/carbs matched the app's own personalized
-  // pre-workout fueling target for THIS activity's run -- when the activity
-  // follows a long/tempo/interval session, nutritionPerformancePreset()
-  // already computes that target, bodyweight-scaled -- into a single 1-10
-  // "fuel impact" score for the Activities feed.
-  function getPrevDayFoodImpact(dateKey){
-    if(prevFoodImpactCache.hasOwnProperty(dateKey))return prevFoodImpactCache[dateKey];
-    var result=null;
-    try{
-      var prev=new Date(dateKey+'T00:00:00');
-      prev.setDate(prev.getDate()-1);
-      var prevKey=dk(prev);
-      var raw=localStorage.getItem('planner_'+prevKey);
-      if(raw){
-        var pd=JSON.parse(raw);
-        var log=Array.isArray(pd.foodLog)?pd.foodLog:[];
-        if(log.length){
-          // runnerFoodQuality() reads the shared `today` global to find
-          // that day's own workouts/journal context (for its run-fuel and
-          // post-run-breakfast bonuses). Swap it to the prior day just for
-          // this scoring pass -- always restored, even if scoring throws --
-          // so each activity's score reflects that activity's own previous
-          // day, not whatever day happens to be selected elsewhere in the
-          // app right now.
-          var savedToday=today,qualityTotal=0,qualityWeight=0;
-          try{
-            today=prev;
-            log.forEach(function(item){
-              inferFoodMacroSources(item);
-              var q=runnerFoodQuality(item);
-              var servings=Math.max(0.01,parseFloat(item.servings)||1);
-              var weight=Math.max(0,(parseFloat(item.cal)||0)*servings)||servings;
-              qualityTotal+=q.score*weight;
-              qualityWeight+=weight;
-            });
-          }finally{
-            today=savedToday;
-          }
-          if(qualityWeight>0){
-            var qualityScore=qualityTotal/qualityWeight;
-            // runnerFoodQuality() starts every item at a baseline of 5 and
-            // nudges it with small (roughly 0.4-1.5 point) bonuses/penalties,
-            // so a day's calorie-weighted average across breakfast, lunch,
-            // dinner, and snacks naturally compresses toward the middle of
-            // its 1-10 scale -- real mixed diets are rarely all-excellent or
-            // all-poor. Stretch the deviation from that same baseline (5) so
-            // a genuinely strong or weak fueling day actually reaches the
-            // ends of the 0-10 scale shown here, instead of the roughly 3-7
-            // band the raw average tends to sit in.
-            var stretched=5+(qualityScore-5)*2.5;
-            var nutr=getPrevDayNutrition(dateKey);
-            var preset=nutritionPerformancePreset(prevKey);
-            var penalty=0,notes=[];
-            if(preset&&preset.phase==='prior'&&nutr){
-              var calOffPct=Math.abs(nutr.cal-preset.calories)/preset.calories;
-              if(calOffPct>0.2){
-                penalty+=Math.min(3,(calOffPct-0.2)*10);
-                notes.push(Math.round(nutr.cal)+' cal vs '+preset.calories+' target');
-              }
-              if(nutr.carbsPct!=null){
-                var carbOffPts=Math.abs(nutr.carbsPct-preset.carbs);
-                if(carbOffPts>10){
-                  penalty+=Math.min(2,(carbOffPts-10)/10);
-                  notes.push(nutr.carbsPct+'% carbs vs '+preset.carbs+'% target');
-                }
-              }
-            }
-            var impact=Math.max(0,Math.min(10,Math.round((stretched-penalty)*10)/10));
-            var label=impact>=9?'Excellent':impact>=7?'Good':impact>=5?'Fair':impact>=3?'Low':'Poor';
-            result={score:impact,label:label,notes:notes,presetLabel:(preset&&preset.phase==='prior')?preset.label.replace('Tomorrow: ',''):''};
-          }
-        }
-      }
-    }catch(e){}
-    prevFoodImpactCache[dateKey]=result;
-    return result;
-  }
-
   function buildCard(a,tc,showDate,inGroup){
     // Stats are split into two visually distinct rows -- core performance
     // numbers (pace, power, HR, etc.) on top, and day-level conditions /
@@ -2226,27 +2085,6 @@ function renderActivities(){
           sParts.push('<strong style="color:'+sColor+';">'+Math.round(sleepInfo.score)+'</strong> score');
         }
         condStats.push('<span class="act-stat" title="Sleep logged for this date">&#x1F634; '+sParts.join(' &middot; ')+'</span>');
-      }
-    }
-    if(a.date){
-      var prevWaterOz=getPrevDayWaterOz(a.date);
-      if(prevWaterOz!=null){
-        condStats.push('<span class="act-stat" title="Water intake logged the day before this activity">&#x1F4A7; <strong>'+Math.round(prevWaterOz)+'</strong> oz prev-day</span>');
-      }
-    }
-    if(a.date){
-      var prevNutr=getPrevDayNutrition(a.date);
-      if(prevNutr!=null){
-        var macroPart=prevNutr.protPct!=null?' &middot; P '+prevNutr.protPct+'% &middot; C '+prevNutr.carbsPct+'% &middot; F '+prevNutr.fatPct+'%':'';
-        condStats.push('<span class="act-stat" title="Calories and macro split logged the day before this activity">&#x1F37D;&#xFE0F; <strong>'+Math.round(prevNutr.cal)+'</strong> cal'+macroPart+' prev-day</span>');
-      }
-    }
-    if(a.date){
-      var foodImpact=getPrevDayFoodImpact(a.date);
-      if(foodImpact!=null){
-        var impactColor=foodImpact.score>=7?'#16a34a':foodImpact.score>=5?'#65a30d':foodImpact.score>=3?'#f97316':'#dc2626';
-        var impactExtra=(foodImpact.presetLabel?' \u00b7 '+foodImpact.presetLabel:'')+(foodImpact.notes.length?' \u00b7 '+foodImpact.notes.join(', '):'');
-        condStats.push('<span class="act-stat" title="Previous day food quality + fueling vs. target, scored 1-10 ('+foodImpact.label+')'+impactExtra+'">&#x1F3C5; <strong style="color:'+impactColor+';">'+foodImpact.score.toFixed(1)+'</strong>/10 fuel impact</span>');
       }
     }
     if(a.execScore)condStats.push('<span class="act-stat">&#x1F3AF; <strong>'+a.execScore+'</strong>/100</span>');
@@ -3471,8 +3309,8 @@ function importWatchRunsFromLink(){
   if(!Array.isArray(runs)||!runs.length)return;
   importWatchRuns(runs,{fromLink:true});
 }
-// Adds runs from BeyondStride to Activities (from the link above, or from the cloud — see
-// daily-planner-beyondstride-sync.js). opts.fromLink: also clear the link and open Activities.
+// Adds runs from BeyondStride to Activities (from the link above).
+// opts.fromLink: also clear the link and open Activities.
 // opts.done(added, updated) runs after saving.
 function importWatchRuns(runs,opts){
   opts=opts||{};
@@ -3515,7 +3353,7 @@ function importWatchRuns(runs,opts){
   })();
 }
 window.addEventListener('load',function(){setTimeout(importWatchRunsFromLink,300);});
-// ── BeyondStride's Nutrition tab opens daily-planner.html#tab=nutrition: jump straight to that tab ──
+// ── Generic #tab=<name> deep link: jump straight to that tab ──
 function openTabFromLink(){
   var m=(location.hash||'').match(/[#&]tab=([a-z0-9]+)/);
   if(!m||typeof hmSwitch!=='function')return;
