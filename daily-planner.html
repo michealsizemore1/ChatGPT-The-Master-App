@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-11-08-1-removenutrition">
+<meta name="app-build" content="2026-11-08-2-removeactivities">
 <script src="theme-switcher.js?v=2026-10-21-1"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#ff6b00">
@@ -268,35 +268,8 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;paddi
 }
 
 /* Activities Tab */
-.act-card{background:white;border:1px solid #e9ecef;border-radius:10px;padding:14px;margin-bottom:10px;border-left:4px solid #e67e22;}
-.act-card.run{border-left-color:#e67e22;}.act-card.ride{border-left-color:#8e44ad;}.act-card.walk{border-left-color:#27ae60;}.act-card.swim{border-left-color:#2980b9;}.act-card.other{border-left-color:#95a5a6;}
-.act-title{font-weight:700;font-size:0.97rem;color:#2c3e50;margin-bottom:3px;}
-.act-date{font-size:0.78rem;color:#888;margin-bottom:8px;}
-.act-stats{display:flex;flex-direction:column;gap:8px;}
-.act-stats-row{display:flex;flex-wrap:wrap;gap:6px 8px;}
-.act-stats-row.act-stats-conditions{padding-top:8px;border-top:1px dashed #eceef1;}
-.act-stat{font-size:0.8rem;color:#555;white-space:nowrap;background:#f6f7f9;border:1px solid #ebedf0;border-radius:7px;padding:3px 9px;display:inline-flex;align-items:center;gap:3px;}
-.act-stat strong{color:#2c3e50;}
-.act-stats-row.act-stats-conditions .act-stat{background:#fffaf2;border-color:#ffe9c7;}
-.act-badge{display:inline-block;font-size:0.7rem;font-weight:700;padding:2px 7px;border-radius:10px;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em;}
-.act-badge.garmin{background:#00b2e3;color:white;}.act-badge.stryd{background:#ff6b35;color:white;}.act-badge.manual{background:#95a5a6;color:white;}.act-badge.strava{background:#fc4c02;color:white;}.act-badge.gear2{background:#16a085;color:white;}
-.act-import-info{background:#fff8f0;border:1px solid #ffd5a8;border-radius:8px;padding:12px;font-size:0.83rem;color:#7d4800;margin-bottom:14px;line-height:1.6;}
-.act-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
-@media(max-width:500px){.act-form-grid{grid-template-columns:1fr;}}
 .act-input{width:100%;border:1px solid #d0d8ff;border-radius:6px;padding:7px;font-size:0.88rem;outline:none;font-family:inherit;background:white;box-sizing:border-box;}
 .act-input:disabled{background:#f0f0f0;color:#aaa;cursor:not-allowed;}
-.act-label{display:block;font-size:0.78rem;font-weight:600;color:#555;margin-bottom:3px;}
-.act-filter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center;}
-.act-filter select,.act-filter input{border:1px solid #e9ecef;border-radius:6px;padding:5px 10px;font-size:0.84rem;color:#555;outline:none;background:white;}
-.act-header-clean{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;padding:12px 14px;background:#fffaf5;border:1px solid #f3dcc7;border-radius:12px;}
-.act-title-block{display:flex;flex-direction:column;gap:3px;}
-.act-header-actions{display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap;}
-.act-header-actions .lib-add-btn,.act-header-actions button{padding:6px 10px!important;font-size:.76rem!important;border-radius:7px!important;line-height:1.2;min-height:30px;}
-.activity-period-details{border-top:1px solid rgba(71,84,103,.14);margin-top:8px;padding-top:7px;display:grid;gap:4px;}
-.activity-period-details div{display:flex;justify-content:space-between;gap:8px;font-size:.72rem;color:#667085;}
-.activity-period-details strong{color:#344054;font-size:.74rem;white-space:nowrap;}
-.activity-period-details .tile-cp-input{width:58px;border:1px solid #a9dfbf;border-radius:5px;padding:2px 4px;text-align:right;font-size:.74rem;font-weight:700;color:#344054;background:rgba(255,255,255,.78);outline:none;}
-.activity-period-details .tile-cp-input:focus{border-color:#27ae60;box-shadow:0 0 0 2px rgba(39,174,96,.14);}
 .check-overview{margin:10px 16px 4px;border:1px solid #c7d2fe;border-radius:11px;background:#f8faff;overflow:hidden;}
 .check-overview-head{display:flex;align-items:center;gap:8px;padding:10px 12px;cursor:pointer;color:#3730a3;font-weight:700;font-size:.88rem;}
 .check-overview-head:focus-visible{outline:3px solid rgba(79,70,229,.25);outline-offset:-3px;}
@@ -459,78 +432,8 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;paddi
 .compact-mini-head{display:flex;align-items:center;gap:7px;padding:7px 10px;cursor:pointer;font-size:.78rem;font-weight:700;color:#475467;}
 .compact-mini-head span:last-child{margin-left:auto;font-size:.7rem;color:#98a2b3;font-weight:600;}
 .compact-mini-body{display:none;padding:0 9px 9px;}
-.act-import-menu{position:relative;}
-.act-import-menu summary{list-style:none;background:#00a6d6;color:#fff;border-radius:7px;padding:7px 11px;font-size:.76rem;font-weight:700;cursor:pointer;min-height:30px;box-sizing:border-box;display:flex;align-items:center;}
-.act-import-menu summary::-webkit-details-marker{display:none;}
-.act-import-options{position:absolute;z-index:20;top:36px;left:0;min-width:145px;background:#fff;border:1px solid #d0d5dd;border-radius:8px;padding:5px;box-shadow:0 8px 20px rgba(16,24,40,.16);}
-.act-import-options label{display:block!important;width:100%;box-sizing:border-box;margin:3px 0;text-align:center;}
-#tab-habits .tri-check{display:none!important;}
-.act-filter-shell{border:1px solid #e4e7ec;border-radius:10px;background:#fafbfc;margin-bottom:12px;overflow:hidden;}
-.act-filter-summary{list-style:none;cursor:pointer;padding:9px 12px;font-size:.8rem;font-weight:700;color:#475467;display:flex;align-items:center;justify-content:space-between;}
-.act-filter-summary::-webkit-details-marker{display:none;}
-.act-filter-summary:after{content:"▾";color:#98a2b3;}
-.act-filter-shell[open] .act-filter-summary:after{content:"▴";}
-.act-filter-body{padding:0 10px 10px;}
-.act-search-row{display:grid;grid-template-columns:minmax(160px,1fr) auto;gap:7px;margin-bottom:8px;}
-.act-search-row input{width:100%;border:1px solid #dfe3ea;border-radius:8px;padding:8px 10px;font-size:.86rem;box-sizing:border-box;}
-.act-filter-grid{display:grid;grid-template-columns:repeat(3,minmax(120px,1fr));gap:7px;}
-.act-filter-grid select,.act-filter-grid input{width:100%;box-sizing:border-box;border:1px solid #dfe3ea;border-radius:7px;padding:7px 8px;font-size:.8rem;background:#fff;color:#475467;}
-.act-date-filters{display:grid;grid-template-columns:auto minmax(125px,1fr) auto minmax(125px,1fr) auto auto;gap:7px;align-items:center;margin-top:8px;font-size:.76rem;color:#667085;}
-@media(max-width:700px){.act-header-clean{padding:10px}.act-header-actions{justify-content:flex-start;width:100%}.act-filter-grid{grid-template-columns:1fr 1fr}.act-date-filters{grid-template-columns:auto 1fr auto 1fr}.act-date-filters .act-date-clear,.act-date-filters .act-group-wrap{grid-column:span 2}.act-header-actions .lib-add-btn,.act-header-actions button{flex:0 0 auto}}
 
 /* Activities enhancements */
-.act-stats-bar{display:flex;flex-wrap:wrap;gap:8px 16px;background:linear-gradient(135deg,#fff5e6,#fff);border:1px solid #ffd5a8;border-radius:10px;padding:12px 16px;margin-bottom:12px;}
-#actStatsBar{display:none!important;}
-.act-stats-bar .sb-item{text-align:center;}
-.act-stats-bar .sb-val{font-size:1.1rem;font-weight:800;color:#e67e22;word-break:break-word;}
-.act-stats-bar .sb-lbl{font-size:0.72rem;color:#999;text-transform:uppercase;letter-spacing:0.04em;}
-.act-pr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-bottom:14px;}
-.act-pr-card{background:linear-gradient(135deg,#fffbe6,#fff);border:1px solid #ffe88a;border-radius:8px;padding:10px 12px;text-align:center;}
-.act-pr-card .pr-val{font-size:1.05rem;font-weight:800;color:#b8860b;}
-.act-pr-card .pr-lbl{font-size:0.72rem;color:#999;text-transform:uppercase;letter-spacing:0.03em;margin-top:2px;}
-.act-pr-card .pr-date{font-size:0.7rem;color:#bbb;margin-top:3px;}
-.act-pr-card .pr-adj{font-size:0.68rem;color:#8a6d1a;font-weight:700;margin-top:4px;border-top:1px dashed #ffe88a;padding-top:4px;}
-.act-section-toggle{font-size:0.8rem;font-weight:700;color:#e67e22;cursor:pointer;user-select:none;margin-bottom:8px;display:flex;align-items:center;gap:5px;}
-.act-chart-wrap{background:white;border:1px solid #e9ecef;border-radius:10px;padding:12px;margin-bottom:14px;}
-.act-chart-title{font-size:0.82rem;font-weight:700;color:#555;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
-.act-chart-toggle{display:flex;gap:4px;}
-.act-chart-toggle button{font-size:0.72rem;padding:2px 8px;border-radius:10px;border:1px solid #e9ecef;cursor:pointer;background:white;color:#888;}
-.act-chart-toggle button.active{background:#e67e22;color:white;border-color:#e67e22;}
-.act-load-card{background:white;border:1px solid #e9ecef;border-radius:10px;padding:12px 14px;margin:12px 0;}
-.act-streak-row{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;}
-.act-streak-chip{background:#e67e22;color:white;font-size:0.78rem;font-weight:700;padding:4px 12px;border-radius:20px;}
-.act-load-bar{display:flex;gap:3px;align-items:flex-end;height:36px;}
-.act-load-week{display:flex;flex-direction:column;align-items:center;gap:2px;}
-.act-load-bar-inner{width:20px;background:#e67e22;border-radius:3px 3px 0 0;min-height:2px;}
-.act-load-lbl{font-size:0.62rem;color:#999;}
-.zone-badge{display:inline-block;font-size:0.68rem;font-weight:700;padding:1px 6px;border-radius:8px;margin-left:5px;color:white;}
-.z1{background:#5dade2;}.z2{background:#58d68d;}.z3{background:#f4d03f;color:#555;}.z4{background:#e67e22;}.z5{background:#e74c3c;}
-.act-note-edit{width:100%;border:1px solid #ffd5a8;border-radius:5px;padding:5px;font-size:0.82rem;font-family:inherit;line-height:1.45;field-sizing:content;max-height:520px;resize:vertical;min-height:40px;background:#fffdf8;outline:none;margin-top:6px;}
-.act-journal-btn{font-size:0.72rem;padding:3px 8px;border-radius:10px;border:none;background:#667eea;color:white;cursor:pointer;white-space:nowrap;}
-.act-note-btn{font-size:0.72rem;padding:3px 8px;border-radius:10px;border:none;background:#f0f0f0;color:#555;cursor:pointer;}
-
-/* AI Training Plan */
-.tp-panel{background:linear-gradient(135deg,#f0f4ff,#fff);border:1px solid #d0d8ff;border-radius:10px;padding:14px;margin-bottom:14px;}
-.tp-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
-.tp-title{font-size:0.9rem;font-weight:700;color:#667eea;}
-.tp-controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
-.tp-select{border:1px solid #d0d8ff;border-radius:6px;padding:5px 10px;font-size:0.84rem;color:#444;outline:none;background:white;}
-.tp-input{width:110px;border:1px solid #d0d8ff;border-radius:6px;padding:5px 8px;font-size:0.84rem;outline:none;background:white;}
-.tp-gen-btn{background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:0.84rem;font-weight:700;white-space:nowrap;}
-.tp-gen-btn:disabled{opacity:0.6;cursor:default;}
-.tp-output{white-space:pre-wrap;font-size:0.83rem;line-height:1.65;color:#2c3e50;background:white;border:1px solid #e9ecef;border-radius:8px;padding:14px;margin-top:10px;max-height:480px;overflow-y:auto;}
-.tp-output strong,.tp-output b{color:#667eea;}
-.tp-meta{font-size:0.75rem;color:#aaa;margin-top:6px;text-align:right;}
-
-/* Persistent Training Plan */
-.tp-persist{background:white;border:1px solid #d0d8ff;border-radius:10px;padding:14px;margin-top:16px;}
-.tp-persist-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
-.tp-persist-title{font-size:0.9rem;font-weight:700;color:#667eea;}
-.tp-persist-meta{font-size:0.75rem;color:#aaa;}
-.tp-persist-body{white-space:pre-wrap;font-size:0.83rem;line-height:1.65;color:#2c3e50;max-height:400px;overflow-y:auto;border:1px solid #e9ecef;border-radius:8px;padding:12px;background:#fafafa;}
-.tp-action-btn{font-size:0.78rem;padding:4px 12px;border-radius:6px;border:none;cursor:pointer;font-weight:600;}
-.tp-adjust-box{margin-top:10px;display:none;}
-.tp-adjust-box textarea{width:100%;border:1px solid #d0d8ff;border-radius:6px;padding:8px;font-size:0.84rem;font-family:inherit;resize:vertical;min-height:60px;outline:none;box-sizing:border-box;}
 .tp-archive-item{background:#f8f8ff;border:1px solid #e9ecef;border-radius:8px;padding:10px;margin-bottom:8px;}
 .tp-archive-meta{font-size:0.75rem;color:#aaa;margin-bottom:4px;}
 .tp-archive-preview{font-size:0.8rem;color:#555;white-space:pre-wrap;max-height:100px;overflow:hidden;line-height:1.5;margin-top:6px;}
@@ -604,14 +507,6 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;paddi
 .goal-input-row input{width:70px;border:1px solid #d0d8ff;border-radius:6px;padding:4px 8px;font-size:0.8rem;text-align:center;}
 
 /* Today's Workout card */
-#todayWorkoutCard{background:linear-gradient(135deg,#f0f4ff,#e8efff);border:1px solid #c7d4ff;border-radius:10px;padding:12px 14px;margin-bottom:10px;display:none;}
-.tw-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
-.tw-title{font-size:0.82rem;font-weight:700;color:#667eea;}
-.tw-date{font-size:0.72rem;color:#aaa;}
-.tw-body{font-size:0.84rem;color:#2c3e50;line-height:1.6;white-space:pre-wrap;}
-.tw-btn{font-size:0.75rem;padding:3px 10px;border-radius:10px;border:none;background:#667eea;color:white;cursor:pointer;font-weight:600;white-space:nowrap;}
-.tw-footer{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
-.tw-rest{color:#27ae60;font-weight:600;font-size:0.84rem;}
 
 /* ── Voice Input ── */
 .mic-btn{display:inline-flex;align-items:center;justify-content:center;background:#7c3aed;border:none;color:#fff;cursor:pointer;font-size:0.78rem;font-weight:700;padding:5px 10px;border-radius:6px;line-height:1;transition:background .15s;vertical-align:middle;margin-top:0;white-space:nowrap;letter-spacing:0.3px;}
@@ -1885,17 +1780,6 @@ html[data-theme="halloween"] .header{
     <canvas id="weightChart" height="120" style="width:100%;display:block;"></canvas>
     <div id="weightChartAvg" style="font-size:0.75rem;color:#888;margin-top:6px;text-align:center;"></div>
   </div>
-  <!-- Mileage Trend Chart -->
-  <div class="bp-chart-wrap" id="milesChartWrap" style="margin-top:14px;display:none;">
-    <div class="bp-chart-title">
-      <span>🏃 Daily Miles — Last 60 Days</span>
-      <div class="bp-legend">
-        <span><div class="bp-legend-dot" style="background:#27ae60;"></div>Miles Run</span>
-      </div>
-    </div>
-    <canvas id="milesChart" height="120" style="width:100%;display:block;"></canvas>
-    <div id="milesChartAvg" style="font-size:0.75rem;color:#888;margin-top:6px;text-align:center;"></div>
-  </div>
 </div></div>
 <div id="tab-review" class="tab-panel"><div class="review-section">
   <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
@@ -2170,504 +2054,18 @@ html[data-theme="halloween"] .header{
 </div></div>
 
 <div id="tab-activities" class="tab-panel"><div class="panel">
-  <!-- Persistent Training Plan -->
-  <div id="tpPersistSection" style="display:none;" class="tp-persist">
-    <div class="tp-persist-header">
-      <span class="tp-persist-title">&#x1F4CB; Active Training Plan</span>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;">
-        <button class="tp-action-btn" id="tpPersistPdfBtn" style="background:#8e44ad;color:white;display:none;" onclick="viewActivePlanPdf()">&#x1F4C4; View Original PDF</button>
-        <button class="tp-action-btn" id="tpPersistReformatBtn" style="background:#d35400;color:white;" onclick="reformatPlanWithAI('current')">&#x1FA84; Clean Up Formatting</button>
-        <button class="tp-action-btn" id="tpPersistZonesBtn" style="background:#16a085;color:white;" onclick="addTrainingZonesToPlan('current')">&#x2795; Add Training Zones</button>
-        <button class="tp-action-btn" id="tpPersistDatesBtn" style="background:#2c3e50;color:white;" onclick="addDatesToSchedule('current')">&#x1F4C5; Add Dates</button>
-        <button class="tp-action-btn" style="background:#667eea;color:white;" onclick="openAdjustPlan()">&#x270F; Adjust</button>
-        <button class="tp-action-btn" style="background:#27ae60;color:white;" onclick="archivePlan()">&#x1F4E6; Archive</button>
-        <button class="tp-action-btn" style="background:#d4e635;color:#121a17;" onclick="sendPlanToRunningApp('current')" title="Send this plan&#39;s dated workouts to BeyondStride on your phone and watch">&#x231A; Send plan to BeyondStride</button>
-        <button class="tp-action-btn" style="background:#e74c3c;color:white;" onclick="deletePlan()">&#x1F5D1; Delete</button>
-      </div>
-    </div>
-    <div class="tp-persist-meta" id="tpPersistMeta"></div>
-    <div class="tp-persist-body" id="tpPersistBody"></div>
-    <div class="tp-adjust-box" id="tpAdjustBox">
-      <div style="font-size:0.82rem;font-weight:600;color:#667eea;margin-bottom:6px;">&#x1F4AC; Tell AI how to adjust the plan:</div>
-      <textarea id="tpAdjustInput" placeholder="e.g. I missed this week due to illness, please shift the plan forward one week and adjust the long run schedule accordingly..."></textarea>
-      <div style="display:flex;gap:8px;margin-top:8px;">
-        <button class="tp-gen-btn" id="tpAdjustBtn" onclick="submitAdjustPlan()">&#x2728; Adjust Plan</button>
-        <button onclick="closeAdjustPlan()" style="font-size:0.84rem;padding:5px 14px;border-radius:6px;border:1px solid #e9ecef;background:white;cursor:pointer;color:#888;">Cancel</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Upcoming (second) Training Plan: saved for a future start date, kept separate from the active plan above until manually activated -->
-  <div id="tpUpcomingSection" style="display:none;" class="tp-persist">
-    <div class="tp-persist-header">
-      <span class="tp-persist-title">&#x1F4C5; Upcoming Training Plan</span>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;">
-        <button class="tp-action-btn" id="tpUpcomingPdfBtn" style="background:#8e44ad;color:white;display:none;" onclick="viewUpcomingPlanPdf()">&#x1F4C4; View Original PDF</button>
-        <button class="tp-action-btn" id="tpUpcomingReformatBtn" style="background:#d35400;color:white;" onclick="reformatPlanWithAI('upcoming')">&#x1FA84; Clean Up Formatting</button>
-        <button class="tp-action-btn" id="tpUpcomingZonesBtn" style="background:#16a085;color:white;" onclick="addTrainingZonesToPlan('upcoming')">&#x2795; Add Training Zones</button>
-        <button class="tp-action-btn" id="tpUpcomingDatesBtn" style="background:#2c3e50;color:white;" onclick="addDatesToSchedule('upcoming')">&#x1F4C5; Add Dates</button>
-        <button class="tp-action-btn" style="background:#667eea;color:white;" onclick="openAdjustPlan('upcoming')">&#x270F; Adjust</button>
-        <button class="tp-action-btn" id="tpUpcomingArchiveBtn" style="background:#27ae60;color:white;" onclick="archivePlan('upcoming')">&#x1F4E6; Archive</button>
-        <button class="tp-action-btn" style="background:#2980b9;color:white;" onclick="makeUpcomingPlanActive()">&#x25B6; Make Active Now</button>
-        <button class="tp-action-btn" style="background:#d4e635;color:#121a17;" onclick="sendPlanToRunningApp('upcoming')" title="Send this plan&#39;s dated workouts to BeyondStride on your phone and watch">&#x231A; Send plan to BeyondStride</button>
-        <button class="tp-action-btn" style="background:#e74c3c;color:white;" onclick="deleteUpcomingPlan()">&#x1F5D1; Delete</button>
-      </div>
-    </div>
-    <div id="tpUpcomingOverdueBanner" style="display:none;background:#fef2f2;border:1px solid #fecaca;color:#991b1b;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:0.84rem;font-weight:700;"></div>
-    <div class="tp-persist-meta" id="tpUpcomingMeta"></div>
-    <div class="tp-persist-body" id="tpUpcomingBody"></div>
-    <div class="tp-adjust-box" id="tpUpcomingAdjustBox">
-      <div style="font-size:0.82rem;font-weight:600;color:#667eea;margin-bottom:6px;">&#x1F4AC; Tell AI how to adjust the plan:</div>
-      <textarea id="tpUpcomingAdjustInput" placeholder="e.g. I missed this week due to illness, please shift the plan forward one week and adjust the long run schedule accordingly..."></textarea>
-      <div style="display:flex;gap:8px;margin-top:8px;">
-        <button class="tp-gen-btn" id="tpUpcomingAdjustBtn" onclick="submitAdjustPlan('upcoming')">&#x2728; Adjust Plan</button>
-        <button onclick="closeAdjustPlan('upcoming')" style="font-size:0.84rem;padding:5px 14px;border-radius:6px;border:1px solid #e9ecef;background:white;cursor:pointer;color:#888;">Cancel</button>
-      </div>
-    </div>
-  </div>
-
   <!-- Daily Movement and Recovery (structured workouts belong in Activities) -->
   <div class="section" style="border:1px solid #f0f0f0;border-radius:10px;margin-bottom:12px;">
     <div class="section-title green compact-toggle" role="button" tabindex="0" aria-expanded="false" aria-controls="physicalExerciseBody" onclick="toggleCompactSection('physicalExerciseBody','physicalExerciseArrow',this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCompactSection('physicalExerciseBody','physicalExerciseArrow',this);}">
-      <span id="physicalExerciseArrow">&#x25B6;</span><span>&#x1F9D8; Daily Movement &amp; Recovery</span><span class="compact-toggle-count" id="physicalExerciseCount">0/3</span>
+      <span id="physicalExerciseArrow">&#x25B6;</span><span>&#x1F9D8; Daily Movement &amp; Recovery</span><span class="compact-toggle-count" id="physicalExerciseCount">0/2</span>
     </div>
     <div id="physicalExerciseBody" class="compact-body">
-    <div class="task-row"><div class="tri-check" data-key="exStrength" onclick="triClick(this)"></div><label>Strength:</label><input type="text" id="exStrengthVal" placeholder="Notes..."></div>
     <div class="task-row" style="display:none;"><div class="tri-check" data-key="exBike" onclick="triClick(this)"></div><label>Bike:</label><input type="text" id="exBikeVal" placeholder="Distance/time..."></div>
     <div class="task-row"><div class="tri-check" data-key="exWalk" onclick="triClick(this)"></div><label>Walk:</label><input type="text" id="exWalkVal" placeholder="Duration/notes..."></div>
     <div class="task-row"><div class="tri-check" data-key="exDogWalk" onclick="triClick(this)"></div><label>Dog Walk:</label><input type="text" id="exDogWalkVal" placeholder="Duration/notes..."></div>
     <div class="goal-row"><div class="tri-check" data-key="exStepsCheck" onclick="triClick(this)"></div><label>Goal 10,000 steps - Actual:</label><input type="number" id="exSteps" min="0" placeholder="Steps"></div>
     </div>
   </div>
-  <!-- Mileage Summary -->
-  <div id="mileageSummaryBar" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-    <div style="flex:1;min-width:120px;background:linear-gradient(135deg,#e8f8f0,#d5f5e3);border:1px solid #a9dfbf;border-radius:10px;padding:10px 12px;text-align:center;">
-      <div style="font-size:0.72rem;font-weight:700;color:#1e8449;text-transform:uppercase;letter-spacing:.04em;">This Week</div>
-      <div id="mileThisWeek" style="font-size:1.3rem;font-weight:700;color:#1a5276;">—</div>
-      <div style="font-size:0.7rem;color:#888;">miles</div>
-      <div class="activity-period-details">
-        <div><span>Avg pace</span><strong id="paceThisWeek">—</strong></div>
-        <div><span>Avg power</span><strong id="wattsThisWeek">—</strong></div>
-        <div><span>Exercise time</span><strong id="timeThisWeek">—</strong></div>
-        <div><span>Critical power</span><strong><input type="number" class="tile-cp-input" id="cpInput" placeholder="280" min="1" inputmode="numeric" oninput="saveCPAndRender()" title="Editable Critical Power in watts, used for power-zone colors"> W</strong></div>
-        <div><span>Max heart rate</span><strong><input type="number" class="tile-cp-input" id="hrMaxInput" placeholder="174" min="1" inputmode="numeric" oninput="saveMaxHRAndRender()" title="Editable Max Heart Rate in bpm, used for Garmin heart-rate-zone colors"> bpm</strong></div>
-        <div><span>Resting HR (30-day avg)</span><strong><input type="number" class="tile-cp-input" id="restHrInput" placeholder="55" min="1" inputmode="numeric" oninput="saveRestHRAndRender()" title="Editable 30-day average resting heart rate, used with Max Heart Rate for Karvonen heart-rate-zone math. Auto-updates from your Wellness Resting HR log on the 1st of each month."> bpm</strong></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:4px;justify-content:center;font-size:0.68rem;color:#888;margin-top:8px;">
-        <span>Goal:</span><input type="number" id="actGoal_week" class="tile-cp-input" style="width:48px;" placeholder="20" min="0" oninput="saveActGoalAndRender('week')"> mi/wk
-      </div>
-      <div id="actGoalBarWrap_week" style="display:none;margin-top:4px;">
-        <div style="background:#e8e8e8;border-radius:6px;height:6px;overflow:hidden;"><div id="actGoalBar_week" style="height:100%;width:0%;background:#e67e22;border-radius:6px;transition:width .3s;"></div></div>
-        <div id="actGoalLbl_week" style="font-size:0.64rem;color:#999;margin-top:2px;"></div>
-      </div>
-    </div>
-    <div style="flex:1;min-width:120px;background:linear-gradient(135deg,#eaf3fb,#d6eaf8);border:1px solid #a9cce3;border-radius:10px;padding:10px 12px;text-align:center;">
-      <div style="font-size:0.72rem;font-weight:700;color:#1a5276;text-transform:uppercase;letter-spacing:.04em;">Last Week</div>
-      <div id="mileLastWeek" style="font-size:1.3rem;font-weight:700;color:#1a5276;">—</div>
-      <div style="font-size:0.7rem;color:#888;">miles</div>
-      <div class="activity-period-details">
-        <div><span>Avg pace</span><strong id="paceLastWeek">—</strong></div>
-        <div><span>Avg power</span><strong id="wattsLastWeek">—</strong></div>
-        <div><span>Exercise time</span><strong id="timeLastWeek">—</strong></div>
-      </div>
-    </div>
-    <div style="flex:1;min-width:120px;background:linear-gradient(135deg,#fef9e7,#fdebd0);border:1px solid #f0c080;border-radius:10px;padding:10px 12px;text-align:center;">
-      <div style="font-size:0.72rem;font-weight:700;color:#d35400;text-transform:uppercase;letter-spacing:.04em;">Month to Date</div>
-      <div id="mileMTD" style="font-size:1.3rem;font-weight:700;color:#1a5276;">—</div>
-      <div style="font-size:0.7rem;color:#888;">miles</div>
-      <div class="activity-period-details">
-        <div><span>Avg pace</span><strong id="paceMTD">—</strong></div>
-        <div><span>Avg power</span><strong id="wattsMTD">—</strong></div>
-        <div><span>Exercise time</span><strong id="timeMTD">—</strong></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:4px;justify-content:center;font-size:0.68rem;color:#888;margin-top:8px;">
-        <span>Goal:</span><input type="number" id="actGoal_month" class="tile-cp-input" style="width:48px;" placeholder="80" min="0" oninput="saveActGoalAndRender('month')"> mi/mo
-      </div>
-      <div id="actGoalBarWrap_month" style="display:none;margin-top:4px;">
-        <div style="background:#e8e8e8;border-radius:6px;height:6px;overflow:hidden;"><div id="actGoalBar_month" style="height:100%;width:0%;background:#e67e22;border-radius:6px;transition:width .3s;"></div></div>
-        <div id="actGoalLbl_month" style="font-size:0.64rem;color:#999;margin-top:2px;"></div>
-      </div>
-    </div>
-    <div style="flex:1;min-width:120px;background:linear-gradient(135deg,#f5eef8,#e8daef);border:1px solid #c39bd3;border-radius:10px;padding:10px 12px;text-align:center;">
-      <div style="font-size:0.72rem;font-weight:700;color:#6c3483;text-transform:uppercase;letter-spacing:.04em;">Year to Date</div>
-      <div id="mileYTD" style="font-size:1.3rem;font-weight:700;color:#1a5276;">—</div>
-      <div style="font-size:0.7rem;color:#888;">miles</div>
-      <div class="activity-period-details">
-        <div><span>Avg pace</span><strong id="paceYTD">—</strong></div>
-        <div><span>Avg power</span><strong id="wattsYTD">—</strong></div>
-        <div><span>Exercise time</span><strong id="timeYTD">—</strong></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:4px;justify-content:center;font-size:0.68rem;color:#888;margin-top:8px;">
-        <span>Goal:</span><input type="number" id="actGoal_year" class="tile-cp-input" style="width:52px;" placeholder="1000" min="0" oninput="saveActGoalAndRender('year')"> mi/yr
-      </div>
-      <div id="actGoalBarWrap_year" style="display:none;margin-top:4px;">
-        <div style="background:#e8e8e8;border-radius:6px;height:6px;overflow:hidden;"><div id="actGoalBar_year" style="height:100%;width:0%;background:#e67e22;border-radius:6px;transition:width .3s;"></div></div>
-        <div id="actGoalLbl_year" style="font-size:0.64rem;color:#999;margin-top:2px;"></div>
-      </div>
-    </div>
-  </div>
-  <!-- Training Zones reference (Heart Rate + Power), under the mileage tiles -->
-  <div style="background:linear-gradient(135deg,#fdf2f8,#fce7f3);border:1px solid #f3b4d8;border-radius:10px;padding:10px 12px;margin-bottom:12px;">
-    <div style="font-size:0.72rem;font-weight:700;color:#9d174d;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">&#x1F3AF; Training Zones</div>
-    <div style="display:flex;flex-wrap:wrap;gap:14px;">
-      <div style="flex:1;min-width:200px;">
-        <div style="font-size:0.7rem;font-weight:700;color:#555;margin-bottom:2px;">&#x2764;&#xFE0F; Heart Rate (Karvonen)</div>
-        <div id="hrZonesSub" style="font-size:0.8rem;font-weight:600;color:#777;margin-bottom:5px;"></div>
-        <div id="hrZonesTable" style="display:flex;flex-direction:column;gap:3px;"></div>
-      </div>
-      <div style="flex:1;min-width:200px;">
-        <div style="font-size:0.7rem;font-weight:700;color:#555;margin-bottom:4px;">&#x26A1; Power (% of Critical Power)</div>
-        <div id="powerZonesTable" style="display:flex;flex-direction:column;gap:3px;"></div>
-      </div>
-    </div>
-  </div>
-  <!-- Shoe Tracker -->
-  <div style="margin-bottom:12px;">
-    <div class="act-section-toggle" onclick="toggleShoeTracker()" style="display:flex;align-items:center;justify-content:space-between;">
-      <span><span id="shoeTrackerArrow">&#x25B6;</span> &#x1F45F; Shoe Tracker</span>
-      <button onclick="event.stopPropagation();openAddShoeModal()" style="background:#e67e22;color:#fff;border:none;border-radius:6px;padding:3px 10px;font-size:0.75rem;cursor:pointer;font-weight:600;">+ Add Shoe</button>
-    </div>
-    <div id="shoeTrackerPanel" style="display:none;margin-top:10px;">
-      <div id="shoeList" style="display:flex;flex-direction:column;gap:10px;"></div>
-      <div id="shoeEmpty" style="font-size:0.82rem;color:#94a3b8;text-align:center;padding:14px 0;">No shoes added yet. Tap <strong>+ Add Shoe</strong> to get started.</div>
-    </div>
-  </div>
-
-  <!-- Add / Edit Shoe Modal -->
-  <div id="shoeModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;align-items:center;justify-content:center;">
-    <div style="background:#fff;border-radius:14px;padding:22px 24px;width:min(94vw,420px);box-shadow:0 8px 32px rgba(0,0,0,0.22);max-height:90vh;overflow-y:auto;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-        <h3 id="shoeModalTitle" style="margin:0;color:#e67e22;font-size:1rem;">&#x1F45F; Add Shoe</h3>
-        <button onclick="closeShoeModal()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#aaa;line-height:1;">&#x2715;</button>
-      </div>
-      <input type="hidden" id="shoeEditId">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
-        <div style="grid-column:1/-1;">
-          <label style="font-size:0.78rem;font-weight:600;color:#555;display:block;margin-bottom:3px;">Shoe Name / Model *</label>
-          <input type="text" id="shoeNameInput" placeholder="e.g. Nike Pegasus 41" style="width:100%;border:1px solid #ddd;border-radius:7px;padding:8px 10px;font-size:0.88rem;box-sizing:border-box;outline:none;">
-        </div>
-        <div>
-          <label style="font-size:0.78rem;font-weight:600;color:#555;display:block;margin-bottom:3px;">Brand</label>
-          <input type="text" id="shoeBrandInput" placeholder="e.g. Nike" style="width:100%;border:1px solid #ddd;border-radius:7px;padding:8px 10px;font-size:0.88rem;box-sizing:border-box;outline:none;">
-        </div>
-        <div>
-          <label style="font-size:0.78rem;font-weight:600;color:#555;display:block;margin-bottom:3px;">Color</label>
-          <input type="text" id="shoeColorInput" placeholder="e.g. Black/White" style="width:100%;border:1px solid #ddd;border-radius:7px;padding:8px 10px;font-size:0.88rem;box-sizing:border-box;outline:none;">
-        </div>
-        <div>
-          <label style="font-size:0.78rem;font-weight:600;color:#555;display:block;margin-bottom:3px;">Date Added</label>
-          <input type="date" id="shoeStartDateInput" style="width:100%;border:1px solid #ddd;border-radius:7px;padding:8px 10px;font-size:0.88rem;box-sizing:border-box;outline:none;background:#fff;">
-        </div>
-        <div>
-          <label style="font-size:0.78rem;font-weight:600;color:#555;display:block;margin-bottom:3px;">Max Miles (retire at)</label>
-          <input type="number" id="shoeMaxMilesInput" placeholder="e.g. 500" min="0" style="width:100%;border:1px solid #ddd;border-radius:7px;padding:8px 10px;font-size:0.88rem;box-sizing:border-box;outline:none;">
-        </div>
-        <div>
-          <label style="font-size:0.78rem;font-weight:600;color:#555;display:block;margin-bottom:3px;">Starting Miles (prior use)</label>
-          <input type="number" id="shoeOffsetMilesInput" placeholder="0" min="0" style="width:100%;border:1px solid #ddd;border-radius:7px;padding:8px 10px;font-size:0.88rem;box-sizing:border-box;outline:none;">
-        </div>
-        <div style="grid-column:1/-1;">
-          <label style="font-size:0.78rem;font-weight:600;color:#555;display:block;margin-bottom:3px;">Notes</label>
-          <textarea id="shoeNotesInput" rows="2" placeholder="Any notes about this shoe..." style="width:100%;border:1px solid #ddd;border-radius:7px;padding:8px 10px;font-size:0.88rem;box-sizing:border-box;outline:none;resize:vertical;font-family:inherit;"></textarea>
-        </div>
-      </div>
-      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px;">
-        <button onclick="closeShoeModal()" style="background:#f0f0f0;color:#555;border:none;padding:8px 16px;border-radius:7px;cursor:pointer;font-size:0.88rem;">Cancel</button>
-        <button onclick="saveShoe()" style="background:#e67e22;color:#fff;border:none;padding:8px 18px;border-radius:7px;cursor:pointer;font-size:0.88rem;font-weight:700;">Save Shoe</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Text training plan upload: intentionally placed after the complete Shoe Tracker component -->
-  <div class="act-section-toggle" onclick="toggleTrainingPlan()" style="margin-top:4px;margin-bottom:8px;" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTrainingPlan();}">
-    <span id="tpArrow">&#x25B6;</span> &#x1F4C2; Upload Plan from Text File
-  </div>
-  <div id="tpSection" style="display:none;padding:2px 0 12px;">
-    <label style="display:inline-flex;align-items:center;gap:7px;margin:0 8px 7px 0;font-size:0.78rem;font-weight:700;color:#475467;">Plan start date
-      <input type="date" id="tpUploadStartDate" style="border:1px solid #b8c1cc;border-radius:6px;padding:6px;font:inherit;">
-    </label>
-    <label style="display:flex;align-items:center;gap:6px;margin:0 0 9px;font-size:0.78rem;color:#475467;cursor:pointer;">
-      <input type="checkbox" id="tpSaveAsUpcoming" style="width:15px;height:15px;cursor:pointer;flex-shrink:0;">
-      Save as a second plan for later (keeps your current active plan running)
-    </label>
-    <label style="display:inline-block;background:#166534;color:#fff;padding:7px 16px;border-radius:6px;font-size:0.78rem;font-weight:700;cursor:pointer;">
-      &#x1F4C4; Choose .txt or .pdf File
-      <input type="file" accept=".txt,.pdf" style="display:none;" onchange="uploadPlanFromFile(event)">
-    </label>
-    <div id="tpUploadStatus" style="margin-top:7px;font-size:0.74rem;color:#667085;">Accepts .txt or .pdf (text-based, not a scanned image). Dated workouts are imported onto their exact calendar dates. The start date is used only when the file is organized by week and weekday.</div>
-  </div>
-
-  <!-- Today's Workout card: contained within the Activities tab -->
-  <div id="todayWorkoutCard" style="display:none;margin:8px 0 12px;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.12);">
-    <div class="tw-header" style="background:linear-gradient(135deg,#667eea,#764ba2);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;">
-      <div style="display:flex;flex-direction:column;gap:2px;">
-        <span style="color:#fff;font-weight:700;font-size:.95rem;">&#x1F3C3; Training Plan &mdash; <span id="twDayLabel"></span></span>
-        <span id="twRaceCountdown" style="color:rgba(255,255,255,.8);font-size:.78rem;display:none;"></span>
-      </div>
-      <div style="display:flex;gap:6px;align-items:center;">
-        <button id="twLoadBtn" onclick="loadTodayWorkout()" style="background:rgba(255,255,255,.25);border:none;color:#fff;font-size:.8rem;padding:4px 10px;border-radius:20px;cursor:pointer;font-weight:600;">Load Workout</button>
-        <button onclick="refreshTodayWorkout()" title="Re-fetch workout for this day" style="background:rgba(255,255,255,.2);border:none;color:#fff;font-size:.9rem;width:28px;height:28px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">&#x21BA;</button>
-        <button onclick="editWorkoutStartDate()" title="Edit plan start date" style="background:rgba(255,255,255,.2);border:none;color:#fff;font-size:.85rem;width:28px;height:28px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">&#x270F;&#xFE0F;</button>
-        <button id="twCollapseBtn" onclick="toggleWorkoutCard()" title="Collapse/Expand" style="background:rgba(255,255,255,.2);border:none;color:#fff;font-size:1.1rem;width:28px;height:28px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">&#x25BE;</button>
-      </div>
-    </div>
-    <div id="twStartDateRow" style="display:none;background:#fff8e1;padding:8px 14px;font-size:.82rem;color:#795548;border-bottom:1px solid #ffe082;">
-      <div style="margin-bottom:4px;">&#x26A0;&#xFE0F; Plan start date:&nbsp;
-        <input type="date" id="twStartDateInput" style="font-size:.82rem;padding:2px 6px;border:1px solid #ffb300;border-radius:6px;">
-        <button onclick="setWorkoutStartDate()" style="background:#f59e0b;color:#fff;border:none;padding:3px 10px;border-radius:6px;font-size:.8rem;font-weight:600;cursor:pointer;margin-left:4px;">Save Start</button>
-      </div>
-      <div>&#x1F3C1; Race date:&nbsp;
-        <input type="date" id="twRaceDateInput" style="font-size:.82rem;padding:2px 6px;border:1px solid #ffb300;border-radius:6px;">
-        <button onclick="setWorkoutRaceDate()" style="background:#764ba2;color:#fff;border:none;padding:3px 10px;border-radius:6px;font-size:.8rem;font-weight:600;cursor:pointer;margin-left:4px;">Save Race Date</button>
-      </div>
-    </div>
-    <div id="twBody" style="background:#f0f4ff;padding:12px 14px;font-size:.88rem;color:#333;line-height:1.5;white-space:pre-wrap;">Tap &ldquo;Load Workout&rdquo; to see today&rsquo;s scheduled session.</div>
-  </div>
-
-  <div class="act-section-toggle" onclick="toggleActivitiesLog()" role="button" tabindex="0" aria-expanded="false" aria-controls="activitiesLogSection" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleActivitiesLog();}" style="background:#fffaf5;border:1px solid #f3dcc7;border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:1rem;">
-    <span id="activitiesLogArrow">&#x25B6;</span> &#x1F3C3; Activities
-  </div>
-  <div id="activitiesLogSection" style="display:none;overflow-anchor:none;">
-  <!-- Header actions -->
-  <div class="act-header-clean">
-    <div class="act-header-actions">
-      <button class="lib-add-btn" onclick="toggleAddActivity()">+ Add</button>
-      <details class="act-import-menu">
-        <summary>&#x1F4E5; Import</summary>
-        <div class="act-import-options">
-          <label class="lib-add-btn" style="background:#00b2e3;cursor:pointer;" title="Import Garmin Connect CSV">Garmin CSV<input type="file" accept=".csv" style="display:none" onchange="importActivities(event,'garmin');this.closest('details').removeAttribute('open')"></label>
-          <label class="lib-add-btn" style="background:#ff6b35;cursor:pointer;" title="Import Stryd CSV">Stryd CSV<input type="file" accept=".csv" style="display:none" onchange="importActivities(event,'stryd');this.closest('details').removeAttribute('open')"></label>
-          <label class="lib-add-btn" style="background:#fc4c02;cursor:pointer;" title="Import Strava bulk-export CSV (activities.csv)">Strava CSV<input type="file" accept=".csv" style="display:none" onchange="importActivities(event,'strava');this.closest('details').removeAttribute('open')"></label>
-        </div>
-      </details>
-      <button class="lib-add-btn" style="background:#27ae60;" onclick="exportActivities()">&#x1F4BE; Export</button>
-      <button class="lib-add-btn" style="background:#2980b9;" onclick="printActivities()" title="Print or copy your training log as text to paste into an AI tool">&#x1F5A8;&#xFE0F; Print</button>
-      <button id="actExpandAllBtn" style="display:none;background:#e67e22;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:0.75rem;cursor:pointer;" onclick="expandAllActs()">&#x229E; Expand</button>
-      <button id="actCollapseAllBtn" style="display:none;background:#888;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:0.75rem;cursor:pointer;" onclick="collapseAllActs()">&#x229F; Collapse</button>
-      <button id="actCompareBtn" style="background:#7c3aed;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:0.75rem;cursor:pointer;" onclick="toggleCompareMode()">&#x2696;&#xFE0F; Compare</button>
-    </div>
-  </div>
-
-  <!-- Add/Edit form -->
-  <div id="addActivityForm" style="display:none;background:#fff8f0;border:1px solid #ffd5a8;border-radius:10px;padding:14px;margin-bottom:14px;">
-    <div style="font-size:0.85rem;font-weight:700;color:#e67e22;margin-bottom:10px;" id="actFormTitle">&#x2795; Add Activity</div>
-    <div style="margin-bottom:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-      <button type="button" onclick="document.getElementById('actScreenshotInput').click()" id="actScreenshotBtn" style="background:#8e44ad;color:#fff;border:none;padding:7px 14px;border-radius:6px;cursor:pointer;font-size:0.82rem;font-weight:600;">📷 Scan Screenshot</button>
-      <input type="file" id="actScreenshotInput" accept="image/png,image/jpeg,image/webp,image/gif" style="display:none;" onchange="handleActivityScreenshotFile(event)">
-      <span id="actScreenshotStatus" style="font-size:0.78rem;color:#666;"></span>
-    </div>
-    <div style="display:flex;align-items:center;gap:6px;font-size:0.76rem;color:#888;margin-bottom:10px;flex-wrap:wrap;">
-      <span>&#x2696;&#xFE0F; Your weight:</span>
-      <input type="number" id="actUserWeight" class="act-input" style="width:60px;display:inline-block;" placeholder="160" min="50" max="500" oninput="localStorage.setItem('act_weight_lbs',this.value||'');updateActCaloriesPlaceholder();">
-      <span>lbs — used only to auto-estimate Calories when you leave that field blank</span>
-    </div>
-    <div class="act-form-grid">
-      <div><label class="act-label">Date</label><input type="date" id="actDate" class="act-input" onchange="syncActWeightFromWellness()"></div>
-      <div><label class="act-label">Type</label>
-        <select id="actType" class="act-input" onchange="handleActTypeChange()">
-          <option value="Run">Run</option><option value="Ride">Ride</option>
-          <option value="Walk">Walk</option><option value="Swim">Swim</option>
-          <option value="Strength">Strength</option><option value="Rest Day">Rest Day</option>
-          <option value="Other">Other</option>
-        </select>
-      </div>
-      <div><label class="act-label">Title / Name</label><input type="text" id="actTitle" class="act-input" placeholder="e.g. Morning Run"></div>
-      <div><label class="act-label">Distance (miles)</label><input type="number" id="actDistance" class="act-input" placeholder="0.0" step="0.01" oninput="updateActCaloriesPlaceholder()"></div>
-      <div><label class="act-label">Time (MM:SS, H:MM:SS, or minutes)</label><input type="text" id="actDuration" class="act-input" placeholder="32:15 or 1:32:15 or 32 min" title="Enter MM:SS for under an hour, H:MM:SS for over an hour, or a plain number of minutes" oninput="updateActCaloriesPlaceholder()"></div>
-      <div><label class="act-label">Avg Pace (MM:SS/mi)</label><input type="text" id="actPace" class="act-input" placeholder="8:30"></div>
-      <div><label class="act-label">Avg Power (W)</label><input type="number" id="actPower" class="act-input" placeholder="0" oninput="updateActCaloriesPlaceholder()"></div>
-      <div><label class="act-label">Air Power (%)</label><input type="number" id="actAirPower" class="act-input" placeholder="e.g. 2.8" min="0" max="100" step="0.1" inputmode="decimal" title="Stryd Air Power: the percentage of your running power spent overcoming air resistance"></div>
-      <div><label class="act-label">Avg HR (bpm)</label><input type="number" id="actHR" class="act-input" placeholder="0"></div>
-      <div><label class="act-label">Cadence (spm)</label><input type="number" id="actCadence" class="act-input" placeholder="0"></div>
-      <div><label class="act-label">Calories</label><input type="number" id="actCalories" class="act-input" placeholder="0" oninput="updateActCaloriesPlaceholder()" title="Leave blank to auto-estimate from distance/duration/power"></div>
-      <div><label class="act-label">Elev Gain (ft)</label><input type="number" id="actElevGain" class="act-input" placeholder="0" oninput="updateActCaloriesPlaceholder()"></div>
-      <div><label class="act-label">Temp (°F)</label><input type="number" id="actTemp" class="act-input" placeholder="e.g. 68"></div>
-      <div><label class="act-label">Humidity (%)</label><input type="number" id="actHumidity" class="act-input" placeholder="e.g. 55" min="0" max="100" step="1" inputmode="numeric" title="Enter the relative humidity during the activity (0–100%)"></div>
-      <div><label class="act-label">AQI (Air Quality)</label><input type="number" id="actAQI" class="act-input" placeholder="e.g. 42" min="0" max="500" title="Enter the Air Quality Index during the workout (0–500)"></div>
-      <div style="display:none;"><label class="act-label">Execution Score (0-100)</label><input type="number" id="actExecScore" class="act-input" placeholder="0-100" min="0" max="100"></div>
-      <div style="display:none;"><label class="act-label">Run Map / Route Link</label><input type="url" id="actRouteUrl" class="act-input" inputmode="url" placeholder="Garmin, Strava, Google Maps, etc."></div>
-      <div><label class="act-label">Source</label>
-        <select id="actSource" class="act-input">
-          <option value="manual" hidden>Manual</option><option value="garmin" hidden>Garmin</option><option value="stryd" hidden>Stryd</option><option value="gear2" hidden>Gear Tracker II</option><option value="watch">BeyondStride</option>
-        </select>
-      </div>
-    </div>
-    <script>document.getElementById('actUserWeight').value=localStorage.getItem('act_weight_lbs')||'';window.addEventListener('load',function(){var w=document.getElementById('wWghtVal');if(w)w.addEventListener('change',function(){setTimeout(syncActWeightFromWellness,0);});try{syncActWeightFromWellness();}catch(e){}});</script>
-    <div><label class="act-label">Notes</label><textarea id="actNotes" class="act-input" style="height:90px;resize:vertical;font-family:inherit;font-size:0.85rem;line-height:1.45;" placeholder="Any notes..." oninput="this.style.height='auto';this.style.height=Math.min(Math.max(this.scrollHeight+4,90),520)+'px'"></textarea></div>
-    <div style="margin-top:9px;"><label class="act-label">Injury Report</label><textarea id="actInjuryReport" class="act-input" style="height:60px;resize:vertical;font-family:inherit;" placeholder="Pain, soreness, location, severity, or changes during the workout..."></textarea></div>
-    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px;">
-      <button onclick="cancelAddActivity()" style="background:#f0f0f0;color:#555;border:none;padding:7px 14px;border-radius:6px;cursor:pointer;font-size:0.88rem;">Cancel</button>
-      <button onclick="saveActivity()" style="background:#e67e22;color:white;border:none;padding:7px 16px;border-radius:6px;cursor:pointer;font-size:0.88rem;font-weight:600;" id="actSaveBtn">Save Activity</button>
-    </div>
-  </div>
-
-  <!-- Stats bar -->
-  <div class="act-stats-bar" id="actStatsBar" style="display:none;">
-    <div class="sb-item"><div class="sb-val" id="sbMiles">—</div><div class="sb-lbl">Miles</div></div>
-    <div class="sb-item"><div class="sb-val" id="sbTime">—</div><div class="sb-lbl">Time</div></div>
-    <div class="sb-item"><div class="sb-val" id="sbAvgPace">—</div><div class="sb-lbl">Avg Pace</div></div>
-    <div class="sb-item"><div class="sb-val" id="sbAvgPower">—</div><div class="sb-lbl">Avg Power</div></div>
-    <div class="sb-item"><div class="sb-val" id="sbCal">—</div><div class="sb-lbl">Calories</div></div>
-    <div class="sb-item"><div class="sb-val" id="sbCount">—</div><div class="sb-lbl">Activities</div></div>
-  </div>
-
-  <!-- Streak + Weekly Load -->
-  <div class="act-load-card">
-    <div class="act-streak-row">
-      <span class="act-streak-chip" id="actStreakChip" style="display:none;"></span>
-    </div>
-    <div class="act-load-bar" id="actLoadBar"></div>
-  </div>
-
-  <!-- Training Load Ratio (ACWR) -->
-  <div id="actACWRCard" style="display:none;background:white;border:1px solid #e9ecef;border-radius:10px;padding:12px 14px;margin:12px 0;"></div>
-
-  <!-- Personal Records -->
-  <div id="actPRSection" style="display:none;margin-top:4px;">
-    <div class="act-section-toggle" onclick="togglePRs()"><span id="prArrow">&#x25B6;</span> &#x1F3C6; Personal Records</div>
-    <div class="act-pr-grid" id="actPRGrid" style="display:none;"></div>
-  </div>
-
-  <!-- Race Predictor -->
-  <div id="actRacePredictCard" style="display:none;background:white;border:1px solid #e9ecef;border-radius:10px;padding:12px 14px;margin-bottom:14px;"></div>
-
-  <!-- 26-Week Volume Chart -->
-  <div class="act-chart-wrap">
-    <div class="act-chart-title">
-      <span>&#x1F4CA; 26-Week Volume</span>
-      <div class="act-chart-toggle">
-        <button id="chartMiBtn" class="active" onclick="setChartMode('miles')">Miles</button>
-        <button id="chartPwBtn" onclick="setChartMode('power')">Power</button>
-      </div>
-    </div>
-    <div style="display:flex;align-items:flex-end;height:100px;gap:2px;" id="actChartBars"></div>
-    <div style="display:flex;gap:2px;margin-top:4px;" id="actChartLabels"></div>
-  </div>
-
-  <!-- Activities charts (Daily Miles chart, relocated here at runtime by relocateDashboardCharts() so it sits right below 26-Week Volume) -->
-  <div id="activityChartsHome" style="margin:16px 0 18px;"></div>
-
-  <!-- Cardiovascular Drift: Heart Rate Elevation in the Heat -->
-  <div style="margin-bottom:14px;">
-    <div class="act-section-toggle" onclick="toggleCardioDrift()" role="button" tabindex="0" aria-expanded="false" aria-controls="cvdSection" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCardioDrift();}"><span id="cvdArrow">&#x25B6;</span> &#x2764;&#xFE0F;&#x1F321;&#xFE0F; Cardiovascular Drift</div>
-    <div id="cvdSection" style="display:none;background:#fff8f0;border:1px solid #ffd5a8;border-radius:10px;padding:14px;">
-      <div style="font-size:0.78rem;color:#888;margin-bottom:10px;line-height:1.4;">Average heart rate by temperature, measured against your heart-rate training zones. Heat makes the heart work harder to cool the body, so a climb across these bars is expected &mdash; a climb that keeps getting steeper over time can be an early sign of heat strain or fading heat acclimation.</div>
-      <div style="height:220px;"><canvas id="cvdChart"></canvas></div>
-      <div id="cvdZoneLegend" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:8px;font-size:0.68rem;color:#888;"></div>
-      <div id="cvdInsight" style="margin-top:10px;font-size:0.8rem;color:#7d4800;text-align:center;line-height:1.4;"></div>
-    </div>
-  </div>
-
-  <!-- Heat Acclimation: Garmin Enduro/Fenix-style heat-load estimate -->
-  <div style="margin-bottom:14px;">
-    <div class="act-section-toggle" onclick="toggleHeatAcclimation()" role="button" tabindex="0" aria-expanded="false" aria-controls="haSection" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleHeatAcclimation();}"><span id="haArrow">&#x25B6;</span> &#x1F321;&#xFE0F;&#x1F4A7; Heat Acclimation</div>
-    <div id="haSection" style="display:none;background:#fff8f0;border:1px solid #ffd5a8;border-radius:10px;padding:14px;">
-      <div style="font-size:0.78rem;color:#888;margin-bottom:12px;line-height:1.4;">Estimated from the temperature and duration you log on each activity &mdash; similar to the Heat Acclimation status on higher-end Garmin watches (Enduro, Fenix, Epix), but built from your logged data rather than a core-temperature sensor. It builds up with repeated time spent training in the heat and fades within a couple of weeks without it.</div>
-      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:10px;">
-        <div id="haPercent" style="font-size:2.1rem;font-weight:800;color:#c2410c;min-width:64px;">&mdash;</div>
-        <div style="flex:1;min-width:160px;">
-          <div id="haStatusLabel" style="font-size:0.88rem;font-weight:700;color:#7d4800;margin-bottom:4px;">&mdash;</div>
-          <div style="height:11px;position:relative;border-radius:999px;background:linear-gradient(90deg,#dc2626 0%,#f97316 25%,#facc15 50%,#84cc16 75%,#16a34a 100%);box-shadow:inset 0 0 0 1px rgba(15,23,42,.12);" role="meter" aria-label="Heat acclimation percentage" aria-valuemin="0" aria-valuemax="100" id="haTrack">
-            <span id="haMarker" style="position:absolute;top:50%;left:0%;width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #0f172a;box-sizing:border-box;transform:translate(-50%,-50%);box-shadow:0 1px 3px rgba(15,23,42,.35);"></span>
-          </div>
-        </div>
-      </div>
-      <div style="height:160px;"><canvas id="haChart"></canvas></div>
-      <div id="haSummary" style="margin-top:10px;font-size:0.8rem;color:#7d4800;text-align:center;line-height:1.4;"></div>
-    </div>
-  </div>
-
-  <!-- Humidity Impact: how humidity correlates with pace -->
-  <div style="margin-bottom:14px;">
-    <div class="act-section-toggle" onclick="toggleHumidityImpact()" role="button" tabindex="0" aria-expanded="false" aria-controls="humSection" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleHumidityImpact();}"><span id="humArrow">&#x25B6;</span> &#x1F4A7;&#x1F4CA; Humidity Impact</div>
-    <div id="humSection" style="display:none;background:#fff8f0;border:1px solid #ffd5a8;border-radius:10px;padding:14px;">
-      <div style="font-size:0.78rem;color:#888;margin-bottom:10px;line-height:1.4;">Average pace grouped by the humidity you logged for each run. Humid air makes it harder for sweat to evaporate and cool the body, so pace tends to slow as humidity climbs &mdash; this is a rough correlation across your own logged runs, not a controlled comparison (temperature and effort still vary run to run).</div>
-      <div style="height:220px;"><canvas id="humChart"></canvas></div>
-      <div id="humInsight" style="margin-top:10px;font-size:0.8rem;color:#7d4800;text-align:center;line-height:1.4;"></div>
-    </div>
-  </div>
-
-  <!-- Filters -->
-  <div class="act-search-row">
-    <input type="text" id="actSearch" placeholder="&#x1F50D; Search activities..." oninput="renderActivities()">
-    <button onclick="toggleRunMetrics(this)" style="border:1px solid #f0c080;border-radius:8px;padding:7px 11px;font-size:0.8rem;color:#b45309;background:#fffaf0;cursor:pointer;font-weight:700;white-space:nowrap;">&#x1F4CA; Metrics <span id="metricsChev" style="font-size:0.7rem;color:#999;">&#x25BC;</span></button>
-  </div>
-  <details class="act-filter-shell">
-    <summary class="act-filter-summary">Filters and sorting</summary>
-    <div class="act-filter-body">
-  <div class="act-filter">
-    <select id="actFilterType" onchange="renderActivities()">
-      <option value="">All Types</option>
-      <option value="Run">Run</option><option value="Ride">Ride</option>
-      <option value="Walk">Walk</option><option value="Swim">Swim</option>
-      <option value="Strength">Strength</option><option value="Rest Day">Rest Day</option>
-      <option value="Other">Other</option>
-    </select>
-    <select id="actFilterSource" onchange="renderActivities()">
-      <option value="all">All Sources</option>
-      <option value="watch">BeyondStride</option>
-    </select>
-    <select id="actSort" onchange="renderActivities()">
-      <option value="newest">&#x1F4C5; Newest</option>
-      <option value="oldest">&#x1F4C5; Oldest</option>
-      <option value="distance">&#x1F4CF; Distance ↓</option>
-      <option value="pace">&#x1F3C3; Best Pace</option>
-      <option value="power">&#x26A1; Power ↓</option>
-      <option value="duration">&#x23F3; Duration ↓</option>
-      <option value="heartrate">&#x2764; Heart Rate ↓</option>
-      <option value="elevation">&#x26F0; Elevation ↓</option>
-    </select>
-  </div>
-  <div class="act-filter" style="margin-top:-4px;">
-    <label style="font-size:0.8rem;color:#888;">From:</label>
-    <input type="date" id="actDateFrom" style="border:1px solid #e9ecef;border-radius:6px;padding:5px 8px;font-size:0.84rem;outline:none;background:white;" onchange="renderActivities()">
-    <label style="font-size:0.8rem;color:#888;">To:</label>
-    <input type="date" id="actDateTo" style="border:1px solid #e9ecef;border-radius:6px;padding:5px 8px;font-size:0.84rem;outline:none;background:white;" onchange="renderActivities()">
-    <button onclick="document.getElementById('actDateFrom').value='';document.getElementById('actDateTo').value='';renderActivities();" style="font-size:0.78rem;padding:4px 10px;border-radius:6px;border:1px solid #e9ecef;background:white;cursor:pointer;color:#888;">✕ Clear</button>
-    <label style="font-size:0.8rem;color:#888;margin-left:4px;">Group by day</label>
-    <input type="checkbox" id="actGroupDay" onchange="renderActivities()" style="width:16px;height:16px;cursor:pointer;">
-  </div>
-    </div>
-  </details>
-
-  <!-- Weekly Run Notes -->
-  <div style="margin-bottom:14px;">
-    <div class="act-section-toggle" onclick="toggleWeekRunNotes()"><span id="wrnArrow">&#x25B6;</span> &#x1F4DD; Weekly Run Notes</div>
-    <div id="wrnSection" style="display:none;background:#fff8f0;border:1px solid #ffd5a8;border-radius:10px;padding:12px;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
-        <button onclick="changeWrnWeek(-1)" style="background:#e67e22;color:#fff;border:none;border-radius:6px;padding:3px 10px;cursor:pointer;font-size:0.85rem;">&#8249;</button>
-        <span id="wrnWeekLabel" style="font-weight:700;font-size:0.87rem;color:#7d4800;flex:1;text-align:center;"></span>
-        <button onclick="changeWrnWeek(1)" style="background:#e67e22;color:#fff;border:none;border-radius:6px;padding:3px 10px;cursor:pointer;font-size:0.85rem;">&#8250;</button>
-      </div>
-      <textarea id="wrnNote" rows="5" style="width:100%;border:1px solid #ffd5a8;border-radius:8px;padding:8px;font-size:0.87rem;font-family:inherit;resize:vertical;box-sizing:border-box;" placeholder="Reflect on this week's runs — effort, progress, how your body felt, what to focus on next week..."></textarea>
-      <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">
-        <button onclick="saveWrnNote()" style="background:#e67e22;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:0.84rem;cursor:pointer;font-weight:600;">&#x1F4BE; Save Note</button>
-        <button onclick="aiWeeklyRunWrapUp(this)" style="background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:0.84rem;cursor:pointer;font-weight:600;">&#x2728; AI Weekly Run Wrap-Up</button>
-        <button onclick="clearWrnNote()" style="background:#f0f0f0;color:#555;border:none;border-radius:7px;padding:6px 12px;font-size:0.84rem;cursor:pointer;">&#x1F5D1; Clear</button>
-        <span id="wrnSaved" style="color:#27ae60;font-size:0.8rem;align-self:center;display:none;">Saved ✓</span>
-      </div>
-    </div>
-  </div>
-
-  <div id="runMetricsPanel" style="display:none;background:#fff8f0;border:1px solid #f5cba7;border-radius:10px;padding:14px 16px;margin-bottom:12px;"></div>
-
-  <!-- Compare selection bar -->
-  <div id="actCompareBar" style="display:none;align-items:center;gap:8px;background:#f3e8ff;border:1px solid #d8b4fe;border-radius:8px;padding:8px 12px;margin-bottom:10px;flex-wrap:wrap;">
-    <span id="actCompareCount" style="font-size:0.82rem;font-weight:700;color:#6d28d9;">0 selected</span>
-    <button onclick="showActivityCompare()" style="background:#7c3aed;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:0.8rem;cursor:pointer;font-weight:600;">&#x1F4CA; Compare Now</button>
-    <button onclick="clearCompareSelection()" style="background:#f0f0f0;color:#555;border:none;border-radius:6px;padding:5px 12px;font-size:0.8rem;cursor:pointer;">Clear</button>
-  </div>
-  <div id="activityComparePanel" style="display:none;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;margin-bottom:14px;"></div>
-
-  <div id="activityList"></div>
-  </div>
-
-  <!-- Archived Plans -->
-  <div id="tpArchiveSection" style="display:none;margin-top:12px;">
-    <div class="act-section-toggle" onclick="toggleArchivedPlans()"><span id="archiveArrow">&#x25B6;</span> &#x1F4BC; Archived Plans</div>
-    <div id="tpArchiveList" style="display:none;"></div>
-  </div>
-
 </div></div>
 <!-- BIBLE NOTES TAB -->
 <div class="tab-panel" id="tab-bible">
@@ -3076,17 +2474,13 @@ html[data-theme="halloween"] .header{
 
 
 
-<script src="daily-planner-core.js?v=2026-11-08-1-removenutrition"></script>
-<script src="daily-planner-bible.js?v=2026-11-08-1-removenutrition"></script>
-<script src="daily-planner-meditation.js?v=2026-11-08-1-removenutrition"></script>
-<script src="daily-planner-journal-archive.js?v=2026-11-08-1-removenutrition"></script>
-<script src="daily-planner-file-uploads.js?v=2026-10-15-6"></script>
-<script src="daily-planner-shoe-tracker.js?v=2026-10-15-6"></script>
-<script src="daily-planner-misc.js?v=2026-11-08-1-removenutrition"></script>
-<script src="daily-planner-exercises.js?v=2026-11-03-1"></script>
-<script src="daily-planner-journal-experience.js?v=2026-11-08-1-removenutrition"></script>
+<script src="daily-planner-core.js?v=2026-11-08-2-removeactivities"></script>
+<script src="daily-planner-bible.js?v=2026-11-08-2-removeactivities"></script>
+<script src="daily-planner-meditation.js?v=2026-11-08-2-removeactivities"></script>
+<script src="daily-planner-journal-archive.js?v=2026-11-08-2-removeactivities"></script>
+<script src="daily-planner-file-uploads.js?v=2026-10-15-6"></script><script src="daily-planner-misc.js?v=2026-11-08-2-removeactivities"></script><script src="daily-planner-journal-experience.js?v=2026-11-08-2-removeactivities"></script>
 <script src="master-backup-shared.js?v=2026-10-15-7"></script>
-<script src="daily-planner-storage-qol.js?v=2026-11-08-1-removenutrition"></script>
+<script src="daily-planner-storage-qol.js?v=2026-11-08-2-removeactivities"></script>
 <button class="journal-float-top" id="journalFloatTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">&#x2191; Top</button>
 <div id="v26Toast" class="v26-toast" role="status" aria-live="polite"></div>
 </body>

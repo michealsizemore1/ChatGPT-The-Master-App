@@ -462,7 +462,6 @@ window.addEventListener('DOMContentLoaded',function(){
   setInterval(checkCalendarReminders,20000);
   document.addEventListener('visibilitychange',function(){if(!document.hidden)checkCalendarReminders();});
   journalCloudInit();
-  arrangeActivityTrainingCards();
   relocateDashboardCharts();
   makeHabitsInformational();
   var density=localStorage.getItem('v26_density')||'compact';

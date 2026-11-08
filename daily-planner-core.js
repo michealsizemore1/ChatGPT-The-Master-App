@@ -134,7 +134,7 @@ function updateCompactSectionCounts(){
   var physical=document.getElementById('physicalExerciseCount');
   if(task)task.textContent=compactDoneCount(['pt0c','pt1c','pt2c'])+'/3';
   if(goals)goals.textContent=compactDoneCount(['dg0c','dg1c','dg2c'])+'/3';
-  if(physical)physical.textContent=compactDoneCount(['exStrength','exWalk','exDogWalk'])+'/3';
+  if(physical)physical.textContent=compactDoneCount(['exWalk','exDogWalk'])+'/2';
 }
 function toggleAITools(){
   toggleCompactSection('aiToolsBody','aiToolsArrow',document.getElementById('aiToolsToggle'));
@@ -282,7 +282,7 @@ function parseBP(s){if(!s)return{sys:0,dia:0};const m=s.match(/(\d+)\s*\/\s*(\d+
 function buildStars(){const ss=document.getElementById('scoreStars');if(!ss)return;ss.innerHTML='';for(let i=1;i<=5;i++){const s=document.createElement('span');s.className='star'+(i<=scoreVal?' active':'');s.textContent='★';s.onclick=()=>{scoreVal=(scoreVal===i)?i-1:i;buildStars();save();};ss.appendChild(s);}updateTodayGlance();}
 
 // All text/number fields
-const TXS=['spDailyBreadText','spMeditationText','gaAudiobookText','gaAudiobookTime','gaSkillText','gaSkillTime','wBPVal','wPulseVal','wRestHRVal','wMedsVal','wWghtVal','wSleepVal','exStrengthVal','exBikeVal','exWalkVal','exDogWalkVal','jAccomplish','jImprov','jGratitude','jNotes','habitIdentity','habitReflection'];
+const TXS=['spDailyBreadText','spMeditationText','gaAudiobookText','gaAudiobookTime','gaSkillText','gaSkillTime','wBPVal','wPulseVal','wRestHRVal','wMedsVal','wWghtVal','wSleepVal','exBikeVal','exWalkVal','exDogWalkVal','jAccomplish','jImprov','jGratitude','jNotes','habitIdentity','habitReflection'];
 const NMS=['exSteps','wSleepScore','exMassageMinutes','gaFinancialVideosTime'];
 const PTIDS=['pt0','pt1','pt2','dg0','dg1','dg2'];
 
@@ -319,238 +319,6 @@ function save(){
 
 
 // ── Today's Workout from Training Plan ───────────────────────────────────────
-function initTodayWorkoutCard(){
-  const raw=localStorage.getItem('current_training_plan');
-  const card=document.getElementById('todayWorkoutCard');
-  if(!raw||!card){if(card)card.style.display='none';return;}
-  const plan=JSON.parse(raw);
-
-  // ── Compute day number ──────────────────────────────────────────────────
-  let dayNum=0,weekNum=0,dayOfWk=0,isFinal=false,beforeStart=false;
-  if(plan.startDate){
-    const startD=new Date(plan.startDate+'T00:00:00');
-    const viewD=new Date(dk(today)+'T00:00:00');
-    dayNum=Math.floor((viewD-startD)/86400000)+1;
-    if(dayNum<1){ beforeStart=true; }
-    else {
-      weekNum=Math.ceil(dayNum/7);
-      dayOfWk=((dayNum-1)%7)+1;
-      const totalDays=(plan.weeks||0)*7;
-      isFinal=totalDays>0&&dayNum===totalDays;
-    }
-  }
-
-  // ── Hide card before plan start date OR on plan Day 1 if it's a rest/recovery day ─
-  if(beforeStart){ card.style.display='none'; return; }
-  // If dayNum===1 and the plan's first entry is a pure rest day, hide the card
-  if(dayNum===1&&plan.text){
-    const firstLines=(plan.text.split('\n').slice(0,8).join(' ')).toLowerCase();
-    if(/rest\s*day|no\s*scheduled\s*workout|recovery/.test(firstLines)){
-      card.style.display='none'; return;
-    }
-  }
-  card.style.display='block';
-
-  // ── Day label + race countdown ─────────────────────────────────────────
-  const dateLabel=today.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
-  let dayBadge='';
-  if(weekNum>0){
-    dayBadge=isFinal?' (Week '+weekNum+', Day '+dayOfWk+' — Final Day 🎉)':' (Week '+weekNum+', Day '+dayOfWk+')';
-  }
-  const el=document.getElementById('twDayLabel');if(el)el.textContent=dateLabel+dayBadge;
-  // Race countdown
-  const raceEl=document.getElementById('twRaceCountdown');
-  if(raceEl){
-    // Priority: 1) user-confirmed raceDate  2) auto-detect from plan text  3) stored raceDate  4) startDate+weeks
-    let raceD=null;
-    if(plan.raceDate&&plan.raceDateConfirmed){raceD=new Date(plan.raceDate+'T00:00:00');}
-    if(!raceD&&plan.text){
-      const ad=detectRaceDateFromPlan(plan.text);
-      if(ad){
-        raceD=new Date(ad+'T00:00:00');
-        // Silently save auto-detected date so it persists
-        if(!plan.raceDateConfirmed&&plan.raceDate!==ad){
-          plan.raceDate=ad;localStorage.setItem('current_training_plan',JSON.stringify(plan));
-        }
-      }
-    }
-    if(!raceD&&plan.raceDate){raceD=new Date(plan.raceDate+'T00:00:00');}
-    if(!raceD&&plan.startDate&&plan.weeks){raceD=new Date(plan.startDate+'T00:00:00');raceD.setDate(raceD.getDate()+(plan.weeks*7));}
-    if(raceD){
-      // Always count from the real current date, not the browsed date
-      const realD=new Date(dk(_realToday)+'T00:00:00');
-      const daysToRace=Math.ceil((raceD-realD)/86400000);
-      if(daysToRace>0){
-        const raceDateStr=raceD.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-        raceEl.textContent='🏁 '+daysToRace+' day'+(daysToRace!==1?'s':'')+' to race day ('+raceDateStr+')';
-        raceEl.style.display='block';
-      } else if(daysToRace===0){
-        raceEl.textContent='🏁 Race day!';raceEl.style.display='block';
-      } else {
-        raceEl.style.display='none';
-      }
-    } else {raceEl.style.display='none';}
-  }
-
-  // ── Start-date setter row ───────────────────────────────────────────────
-  const sdr=document.getElementById('twStartDateRow');
-  const sdi=document.getElementById('twStartDateInput');
-  if(sdr){
-    if(!plan.startDate){
-      sdr.style.display='block';
-      if(sdi)sdi.value=dk(new Date());
-    } else {
-      sdr.style.display='none';
-      // One-time auto-clear of stale caches when startDate is present
-      const clearedKey='tw_caches_cleared_v2_'+plan.startDate;
-      if(!localStorage.getItem(clearedKey)){
-        const toRemove=[];
-        for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('workout_cache_'))toRemove.push(k);}
-        toRemove.forEach(k=>localStorage.removeItem(k));
-        localStorage.setItem(clearedKey,'1');
-      }
-    }
-  }
-
-  // ── Collapsed state ─────────────────────────────────────────────────────
-  if(localStorage.getItem('tw_collapsed')==='1'){
-    const twB=document.getElementById('twBody');
-    const twCBtn=document.getElementById('twCollapseBtn');
-    if(twB)twB.style.display='none';
-    if(twCBtn)twCBtn.innerHTML='&#x25B8;';
-  }
-
-  // ── Cache check ─────────────────────────────────────────────────────────
-  const cacheKey='workout_cache_'+dk(today);
-  let cached=localStorage.getItem(cacheKey);
-  const twBodyEl=document.getElementById('twBody');
-  const twBtn=document.getElementById('twLoadBtn');
-  const plannedForDate=extractWorkoutFromActivePlan(plan,today);
-  if(plannedForDate){
-    cached=plannedForDate.replace(/^#+\s*/gm,'').replace(/\*\*([^*]+)\*\*/g,'$1').replace(/\*([^*]+)\*/g,'$1').replace(/^---+$/gm,'').trim();
-    localStorage.setItem(cacheKey,cached);
-  }
-  if(cached){
-    // Stale cache detection: if cached text mentions a different month+day, purge it
-    const viewMonDay=new Date(dk(today)+'T00:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric'}).toLowerCase();
-    const hasDate=/\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2}\b/i.test(cached);
-    if(hasDate&&!cached.toLowerCase().includes(viewMonDay)){
-      localStorage.removeItem(cacheKey);
-      cached=null;
-    }
-  }
-  if(cached){
-    if(twBodyEl)twBodyEl.textContent=cached;
-    if(twBtn)twBtn.style.display='none';
-    updateDaysOut(plan);
-    return;
-  }
-
-  // ── No cache: auto-fetch if AI key exists, else show button ─────────────
-  const aiKey=journalAIKey();
-  if(aiKey&&plan.startDate&&dayNum>=1){
-    if(twBodyEl)twBodyEl.textContent='⏳ Loading workout…';
-    if(twBtn)twBtn.style.display='none';
-    loadTodayWorkout();
-  } else {
-    if(twBodyEl)twBodyEl.textContent='Tap “Load Workout” to see this day’s scheduled session.';
-    if(twBtn){twBtn.style.display='inline-block';twBtn.disabled=false;twBtn.textContent='Load Workout';}
-  }
-  updateDaysOut(plan);
-}
-function detectRaceDateFromPlan(text){
-  // Scan plan text for all "Month Day, Year" dates; find the latest.
-  // If the latest entry mentions "race", use that date. Otherwise use latest+1 day (race day after last plan entry).
-  const mo={january:1,february:2,march:3,april:4,may:5,june:6,july:7,august:8,september:9,october:10,november:11,december:12};
-  const re=/\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{1,2}),?\s+(202\d)\b/gi;
-  let latest=null,latestIsRace=false,m;
-  while((m=re.exec(text))!==null){
-    const d=new Date(parseInt(m[3]),mo[m[1].toLowerCase()]-1,parseInt(m[2]));
-    const ctx=text.slice(Math.max(0,m.index-60),m.index+m[0].length+60).toLowerCase();
-    const isRace=/\brace\b/.test(ctx);
-    if(!latest||d>latest){latest=d;latestIsRace=isRace;}
-    else if(isRace&&d.getTime()===latest.getTime()){latestIsRace=true;}
-  }
-  if(!latest)return null;
-  if(!latestIsRace)latest.setDate(latest.getDate()+1); // race day is the day after last plan entry
-  return latest.toISOString().slice(0,10);
-}
-function editWorkoutStartDate(){
-  const sdr=document.getElementById('twStartDateRow');
-  const sdi=document.getElementById('twStartDateInput');
-  const rdi=document.getElementById('twRaceDateInput');
-  if(!sdr)return;
-  const raw=localStorage.getItem('current_training_plan');
-  if(raw){
-    const plan=JSON.parse(raw);
-    if(sdi)sdi.value=plan.startDate||dk(new Date());
-    if(rdi)rdi.value=plan.raceDate||'';
-  }
-  sdr.style.display=sdr.style.display==='none'?'block':'none';
-}
-function setWorkoutRaceDate(){
-  const dateVal=(document.getElementById('twRaceDateInput')||{}).value||'';
-  if(!dateVal){alert('Pick a race date first.');return;}
-  const raw=localStorage.getItem('current_training_plan');
-  if(!raw)return;
-  const plan=JSON.parse(raw);
-  plan.raceDate=dateVal;
-  plan.raceDateConfirmed=true; // user explicitly set — takes priority over auto-detection
-  // Update weeks if startDate known
-  if(plan.startDate){
-    const ms=new Date(dateVal+'T00:00:00')-new Date(plan.startDate+'T00:00:00');
-    const w=Math.round(ms/(7*24*60*60*1000));
-    if(w>0&&w<=52)plan.weeks=w;
-  }
-  localStorage.setItem('current_training_plan',JSON.stringify(plan));
-  const sdr=document.getElementById('twStartDateRow');if(sdr)sdr.style.display='none';
-  renderTrainingCard();
-  renderJournalHome();
-}
-function setWorkoutStartDate(){
-  const dateVal=(document.getElementById('twStartDateInput')||{}).value||'';
-  if(!dateVal){alert('Pick a date first.');return;}
-  const raw=localStorage.getItem('current_training_plan');
-  if(!raw)return;
-  const plan=JSON.parse(raw);
-  plan.startDate=dateVal;
-  if(plan.scheduleMode==='weekly')plan.schedule=buildUploadedTrainingSchedule(plan.text,dateVal,plan.weeks).schedule;
-  localStorage.setItem('current_training_plan',JSON.stringify(plan));
-  // Clear all old workout caches so they re-fetch with correct day numbers
-  const keysToRemove=[];
-  for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('workout_cache_'))keysToRemove.push(k);}
-  keysToRemove.forEach(k=>localStorage.removeItem(k));
-  const sdr=document.getElementById('twStartDateRow');if(sdr)sdr.style.display='none';
-  const body=document.getElementById('twBody');
-  if(body)body.textContent='Start date saved ('+dateVal+'). Tap Load Workout to get the correct workout for each day.';
-  const btn=document.getElementById('twLoadBtn');if(btn)btn.style.display='inline-block';
-  renderJournalHome();
-}
-function refreshTodayWorkout(){
-  // Clear cache for viewed day and auto-reload
-  localStorage.removeItem('workout_cache_'+dk(today));
-  const body=document.getElementById('twBody');
-  if(body)body.textContent='⏳ Refreshing…';
-  const btn=document.getElementById('twLoadBtn');
-  if(btn)btn.style.display='none';
-  renderJournalHome();
-  loadTodayWorkout();
-}
-function toggleWorkoutCard(){
-  const body=document.getElementById('twBody');
-  const btn=document.getElementById('twCollapseBtn');
-  if(!body)return;
-  const isCollapsed=body.style.display==='none';
-  body.style.display=isCollapsed?'block':'none';
-  if(btn)btn.innerHTML=isCollapsed?'&#x25BE;':'&#x25B8;';
-  localStorage.setItem('tw_collapsed',isCollapsed?'0':'1');
-}
-function updateDaysOut(plan){
-  const created=plan.createdAt||'';
-  const el=document.getElementById('twDaysOut');
-  if(el&&created)el.textContent='Plan created: '+created;
-}
-// Extract workout by position (day number from plan start) — immune to date format mismatches
 function extractWorkoutByPosition(planText, dayNum){
   if(!planText||dayNum<1)return null;
   const lines=planText.split('\n');
@@ -640,97 +408,6 @@ function extractWorkoutFromActivePlan(plan,targetDate,allowPosition){
   return allowPosition===false?null:extractWorkoutByPosition(plan.text,dayNum);
 }
 
-function loadTodayWorkout(){
-  const raw=localStorage.getItem('current_training_plan');
-  if(!raw){alert('No active training plan found. Generate a plan in the Activities tab first.');return;}
-  const plan=JSON.parse(raw);
-  const key=journalAIKey();
-  if(!key){alert('Add your Anthropic API key in ⚙️ Settings first.');return;}
-  const btn=document.getElementById('twLoadBtn');
-  const body=document.getElementById('twBody');
-  if(btn){btn.disabled=true;btn.textContent='⏳ Loading...';}
-
-  // ── Step 0: Positional extraction — find Nth day entry by plan day number ─
-  let _dayNumPos=0;
-  if(plan.startDate){
-    const _sd=new Date(plan.startDate+'T00:00:00');
-    const _vd=new Date(dk(today)+'T00:00:00');
-    _dayNumPos=Math.floor((_vd-_sd)/86400000)+1;
-  }
-  if(_dayNumPos>=1){
-    const posResult=extractWorkoutFromActivePlan(plan,today);
-    if(posResult){
-      const cleaned=posResult
-        .replace(/^#+\s*/gm,'').replace(/\*\*([^*]+)\*\*/g,'$1')
-        .replace(/\*([^*]+)\*/g,'$1').replace(/^---+$/gm,'').trim();
-      if(btn){btn.disabled=false;btn.style.display='none';}
-      if(body){body.textContent=cleaned;body.style.display='block';}
-      localStorage.setItem('workout_cache_'+dk(today),cleaned);
-      return;
-    }
-  }
-
-  // ── Step 1: Try direct text extraction (no AI, exact date match) ─────────
-  const extracted=extractWorkoutSection(plan.text,today);
-  if(extracted){
-    // Clean up markdown formatting for display
-    const cleaned=extracted
-      .replace(/^#+\s*/gm,'')          // remove ## headers
-      .replace(/\*\*([^*]+)\*\*/g,'$1') // remove bold markers
-      .replace(/\*([^*]+)\*/g,'$1')     // remove italic markers
-      .replace(/^---+$/gm,'')           // remove horizontal rules
-      .trim();
-    // Check if this looks like a rest day
-    const isRest=/rest\s*day|no\s*(scheduled\s*)?workout|recovery\s*day|off\s*day/i.test(cleaned);
-    if(btn){btn.disabled=false;btn.style.display='none';}
-    if(body){body.textContent=cleaned;body.style.display='block';}
-    localStorage.setItem('workout_cache_'+dk(today),cleaned);
-    return;
-  }
-  // ── Step 1b: Check if today is a rest/off day by week position ──────────
-  // Scan plan text for today's weekday + "rest" without needing an exact date
-  const todayName=today.toLocaleDateString('en-US',{weekday:'long'}).toLowerCase();
-  const planLines=(plan.text||'').split('\n');
-  for(let i=0;i<planLines.length;i++){
-    const lower=planLines[i].toLowerCase();
-    if(lower.includes(todayName)&&(/rest|off day|no run|recovery/.test(lower))){
-      const msg='Rest Day / No workout scheduled for '+today.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'})+'.';
-      if(btn){btn.disabled=false;btn.style.display='none';}
-      if(body){body.textContent=msg;body.style.display='block';}
-      localStorage.setItem('workout_cache_'+dk(today),msg);
-      return;
-    }
-  }
-
-  // ── Step 2: Fallback to AI if date not found in plan text ────────────────
-  const viewDate=new Date(dk(today)+'T00:00:00');
-  const fullDate=viewDate.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
-  let dayCtx='';
-  if(plan.startDate){
-    const startD=new Date(plan.startDate+'T00:00:00');
-    const dayNum=Math.floor((viewDate-startD)/86400000)+1;
-    if(dayNum>=1){
-      const weekNum=Math.ceil(dayNum/7);
-      const dayOfWk=((dayNum-1)%7)+1;
-      dayCtx=' (Week '+weekNum+', Day '+dayOfWk+' — Day '+dayNum+' overall)';
-    }
-  }
-  const prompt='Training plan:\n\n'+plan.text+'\n\nReturn ONLY the workout for: '+fullDate+dayCtx+'. Be concise — type, distance, pace, notes. If rest day say so.';
-  fetch('https://api.anthropic.com/v1/messages',{
-    method:'POST',
-    headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1000,messages:[{role:'user',content:prompt}]})
-  }).then(r=>r.json()).then(data=>{
-    if(btn){btn.disabled=false;btn.style.display='none';}
-    if(data.error){if(body)body.textContent='Error: '+data.error.message;return;}
-    const text=(data.content[0].text||'').trim();
-    if(body){body.textContent=text;body.style.display='block';}
-    localStorage.setItem('workout_cache_'+dk(today),text);
-  }).catch(err=>{
-    if(btn){btn.disabled=false;btn.textContent='Load Workout';}
-    if(body)body.textContent='Error: '+err.message;
-  });
-}
 function load(){
   const raw=localStorage.getItem('planner_'+dk(today));
   const d=raw?JSON.parse(raw):{};
@@ -739,7 +416,6 @@ function load(){
   if(_cdEl)_cdEl.textContent=fmtD(today);
   updateMobileWeekIndicator();
   updateMobileYearProgress();
-  try{initTodayWorkoutCard();}catch(e){console.error('initTodayWorkoutCard:',e);}
   try{
     // Tri-state checkboxes
     document.querySelectorAll('.tri-check').forEach(el=>{if(el.dataset.key)applyTriState(el,d[el.dataset.key]||'');});
@@ -1615,25 +1291,10 @@ function renderSectionCharts(containerId,cfgs){
   });
 }
 function relocateDashboardCharts(){
-  const wellness=document.getElementById('wellnessChartsHome'),activities=document.getElementById('activityChartsHome');
-  const bpCanvas=document.getElementById('bpChart'),bp=bpCanvas?bpCanvas.closest('.bp-chart-wrap'):null,weight=document.getElementById('weightChartWrap'),miles=document.getElementById('milesChartWrap');
+  const wellness=document.getElementById('wellnessChartsHome');
+  const bpCanvas=document.getElementById('bpChart'),bp=bpCanvas?bpCanvas.closest('.bp-chart-wrap'):null,weight=document.getElementById('weightChartWrap');
   if(wellness&&bp)wellness.appendChild(bp);
   if(wellness&&weight)wellness.appendChild(weight);
-  if(activities&&miles)activities.appendChild(miles);
-}
-function arrangeActivityTrainingCards(){
-  const panel=document.querySelector('#tab-activities > .panel');
-  const workout=document.getElementById('todayWorkoutCard');
-  const active=document.getElementById('tpPersistSection');
-  const upcoming=document.getElementById('tpUpcomingSection');
-  const archive=document.getElementById('tpArchiveSection');
-  if(!panel)return;
-  if(active&&archive)panel.insertBefore(active,archive);
-  if(upcoming&&archive)panel.insertBefore(upcoming,archive);
-  if(workout)panel.insertBefore(workout,panel.firstElementChild);
-}
-function renderActivitySectionCharts(){
-  renderMilesChart();
 }
 function renderLibrarySectionCharts(){renderSectionCharts('libraryChartsGrid',[{k:'audiobook',l:'Audiobook Time',c:'#27ae60'}]);}
 function renderSkillSectionCharts(){
@@ -1868,65 +1529,6 @@ function renderWeightChart(){
   if(el)el.textContent='60-day avg: '+avg+' lbs  •  Range: '+min+' – '+max+' lbs  ('+entries.length+' readings)';
 }
 
-function renderMilesChart(){
-  const wrap=document.getElementById('milesChartWrap');
-  const canvas=document.getElementById('milesChart');
-  if(!canvas||!wrap)return;
-  const entries=[];
-  const today2=new Date();
-  for(let i=59;i>=0;i--){
-    const d=new Date(today2);d.setDate(today2.getDate()-i);
-    // Pull mileage straight from logged Activities for every day in the window,
-    // not just days that also have a saved Daily journal record — a run logged
-    // on a day the journal tab was never opened has no 'planner_' entry, and
-    // was previously being skipped entirely, making the chart look empty even
-    // with real mileage on the books.
-    const r=localStorage.getItem('planner_'+dk(d));
-    const dd=r?JSON.parse(r):{};
-    const dm=getDM(dd,dk(d));const m=dm.miles||parseFloat(dd.exMiles)||0;
-    entries.push({date:dk(d),val:m,label:d.toLocaleDateString('en-US',{month:'numeric',day:'numeric'})});
-  }
-  const withMiles=entries.filter(e=>e.val>0);
-  wrap.style.display='block';
-  if(withMiles.length<1){
-    const c=document.getElementById('milesChart');if(c){const ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);}
-    const avg=document.getElementById('milesChartAvg');if(avg)avg.textContent='No mileage logged in the last 60 days. Log a run on the Activities tab to see it here.';
-    return;
-  }
-  const doDraw=()=>{
-    const W=Math.max(canvas.parentElement?canvas.parentElement.clientWidth-28:280,200);
-    const H=120;canvas.width=W;canvas.height=H;
-    const ctx=canvas.getContext('2d');ctx.clearRect(0,0,W,H);
-    const pad={l:28,r:10,t:14,b:22};
-    const cW=W-pad.l-pad.r,cH=H-pad.t-pad.b;
-    const maxV=Math.max(...entries.map(e=>e.val))+0.5;
-    const minV=0;
-    const xScale=i=>pad.l+i*(cW/Math.max(1,entries.length-1));
-    const yScale=v=>pad.t+(1-(v-minV)/(maxV-minV))*cH;
-    for(let g=0;g<=4;g++){
-      const y=pad.t+g*(cH/4);ctx.strokeStyle='#f0f0f0';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r,y);ctx.stroke();
-      const val=(maxV-g/4*(maxV-minV)).toFixed(1);ctx.fillStyle='#bbb';ctx.font='8px sans-serif';ctx.textAlign='right';ctx.fillText(val,pad.l-3,y+3);
-    }
-    // Bars
-    const barW=Math.max(2,cW/entries.length*0.6);
-    entries.forEach((e,i)=>{
-      if(e.val<=0)return;
-      const x=xScale(i);const y=yScale(e.val);const bh=pad.t+cH-y;
-      ctx.fillStyle='rgba(39,174,96,0.75)';
-      ctx.fillRect(x-barW/2,y,barW,bh);
-    });
-    // X labels
-    ctx.fillStyle='#bbb';ctx.font='8px sans-serif';ctx.textAlign='center';
-    const step=Math.max(1,Math.floor(entries.length/6));
-    entries.forEach((e,i)=>{if(i%step===0||i===entries.length-1)ctx.fillText(e.label,xScale(i),H-4);});
-  };
-  setTimeout(doDraw,80);
-  const totalMiles=withMiles.reduce((a,e)=>a+e.val,0);
-  const el=document.getElementById('milesChartAvg');
-  if(el)el.textContent='60-day total: '+totalMiles.toFixed(1)+' mi  •  Avg run day: '+(totalMiles/withMiles.length).toFixed(1)+' mi  ('+withMiles.length+' run days)';
-}
-
-// ── Shared AI helper ─────────────────────────────────────────────────────────
 function callAI(prompt,resultDivId,maxTok){
   const el=document.getElementById(resultDivId);
   if(el){el.style.display='block';el.textContent='⏳ Thinking...';}
@@ -2000,122 +1602,6 @@ function closeAIArchive(){document.getElementById('aiArchiveModal').style.displa
 var wrnOff=0;
 function wrnMonday(off){var d=new Date(today);var day=d.getDay();var diff=day===0?-6:1-day;d.setDate(d.getDate()+diff+(off*7));d.setHours(0,0,0,0);return d;}
 function wrnKey(off){return 'act_week_note_'+dk(wrnMonday(off));}
-function wrnLabel(off){var m=wrnMonday(off);var e=new Date(m);e.setDate(m.getDate()+6);return m.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' – '+e.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
-function loadWrnNote(){
-  var ta=document.getElementById('wrnNote');var lbl=document.getElementById('wrnWeekLabel');
-  if(ta)ta.value=localStorage.getItem(wrnKey(wrnOff))||'';
-  if(lbl)lbl.textContent=wrnLabel(wrnOff);
-}
-function saveWrnNote(){
-  var ta=document.getElementById('wrnNote');if(!ta)return;
-  var val=ta.value.trim();
-  if(val)localStorage.setItem(wrnKey(wrnOff),val);
-  else localStorage.removeItem(wrnKey(wrnOff));
-  var s=document.getElementById('wrnSaved');if(s){s.style.display='inline';setTimeout(function(){s.style.display='none';},1800);}
-}
-function clearWrnNote(){var ta=document.getElementById('wrnNote');if(ta)ta.value='';saveWrnNote();}
-function changeWrnWeek(delta){wrnOff+=delta;loadWrnNote();}
-function toggleActivitiesLog(){
-  var section=document.getElementById('activitiesLogSection');
-  var arrow=document.getElementById('activitiesLogArrow');
-  var toggle=section?section.previousElementSibling:null;
-  if(!section)return;
-  var opening=section.style.display==='none';
-  // This section can swing from empty to hundreds of activity cards plus
-  // charts in one tap, and some mobile browsers mis-fire their scroll-anchoring
-  // heuristic on a layout change that large, jumping the viewport away from
-  // the toggle the user just tapped. Re-anchor the scroll position to the
-  // toggle itself immediately, next frame, and shortly after (to also cover
-  // Chart.js resizing its canvases a beat later), so the tap keeps its place.
-  var anchorTop=toggle?toggle.getBoundingClientRect().top:null;
-  section.style.display=opening?'block':'none';
-  if(arrow)arrow.innerHTML=opening?'&#x25BC;':'&#x25B6;';
-  if(toggle)toggle.setAttribute('aria-expanded',opening?'true':'false');
-  if(opening)renderActivities();
-  if(toggle&&anchorTop!==null){
-    var restoreScroll=function(){
-      var newTop=toggle.getBoundingClientRect().top;
-      var delta=newTop-anchorTop;
-      if(Math.abs(delta)>1)window.scrollBy(0,delta);
-    };
-    restoreScroll();
-    requestAnimationFrame(restoreScroll);
-    setTimeout(restoreScroll,120);
-  }
-}
-function resetActivityAdvancedPanels(){
-  var metrics=document.getElementById('runMetricsPanel');
-  var metricsChev=document.getElementById('metricsChev');
-  var notes=document.getElementById('wrnSection');
-  var notesArrow=document.getElementById('wrnArrow');
-  var filters=document.querySelector('#activitiesLogSection .act-filter-shell');
-  if(metrics)metrics.style.display='none';
-  if(metricsChev)metricsChev.innerHTML='&#x25BC;';
-  if(notes)notes.style.display='none';
-  if(notesArrow)notesArrow.innerHTML='&#x25B6;';
-  if(filters)filters.removeAttribute('open');
-}
-function toggleWeekRunNotes(){
-  var sec=document.getElementById('wrnSection');var arr=document.getElementById('wrnArrow');
-  if(!sec)return;var open=sec.style.display!=='none';
-  sec.style.display=open?'none':'block';if(arr)arr.textContent=open?'▶':'▼';
-  if(!open)loadWrnNote();
-}
-function aiWeeklyRunWrapUp(btn){
-  if(!journalAIKey()){
-    alert('Add your Anthropic API key in Settings first.');
-    return;
-  }
-  var start=wrnMonday(wrnOff),end=new Date(start);
-  end.setDate(start.getDate()+6);
-  function isoDay(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
-  var startIso=isoDay(start),endIso=isoDay(end);
-  var runs=uniqueRunActivities(startIso,endIso);
-  if(!runs.length){
-    alert('No running activities were found for '+wrnLabel(wrnOff)+'.');
-    return;
-  }
-  var totalMiles=0,totalMinutes=0,totalElevation=0,totalCalories=0,powerSum=0,powerCount=0,longest=null;
-  runs.forEach(function(a){
-    var miles=Number(a.distance)||0;
-    totalMiles+=miles;
-    totalMinutes+=parseMins(String(a.duration||''));
-    totalElevation+=Number(a.elevGain)||0;
-    totalCalories+=Number(a.calories)||0;
-    if(Number(a.power)>0){powerSum+=Number(a.power);powerCount++;}
-    if(!longest||miles>(Number(longest.distance)||0))longest=a;
-  });
-  var avgPace=totalMiles>0&&totalMinutes>0?fmtPace(totalMinutes*60/totalMiles)+'/mi':'not available';
-  var existing=(document.getElementById('wrnNote')||{}).value||'';
-  var activityLines=runs.slice().sort(function(a,b){return String(a.date||'').localeCompare(String(b.date||''));}).map(function(a){
-    return [
-      a.date||'No date',
-      a.title||a.type||'Run',
-      (Number(a.distance)||0).toFixed(2)+' mi',
-      a.duration||'duration unavailable',
-      a.pace?String(a.pace)+'/mi':'pace unavailable',
-      Number(a.power)>0?Math.round(Number(a.power))+' W':'power unavailable',
-      Number(a.heartRate)>0?Math.round(Number(a.heartRate))+' bpm':'heart rate unavailable',
-      Number(a.elevGain)>0?Math.round(Number(a.elevGain))+' ft gain':'elevation unavailable',
-      a.notes?'notes: '+a.notes:'',
-      a.injuryReport?'injury report: '+a.injuryReport:''
-    ].filter(Boolean).join(' | ');
-  }).join('\n');
-  var prompt='Write a concise weekly running wrap-up for '+wrnLabel(wrnOff)+'. Use only the supplied facts and do not invent performance, recovery, injury, or health claims. Keep it encouraging, practical, and about 150-220 words. Use short headings: Week at a Glance, Strongest Session, Patterns & Recovery, and Focus for Next Week. If a conclusion is uncertain, say so. This is training reflection, not medical advice.\n\n'
-    +'SUMMARY\nRuns: '+runs.length+'\nDistance: '+totalMiles.toFixed(2)+' miles\nTime: '+fmtMins(totalMinutes)+'\nAverage pace: '+avgPace+'\nElevation gain: '+Math.round(totalElevation)+' ft\nCalories: '+Math.round(totalCalories)+'\nAverage recorded power: '+(powerCount?Math.round(powerSum/powerCount)+' W':'not available')+'\nLongest run: '+(longest?((longest.title||'Run')+', '+(Number(longest.distance)||0).toFixed(2)+' miles'):'not available')+'\n\n'
-    +'ACTIVITIES\n'+activityLines+'\n\nATHLETE NOTES\n'+(existing.trim()||'No notes entered.');
-  aiBtnState(btn,true);
-  aiCall(prompt,2200,function(text){
-    var ta=document.getElementById('wrnNote');
-    if(ta){ta.value=text;ta.dispatchEvent(new Event('input',{bubbles:true}));}
-    saveWrnNote();
-    aiBtnState(btn,false);
-  },function(message){
-    aiBtnState(btn,false);
-    alert('AI wrap-up could not be created: '+message);
-  });
-}
-// Get current week's run note for AI
 function getCurrentWeekRunNote(){return localStorage.getItem(wrnKey(0))||'';}
 function aiBtnState(btn,loading,originalText){
   if(!btn)return;
@@ -2590,7 +2076,7 @@ function attachAllFieldUndos(){
            'spDailyBreadText','spMeditationText',
            'gaAudiobookText','gaSkillText',
            'wBPVal','wPulseVal','wRestHRVal','wWghtVal','wSleepVal','wMedsVal',
-           'exStrengthVal','exBikeVal','exWalkVal'];
+           'exBikeVal','exWalkVal'];
   ids.forEach(_attachFieldUndo);
 }
 
