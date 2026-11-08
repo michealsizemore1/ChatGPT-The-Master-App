@@ -509,7 +509,6 @@ function importWatchRuns(runs,opts){
     saveActivities(acts);
     if(opts.fromLink){
       try{history.replaceState(null,'',location.pathname+location.search);}catch(ignore3){}
-      try{hmSwitch('activities');}catch(ignore4){}
     }
     var msg=added?(added+' BeyondStride run'+(added===1?'':'s')+' added to Activities'):(opts.fromLink?'Those runs were already in Activities':'');
     if(updated&&added)msg+=' ('+updated+' already there)';

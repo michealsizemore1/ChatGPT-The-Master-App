@@ -1332,7 +1332,7 @@ function renderWeeklyGrowthTable(start,end,days,labels){
   host.innerHTML='<table class="summary-table"><thead><tr><th>Period</th><th>Financial Videos</th><th>Udemy</th><th>Gun Range</th><th>Language</th><th>Reading / Audiobook</th></tr></thead><tbody>'+rows.join('')+'</tbody></table>'+detailHtml;
 }
 
-var _hmTabs=['habits2','meditate','bible','library','activities','wellness','file-uploads'];
+var _hmTabs=['habits2','meditate','bible','library','wellness','file-uploads'];
 var _cardTabs=['weekly','monthly','yearly','dashboard'].concat(_hmTabs);
 function toggleHamburger(e){
   if(e)e.stopPropagation();
@@ -1381,7 +1381,6 @@ function switchTab(tab,e){
   if(tab==='weekly')renderWeekly();if(tab==='monthly')renderMonthly();
   if(tab==='yearly')renderYearly();if(tab==='dashboard')renderDashboard();
   if(tab==='review')renderReview();if(tab==='library'){renderLibrary();renderLibrarySectionCharts();}
-  if(tab==='activities'){updateCompactSectionCounts();}
   if(tab==='bible')renderBibleTab();
   if(tab==='habits2')h2Render();
   if(tab==='meditate'){meditInitTab();}

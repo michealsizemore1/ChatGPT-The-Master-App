@@ -265,7 +265,7 @@ window.addEventListener('load',function(){
   var lastTab=localStorage.getItem('last_active_tab');
   if(lastTab==='habits')lastTab='habits2';
   if(lastTab==='dashboard')lastTab='weekly';
-  var validTabs=['daily','weekly','monthly','yearly','review','habits2','meditate','bible','library','activities','wellness','file-uploads'];
+  var validTabs=['daily','weekly','monthly','yearly','review','habits2','meditate','bible','library','wellness','file-uploads'];
   if(lastTab&&lastTab!=='daily'&&validTabs.indexOf(lastTab)!==-1){
     if(_hmTabs.includes(lastTab)){hmSwitch(lastTab,null);}
     else{var btn=document.querySelector('[onclick*="switchTab(\''+lastTab+'\'"]');if(btn)btn.click();}

@@ -1484,6 +1484,17 @@ function h2SyncFromJournal(){
     if(state.dismissedAuto.indexOf('nutrition')===-1)state.dismissedAuto.push('nutrition');
     localStorage.setItem('habits2_nutrition_removed_v1','1');
   }
+  // "Follow Training Plan" removed per user request — same pattern as hydration/nutrition
+  // above: drop any existing habit card and record 'training' in dismissedAuto so the
+  // self-heal and suggestion logic below (which both skip any sourceId already in
+  // dismissedAuto) never brings it back. Historical logs/streak data for this habit are
+  // left in storage untouched, same as every other habit removal here.
+  if(!localStorage.getItem('habits2_training_removed_v1')){
+    state.habits=state.habits.filter(function(h){return h.autoSource!=='training';});
+    state.dismissedAuto=state.dismissedAuto||[];
+    if(state.dismissedAuto.indexOf('training')===-1)state.dismissedAuto.push('training');
+    localStorage.setItem('habits2_training_removed_v1','1');
+  }
   var habitRenameMap={hydration:'Reach 64 oz Water',nutrition:'Log Meals & Nutrition',training:'Follow Training Plan',steps:'Reach 10,000 Steps',library:'Read or Listen Daily',udemy:'Complete a Udemy Lesson','retirement-videos':'Watch Financial Videos'};
   state.habits.forEach(function(h){if(habitRenameMap[h.autoSource])h.name=habitRenameMap[h.autoSource];if(h.autoSource==='hydration'){h.type='count';h.target=64;h.schedule='daily';h.weeklyTarget=7;h.category='Health';h.why='Support endurance, recovery, and long-distance running with consistent hydration.';}if(h.autoSource==='steps'){h.type='count';h.target=10000;h.schedule='daily';h.weeklyTarget=7;h.category='Fitness';h.why='Build consistent daily movement by reaching 10,000 steps.';}if(h.autoSource==='udemy'){h.type='duration';h.target=20;h.category='Growth';h.why='Build consistent learning through current and future Udemy courses.';h.minimum='Complete one lesson or log at least 20 minutes';}if(h.autoSource==='retirement-videos'){h.category='Growth';h.why='Build financial knowledge through focused video learning.';}});
   if(!localStorage.getItem('habits2_udemy_tts_v1')){

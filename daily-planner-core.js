@@ -134,7 +134,7 @@ function updateCompactSectionCounts(){
   var physical=document.getElementById('physicalExerciseCount');
   if(task)task.textContent=compactDoneCount(['pt0c','pt1c','pt2c'])+'/3';
   if(goals)goals.textContent=compactDoneCount(['dg0c','dg1c','dg2c'])+'/3';
-  if(physical)physical.textContent=compactDoneCount(['exWalk','exDogWalk'])+'/2';
+  if(physical)physical.textContent=compactDoneCount(['exDogWalk'])+'/1';
 }
 function toggleAITools(){
   toggleCompactSection('aiToolsBody','aiToolsArrow',document.getElementById('aiToolsToggle'));
@@ -282,7 +282,7 @@ function parseBP(s){if(!s)return{sys:0,dia:0};const m=s.match(/(\d+)\s*\/\s*(\d+
 function buildStars(){const ss=document.getElementById('scoreStars');if(!ss)return;ss.innerHTML='';for(let i=1;i<=5;i++){const s=document.createElement('span');s.className='star'+(i<=scoreVal?' active':'');s.textContent='★';s.onclick=()=>{scoreVal=(scoreVal===i)?i-1:i;buildStars();save();};ss.appendChild(s);}updateTodayGlance();}
 
 // All text/number fields
-const TXS=['spDailyBreadText','spMeditationText','gaAudiobookText','gaAudiobookTime','gaSkillText','gaSkillTime','wBPVal','wPulseVal','wRestHRVal','wMedsVal','wWghtVal','wSleepVal','exBikeVal','exWalkVal','exDogWalkVal','jAccomplish','jImprov','jGratitude','jNotes','habitIdentity','habitReflection'];
+const TXS=['spDailyBreadText','spMeditationText','gaAudiobookText','gaAudiobookTime','gaSkillText','gaSkillTime','wBPVal','wPulseVal','wRestHRVal','wMedsVal','wWghtVal','wSleepVal','exBikeVal','exDogWalkVal','jAccomplish','jImprov','jGratitude','jNotes','habitIdentity','habitReflection'];
 const NMS=['exSteps','wSleepScore','exMassageMinutes','gaFinancialVideosTime'];
 const PTIDS=['pt0','pt1','pt2','dg0','dg1','dg2'];
 
@@ -2076,7 +2076,7 @@ function attachAllFieldUndos(){
            'spDailyBreadText','spMeditationText',
            'gaAudiobookText','gaSkillText',
            'wBPVal','wPulseVal','wRestHRVal','wWghtVal','wSleepVal','wMedsVal',
-           'exBikeVal','exWalkVal'];
+           'exBikeVal'];
   ids.forEach(_attachFieldUndo);
 }
 

@@ -181,7 +181,7 @@ function journalScheduleDetailHtml(kind,data){
       +[5,10,15,20].map(function(m){return'<button type="button" class="journal-schedule-medit-btn" onclick="journalMeditationQuickStart(event,'+m+')">'+m+'m</button>';}).join('')
       +'</div></div>';
   }
-  var rows=kind==='faith'?[['Daily Bread','spDailyBread','bible'],['Bible reading','spBibleAudio','bible'],['Worship','spWorship','bible'],['Prayer','spAIPrayer','bible']]:kind==='wellness'?[['Blood pressure','wBP','wellness'],['Medications','wMeds','wellness'],['Weight','wWght','wellness'],['Sleep','wSleep','wellness']]:[['Walk','exWalk','activities'],['Dog walk','exDogWalk','activities'],['10,000 steps','exStepsCheck','activities']];
+  var rows=kind==='faith'?[['Daily Bread','spDailyBread','bible'],['Bible reading','spBibleAudio','bible'],['Worship','spWorship','bible'],['Prayer','spAIPrayer','bible']]:kind==='wellness'?[['Blood pressure','wBP','wellness'],['Medications','wMeds','wellness'],['Weight','wWght','wellness'],['Sleep','wSleep','wellness']]:[['Dog walk','exDogWalk','daily'],['10,000 steps','exStepsCheck','daily']];
   return'<div class="journal-schedule-detail-panel">'+rows.map(function(row){var status=journalCheckState(data,row[1]);return'<button type="button" class="journal-schedule-detail-row" onclick="journalOpenDailyCheck(event,\''+row[2]+'\',\''+row[1]+'\')"><i class="journal-schedule-detail-dot '+status+'"></i><span>'+row[0]+'</span></button>';}).join('')+'</div>';
 }
 function journalToggleHiddenCheck(event,id){if(event){event.preventDefault();event.stopPropagation();}var target=document.getElementById(id);if(target){target.checked=!target.checked;save();renderJournalSchedule();}}
@@ -443,8 +443,8 @@ function renderJournalSchedule(){
     {time:'8:20 AM',mins:500,label:'Wellness check and water',detail:wellnessRecorded+' of 4 wellness items complete',done:wellnessRecorded===4,partial:wellnessRecorded>0&&wellnessRecorded<4,tab:'wellness',detailKind:'wellness'},
     {time:'8:30 AM',mins:510,label:'Bible, worship & prayer',detail:faithDone+' of 4 faith practices complete',done:faithDone===4,partial:faithDone>0&&faithDone<4,tab:'bible',detailKind:'faith'},
     {time:'9:30 AM',mins:570,label:'Work',detail:'9:30 AM – 6:00 PM',done:true,tab:'daily',skip:!(today.getDay()>=1&&today.getDay()<=5),fixed:true},
-    {time:'12:00 PM',mins:720,label:'Walk Buddy',detail:'Take Buddy for a walk',done:d.exDogWalk==='green',tab:'activities',linkedCheckKey:'exDogWalk'},
-    {time:journalMinsToClock(trainingStartMins),mins:trainingStartMins,label:restDay?'Rest day — no training scheduled':'Today’s training',detail:restDay?'Automatically complete because no workout is scheduled':training,done:activityDone,tab:'activities'},
+    {time:'12:00 PM',mins:720,label:'Walk Buddy',detail:'Take Buddy for a walk',done:d.exDogWalk==='green',tab:'daily',linkedCheckKey:'exDogWalk'},
+    {time:journalMinsToClock(trainingStartMins),mins:trainingStartMins,label:restDay?'Rest day — no training scheduled':'Today’s training',detail:restDay?'Automatically complete because no workout is scheduled':training,done:activityDone,tab:'daily'},
     {time:'11:30 PM',mins:1410,label:'Prepare priorities for tomorrow',detail:'Close the day intentionally',done:localStorage.getItem('schedule_eveningPlanning_'+dateKey)==='1'||!!d.prepJournalCheck,tab:'daily',manual:'eveningPlanning'}
   ].filter(function(item){return !item.skip;});
   // Growth habits are placed directly onto My Schedule on the days selected in Habits. A manually
