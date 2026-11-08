@@ -371,7 +371,7 @@
     var c=cfg();if(!c)return;
     var lib={favorites:[],healthy:[],meals:[],updated:Date.now()};
     try{lib.favorites=(getFavorites()||[]).slice(0,500).map(function(x){return cleanFood(x,false);});}catch(e){}
-    try{lib.healthy=(getHealthyFoods()||[]).slice(0,500).map(function(x){return cleanFood(x,false);});}catch(e){}
+    try{lib.healthy=(getHealthyFoods()||[]).slice(0,500).map(function(x){var o=cleanFood(x,false);if(x.mealCounts)o.mealCounts=x.mealCounts;['proteinSource','carbSource','fatSource'].forEach(function(k){if(x[k])o[k]=x[k];});return o;});}catch(e){}
     try{lib.meals=(getSavedMeals()||[]).slice(0,100).map(function(m){return{name:String(m.name||'Meal'),category:m.category||'',items:(m.items||[]).slice(0,30).map(function(x){return cleanFood(x,false);})};});}catch(e){}
     try{if(typeof calorieAdvisorSettings==='function')lib.calSettings=calorieAdvisorSettings();}catch(e){}
     // Counts for the Enrich All / Undo All tiles.
