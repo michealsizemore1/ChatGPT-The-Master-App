@@ -28,9 +28,31 @@
       if(done)return;done=true;clearTimeout(t);
       if(!o){cb('');return;}
       var keys=Object.keys(o).sort();
+      if(keys.length===1)lastDay={key:keys[0],data:o[keys[0]]};
       cb(keys.map(function(k){return (keys.length>1?nice(k)+':\n':'')+String((o[k]||{}).text||'').trim();}).join('\n\n'));
     }).catch(function(){if(!done){done=true;clearTimeout(t);cb('');}});
   };
+
+  var lastDay=null;
+
+  // Wellness: Sleep, Weight and Resting HR fill in from BeyondStride. A value you typed yourself is never replaced;
+  // one BeyondStride filled earlier is kept up to date.
+  var FIELDS={sleep:'wSleepVal',weight:'wWghtVal',restHr:'wRestHRVal'};
+  function fillWellness(k,data){
+    var w=data&&data.wellness;if(!w||typeof dk!=='function'||dk(today)!==k)return;
+    var store='bsAutoWellness_'+k,prev={};try{prev=JSON.parse(localStorage.getItem(store)||'{}');}catch(e){}
+    var changed=false;
+    Object.keys(FIELDS).forEach(function(f){
+      if(w[f]==null||w[f]==='')return;
+      var el=document.getElementById(FIELDS[f]);if(!el)return;
+      var v=String(w[f]),cur=el.value.trim();
+      if(cur!==''&&cur!==String(prev[f]||''))return;   // typed by hand: leave it
+      if(cur!==v){el.value=v;el.dispatchEvent(new Event('input',{bubbles:true}));changed=true;}
+      prev[f]=v;
+    });
+    try{localStorage.setItem(store,JSON.stringify(prev));}catch(e){}
+    if(changed&&typeof v26Toast==='function')v26Toast('Sleep / weight / resting HR filled from BeyondStride');
+  }
 
   // "From BeyondStride" box in the Daily AI Review (collapsed; tap to open).
   var shownFor='',open=false;
@@ -51,8 +73,8 @@
   function refresh(force){
     if(typeof dk!=='function'||typeof today==='undefined')return;
     var k=dk(today);if(!force&&k===shownFor)return;shownFor=k;
-    if(!box())return;
-    window.bsReviewFetch(k,k,render);
+    if(!cfg())return;
+    window.bsReviewFetch(k,k,function(text){render(text);if(lastDay&&lastDay.key===k)fillWellness(k,lastDay.data);});
   }
   setInterval(function(){refresh(false);},3000);
   document.addEventListener('visibilitychange',function(){if(!document.hidden)refresh(true);});
