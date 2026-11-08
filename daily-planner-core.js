@@ -1811,7 +1811,7 @@ function aiFillEntireReview(btn){
       var start=cleaned.indexOf('{'),end=cleaned.lastIndexOf('}');if(start>=0&&end>=start)cleaned=cleaned.slice(start,end+1);
       var result=JSON.parse(cleaned),map={wins:'revWins',improve:'revImprove',focus:'revFocus',lessons:'revLessons'};
       Object.keys(map).forEach(function(key){var el=document.getElementById(map[key]);if(el&&result[key]!=null){el.value=String(result[key]).trim();el.dispatchEvent(new Event('input'));}});
-      saveReview();v26Toast('Weekly Review filled and saved');
+      v26Toast('Weekly Review filled — edit it, then tap Save Review to keep it');
     }catch(e){alert('The AI response could not be placed into the Review fields. Please try again.');}
     btn.disabled=false;btn.innerHTML=original;
   },function(err){btn.disabled=false;btn.innerHTML=original;alert('AI error: '+err);});
@@ -1906,7 +1906,7 @@ function aiFillEntireDayReview(btn){
       var start=cleaned.indexOf('{'),end=cleaned.lastIndexOf('}');if(start>=0&&end>=start)cleaned=cleaned.slice(start,end+1);
       var result=JSON.parse(cleaned),map={wins:'dayRevWins',improve:'dayRevImprove',focus:'dayRevFocus',lessons:'dayRevLessons'};
       Object.keys(map).forEach(function(key){var el=document.getElementById(map[key]);if(el&&result[key]!=null){el.value=String(result[key]).trim();el.dispatchEvent(new Event('input'));}});
-      saveDayReview();v26Toast('Day Review filled and saved');
+      v26Toast('Day Review filled — edit it, then tap Save Review to keep it');
     }catch(e){alert('The AI response could not be placed into the Review fields. Please try again.');}
     btn.disabled=false;btn.innerHTML=original;
   },function(err){btn.disabled=false;btn.innerHTML=original;alert('AI error: '+err);});
