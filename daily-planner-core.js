@@ -1873,16 +1873,38 @@ function getDayJournalText(d){
   if(actText)parts.push(actText);
   return parts.join('\n');
 }
+var DAY_REV_IDS=['dayRevWins','dayRevImprove','dayRevFocus','dayRevLessons'];
 function renderDayReview(){
-  const raw=localStorage.getItem('dayreview_'+dk(today)),rv=raw?JSON.parse(raw):{};
-  ['dayRevWins','dayRevImprove','dayRevFocus','dayRevLessons'].forEach(function(id){const e=document.getElementById(id);if(e)e.value=rv[id]||'';});
+  var key='dayreview_'+dk(today),raw=null;try{raw=localStorage.getItem(key);}catch(e){}
+  var rv={};try{rv=raw?JSON.parse(raw):{};}catch(e2){}
+  DAY_REV_IDS.forEach(function(id){const e=document.getElementById(id);if(e)e.value=rv[id]||'';});
+  // A review saved while device storage was full lives in the larger on-device store.
+  if(!raw&&typeof journalLargeStoreGet==='function')journalLargeStoreGet(key).then(function(v){
+    if(!v||key!=='dayreview_'+dk(today))return;
+    DAY_REV_IDS.forEach(function(id){const e=document.getElementById(id);if(e&&!e.value)e.value=v[id]||'';});
+  }).catch(function(){});
 }
-function saveDayReview(){
-  const d={};['dayRevWins','dayRevImprove','dayRevFocus','dayRevLessons'].forEach(function(id){const e=document.getElementById(id);if(e)d[id]=e.value;});
-  localStorage.setItem('dayreview_'+dk(today),JSON.stringify(d));
+function saveDayReview(quiet){
+  const d={};DAY_REV_IDS.forEach(function(id){const e=document.getElementById(id);if(e)d[id]=e.value;});
+  const key='dayreview_'+dk(today);
   const btn=document.querySelector('[onclick="saveDayReview()"]');
-  if(btn){btn.textContent='Saved!';btn.style.background='#27ae60';setTimeout(function(){btn.textContent='Save Review';btn.style.background='#667eea';},2000);}
+  function done(ok,msg){
+    if(quiet)return;
+    if(btn){btn.textContent=ok?'Saved!':'Not saved';btn.style.background=ok?'#27ae60':'#dc2626';setTimeout(function(){btn.textContent='Save Review';btn.style.background='#667eea';},2500);}
+    if(!ok)alert(msg);
+  }
+  try{localStorage.setItem(key,JSON.stringify(d));done(true);}
+  catch(err){
+    // Device storage full: keep it in the larger on-device store instead so it isn't lost.
+    if(typeof journalLargeStoreSet==='function')journalLargeStoreSet(key,d).then(function(){done(true);if(!quiet&&typeof v26Toast==='function')v26Toast('Saved (device storage is nearly full — consider a backup and cleanup)');})
+      .catch(function(){done(false,'The review could not be saved — device storage is full. Free up space (for example old AI Prayer or Bible Reading Archive entries), then tap Save Review again.');});
+    else done(false,'The review could not be saved — device storage is full.');
+  }
 }
+// Typing in the review saves it automatically (AI Fill still waits for Save Review).
+(function(){var t=null;document.addEventListener('input',function(e){
+  if(!e.isTrusted||!e.target||DAY_REV_IDS.indexOf(e.target.id)<0)return;
+  clearTimeout(t);t=setTimeout(function(){saveDayReview(true);},800);},true);})();
 function aiFillEntireDayReview(btn){
   if(!journalAIKey()){alert('Add your Anthropic API key in Settings first.');return;}
   // BeyondStride's training / nutrition / recovery summary for the day (read-only), fetched first.

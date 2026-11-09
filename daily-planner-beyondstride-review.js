@@ -73,7 +73,7 @@
     ['&#x1F37D;&#xFE0F; Nutrition',/^(calories|food quality|micronutrients|low|over limit|fluids|protein|carbs)/i],
     ['&#x2696;&#xFE0F; Body',/^(weight)/i]];
   function chip(t,c){return '<span style="display:inline-block;margin:3px 4px 0 0;padding:3px 9px;border-radius:999px;background:'+(c||'#fff')+';border:1px solid #c7d2fe;font-size:.88rem;white-space:nowrap;">'+esc(t)+'</span>';}
-  function row(label,val){return '<div style="display:flex;gap:10px;padding:6px 0;border-top:1px solid #dbe2ff;"><div style="flex:0 0 96px;font-weight:600;color:#4338ca;font-size:.85rem;padding-top:2px;">'+esc(label)+'</div><div style="flex:1;min-width:0;">'+val+'</div></div>';}
+  function row(label,val){return '<div style="padding:7px 0;border-top:1px solid #dbe2ff;text-align:left;"><div style="font-weight:600;color:#4338ca;font-size:.8rem;text-transform:uppercase;letter-spacing:.03em;margin-bottom:2px;">'+esc(label)+'</div><div style="text-align:left;">'+val+'</div></div>';}
   function workout(v){
     var notes='',i=v.indexOf(' — notes: ');if(i>=0){notes=v.slice(i+10);v=v.slice(0,i);}
     var parts=v.split(' · '),title=parts.slice(0,2).join(' · ');
@@ -103,7 +103,7 @@
   function render(text){
     var b=box();if(!b)return;b._text=text;
     var head='&#x1F3C3; <strong>From BeyondStride</strong> '+(text?'<span style="opacity:.7">('+(open?'tap to hide':'tap to see what AI Fill uses')+')</span>':'<span style="opacity:.7">— nothing shared for this day yet</span>');
-    b.innerHTML=head+(open&&text?'<div style="font-size:.95rem;color:#1e1b4b;">'+pretty(text)+'</div>':'');
+    b.innerHTML=head+(open&&text?'<div style="font-size:.95rem;color:#1e1b4b;text-align:left;">'+pretty(text)+'</div>':'');
   }
   function refresh(force){
     if(typeof dk!=='function'||typeof today==='undefined')return;
