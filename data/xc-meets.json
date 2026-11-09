@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-09T11:49:30+00:00",
+  "updatedAt": "2026-11-09T22:30:26+00:00",
   "source": "Google News searches for cross country meet results",
   "page": "https://michealsizemore1.github.io/ChatGPT-The-Master-App/cross-country.html",
   "meets": [
@@ -59,6 +59,12 @@
   "results": [
     {
       "date": "2026-11-09",
+      "headline": "Ryu Medina, Ashley Galaz lead local runners at NMAA State XC Championships",
+      "source": "Las Cruces Sun-News",
+      "url": "https://news.google.com/rss/articles/CBMixwFBVV95cUxQNDJGOW9Wejg5SGlfOTFEVDgxSXotWHJEMEdpcjEzNm00X21oaTNScUthMXlXbUpWVlVoV2o4dFlacFVSRkZlUjlCcGVPMlBUM1hCMnhXLThOS3otTW4xYU9jRUpaY3JJRkMzMVQtVlBnNklYNEdGNFlldUtxS1BETVlDbURjaEY5elQ1YzRKZW1VaVZaVlNDTHU3TmF4ZmNSUm5aV2lLSWhUMi1XZEVyQVBoc0MzSkRIUUhfN21oa2VXcDc4MGVv?oc=5"
+    },
+    {
+      "date": "2026-11-09",
       "headline": "Home course advantage for the first time in 13 years! Augustana cross country continued their success",
       "source": "Dakota News Now",
       "url": "https://news.google.com/rss/articles/CBMiywFBVV95cUxQOGU1Tm1NUmdxOU55cms2eEp5anNUSmd1b3FIXzVrYnNvMGlXLVh6OGprbGJlYU5QdW9Hdld2S1M4bDJwWmdSN0pCQndlVW9OSi1rbXhONEtmejhoazEwalFjS2pOMFFJWWtxWHVaMW94WERWbmJOS0xNMWhGRVZjUXNodlljeDc4VGpCZ3NBbWNpeGtBN1I4VFhGSURDaU9RN1NJRnZjLUFYd3NGa3ZGSTlER1JpYmpLaXBVZjAyam1tQUNJX25TT0JsQdIB3wFBVV95cUxPRXhOQVdYQ1ZMc2h3WmJGVDB2cV9rZWpETzY4cTJTUnY5ZHFVY1RmMUNBZlctbzVsc2Yzamt2YWdoRnlJMnFIMHRESmdDUTlYRFF0eDN0Q0ZoOE11UE5HQzEzWDlhUDRDVEtidll6cXhXZ2xXNHAxa1M5emltOUMzcWV5Z09jQ0dtQVZkOG95VktFQk13V1RQeGYxR2RQdENNTktyT0N3WG1FOTZwNktLTjlfbS1lUXVKTnA5dXZWMC13ZW5peVdXYTRJWWxGekVKT2xBeVpXa0s0MlhFMVVB?oc=5"
@@ -71,21 +77,15 @@
     },
     {
       "date": "2026-11-08",
-      "headline": "UJ Women 5th, Men 4th At NSIC Cross Country Championships",
-      "source": "News Dakota",
-      "url": "https://news.google.com/rss/articles/CBMimwFBVV95cUxQeVJLdi16SVBiN0w5Zjk5c1ZGV3A4Wm9iX2JzdkJoWC1xTHVZLVZCM1FvT1lZYWNLZ3g2Z1EyTTdPRjhaa0pwN0V6a3B6aWhTeUpEa3ppdUJfME9FZHh0VlhFdDFaYW84OXZWZ2hmSkNPdHFGZE1TeVRTZlpxVzRNUHR2MWdfWUt3emgtNFRSZTN4ejQ1QTIxRFlOSQ?oc=5"
+      "headline": "UCLA cross country improves on last year’s results at Big Ten Championships",
+      "source": "Daily Bruin",
+      "url": "https://news.google.com/rss/articles/CBMirAFBVV95cUxON0pZY1FQeDliV1hCUzgzSUhlc29jZjBNYVY5ckZEbXFwcWNpQVVmNjFBNldjeUFxWHFZV1g1SVd1QUI0ZWF5aTJoUnJVWUJFQUdxMjhNS0ZaajlfWmdSUHNWYVI3cDlaZFA3TmMzcVBVcTFXbV9HbUoxREZ5dWRaVFFYUEFVS09nRE42Q29mTF9vTzhvS0JPY20wZ0l5ZzhzUWRPYW1MQ0wyZ3kt?oc=5"
     },
     {
       "date": "2026-11-08",
       "headline": "West Texas A&M men’s, women’s cross country teams win Lone Star Conference titles",
       "source": "NewsChannel 10",
       "url": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxNWkJ2UGk2QnJsVktwalE5TE4xRjUzekVUNldHX3c4bzk1WkR5MjdyZW1XM1JEUFdIVnhGMDV6bXhpbGp2aUVtUlVCYnlnSDQ2NHZlX3RqSm1zUnZ2SWZpalI5UVlrYUpWcmY3M0otdngwemw2ZC1XbC1QNVM4UFVlQXZpS1V6TkQ2RDFyNkpKZjQ2NnNRclc2aS1Tbmd2c0JUY3BtT01fWmlqSVltRWFOV0dzdXhqXzdWd0Mw0gHPAUFVX3lxTE0yYjJLTzJhZFRSRkRueWxxemQyelBqZ3NLdlg1VFRtenVaNDJmTXZuaFZOd1lTcHN0RFdMYmt6ZlVMMHY0bThsZnRQU3NocWNrUW9qdWE4cDh6Zk8yN1dtZHEyUk5TU0w4elZ2ZzIzZ05tN2hMSGxPS1RZVEZ2WW5Rd0hIMGp1U0x1TG1BMXhlVVhZWi16cFdFb0p4d1ZFdFRSU21DT2pxRGdZeWcwcGV5WXEzRWMybTgyWnVKNU92RDl2S3pERGhGUnljd3VrYw?oc=5"
-    },
-    {
-      "date": "2026-11-08",
-      "headline": "UMD Cross Country Teams Run to Strong Finishes at NSIC Conference Championship Meet",
-      "source": "UMD Bulldogs",
-      "url": "https://news.google.com/rss/articles/CBMi3wFBVV95cUxPWWU4LUJ5ckl1ZnpCbVhFYTNoNkliQWZXcmNVT21fQ1dpVl9LQm1Falp1YUFTcmhIQ0MwMWdNb3BnRDl2bTBKME9ZeFpzLXktYzJOSUZkM2ozUXhGTGxHV0xDd3ZRSTZCZDY0NkIwYkJYRl9iXzFnTEg1ZlVoYnpOTlQ5ZGUyblQ2azZ1QzJkYzRvblZ1aEkyeTNYV3VRR29xckJscXRNbXpsWE0wZEFqQ3lsT005ZVBfQlhvNzZQVDJDQ21wNVpGWUFDdFNreG1pX2FRckdKckZEMnhSc0M0?oc=5"
     },
     {
       "date": "2026-11-07",
@@ -104,12 +104,6 @@
       "headline": "Scoreboard: 2026 Frontier Conference Cross Country Championships",
       "source": "406 Sports",
       "url": "https://news.google.com/rss/articles/CBMijgJBVV95cUxQNjdHYjhnR0Joai1HQzBXenVvS19yZmo5blc3cXROdHVGaVVVWWdRM182T0w3U05lZm5jNDk2d2YtRkR1RXhxOGdyM0gwR1dLb1BZel9GTjBqVWdVX1h1ZF9idmE1RnZXVzNndWszLTFqOTQ0N0pvbmlzZGRXZ0NpN25oWDc1YVhZSDcxWXUyX1VscHhZZEFSWUZEVDZIOExqT2ZYT1hrT2VLb3FMR1J4d3RLTUs1aXEzU0VlWGRYT2JsOElwSU1KNDdYSl9INEo0RDA5LWtkaERDSHY2dXRhc1lIVDRWc3dFQ1F5S2s2U3g1azl6TmxTVUhPVWZ4d0FZbVM3MmdreTUtOUgyekE?oc=5"
-    },
-    {
-      "date": "2026-11-06",
-      "headline": "UCLA cross country improves on last year’s results at Big Ten Championships",
-      "source": "Daily Bruin",
-      "url": "https://news.google.com/rss/articles/CBMirAFBVV95cUxON0pZY1FQeDliV1hCUzgzSUhlc29jZjBNYVY5ckZEbXFwcWNpQVVmNjFBNldjeUFxWHFZV1g1SVd1QUI0ZWF5aTJoUnJVWUJFQUdxMjhNS0ZaajlfWmdSUHNWYVI3cDlaZFA3TmMzcVBVcTFXbV9HbUoxREZ5dWRaVFFYUEFVS09nRE42Q29mTF9vTzhvS0JPY20wZ0l5ZzhzUWRPYW1MQ0wyZ3kt?oc=5"
     },
     {
       "date": "2026-11-04",
@@ -146,6 +140,12 @@
       "headline": "2026 Big Sky Cross Country Championships",
       "source": "Big Sky Conference",
       "url": "https://news.google.com/rss/articles/CBMiVEFVX3lxTE92NVpfc3EweEZzb2Y1X1BlZ19FZlcyWGdEbmZEOHFDdFl4MzRsNmFMS1EzY0RLRUFsZWZ0OHJiMHVzX1dQdVVHVUhSYW9rcXJtQ0JWQw?oc=5"
+    },
+    {
+      "date": "2026-10-28",
+      "headline": "2026 BIG EAST Cross Country Championships Set for Friday",
+      "source": "Big East Conference",
+      "url": "https://news.google.com/rss/articles/CBMiogFBVV95cUxNdFNHXzBtNkI1ckpnTjNiQmxOc0ZfY25zZ2kwaXZFM1ZhVkVDSE93RkNaYXdOSnZuamNBOW9wSkl6RFRBNVRKNWNkZlVYM1RNM2F2bEZMZTNsLTZrZ1plR09fZ0ZUNmdpVlhYUGJkWE9QYzVzbExqV28tcnF2cXNMaXhQalItYjNJM2FZYVVwenJoMmZxcWxNdWl2Q0tkZzc5bXc?oc=5"
     }
   ]
 }
