@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-10T07:29:36+00:00",
+  "updatedAt": "2026-11-10T17:08:54+00:00",
   "source": "Google News searches for cross country meet results",
   "page": "https://michealsizemore1.github.io/ChatGPT-The-Master-App/cross-country.html",
   "meets": [
@@ -58,6 +58,18 @@
   ],
   "results": [
     {
+      "date": "2026-11-10",
+      "headline": "Kellogg CC had championship performances in the fall, including soccer, cross country",
+      "source": "Battle Creek Enquirer",
+      "url": "https://news.google.com/rss/articles/CBMi3wFBVV95cUxOSVB5blFJSkJkMkRmd3ljaEN6V2Y0RWl1Rm8yRW5SbENZdXRQdFFIQTRXUFN3NERjYkI2cktCZGNTcUt4Qlk4OVpRUEZ3SGF5eTNFTXpEeG5nRC01R19zaEl5QXhFWGt1Rk9yaFFNaGVVM0RsWU5sMnRiVk1jRTZiYmxUWVFwX2xJbVdDblBBRUhIR1lmc3VyMl93MTFhUlBidDFxekVDMTRIQ2g5RE9fcEhOVF9ZNW1CNk5oOUdiR2k0M3h6ZGJEM1k3M01uZmVYekdqUXdaYnd6TFF1VFBz?oc=5"
+    },
+    {
+      "date": "2026-11-10",
+      "headline": "Top DI cross country individual championship contenders entering regionals",
+      "source": "NCAA.com",
+      "url": "https://news.google.com/rss/articles/CBMi1gFBVV95cUxPcElMZ1QxWUY5ZVRUSU42TFhPa29WRDJpcVRKVmNtdUh5b2dUNzNkazVsUEx4Z0hzSU14b2NOQXVwMDZqLUJWeHdvblJPWDgwXzJMSXdJeTNiZUdLM0hsSEF1c1NMWUpSNWtJWURmT0xGMElQWTNyUWI5MEJxcE82aDZpZVU5SnZsT1o5NXZEcFc2TnIzak5uZkJDbW9SWlJyZkVYU0xBejBqVlZNLV82Z2hwaVUxYm9KVlhiMk9ncnJyWllCTHF6dU1iYVItYTBEb1V2MVVR0gHbAUFVX3lxTFBuOHN6dFAzdDRLNXM1ZWxBYnFhV3ZCZXBaeXYzUXlJdGdRb1FkS21Dd2RHOGswQU5wRENrOXRrYy0yTC1INmV6bkt4TWZ2UHgydnV1MEhwVTJfaHBYN0RJd1psT2tzODB3Q21PMGkwZXVVX2dnOE5NT2xHSHU4YnZBQ2JBc01iWGNUU2J0NDRCRnhFV3d4OFZTdjJ2VzY2M3I1QXF4Y3NQc1pVUks5X2pNUmpmYzBsT1NUckJ6VVNFanJHbTVMSFY2RkNQM1pHQ2x6SldETWFkYi1FYw?oc=5"
+    },
+    {
       "date": "2026-11-09",
       "headline": "‘Absolute domination’ for Surrey runner in B.C. championship XC race",
       "source": "Surrey Now-Leader",
@@ -92,12 +104,6 @@
       "headline": "BACK-TO-BACK: SCSU Women's Cross Country Wins Second Straight NE10 Championship",
       "source": "Southern Connecticut State University Athletics",
       "url": "https://news.google.com/rss/articles/CBMiswFBVV95cUxQSVV3UEVEb2tRV1JRaVhYM2FvSXlNczF6cWtLcXVRNDhLcmdUQ1JuclczbWU2T2o3TkRxdk5meENZaEFicWhvaUMteVNxQnFPamtuTG43ZnFFa3lBM09mVjhvZno3bGtIVnhweHpFVTVhVlBEbmFValdxMjN2MjdlNmtTY0VwdXBjLXlTNnZ1YTFBQ0NPQmFuRm02dXVGNDZ6UGkxMXBLVjNJNFVPUVltd3BQUQ?oc=5"
-    },
-    {
-      "date": "2026-11-07",
-      "headline": "Cross country: Recaps, results and photos for the NJSIAA Group Championships, Nov. 7",
-      "source": "NJ.com",
-      "url": "https://news.google.com/rss/articles/CBMiyAFBVV95cUxNT0FwUVA0ckhzNHplb1BwTS1FclFxYUZyQmxOOTlRaUVrU292MGlaYjNEZzZZV1ZxV1UwYzctN295bzJVTDYzeFV1ZWljNjlab1BxNHlQNEplZWdpVkcwYURwT2JlSkRkV0hMLWRzbkxIZEJiN1ZFUXVsZnR1VmRvX3B3LS1DZ2xUM3VPOTNfeHJPdlhoeENYczhKckdKaGVtdllnNUhBbjN5WG5wTjM2enZ1eUl4VFZXN1pIRUpXcGxkZDBmcjRyTg?oc=5"
     },
     {
       "date": "2026-11-06",
@@ -140,12 +146,6 @@
       "headline": "Rachael Withrow Wins Gold, Becomes Second Women’s XC Conference Champion in Program History",
       "source": "Marshall University Athletics",
       "url": "https://news.google.com/rss/articles/CBMi1wFBVV95cUxQQ1V0QU5Za2FZbzllWW8tNWhLOWszbEtTZ2FMUjgxWjN6UTVlZ2hLbG5VSS1BdG5kS3Q3UjBTeFZUcXRmUGE1RThlcnctRU5wQ2paWmpSZGludmpzbkRyeHJYc0hoWGlZQWc5c1hJcEk2VWtLZ20wcEZwUXVFdzhvY1hRXzhIeXFXbFBqNnpBRGpMLVVoWFZuSmU2OHcwc3J5ZTVPS19PS3B5Zjd2RURJZjgxc3FoejRoa29PbHpuai1WQTR4X0FsZ2otdl9qYUdEM0FtWDJXQQ?oc=5"
-    },
-    {
-      "date": "2026-10-30",
-      "headline": "2026 Big Sky Cross Country Championships",
-      "source": "Big Sky Conference",
-      "url": "https://news.google.com/rss/articles/CBMiVEFVX3lxTE92NVpfc3EweEZzb2Y1X1BlZ19FZlcyWGdEbmZEOHFDdFl4MzRsNmFMS1EzY0RLRUFsZWZ0OHJiMHVzX1dQdVVHVUhSYW9rcXJtQ0JWQw?oc=5"
     }
   ]
 }
