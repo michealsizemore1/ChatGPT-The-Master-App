@@ -46,7 +46,8 @@ function journalTodayTrainingSummary(){
   var text='';
   try{
     var raw=localStorage.getItem('current_training_plan'),plan=raw?JSON.parse(raw):null;
-    if(typeof bsPlanCovers==='function'&&bsPlanCovers(dateKey))text=bsPlanText(dateKey)||'Rest Day';
+    // BeyondStride's plan: show its own workout name ("Recovery 3 miles"), not a guessed category.
+    if(typeof bsPlanCovers==='function'&&bsPlanCovers(dateKey)){var bt=bsPlanText(dateKey);if(!bt)return'Rest Day';var hl=journalTrainingHeadline(bt);if(hl)return hl;text=bt;}
     else if(plan&&plan.text&&plan.startDate)text=extractWorkoutFromActivePlan(plan,today)||'';
   }catch(e){}
   if(!text)text=localStorage.getItem('workout_cache_'+dateKey)||'';

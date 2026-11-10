@@ -581,7 +581,7 @@ function journalTrainingCalendarLabel(section){
 }
 // BeyondStride's plan text for a day (yyyy-mm-dd), '' when it hasn't shared that day.
 function bsPlanText(dateKey){try{var bs=JSON.parse(localStorage.getItem('bs_plan_days')||'null');return bs&&bs.days&&bs.days[dateKey]?String(bs.days[dateKey]):'';}catch(e){return'';}}
-function bsPlanCovers(dateKey){try{var bs=JSON.parse(localStorage.getItem('bs_plan_days')||'null');if(!bs||!bs.days)return false;var from=new Date();from.setDate(from.getDate()-7);var to=new Date();to.setDate(to.getDate()+21);return dateKey>=journalCalendarRealDateKey(from)&&dateKey<=journalCalendarRealDateKey(to);}catch(e){return false;}}
+function bsPlanCovers(dateKey){try{var bs=JSON.parse(localStorage.getItem('bs_plan_days')||'null');if(!bs||!bs.days)return false;if(!bs.at)return !!bs.days[dateKey];var from=new Date();from.setDate(from.getDate()-7);var to=new Date();to.setDate(to.getDate()+21);return dateKey>=journalCalendarRealDateKey(from)&&dateKey<=journalCalendarRealDateKey(to);}catch(e){return false;}}
 // Today's workout as BeyondStride's plan has it ("Recovery 3 miles"), without the date or markdown.
 function journalTrainingHeadline(section){
   var line=String(section||'').split(/\r?\n/).map(function(l){return l.trim();}).filter(function(l){return l&&!/^[↪⇄↘＋]/.test(l);})[0]||'';
@@ -598,7 +598,7 @@ function journalTrainingCalendarEvents(){
     schedule=Object.assign({},schedule||{});
     var from=new Date();from.setDate(from.getDate()-7);var to=new Date();to.setDate(to.getDate()+21);
     var f=journalCalendarRealDateKey(from),t=journalCalendarRealDateKey(to);
-    Object.keys(schedule).forEach(function(d){if(d>=f&&d<=t&&!bs.days[d])delete schedule[d];});
+    if(bs.at)Object.keys(schedule).forEach(function(d){if(d>=f&&d<=t&&!bs.days[d])delete schedule[d];});
     Object.keys(bs.days).forEach(function(d){schedule[d]=bs.days[d];});
   }
   if(!schedule||!Object.keys(schedule).length)return[];

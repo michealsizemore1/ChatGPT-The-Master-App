@@ -118,12 +118,21 @@
       try{if(typeof renderJournalSchedule==='function')renderJournalSchedule();}catch(e2){}
     }).catch(function(){});
   }
+  // Until the phone shares its plan days, take today's workout from the day's summary ("Planned: …").
+  function fromSummary(k,text){
+    var m=String(text||'').match(/^Planned:\s*(.+)$/m);if(!m)return;
+    var bs=null;try{bs=JSON.parse(localStorage.getItem('bs_plan_days')||'null');}catch(e){}
+    if(bs&&bs.at)return;   // the full plan feed is there
+    bs=bs||{days:{},at:0};if(bs.days[k]===m[1])return;bs.days[k]=m[1];
+    try{localStorage.setItem('bs_plan_days',JSON.stringify(bs));}catch(e2){}
+    try{if(typeof renderJournalSchedule==='function')renderJournalSchedule();}catch(e3){}
+  }
   function refresh(force){
     if(typeof dk!=='function'||typeof today==='undefined')return;
     var k=dk(today);if(!force&&k===shownFor)return;shownFor=k;
     if(!cfg())return;
     fetchPlan();
-    window.bsReviewFetch(k,k,function(text){render(text);if(lastDay&&lastDay.key===k)fillWellness(k,lastDay.data);});
+    window.bsReviewFetch(k,k,function(text){render(text);fromSummary(k,text);if(lastDay&&lastDay.key===k)fillWellness(k,lastDay.data);});
   }
   setInterval(function(){refresh(false);},3000);
   document.addEventListener('visibilitychange',function(){if(!document.hidden)refresh(true);});
