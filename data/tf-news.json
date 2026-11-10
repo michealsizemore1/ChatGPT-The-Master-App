@@ -1,7 +1,19 @@
 {
-  "updatedAt": "2026-11-09T22:41:57+00:00",
+  "updatedAt": "2026-11-10T20:00:04+00:00",
   "source": "Google News searches for college track & field",
   "news": [
+    {
+      "date": "2026-11-10",
+      "headline": "CSUN Releases Track & Field Schedule",
+      "source": "CSUN Athletics",
+      "url": "https://news.google.com/rss/articles/CBMilAFBVV95cUxOYmt2aEdHN256aGJacHVIOERFZWZydWthdEgteUFzRTRxZGJJVXp1TVhtc2dldWNReHJZSnhUcWl6dmJ4Z2JLbFF4LXowaHpkd1lKV3E4ekhlc2phQWdpbWxVa1JRbklZYXFTWEpNSVpEWE0tRDNKUHBka3V3SnI5bndLMUFTeUYxNjU1WXI5QjBBODJQ?oc=5"
+    },
+    {
+      "date": "2026-11-10",
+      "headline": "OU Track & Field Announces 2027 Schedule",
+      "source": "Soonersports.com",
+      "url": "https://news.google.com/rss/articles/CBMimwFBVV95cUxPNVBuWGd6Wlo0REx6Z2Z3X1V3M05lckFhY1BwRWdYZkkxczgteHBzLXNydG9QQmwtZS1BR0pTOEJvY1NlUjZDZEVna1l2NGNITkt5MXZEeTRXU3d5OGgyTmdlcmhnODR0dTZMVG5kOXVCbHh0bEFlRlpxT29RM29TeDdRYVQzaVEtaEdjeWsxanFtbWNkeGVOb1RVTQ?oc=5"
+    },
     {
       "date": "2026-11-09",
       "headline": "Track and Field NIL Score Rankings: Pitt’s Maycock Leads",
