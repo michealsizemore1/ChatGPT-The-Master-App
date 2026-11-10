@@ -143,11 +143,28 @@ function importBackup(ev){
 let editingActivityId=null;
 var compareMode=false;
 var compareSelected=new Set();
-function getActivities(){
+function getActivitiesOwn(){
   if(Array.isArray(_activitiesLargeCache))return _activitiesLargeCache;
   try{const r=localStorage.getItem('activities_data');return r?JSON.parse(r):[];}catch(e){return[];}
 }
+// BeyondStride's activities (read-only, shared by the phone) are shown alongside the ones saved here.
+// They're never written into this page's own list; one already here (same day, same distance) is not repeated.
+var _bsActsCache=null,_bsActsRaw=null;
+function bsActivities(){
+  var raw=null;try{raw=localStorage.getItem('bs_activities');}catch(e){}
+  if(raw===_bsActsRaw&&_bsActsCache)return _bsActsCache;
+  _bsActsRaw=raw;var list=[];try{var o=JSON.parse(raw||'null');list=(o&&o.list)||[];}catch(e2){}
+  _bsActsCache=list.map(function(a){var c=Object.assign({},a);c._bs=true;c.id='bs-'+(a.id||a.date+'-'+a.distance);return c;});
+  return _bsActsCache;
+}
+function getActivities(){
+  var own=getActivitiesOwn(),bs=bsActivities();if(!bs.length)return own;
+  function key(a){return String(a.date||'').slice(0,10);}
+  var extra=bs.filter(function(b){var m=parseFloat(b.distance)||0;return !own.some(function(a){if(key(a)!==key(b))return false;var d=parseFloat(a.distance)||0;return (m<=0&&d<=0&&String(a.type||'')===String(b.type||''))||(m>0&&Math.abs(d-m)/m<0.05);});});
+  return extra.length?own.concat(extra):own;
+}
 function saveActivities(a){
+  if(Array.isArray(a))a=a.filter(function(x){return !(x&&x._bs);});
   _activitiesLargeCache=Array.isArray(a)?a:[];
   journalLargeStoreSet('activities_data',_activitiesLargeCache).then(function(){
     try{localStorage.removeItem('activities_data');}catch(ignore){}
@@ -411,11 +428,18 @@ function renderGoals(){
     if(dd.spBibleAudio==='green')bibleD++;
     if(dd.spAIPrayer==='green')prayerD++;
   }
+  // Run days: days with a run this week vs the run days in BeyondStride's plan (or your goal).
+  const runDays=Object.keys(weekRuns.reduce(function(m,r){m[String(r.date||'').slice(0,10)]=1;return m;},{})).length;
+  let planRunDays=0,planMiles=0;
+  if(typeof bsPlanText==='function')for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);const t=bsPlanText(dk(d));
+    if(!t||/rest\s*day|no\s+(workout|run)/i.test(t.split('\n')[0]))continue;const hl=(typeof journalTrainingHeadline==='function'?journalTrainingHeadline(t):t);const m=hl.match(/(\d+(?:\.\d+)?)\s*(?:mi|miles?)\b/i);if(m){planRunDays++;planMiles+=parseFloat(m[1]);}}
+  const runTarget=planRunDays||g.Exercise||0;
+  if(planRunDays)g.Exercise=planRunDays;
   const actuals=[
     {key:'Miles',label:'Miles',actual:parseFloat(miles.toFixed(1)),unit:'mi',fmt:v=>v.toFixed(1)},
     {key:'Bible',label:'Bible',actual:bibleD,unit:'/7',fmt:v=>v+'/7'},
     {key:'Prayer',label:'Prayer',actual:prayerD,unit:'/7',fmt:v=>v+'/7'},
-    {key:'Exercise',label:'Running',actual:exD,unit:'/7',fmt:v=>v+'/7'},
+    {key:'Exercise',label:'Run days',actual:runDays,unit:'days',fmt:v=>v+' of '+runTarget+' days'},
     {key:'Audible',label:'Audiobook',actual:Math.round(audioMin),unit:'min',fmt:v=>fmtMins(v)},
   ];
   const wrap=document.getElementById('goalBars');if(!wrap)return;
@@ -425,7 +449,7 @@ function renderGoals(){
     const target=g[a.key];const pct=Math.min(100,Math.round((a.actual/target)*100));
     const reached=pct>=100;
     return`<div class="goal-row ${reached?'goal-reached':'goal-progress'}">
-      <div class="goal-label"><span style="margin-right:.35em;">${a.label}</span><span>${a.fmt(a.actual)} / ${a.key==='Bible'||a.key==='Prayer'||a.key==='Exercise'?target+'/7':a.fmt(target)} ${reached?'✅':pct+'%'}</span></div>
+      <div class="goal-label"><span style="margin-right:.35em;">${a.label}</span><span>${a.key==='Exercise'?a.fmt(a.actual)+(planRunDays?' (plan)':''):a.fmt(a.actual)+' / '+(a.key==='Bible'||a.key==='Prayer'?target+'/7':a.fmt(target))}${a.key==='Miles'&&planMiles?' · plan '+planMiles.toFixed(1):''} ${reached?'✅':pct+'%'}</span></div>
       <div class="goal-bar-bg"><div class="goal-bar-fill" style="width:${pct}%;background:${reached?'#27ae60':'#667eea'};"></div></div>
     </div>`;
   }).join('');

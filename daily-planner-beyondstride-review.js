@@ -110,6 +110,17 @@
   }
   // Training plan days for My Schedule (BeyondStride holds the plan now).
   var planAt=0;
+  var actsAt=0;
+  function fetchActs(){
+    var c=cfg();if(!c||!c.db||!c.key||Date.now()-actsAt<10*60000)return;actsAt=Date.now();
+    fetch(c.db+'/nutrition/'+encodeURIComponent(c.key)+'/beyondstride/activities.json').then(function(r){return r.ok?r.json():null;}).then(function(o){
+      if(!o||!o.list)return;var now=JSON.stringify({list:o.list,at:o.at||0});if(localStorage.getItem('bs_activities')===now)return;
+      try{localStorage.setItem('bs_activities',now);}catch(e){return;}
+      try{if(typeof renderWeekly==='function')renderWeekly();}catch(e1){}
+      try{if(typeof renderGoals==='function')renderGoals();}catch(e2){}
+      try{if(typeof renderJournalSchedule==='function')renderJournalSchedule();}catch(e3){}
+    }).catch(function(){});
+  }
   function fetchPlan(){
     var c=cfg();if(!c||!c.db||!c.key||Date.now()-planAt<10*60000)return;planAt=Date.now();
     fetch(c.db+'/nutrition/'+encodeURIComponent(c.key)+'/beyondstride/plan.json').then(function(r){return r.ok?r.json():null;}).then(function(o){
@@ -131,7 +142,7 @@
     if(typeof dk!=='function'||typeof today==='undefined')return;
     var k=dk(today);if(!force&&k===shownFor)return;shownFor=k;
     if(!cfg())return;
-    fetchPlan();
+    fetchPlan();fetchActs();
     window.bsReviewFetch(k,k,function(text){render(text);fromSummary(k,text);if(lastDay&&lastDay.key===k)fillWellness(k,lastDay.data);});
   }
   setInterval(function(){refresh(false);},3000);
