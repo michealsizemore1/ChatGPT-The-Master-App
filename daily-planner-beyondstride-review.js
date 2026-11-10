@@ -100,15 +100,29 @@
         buckets[gi].map(function(r){return row(r[0],value(r[0],r[1]));}).join('')+'</div>';});
     if(other.length)out+='<div style="margin-top:12px;padding:8px 12px 4px;background:#f8f9ff;border:1px solid #dbe2ff;border-radius:10px;"><div style="font-weight:700;font-size:.95rem;margin-bottom:4px;">More</div>'+other.map(function(r){return row(r[0],value(r[0],r[1]));}).join('')+'</div>';
     return out;}
+  // The box is no longer shown (AI Fill still reads the same information).
+  var SHOW_BOX=false;
   function render(text){
+    if(!SHOW_BOX)return;
     var b=box();if(!b)return;b._text=text;
     var head='&#x1F3C3; <strong>From BeyondStride</strong> '+(text?'<span style="opacity:.7">('+(open?'tap to hide':'tap to see what AI Fill uses')+')</span>':'<span style="opacity:.7">— nothing shared for this day yet</span>');
     b.innerHTML=head+(open&&text?'<div style="font-size:.95rem;color:#1e1b4b;text-align:left;">'+pretty(text)+'</div>':'');
+  }
+  // Training plan days for My Schedule (BeyondStride holds the plan now).
+  var planAt=0;
+  function fetchPlan(){
+    var c=cfg();if(!c||!c.db||!c.key||Date.now()-planAt<10*60000)return;planAt=Date.now();
+    fetch(c.db+'/nutrition/'+encodeURIComponent(c.key)+'/beyondstride/plan.json').then(function(r){return r.ok?r.json():null;}).then(function(o){
+      if(!o||!o.days)return;var before=localStorage.getItem('bs_plan_days'),now=JSON.stringify({days:o.days,at:o.at||0});
+      if(before===now)return;try{localStorage.setItem('bs_plan_days',now);}catch(e){}
+      try{if(typeof renderJournalSchedule==='function')renderJournalSchedule();}catch(e2){}
+    }).catch(function(){});
   }
   function refresh(force){
     if(typeof dk!=='function'||typeof today==='undefined')return;
     var k=dk(today);if(!force&&k===shownFor)return;shownFor=k;
     if(!cfg())return;
+    fetchPlan();
     window.bsReviewFetch(k,k,function(text){render(text);if(lastDay&&lastDay.key===k)fillWellness(k,lastDay.data);});
   }
   setInterval(function(){refresh(false);},3000);

@@ -134,7 +134,7 @@ function updateCompactSectionCounts(){
   var physical=document.getElementById('physicalExerciseCount');
   if(task)task.textContent=compactDoneCount(['pt0c','pt1c','pt2c'])+'/3';
   if(goals)goals.textContent=compactDoneCount(['dg0c','dg1c','dg2c'])+'/3';
-  if(physical)physical.textContent=compactDoneCount(['exDogWalk'])+'/1';
+  if(physical)physical.textContent=compactDoneCount(['exDogWalk','exStepsCheck'])+'/2';
 }
 function toggleAITools(){
   toggleCompactSection('aiToolsBody','aiToolsArrow',document.getElementById('aiToolsToggle'));
@@ -579,10 +579,30 @@ function journalTrainingCalendarLabel(section){
   for(var i=0;i<labels.length;i++)if(labels[i][0].test(text))return labels[i][1];
   return /\b\d+(?:\.\d+)?\s*(?:mi|miles?|km)\b/i.test(text)?'Scheduled Run':'';
 }
+// BeyondStride's plan text for a day (yyyy-mm-dd), '' when it hasn't shared that day.
+function bsPlanText(dateKey){try{var bs=JSON.parse(localStorage.getItem('bs_plan_days')||'null');return bs&&bs.days&&bs.days[dateKey]?String(bs.days[dateKey]):'';}catch(e){return'';}}
+function bsPlanCovers(dateKey){try{var bs=JSON.parse(localStorage.getItem('bs_plan_days')||'null');if(!bs||!bs.days)return false;var from=new Date();from.setDate(from.getDate()-7);var to=new Date();to.setDate(to.getDate()+21);return dateKey>=journalCalendarRealDateKey(from)&&dateKey<=journalCalendarRealDateKey(to);}catch(e){return false;}}
+// Today's workout as BeyondStride's plan has it ("Recovery 3 miles"), without the date or markdown.
+function journalTrainingHeadline(section){
+  var line=String(section||'').split(/\r?\n/).map(function(l){return l.trim();}).filter(function(l){return l&&!/^[↪⇄↘＋]/.test(l);})[0]||'';
+  line=line.replace(/^[#*>\-\s]+/,'').replace(/\*\*/g,'').replace(/^(mon|tue|wed|thu|fri|sat|sun)[a-z]*\.?,?\s+[a-z]{3,9}\.?\s+\d{1,2}(,\s*\d{4})?\s*[:\-–—]\s*/i,'').replace(/^(day\s*\d+|mon|tue|wed|thu|fri|sat|sun)[a-z]*\s*[:\-–—]\s*/i,'');
+  return line.length>70?line.slice(0,67)+'…':line;
+}
 function journalTrainingCalendarEvents(){
-  var plan=null;try{plan=JSON.parse(localStorage.getItem('current_training_plan')||'null');}catch(ignore){}if(!plan||!plan.text||!plan.startDate)return[];
-  var schedule=plan.schedule&&Object.keys(plan.schedule).length?plan.schedule:buildUploadedTrainingSchedule(plan.text,plan.startDate,plan.weeks||1).schedule;
-  return Object.keys(schedule||{}).map(function(date){var section=String(schedule[date]||''),label=journalTrainingCalendarLabel(section),hasRunWords=/\b(run|race|intervals?|repeats?|speed\s*work|tempo|threshold|recovery|progression)\b/i.test(section)||/\b\d+(?:\.\d+)?\s*(?:E|EZ|M|MP|T|LT|I|R|L|LR|MLR|GA)\b/.test(section);if(!label||/\b(rest\s*day|no\s+(?:workout|run))\b/i.test(section)||(/\bwalk(?:ing)?\b/i.test(section)&&!hasRunWords)||(/\b(strength|cross[- ]training)\b/i.test(section)&&!hasRunWords))return null;var detail=section.split(/\r?\n/).map(function(line){return line.trim();}).filter(Boolean).slice(0,3).join(' · ');return{id:'training-plan-'+date,date:date,time:'',title:label,note:detail+' · Add the start time in My Schedule',noReminder:true,trainingPlan:true};}).filter(Boolean);
+  var plan=null;try{plan=JSON.parse(localStorage.getItem('current_training_plan')||'null');}catch(ignore){}
+  var schedule={};
+  if(plan&&plan.text&&plan.startDate)schedule=plan.schedule&&Object.keys(plan.schedule).length?plan.schedule:buildUploadedTrainingSchedule(plan.text,plan.startDate,plan.weeks||1).schedule;
+  // BeyondStride holds the training plan now: its days win (a week back, three weeks ahead).
+  var bs=null;try{bs=JSON.parse(localStorage.getItem('bs_plan_days')||'null');}catch(ignoreBs){}
+  if(bs&&bs.days){
+    schedule=Object.assign({},schedule||{});
+    var from=new Date();from.setDate(from.getDate()-7);var to=new Date();to.setDate(to.getDate()+21);
+    var f=journalCalendarRealDateKey(from),t=journalCalendarRealDateKey(to);
+    Object.keys(schedule).forEach(function(d){if(d>=f&&d<=t&&!bs.days[d])delete schedule[d];});
+    Object.keys(bs.days).forEach(function(d){schedule[d]=bs.days[d];});
+  }
+  if(!schedule||!Object.keys(schedule).length)return[];
+  return Object.keys(schedule||{}).map(function(date){var section=String(schedule[date]||''),label=journalTrainingCalendarLabel(section),hasRunWords=/\b(run|race|intervals?|repeats?|speed\s*work|tempo|threshold|recovery|progression)\b/i.test(section)||/\b\d+(?:\.\d+)?\s*(?:E|EZ|M|MP|T|LT|I|R|L|LR|MLR|GA)\b/.test(section);if(!label||/\b(rest\s*day|no\s+(?:workout|run))\b/i.test(section)||(/\bwalk(?:ing)?\b/i.test(section)&&!hasRunWords)||(/\b(strength|cross[- ]training)\b/i.test(section)&&!hasRunWords))return null;var detail=section.replace(/\*\*/g,'').split(/\r?\n/).map(function(line){return line.trim();}).filter(Boolean).slice(0,3).join(' · ');return{id:'training-plan-'+date,date:date,time:'',title:(journalTrainingHeadline(section)||label),note:detail+' · Add the start time in My Schedule',noReminder:true,trainingPlan:true};}).filter(Boolean);
 }
 function journalGrowthHabitCalendarInfo(habit){
   var source=String(habit.autoSource||'').toLowerCase(),name=String(habit.name||'').toLowerCase();

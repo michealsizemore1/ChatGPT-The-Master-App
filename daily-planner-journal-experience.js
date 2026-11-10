@@ -46,7 +46,8 @@ function journalTodayTrainingSummary(){
   var text='';
   try{
     var raw=localStorage.getItem('current_training_plan'),plan=raw?JSON.parse(raw):null;
-    if(plan&&plan.text&&plan.startDate)text=extractWorkoutFromActivePlan(plan,today)||'';
+    if(typeof bsPlanCovers==='function'&&bsPlanCovers(dateKey))text=bsPlanText(dateKey)||'Rest Day';
+    else if(plan&&plan.text&&plan.startDate)text=extractWorkoutFromActivePlan(plan,today)||'';
   }catch(e){}
   if(!text)text=localStorage.getItem('workout_cache_'+dateKey)||'';
   if(!text)return acts.length?(acts[0].title||acts[0].type||'Activity logged'):'No workout scheduled';

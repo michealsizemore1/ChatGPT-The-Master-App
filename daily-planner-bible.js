@@ -1282,6 +1282,7 @@ function journalIsRestDay(date){
     if(hasRestDayActivity)return true;
   }catch(eAct){}
   try{
+    if(typeof bsPlanCovers==='function'&&bsPlanCovers(h2Key(date))){var bt=bsPlanText(h2Key(date));return !bt||/rest day|no workout scheduled/i.test(bt);}
     var raw=localStorage.getItem('current_training_plan'),plan=raw?JSON.parse(raw):null;
     if(!plan||!plan.text||!plan.startDate)return false;
     var text=extractWorkoutFromActivePlan(plan,date)||'';
