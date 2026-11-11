@@ -216,9 +216,11 @@
     try{localStorage.setItem('bs_plan_days',JSON.stringify(bs));}catch(e2){}
     try{if(typeof renderJournalSchedule==='function')renderJournalSchedule();}catch(e3){}
   }
+  var fetchedAt=0;
   function refresh(force){
     if(typeof dk!=='function'||typeof today==='undefined')return;
-    var k=dk(today);if(!force&&k===shownFor)return;shownFor=k;
+    // Also look again every 5 minutes while the page stays open (sleep can arrive later in the morning).
+    var k=dk(today);if(!force&&k===shownFor&&Date.now()-fetchedAt<5*60000)return;shownFor=k;fetchedAt=Date.now();
     if(!cfg())return;
     fetchPlan();fetchActs();
     window.bsReviewFetch(k,k,function(text){render(text);fromSummary(k,text);if(lastDay&&lastDay.key===k)fillWellness(k,lastDay.data);});
