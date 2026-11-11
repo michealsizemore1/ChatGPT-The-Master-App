@@ -55,7 +55,7 @@
     var cache=nuCache(),el=document.getElementById('wNutrition'),em=document.getElementById('wNutritionMicro');if(!el)return;
     // Colors as in BeyondStride: calories orange, protein red, carbs amber, fat blue, fluids blue; status green / amber / red.
     var hc=function(t,c){return'<th><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+c+';margin-right:5px;vertical-align:middle;"></span>'+t+'</th>';};
-    var th='<table class="summary-table"><thead><tr><th>Period</th>'+hc('Calories','#F39C12')+hc('Protein (g)','#F87171')+hc('Fat (g)','#60A5FA')+hc('Carbs (g)','#FBBF24')+hc('Fluids (oz)','#38BDF8')+hc('Food Quality','#4ADE80')+'</tr></thead><tbody>';
+    var th='<table class="summary-table"><thead><tr><th>Period</th>'+hc('Food Quality','#4ADE80')+hc('Calories','#F39C12')+hc('Protein (g)','#F87171')+hc('Fat (g)','#60A5FA')+hc('Carbs (g)','#FBBF24')+hc('Fluids (oz)','#38BDF8')+'</tr></thead><tbody>';
     var G='#16a34a',A='#d97706',R='#dc2626';
     function sub(txt,c){return'<div style="font-size:.72em;font-weight:600;color:'+c+';white-space:nowrap;">'+txt+'</div>';}
     function calCell(n){if(!n.cal)return'<td>-</td>';var h=fmtN(n.cal);if(!n.target)return'<td>'+h+'</td>';var r=n.cal/n.target,c=(r>=0.9&&r<=1.1)?G:(r>=0.75&&r<=1.25)?A:R;
@@ -71,14 +71,14 @@
       if(!n){rows+='<tr><td>'+labels[i]+'</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>';mrows+='<tr><td>'+labels[i]+'</td><td>-</td>'+MICRO_COLS.map(function(){return'<td>-</td>';}).join('')+'</tr>';return;}
       tot.n++;tot.cal+=n.cal||0;tot.target+=n.target||0;tot.prot+=n.prot||0;tot.fat+=n.fat||0;tot.carbs+=n.carbs||0;tot.water+=n.water||0;if(n.quality){tot.q+=n.quality;tot.qn++;}
       var mc=n.macros||{};if(n.fluidTarget)tot.ft=(tot.ft||0)+n.fluidTarget;
-      rows+='<tr><td>'+labels[i]+'</td>'+calCell(n)+macroCell(n.prot,mc.protein)+macroCell(n.fat,mc.fat)+macroCell(n.carbs,mc.carbs)+fluidCell(n)+qCell(n.quality,n.qualityLabel)+'</tr>';
+      rows+='<tr><td>'+labels[i]+'</td>'+qCell(n.quality,n.qualityLabel)+calCell(n)+macroCell(n.prot,mc.protein)+macroCell(n.fat,mc.fat)+macroCell(n.carbs,mc.carbs)+fluidCell(n)+'</tr>';
       var m=n.micros||{},tg=n.microTargets||{};if(n.microScore){tot.ms=(tot.ms||0)+n.microScore;tot.msn=(tot.msn||0)+1;}
       mrows+='<tr><td>'+labels[i]+'</td>'+qCell(n.microScore||0,mLabel(n.microScore))+MICRO_COLS.map(function(c){var v=m[c[0]],t=tg[c[0]];if(t)lastT[c[0]]=t;if(v)mt[c[0]]=(mt[c[0]]||0)+v;return microCell(v,t,t&&t.s);}).join('')+'</tr>';
     });
     var d=tot.n||1,b='background:#f8f9fa;font-weight:700';
     var avgQ=tot.qn?tot.q/tot.qn:0,ql=avgQ>=9?'Excellent':avgQ>=7?'Good':avgQ>=5?'Fair':avgQ>=3?'Low':avgQ?'Poor':'';
-    rows+='<tr style="'+b+'"><td>DAILY AVG</td>'+(tot.n?calCell({cal:tot.cal/d,target:tot.target/d}):'<td>-</td>')+'<td>'+(tot.n?fmtN(tot.prot/d):'-')+'</td><td>'+(tot.n?fmtN(tot.fat/d):'-')+'</td><td>'+(tot.n?fmtN(tot.carbs/d):'-')+'</td>'
-      +(tot.n?fluidCell({water:tot.water/d,fluidTarget:tot.ft?Math.round(tot.ft/d):0}):'<td>-</td>')+qCell(avgQ,ql)+'</tr>';
+    rows+='<tr style="'+b+'"><td>DAILY AVG</td>'+qCell(avgQ,ql)+(tot.n?calCell({cal:tot.cal/d,target:tot.target/d}):'<td>-</td>')+'<td>'+(tot.n?fmtN(tot.prot/d):'-')+'</td><td>'+(tot.n?fmtN(tot.fat/d):'-')+'</td><td>'+(tot.n?fmtN(tot.carbs/d):'-')+'</td>'
+      +(tot.n?fluidCell({water:tot.water/d,fluidTarget:tot.ft?Math.round(tot.ft/d):0}):'<td>-</td>')+'</tr>';
     var avgM=tot.msn?tot.ms/tot.msn:0;
     mrows+='<tr style="'+b+'"><td>DAILY AVG</td>'+qCell(avgM,mLabel(avgM))+MICRO_COLS.map(function(c){var v=mt[c[0]]?mt[c[0]]/d:0;return microCell(v,lastT[c[0]]);}).join('')+'</tr>';
     el.innerHTML=th+rows+'</tbody></table>'+(tot.n?'':'<div style="font-size:.75rem;color:#94a3b8;margin-top:4px;">No BeyondStride nutrition for this week yet.</div>');
