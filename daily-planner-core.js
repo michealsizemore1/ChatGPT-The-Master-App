@@ -1785,8 +1785,13 @@ function aiReviewAnalysis(){
 }
 function changeDashOff(n){dashOff2+=n;renderDashboard();renderBPChart();}
 let revOff2=0;
-function renderReview(){const ws=wkStart(revOff2),we=new Date(ws);we.setDate(ws.getDate()+6);document.getElementById('revLabel').textContent=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' - '+we.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});const r=localStorage.getItem('review_'+dk(ws)),rv=r?JSON.parse(r):{};['revAnalysis','revWins','revImprove','revFocus','revLessons'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=rv[id]||'';});let logged=0,bible=0,prayer=0,steps=0;for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);const dateKey=dk(d),r2=localStorage.getItem('planner_'+dateKey);if(!r2)continue;logged++;const dd=JSON.parse(r2);if(dd.spBibleAudio==='green')bible++;if(dd.spAIPrayer==='green')prayer++;steps+=parseFloat(dd.exSteps)||0;}const runs=uniqueRunActivities(ws,we).length;document.getElementById('revStats').innerHTML=[{l:'Days Logged',v:logged+'/7'},{l:'Bible Days',v:bible+'/7'},{l:'Prayer Days',v:prayer+'/7'},{l:'Runs',v:runs},{l:'Total Steps',v:Math.round(steps).toLocaleString()}].map(({l,v})=>'<div class="review-stat"><strong>'+v+'</strong>'+l+'</div>').join('');renderReviewInjuryRollup();}
+function renderReview(){const ws=wkStart(revOff2),we=new Date(ws);we.setDate(ws.getDate()+6);document.getElementById('revLabel').textContent=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' - '+we.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});const r=localStorage.getItem('review_'+dk(ws)),rv=r?JSON.parse(r):{};['revAnalysis','revWins','revImprove','revFocus','revLessons'].forEach(id=>{const e=document.getElementById(id);if(e){e.value=rv[id]||'';autoGrowReviewField(e);}});let logged=0,bible=0,prayer=0,steps=0;for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);const dateKey=dk(d),r2=localStorage.getItem('planner_'+dateKey);if(!r2)continue;logged++;const dd=JSON.parse(r2);if(dd.spBibleAudio==='green')bible++;if(dd.spAIPrayer==='green')prayer++;steps+=parseFloat(dd.exSteps)||0;}const runs=uniqueRunActivities(ws,we).length;document.getElementById('revStats').innerHTML=[{l:'Days Logged',v:logged+'/7'},{l:'Bible Days',v:bible+'/7'},{l:'Prayer Days',v:prayer+'/7'},{l:'Runs',v:runs},{l:'Total Steps',v:Math.round(steps).toLocaleString()}].map(({l,v})=>'<div class="review-stat"><strong>'+v+'</strong>'+l+'</div>').join('');renderReviewInjuryRollup();}
 function saveReview(){const ws=wkStart(revOff2),d={};['revAnalysis','revWins','revImprove','revFocus','revLessons'].forEach(id=>{const e=document.getElementById(id);if(e)d[id]=e.value;});localStorage.setItem('review_'+dk(ws),JSON.stringify(d));const btn=document.querySelector('[onclick="saveReview()"]');if(btn){btn.textContent='Saved!';btn.style.background='#27ae60';setTimeout(()=>{btn.textContent='Save Review';btn.style.background='#667eea';},2000);}}
+function clearReview(){
+  if(!confirm('Clear this week\'s Review (Wins, What to Improve, Focus, Lessons)?'))return;
+  ['revWins','revImprove','revFocus','revLessons'].forEach(function(id){const e=document.getElementById(id);if(e){e.value='';autoGrowReviewField(e);}});
+  saveReview();
+}
 function changeRevOff(n){revOff2+=n;renderReview();}
 function getReviewWeekInjuryReports(){
   const ws=wkStart(revOff2),we=new Date(ws);we.setDate(ws.getDate()+6);
@@ -1914,15 +1919,28 @@ function getDayJournalText(d){
   return parts.join('\n');
 }
 var DAY_REV_IDS=['dayRevWins','dayRevImprove','dayRevFocus','dayRevLessons'];
+// Review fields grow to fit their text instead of scrolling inside a fixed-height box,
+// so a filled-in review still reads as one continuous block, not four separate boxes.
+var REVIEW_AUTOGROW_IDS=DAY_REV_IDS.concat(['revWins','revImprove','revFocus','revLessons']);
+function autoGrowReviewField(el){if(!el)return;el.style.height='auto';el.style.height=el.scrollHeight+'px';}
+(function(){document.addEventListener('input',function(e){
+  if(!e.target||REVIEW_AUTOGROW_IDS.indexOf(e.target.id)<0)return;
+  autoGrowReviewField(e.target);
+},true);})();
 function renderDayReview(){
   var key='dayreview_'+dk(today),raw=null;try{raw=localStorage.getItem(key);}catch(e){}
   var rv={};try{rv=raw?JSON.parse(raw):{};}catch(e2){}
-  DAY_REV_IDS.forEach(function(id){const e=document.getElementById(id);if(e)e.value=rv[id]||'';});
+  DAY_REV_IDS.forEach(function(id){const e=document.getElementById(id);if(e){e.value=rv[id]||'';autoGrowReviewField(e);}});
   // A review saved while device storage was full lives in the larger on-device store.
   if(!raw&&typeof journalLargeStoreGet==='function')journalLargeStoreGet(key).then(function(v){
     if(!v||key!=='dayreview_'+dk(today))return;
-    DAY_REV_IDS.forEach(function(id){const e=document.getElementById(id);if(e&&!e.value)e.value=v[id]||'';});
+    DAY_REV_IDS.forEach(function(id){const e=document.getElementById(id);if(e&&!e.value){e.value=v[id]||'';autoGrowReviewField(e);}});
   }).catch(function(){});
+}
+function clearDayReview(){
+  if(!confirm('Clear today\'s AI Review (Wins, What to Improve, Focus, Lessons)?'))return;
+  DAY_REV_IDS.forEach(function(id){const e=document.getElementById(id);if(e){e.value='';autoGrowReviewField(e);}});
+  saveDayReview();
 }
 function saveDayReview(quiet){
   const d={};DAY_REV_IDS.forEach(function(id){const e=document.getElementById(id);if(e)d[id]=e.value;});
