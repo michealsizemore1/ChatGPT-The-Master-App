@@ -39,21 +39,32 @@
   var NU_KEY='bs_daily_nutrition';
   function nuCache(){try{return JSON.parse(localStorage.getItem(NU_KEY)||'{}')||{};}catch(e){return {};}}
   function fmtN(v){return v?Math.round(v).toLocaleString('en-US'):'-';}
-  var MICRO_COLS=[['fiber','Fiber (g)'],['sugar','Sugar (g)'],['sodium','Sodium (mg)'],['vitC','Vit C (mg)'],['vitD','Vit D (mcg)'],['calcium','Calcium (mg)'],['iron','Iron (mg)'],['potassium','Potassium (mg)'],['magnesium','Magnesium (mg)']];
+  // Same 12 nutrients as BeyondStride's micronutrient panel.
+  var MICRO_COLS=[['fiber','Fiber (g)'],['sugar','Sugar (g)'],['sodium','Sodium (mg)'],['potassium','Potassium (mg)'],['calcium','Calcium (mg)'],['magnesium','Magnesium (mg)'],
+    ['iron','Iron (mg)'],['zinc','Zinc (mg)'],['vitC','Vit C (mg)'],['vitD','Vit D (mcg)'],['vitB12','Vit B12 (mcg)'],['caffeine','Caffeine (mg)']];
+  var ST_COLOR={Low:'#dc2626',Close:'#ca8a04',Met:'#16a34a',High:'#dc2626'};
+  function status(v,t){if(!t)return'';var pct=t.t>0?v/t.t*100:0;return (t.mx>0&&v>t.mx)?'High':pct>=100?'Met':pct>=75?'Close':'Low';}
+  function microCell(v,t,st){
+    if(!v)return'<td>-</td>';
+    var val=v<10?(Math.round(v*10)/10):Math.round(v).toLocaleString('en-US');
+    if(!t||!t.t)return'<td>'+val+'</td>';
+    st=st||status(v,t);var pct=Math.floor(v/t.t*100);
+    return'<td>'+val+'<div style="font-size:.72em;font-weight:600;color:'+(ST_COLOR[st]||'#64748b')+';white-space:nowrap;">'+pct+'% · '+st+'</div></td>';
+  }
   function nuTables(keys,labels){
     var cache=nuCache(),el=document.getElementById('wNutrition'),em=document.getElementById('wNutritionMicro');if(!el)return;
     var th='<table class="summary-table"><thead><tr><th>Period</th><th>Calories</th><th>Protein (g)</th><th>Fat (g)</th><th>Carbs (g)</th><th>Fluids (oz)</th><th>Food Quality</th></tr></thead><tbody>';
-    var tot={cal:0,target:0,prot:0,fat:0,carbs:0,water:0,q:0,qn:0,n:0},rows='',mrows='',mt={};
+    var tot={cal:0,target:0,prot:0,fat:0,carbs:0,water:0,q:0,qn:0,n:0},rows='',mrows='',mt={},lastT={};
     keys.forEach(function(k,i){var n=cache[k];
       if(!n){rows+='<tr><td>'+labels[i]+'</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>';mrows+='<tr><td>'+labels[i]+'</td>'+MICRO_COLS.map(function(){return'<td>-</td>';}).join('')+'</tr>';return;}
       tot.n++;tot.cal+=n.cal||0;tot.target+=n.target||0;tot.prot+=n.prot||0;tot.fat+=n.fat||0;tot.carbs+=n.carbs||0;tot.water+=n.water||0;if(n.quality){tot.q+=n.quality;tot.qn++;}
       var calTxt=fmtN(n.cal)+(n.target?' <span style="color:#94a3b8;font-size:.8em;">/ '+fmtN(n.target)+'</span>':'');
       rows+='<tr><td>'+labels[i]+'</td><td>'+calTxt+'</td><td>'+fmtN(n.prot)+'</td><td>'+fmtN(n.fat)+'</td><td>'+fmtN(n.carbs)+'</td><td>'+fmtN(n.water)+'</td><td>'+(n.quality?n.quality.toFixed(1):'-')+'</td></tr>';
-      var m=n.micros||{};mrows+='<tr><td>'+labels[i]+'</td>'+MICRO_COLS.map(function(c){var v=m[c[0]];if(v)mt[c[0]]=(mt[c[0]]||0)+v;return'<td>'+(v?(v<10?(Math.round(v*10)/10):Math.round(v).toLocaleString('en-US')):'-')+'</td>';}).join('')+'</tr>';
+      var m=n.micros||{},tg=n.microTargets||{};mrows+='<tr><td>'+labels[i]+'</td>'+MICRO_COLS.map(function(c){var v=m[c[0]],t=tg[c[0]];if(t)lastT[c[0]]=t;if(v)mt[c[0]]=(mt[c[0]]||0)+v;return microCell(v,t,t&&t.s);}).join('')+'</tr>';
     });
     var d=tot.n||1,b='background:#f8f9fa;font-weight:700';
     rows+='<tr style="'+b+'"><td>DAILY AVG</td><td>'+(tot.n?fmtN(tot.cal/d)+(tot.target?' <span style="color:#94a3b8;font-size:.8em;">/ '+fmtN(tot.target/d)+'</span>':''):'-')+'</td><td>'+(tot.n?fmtN(tot.prot/d):'-')+'</td><td>'+(tot.n?fmtN(tot.fat/d):'-')+'</td><td>'+(tot.n?fmtN(tot.carbs/d):'-')+'</td><td>'+(tot.n?fmtN(tot.water/d):'-')+'</td><td>'+(tot.qn?(tot.q/tot.qn).toFixed(1):'-')+'</td></tr>';
-    mrows+='<tr style="'+b+'"><td>DAILY AVG</td>'+MICRO_COLS.map(function(c){var v=mt[c[0]]?mt[c[0]]/d:0;return'<td>'+(v?(v<10?Math.round(v*10)/10:Math.round(v).toLocaleString('en-US')):'-')+'</td>';}).join('')+'</tr>';
+    mrows+='<tr style="'+b+'"><td>DAILY AVG</td>'+MICRO_COLS.map(function(c){var v=mt[c[0]]?mt[c[0]]/d:0;return microCell(v,lastT[c[0]]);}).join('')+'</tr>';
     el.innerHTML=th+rows+'</tbody></table>'+(tot.n?'':'<div style="font-size:.75rem;color:#94a3b8;margin-top:4px;">No BeyondStride nutrition for this week yet.</div>');
     if(em)em.innerHTML='<table class="summary-table"><thead><tr><th>Period</th>'+MICRO_COLS.map(function(c){return'<th>'+c[1]+'</th>';}).join('')+'</tr></thead><tbody>'+mrows+'</tbody></table>';
   }
