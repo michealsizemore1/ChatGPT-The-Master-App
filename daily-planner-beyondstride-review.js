@@ -64,22 +64,25 @@
       return'<td>'+fmtN(g)+sub(m.pct.toFixed(1)+'% / '+m.goal+'% · '+m.status,c)+'</td>';}
     function fluidCell(n){if(!n.water)return'<td>-</td>';if(!n.fluidTarget)return'<td>'+fmtN(n.water)+'</td>';var p=Math.floor(n.water/n.fluidTarget*100),c=p>=100?G:p>=75?A:R;
       return'<td>'+fmtN(n.water)+sub(p+'% of '+n.fluidTarget+' oz',c)+'</td>';}
+    function mLabel(v){return !v?'':v>=9?'Excellent':v>=7?'Good':v>=5?'Fair':v>=3?'Low':'Poor';}
     function qCell(q,label){if(!q)return'<td>-</td>';var c=q>=7?G:q>=5?A:R;return'<td><span style="color:'+c+';font-weight:700;">'+q.toFixed(1)+'</span>'+(label?sub(label,c):'')+'</td>';}
     var tot={cal:0,target:0,prot:0,fat:0,carbs:0,water:0,q:0,qn:0,n:0},rows='',mrows='',mt={},lastT={};
     keys.forEach(function(k,i){var n=cache[k];
-      if(!n){rows+='<tr><td>'+labels[i]+'</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>';mrows+='<tr><td>'+labels[i]+'</td>'+MICRO_COLS.map(function(){return'<td>-</td>';}).join('')+'</tr>';return;}
+      if(!n){rows+='<tr><td>'+labels[i]+'</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>';mrows+='<tr><td>'+labels[i]+'</td><td>-</td>'+MICRO_COLS.map(function(){return'<td>-</td>';}).join('')+'</tr>';return;}
       tot.n++;tot.cal+=n.cal||0;tot.target+=n.target||0;tot.prot+=n.prot||0;tot.fat+=n.fat||0;tot.carbs+=n.carbs||0;tot.water+=n.water||0;if(n.quality){tot.q+=n.quality;tot.qn++;}
       var mc=n.macros||{};if(n.fluidTarget)tot.ft=(tot.ft||0)+n.fluidTarget;
       rows+='<tr><td>'+labels[i]+'</td>'+calCell(n)+macroCell(n.prot,mc.protein)+macroCell(n.fat,mc.fat)+macroCell(n.carbs,mc.carbs)+fluidCell(n)+qCell(n.quality,n.qualityLabel)+'</tr>';
-      var m=n.micros||{},tg=n.microTargets||{};mrows+='<tr><td>'+labels[i]+'</td>'+MICRO_COLS.map(function(c){var v=m[c[0]],t=tg[c[0]];if(t)lastT[c[0]]=t;if(v)mt[c[0]]=(mt[c[0]]||0)+v;return microCell(v,t,t&&t.s);}).join('')+'</tr>';
+      var m=n.micros||{},tg=n.microTargets||{};if(n.microScore){tot.ms=(tot.ms||0)+n.microScore;tot.msn=(tot.msn||0)+1;}
+      mrows+='<tr><td>'+labels[i]+'</td>'+qCell(n.microScore||0,mLabel(n.microScore))+MICRO_COLS.map(function(c){var v=m[c[0]],t=tg[c[0]];if(t)lastT[c[0]]=t;if(v)mt[c[0]]=(mt[c[0]]||0)+v;return microCell(v,t,t&&t.s);}).join('')+'</tr>';
     });
     var d=tot.n||1,b='background:#f8f9fa;font-weight:700';
     var avgQ=tot.qn?tot.q/tot.qn:0,ql=avgQ>=9?'Excellent':avgQ>=7?'Good':avgQ>=5?'Fair':avgQ>=3?'Low':avgQ?'Poor':'';
     rows+='<tr style="'+b+'"><td>DAILY AVG</td>'+(tot.n?calCell({cal:tot.cal/d,target:tot.target/d}):'<td>-</td>')+'<td>'+(tot.n?fmtN(tot.prot/d):'-')+'</td><td>'+(tot.n?fmtN(tot.fat/d):'-')+'</td><td>'+(tot.n?fmtN(tot.carbs/d):'-')+'</td>'
       +(tot.n?fluidCell({water:tot.water/d,fluidTarget:tot.ft?Math.round(tot.ft/d):0}):'<td>-</td>')+qCell(avgQ,ql)+'</tr>';
-    mrows+='<tr style="'+b+'"><td>DAILY AVG</td>'+MICRO_COLS.map(function(c){var v=mt[c[0]]?mt[c[0]]/d:0;return microCell(v,lastT[c[0]]);}).join('')+'</tr>';
+    var avgM=tot.msn?tot.ms/tot.msn:0;
+    mrows+='<tr style="'+b+'"><td>DAILY AVG</td>'+qCell(avgM,mLabel(avgM))+MICRO_COLS.map(function(c){var v=mt[c[0]]?mt[c[0]]/d:0;return microCell(v,lastT[c[0]]);}).join('')+'</tr>';
     el.innerHTML=th+rows+'</tbody></table>'+(tot.n?'':'<div style="font-size:.75rem;color:#94a3b8;margin-top:4px;">No BeyondStride nutrition for this week yet.</div>');
-    if(em)em.innerHTML='<table class="summary-table"><thead><tr><th>Period</th>'+MICRO_COLS.map(function(c){return'<th>'+c[1]+'</th>';}).join('')+'</tr></thead><tbody>'+mrows+'</tbody></table>';
+    if(em)em.innerHTML='<table class="summary-table"><thead><tr><th>Period</th>'+hc('Micro Quality','#4ADE80')+MICRO_COLS.map(function(c){return'<th>'+c[1]+'</th>';}).join('')+'</tr></thead><tbody>'+mrows+'</tbody></table>';
   }
   // Older summaries (before the phone sent the numbers): read them from the summary text.
   function fromText(t){
