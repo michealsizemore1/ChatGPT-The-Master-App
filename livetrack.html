@@ -25,6 +25,9 @@ h1{font-size:1.25rem;margin:0}
 .stat span{color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.04em}
 #msg{padding:24px 16px;color:var(--muted)}
 footer{padding:4px 16px 24px;color:var(--muted);font-size:.75rem}
+.countdown{margin:10px 16px 0;padding:10px 12px;border-radius:12px;background:rgba(198,244,50,.08);border:1px solid rgba(198,244,50,.35)}
+.cdbar{height:8px;border-radius:6px;background:rgba(255,255,255,.12);overflow:hidden;margin-bottom:8px}.cdbar i{display:block;height:100%;background:#C6F432}
+.cdrow{display:flex;flex-wrap:wrap;gap:8px}.cdtxt{font-size:.8rem;opacity:.7;margin-top:6px}
 </style>
 </head>
 <body>
@@ -34,7 +37,7 @@ footer{padding:4px 16px 24px;color:var(--muted);font-size:.75rem}
 </header>
 <div id="alert"></div>
 <div id="map"></div>
-<div class="stats" id="stats"></div>
+<div id="countdown" class="countdown" style="display:none"></div><div class="stats" id="stats"></div>
 <div id="msg"></div>
 <footer>Updates about every 30 seconds while the run is going. Map © OpenStreetMap contributors.</footer>
 <script>
@@ -66,7 +69,22 @@ footer{padding:4px 16px 24px;color:var(--muted);font-size:.75rem}
     if(n.alert){al.style.display='block';al.textContent='No movement for several minutes. Last known location is on the map.';}else al.style.display='none';
     var mi=(n.dist||0)/1609.344;
     document.getElementById('stats').innerHTML=stat(mi.toFixed(2),'miles')+stat(clock(n.moving),'moving time')+stat(pace(n.moving,n.dist),'avg pace /mi')+
-      (n.hr?stat(n.hr,'heart rate'):'')+(n.power?stat(n.power+' W','power'):'')+(n.trailLeft!=null?stat((n.trailLeft/1609.344).toFixed(2),'trail mi left'):'');
+      (n.hr?stat(n.hr,'heart rate'):'')+(n.power?stat(n.power+' W','power'):'')+(n.trailLeft!=null&&n.goalSrc!=='trail'?stat((n.trailLeft/1609.344).toFixed(2),'trail mi left'):'');
+    // Countdown to the planned distance: miles left, time left at the current average pace, and the estimated finish time.
+    var cd=document.getElementById('countdown');
+    if(n.goal&&n.goal>0){
+      var left=Math.max(0,n.goal-(n.dist||0)),src={workout:"today's workout",trail:'the trail',plan:"today's plan"}[n.goalSrc]||'the plan';
+      var pct=Math.min(100,Math.round((n.dist||0)/n.goal*100)),html;
+      if(st==='finished')html='<b>'+((n.dist||0)>=n.goal*0.98?'Goal reached':'Finished')+'</b> · '+(n.goal/1609.344).toFixed(1)+' mi planned';
+      else if(left<30)html='<b>Goal reached</b> · '+(n.goal/1609.344).toFixed(1)+' mi ('+src+')';
+      else{
+        var spm=(n.dist>200&&n.moving>0)?n.moving/n.dist:0,secLeft=spm?left*spm:0;
+        var fin=secLeft?new Date((st==='running'&&!stale?Date.now():n.updated)+secLeft*1000):null;
+        html='<div class="cdrow">'+stat((left/1609.344).toFixed(2),'mi to go')+(secLeft?stat(clock(secLeft),'time left'):'')+(fin?stat(fin.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}),'est. finish'):'')+'</div>'+
+          '<div class="cdtxt">'+(n.goal/1609.344).toFixed(1)+' mi planned ('+src+')'+(secLeft?' · at the current average pace':'')+'</div>';
+      }
+      cd.innerHTML='<div class="cdbar"><i style="width:'+pct+'%"></i></div>'+html;cd.style.display='block';
+    }else cd.style.display='none';
     var pts=[];var p=d.pts;
     if(Array.isArray(p))p.forEach(function(x){if(x)pts.push([x[0],x[1]]);});
     else if(p&&typeof p==='object')Object.keys(p).sort(function(a,b){return a-b;}).forEach(function(k){pts.push([p[k][0],p[k][1]]);});
