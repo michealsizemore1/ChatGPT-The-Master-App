@@ -1187,8 +1187,17 @@ function renderWeeklyDigest(days,tot,wDayKeys,lbls){
 }
 function renderWeekly(){const ws=wkStart(weekOff2),days=[],lbls=[];for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);const r=localStorage.getItem('planner_'+dk(d));var _dk=dk(d);days.push(getDM(r?JSON.parse(r):{},_dk));lbls.push(d.toLocaleDateString('en-US',{weekday:'short',month:'numeric',day:'numeric'}));}const we=new Date(ws);we.setDate(ws.getDate()+6);document.getElementById('weekLabel').textContent=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' - '+we.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});const tot=agg(days);document.getElementById('wGrowth').innerHTML=mkT(gH,days.map((m,i)=>gRow(lbls[i],m)),gRow('TOTAL',tot,true));document.getElementById('wFitness').innerHTML=mkT(fH,days.map((m,i)=>fRow(lbls[i],m)),fRow('TOTAL/AVG',tot,true));try{if(window.bsWeeklyNutrition){const nk=[];for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);nk.push(dk(d));}window.bsWeeklyNutrition(nk,lbls);}}catch(eNu){}document.getElementById('wWellness').innerHTML=mkT(wH,days.map((m,i)=>wRow(lbls[i],m)),wRow('TOTAL/AVG',tot,true));
   renderWeeklyGrowthTable(ws,we,days,lbls);
-  renderGrowthActivityReport('wGrowth',lbls.map(function(label,i){var d=new Date(ws);d.setDate(ws.getDate()+i);return{label:label,start:dk(d),end:dk(d)};}));
-  const wDayKeys=[];for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);wDayKeys.push(dk(d));}renderSpirit(wDayKeys,lbls,'wSpirituality');}
+  // Growth / Skills (Language, Guitar) is no longer shown on Weekly; Reading / Audible joins the Spirituality table.
+  const wDayKeys=[];for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);wDayKeys.push(dk(d));}renderSpirit(wDayKeys,lbls,'wSpirituality');weeklyReadingColumn(wDayKeys);}
+// 📚 Reading / Audible minutes as the last column of the Weekly Spirituality table.
+function weeklyReadingColumn(keys){
+  var t=document.querySelector('#wSpirituality table');if(!t)return;
+  var mins=keys.map(function(k){var r=localStorage.getItem('planner_'+k),dd={};try{dd=r?JSON.parse(r):{};}catch(e){}try{return journalAudiobookMinutesForDate(k,dd)||0;}catch(e2){return 0;}});
+  var total=mins.reduce(function(a,b){return a+b;},0);
+  var head=t.querySelector('thead tr');if(head){var th=document.createElement('th');th.textContent='Reading / Audible';head.appendChild(th);}
+  var rows=t.querySelectorAll('tbody tr');
+  rows.forEach(function(tr,i){var td=document.createElement('td');var v=i<mins.length?mins[i]:total;td.innerHTML=v?fmtMinsSeconds(v):'-';tr.appendChild(td);});
+}
 function changeWeekOff(n){weekOff2+=n;renderWeekly();renderGoals();}
 let monthOff2=0;
 function renderMonthly(){const now=new Date(),ref=new Date(now.getFullYear(),now.getMonth()+monthOff2,1);const yr=ref.getFullYear(),mo=ref.getMonth(),dim=new Date(yr,mo+1,0).getDate();const wmap={};for(let d=1;d<=dim;d++){const dt=new Date(yr,mo,d);const ws=wkStartOf(dt);const k=dk(ws),dateKey=dk(dt);if(!wmap[k])wmap[k]={ws,ms:[]};const r=localStorage.getItem('planner_'+dateKey);wmap[k].ms.push(getDM(r?JSON.parse(r):{},dateKey));}document.getElementById('monthLabel').textContent=ref.toLocaleDateString('en-US',{month:'long',year:'numeric'});const wks=Object.values(wmap).sort((a,b)=>a.ws-b.ws),allM=[],gR=[],fR=[],wR=[];wks.forEach(({ws,ms})=>{const we=new Date(ws);we.setDate(ws.getDate()+6);const lb=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+'-'+we.toLocaleDateString('en-US',{day:'numeric'});const a=agg(ms);allM.push(...ms);gR.push(gRow('Wk '+lb,a));fR.push(fRow('Wk '+lb,a));wR.push(wRow('Wk '+lb,a));});const tot=agg(allM);document.getElementById('mGrowth').innerHTML=mkT(gH,gR,gRow('TOTAL',tot,true));document.getElementById('mFitness').innerHTML=mkT(fH,fR,fRow('TOTAL/AVG',tot,true));document.getElementById('mWellness').innerHTML=mkT(wH,wR,wRow('TOTAL/AVG',tot,true));
