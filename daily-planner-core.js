@@ -1190,9 +1190,10 @@ function renderWeekly(){const ws=wkStart(weekOff2),days=[],lbls=[];for(let i=0;i
   // Growth / Skills (Language, Guitar) is no longer shown on Weekly; Reading / Audible joins the Spirituality table.
   const wDayKeys=[];for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);wDayKeys.push(dk(d));}renderSpirit(wDayKeys,lbls,'wSpirituality');weeklyReadingColumn(wDayKeys);}
 // 📚 Reading / Audible minutes as the last column of the Weekly Spirituality table.
-function weeklyReadingColumn(keys){
-  var t=document.querySelector('#wSpirituality table');if(!t)return;
-  var mins=keys.map(function(k){var r=localStorage.getItem('planner_'+k),dd={};try{dd=r?JSON.parse(r):{};}catch(e){}try{return journalAudiobookMinutesForDate(k,dd)||0;}catch(e2){return 0;}});
+function weeklyReadingColumn(keys,hostId){
+  var t=document.querySelector('#'+(hostId||'wSpirituality')+' table');if(!t)return;
+  function day(k){var r=localStorage.getItem('planner_'+k),dd={};try{dd=r?JSON.parse(r):{};}catch(e){}try{return journalAudiobookMinutesForDate(k,dd)||0;}catch(e2){return 0;}}
+  var mins=keys.map(function(k){return Array.isArray(k)?k.reduce(function(a,x){return a+day(x);},0):day(k);});
   var total=mins.reduce(function(a,b){return a+b;},0);
   var head=t.querySelector('thead tr');if(head){var th=document.createElement('th');th.textContent='Reading / Audible';head.appendChild(th);}
   var rows=t.querySelectorAll('tbody tr');
@@ -1201,7 +1202,7 @@ function weeklyReadingColumn(keys){
 function changeWeekOff(n){weekOff2+=n;renderWeekly();renderGoals();}
 let monthOff2=0;
 function renderMonthly(){const now=new Date(),ref=new Date(now.getFullYear(),now.getMonth()+monthOff2,1);const yr=ref.getFullYear(),mo=ref.getMonth(),dim=new Date(yr,mo+1,0).getDate();const wmap={};for(let d=1;d<=dim;d++){const dt=new Date(yr,mo,d);const ws=wkStartOf(dt);const k=dk(ws),dateKey=dk(dt);if(!wmap[k])wmap[k]={ws,ms:[]};const r=localStorage.getItem('planner_'+dateKey);wmap[k].ms.push(getDM(r?JSON.parse(r):{},dateKey));}document.getElementById('monthLabel').textContent=ref.toLocaleDateString('en-US',{month:'long',year:'numeric'});const wks=Object.values(wmap).sort((a,b)=>a.ws-b.ws),allM=[],gR=[],fR=[],wR=[];wks.forEach(({ws,ms})=>{const we=new Date(ws);we.setDate(ws.getDate()+6);const lb=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+'-'+we.toLocaleDateString('en-US',{day:'numeric'});const a=agg(ms);allM.push(...ms);gR.push(gRow('Wk '+lb,a));fR.push(fRow('Wk '+lb,a));wR.push(wRow('Wk '+lb,a));});const tot=agg(allM);document.getElementById('mGrowth').innerHTML=mkT(gH,gR,gRow('TOTAL',tot,true));document.getElementById('mFitness').innerHTML=mkT(fH,fR,fRow('TOTAL/AVG',tot,true));document.getElementById('mWellness').innerHTML=mkT(wH,wR,wRow('TOTAL/AVG',tot,true));
-  const mWkKeys=[],mWkLbls=[],mGrowthPeriods=[],monthStartKey=dk(new Date(yr,mo,1)),monthEndKey=dk(new Date(yr,mo,dim));wks.forEach(({ws,ms})=>{const we=new Date(ws);we.setDate(ws.getDate()+6);const lb=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+'-'+we.toLocaleDateString('en-US',{day:'numeric'});const keys=[];for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);keys.push(dk(d));}mWkKeys.push(keys);mWkLbls.push('Wk '+lb);mGrowthPeriods.push({label:'Wk '+lb,start:dk(ws)<monthStartKey?monthStartKey:dk(ws),end:dk(we)>monthEndKey?monthEndKey:dk(we)});});renderGrowthActivityReport('mGrowth',mGrowthPeriods);renderSpirit(mWkKeys,mWkLbls,'mSpirituality');
+  const mWkKeys=[],mWkLbls=[],mGrowthPeriods=[],monthStartKey=dk(new Date(yr,mo,1)),monthEndKey=dk(new Date(yr,mo,dim));wks.forEach(({ws,ms})=>{const we=new Date(ws);we.setDate(ws.getDate()+6);const lb=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+'-'+we.toLocaleDateString('en-US',{day:'numeric'});const keys=[];for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);keys.push(dk(d));}mWkKeys.push(keys);mWkLbls.push('Wk '+lb);mGrowthPeriods.push({label:'Wk '+lb,start:dk(ws)<monthStartKey?monthStartKey:dk(ws),end:dk(we)>monthEndKey?monthEndKey:dk(we)});});/* Growth (Language, Guitar) no longer shown; Reading / Audible joins Spirituality */renderSpirit(mWkKeys,mWkLbls,'mSpirituality');weeklyReadingColumn(mWkKeys,'mSpirituality');
   // Render heatmap
   const hmGrid=document.getElementById('hmGrid');
   const hmMonth=document.getElementById('hmMonth');
@@ -1239,7 +1240,7 @@ function renderYearly(){const yr=new Date().getFullYear()+yearOff2;document.getE
   const yr2=new Date().getFullYear()+yearOff2;
   const yMoKeys=[],yMoLbls=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const yGrowthPeriods=[];for(let mi=0;mi<12;mi++){const dim=new Date(yr2,mi+1,0).getDate();const keys=[];for(let d=1;d<=dim;d++)keys.push(dk(new Date(yr2,mi,d)));yMoKeys.push(keys);yGrowthPeriods.push({label:yMoLbls[mi],start:dk(new Date(yr2,mi,1)),end:dk(new Date(yr2,mi,dim))});}
-  renderGrowthActivityReport('yGrowth',yGrowthPeriods);renderSpirit(yMoKeys,yMoLbls,'ySpirituality');}
+  renderSpirit(yMoKeys,yMoLbls,'ySpirituality');weeklyReadingColumn(yMoKeys,'ySpirituality');}
 function changeYearOff(n){yearOff2+=n;renderYearly();}
 let dashOff2=0;
 function renderDashboard(){
