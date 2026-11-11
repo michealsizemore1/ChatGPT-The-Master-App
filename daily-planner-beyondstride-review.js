@@ -35,6 +35,44 @@
 
   var lastDay=null;
 
+  // ── Weekly screen: Nutrition and Micronutrients tables (read from BeyondStride's day summaries) ──
+  var NU_KEY='bs_daily_nutrition';
+  function nuCache(){try{return JSON.parse(localStorage.getItem(NU_KEY)||'{}')||{};}catch(e){return {};}}
+  function fmtN(v){return v?Math.round(v).toLocaleString('en-US'):'-';}
+  var MICRO_COLS=[['fiber','Fiber (g)'],['sugar','Sugar (g)'],['sodium','Sodium (mg)'],['vitC','Vit C (mg)'],['vitD','Vit D (mcg)'],['calcium','Calcium (mg)'],['iron','Iron (mg)'],['potassium','Potassium (mg)'],['magnesium','Magnesium (mg)']];
+  function nuTables(keys,labels){
+    var cache=nuCache(),el=document.getElementById('wNutrition'),em=document.getElementById('wNutritionMicro');if(!el)return;
+    var th='<table class="summary-table"><thead><tr><th>Period</th><th>Calories</th><th>Protein (g)</th><th>Fat (g)</th><th>Carbs (g)</th><th>Fluids (oz)</th><th>Food Quality</th></tr></thead><tbody>';
+    var tot={cal:0,target:0,prot:0,fat:0,carbs:0,water:0,q:0,qn:0,n:0},rows='',mrows='',mt={};
+    keys.forEach(function(k,i){var n=cache[k];
+      if(!n){rows+='<tr><td>'+labels[i]+'</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>';mrows+='<tr><td>'+labels[i]+'</td>'+MICRO_COLS.map(function(){return'<td>-</td>';}).join('')+'</tr>';return;}
+      tot.n++;tot.cal+=n.cal||0;tot.target+=n.target||0;tot.prot+=n.prot||0;tot.fat+=n.fat||0;tot.carbs+=n.carbs||0;tot.water+=n.water||0;if(n.quality){tot.q+=n.quality;tot.qn++;}
+      var calTxt=fmtN(n.cal)+(n.target?' <span style="color:#94a3b8;font-size:.8em;">/ '+fmtN(n.target)+'</span>':'');
+      rows+='<tr><td>'+labels[i]+'</td><td>'+calTxt+'</td><td>'+fmtN(n.prot)+'</td><td>'+fmtN(n.fat)+'</td><td>'+fmtN(n.carbs)+'</td><td>'+fmtN(n.water)+'</td><td>'+(n.quality?n.quality.toFixed(1):'-')+'</td></tr>';
+      var m=n.micros||{};mrows+='<tr><td>'+labels[i]+'</td>'+MICRO_COLS.map(function(c){var v=m[c[0]];if(v)mt[c[0]]=(mt[c[0]]||0)+v;return'<td>'+(v?(v<10?(Math.round(v*10)/10):Math.round(v).toLocaleString('en-US')):'-')+'</td>';}).join('')+'</tr>';
+    });
+    var d=tot.n||1,b='background:#f8f9fa;font-weight:700';
+    rows+='<tr style="'+b+'"><td>DAILY AVG</td><td>'+(tot.n?fmtN(tot.cal/d)+(tot.target?' <span style="color:#94a3b8;font-size:.8em;">/ '+fmtN(tot.target/d)+'</span>':''):'-')+'</td><td>'+(tot.n?fmtN(tot.prot/d):'-')+'</td><td>'+(tot.n?fmtN(tot.fat/d):'-')+'</td><td>'+(tot.n?fmtN(tot.carbs/d):'-')+'</td><td>'+(tot.n?fmtN(tot.water/d):'-')+'</td><td>'+(tot.qn?(tot.q/tot.qn).toFixed(1):'-')+'</td></tr>';
+    mrows+='<tr style="'+b+'"><td>DAILY AVG</td>'+MICRO_COLS.map(function(c){var v=mt[c[0]]?mt[c[0]]/d:0;return'<td>'+(v?(v<10?Math.round(v*10)/10:Math.round(v).toLocaleString('en-US')):'-')+'</td>';}).join('')+'</tr>';
+    el.innerHTML=th+rows+'</tbody></table>'+(tot.n?'':'<div style="font-size:.75rem;color:#94a3b8;margin-top:4px;">No BeyondStride nutrition for this week yet.</div>');
+    if(em)em.innerHTML='<table class="summary-table"><thead><tr><th>Period</th>'+MICRO_COLS.map(function(c){return'<th>'+c[1]+'</th>';}).join('')+'</tr></thead><tbody>'+mrows+'</tbody></table>';
+  }
+  var nuFetched={};
+  window.bsWeeklyNutrition=function(keys,labels){
+    nuTables(keys,labels);
+    var c=cfg();if(!c||!c.db||!c.key||!keys.length)return;
+    var from=keys[0],to=keys[keys.length-1],sig=from+to;if(nuFetched[sig]&&Date.now()-nuFetched[sig]<2*60000)return;nuFetched[sig]=Date.now();
+    fetch(c.db+'/nutrition/'+encodeURIComponent(c.key)+'/beyondstride/daily.json?orderBy=%22%24key%22&startAt=%22'+from+'%22&endAt=%22'+to+'%22').then(function(r){return r.ok?r.json():null;}).then(function(o){
+      if(!o)return;var cache=nuCache(),changed=false;
+      Object.keys(o).forEach(function(k){var n=(o[k]||{}).nutrition;if(n&&JSON.stringify(cache[k])!==JSON.stringify(n)){cache[k]=n;changed=true;}});
+      if(!changed)return;
+      // Keep about four months.
+      var cut=new Date();cut.setDate(cut.getDate()-120);var ck=cut.toISOString().slice(0,10);Object.keys(cache).forEach(function(k){if(k<ck)delete cache[k];});
+      try{localStorage.setItem(NU_KEY,JSON.stringify(cache));}catch(e){}
+      nuTables(keys,labels);
+    }).catch(function(){});
+  };
+
   // Wellness: Sleep, Weight and Resting HR fill in from BeyondStride. A value you typed yourself is never replaced;
   // one BeyondStride filled earlier is kept up to date.
   var FIELDS={sleep:'wSleepVal',weight:'wWghtVal',restHr:'wRestHRVal'};
