@@ -57,6 +57,15 @@
     el.innerHTML=th+rows+'</tbody></table>'+(tot.n?'':'<div style="font-size:.75rem;color:#94a3b8;margin-top:4px;">No BeyondStride nutrition for this week yet.</div>');
     if(em)em.innerHTML='<table class="summary-table"><thead><tr><th>Period</th>'+MICRO_COLS.map(function(c){return'<th>'+c[1]+'</th>';}).join('')+'</tr></thead><tbody>'+mrows+'</tbody></table>';
   }
+  // Older summaries (before the phone sent the numbers): read them from the summary text.
+  function fromText(t){
+    t=String(t||'');var m=t.match(/^Calories:\s*([\d,]+)(?:\s+of\s+([\d,]+)\s+target)?(.*)$/m);if(!m)return null;
+    function num(x){return x?parseFloat(String(x).replace(/,/g,'')):0;}
+    function g(re,s){var x=(s||'').match(re);return x?num(x[1]):0;}
+    var n={cal:num(m[1]),target:num(m[2]),prot:g(/protein\s+([\d.]+)/i,m[3]),carbs:g(/carbs\s+([\d.]+)/i,m[3]),fat:g(/fat\s+([\d.]+)/i,m[3]),micros:{}};
+    n.water=g(/^Fluids:\s*([\d.]+)/m,t);n.quality=g(/^Food quality:\s*([\d.]+)/m,t);
+    return n.cal?n:null;
+  }
   var nuFetched={};
   window.bsWeeklyNutrition=function(keys,labels){
     nuTables(keys,labels);
@@ -64,7 +73,7 @@
     var from=keys[0],to=keys[keys.length-1],sig=from+to;if(nuFetched[sig]&&Date.now()-nuFetched[sig]<2*60000)return;nuFetched[sig]=Date.now();
     fetch(c.db+'/nutrition/'+encodeURIComponent(c.key)+'/beyondstride/daily.json?orderBy=%22%24key%22&startAt=%22'+from+'%22&endAt=%22'+to+'%22').then(function(r){return r.ok?r.json():null;}).then(function(o){
       if(!o)return;var cache=nuCache(),changed=false;
-      Object.keys(o).forEach(function(k){var n=(o[k]||{}).nutrition;if(n&&JSON.stringify(cache[k])!==JSON.stringify(n)){cache[k]=n;changed=true;}});
+      Object.keys(o).forEach(function(k){var n=(o[k]||{}).nutrition||fromText((o[k]||{}).text);if(n&&JSON.stringify(cache[k])!==JSON.stringify(n)){cache[k]=n;changed=true;}});
       if(!changed)return;
       // Keep about four months.
       var cut=new Date();cut.setDate(cut.getDate()-120);var ck=cut.toISOString().slice(0,10);Object.keys(cache).forEach(function(k){if(k<ck)delete cache[k];});
