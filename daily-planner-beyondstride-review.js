@@ -100,6 +100,10 @@
     var from=keys[0],to=keys[keys.length-1],sig=from+to;if(nuFetched[sig]&&Date.now()-nuFetched[sig]<2*60000)return;nuFetched[sig]=Date.now();
     fetch(c.db+'/nutrition/'+encodeURIComponent(c.key)+'/beyondstride/daily.json?orderBy=%22%24key%22&startAt=%22'+from+'%22&endAt=%22'+to+'%22').then(function(r){return r.ok?r.json():null;}).then(function(o){
       if(!o)return;var cache=nuCache(),changed=false;
+      // Sleeping HR for the Wellness tables.
+      var sh={};try{sh=JSON.parse(localStorage.getItem('bs_daily_sleephr')||'{}')||{};}catch(e0){}var shChanged=false;
+      Object.keys(o).forEach(function(k){var v=((o[k]||{}).wellness||{}).sleepHr;if(v&&sh[k]!==v){sh[k]=v;shChanged=true;}});
+      if(shChanged){try{localStorage.setItem('bs_daily_sleephr',JSON.stringify(sh));}catch(e1){}try{if(typeof renderWeekly==='function')renderWeekly();}catch(e2){}}
       Object.keys(o).forEach(function(k){var n=(o[k]||{}).nutrition||fromText((o[k]||{}).text);if(n&&JSON.stringify(cache[k])!==JSON.stringify(n)){cache[k]=n;changed=true;}});
       if(!changed)return;
       // Keep about four months.
