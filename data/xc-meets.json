@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-12T11:29:26+00:00",
+  "updatedAt": "2026-11-12T20:07:00+00:00",
   "source": "Google News searches for cross country meet results",
   "page": "https://michealsizemore1.github.io/ChatGPT-The-Master-App/cross-country.html",
   "meets": [
@@ -57,6 +57,12 @@
     }
   ],
   "results": [
+    {
+      "date": "2026-11-12",
+      "headline": "Lobos Host NCAA Mountain Regional XC Championships Friday at the North Course",
+      "source": "New Mexico Lobos",
+      "url": "https://news.google.com/rss/articles/CBMidEFVX3lxTFBSenBMZW1PQ0YzbWxlMDQ3NHhYM0JaeEJMOC1zeU9uZ1F0TmlWZHVUYllKWWl3NnREenhnQk16dHZkbGhsMDZrekRkTktDWDNFb2xBbWI2Nkh6Mkh1X045WFFvOURVLUgwNWItcFNlUUkteWFf?oc=5"
+    },
     {
       "date": "2026-11-12",
       "headline": "Follow the 2026 NCAA Cross Country Mountain Regional Championships live results, team scores, race start times",
@@ -140,12 +146,6 @@
       "headline": "Rachael Withrow Wins Gold, Becomes Second Women’s XC Conference Champion in Program History",
       "source": "Marshall University Athletics",
       "url": "https://news.google.com/rss/articles/CBMi1wFBVV95cUxQQ1V0QU5Za2FZbzllWW8tNWhLOWszbEtTZ2FMUjgxWjN6UTVlZ2hLbG5VSS1BdG5kS3Q3UjBTeFZUcXRmUGE1RThlcnctRU5wQ2paWmpSZGludmpzbkRyeHJYc0hoWGlZQWc5c1hJcEk2VWtLZ20wcEZwUXVFdzhvY1hRXzhIeXFXbFBqNnpBRGpMLVVoWFZuSmU2OHcwc3J5ZTVPS19PS3B5Zjd2RURJZjgxc3FoejRoa29PbHpuai1WQTR4X0FsZ2otdl9qYUdEM0FtWDJXQQ?oc=5"
-    },
-    {
-      "date": "2026-10-30",
-      "headline": "Women’s Cross Country Wins Back-to-Back MEAC Championships",
-      "source": "Howard University Athletics",
-      "url": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxONi1wbTVfODBCajRVMXdJdUowRHBSMzJJZ19pUDBJNzMzVzRXZzNRQnJ5ODZzT0g0aV95RU16OWp1ZWV0YV81WklIbm5mZVZoQTluNkYwVHIxckc3NTRvU3VLQXZscEItLXVLQ2g4VkZUcjNlY2RQRDhOS1lvTnpuMWg0TXdwWmxIU2Z1M2Z1Z0JfMHdLVElIemR0MDVwVTFGZklQQTFhczBWc3dHYlRhb3hoNjBnZEFmazZv?oc=5"
     }
   ]
 }
