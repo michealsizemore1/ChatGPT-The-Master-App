@@ -1,6 +1,6 @@
 
 let today=new Date();const _realToday=new Date(today);// snapshot of actual launch date — never changes with navigation
-const charts={};let waterOz=0,sportsDrinksOz=0,otherLiquidsOz=0,autoSportsDrinksOz=0,autoOtherLiquidsOz=0,scoreVal=0,copiedDayData=null;
+const charts={};let scoreVal=0,copiedDayData=null;
 function dk(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return y+'-'+m+'-'+day;}
 function fmtD(d){return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});}
 function wkStart(off=0){const t=new Date();t.setDate(t.getDate()+off*7);const dow=(t.getDay()+6)%7;const ws=new Date(t);ws.setDate(t.getDate()-dow);ws.setHours(0,0,0,0);return ws;}
@@ -134,7 +134,7 @@ function updateCompactSectionCounts(){
   var physical=document.getElementById('physicalExerciseCount');
   if(task)task.textContent=compactDoneCount(['pt0c','pt1c','pt2c'])+'/3';
   if(goals)goals.textContent=compactDoneCount(['dg0c','dg1c','dg2c'])+'/3';
-  if(physical)physical.textContent=compactDoneCount(['exStrength','exWalk','exDogWalk'])+'/3';
+  if(physical)physical.textContent=compactDoneCount(['exDogWalk','exStepsCheck'])+'/2';
 }
 function toggleAITools(){
   toggleCompactSection('aiToolsBody','aiToolsArrow',document.getElementById('aiToolsToggle'));
@@ -146,7 +146,7 @@ function toggleTabNotes(){
 var dailyCheckFilter='all';
 var DAILY_CHECK_TAB_NAMES={
   daily:'Daily',activities:'Activities',bible:'Bible',meditate:'Meditation',
-  wellness:'Wellness',nutrition:'Nutrition',library:'Library',
+  wellness:'Wellness',library:'Library',
   'skill-log':'Learning & Growth',habits:'Habits'
 };
 function dailyCheckLabel(el){
@@ -272,12 +272,6 @@ function jumpToDailyCheck(btn){
   },80);
 }
 
-function updateWaterDisplay(){const cups=(waterOz/8).toFixed(1);const el=document.getElementById('waterDisplay');if(el)el.textContent=waterOz+' oz ('+cups+' cups)';}
-function changeWater(delta){waterOz=Math.max(0,waterOz+delta);updateWaterDisplay();save();renderJournalSchedule();}
-function updateSportsDrinksDisplay(){const cups=(sportsDrinksOz/8).toFixed(1);const el=document.getElementById('sportsDrinksDisplay');if(el)el.textContent=sportsDrinksOz+' oz ('+cups+' cups)';}
-function changeSportsDrinks(delta){sportsDrinksOz=Math.max(0,sportsDrinksOz+delta);updateSportsDrinksDisplay();save();}
-function updateOtherLiquidsDisplay(){const cups=(otherLiquidsOz/8).toFixed(1);const el=document.getElementById('otherLiquidsDisplay');if(el)el.textContent=otherLiquidsOz+' oz ('+cups+' cups)';}
-function changeOtherLiquids(delta){otherLiquidsOz=Math.max(0,otherLiquidsOz+delta);updateOtherLiquidsDisplay();save();}
 function syncMassageMinutes(source){
   var daily=document.getElementById('dailyMassageMinutes'),activities=document.getElementById('exMassageMinutes');
   if(source==='daily'&&daily&&activities)activities.value=daily.value;
@@ -288,7 +282,7 @@ function parseBP(s){if(!s)return{sys:0,dia:0};const m=s.match(/(\d+)\s*\/\s*(\d+
 function buildStars(){const ss=document.getElementById('scoreStars');if(!ss)return;ss.innerHTML='';for(let i=1;i<=5;i++){const s=document.createElement('span');s.className='star'+(i<=scoreVal?' active':'');s.textContent='★';s.onclick=()=>{scoreVal=(scoreVal===i)?i-1:i;buildStars();save();};ss.appendChild(s);}updateTodayGlance();}
 
 // All text/number fields
-const TXS=['spDailyBreadText','spMeditationText','gaAudiobookText','gaAudiobookTime','gaSkillText','gaSkillTime','wBPVal','wPulseVal','wRestHRVal','wMedsVal','wWghtVal','wSleepVal','exStrengthVal','exBikeVal','exWalkVal','exDogWalkVal','nuCalVal','nuProtVal','nuFatVal','nuCarbsVal','jAccomplish','jImprov','jGratitude','jNotes','habitIdentity','habitReflection','mnotes-breakfast','mnotes-lunch','mnotes-dinner','mnotes-snack','mnotes-liquids','mnotes-sports','mnotes-supplements'];
+const TXS=['spDailyBreadText','spMeditationText','gaAudiobookText','gaAudiobookTime','gaSkillText','gaSkillTime','wBPVal','wPulseVal','wRestHRVal','wMedsVal','wWghtVal','wSleepVal','exBikeVal','exDogWalkVal','jAccomplish','jImprov','jGratitude','jNotes','habitIdentity','habitReflection'];
 const NMS=['exSteps','wSleepScore','exMassageMinutes','gaFinancialVideosTime'];
 const PTIDS=['pt0','pt1','pt2','dg0','dg1','dg2'];
 
@@ -305,8 +299,7 @@ function save(){
   NMS.forEach(id=>{const e=document.getElementById(id);if(e)d[id]=e.value;});
   // Priority/goal text
   PTIDS.forEach(id=>{const row=document.getElementById(id);if(row){const tx=row.querySelector('input[type=text]');if(tx)d[id+'t']=tx.value;}});
-  d.waterOz=waterOz;d.sportsDrinksOz=sportsDrinksOz;d.otherLiquidsOz=otherLiquidsOz;d.autoSportsDrinksOz=autoSportsDrinksOz;d.autoOtherLiquidsOz=autoOtherLiquidsOz;d.score=scoreVal;
-  d.foodLog=window._foodLog||[];
+  d.score=scoreVal;
   try{
     localStorage.setItem('planner_'+dk(today),JSON.stringify(d));
   }catch(saveErr){
@@ -326,238 +319,6 @@ function save(){
 
 
 // ── Today's Workout from Training Plan ───────────────────────────────────────
-function initTodayWorkoutCard(){
-  const raw=localStorage.getItem('current_training_plan');
-  const card=document.getElementById('todayWorkoutCard');
-  if(!raw||!card){if(card)card.style.display='none';return;}
-  const plan=JSON.parse(raw);
-
-  // ── Compute day number ──────────────────────────────────────────────────
-  let dayNum=0,weekNum=0,dayOfWk=0,isFinal=false,beforeStart=false;
-  if(plan.startDate){
-    const startD=new Date(plan.startDate+'T00:00:00');
-    const viewD=new Date(dk(today)+'T00:00:00');
-    dayNum=Math.floor((viewD-startD)/86400000)+1;
-    if(dayNum<1){ beforeStart=true; }
-    else {
-      weekNum=Math.ceil(dayNum/7);
-      dayOfWk=((dayNum-1)%7)+1;
-      const totalDays=(plan.weeks||0)*7;
-      isFinal=totalDays>0&&dayNum===totalDays;
-    }
-  }
-
-  // ── Hide card before plan start date OR on plan Day 1 if it's a rest/recovery day ─
-  if(beforeStart){ card.style.display='none'; return; }
-  // If dayNum===1 and the plan's first entry is a pure rest day, hide the card
-  if(dayNum===1&&plan.text){
-    const firstLines=(plan.text.split('\n').slice(0,8).join(' ')).toLowerCase();
-    if(/rest\s*day|no\s*scheduled\s*workout|recovery/.test(firstLines)){
-      card.style.display='none'; return;
-    }
-  }
-  card.style.display='block';
-
-  // ── Day label + race countdown ─────────────────────────────────────────
-  const dateLabel=today.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
-  let dayBadge='';
-  if(weekNum>0){
-    dayBadge=isFinal?' (Week '+weekNum+', Day '+dayOfWk+' — Final Day 🎉)':' (Week '+weekNum+', Day '+dayOfWk+')';
-  }
-  const el=document.getElementById('twDayLabel');if(el)el.textContent=dateLabel+dayBadge;
-  // Race countdown
-  const raceEl=document.getElementById('twRaceCountdown');
-  if(raceEl){
-    // Priority: 1) user-confirmed raceDate  2) auto-detect from plan text  3) stored raceDate  4) startDate+weeks
-    let raceD=null;
-    if(plan.raceDate&&plan.raceDateConfirmed){raceD=new Date(plan.raceDate+'T00:00:00');}
-    if(!raceD&&plan.text){
-      const ad=detectRaceDateFromPlan(plan.text);
-      if(ad){
-        raceD=new Date(ad+'T00:00:00');
-        // Silently save auto-detected date so it persists
-        if(!plan.raceDateConfirmed&&plan.raceDate!==ad){
-          plan.raceDate=ad;localStorage.setItem('current_training_plan',JSON.stringify(plan));
-        }
-      }
-    }
-    if(!raceD&&plan.raceDate){raceD=new Date(plan.raceDate+'T00:00:00');}
-    if(!raceD&&plan.startDate&&plan.weeks){raceD=new Date(plan.startDate+'T00:00:00');raceD.setDate(raceD.getDate()+(plan.weeks*7));}
-    if(raceD){
-      // Always count from the real current date, not the browsed date
-      const realD=new Date(dk(_realToday)+'T00:00:00');
-      const daysToRace=Math.ceil((raceD-realD)/86400000);
-      if(daysToRace>0){
-        const raceDateStr=raceD.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-        raceEl.textContent='🏁 '+daysToRace+' day'+(daysToRace!==1?'s':'')+' to race day ('+raceDateStr+')';
-        raceEl.style.display='block';
-      } else if(daysToRace===0){
-        raceEl.textContent='🏁 Race day!';raceEl.style.display='block';
-      } else {
-        raceEl.style.display='none';
-      }
-    } else {raceEl.style.display='none';}
-  }
-
-  // ── Start-date setter row ───────────────────────────────────────────────
-  const sdr=document.getElementById('twStartDateRow');
-  const sdi=document.getElementById('twStartDateInput');
-  if(sdr){
-    if(!plan.startDate){
-      sdr.style.display='block';
-      if(sdi)sdi.value=dk(new Date());
-    } else {
-      sdr.style.display='none';
-      // One-time auto-clear of stale caches when startDate is present
-      const clearedKey='tw_caches_cleared_v2_'+plan.startDate;
-      if(!localStorage.getItem(clearedKey)){
-        const toRemove=[];
-        for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('workout_cache_'))toRemove.push(k);}
-        toRemove.forEach(k=>localStorage.removeItem(k));
-        localStorage.setItem(clearedKey,'1');
-      }
-    }
-  }
-
-  // ── Collapsed state ─────────────────────────────────────────────────────
-  if(localStorage.getItem('tw_collapsed')==='1'){
-    const twB=document.getElementById('twBody');
-    const twCBtn=document.getElementById('twCollapseBtn');
-    if(twB)twB.style.display='none';
-    if(twCBtn)twCBtn.innerHTML='&#x25B8;';
-  }
-
-  // ── Cache check ─────────────────────────────────────────────────────────
-  const cacheKey='workout_cache_'+dk(today);
-  let cached=localStorage.getItem(cacheKey);
-  const twBodyEl=document.getElementById('twBody');
-  const twBtn=document.getElementById('twLoadBtn');
-  const plannedForDate=extractWorkoutFromActivePlan(plan,today);
-  if(plannedForDate){
-    cached=plannedForDate.replace(/^#+\s*/gm,'').replace(/\*\*([^*]+)\*\*/g,'$1').replace(/\*([^*]+)\*/g,'$1').replace(/^---+$/gm,'').trim();
-    localStorage.setItem(cacheKey,cached);
-  }
-  if(cached){
-    // Stale cache detection: if cached text mentions a different month+day, purge it
-    const viewMonDay=new Date(dk(today)+'T00:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric'}).toLowerCase();
-    const hasDate=/\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2}\b/i.test(cached);
-    if(hasDate&&!cached.toLowerCase().includes(viewMonDay)){
-      localStorage.removeItem(cacheKey);
-      cached=null;
-    }
-  }
-  if(cached){
-    if(twBodyEl)twBodyEl.textContent=cached;
-    if(twBtn)twBtn.style.display='none';
-    updateDaysOut(plan);
-    return;
-  }
-
-  // ── No cache: auto-fetch if AI key exists, else show button ─────────────
-  const aiKey=journalAIKey();
-  if(aiKey&&plan.startDate&&dayNum>=1){
-    if(twBodyEl)twBodyEl.textContent='⏳ Loading workout…';
-    if(twBtn)twBtn.style.display='none';
-    loadTodayWorkout();
-  } else {
-    if(twBodyEl)twBodyEl.textContent='Tap “Load Workout” to see this day’s scheduled session.';
-    if(twBtn){twBtn.style.display='inline-block';twBtn.disabled=false;twBtn.textContent='Load Workout';}
-  }
-  updateDaysOut(plan);
-}
-function detectRaceDateFromPlan(text){
-  // Scan plan text for all "Month Day, Year" dates; find the latest.
-  // If the latest entry mentions "race", use that date. Otherwise use latest+1 day (race day after last plan entry).
-  const mo={january:1,february:2,march:3,april:4,may:5,june:6,july:7,august:8,september:9,october:10,november:11,december:12};
-  const re=/\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{1,2}),?\s+(202\d)\b/gi;
-  let latest=null,latestIsRace=false,m;
-  while((m=re.exec(text))!==null){
-    const d=new Date(parseInt(m[3]),mo[m[1].toLowerCase()]-1,parseInt(m[2]));
-    const ctx=text.slice(Math.max(0,m.index-60),m.index+m[0].length+60).toLowerCase();
-    const isRace=/\brace\b/.test(ctx);
-    if(!latest||d>latest){latest=d;latestIsRace=isRace;}
-    else if(isRace&&d.getTime()===latest.getTime()){latestIsRace=true;}
-  }
-  if(!latest)return null;
-  if(!latestIsRace)latest.setDate(latest.getDate()+1); // race day is the day after last plan entry
-  return latest.toISOString().slice(0,10);
-}
-function editWorkoutStartDate(){
-  const sdr=document.getElementById('twStartDateRow');
-  const sdi=document.getElementById('twStartDateInput');
-  const rdi=document.getElementById('twRaceDateInput');
-  if(!sdr)return;
-  const raw=localStorage.getItem('current_training_plan');
-  if(raw){
-    const plan=JSON.parse(raw);
-    if(sdi)sdi.value=plan.startDate||dk(new Date());
-    if(rdi)rdi.value=plan.raceDate||'';
-  }
-  sdr.style.display=sdr.style.display==='none'?'block':'none';
-}
-function setWorkoutRaceDate(){
-  const dateVal=(document.getElementById('twRaceDateInput')||{}).value||'';
-  if(!dateVal){alert('Pick a race date first.');return;}
-  const raw=localStorage.getItem('current_training_plan');
-  if(!raw)return;
-  const plan=JSON.parse(raw);
-  plan.raceDate=dateVal;
-  plan.raceDateConfirmed=true; // user explicitly set — takes priority over auto-detection
-  // Update weeks if startDate known
-  if(plan.startDate){
-    const ms=new Date(dateVal+'T00:00:00')-new Date(plan.startDate+'T00:00:00');
-    const w=Math.round(ms/(7*24*60*60*1000));
-    if(w>0&&w<=52)plan.weeks=w;
-  }
-  localStorage.setItem('current_training_plan',JSON.stringify(plan));
-  const sdr=document.getElementById('twStartDateRow');if(sdr)sdr.style.display='none';
-  renderTrainingCard();
-  renderJournalHome();
-}
-function setWorkoutStartDate(){
-  const dateVal=(document.getElementById('twStartDateInput')||{}).value||'';
-  if(!dateVal){alert('Pick a date first.');return;}
-  const raw=localStorage.getItem('current_training_plan');
-  if(!raw)return;
-  const plan=JSON.parse(raw);
-  plan.startDate=dateVal;
-  if(plan.scheduleMode==='weekly')plan.schedule=buildUploadedTrainingSchedule(plan.text,dateVal,plan.weeks).schedule;
-  localStorage.setItem('current_training_plan',JSON.stringify(plan));
-  // Clear all old workout caches so they re-fetch with correct day numbers
-  const keysToRemove=[];
-  for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('workout_cache_'))keysToRemove.push(k);}
-  keysToRemove.forEach(k=>localStorage.removeItem(k));
-  const sdr=document.getElementById('twStartDateRow');if(sdr)sdr.style.display='none';
-  const body=document.getElementById('twBody');
-  if(body)body.textContent='Start date saved ('+dateVal+'). Tap Load Workout to get the correct workout for each day.';
-  const btn=document.getElementById('twLoadBtn');if(btn)btn.style.display='inline-block';
-  renderJournalHome();
-}
-function refreshTodayWorkout(){
-  // Clear cache for viewed day and auto-reload
-  localStorage.removeItem('workout_cache_'+dk(today));
-  const body=document.getElementById('twBody');
-  if(body)body.textContent='⏳ Refreshing…';
-  const btn=document.getElementById('twLoadBtn');
-  if(btn)btn.style.display='none';
-  renderJournalHome();
-  loadTodayWorkout();
-}
-function toggleWorkoutCard(){
-  const body=document.getElementById('twBody');
-  const btn=document.getElementById('twCollapseBtn');
-  if(!body)return;
-  const isCollapsed=body.style.display==='none';
-  body.style.display=isCollapsed?'block':'none';
-  if(btn)btn.innerHTML=isCollapsed?'&#x25BE;':'&#x25B8;';
-  localStorage.setItem('tw_collapsed',isCollapsed?'0':'1');
-}
-function updateDaysOut(plan){
-  const created=plan.createdAt||'';
-  const el=document.getElementById('twDaysOut');
-  if(el&&created)el.textContent='Plan created: '+created;
-}
-// Extract workout by position (day number from plan start) — immune to date format mismatches
 function extractWorkoutByPosition(planText, dayNum){
   if(!planText||dayNum<1)return null;
   const lines=planText.split('\n');
@@ -647,97 +408,6 @@ function extractWorkoutFromActivePlan(plan,targetDate,allowPosition){
   return allowPosition===false?null:extractWorkoutByPosition(plan.text,dayNum);
 }
 
-function loadTodayWorkout(){
-  const raw=localStorage.getItem('current_training_plan');
-  if(!raw){alert('No active training plan found. Generate a plan in the Activities tab first.');return;}
-  const plan=JSON.parse(raw);
-  const key=journalAIKey();
-  if(!key){alert('Add your Anthropic API key in ⚙️ Settings first.');return;}
-  const btn=document.getElementById('twLoadBtn');
-  const body=document.getElementById('twBody');
-  if(btn){btn.disabled=true;btn.textContent='⏳ Loading...';}
-
-  // ── Step 0: Positional extraction — find Nth day entry by plan day number ─
-  let _dayNumPos=0;
-  if(plan.startDate){
-    const _sd=new Date(plan.startDate+'T00:00:00');
-    const _vd=new Date(dk(today)+'T00:00:00');
-    _dayNumPos=Math.floor((_vd-_sd)/86400000)+1;
-  }
-  if(_dayNumPos>=1){
-    const posResult=extractWorkoutFromActivePlan(plan,today);
-    if(posResult){
-      const cleaned=posResult
-        .replace(/^#+\s*/gm,'').replace(/\*\*([^*]+)\*\*/g,'$1')
-        .replace(/\*([^*]+)\*/g,'$1').replace(/^---+$/gm,'').trim();
-      if(btn){btn.disabled=false;btn.style.display='none';}
-      if(body){body.textContent=cleaned;body.style.display='block';}
-      localStorage.setItem('workout_cache_'+dk(today),cleaned);
-      return;
-    }
-  }
-
-  // ── Step 1: Try direct text extraction (no AI, exact date match) ─────────
-  const extracted=extractWorkoutSection(plan.text,today);
-  if(extracted){
-    // Clean up markdown formatting for display
-    const cleaned=extracted
-      .replace(/^#+\s*/gm,'')          // remove ## headers
-      .replace(/\*\*([^*]+)\*\*/g,'$1') // remove bold markers
-      .replace(/\*([^*]+)\*/g,'$1')     // remove italic markers
-      .replace(/^---+$/gm,'')           // remove horizontal rules
-      .trim();
-    // Check if this looks like a rest day
-    const isRest=/rest\s*day|no\s*(scheduled\s*)?workout|recovery\s*day|off\s*day/i.test(cleaned);
-    if(btn){btn.disabled=false;btn.style.display='none';}
-    if(body){body.textContent=cleaned;body.style.display='block';}
-    localStorage.setItem('workout_cache_'+dk(today),cleaned);
-    return;
-  }
-  // ── Step 1b: Check if today is a rest/off day by week position ──────────
-  // Scan plan text for today's weekday + "rest" without needing an exact date
-  const todayName=today.toLocaleDateString('en-US',{weekday:'long'}).toLowerCase();
-  const planLines=(plan.text||'').split('\n');
-  for(let i=0;i<planLines.length;i++){
-    const lower=planLines[i].toLowerCase();
-    if(lower.includes(todayName)&&(/rest|off day|no run|recovery/.test(lower))){
-      const msg='Rest Day / No workout scheduled for '+today.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'})+'.';
-      if(btn){btn.disabled=false;btn.style.display='none';}
-      if(body){body.textContent=msg;body.style.display='block';}
-      localStorage.setItem('workout_cache_'+dk(today),msg);
-      return;
-    }
-  }
-
-  // ── Step 2: Fallback to AI if date not found in plan text ────────────────
-  const viewDate=new Date(dk(today)+'T00:00:00');
-  const fullDate=viewDate.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
-  let dayCtx='';
-  if(plan.startDate){
-    const startD=new Date(plan.startDate+'T00:00:00');
-    const dayNum=Math.floor((viewDate-startD)/86400000)+1;
-    if(dayNum>=1){
-      const weekNum=Math.ceil(dayNum/7);
-      const dayOfWk=((dayNum-1)%7)+1;
-      dayCtx=' (Week '+weekNum+', Day '+dayOfWk+' — Day '+dayNum+' overall)';
-    }
-  }
-  const prompt='Training plan:\n\n'+plan.text+'\n\nReturn ONLY the workout for: '+fullDate+dayCtx+'. Be concise — type, distance, pace, notes. If rest day say so.';
-  fetch('https://api.anthropic.com/v1/messages',{
-    method:'POST',
-    headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1000,messages:[{role:'user',content:prompt}]})
-  }).then(r=>r.json()).then(data=>{
-    if(btn){btn.disabled=false;btn.style.display='none';}
-    if(data.error){if(body)body.textContent='Error: '+data.error.message;return;}
-    const text=(data.content[0].text||'').trim();
-    if(body){body.textContent=text;body.style.display='block';}
-    localStorage.setItem('workout_cache_'+dk(today),text);
-  }).catch(err=>{
-    if(btn){btn.disabled=false;btn.textContent='Load Workout';}
-    if(body)body.textContent='Error: '+err.message;
-  });
-}
 function load(){
   const raw=localStorage.getItem('planner_'+dk(today));
   const d=raw?JSON.parse(raw):{};
@@ -746,7 +416,6 @@ function load(){
   if(_cdEl)_cdEl.textContent=fmtD(today);
   updateMobileWeekIndicator();
   updateMobileYearProgress();
-  try{initTodayWorkoutCard();}catch(e){console.error('initTodayWorkoutCard:',e);}
   try{
     // Tri-state checkboxes
     document.querySelectorAll('.tri-check').forEach(el=>{if(el.dataset.key)applyTriState(el,d[el.dataset.key]||'');});
@@ -769,48 +438,11 @@ function load(){
     NMS.forEach(id=>{const e=document.getElementById(id);if(e)e.value=d[id]||'';});
     const dailyMassage=document.getElementById('dailyMassageMinutes');if(dailyMassage)dailyMassage.value=d.exMassageMinutes||'';
     const jcEl=document.getElementById('jCombined');if(jcEl)jcEl.value=buildJournalCombined();
-    waterOz=d.waterOz||(d.waterCount?d.waterCount*8:0);updateWaterDisplay();
-    sportsDrinksOz=d.sportsDrinksOz||0;updateSportsDrinksDisplay();
-    otherLiquidsOz=d.otherLiquidsOz||0;updateOtherLiquidsDisplay();
-    autoSportsDrinksOz=d.autoSportsDrinksOz||0;autoOtherLiquidsOz=d.autoOtherLiquidsOz||0;
     scoreVal=d.score||0;buildStars();renderDayReview();
   }catch(e){console.error('load fields:',e);}
   attachListeners();
   attachAllFieldUndos();
-  window._foodLog=Array.isArray(d.foodLog)?d.foodLog:[];
-  // Migrate old food_YYYY-MM-DD storage format if new format is empty
-  if(!window._foodLog.length){
-    var oldFoodRaw=localStorage.getItem('food_'+dk(today));
-    if(oldFoodRaw){
-      try{
-        var oldItems=JSON.parse(oldFoodRaw);
-        if(Array.isArray(oldItems)&&oldItems.length){
-          window._foodLog=oldItems.map(function(it,i){
-            if(!it.id)it.id='f'+Date.now()+'_'+i;
-            return it;
-          });
-          save(); // persist in new location
-          localStorage.removeItem('food_'+dk(today)); // clean up old key
-        }
-      }catch(e){}
-    }
-  }
-  renderFoodItems();
-  try{renderGusisPicker();}catch(e){console.error('renderGusisPicker:',e);}
   try{renderStreaks();}catch(e){console.error('renderStreaks:',e);}
-  // Restore nutrition card state
-  (function(){
-    var mpBody=document.getElementById('mpBody');
-    var nutrBody=document.getElementById('nutrBody');
-    if(mpBody){
-      var mpOpen=localStorage.getItem('mp_open');
-      if(mpOpen==='0'){mpBody.style.display='none';var chev=mpBody.previousElementSibling&&mpBody.previousElementSibling.querySelector('.mp-chev');if(chev)chev.textContent='▸';}
-    }
-    if(nutrBody){
-      var nuOpen=localStorage.getItem('nu_open');
-      if(nuOpen==='0'){nutrBody.style.display='none';var chev2=nutrBody.previousElementSibling&&nutrBody.previousElementSibling.querySelector('.nu-chev');if(chev2)chev2.textContent='▸';}
-    }
-  })();
   renderJournalHome();
   // Daily checkmarks are now fully restored; refresh linked schedule counts once more.
   setTimeout(renderJournalSchedule,0);
@@ -947,10 +579,30 @@ function journalTrainingCalendarLabel(section){
   for(var i=0;i<labels.length;i++)if(labels[i][0].test(text))return labels[i][1];
   return /\b\d+(?:\.\d+)?\s*(?:mi|miles?|km)\b/i.test(text)?'Scheduled Run':'';
 }
+// BeyondStride's plan text for a day (yyyy-mm-dd), '' when it hasn't shared that day.
+function bsPlanText(dateKey){try{var bs=JSON.parse(localStorage.getItem('bs_plan_days')||'null');return bs&&bs.days&&bs.days[dateKey]?String(bs.days[dateKey]):'';}catch(e){return'';}}
+function bsPlanCovers(dateKey){try{var bs=JSON.parse(localStorage.getItem('bs_plan_days')||'null');if(!bs||!bs.days)return false;if(!bs.at)return !!bs.days[dateKey];var from=new Date();from.setDate(from.getDate()-7);var to=new Date();to.setDate(to.getDate()+21);return dateKey>=journalCalendarRealDateKey(from)&&dateKey<=journalCalendarRealDateKey(to);}catch(e){return false;}}
+// Today's workout as BeyondStride's plan has it ("Recovery 3 miles"), without the date or markdown.
+function journalTrainingHeadline(section){
+  var line=String(section||'').split(/\r?\n/).map(function(l){return l.trim();}).filter(function(l){return l&&!/^[↪⇄↘＋]/.test(l);})[0]||'';
+  line=line.replace(/^[#*>\-\s]+/,'').replace(/\*\*/g,'').replace(/^(mon|tue|wed|thu|fri|sat|sun)[a-z]*\.?,?\s+[a-z]{3,9}\.?\s+\d{1,2}(,\s*\d{4})?\s*[:\-–—]\s*/i,'').replace(/^(day\s*\d+|mon|tue|wed|thu|fri|sat|sun)[a-z]*\s*[:\-–—]\s*/i,'');
+  return line.length>70?line.slice(0,67)+'…':line;
+}
 function journalTrainingCalendarEvents(){
-  var plan=null;try{plan=JSON.parse(localStorage.getItem('current_training_plan')||'null');}catch(ignore){}if(!plan||!plan.text||!plan.startDate)return[];
-  var schedule=plan.schedule&&Object.keys(plan.schedule).length?plan.schedule:buildUploadedTrainingSchedule(plan.text,plan.startDate,plan.weeks||1).schedule;
-  return Object.keys(schedule||{}).map(function(date){var section=String(schedule[date]||''),label=journalTrainingCalendarLabel(section),hasRunWords=/\b(run|race|intervals?|repeats?|speed\s*work|tempo|threshold|recovery|progression)\b/i.test(section)||/\b\d+(?:\.\d+)?\s*(?:E|EZ|M|MP|T|LT|I|R|L|LR|MLR|GA)\b/.test(section);if(!label||/\b(rest\s*day|no\s+(?:workout|run))\b/i.test(section)||(/\bwalk(?:ing)?\b/i.test(section)&&!hasRunWords)||(/\b(strength|cross[- ]training)\b/i.test(section)&&!hasRunWords))return null;var detail=section.split(/\r?\n/).map(function(line){return line.trim();}).filter(Boolean).slice(0,3).join(' · ');return{id:'training-plan-'+date,date:date,time:'',title:label,note:detail+' · Add the start time in My Schedule',noReminder:true,trainingPlan:true};}).filter(Boolean);
+  var plan=null;try{plan=JSON.parse(localStorage.getItem('current_training_plan')||'null');}catch(ignore){}
+  var schedule={};
+  if(plan&&plan.text&&plan.startDate)schedule=plan.schedule&&Object.keys(plan.schedule).length?plan.schedule:buildUploadedTrainingSchedule(plan.text,plan.startDate,plan.weeks||1).schedule;
+  // BeyondStride holds the training plan now: its days win (a week back, three weeks ahead).
+  var bs=null;try{bs=JSON.parse(localStorage.getItem('bs_plan_days')||'null');}catch(ignoreBs){}
+  if(bs&&bs.days){
+    schedule=Object.assign({},schedule||{});
+    var from=new Date();from.setDate(from.getDate()-7);var to=new Date();to.setDate(to.getDate()+21);
+    var f=journalCalendarRealDateKey(from),t=journalCalendarRealDateKey(to);
+    if(bs.at)Object.keys(schedule).forEach(function(d){if(d>=f&&d<=t&&!bs.days[d])delete schedule[d];});
+    Object.keys(bs.days).forEach(function(d){schedule[d]=bs.days[d];});
+  }
+  if(!schedule||!Object.keys(schedule).length)return[];
+  return Object.keys(schedule||{}).map(function(date){var section=String(schedule[date]||''),label=journalTrainingCalendarLabel(section),hasRunWords=/\b(run|race|intervals?|repeats?|speed\s*work|tempo|threshold|recovery|progression)\b/i.test(section)||/\b\d+(?:\.\d+)?\s*(?:E|EZ|M|MP|T|LT|I|R|L|LR|MLR|GA)\b/.test(section);if(!label||/\b(rest\s*day|no\s+(?:workout|run))\b/i.test(section)||(/\bwalk(?:ing)?\b/i.test(section)&&!hasRunWords)||(/\b(strength|cross[- ]training)\b/i.test(section)&&!hasRunWords))return null;var detail=section.replace(/\*\*/g,'').split(/\r?\n/).map(function(line){return line.trim();}).filter(Boolean).slice(0,3).join(' · ');return{id:'training-plan-'+date,date:date,time:'',title:(journalTrainingHeadline(section)||label),note:detail+' · Add the start time in My Schedule',noReminder:true,trainingPlan:true};}).filter(Boolean);
 }
 function journalGrowthHabitCalendarInfo(habit){
   var source=String(habit.autoSource||'').toLowerCase(),name=String(habit.name||'').toLowerCase();
@@ -1400,8 +1052,7 @@ function renderStreaks(){
   const DEFS=[
     {id:'stBible',  label:'📖',  tip:'Bible',    fn:d=>d.spBibleAudio==='green'},
     {id:'stPrayer', label:'🙏',  tip:'Prayer',   fn:d=>d.spAIPrayer==='green'},
-    {id:'stExercise',label:'🏃', tip:'Running',  fn:(d,dk)=>d.exRun==='green'||!!actIdx.run[dk]},
-    {id:'stWater',  label:'💧',  tip:'Water',    fn:d=>(parseFloat(d.waterOz)||parseFloat(d.waterCount)*8||0)>=64}
+    {id:'stExercise',label:'🏃', tip:'Running',  fn:(d,dk)=>d.exRun==='green'||!!actIdx.run[dk]}
   ];
   DEFS.forEach(({id,label,tip,fn})=>{
     const n=streak(fn,_streakCache);
@@ -1424,8 +1075,8 @@ function getDM(d,dateKey){
       if(a.pace&&parsePace(a.pace)){actPace+=parsePace(a.pace);actPaceN++;}
     });
   }
-  const bp=parseBP(d.wBPVal);const waterOzDay=parseFloat(d.waterOz)||(parseFloat(d.waterCount)*8||0);return{miles:actMiles,pace:actPaceN?actPace/actPaceN:0,watts:actWattsN?actWatts/actWattsN:0,time:actTime,steps:parseFloat(d.exSteps)||0,stretch:parseTimedMins(d.exStretchVal)||0,massage:parseFloat(d.exMassageMinutes)||parseTimedMins(d.exMassageVal)||0,score:parseFloat(d.score)||0,weight:parseFloat(d.wWghtVal)||0,sleep:parseSleepMins(d.wSleepVal),sleepScore:parseFloat(d.wSleepScore)||0,calories:parseFloat(d.nuCalVal)||0,water:waterOzDay,liquidsNoCaf:waterOzDay+(parseFloat(d.sportsDrinksOz)||0)+(parseFloat(d.otherLiquidsOz)||0),audiobook:journalAudiobookMinutesForDate(dateKey,d),financialVideos:parseTimedMins(d.gaFinancialVideosTime),financialVideosDone:d.gaFinancialVideos==='green'?1:0,skill:parseMins(d.gaSkillTime),skillName:d.gaSkillText||'',skillDone:d.gaSkill==='green'?1:0,bpSys:bp.sys,bpDia:bp.dia,pulse:parseFloat(d.wPulseVal)||0,restHR:parseFloat(d.wRestHRVal)||0,dogWalk:parseFloat(d.exDogWalkVal)||(d.exDogWalk==='green'?1:0),walk:parseFloat(d.exWalkVal)||(d.exWalk==='green'?1:0),headache:d.wHeadache==='green'?1:0};}
-function agg(arr){const t={miles:0,pace:0,watts:0,time:0,steps:0,stretch:0,massage:0,score:0,weight:0,sleep:0,sleepScore:0,calories:0,water:0,audiobook:0,skill:0,skillDone:0,bpSys:0,bpDia:0,pulse:0,restHR:0,dogWalk:0,walk:0,headache:0};const c={pace:0,watts:0,score:0,weight:0,sleep:0,sleepScore:0,bp:0,pulse:0,restHR:0};arr.forEach(m=>{t.miles+=m.miles;t.time+=m.time;t.steps+=m.steps;t.stretch+=(m.stretch||0);t.massage+=(m.massage||0);t.calories+=m.calories;t.water+=m.water;t.audiobook+=m.audiobook;t.skill+=m.skill||0;t.skillDone+=(m.skillDone||0);t.dogWalk+=(m.dogWalk||0);t.walk+=(m.walk||0);t.headache+=(m.headache||0);if(m.pace){t.pace+=m.pace;c.pace++;}if(m.watts){t.watts+=m.watts;c.watts++;}if(m.score){t.score+=m.score;c.score++;}if(m.weight){t.weight+=m.weight;c.weight++;}if(m.sleep){t.sleep+=m.sleep;c.sleep++;}if(m.sleepScore){t.sleepScore+=m.sleepScore;c.sleepScore++;}if(m.bpSys){t.bpSys+=m.bpSys;t.bpDia+=m.bpDia;c.bp++;}if(m.pulse){t.pulse+=m.pulse;c.pulse++;}if(m.restHR){t.restHR+=m.restHR;c.restHR++;}});return{miles:t.miles,pace:c.pace?t.pace/c.pace:0,watts:c.watts?t.watts/c.watts:0,time:t.time,steps:t.steps,stretch:t.stretch,massage:t.massage,calories:t.calories,water:t.water,score:c.score?t.score/c.score:0,weight:c.weight?t.weight/c.weight:0,sleep:c.sleep?t.sleep/c.sleep:0,sleepScore:c.sleepScore?t.sleepScore/c.sleepScore:0,audiobook:t.audiobook,skill:t.skill,skillDone:t.skillDone,bpSys:c.bp?t.bpSys/c.bp:0,bpDia:c.bp?t.bpDia/c.bp:0,pulse:c.pulse?t.pulse/c.pulse:0,restHR:c.restHR?t.restHR/c.restHR:0,dogWalk:t.dogWalk,walk:t.walk,headache:t.headache};}
+  const bp=parseBP(d.wBPVal);return{miles:actMiles,pace:actPaceN?actPace/actPaceN:0,watts:actWattsN?actWatts/actWattsN:0,time:actTime,steps:parseFloat(d.exSteps)||0,stretch:parseTimedMins(d.exStretchVal)||0,massage:parseFloat(d.exMassageMinutes)||parseTimedMins(d.exMassageVal)||0,score:parseFloat(d.score)||0,weight:parseFloat(d.wWghtVal)||0,sleep:parseSleepMins(d.wSleepVal),sleepScore:parseFloat(d.wSleepScore)||0,audiobook:journalAudiobookMinutesForDate(dateKey,d),financialVideos:parseTimedMins(d.gaFinancialVideosTime),financialVideosDone:d.gaFinancialVideos==='green'?1:0,skill:parseMins(d.gaSkillTime),skillName:d.gaSkillText||'',skillDone:d.gaSkill==='green'?1:0,bpSys:bp.sys,bpDia:bp.dia,pulse:parseFloat(d.wPulseVal)||0,restHR:parseFloat(d.wRestHRVal)||0,dogWalk:parseFloat(d.exDogWalkVal)||(d.exDogWalk==='green'?1:0),walk:parseFloat(d.exWalkVal)||(d.exWalk==='green'?1:0),headache:d.wHeadache==='green'?1:0};}
+function agg(arr){const t={miles:0,pace:0,watts:0,time:0,steps:0,stretch:0,massage:0,score:0,weight:0,sleep:0,sleepScore:0,audiobook:0,skill:0,skillDone:0,bpSys:0,bpDia:0,pulse:0,restHR:0,dogWalk:0,walk:0,headache:0};const c={pace:0,watts:0,score:0,weight:0,sleep:0,sleepScore:0,bp:0,pulse:0,restHR:0};arr.forEach(m=>{t.miles+=m.miles;t.time+=m.time;t.steps+=m.steps;t.stretch+=(m.stretch||0);t.massage+=(m.massage||0);t.audiobook+=m.audiobook;t.skill+=m.skill||0;t.skillDone+=(m.skillDone||0);t.dogWalk+=(m.dogWalk||0);t.walk+=(m.walk||0);t.headache+=(m.headache||0);if(m.pace){t.pace+=m.pace;c.pace++;}if(m.watts){t.watts+=m.watts;c.watts++;}if(m.score){t.score+=m.score;c.score++;}if(m.weight){t.weight+=m.weight;c.weight++;}if(m.sleep){t.sleep+=m.sleep;c.sleep++;}if(m.sleepScore){t.sleepScore+=m.sleepScore;c.sleepScore++;}if(m.bpSys){t.bpSys+=m.bpSys;t.bpDia+=m.bpDia;c.bp++;}if(m.pulse){t.pulse+=m.pulse;c.pulse++;}if(m.restHR){t.restHR+=m.restHR;c.restHR++;}});return{miles:t.miles,pace:c.pace?t.pace/c.pace:0,watts:c.watts?t.watts/c.watts:0,time:t.time,steps:t.steps,stretch:t.stretch,massage:t.massage,score:c.score?t.score/c.score:0,weight:c.weight?t.weight/c.weight:0,sleep:c.sleep?t.sleep/c.sleep:0,sleepScore:c.sleepScore?t.sleepScore/c.sleepScore:0,audiobook:t.audiobook,skill:t.skill,skillDone:t.skillDone,bpSys:c.bp?t.bpSys/c.bp:0,bpDia:c.bp?t.bpDia/c.bp:0,pulse:c.pulse?t.pulse/c.pulse:0,restHR:c.restHR?t.restHR/c.restHR:0,dogWalk:t.dogWalk,walk:t.walk,headache:t.headache};}
 function gRow(l,m,t){const b=t?'background:#f8f9fa;font-weight:700':'';const skillCell=m.skillDone?(t?m.skillDone+'d':'✅'):'-';return`<tr style="${b}"><td>${l}</td><td>${fmtMins(m.audiobook)}</td><td>${skillCell}</td></tr>`;}
 function fRow(l,m,t){const b=t?'background:#f8f9fa;font-weight:700':'';return`<tr style="${b}"><td>${l}</td><td>${m.miles?m.miles.toFixed(1):'-'}</td><td>${m.pace?fmtPace(m.pace):'-'}</td><td>${m.watts?Math.round(m.watts):'-'}</td><td>${fmtMins(m.time)}</td><td>${m.steps?Math.round(m.steps):'-'}</td><td>${m.dogWalk?(Math.round(m.dogWalk*10)/10)%1===0?Math.round(m.dogWalk):+(m.dogWalk.toFixed(1)):'-'}</td><td>${m.walk?(Math.round(m.walk*10)/10)%1===0?Math.round(m.walk):+(m.walk.toFixed(1)):'-'}</td></tr>`;}
 function wRow(l,m,t){const b=t?'background:#f8f9fa;font-weight:700':'';const bp=m.bpSys?Math.round(m.bpSys)+'/'+Math.round(m.bpDia):'-';return`<tr style="${b}"><td>${l}</td><td>${m.weight?m.weight.toFixed(1):'-'}</td><td>${m.sleep?fmtMins(m.sleep):'-'}</td><td>${m.sleepScore?m.sleepScore.toFixed(0):'-'}</td><td>${bp}</td><td>${m.pulse?Math.round(m.pulse):'-'}</td><td>${m.restHR?Math.round(m.restHR):'-'}</td></tr>`;}
@@ -1433,63 +1084,11 @@ const gH='<table class="summary-table"><thead><tr><th>Period</th><th>Audiobook</
 const fH='<table class="summary-table"><thead><tr><th>Period</th><th>Miles</th><th>Pace</th><th>Watts</th><th>Time</th><th>Steps</th><th>Dog Walk</th><th>Walk</th></tr></thead><tbody>';
 gRow=function(l,m,t){const b=t?'background:#f8f9fa;font-weight:700':'';const skillCell=m.skillDone?(t?m.skillDone+'d':'&#x2705;'):'-';return`<tr style="${b}"><td>${l}</td><td>${fmtMinsSeconds(m.audiobook)}</td><td>${skillCell}</td></tr>`;};
 fRow=function(l,m,t){const b=t?'background:#f8f9fa;font-weight:700':'';return`<tr style="${b}"><td>${l}</td><td>${m.miles?m.miles.toFixed(1):'-'}</td><td>${m.pace?fmtPace(m.pace):'-'}</td><td>${m.watts?Math.round(m.watts):'-'}</td><td>${fmtMinsSeconds(m.time)}</td><td>${m.steps?Math.round(m.steps):'-'}</td><td>${m.dogWalk?(Math.round(m.dogWalk*10)/10)%1===0?Math.round(m.dogWalk):+(m.dogWalk.toFixed(1)):'-'}</td><td>${m.walk?(Math.round(m.walk*10)/10)%1===0?Math.round(m.walk):+(m.walk.toFixed(1)):'-'}</td></tr>`;};
-const wH='<table class="summary-table"><thead><tr><th>Period</th><th>Weight</th><th>Sleep</th><th>Sleep Score</th><th>Avg BP</th><th>Pulse</th><th>Resting HR</th></tr></thead><tbody>';
+const wH='<table class="summary-table"><thead><tr><th>Period</th><th>Weight</th><th>Sleep</th><th>Sleep Score</th><th>Avg BP</th><th>Pulse</th><th>Morning HR</th></tr></thead><tbody>';
 function mkT(h,r,t){return h+r.join('')+t+'</tbody></table>';}
 let weekOff2=0;
-// ── Nutrition + Spirituality summary helpers ──────────────────────────────
-const nuH='<table class="summary-table"><thead><tr><th>Period</th><th>Calories</th><th>Protein (g)</th><th>Fat (g)</th><th>Carbs (g)</th><th>Water (oz)</th></tr></thead><tbody>';
-const nuMicroH='<table class="summary-table"><thead><tr><th>Period</th><th>Fiber (g)</th><th>Sugar (g)</th><th>Sodium (mg)</th><th>Vit A (mcg)</th><th>Vit C (mg)</th><th>Vit D (mcg)</th><th>Calcium (mg)</th><th>Iron (mg)</th><th>Potassium (mg)</th></tr></thead><tbody>';
+// ── Spirituality summary helpers ──────────────────────────────
 const spirH='<table class="summary-table"><thead><tr><th>Period</th><th>Meditation</th><th>Bible Audio</th><th>Worship</th><th>AI Prayer</th><th>Daily Bread</th></tr></thead><tbody>';
-
-function getNuDay(dateKey){
-  var cal=0,prot=0,fat=0,carbs=0;
-  var micro={fiber:0,sugar:0,sodium:0,vitA:0,vitC:0,vitD:0,calcium:0,iron:0,potassium:0};
-  // New format: foodLog inside planner record
-  var pr=localStorage.getItem('planner_'+dateKey);
-  if(pr){
-    var pd=JSON.parse(pr);
-    if(Array.isArray(pd.foodLog)&&pd.foodLog.length){
-      pd.foodLog.forEach(function(f){
-        var s=parseFloat(f.servings)||1;
-        cal+=(parseFloat(f.cal)||0)*s;
-        prot+=(parseFloat(f.prot)||0)*s;
-        fat+=(parseFloat(f.fat)||0)*s;
-        carbs+=(parseFloat(f.carbs)||0)*s;
-        MICRO_FIELDS.forEach(function(mf){micro[mf]+=(parseFloat(f[mf])||0)*s;});
-      });
-    }
-  }
-  // Old format: food_YYYY-MM-DD key
-  if(!cal){
-    var oldRaw=localStorage.getItem('food_'+dateKey);
-    if(oldRaw){
-      try{
-        var oldItems=JSON.parse(oldRaw);
-        if(Array.isArray(oldItems)){
-          oldItems.forEach(function(f){
-            var s=parseFloat(f.servings)||1;
-            cal+=(parseFloat(f.cal)||0)*s;
-            prot+=(parseFloat(f.prot)||0)*s;
-            fat+=(parseFloat(f.fat)||0)*s;
-            carbs+=(parseFloat(f.carbs)||0)*s;
-          });
-        }
-      }catch(e){}
-    }
-  }
-  // Legacy hidden-field fallback
-  if(!cal&&pr){
-    var pd2=JSON.parse(pr);
-    cal=parseFloat(pd2.nuCalVal)||0;
-    prot=parseFloat(pd2.nuProtVal)||0;
-    fat=parseFloat(pd2.nuFatVal)||0;
-    carbs=parseFloat(pd2.nuCarbsVal)||0;
-  }
-    // Water from planner data
-  var water=0;
-  if(pr){try{var pd3=JSON.parse(pr);water=parseFloat(pd3.waterOz)||(parseFloat(pd3.waterCount)*8)||0;}catch(e){}}
-  return{cal:cal,prot:prot,fat:fat,carbs:carbs,water:water,fiber:micro.fiber,sugar:micro.sugar,sodium:micro.sodium,vitA:micro.vitA,vitC:micro.vitC,vitD:micro.vitD,calcium:micro.calcium,iron:micro.iron,potassium:micro.potassium};
-}
 
 function getSpiritDay(dateKey){
   var pr=localStorage.getItem('planner_'+dateKey);
@@ -1503,14 +1102,6 @@ function getSpiritDay(dateKey){
   };
 }
 
-function aggNu(arr){
-  return arr.reduce(function(a,n){
-    var r={cal:a.cal+n.cal,prot:a.prot+n.prot,fat:a.fat+n.fat,carbs:a.carbs+n.carbs,water:a.water+(n.water||0)};
-    MICRO_FIELDS.forEach(function(f){r[f]=(a[f]||0)+(n[f]||0);});
-    return r;
-  },{cal:0,prot:0,fat:0,carbs:0,water:0});
-}
-
 function aggSpir(arr){
   return arr.reduce(function(a,s){
     return{
@@ -1521,31 +1112,6 @@ function aggSpir(arr){
       dailyBread: a.dailyBread+(s.hasDailyBread?1:(s.dailyBread||0))
     };
   },{meditation:0,aiPrayer:0,bibleAudio:0,worship:0,dailyBread:0});
-}
-
-function nuRow(l,n,isTot){
-  var b=isTot?'background:#f8f9fa;font-weight:700':'';
-  return '<tr style="'+b+'"><td>'+l+'</td>'
-    +'<td>'+(n.cal?Math.round(n.cal):'-')+'</td>'
-    +'<td>'+(n.prot?Math.round(n.prot):'-')+'</td>'
-    +'<td>'+(n.fat?Math.round(n.fat):'-')+'</td>'
-    +'<td>'+(n.carbs?Math.round(n.carbs):'-')+'</td>'
-    +'<td>'+(n.water?Math.round(n.water)+' oz':'-')+'</td></tr>';
-}
-
-function nuMicroRow(l,n,isTot){
-  var b=isTot?'background:#f8f9fa;font-weight:700':'';
-  var v=function(x){return x?Math.round(x):'-';};
-  return '<tr style="'+b+'"><td>'+l+'</td>'
-    +'<td>'+v(n.fiber)+'</td>'
-    +'<td>'+v(n.sugar)+'</td>'
-    +'<td>'+v(n.sodium)+'</td>'
-    +'<td>'+v(n.vitA)+'</td>'
-    +'<td>'+v(n.vitC)+'</td>'
-    +'<td>'+v(n.vitD)+'</td>'
-    +'<td>'+v(n.calcium)+'</td>'
-    +'<td>'+v(n.iron)+'</td>'
-    +'<td>'+v(n.potassium)+'</td></tr>';
 }
 
 function spirRow(l,s,isTot){
@@ -1569,39 +1135,29 @@ function spirRow(l,s,isTot){
     +'<td>'+n(s.dailyBread)+'</td></tr>';
 }
 
-function renderNutritionSpirit(dateKeys,labels,nuContainerId,spirContainerId,nuMicroContainerId){
-  var nuRows=[],spirRows=[],nuMicroRows=[],allNu=[],allSpir=[];
+function renderSpirit(dateKeys,labels,spirContainerId){
+  var spirRows=[],allSpir=[];
   dateKeys.forEach(function(keys,i){
     var arr=Array.isArray(keys)?keys:[keys];
-    var nus=arr.map(function(k){return getNuDay(k);});
     var spirs=arr.map(function(k){return getSpiritDay(k);});
-    var nu=aggNu(nus);
     var sp=aggSpir(spirs);
-    allNu.push.apply(allNu,nus);
     allSpir.push.apply(allSpir,spirs);
-    nuRows.push(nuRow(labels[i],nu));
-    nuMicroRows.push(nuMicroRow(labels[i],nu));
     if(arr.length===1){
       spirRows.push(spirRow(labels[i],spirs[0]));
     } else {
       spirRows.push(spirRow(labels[i],sp));
     }
   });
-  var totNu=aggNu(allNu);
   var totSpir=aggSpir(allSpir);
-  var nuEl=document.getElementById(nuContainerId);
   var spEl=document.getElementById(spirContainerId);
-  var nuMicroEl=nuMicroContainerId?document.getElementById(nuMicroContainerId):null;
-  if(nuEl)nuEl.innerHTML=mkT(nuH,nuRows,nuRow('TOTAL',totNu,true));
   if(spEl)spEl.innerHTML=mkT(spirH,spirRows,spirRow('TOTAL',totSpir,true));
-  if(nuMicroEl)nuMicroEl.innerHTML=mkT(nuMicroH,nuMicroRows,nuMicroRow('TOTAL',totNu,true));
 }
 
 function renderWeeklyDigest(days,tot,wDayKeys,lbls){
   var el=document.getElementById('wDigest');if(!el)return;
   var spirs=wDayKeys.map(function(k){return getSpiritDay(k);});
   var sp=aggSpir(spirs);
-  var daysLogged=days.filter(function(d){return d.score||d.miles||d.calories||d.audiobook||d.sleep;}).length;
+  var daysLogged=days.filter(function(d){return d.score||d.miles||d.audiobook||d.sleep;}).length;
   var activeDays=days.filter(function(d){return d.miles>0;}).length;
   var goals={};try{goals=JSON.parse(localStorage.getItem('weekly_goals')||'{}');}catch(ignore){}
   var goalRows=[{name:'Miles',target:Number(goals.Miles)||0,actual:tot.miles||0},{name:'Bible',target:Number(goals.Bible)||0,actual:sp.bibleAudio||0},{name:'Prayer',target:Number(goals.Prayer)||0,actual:sp.aiPrayer||0},{name:'Running',target:Number(goals.Exercise)||0,actual:activeDays},{name:'Audiobook',target:Number(goals.Audible)||0,actual:tot.audiobook||0}].filter(function(goal){return goal.target>0;});
@@ -1611,8 +1167,7 @@ function renderWeeklyDigest(days,tot,wDayKeys,lbls){
     {name:'Daily consistency',value:daysLogged/7,detail:daysLogged+' days logged'},
     {name:'Fitness',value:activeDays/7,detail:activeDays+' active days'},
     {name:'Spirituality',value:((sp.bibleAudio||0)+(sp.aiPrayer||0))/14,detail:(sp.bibleAudio||0)+' Bible and '+(sp.aiPrayer||0)+' prayer days'},
-    {name:'Wellness',value:days.filter(function(d){return d.sleep||d.weight||d.bpSys;}).length/7,detail:'wellness recorded'},
-    {name:'Nutrition',value:days.filter(function(d){return d.calories||d.water;}).length/7,detail:'nutrition recorded'}
+    {name:'Wellness',value:days.filter(function(d){return d.sleep||d.weight||d.bpSys;}).length/7,detail:'wellness recorded'}
   ];
   coverage.sort(function(a,b){return b.value-a.value;});
   var strongest=coverage[0].value?coverage[0].name+' — '+coverage[0].detail:'No clear pattern yet';
@@ -1621,7 +1176,7 @@ function renderWeeklyDigest(days,tot,wDayKeys,lbls){
   var attention=attentionGoals.length?attentionGoals[0].name+' needs '+Math.max(0,Math.round((attentionGoals[0].target-attentionGoals[0].actual)*10)/10)+' more':(weakest.value<1?weakest.name+' has the least coverage':'All tracked areas are current');
   var priorStart=new Date(wDayKeys[0]+'T12:00:00');priorStart.setDate(priorStart.getDate()-7);var priorDays=[];
   for(var p=0;p<7;p++){var pd=new Date(priorStart);pd.setDate(priorStart.getDate()+p);var pk=dk(pd),raw=localStorage.getItem('planner_'+pk);priorDays.push(getDM(raw?JSON.parse(raw):{},pk));}
-  var prior=agg(priorDays),priorLogged=priorDays.filter(function(d){return d.score||d.miles||d.calories||d.audiobook||d.sleep;}).length;
+  var prior=agg(priorDays),priorLogged=priorDays.filter(function(d){return d.score||d.miles||d.audiobook||d.sleep;}).length;
   var changes=[];
   if(tot.miles||prior.miles){var mileDiff=tot.miles-prior.miles;changes.push((mileDiff>=0?'+':'')+mileDiff.toFixed(1)+' miles');}
   if(tot.score||prior.score){var scoreDiff=tot.score-prior.score;changes.push((scoreDiff>=0?'+':'')+scoreDiff.toFixed(1)+' average score');}
@@ -1630,14 +1185,34 @@ function renderWeeklyDigest(days,tot,wDayKeys,lbls){
   var cards=[['&#x1F3AF; Goals on Track',goalText],['&#x2B50; Strongest Area',strongest],['&#x1F50E; Needs Attention',attention],['&#x2194;&#xFE0F; Change from Last Week',changeText]];
   el.innerHTML='<div class="wdig-title">&#x1F4CA; Weekly Snapshot</div><div class="wdig-chips">'+cards.map(function(card){return '<div class="wdig-chip"><strong>'+card[0]+'</strong>'+escHtml(card[1])+'</div>';}).join('')+'</div>';
 }
-function renderWeekly(){const ws=wkStart(weekOff2),days=[],lbls=[];for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);const r=localStorage.getItem('planner_'+dk(d));var _dk=dk(d);days.push(getDM(r?JSON.parse(r):{},_dk));lbls.push(d.toLocaleDateString('en-US',{weekday:'short',month:'numeric',day:'numeric'}));}const we=new Date(ws);we.setDate(ws.getDate()+6);document.getElementById('weekLabel').textContent=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' - '+we.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});const tot=agg(days);document.getElementById('wGrowth').innerHTML=mkT(gH,days.map((m,i)=>gRow(lbls[i],m)),gRow('TOTAL',tot,true));document.getElementById('wFitness').innerHTML=mkT(fH,days.map((m,i)=>fRow(lbls[i],m)),fRow('TOTAL/AVG',tot,true));document.getElementById('wWellness').innerHTML=mkT(wH,days.map((m,i)=>wRow(lbls[i],m)),wRow('TOTAL/AVG',tot,true));
+function renderWeekly(){const ws=wkStart(weekOff2),days=[],lbls=[];for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);const r=localStorage.getItem('planner_'+dk(d));var _dk=dk(d);days.push(getDM(r?JSON.parse(r):{},_dk));lbls.push(d.toLocaleDateString('en-US',{weekday:'short',month:'numeric',day:'numeric'}));}const we=new Date(ws);we.setDate(ws.getDate()+6);document.getElementById('weekLabel').textContent=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' - '+we.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});const tot=agg(days);document.getElementById('wGrowth').innerHTML=mkT(gH,days.map((m,i)=>gRow(lbls[i],m)),gRow('TOTAL',tot,true));document.getElementById('wFitness').innerHTML=mkT(fH,days.map((m,i)=>fRow(lbls[i],m)),fRow('TOTAL/AVG',tot,true));try{if(window.bsWeeklyNutrition){const nk=[];for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);nk.push(dk(d));}window.bsWeeklyNutrition(nk,lbls);}}catch(eNu){}document.getElementById('wWellness').innerHTML=mkT(wH,days.map((m,i)=>wRow(lbls[i],m)),wRow('TOTAL/AVG',tot,true));
   renderWeeklyGrowthTable(ws,we,days,lbls);
-  renderGrowthActivityReport('wGrowth',lbls.map(function(label,i){var d=new Date(ws);d.setDate(ws.getDate()+i);return{label:label,start:dk(d),end:dk(d)};}));
-  const wDayKeys=[];for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);wDayKeys.push(dk(d));}renderNutritionSpirit(wDayKeys,lbls,'wNutrition','wSpirituality','wNutritionMicro');}
+  // Growth / Skills (Language, Guitar) is no longer shown on Weekly; Reading / Audible joins the Spirituality table.
+  const wDayKeys=[];for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);wDayKeys.push(dk(d));}renderSpirit(wDayKeys,lbls,'wSpirituality');weeklyReadingColumn(wDayKeys);sleepingHrColumn(wDayKeys,'wWellness');}
+// 💤 Sleeping HR (BeyondStride, overnight from the watch) as the last Wellness column, next to Morning HR.
+function sleepingHrColumn(keys,hostId){
+  var t=document.querySelector('#'+hostId+' table');if(!t||t.querySelector('th[data-shr]'))return;
+  var cache={};try{cache=JSON.parse(localStorage.getItem('bs_daily_sleephr')||'{}')||{};}catch(e){}
+  function grp(k){var arr=Array.isArray(k)?k:[k],v=arr.map(function(x){return cache[x];}).filter(function(x){return x>0;});return v.length?v.reduce(function(a,b){return a+b;},0)/v.length:0;}
+  var vals=keys.map(grp),all=[];keys.forEach(function(k){(Array.isArray(k)?k:[k]).forEach(function(x){if(cache[x]>0)all.push(cache[x]);});});
+  var avg=all.length?all.reduce(function(a,b){return a+b;},0)/all.length:0;
+  var head=t.querySelector('thead tr');if(head){var th=document.createElement('th');th.textContent='Sleeping HR';th.setAttribute('data-shr','1');head.appendChild(th);}
+  t.querySelectorAll('tbody tr').forEach(function(tr,i){var td=document.createElement('td');var v=i<vals.length?vals[i]:avg;td.textContent=v?Math.round(v):'-';tr.appendChild(td);});
+}
+// 📚 Reading / Audible minutes as the last column of the Weekly Spirituality table.
+function weeklyReadingColumn(keys,hostId){
+  var t=document.querySelector('#'+(hostId||'wSpirituality')+' table');if(!t)return;
+  function day(k){var r=localStorage.getItem('planner_'+k),dd={};try{dd=r?JSON.parse(r):{};}catch(e){}try{return journalAudiobookMinutesForDate(k,dd)||0;}catch(e2){return 0;}}
+  var mins=keys.map(function(k){return Array.isArray(k)?k.reduce(function(a,x){return a+day(x);},0):day(k);});
+  var total=mins.reduce(function(a,b){return a+b;},0);
+  var head=t.querySelector('thead tr');if(head){var th=document.createElement('th');th.textContent='Reading / Audible';head.appendChild(th);}
+  var rows=t.querySelectorAll('tbody tr');
+  rows.forEach(function(tr,i){var td=document.createElement('td');var v=i<mins.length?mins[i]:total;td.innerHTML=v?fmtMinsSeconds(v):'-';tr.appendChild(td);});
+}
 function changeWeekOff(n){weekOff2+=n;renderWeekly();renderGoals();}
 let monthOff2=0;
 function renderMonthly(){const now=new Date(),ref=new Date(now.getFullYear(),now.getMonth()+monthOff2,1);const yr=ref.getFullYear(),mo=ref.getMonth(),dim=new Date(yr,mo+1,0).getDate();const wmap={};for(let d=1;d<=dim;d++){const dt=new Date(yr,mo,d);const ws=wkStartOf(dt);const k=dk(ws),dateKey=dk(dt);if(!wmap[k])wmap[k]={ws,ms:[]};const r=localStorage.getItem('planner_'+dateKey);wmap[k].ms.push(getDM(r?JSON.parse(r):{},dateKey));}document.getElementById('monthLabel').textContent=ref.toLocaleDateString('en-US',{month:'long',year:'numeric'});const wks=Object.values(wmap).sort((a,b)=>a.ws-b.ws),allM=[],gR=[],fR=[],wR=[];wks.forEach(({ws,ms})=>{const we=new Date(ws);we.setDate(ws.getDate()+6);const lb=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+'-'+we.toLocaleDateString('en-US',{day:'numeric'});const a=agg(ms);allM.push(...ms);gR.push(gRow('Wk '+lb,a));fR.push(fRow('Wk '+lb,a));wR.push(wRow('Wk '+lb,a));});const tot=agg(allM);document.getElementById('mGrowth').innerHTML=mkT(gH,gR,gRow('TOTAL',tot,true));document.getElementById('mFitness').innerHTML=mkT(fH,fR,fRow('TOTAL/AVG',tot,true));document.getElementById('mWellness').innerHTML=mkT(wH,wR,wRow('TOTAL/AVG',tot,true));
-  const mWkKeys=[],mWkLbls=[],mGrowthPeriods=[],monthStartKey=dk(new Date(yr,mo,1)),monthEndKey=dk(new Date(yr,mo,dim));wks.forEach(({ws,ms})=>{const we=new Date(ws);we.setDate(ws.getDate()+6);const lb=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+'-'+we.toLocaleDateString('en-US',{day:'numeric'});const keys=[];for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);keys.push(dk(d));}mWkKeys.push(keys);mWkLbls.push('Wk '+lb);mGrowthPeriods.push({label:'Wk '+lb,start:dk(ws)<monthStartKey?monthStartKey:dk(ws),end:dk(we)>monthEndKey?monthEndKey:dk(we)});});renderGrowthActivityReport('mGrowth',mGrowthPeriods);renderNutritionSpirit(mWkKeys,mWkLbls,'mNutrition','mSpirituality','mNutritionMicro');
+  const mWkKeys=[],mWkLbls=[],mGrowthPeriods=[],monthStartKey=dk(new Date(yr,mo,1)),monthEndKey=dk(new Date(yr,mo,dim));wks.forEach(({ws,ms})=>{const we=new Date(ws);we.setDate(ws.getDate()+6);const lb=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+'-'+we.toLocaleDateString('en-US',{day:'numeric'});const keys=[];for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);keys.push(dk(d));}mWkKeys.push(keys);mWkLbls.push('Wk '+lb);mGrowthPeriods.push({label:'Wk '+lb,start:dk(ws)<monthStartKey?monthStartKey:dk(ws),end:dk(we)>monthEndKey?monthEndKey:dk(we)});});/* Growth (Language, Guitar) no longer shown; Reading / Audible joins Spirituality */renderSpirit(mWkKeys,mWkLbls,'mSpirituality');weeklyReadingColumn(mWkKeys,'mSpirituality');sleepingHrColumn(mWkKeys,'mWellness');
   // Render heatmap
   const hmGrid=document.getElementById('hmGrid');
   const hmMonth=document.getElementById('hmMonth');
@@ -1661,10 +1236,9 @@ function renderMonthly(){const now=new Date(),ref=new Date(now.getFullYear(),now
           if(dd.spBibleAudio==='green')score++;
           if(dd.spAIPrayer==='green')score++;
           if(dd.exRun==='green'||dd.exStrength==='green'||dd.exBike==='green'||dd.exWalk==='green'||hasActivityOnDate(dStr))score++;
-          if((parseFloat(dd.waterOz)||parseFloat(dd.waterCount)*8||0)>=64)score++;
         }
         cell.classList.add('hm'+score);
-        cell.title=dt.toLocaleDateString('en-US',{month:'short',day:'numeric'})+': '+score+'/4 habits';
+        cell.title=dt.toLocaleDateString('en-US',{month:'short',day:'numeric'})+': '+score+'/3 habits';
       }
       hmGrid.appendChild(cell);
     }
@@ -1676,7 +1250,7 @@ function renderYearly(){const yr=new Date().getFullYear()+yearOff2;document.getE
   const yr2=new Date().getFullYear()+yearOff2;
   const yMoKeys=[],yMoLbls=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const yGrowthPeriods=[];for(let mi=0;mi<12;mi++){const dim=new Date(yr2,mi+1,0).getDate();const keys=[];for(let d=1;d<=dim;d++)keys.push(dk(new Date(yr2,mi,d)));yMoKeys.push(keys);yGrowthPeriods.push({label:yMoLbls[mi],start:dk(new Date(yr2,mi,1)),end:dk(new Date(yr2,mi,dim))});}
-  renderGrowthActivityReport('yGrowth',yGrowthPeriods);renderNutritionSpirit(yMoKeys,yMoLbls,'yNutrition','ySpirituality','yNutritionMicro');}
+  renderSpirit(yMoKeys,yMoLbls,'ySpirituality');weeklyReadingColumn(yMoKeys,'ySpirituality');sleepingHrColumn(yMoKeys,'yWellness');}
 function changeYearOff(n){yearOff2+=n;renderYearly();}
 let dashOff2=0;
 function renderDashboard(){
@@ -1757,27 +1331,11 @@ function renderSectionCharts(containerId,cfgs){
   });
 }
 function relocateDashboardCharts(){
-  const wellness=document.getElementById('wellnessChartsHome'),activities=document.getElementById('activityChartsHome');
-  const bpCanvas=document.getElementById('bpChart'),bp=bpCanvas?bpCanvas.closest('.bp-chart-wrap'):null,weight=document.getElementById('weightChartWrap'),miles=document.getElementById('milesChartWrap');
+  const wellness=document.getElementById('wellnessChartsHome');
+  const bpCanvas=document.getElementById('bpChart'),bp=bpCanvas?bpCanvas.closest('.bp-chart-wrap'):null,weight=document.getElementById('weightChartWrap');
   if(wellness&&bp)wellness.appendChild(bp);
   if(wellness&&weight)wellness.appendChild(weight);
-  if(activities&&miles)activities.appendChild(miles);
 }
-function arrangeActivityTrainingCards(){
-  const panel=document.querySelector('#tab-activities > .panel');
-  const workout=document.getElementById('todayWorkoutCard');
-  const active=document.getElementById('tpPersistSection');
-  const upcoming=document.getElementById('tpUpcomingSection');
-  const archive=document.getElementById('tpArchiveSection');
-  if(!panel)return;
-  if(active&&archive)panel.insertBefore(active,archive);
-  if(upcoming&&archive)panel.insertBefore(upcoming,archive);
-  if(workout)panel.insertBefore(workout,panel.firstElementChild);
-}
-function renderActivitySectionCharts(){
-  renderMilesChart();
-}
-function renderNutritionSectionCharts(){renderSectionCharts('nutritionChartsGrid',[{k:'calories',l:'Calories',c:'#f39c12'},{k:'water',l:'Water',c:'#3498db'},{k:'liquidsNoCaf',l:'Total Liquids (excl. Caffeine)',c:'#16a085',help:'Water + Sports Nutrition Drinks + Other Drinks, minus coffee, energy drinks, and black/green tea. GU drink mix still counts.'}]);}
 function renderLibrarySectionCharts(){renderSectionCharts('libraryChartsGrid',[{k:'audiobook',l:'Audiobook Time',c:'#27ae60'}]);}
 function renderSkillSectionCharts(){
   var grid=document.getElementById('skillChartsGrid');if(!grid)return;
@@ -1805,13 +1363,12 @@ function renderSkillSectionCharts(){
 }
 function renderWellnessSectionCharts(){renderBPChart();renderWeightChart();}
 
-// Weekly habit trend: days-hit (0-7) for Bible / Prayer / Exercise / Water over the dashboard week.
+// Weekly habit trend: days-hit (0-7) for Bible / Prayer / Exercise over the dashboard week.
 function renderHabitStreakChart(ws){
   var habitDefs=[
     {k:'bible',   l:'Bible',    c:'#f0b429', fn:function(d,dateKey){return d.spBibleAudio==='green';}},
     {k:'prayer',  l:'Prayer',   c:'#8e44ad', fn:function(d,dateKey){return d.spAIPrayer==='green';}},
-    {k:'exercise',l:'Exercise', c:'#e67e22', fn:function(d,dateKey){return d.exRun==='green'||d.exStrength==='green'||d.exBike==='green'||d.exWalk==='green'||hasActivityOnDate(dateKey);}},
-    {k:'water',   l:'Water',    c:'#3498db', fn:function(d){return (parseFloat(d.waterOz)||parseFloat(d.waterCount)*8||0)>=64;}}
+    {k:'exercise',l:'Exercise', c:'#e67e22', fn:function(d,dateKey){return d.exRun==='green'||d.exStrength==='green'||d.exBike==='green'||d.exWalk==='green'||hasActivityOnDate(dateKey);}}
   ];
   var counts=habitDefs.map(function(){return 0;});
   for(var i=0;i<7;i++){
@@ -2012,227 +1569,6 @@ function renderWeightChart(){
   if(el)el.textContent='60-day avg: '+avg+' lbs  •  Range: '+min+' – '+max+' lbs  ('+entries.length+' readings)';
 }
 
-function renderMilesChart(){
-  const wrap=document.getElementById('milesChartWrap');
-  const canvas=document.getElementById('milesChart');
-  if(!canvas||!wrap)return;
-  const entries=[];
-  const today2=new Date();
-  for(let i=59;i>=0;i--){
-    const d=new Date(today2);d.setDate(today2.getDate()-i);
-    // Pull mileage straight from logged Activities for every day in the window,
-    // not just days that also have a saved Daily journal record — a run logged
-    // on a day the journal tab was never opened has no 'planner_' entry, and
-    // was previously being skipped entirely, making the chart look empty even
-    // with real mileage on the books.
-    const r=localStorage.getItem('planner_'+dk(d));
-    const dd=r?JSON.parse(r):{};
-    const dm=getDM(dd,dk(d));const m=dm.miles||parseFloat(dd.exMiles)||0;
-    entries.push({date:dk(d),val:m,label:d.toLocaleDateString('en-US',{month:'numeric',day:'numeric'})});
-  }
-  const withMiles=entries.filter(e=>e.val>0);
-  wrap.style.display='block';
-  if(withMiles.length<1){
-    const c=document.getElementById('milesChart');if(c){const ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);}
-    const avg=document.getElementById('milesChartAvg');if(avg)avg.textContent='No mileage logged in the last 60 days. Log a run on the Activities tab to see it here.';
-    return;
-  }
-  const doDraw=()=>{
-    const W=Math.max(canvas.parentElement?canvas.parentElement.clientWidth-28:280,200);
-    const H=120;canvas.width=W;canvas.height=H;
-    const ctx=canvas.getContext('2d');ctx.clearRect(0,0,W,H);
-    const pad={l:28,r:10,t:14,b:22};
-    const cW=W-pad.l-pad.r,cH=H-pad.t-pad.b;
-    const maxV=Math.max(...entries.map(e=>e.val))+0.5;
-    const minV=0;
-    const xScale=i=>pad.l+i*(cW/Math.max(1,entries.length-1));
-    const yScale=v=>pad.t+(1-(v-minV)/(maxV-minV))*cH;
-    for(let g=0;g<=4;g++){
-      const y=pad.t+g*(cH/4);ctx.strokeStyle='#f0f0f0';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r,y);ctx.stroke();
-      const val=(maxV-g/4*(maxV-minV)).toFixed(1);ctx.fillStyle='#bbb';ctx.font='8px sans-serif';ctx.textAlign='right';ctx.fillText(val,pad.l-3,y+3);
-    }
-    // Bars
-    const barW=Math.max(2,cW/entries.length*0.6);
-    entries.forEach((e,i)=>{
-      if(e.val<=0)return;
-      const x=xScale(i);const y=yScale(e.val);const bh=pad.t+cH-y;
-      ctx.fillStyle='rgba(39,174,96,0.75)';
-      ctx.fillRect(x-barW/2,y,barW,bh);
-    });
-    // X labels
-    ctx.fillStyle='#bbb';ctx.font='8px sans-serif';ctx.textAlign='center';
-    const step=Math.max(1,Math.floor(entries.length/6));
-    entries.forEach((e,i)=>{if(i%step===0||i===entries.length-1)ctx.fillText(e.label,xScale(i),H-4);});
-  };
-  setTimeout(doDraw,80);
-  const totalMiles=withMiles.reduce((a,e)=>a+e.val,0);
-  const el=document.getElementById('milesChartAvg');
-  if(el)el.textContent='60-day total: '+totalMiles.toFixed(1)+' mi  •  Avg run day: '+(totalMiles/withMiles.length).toFixed(1)+' mi  ('+withMiles.length+' run days)';
-}
-
-// ── Shared AI helper ─────────────────────────────────────────────────────────
-function nextDayRunContext(){
-  var nextDate=new Date(today);nextDate.setDate(nextDate.getDate()+1);
-  var nextKey=dk(nextDate);
-  var lines=[];
-  var scheduled=getActivities().filter(function(a){
-    return a.date===nextKey&&String(a.type||'Run').toLowerCase().indexOf('run')!==-1;
-  });
-  scheduled.forEach(function(a){
-    lines.push('Scheduled activity: '+[
-      a.title||'Run',
-      a.distance?Number(a.distance).toFixed(2)+' miles':'',
-      a.duration||'',
-      a.pace?a.pace+'/mi':'',
-      a.power?a.power+' W':'',
-      a.notes||'',
-      a.injuryReport?'Injury report: '+a.injuryReport:''
-    ].filter(Boolean).join(' | '));
-  });
-  var cached=localStorage.getItem('workout_cache_'+nextKey);
-  if(cached)lines.push('Tomorrow workout details: '+cached);
-  var raw=localStorage.getItem('current_training_plan');
-  if(raw){
-    try{
-      var plan=JSON.parse(raw),text=String(plan.text||'');
-      var dayNum=0;
-      if(plan.startDate){
-        dayNum=Math.floor((new Date(nextKey+'T00:00:00')-new Date(plan.startDate+'T00:00:00'))/86400000)+1;
-      }
-      var planLines=text.split(/\r?\n/),hit=-1;
-      var dateWords=nextDate.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}).toLowerCase();
-      for(var i=0;i<planLines.length;i++){
-        var lower=planLines[i].toLowerCase();
-        if(lower.indexOf(dateWords)>=0||lower.indexOf(nextKey)>=0||(dayNum>0&&new RegExp('\\bday\\s*'+dayNum+'\\b','i').test(planLines[i]))){hit=i;break;}
-      }
-      var excerpt=hit>=0?planLines.slice(Math.max(0,hit-2),Math.min(planLines.length,hit+7)).join('\n'):text.slice(0,7000);
-      if(excerpt.trim())lines.push('Active training plan context'+(dayNum>0?' (tomorrow is plan day '+dayNum+')':'')+':\n'+excerpt);
-    }catch(e){}
-  }
-  return{date:nextDate,key:nextKey,text:lines.join('\n\n')};
-}
-function selectedDayRunContext(){
-  var runDate=new Date(today),runKey=dk(runDate),lines=[];
-  var runs=getActivities().filter(function(a){
-    return a.date===runKey&&String(a.type||'Run').toLowerCase().indexOf('run')!==-1;
-  });
-  runs.forEach(function(a){
-    lines.push('Run activity: '+[
-      a.title||'Run',
-      a.distance?Number(a.distance).toFixed(2)+' miles':'',
-      a.duration||'',
-      a.pace?a.pace+'/mi':'',
-      a.power?a.power+' W':'',
-      a.calories?a.calories+' calories':'',
-      a.elevation?a.elevation+' ft elevation gain':'',
-      a.notes||'',
-      a.injuryReport?'Injury report: '+a.injuryReport:''
-    ].filter(Boolean).join(' | '));
-  });
-  var cached=localStorage.getItem('workout_cache_'+runKey);
-  if(cached)lines.push('Scheduled workout details: '+cached);
-  var raw=localStorage.getItem('current_training_plan');
-  if(raw){
-    try{
-      var plan=JSON.parse(raw),text=String(plan.text||''),dayNum=0;
-      if(plan.startDate){
-        dayNum=Math.floor((new Date(runKey+'T00:00:00')-new Date(plan.startDate+'T00:00:00'))/86400000)+1;
-      }
-      var planLines=text.split(/\r?\n/),hit=-1;
-      var dateWords=runDate.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}).toLowerCase();
-      for(var i=0;i<planLines.length;i++){
-        var lower=planLines[i].toLowerCase();
-        if(lower.indexOf(dateWords)>=0||lower.indexOf(runKey)>=0||(dayNum>0&&new RegExp('\\bday\\s*'+dayNum+'\\b','i').test(planLines[i]))){hit=i;break;}
-      }
-      if(hit>=0){
-        var excerpt=planLines.slice(Math.max(0,hit-2),Math.min(planLines.length,hit+7)).join('\n');
-        if(excerpt.trim())lines.push('Active training plan context'+(dayNum>0?' (plan day '+dayNum+')':'')+':\n'+excerpt);
-      }
-    }catch(e){}
-  }
-  return{date:runDate,key:runKey,text:lines.join('\n\n')};
-}
-function aiRecoveryMealPlan(btn){
-  if(!journalAIKey()){
-    alert('Add your Anthropic API key in Settings first.');
-    return;
-  }
-  var context=selectedDayRunContext();
-  if(!context.text.trim()){
-    alert('No logged run or scheduled training information was found for the selected day.');
-    return;
-  }
-  var result=document.getElementById('aiMealPlanResult');
-  if(result){result.style.display='block';result.textContent='Creating recovery-focused meals for the selected run day...';}
-  aiBtnState(btn,true);
-  var dateLabel=context.date.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
-  var prompt='Create a practical same-day meal plan that supports RECOVERY from the athlete’s run on '+dateLabel+'. Use only the run information supplied below and do not invent workout facts. Emphasize ordinary foods, post-run carbohydrate and protein intake, hydration, and balanced meals appropriate to the run’s duration and difficulty. Avoid medical claims, supplements, extreme quantities, and precise calorie or macro targets unless supplied. Return ONLY valid JSON with these string fields: breakfast, lunch, dinner, snacks, sportsNutrition, rationale. Keep each meal field concise. Make sportsNutrition focus on immediate post-run recovery, fluids, and electrolytes when appropriate.\n\nRUN INFORMATION\n'+context.text;
-  aiCall(prompt,1800,function(text){
-    aiBtnState(btn,false);
-    try{
-      var clean=text.replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'').trim();
-      var first=clean.indexOf('{'),last=clean.lastIndexOf('}');
-      if(first>=0&&last>first)clean=clean.slice(first,last+1);
-      var plan=JSON.parse(clean);
-      var fields={mpBreakfast:plan.breakfast,mpLunch:plan.lunch,mpDinner:plan.dinner,mpSnack:plan.snacks,mpSports:plan.sportsNutrition};
-      Object.keys(fields).forEach(function(id){
-        var el=document.getElementById(id);
-        if(el&&fields[id]!=null){el.value=String(fields[id]);el.dispatchEvent(new Event('input',{bubbles:true}));}
-      });
-      save();
-      if(result){
-        result.textContent='Recovery meal plan prepared for '+dateLabel+'.'+(plan.rationale?'\n\nWhy this supports recovery:\n'+plan.rationale:'');
-        result.scrollIntoView({behavior:'smooth',block:'nearest'});
-      }
-    }catch(e){
-      if(result)result.textContent='The AI response could not be placed into the meal fields automatically. Response:\n\n'+text;
-    }
-  },function(message){
-    aiBtnState(btn,false);
-    if(result)result.textContent='Recovery meal plan could not be created: '+message;
-  });
-}
-function aiMealPlanForNextRun(btn){
-  if(!journalAIKey()){
-    alert('Add your Anthropic API key in Settings first.');
-    return;
-  }
-  var context=nextDayRunContext();
-  if(!context.text.trim()){
-    alert('No run or active training-plan information was found for tomorrow.');
-    return;
-  }
-  var result=document.getElementById('aiMealPlanResult');
-  if(result){result.style.display='block';result.textContent='Creating a meal plan for tomorrow’s run...';}
-  aiBtnState(btn,true);
-  var dateLabel=context.date.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
-  var prompt='Create a practical meal plan for TODAY that supports the athlete’s scheduled run TOMORROW ('+dateLabel+'). Use the workout information below. Do not invent workout facts. Emphasize ordinary foods, sensible carbohydrate availability, hydration, and recovery. Avoid medical claims, supplements, extreme quantities, and precise calorie targets unless supplied. Return ONLY valid JSON with these string fields: breakfast, lunch, dinner, snacks, sportsNutrition, rationale. Keep each meal field concise and make sportsNutrition cover tonight, pre-run, during-run only if appropriate, and post-run guidance.\n\nWORKOUT INFORMATION\n'+context.text;
-  aiCall(prompt,1800,function(text){
-    aiBtnState(btn,false);
-    try{
-      var clean=text.replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'').trim();
-      var first=clean.indexOf('{'),last=clean.lastIndexOf('}');
-      if(first>=0&&last>first)clean=clean.slice(first,last+1);
-      var plan=JSON.parse(clean);
-      var fields={mpBreakfast:plan.breakfast,mpLunch:plan.lunch,mpDinner:plan.dinner,mpSnack:plan.snacks,mpSports:plan.sportsNutrition};
-      Object.keys(fields).forEach(function(id){
-        var el=document.getElementById(id);
-        if(el&&fields[id]!=null){el.value=String(fields[id]);el.dispatchEvent(new Event('input',{bubbles:true}));}
-      });
-      save();
-      if(result){
-        result.textContent='Plan prepared for '+dateLabel+'.'+(plan.rationale?'\n\nWhy this fits tomorrow’s run:\n'+plan.rationale:'');
-        result.scrollIntoView({behavior:'smooth',block:'nearest'});
-      }
-    }catch(e){
-      if(result)result.textContent='The AI response could not be placed into the meal fields automatically. Response:\n\n'+text;
-    }
-  },function(message){
-    aiBtnState(btn,false);
-    if(result)result.textContent='Meal plan could not be created: '+message;
-  });
-}
-
 function callAI(prompt,resultDivId,maxTok){
   const el=document.getElementById(resultDivId);
   if(el){el.style.display='block';el.textContent='⏳ Thinking...';}
@@ -2306,122 +1642,6 @@ function closeAIArchive(){document.getElementById('aiArchiveModal').style.displa
 var wrnOff=0;
 function wrnMonday(off){var d=new Date(today);var day=d.getDay();var diff=day===0?-6:1-day;d.setDate(d.getDate()+diff+(off*7));d.setHours(0,0,0,0);return d;}
 function wrnKey(off){return 'act_week_note_'+dk(wrnMonday(off));}
-function wrnLabel(off){var m=wrnMonday(off);var e=new Date(m);e.setDate(m.getDate()+6);return m.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' – '+e.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
-function loadWrnNote(){
-  var ta=document.getElementById('wrnNote');var lbl=document.getElementById('wrnWeekLabel');
-  if(ta)ta.value=localStorage.getItem(wrnKey(wrnOff))||'';
-  if(lbl)lbl.textContent=wrnLabel(wrnOff);
-}
-function saveWrnNote(){
-  var ta=document.getElementById('wrnNote');if(!ta)return;
-  var val=ta.value.trim();
-  if(val)localStorage.setItem(wrnKey(wrnOff),val);
-  else localStorage.removeItem(wrnKey(wrnOff));
-  var s=document.getElementById('wrnSaved');if(s){s.style.display='inline';setTimeout(function(){s.style.display='none';},1800);}
-}
-function clearWrnNote(){var ta=document.getElementById('wrnNote');if(ta)ta.value='';saveWrnNote();}
-function changeWrnWeek(delta){wrnOff+=delta;loadWrnNote();}
-function toggleActivitiesLog(){
-  var section=document.getElementById('activitiesLogSection');
-  var arrow=document.getElementById('activitiesLogArrow');
-  var toggle=section?section.previousElementSibling:null;
-  if(!section)return;
-  var opening=section.style.display==='none';
-  // This section can swing from empty to hundreds of activity cards plus
-  // charts in one tap, and some mobile browsers mis-fire their scroll-anchoring
-  // heuristic on a layout change that large, jumping the viewport away from
-  // the toggle the user just tapped. Re-anchor the scroll position to the
-  // toggle itself immediately, next frame, and shortly after (to also cover
-  // Chart.js resizing its canvases a beat later), so the tap keeps its place.
-  var anchorTop=toggle?toggle.getBoundingClientRect().top:null;
-  section.style.display=opening?'block':'none';
-  if(arrow)arrow.innerHTML=opening?'&#x25BC;':'&#x25B6;';
-  if(toggle)toggle.setAttribute('aria-expanded',opening?'true':'false');
-  if(opening)renderActivities();
-  if(toggle&&anchorTop!==null){
-    var restoreScroll=function(){
-      var newTop=toggle.getBoundingClientRect().top;
-      var delta=newTop-anchorTop;
-      if(Math.abs(delta)>1)window.scrollBy(0,delta);
-    };
-    restoreScroll();
-    requestAnimationFrame(restoreScroll);
-    setTimeout(restoreScroll,120);
-  }
-}
-function resetActivityAdvancedPanels(){
-  var metrics=document.getElementById('runMetricsPanel');
-  var metricsChev=document.getElementById('metricsChev');
-  var notes=document.getElementById('wrnSection');
-  var notesArrow=document.getElementById('wrnArrow');
-  var filters=document.querySelector('#activitiesLogSection .act-filter-shell');
-  if(metrics)metrics.style.display='none';
-  if(metricsChev)metricsChev.innerHTML='&#x25BC;';
-  if(notes)notes.style.display='none';
-  if(notesArrow)notesArrow.innerHTML='&#x25B6;';
-  if(filters)filters.removeAttribute('open');
-}
-function toggleWeekRunNotes(){
-  var sec=document.getElementById('wrnSection');var arr=document.getElementById('wrnArrow');
-  if(!sec)return;var open=sec.style.display!=='none';
-  sec.style.display=open?'none':'block';if(arr)arr.textContent=open?'▶':'▼';
-  if(!open)loadWrnNote();
-}
-function aiWeeklyRunWrapUp(btn){
-  if(!journalAIKey()){
-    alert('Add your Anthropic API key in Settings first.');
-    return;
-  }
-  var start=wrnMonday(wrnOff),end=new Date(start);
-  end.setDate(start.getDate()+6);
-  function isoDay(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
-  var startIso=isoDay(start),endIso=isoDay(end);
-  var runs=uniqueRunActivities(startIso,endIso);
-  if(!runs.length){
-    alert('No running activities were found for '+wrnLabel(wrnOff)+'.');
-    return;
-  }
-  var totalMiles=0,totalMinutes=0,totalElevation=0,totalCalories=0,powerSum=0,powerCount=0,longest=null;
-  runs.forEach(function(a){
-    var miles=Number(a.distance)||0;
-    totalMiles+=miles;
-    totalMinutes+=parseMins(String(a.duration||''));
-    totalElevation+=Number(a.elevGain)||0;
-    totalCalories+=Number(a.calories)||0;
-    if(Number(a.power)>0){powerSum+=Number(a.power);powerCount++;}
-    if(!longest||miles>(Number(longest.distance)||0))longest=a;
-  });
-  var avgPace=totalMiles>0&&totalMinutes>0?fmtPace(totalMinutes*60/totalMiles)+'/mi':'not available';
-  var existing=(document.getElementById('wrnNote')||{}).value||'';
-  var activityLines=runs.slice().sort(function(a,b){return String(a.date||'').localeCompare(String(b.date||''));}).map(function(a){
-    return [
-      a.date||'No date',
-      a.title||a.type||'Run',
-      (Number(a.distance)||0).toFixed(2)+' mi',
-      a.duration||'duration unavailable',
-      a.pace?String(a.pace)+'/mi':'pace unavailable',
-      Number(a.power)>0?Math.round(Number(a.power))+' W':'power unavailable',
-      Number(a.heartRate)>0?Math.round(Number(a.heartRate))+' bpm':'heart rate unavailable',
-      Number(a.elevGain)>0?Math.round(Number(a.elevGain))+' ft gain':'elevation unavailable',
-      a.notes?'notes: '+a.notes:'',
-      a.injuryReport?'injury report: '+a.injuryReport:''
-    ].filter(Boolean).join(' | ');
-  }).join('\n');
-  var prompt='Write a concise weekly running wrap-up for '+wrnLabel(wrnOff)+'. Use only the supplied facts and do not invent performance, recovery, injury, or health claims. Keep it encouraging, practical, and about 150-220 words. Use short headings: Week at a Glance, Strongest Session, Patterns & Recovery, and Focus for Next Week. If a conclusion is uncertain, say so. This is training reflection, not medical advice.\n\n'
-    +'SUMMARY\nRuns: '+runs.length+'\nDistance: '+totalMiles.toFixed(2)+' miles\nTime: '+fmtMins(totalMinutes)+'\nAverage pace: '+avgPace+'\nElevation gain: '+Math.round(totalElevation)+' ft\nCalories: '+Math.round(totalCalories)+'\nAverage recorded power: '+(powerCount?Math.round(powerSum/powerCount)+' W':'not available')+'\nLongest run: '+(longest?((longest.title||'Run')+', '+(Number(longest.distance)||0).toFixed(2)+' miles'):'not available')+'\n\n'
-    +'ACTIVITIES\n'+activityLines+'\n\nATHLETE NOTES\n'+(existing.trim()||'No notes entered.');
-  aiBtnState(btn,true);
-  aiCall(prompt,2200,function(text){
-    var ta=document.getElementById('wrnNote');
-    if(ta){ta.value=text;ta.dispatchEvent(new Event('input',{bubbles:true}));}
-    saveWrnNote();
-    aiBtnState(btn,false);
-  },function(message){
-    aiBtnState(btn,false);
-    alert('AI wrap-up could not be created: '+message);
-  });
-}
-// Get current week's run note for AI
 function getCurrentWeekRunNote(){return localStorage.getItem(wrnKey(0))||'';}
 function aiBtnState(btn,loading,originalText){
   if(!btn)return;
@@ -2565,8 +1785,13 @@ function aiReviewAnalysis(){
 }
 function changeDashOff(n){dashOff2+=n;renderDashboard();renderBPChart();}
 let revOff2=0;
-function renderReview(){const ws=wkStart(revOff2),we=new Date(ws);we.setDate(ws.getDate()+6);document.getElementById('revLabel').textContent=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' - '+we.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});const r=localStorage.getItem('review_'+dk(ws)),rv=r?JSON.parse(r):{};['revAnalysis','revWins','revImprove','revFocus','revLessons'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=rv[id]||'';});let logged=0,bible=0,prayer=0,steps=0;for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);const dateKey=dk(d),r2=localStorage.getItem('planner_'+dateKey);if(!r2)continue;logged++;const dd=JSON.parse(r2);if(dd.spBibleAudio==='green')bible++;if(dd.spAIPrayer==='green')prayer++;steps+=parseFloat(dd.exSteps)||0;}const runs=uniqueRunActivities(ws,we).length;document.getElementById('revStats').innerHTML=[{l:'Days Logged',v:logged+'/7'},{l:'Bible Days',v:bible+'/7'},{l:'Prayer Days',v:prayer+'/7'},{l:'Runs',v:runs},{l:'Total Steps',v:Math.round(steps).toLocaleString()}].map(({l,v})=>'<div class="review-stat"><strong>'+v+'</strong>'+l+'</div>').join('');renderReviewInjuryRollup();}
+function renderReview(){const ws=wkStart(revOff2),we=new Date(ws);we.setDate(ws.getDate()+6);document.getElementById('revLabel').textContent=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' - '+we.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});const r=localStorage.getItem('review_'+dk(ws)),rv=r?JSON.parse(r):{};['revAnalysis','revWins','revImprove','revFocus','revLessons'].forEach(id=>{const e=document.getElementById(id);if(e){e.value=rv[id]||'';autoGrowReviewField(e);}});let logged=0,bible=0,prayer=0,steps=0;for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);const dateKey=dk(d),r2=localStorage.getItem('planner_'+dateKey);if(!r2)continue;logged++;const dd=JSON.parse(r2);if(dd.spBibleAudio==='green')bible++;if(dd.spAIPrayer==='green')prayer++;steps+=parseFloat(dd.exSteps)||0;}const runs=uniqueRunActivities(ws,we).length;document.getElementById('revStats').innerHTML=[{l:'Days Logged',v:logged+'/7'},{l:'Bible Days',v:bible+'/7'},{l:'Prayer Days',v:prayer+'/7'},{l:'Runs',v:runs},{l:'Total Steps',v:Math.round(steps).toLocaleString()}].map(({l,v})=>'<div class="review-stat"><strong>'+v+'</strong>'+l+'</div>').join('');renderReviewInjuryRollup();}
 function saveReview(){const ws=wkStart(revOff2),d={};['revAnalysis','revWins','revImprove','revFocus','revLessons'].forEach(id=>{const e=document.getElementById(id);if(e)d[id]=e.value;});localStorage.setItem('review_'+dk(ws),JSON.stringify(d));const btn=document.querySelector('[onclick="saveReview()"]');if(btn){btn.textContent='Saved!';btn.style.background='#27ae60';setTimeout(()=>{btn.textContent='Save Review';btn.style.background='#667eea';},2000);}}
+function clearReview(){
+  if(!confirm('Clear this week\'s Review (Wins, What to Improve, Focus, Lessons)?'))return;
+  ['revWins','revImprove','revFocus','revLessons'].forEach(function(id){const e=document.getElementById(id);if(e){e.value='';autoGrowReviewField(e);}});
+  saveReview();
+}
 function changeRevOff(n){revOff2+=n;renderReview();}
 function getReviewWeekInjuryReports(){
   const ws=wkStart(revOff2),we=new Date(ws);we.setDate(ws.getDate()+6);
@@ -2610,16 +1835,20 @@ function getReviewWeekJournalText(){
 function aiFillEntireReview(btn){
   if(!journalAIKey()){alert('Add your Anthropic API key in Settings first.');return;}
   const ws=wkStart(revOff2),we=new Date(ws);we.setDate(ws.getDate()+6);
+  // BeyondStride's day-by-day training / nutrition / recovery for the week (read-only), fetched first.
+  if(typeof window.bsReviewFetch==='function'&&!btn.__bsReady){btn.disabled=true;window.bsReviewFetch(dk(ws),dk(we),function(t){btn.__bsText=t||'';btn.__bsReady=true;btn.disabled=false;aiFillEntireReview(btn);});return;}
+  const bsText=btn.__bsText||'';btn.__bsReady=false;btn.__bsText='';
   const weekLabel=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' - '+we.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
   const journal=getReviewWeekJournalText();
   const injuries=reviewInjuryText();
   const stats=(document.getElementById('revStats')||{}).innerText||'';
   const current=['revWins','revImprove','revFocus','revLessons'].map(function(id){var el=document.getElementById(id);return el&&el.value.trim()?id+': '+el.value.trim():'';}).filter(Boolean).join('\n');
-  const prompt='You are completing a personal weekly review for '+weekLabel+'. Use only the supplied weekly statistics, journal entries, and existing review notes. Return ONLY one valid JSON object with exactly these four string keys:\n'
+  const prompt='You are completing a personal weekly review for '+weekLabel+'. Use only the supplied weekly statistics, journal entries, day-by-day training / nutrition / recovery data from the BeyondStride app, and existing review notes. Return ONLY one valid JSON object with exactly these four string keys:\n'
     +'{"wins":"","improve":"","focus":"","lessons":""}\n\n'
     +'Writing requirements:\n- wins: 2-4 specific achievements or positive patterns\n- improve: 2-4 constructive, realistic improvements\n- focus: 1-3 specific priorities for next week\n- lessons: 2-4 concise takeaways from the week\n'
-    +'Use short bullet-style lines inside each string. Do not invent events or accomplishments. If information is limited, acknowledge that briefly and make cautious suggestions.\n\n'
-    +'WEEKLY STATISTICS:\n'+(stats||'No statistics available')+'\n\nINJURY REPORT WEEKLY ROLL-UP:\n'+injuries+'\n\nDAILY JOURNAL:\n'+(journal||'No written daily notes available')+'\n\nEXISTING REVIEW NOTES:\n'+(current||'None');
+    +'Use short bullet-style lines inside each string. Do not invent events or accomplishments. If information is limited, acknowledge that briefly and make cautious suggestions.\n'
+    +'Use numbers exactly as written; never guess or calculate a score that is not given. When the journal and BeyondStride differ, BeyondStride is the watch / app measurement for sleep, HRV, heart rate, runs and food logged.\n\n'
+    +'WEEKLY STATISTICS:\n'+(stats||'No statistics available')+'\n\nINJURY REPORT WEEKLY ROLL-UP:\n'+injuries+'\n\nDAILY JOURNAL:\n'+(journal||'No written daily notes available')+'\n\nTRAINING, NUTRITION & RECOVERY BY DAY (BeyondStride app):\n'+(bsText||'Not available')+'\n\nEXISTING REVIEW NOTES:\n'+(current||'None');
   const original=btn.innerHTML;btn.disabled=true;btn.innerHTML='&#x23F3; Filling Review...';
   aiCall(prompt,2400,function(text){
     try{
@@ -2627,7 +1856,7 @@ function aiFillEntireReview(btn){
       var start=cleaned.indexOf('{'),end=cleaned.lastIndexOf('}');if(start>=0&&end>=start)cleaned=cleaned.slice(start,end+1);
       var result=JSON.parse(cleaned),map={wins:'revWins',improve:'revImprove',focus:'revFocus',lessons:'revLessons'};
       Object.keys(map).forEach(function(key){var el=document.getElementById(map[key]);if(el&&result[key]!=null){el.value=String(result[key]).trim();el.dispatchEvent(new Event('input'));}});
-      saveReview();v26Toast('Weekly Review filled and saved');
+      v26Toast('Weekly Review filled — edit it, then tap Save Review to keep it');
     }catch(e){alert('The AI response could not be placed into the Review fields. Please try again.');}
     btn.disabled=false;btn.innerHTML=original;
   },function(err){btn.disabled=false;btn.innerHTML=original;alert('AI error: '+err);});
@@ -2648,7 +1877,7 @@ function getDayActivityNotesText(d){
 function getDayJournalText(d){
   const raw=localStorage.getItem('planner_'+dk(d));
   const dd=raw?JSON.parse(raw):{},parts=[];
-  const labeled={jNotes:'Daily Journal',spMeditationText:'Meditation notes',spDailyBreadText:'Daily Bread / verse notes',jAccomplish:'Accomplishments',jImprov:'What to improve',jGratitude:'Gratitude',jIssues:'Issues',jRunLog:'Run log','mnotes-breakfast':'Breakfast notes','mnotes-lunch':'Lunch notes','mnotes-dinner':'Dinner notes','mnotes-snack':'Snack notes','mnotes-liquids':'Liquids notes','mnotes-sports':'Sports nutrition notes','mnotes-supplements':'Supplement notes','wBPVal':'Blood pressure','wPulseVal':'Pulse','wRestHRVal':'Resting heart rate','wMedsVal':'Medications','wWghtVal':'Weight','wSleepVal':'Sleep','gaAudiobookText':"Today's listening",'gaAudiobookTime':'Listening time'};
+  const labeled={jNotes:'Daily Journal',spMeditationText:'Meditation notes',spDailyBreadText:'Daily Bread / verse notes',jAccomplish:'Accomplishments',jImprov:'What to improve',jGratitude:'Gratitude',jIssues:'Issues',jRunLog:'Run log','wBPVal':'Blood pressure','wPulseVal':'Pulse','wRestHRVal':'Resting heart rate','wMedsVal':'Medications','wWghtVal':'Weight','wSleepVal':'Sleep','gaAudiobookText':"Today's listening",'gaAudiobookTime':'Listening time'};
   Object.keys(labeled).forEach(function(k){if(dd[k]&&String(dd[k]).trim())parts.push(labeled[k]+': '+String(dd[k]).trim());});
   // Bible / Sermon Notes tab is stored separately under its own bible_<date> key,
   // not in the planner_ blob above -- pull its substantive fields in directly.
@@ -2689,26 +1918,67 @@ function getDayJournalText(d){
   if(actText)parts.push(actText);
   return parts.join('\n');
 }
+var DAY_REV_IDS=['dayRevWins','dayRevImprove','dayRevFocus','dayRevLessons'];
+// Review fields grow to fit their text instead of scrolling inside a fixed-height box,
+// so a filled-in review still reads as one continuous block, not four separate boxes.
+var REVIEW_AUTOGROW_IDS=DAY_REV_IDS.concat(['revWins','revImprove','revFocus','revLessons']);
+function autoGrowReviewField(el){if(!el)return;el.style.height='auto';el.style.height=el.scrollHeight+'px';}
+(function(){document.addEventListener('input',function(e){
+  if(!e.target||REVIEW_AUTOGROW_IDS.indexOf(e.target.id)<0)return;
+  autoGrowReviewField(e.target);
+},true);})();
 function renderDayReview(){
-  const raw=localStorage.getItem('dayreview_'+dk(today)),rv=raw?JSON.parse(raw):{};
-  ['dayRevWins','dayRevImprove','dayRevFocus','dayRevLessons'].forEach(function(id){const e=document.getElementById(id);if(e)e.value=rv[id]||'';});
+  var key='dayreview_'+dk(today),raw=null;try{raw=localStorage.getItem(key);}catch(e){}
+  var rv={};try{rv=raw?JSON.parse(raw):{};}catch(e2){}
+  DAY_REV_IDS.forEach(function(id){const e=document.getElementById(id);if(e){e.value=rv[id]||'';autoGrowReviewField(e);}});
+  // A review saved while device storage was full lives in the larger on-device store.
+  if(!raw&&typeof journalLargeStoreGet==='function')journalLargeStoreGet(key).then(function(v){
+    if(!v||key!=='dayreview_'+dk(today))return;
+    DAY_REV_IDS.forEach(function(id){const e=document.getElementById(id);if(e&&!e.value){e.value=v[id]||'';autoGrowReviewField(e);}});
+  }).catch(function(){});
 }
-function saveDayReview(){
-  const d={};['dayRevWins','dayRevImprove','dayRevFocus','dayRevLessons'].forEach(function(id){const e=document.getElementById(id);if(e)d[id]=e.value;});
-  localStorage.setItem('dayreview_'+dk(today),JSON.stringify(d));
+function clearDayReview(){
+  if(!confirm('Clear today\'s AI Review (Wins, What to Improve, Focus, Lessons)?'))return;
+  DAY_REV_IDS.forEach(function(id){const e=document.getElementById(id);if(e){e.value='';autoGrowReviewField(e);}});
+  saveDayReview();
+}
+function saveDayReview(quiet){
+  const d={};DAY_REV_IDS.forEach(function(id){const e=document.getElementById(id);if(e)d[id]=e.value;});
+  const key='dayreview_'+dk(today);
   const btn=document.querySelector('[onclick="saveDayReview()"]');
-  if(btn){btn.textContent='Saved!';btn.style.background='#27ae60';setTimeout(function(){btn.textContent='Save Review';btn.style.background='#667eea';},2000);}
+  function done(ok,msg){
+    if(quiet)return;
+    if(btn){btn.textContent=ok?'Saved!':'Not saved';btn.style.background=ok?'#27ae60':'#dc2626';setTimeout(function(){btn.textContent='Save Review';btn.style.background='#667eea';},2500);}
+    if(!ok)alert(msg);
+  }
+  try{localStorage.setItem(key,JSON.stringify(d));done(true);}
+  catch(err){
+    // Device storage full: keep it in the larger on-device store instead so it isn't lost.
+    if(typeof journalLargeStoreSet==='function')journalLargeStoreSet(key,d).then(function(){done(true);if(!quiet&&typeof v26Toast==='function')v26Toast('Saved (device storage is nearly full — consider a backup and cleanup)');})
+      .catch(function(){done(false,'The review could not be saved — device storage is full. Free up space (for example old AI Prayer or Bible Reading Archive entries), then tap Save Review again.');});
+    else done(false,'The review could not be saved — device storage is full.');
+  }
 }
+// Typing in the review saves it automatically (AI Fill still waits for Save Review).
+(function(){var t=null;document.addEventListener('input',function(e){
+  if(!e.isTrusted||!e.target||DAY_REV_IDS.indexOf(e.target.id)<0)return;
+  clearTimeout(t);t=setTimeout(function(){saveDayReview(true);},800);},true);})();
 function aiFillEntireDayReview(btn){
   if(!journalAIKey()){alert('Add your Anthropic API key in Settings first.');return;}
+  // BeyondStride's training / nutrition / recovery summary for the day (read-only), fetched first.
+  if(typeof window.bsReviewFetch==='function'&&!btn.__bsReady){var _k=dk(today);btn.disabled=true;window.bsReviewFetch(_k,_k,function(t){btn.__bsText=t||'';btn.__bsReady=true;btn.disabled=false;aiFillEntireDayReview(btn);});return;}
+  const bsText=btn.__bsText||'';btn.__bsReady=false;btn.__bsText='';
   const dayLabel=today.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric',year:'numeric'});
   const journal=getDayJournalText(today);
   const current=['dayRevWins','dayRevImprove','dayRevFocus','dayRevLessons'].map(function(id){var el=document.getElementById(id);return el&&el.value.trim()?id+': '+el.value.trim():'';}).filter(Boolean).join('\n');
-  const prompt='You are completing a personal daily review for '+dayLabel+'. Use only the supplied journal entry and existing review notes. Return ONLY one valid JSON object with exactly these four string keys:\n'
+  const prompt='You are completing a personal daily review for '+dayLabel+'. Use only the supplied journal entry, training / nutrition / recovery data from the BeyondStride app, and existing review notes. Return ONLY one valid JSON object with exactly these four string keys:\n'
     +'{"wins":"","improve":"","focus":"","lessons":""}\n\n'
     +'Writing requirements:\n- wins: 1-3 specific achievements or positive moments from today\n- improve: 1-3 constructive, realistic improvements\n- focus: 1-2 specific priorities for tomorrow\n- lessons: 1-3 concise takeaways from today\n'
-    +'Use short bullet-style lines inside each string. Do not invent events or accomplishments. If information is limited, acknowledge that briefly and make cautious suggestions.\n\n'
-    +'DAILY JOURNAL:\n'+(journal||'No written journal notes available for today')+'\n\nEXISTING REVIEW NOTES:\n'+(current||'None');
+    +'Use short bullet-style lines inside each string. Do not invent events or accomplishments. If information is limited, acknowledge that briefly and make cautious suggestions.\n'
+    +'Use numbers exactly as written; never guess or calculate a score that is not given (HRV in ms is not a readiness score). When the journal and BeyondStride give different numbers (for example sleep), BeyondStride is the watch / app measurement for sleep, HRV, heart rate, runs and food logged; mention both only if the difference matters.\n'
+    +(dk(today)===dk(new Date())?'It is now '+new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})+' and the day is not over: a planned workout not done yet is still to do today (not missed), and food totals are only so far.\n\n':'\n')
+    +'DAILY JOURNAL:\n'+(journal||'No written journal notes available for today')
+    +'\n\nTRAINING, NUTRITION & RECOVERY (BeyondStride app):\n'+(bsText||'Not available')+'\n\nEXISTING REVIEW NOTES:\n'+(current||'None');
   const original=btn.innerHTML;btn.disabled=true;btn.innerHTML='&#x23F3; Filling Review...';
   aiCall(prompt,2000,function(text){
     try{
@@ -2716,7 +1986,7 @@ function aiFillEntireDayReview(btn){
       var start=cleaned.indexOf('{'),end=cleaned.lastIndexOf('}');if(start>=0&&end>=start)cleaned=cleaned.slice(start,end+1);
       var result=JSON.parse(cleaned),map={wins:'dayRevWins',improve:'dayRevImprove',focus:'dayRevFocus',lessons:'dayRevLessons'};
       Object.keys(map).forEach(function(key){var el=document.getElementById(map[key]);if(el&&result[key]!=null){el.value=String(result[key]).trim();el.dispatchEvent(new Event('input'));}});
-      saveDayReview();v26Toast('Day Review filled and saved');
+      v26Toast('Day Review filled — edit it, then tap Save Review to keep it');
     }catch(e){alert('The AI response could not be placed into the Review fields. Please try again.');}
     btn.disabled=false;btn.innerHTML=original;
   },function(err){btn.disabled=false;btn.innerHTML=original;alert('AI error: '+err);});
@@ -2896,7 +2166,7 @@ function attachAllFieldUndos(){
            'spDailyBreadText','spMeditationText',
            'gaAudiobookText','gaSkillText',
            'wBPVal','wPulseVal','wRestHRVal','wWghtVal','wSleepVal','wMedsVal',
-           'exStrengthVal','exBikeVal','exWalkVal'];
+           'exBikeVal'];
   ids.forEach(_attachFieldUndo);
 }
 

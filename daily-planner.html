@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-11-04-2-worktime930">
+<meta name="app-build" content="2026-11-11-4-airevautogrow">
 <script src="theme-switcher.js?v=2026-10-21-1"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#ff6b00">
@@ -121,7 +121,6 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;paddi
 #tab-weekly .summary-table th:not(:first-child),#tab-weekly .summary-table td:not(:first-child),
 #tab-monthly .summary-table th:not(:first-child),#tab-monthly .summary-table td:not(:first-child),
 #tab-yearly .summary-table th:not(:first-child),#tab-yearly .summary-table td:not(:first-child),
-#tab-nutrition .summary-table th:not(:first-child),#tab-nutrition .summary-table td:not(:first-child),
 #tab-habits .summary-table th:not(:first-child),#tab-habits .summary-table td:not(:first-child),
 #tab-meditate .summary-table th:not(:first-child),#tab-meditate .summary-table td:not(:first-child),
 #tab-bible .summary-table th:not(:first-child),#tab-bible .summary-table td:not(:first-child),
@@ -133,17 +132,17 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;paddi
 #tab-dashboard .summary-table th:not(:first-child),#tab-dashboard .summary-table td:not(:first-child){text-align:center;}
 @media(max-width:768px){
   body.tab-weekly-active .container,body.tab-monthly-active .container,body.tab-yearly-active .container,
-  body.tab-nutrition-active .container,body.tab-habits-active .container,body.tab-habits2-active .container,body.tab-meditate-active .container,
+  body.tab-habits-active .container,body.tab-habits2-active .container,body.tab-meditate-active .container,
   body.tab-bible-active .container,body.tab-library-active .container,body.tab-activities-active .container,
   body.tab-skill-log-active .container,body.tab-wellness-active .container,
   body.tab-file-uploads-active .container,body.tab-dashboard-active .container{width:100%;max-width:none;margin:0;border:none;border-radius:0;box-shadow:none;}
   body.tab-weekly-active,body.tab-monthly-active,body.tab-yearly-active,
-  body.tab-nutrition-active,body.tab-habits-active,body.tab-habits2-active,body.tab-meditate-active,
+  body.tab-habits-active,body.tab-habits2-active,body.tab-meditate-active,
   body.tab-bible-active,body.tab-library-active,body.tab-activities-active,
   body.tab-skill-log-active,body.tab-wellness-active,
   body.tab-file-uploads-active,body.tab-dashboard-active{padding-left:6px;padding-right:6px;}
   #tab-weekly .panel,#tab-monthly .panel,#tab-yearly .panel,
-  #tab-nutrition .panel,#tab-habits .panel,#tab-habits2 .panel,#tab-meditate .panel,
+  #tab-habits .panel,#tab-habits2 .panel,#tab-meditate .panel,
   #tab-bible .panel,#tab-library .panel,#tab-activities .panel,
   #tab-skill-log .panel,#tab-wellness .panel,
   #tab-file-uploads .panel,#tab-dashboard .panel{padding-left:8px;padding-right:8px;}
@@ -157,6 +156,12 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;paddi
 .review-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
 .review-section label{display:block;font-size:0.82rem;font-weight:600;color:#555;margin-bottom:3px;}
 .review-section textarea{width:100%;height:75px;border:1px solid #e9ecef;border-radius:6px;padding:7px;font-size:0.95rem;resize:vertical;outline:none;font-family:inherit;}
+.review-merged{border:1px solid #e9ecef;border-radius:8px;padding:14px 14px 4px;margin-bottom:14px;}
+.review-merged .review-grid{margin-bottom:0;gap:0;}
+.review-merged .review-grid>div{margin-bottom:14px;}
+.review-merged .review-grid>div:last-child{margin-bottom:4px;}
+.review-merged textarea{border:none;border-radius:0;padding:2px 0 0;background:transparent;resize:none;overflow:hidden;min-height:44px;box-sizing:border-box;}
+.review-merged textarea:focus{outline:none;}
 .review-stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
 .review-stat{background:linear-gradient(135deg,#667eea,#764ba2);color:white;border-radius:8px;padding:8px 12px;font-size:0.85rem;text-align:center;}
 .review-stat strong{display:block;font-size:1.2rem;}
@@ -269,35 +274,8 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;paddi
 }
 
 /* Activities Tab */
-.act-card{background:white;border:1px solid #e9ecef;border-radius:10px;padding:14px;margin-bottom:10px;border-left:4px solid #e67e22;}
-.act-card.run{border-left-color:#e67e22;}.act-card.ride{border-left-color:#8e44ad;}.act-card.walk{border-left-color:#27ae60;}.act-card.swim{border-left-color:#2980b9;}.act-card.other{border-left-color:#95a5a6;}
-.act-title{font-weight:700;font-size:0.97rem;color:#2c3e50;margin-bottom:3px;}
-.act-date{font-size:0.78rem;color:#888;margin-bottom:8px;}
-.act-stats{display:flex;flex-direction:column;gap:8px;}
-.act-stats-row{display:flex;flex-wrap:wrap;gap:6px 8px;}
-.act-stats-row.act-stats-conditions{padding-top:8px;border-top:1px dashed #eceef1;}
-.act-stat{font-size:0.8rem;color:#555;white-space:nowrap;background:#f6f7f9;border:1px solid #ebedf0;border-radius:7px;padding:3px 9px;display:inline-flex;align-items:center;gap:3px;}
-.act-stat strong{color:#2c3e50;}
-.act-stats-row.act-stats-conditions .act-stat{background:#fffaf2;border-color:#ffe9c7;}
-.act-badge{display:inline-block;font-size:0.7rem;font-weight:700;padding:2px 7px;border-radius:10px;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em;}
-.act-badge.garmin{background:#00b2e3;color:white;}.act-badge.stryd{background:#ff6b35;color:white;}.act-badge.manual{background:#95a5a6;color:white;}.act-badge.strava{background:#fc4c02;color:white;}.act-badge.gear2{background:#16a085;color:white;}
-.act-import-info{background:#fff8f0;border:1px solid #ffd5a8;border-radius:8px;padding:12px;font-size:0.83rem;color:#7d4800;margin-bottom:14px;line-height:1.6;}
-.act-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
-@media(max-width:500px){.act-form-grid{grid-template-columns:1fr;}}
 .act-input{width:100%;border:1px solid #d0d8ff;border-radius:6px;padding:7px;font-size:0.88rem;outline:none;font-family:inherit;background:white;box-sizing:border-box;}
 .act-input:disabled{background:#f0f0f0;color:#aaa;cursor:not-allowed;}
-.act-label{display:block;font-size:0.78rem;font-weight:600;color:#555;margin-bottom:3px;}
-.act-filter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center;}
-.act-filter select,.act-filter input{border:1px solid #e9ecef;border-radius:6px;padding:5px 10px;font-size:0.84rem;color:#555;outline:none;background:white;}
-.act-header-clean{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;padding:12px 14px;background:#fffaf5;border:1px solid #f3dcc7;border-radius:12px;}
-.act-title-block{display:flex;flex-direction:column;gap:3px;}
-.act-header-actions{display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap;}
-.act-header-actions .lib-add-btn,.act-header-actions button{padding:6px 10px!important;font-size:.76rem!important;border-radius:7px!important;line-height:1.2;min-height:30px;}
-.activity-period-details{border-top:1px solid rgba(71,84,103,.14);margin-top:8px;padding-top:7px;display:grid;gap:4px;}
-.activity-period-details div{display:flex;justify-content:space-between;gap:8px;font-size:.72rem;color:#667085;}
-.activity-period-details strong{color:#344054;font-size:.74rem;white-space:nowrap;}
-.activity-period-details .tile-cp-input{width:58px;border:1px solid #a9dfbf;border-radius:5px;padding:2px 4px;text-align:right;font-size:.74rem;font-weight:700;color:#344054;background:rgba(255,255,255,.78);outline:none;}
-.activity-period-details .tile-cp-input:focus{border-color:#27ae60;box-shadow:0 0 0 2px rgba(39,174,96,.14);}
 .check-overview{margin:10px 16px 4px;border:1px solid #c7d2fe;border-radius:11px;background:#f8faff;overflow:hidden;}
 .check-overview-head{display:flex;align-items:center;gap:8px;padding:10px 12px;cursor:pointer;color:#3730a3;font-weight:700;font-size:.88rem;}
 .check-overview-head:focus-visible{outline:3px solid rgba(79,70,229,.25);outline-offset:-3px;}
@@ -460,78 +438,8 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;paddi
 .compact-mini-head{display:flex;align-items:center;gap:7px;padding:7px 10px;cursor:pointer;font-size:.78rem;font-weight:700;color:#475467;}
 .compact-mini-head span:last-child{margin-left:auto;font-size:.7rem;color:#98a2b3;font-weight:600;}
 .compact-mini-body{display:none;padding:0 9px 9px;}
-.act-import-menu{position:relative;}
-.act-import-menu summary{list-style:none;background:#00a6d6;color:#fff;border-radius:7px;padding:7px 11px;font-size:.76rem;font-weight:700;cursor:pointer;min-height:30px;box-sizing:border-box;display:flex;align-items:center;}
-.act-import-menu summary::-webkit-details-marker{display:none;}
-.act-import-options{position:absolute;z-index:20;top:36px;left:0;min-width:145px;background:#fff;border:1px solid #d0d5dd;border-radius:8px;padding:5px;box-shadow:0 8px 20px rgba(16,24,40,.16);}
-.act-import-options label{display:block!important;width:100%;box-sizing:border-box;margin:3px 0;text-align:center;}
-#tab-habits .tri-check{display:none!important;}
-.act-filter-shell{border:1px solid #e4e7ec;border-radius:10px;background:#fafbfc;margin-bottom:12px;overflow:hidden;}
-.act-filter-summary{list-style:none;cursor:pointer;padding:9px 12px;font-size:.8rem;font-weight:700;color:#475467;display:flex;align-items:center;justify-content:space-between;}
-.act-filter-summary::-webkit-details-marker{display:none;}
-.act-filter-summary:after{content:"▾";color:#98a2b3;}
-.act-filter-shell[open] .act-filter-summary:after{content:"▴";}
-.act-filter-body{padding:0 10px 10px;}
-.act-search-row{display:grid;grid-template-columns:minmax(160px,1fr) auto;gap:7px;margin-bottom:8px;}
-.act-search-row input{width:100%;border:1px solid #dfe3ea;border-radius:8px;padding:8px 10px;font-size:.86rem;box-sizing:border-box;}
-.act-filter-grid{display:grid;grid-template-columns:repeat(3,minmax(120px,1fr));gap:7px;}
-.act-filter-grid select,.act-filter-grid input{width:100%;box-sizing:border-box;border:1px solid #dfe3ea;border-radius:7px;padding:7px 8px;font-size:.8rem;background:#fff;color:#475467;}
-.act-date-filters{display:grid;grid-template-columns:auto minmax(125px,1fr) auto minmax(125px,1fr) auto auto;gap:7px;align-items:center;margin-top:8px;font-size:.76rem;color:#667085;}
-@media(max-width:700px){.act-header-clean{padding:10px}.act-header-actions{justify-content:flex-start;width:100%}.act-filter-grid{grid-template-columns:1fr 1fr}.act-date-filters{grid-template-columns:auto 1fr auto 1fr}.act-date-filters .act-date-clear,.act-date-filters .act-group-wrap{grid-column:span 2}.act-header-actions .lib-add-btn,.act-header-actions button{flex:0 0 auto}}
 
 /* Activities enhancements */
-.act-stats-bar{display:flex;flex-wrap:wrap;gap:8px 16px;background:linear-gradient(135deg,#fff5e6,#fff);border:1px solid #ffd5a8;border-radius:10px;padding:12px 16px;margin-bottom:12px;}
-#actStatsBar{display:none!important;}
-.act-stats-bar .sb-item{text-align:center;}
-.act-stats-bar .sb-val{font-size:1.1rem;font-weight:800;color:#e67e22;word-break:break-word;}
-.act-stats-bar .sb-lbl{font-size:0.72rem;color:#999;text-transform:uppercase;letter-spacing:0.04em;}
-.act-pr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-bottom:14px;}
-.act-pr-card{background:linear-gradient(135deg,#fffbe6,#fff);border:1px solid #ffe88a;border-radius:8px;padding:10px 12px;text-align:center;}
-.act-pr-card .pr-val{font-size:1.05rem;font-weight:800;color:#b8860b;}
-.act-pr-card .pr-lbl{font-size:0.72rem;color:#999;text-transform:uppercase;letter-spacing:0.03em;margin-top:2px;}
-.act-pr-card .pr-date{font-size:0.7rem;color:#bbb;margin-top:3px;}
-.act-pr-card .pr-adj{font-size:0.68rem;color:#8a6d1a;font-weight:700;margin-top:4px;border-top:1px dashed #ffe88a;padding-top:4px;}
-.act-section-toggle{font-size:0.8rem;font-weight:700;color:#e67e22;cursor:pointer;user-select:none;margin-bottom:8px;display:flex;align-items:center;gap:5px;}
-.act-chart-wrap{background:white;border:1px solid #e9ecef;border-radius:10px;padding:12px;margin-bottom:14px;}
-.act-chart-title{font-size:0.82rem;font-weight:700;color:#555;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
-.act-chart-toggle{display:flex;gap:4px;}
-.act-chart-toggle button{font-size:0.72rem;padding:2px 8px;border-radius:10px;border:1px solid #e9ecef;cursor:pointer;background:white;color:#888;}
-.act-chart-toggle button.active{background:#e67e22;color:white;border-color:#e67e22;}
-.act-load-card{background:white;border:1px solid #e9ecef;border-radius:10px;padding:12px 14px;margin:12px 0;}
-.act-streak-row{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;}
-.act-streak-chip{background:#e67e22;color:white;font-size:0.78rem;font-weight:700;padding:4px 12px;border-radius:20px;}
-.act-load-bar{display:flex;gap:3px;align-items:flex-end;height:36px;}
-.act-load-week{display:flex;flex-direction:column;align-items:center;gap:2px;}
-.act-load-bar-inner{width:20px;background:#e67e22;border-radius:3px 3px 0 0;min-height:2px;}
-.act-load-lbl{font-size:0.62rem;color:#999;}
-.zone-badge{display:inline-block;font-size:0.68rem;font-weight:700;padding:1px 6px;border-radius:8px;margin-left:5px;color:white;}
-.z1{background:#5dade2;}.z2{background:#58d68d;}.z3{background:#f4d03f;color:#555;}.z4{background:#e67e22;}.z5{background:#e74c3c;}
-.act-note-edit{width:100%;border:1px solid #ffd5a8;border-radius:5px;padding:5px;font-size:0.82rem;font-family:inherit;line-height:1.45;field-sizing:content;max-height:520px;resize:vertical;min-height:40px;background:#fffdf8;outline:none;margin-top:6px;}
-.act-journal-btn{font-size:0.72rem;padding:3px 8px;border-radius:10px;border:none;background:#667eea;color:white;cursor:pointer;white-space:nowrap;}
-.act-note-btn{font-size:0.72rem;padding:3px 8px;border-radius:10px;border:none;background:#f0f0f0;color:#555;cursor:pointer;}
-
-/* AI Training Plan */
-.tp-panel{background:linear-gradient(135deg,#f0f4ff,#fff);border:1px solid #d0d8ff;border-radius:10px;padding:14px;margin-bottom:14px;}
-.tp-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
-.tp-title{font-size:0.9rem;font-weight:700;color:#667eea;}
-.tp-controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
-.tp-select{border:1px solid #d0d8ff;border-radius:6px;padding:5px 10px;font-size:0.84rem;color:#444;outline:none;background:white;}
-.tp-input{width:110px;border:1px solid #d0d8ff;border-radius:6px;padding:5px 8px;font-size:0.84rem;outline:none;background:white;}
-.tp-gen-btn{background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:0.84rem;font-weight:700;white-space:nowrap;}
-.tp-gen-btn:disabled{opacity:0.6;cursor:default;}
-.tp-output{white-space:pre-wrap;font-size:0.83rem;line-height:1.65;color:#2c3e50;background:white;border:1px solid #e9ecef;border-radius:8px;padding:14px;margin-top:10px;max-height:480px;overflow-y:auto;}
-.tp-output strong,.tp-output b{color:#667eea;}
-.tp-meta{font-size:0.75rem;color:#aaa;margin-top:6px;text-align:right;}
-
-/* Persistent Training Plan */
-.tp-persist{background:white;border:1px solid #d0d8ff;border-radius:10px;padding:14px;margin-top:16px;}
-.tp-persist-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
-.tp-persist-title{font-size:0.9rem;font-weight:700;color:#667eea;}
-.tp-persist-meta{font-size:0.75rem;color:#aaa;}
-.tp-persist-body{white-space:pre-wrap;font-size:0.83rem;line-height:1.65;color:#2c3e50;max-height:400px;overflow-y:auto;border:1px solid #e9ecef;border-radius:8px;padding:12px;background:#fafafa;}
-.tp-action-btn{font-size:0.78rem;padding:4px 12px;border-radius:6px;border:none;cursor:pointer;font-weight:600;}
-.tp-adjust-box{margin-top:10px;display:none;}
-.tp-adjust-box textarea{width:100%;border:1px solid #d0d8ff;border-radius:6px;padding:8px;font-size:0.84rem;font-family:inherit;resize:vertical;min-height:60px;outline:none;box-sizing:border-box;}
 .tp-archive-item{background:#f8f8ff;border:1px solid #e9ecef;border-radius:8px;padding:10px;margin-bottom:8px;}
 .tp-archive-meta{font-size:0.75rem;color:#aaa;margin-bottom:4px;}
 .tp-archive-preview{font-size:0.8rem;color:#555;white-space:pre-wrap;max-height:100px;overflow:hidden;line-height:1.5;margin-top:6px;}
@@ -605,14 +513,6 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;paddi
 .goal-input-row input{width:70px;border:1px solid #d0d8ff;border-radius:6px;padding:4px 8px;font-size:0.8rem;text-align:center;}
 
 /* Today's Workout card */
-#todayWorkoutCard{background:linear-gradient(135deg,#f0f4ff,#e8efff);border:1px solid #c7d4ff;border-radius:10px;padding:12px 14px;margin-bottom:10px;display:none;}
-.tw-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
-.tw-title{font-size:0.82rem;font-weight:700;color:#667eea;}
-.tw-date{font-size:0.72rem;color:#aaa;}
-.tw-body{font-size:0.84rem;color:#2c3e50;line-height:1.6;white-space:pre-wrap;}
-.tw-btn{font-size:0.75rem;padding:3px 10px;border-radius:10px;border:none;background:#667eea;color:white;cursor:pointer;font-weight:600;white-space:nowrap;}
-.tw-footer{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
-.tw-rest{color:#27ae60;font-weight:600;font-size:0.84rem;}
 
 /* ── Voice Input ── */
 .mic-btn{display:inline-flex;align-items:center;justify-content:center;background:#7c3aed;border:none;color:#fff;cursor:pointer;font-size:0.78rem;font-weight:700;padding:5px 10px;border-radius:6px;line-height:1;transition:background .15s;vertical-align:middle;margin-top:0;white-space:nowrap;letter-spacing:0.3px;}
@@ -633,35 +533,6 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;paddi
 .meal-subtotal{font-size:0.72rem;color:#888;white-space:nowrap;}
 .meal-chevron{font-size:0.8rem;color:#aaa;transition:transform .2s;min-width:12px;}
 
-/* ── Halloween section colors (differentiates each meal section in the Nutrition tab) ── */
-.meal-section[data-meal="breakfast"]{border-left-color:#e67e22;}
-.meal-section[data-meal="breakfast"] .meal-header{background:#fff6ea;}
-.meal-section[data-meal="breakfast"] .meal-header:hover{background:#ffe9cc;}
-.meal-section[data-meal="breakfast"] .meal-add-btn{background:#e67e22;}
-.meal-section[data-meal="lunch"]{border-left-color:#16a34a;}
-.meal-section[data-meal="lunch"] .meal-header{background:#eefdf3;}
-.meal-section[data-meal="lunch"] .meal-header:hover{background:#d7f7e3;}
-.meal-section[data-meal="lunch"] .meal-add-btn{background:#16a34a;}
-.meal-section[data-meal="dinner"]{border-left-color:#7c3aed;}
-.meal-section[data-meal="dinner"] .meal-header{background:#f6f1ff;}
-.meal-section[data-meal="dinner"] .meal-header:hover{background:#ece0ff;}
-.meal-section[data-meal="dinner"] .meal-add-btn{background:#7c3aed;}
-.meal-section[data-meal="snack"]{border-left-color:#b91c1c;}
-.meal-section[data-meal="snack"] .meal-header{background:#fef2f2;}
-.meal-section[data-meal="snack"] .meal-header:hover{background:#fde0e0;}
-.meal-section[data-meal="snack"] .meal-add-btn{background:#b91c1c;}
-.meal-section[data-meal="liquids"]{border-left-color:#0d9488;}
-.meal-section[data-meal="liquids"] .meal-header{background:#effcfa;}
-.meal-section[data-meal="liquids"] .meal-header:hover{background:#d3f5ef;}
-.meal-section[data-meal="liquids"] .meal-add-btn{background:#0d9488;}
-.meal-section[data-meal="sports"]{border-left-color:#d97706;}
-.meal-section[data-meal="sports"] .meal-header{background:#fff8ec;}
-.meal-section[data-meal="sports"] .meal-header:hover{background:#ffecc7;}
-.meal-section[data-meal="sports"] .meal-add-btn{background:#d97706;}
-.meal-section[data-meal="supplements"]{border-left-color:#3f3f46;}
-.meal-section[data-meal="supplements"] .meal-header{background:#f5f5f6;}
-.meal-section[data-meal="supplements"] .meal-header:hover{background:#e4e4e7;}
-.meal-section[data-meal="supplements"] .meal-add-btn{background:#3f3f46;}
 .meal-chevron.open{transform:rotate(90deg);}
 /* Meditation Tab */
 .medit-preset{background:#f3f4f6;border:1px solid #d1d5db;border-radius:6px;padding:4px 9px;font-size:0.78rem;cursor:pointer;color:#374151;font-weight:600;transition:background .15s,border-color .15s;}
@@ -981,8 +852,7 @@ body.v26-compact .journal-col textarea{height:70px;}
   #tab-bible.active,
   #tab-wellness.active,
   #tab-file-uploads.active,
-  #tab-skill-log.active,
-  #tab-nutrition.active{
+  #tab-skill-log.active{
     width:100%;
     max-width:none;
     margin:16px auto 0;
@@ -1573,13 +1443,11 @@ html[data-theme="halloween"] .header{
     <span class="hm-petal petal6">&#x1F338;</span>
   </div>
   <div class="hm-sidebar-header">More Tabs</div>
-  <button id="hm-activities" class="hm-nav-btn" onclick="hmSwitch('activities',event)">&#x1F3C3; Activities</button>
   <button id="hm-bible" class="hm-nav-btn" onclick="hmSwitch('bible',event)">&#x1F4D6; Bible</button>
   <button id="hm-file-uploads" class="hm-nav-btn" onclick="hmSwitch('file-uploads',event)">&#x1F4C1; Uploads</button>
   <button id="hm-habits2" class="hm-nav-btn" onclick="hmSwitch('habits2',event)">&#x1F331; Habits</button>
   <button id="hm-library" class="hm-nav-btn" onclick="hmSwitch('library',event)">&#x1F4DA; Library</button>
   <button id="hm-meditate" class="hm-nav-btn" onclick="hmSwitch('meditate',event)">&#x1F9D8; Meditate</button>
-  <button id="hm-nutrition" class="hm-nav-btn" onclick="hmSwitch('nutrition',event)">&#x1F957; Nutrition</button>
   <button id="hm-wellness" class="hm-nav-btn" onclick="hmSwitch('wellness',event)">&#x2764;&#xFE0F; Wellness</button>
 </nav>
 
@@ -1702,13 +1570,23 @@ html[data-theme="halloween"] .header{
     <div class="journal-day-progress-label"><span>Day's Progress</span><span id="journalDayProgressText">0%</span></div>
     <div class="journal-day-progress-track" role="progressbar" aria-label="Completed schedule items" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="journalDayProgressTrack"><div class="journal-day-progress-fill" id="journalDayProgressFill"></div></div>
   </div>
-  <div style="font-size:.66rem;color:#64748b;padding:7px 12px 0;">Sources: Training Plan, Nutrition, Growth, Library and journal entries</div>
+  <div style="font-size:.66rem;color:#64748b;padding:7px 12px 0;">Sources: Training Plan, Growth, Library and journal entries</div>
   <div class="journal-schedule-body" id="journalScheduleBody"></div>
-  <div class="journal-growth-pool">
+  <div class="journal-growth-pool" style="display:none"><!-- Growth Activities hidden at Michael's request (Nov 2026); elements kept so scripts still find them -->
     <div class="journal-growth-pool-title"><span>Growth Activities</span><span id="financialVideoScheduleStatus" style="font-size:.62rem;color:#7c3aed;text-transform:none;"></span></div>
     <div class="journal-growth-pool-card" data-growth-kind="language" style="grid-template-columns:19px minmax(120px,1fr) minmax(80px,auto) auto;"><div class="tri-check" data-key="gaLanguage" onclick="triClick(this)" title="Mark Language Practice complete"></div><strong style="font-size:.76rem;">Language Practice</strong><span class="journal-growth-status" id="growthLanguageStatus"></span><button type="button" class="journal-growth-add" onclick="journalOpenGrowthLog('language')">Schedule / Log</button></div>
     <div class="journal-growth-pool-card" data-growth-kind="guitar" style="grid-template-columns:19px minmax(120px,1fr) minmax(80px,auto) auto;"><div class="tri-check" data-key="gaGuitar" onclick="triClick(this)" title="Mark Guitar complete"></div><strong style="font-size:.76rem;">Guitar</strong><span class="journal-growth-status" id="growthGuitarStatus"></span><button type="button" class="journal-growth-add" onclick="journalOpenGrowthLog('guitar')">Schedule / Log</button></div>
     <div class="journal-growth-help" style="margin-top:7px;font-size:.64rem;color:#7c6f98;">Choose Schedule / Log to place an activity on My Schedule. Time spent is optional until you complete the activity; completed time appears under Growth / Skills in the Weekly, Monthly and Yearly screens.</div>
+  </div>
+  <div class="section" style="border:1px solid #f0f0f0;border-radius:10px;margin-top:12px;">
+    <div class="section-title green compact-toggle" role="button" tabindex="0" aria-expanded="false" aria-controls="physicalExerciseBody" onclick="toggleCompactSection('physicalExerciseBody','physicalExerciseArrow',this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCompactSection('physicalExerciseBody','physicalExerciseArrow',this);}">
+      <span id="physicalExerciseArrow">&#x25B6;</span><span>&#x1F9D8; Daily Movement</span><span class="compact-toggle-count" id="physicalExerciseCount">0/1</span>
+    </div>
+    <div id="physicalExerciseBody" class="compact-body">
+    <div class="task-row" style="display:none;"><div class="tri-check" data-key="exBike" onclick="triClick(this)"></div><label>Bike:</label><input type="text" id="exBikeVal" placeholder="Distance/time..."></div>
+    <div class="task-row"><div class="tri-check" data-key="exDogWalk" onclick="triClick(this)"></div><label>Dog Walk:</label><input type="text" id="exDogWalkVal" placeholder="Duration/notes..."></div>
+    <div class="goal-row"><div class="tri-check" data-key="exStepsCheck" onclick="triClick(this)"></div><label>Goal 10,000 steps - Actual:</label><input type="number" id="exSteps" min="0" placeholder="Steps"></div>
+    </div>
   </div>
 </details>
 <div class="modal-overlay" id="journalGrowthLogModal" style="display:none;">
@@ -1815,27 +1693,32 @@ html[data-theme="halloween"] .header{
     <strong style="font-size:0.98rem;color:#3730a3;">&#x1F916; Daily AI Review</strong>
     <button type="button" id="aiFillDayReviewBtn" class="ai-btn" onclick="aiFillEntireDayReview(this)" style="margin:0;background:linear-gradient(135deg,#1d4ed8,#7c3aed);">&#x2728; AI Fill Day Review</button>
   </div>
-  <div class="review-grid">
-    <div>
-      <label>Wins Today</label><textarea id="dayRevWins" placeholder="What went well today?"></textarea>
-    </div>
-    <div>
-      <label>What to Improve</label><textarea id="dayRevImprove" placeholder="Areas to work on..."></textarea>
-    </div>
-    <div>
-      <label>Focus for Tomorrow</label><textarea id="dayRevFocus" placeholder="Top priorities..."></textarea>
-    </div>
-    <div>
-      <label>Lessons Learned</label><textarea id="dayRevLessons" placeholder="Key takeaways..."></textarea>
+  <div class="review-merged">
+    <div class="review-grid">
+      <div>
+        <label>Wins Today</label><textarea id="dayRevWins" placeholder="What went well today?"></textarea>
+      </div>
+      <div>
+        <label>What to Improve</label><textarea id="dayRevImprove" placeholder="Areas to work on..."></textarea>
+      </div>
+      <div>
+        <label>Focus for Tomorrow</label><textarea id="dayRevFocus" placeholder="Top priorities..."></textarea>
+      </div>
+      <div>
+        <label>Lessons Learned</label><textarea id="dayRevLessons" placeholder="Key takeaways..."></textarea>
+      </div>
     </div>
   </div>
-  <button onclick="saveDayReview()" style="background:#667eea;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-size:0.85rem;">Save Review</button>
-</div>
-<div class="journaling-section">
-  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
-    <strong style="font-size:0.98rem;color:#3730a3;">&#x270D;&#xFE0F; Daily Journal</strong>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <button onclick="saveDayReview()" style="background:#667eea;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-size:0.85rem;">Save Review</button>
+    <button type="button" class="clear-btn" onclick="clearDayReview()">Clear</button>
   </div>
-  <textarea id="jNotes" placeholder="Write whatever's on your mind today..." style="width:100%;min-height:140px;border:1px solid #e9ecef;border-radius:6px;padding:8px;font-size:0.95rem;resize:vertical;outline:none;font-family:inherit;box-sizing:border-box;"></textarea>
+  <div class="integrated-journal" style="margin-top:18px;padding-top:16px;border-top:1px solid #e9ecef;">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+      <strong style="font-size:0.98rem;color:#3730a3;">&#x270D;&#xFE0F; Daily Journal</strong>
+    </div>
+    <textarea id="jNotes" placeholder="Write whatever's on your mind today..." style="width:100%;min-height:140px;border:1px solid #e9ecef;border-radius:6px;padding:8px;font-size:0.95rem;resize:vertical;outline:none;font-family:inherit;box-sizing:border-box;"></textarea>
+  </div>
 </div>
 </div>
 <div id="tab-weekly" class="tab-panel"><div class="panel">
@@ -1859,10 +1742,8 @@ html[data-theme="halloween"] .header{
   </div>
   <div id="aiWeeklyBox" class="ai-box"></div>
   <div id="wDigest" class="week-digest"></div>
-  <h2>Growth / Skills <small style="font-size:.62rem;font-weight:500;color:#64748b;">Language and Guitar</small></h2><div id="wGrowth"></div><h2>Fitness <small style="font-size:.62rem;font-weight:500;color:#64748b;">From Activities and Steps</small></h2><div id="wFitness"></div><h2>Wellness</h2><div id="wWellness"></div>
-<h2>Nutrition</h2><div id="wNutrition"></div>
-<h2>Micronutrients</h2><div id="wNutritionMicro"></div>
-<h2>Spirituality</h2><div id="wSpirituality"></div>
+  <div id="wGrowth" style="display:none"></div><h2>Nutrition <small style="font-size:.62rem;font-weight:500;color:#64748b;">From BeyondStride</small></h2><div id="wNutrition"></div><h2>Micronutrients <small style="font-size:.62rem;font-weight:500;color:#64748b;">From BeyondStride</small></h2><div id="wNutritionMicro"></div><h2>Fitness <small style="font-size:.62rem;font-weight:500;color:#64748b;">From Activities and Steps</small></h2><div id="wFitness"></div><h2>Wellness</h2><div id="wWellness"></div>
+<h2>Spirituality &amp; Reading</h2><div id="wSpirituality"></div>
 
 </div></div>
 <div id="tab-monthly" class="tab-panel"><div class="panel"><div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px;"><div class="week-nav" style="margin-bottom:0;"><button onclick="changeMonthOff(-1)">&#8249; Prev</button><span id="monthLabel"></span><button onclick="changeMonthOff(1)">Next &#8250;</button></div></div><div class="heatmap-wrap">
@@ -1874,9 +1755,7 @@ html[data-theme="halloween"] .header{
       <div class="heatmap-legend-cell hm1"></div>
       <div class="heatmap-legend-cell hm2"></div>
       <div class="heatmap-legend-cell hm3"></div>
-      <div class="heatmap-legend-cell hm4"></div>
-      <div class="heatmap-legend-cell hm5"></div>
-      <span>5 habits</span>
+      <span>3 habits</span>
     </div>
   </div>
   <div class="heatmap-grid" id="hmGrid">
@@ -1885,17 +1764,13 @@ html[data-theme="halloween"] .header{
     <div class="heatmap-dow">S</div>
   </div>
 </div>
-<h2>Growth</h2><div id="mGrowth"></div><h2>Fitness</h2><div id="mFitness"></div><h2>Wellness</h2><div id="mWellness"></div>
-<h2>Nutrition</h2><div id="mNutrition"></div>
-<h2>Micronutrients</h2><div id="mNutritionMicro"></div>
-<h2>Spirituality</h2><div id="mSpirituality"></div>
+<div id="mGrowth" style="display:none"></div><h2>Fitness</h2><div id="mFitness"></div><h2>Wellness</h2><div id="mWellness"></div>
+<h2>Spirituality &amp; Reading</h2><div id="mSpirituality"></div>
 
 </div></div>
 <div id="tab-yearly" class="tab-panel"><div class="panel"><div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px;"><div class="week-nav" style="margin-bottom:0;"><button onclick="changeYearOff(-1)">&#8249; Prev</button><span id="yearLabel"></span><button onclick="changeYearOff(1)">Next &#8250;</button></div></div>
-<h2>Growth</h2><div id="yGrowth"></div><h2>Fitness</h2><div id="yFitness"></div><h2>Wellness</h2><div id="yWellness"></div>
-<h2>Nutrition</h2><div id="yNutrition"></div>
-<h2>Micronutrients</h2><div id="yNutritionMicro"></div>
-<h2>Spirituality</h2><div id="ySpirituality"></div>
+<div id="yGrowth" style="display:none"></div><h2>Fitness</h2><div id="yFitness"></div><h2>Wellness</h2><div id="yWellness"></div>
+<h2>Spirituality &amp; Reading</h2><div id="ySpirituality"></div>
 
 </div></div>
 <div id="tab-dashboard" class="tab-panel"><div class="panel"><div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px;"><div class="week-nav" style="margin-bottom:0;"><button onclick="changeDashOff(-1)">&#8249; Prev</button><span id="dashLabel"></span><button onclick="changeDashOff(1)">Next &#8250;</button></div></div><div class="dash-grid" id="dashGrid"></div>
@@ -1925,17 +1800,6 @@ html[data-theme="halloween"] .header{
     <canvas id="weightChart" height="120" style="width:100%;display:block;"></canvas>
     <div id="weightChartAvg" style="font-size:0.75rem;color:#888;margin-top:6px;text-align:center;"></div>
   </div>
-  <!-- Mileage Trend Chart -->
-  <div class="bp-chart-wrap" id="milesChartWrap" style="margin-top:14px;display:none;">
-    <div class="bp-chart-title">
-      <span>🏃 Daily Miles — Last 60 Days</span>
-      <div class="bp-legend">
-        <span><div class="bp-legend-dot" style="background:#27ae60;"></div>Miles Run</span>
-      </div>
-    </div>
-    <canvas id="milesChart" height="120" style="width:100%;display:block;"></canvas>
-    <div id="milesChartAvg" style="font-size:0.75rem;color:#888;margin-top:6px;text-align:center;"></div>
-  </div>
 </div></div>
 <div id="tab-review" class="tab-panel"><div class="review-section">
   <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
@@ -1951,6 +1815,7 @@ html[data-theme="halloween"] .header{
     <div id="revInjuryRollup"></div>
   </section>
   <textarea id="revAnalysis" style="display:none;" aria-hidden="true"></textarea>
+  <div class="review-merged">
   <div class="review-grid">
     <div>
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
@@ -1968,7 +1833,11 @@ html[data-theme="halloween"] .header{
       <label>Lessons Learned</label><textarea id="revLessons" placeholder="Key takeaways..."></textarea>
     </div>
   </div>
-  <button onclick="saveReview()" style="background:#667eea;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-size:0.85rem;">Save Review</button>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <button onclick="saveReview()" style="background:#667eea;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-size:0.85rem;">Save Review</button>
+    <button type="button" class="clear-btn" onclick="clearReview()">Clear</button>
+  </div>
 </div></div>
 </div>
 <div id="tab-habits2" class="tab-panel">
@@ -2209,508 +2078,6 @@ html[data-theme="halloween"] .header{
   <div id="bookList"></div>
 </div></div>
 
-<div id="tab-activities" class="tab-panel"><div class="panel">
-  <!-- Persistent Training Plan -->
-  <div id="tpPersistSection" style="display:none;" class="tp-persist">
-    <div class="tp-persist-header">
-      <span class="tp-persist-title">&#x1F4CB; Active Training Plan</span>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;">
-        <button class="tp-action-btn" id="tpPersistPdfBtn" style="background:#8e44ad;color:white;display:none;" onclick="viewActivePlanPdf()">&#x1F4C4; View Original PDF</button>
-        <button class="tp-action-btn" id="tpPersistReformatBtn" style="background:#d35400;color:white;" onclick="reformatPlanWithAI('current')">&#x1FA84; Clean Up Formatting</button>
-        <button class="tp-action-btn" id="tpPersistZonesBtn" style="background:#16a085;color:white;" onclick="addTrainingZonesToPlan('current')">&#x2795; Add Training Zones</button>
-        <button class="tp-action-btn" id="tpPersistDatesBtn" style="background:#2c3e50;color:white;" onclick="addDatesToSchedule('current')">&#x1F4C5; Add Dates</button>
-        <button class="tp-action-btn" style="background:#667eea;color:white;" onclick="openAdjustPlan()">&#x270F; Adjust</button>
-        <button class="tp-action-btn" style="background:#27ae60;color:white;" onclick="archivePlan()">&#x1F4E6; Archive</button>
-        <button class="tp-action-btn" style="background:#d4e635;color:#121a17;" onclick="sendPlanToRunningApp('current')" title="Send this plan&#39;s dated workouts to BeyondStride on your phone and watch">&#x231A; Send plan to BeyondStride</button>
-        <button class="tp-action-btn" style="background:#e74c3c;color:white;" onclick="deletePlan()">&#x1F5D1; Delete</button>
-      </div>
-    </div>
-    <div class="tp-persist-meta" id="tpPersistMeta"></div>
-    <div class="tp-persist-body" id="tpPersistBody"></div>
-    <div class="tp-adjust-box" id="tpAdjustBox">
-      <div style="font-size:0.82rem;font-weight:600;color:#667eea;margin-bottom:6px;">&#x1F4AC; Tell AI how to adjust the plan:</div>
-      <textarea id="tpAdjustInput" placeholder="e.g. I missed this week due to illness, please shift the plan forward one week and adjust the long run schedule accordingly..."></textarea>
-      <div style="display:flex;gap:8px;margin-top:8px;">
-        <button class="tp-gen-btn" id="tpAdjustBtn" onclick="submitAdjustPlan()">&#x2728; Adjust Plan</button>
-        <button onclick="closeAdjustPlan()" style="font-size:0.84rem;padding:5px 14px;border-radius:6px;border:1px solid #e9ecef;background:white;cursor:pointer;color:#888;">Cancel</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Upcoming (second) Training Plan: saved for a future start date, kept separate from the active plan above until manually activated -->
-  <div id="tpUpcomingSection" style="display:none;" class="tp-persist">
-    <div class="tp-persist-header">
-      <span class="tp-persist-title">&#x1F4C5; Upcoming Training Plan</span>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;">
-        <button class="tp-action-btn" id="tpUpcomingPdfBtn" style="background:#8e44ad;color:white;display:none;" onclick="viewUpcomingPlanPdf()">&#x1F4C4; View Original PDF</button>
-        <button class="tp-action-btn" id="tpUpcomingReformatBtn" style="background:#d35400;color:white;" onclick="reformatPlanWithAI('upcoming')">&#x1FA84; Clean Up Formatting</button>
-        <button class="tp-action-btn" id="tpUpcomingZonesBtn" style="background:#16a085;color:white;" onclick="addTrainingZonesToPlan('upcoming')">&#x2795; Add Training Zones</button>
-        <button class="tp-action-btn" id="tpUpcomingDatesBtn" style="background:#2c3e50;color:white;" onclick="addDatesToSchedule('upcoming')">&#x1F4C5; Add Dates</button>
-        <button class="tp-action-btn" style="background:#667eea;color:white;" onclick="openAdjustPlan('upcoming')">&#x270F; Adjust</button>
-        <button class="tp-action-btn" id="tpUpcomingArchiveBtn" style="background:#27ae60;color:white;" onclick="archivePlan('upcoming')">&#x1F4E6; Archive</button>
-        <button class="tp-action-btn" style="background:#2980b9;color:white;" onclick="makeUpcomingPlanActive()">&#x25B6; Make Active Now</button>
-        <button class="tp-action-btn" style="background:#d4e635;color:#121a17;" onclick="sendPlanToRunningApp('upcoming')" title="Send this plan&#39;s dated workouts to BeyondStride on your phone and watch">&#x231A; Send plan to BeyondStride</button>
-        <button class="tp-action-btn" style="background:#e74c3c;color:white;" onclick="deleteUpcomingPlan()">&#x1F5D1; Delete</button>
-      </div>
-    </div>
-    <div id="tpUpcomingOverdueBanner" style="display:none;background:#fef2f2;border:1px solid #fecaca;color:#991b1b;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:0.84rem;font-weight:700;"></div>
-    <div class="tp-persist-meta" id="tpUpcomingMeta"></div>
-    <div class="tp-persist-body" id="tpUpcomingBody"></div>
-    <div class="tp-adjust-box" id="tpUpcomingAdjustBox">
-      <div style="font-size:0.82rem;font-weight:600;color:#667eea;margin-bottom:6px;">&#x1F4AC; Tell AI how to adjust the plan:</div>
-      <textarea id="tpUpcomingAdjustInput" placeholder="e.g. I missed this week due to illness, please shift the plan forward one week and adjust the long run schedule accordingly..."></textarea>
-      <div style="display:flex;gap:8px;margin-top:8px;">
-        <button class="tp-gen-btn" id="tpUpcomingAdjustBtn" onclick="submitAdjustPlan('upcoming')">&#x2728; Adjust Plan</button>
-        <button onclick="closeAdjustPlan('upcoming')" style="font-size:0.84rem;padding:5px 14px;border-radius:6px;border:1px solid #e9ecef;background:white;cursor:pointer;color:#888;">Cancel</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Daily Movement and Recovery (structured workouts belong in Activities) -->
-  <div class="section" style="border:1px solid #f0f0f0;border-radius:10px;margin-bottom:12px;">
-    <div class="section-title green compact-toggle" role="button" tabindex="0" aria-expanded="false" aria-controls="physicalExerciseBody" onclick="toggleCompactSection('physicalExerciseBody','physicalExerciseArrow',this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCompactSection('physicalExerciseBody','physicalExerciseArrow',this);}">
-      <span id="physicalExerciseArrow">&#x25B6;</span><span>&#x1F9D8; Daily Movement &amp; Recovery</span><span class="compact-toggle-count" id="physicalExerciseCount">0/3</span>
-    </div>
-    <div id="physicalExerciseBody" class="compact-body">
-    <div class="task-row"><div class="tri-check" data-key="exStrength" onclick="triClick(this)"></div><label>Strength:</label><input type="text" id="exStrengthVal" placeholder="Notes..."></div>
-    <div class="task-row" style="display:none;"><div class="tri-check" data-key="exBike" onclick="triClick(this)"></div><label>Bike:</label><input type="text" id="exBikeVal" placeholder="Distance/time..."></div>
-    <div class="task-row"><div class="tri-check" data-key="exWalk" onclick="triClick(this)"></div><label>Walk:</label><input type="text" id="exWalkVal" placeholder="Duration/notes..."></div>
-    <div class="task-row"><div class="tri-check" data-key="exDogWalk" onclick="triClick(this)"></div><label>Dog Walk:</label><input type="text" id="exDogWalkVal" placeholder="Duration/notes..."></div>
-    <div class="goal-row"><div class="tri-check" data-key="exStepsCheck" onclick="triClick(this)"></div><label>Goal 10,000 steps - Actual:</label><input type="number" id="exSteps" min="0" placeholder="Steps"></div>
-    </div>
-  </div>
-  <!-- Mileage Summary -->
-  <div id="mileageSummaryBar" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-    <div style="flex:1;min-width:120px;background:linear-gradient(135deg,#e8f8f0,#d5f5e3);border:1px solid #a9dfbf;border-radius:10px;padding:10px 12px;text-align:center;">
-      <div style="font-size:0.72rem;font-weight:700;color:#1e8449;text-transform:uppercase;letter-spacing:.04em;">This Week</div>
-      <div id="mileThisWeek" style="font-size:1.3rem;font-weight:700;color:#1a5276;">—</div>
-      <div style="font-size:0.7rem;color:#888;">miles</div>
-      <div class="activity-period-details">
-        <div><span>Avg pace</span><strong id="paceThisWeek">—</strong></div>
-        <div><span>Avg power</span><strong id="wattsThisWeek">—</strong></div>
-        <div><span>Exercise time</span><strong id="timeThisWeek">—</strong></div>
-        <div><span>Critical power</span><strong><input type="number" class="tile-cp-input" id="cpInput" placeholder="280" min="1" inputmode="numeric" oninput="saveCPAndRender()" title="Editable Critical Power in watts, used for power-zone colors"> W</strong></div>
-        <div><span>Max heart rate</span><strong><input type="number" class="tile-cp-input" id="hrMaxInput" placeholder="174" min="1" inputmode="numeric" oninput="saveMaxHRAndRender()" title="Editable Max Heart Rate in bpm, used for Garmin heart-rate-zone colors"> bpm</strong></div>
-        <div><span>Resting HR (30-day avg)</span><strong><input type="number" class="tile-cp-input" id="restHrInput" placeholder="55" min="1" inputmode="numeric" oninput="saveRestHRAndRender()" title="Editable 30-day average resting heart rate, used with Max Heart Rate for Karvonen heart-rate-zone math. Auto-updates from your Wellness Resting HR log on the 1st of each month."> bpm</strong></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:4px;justify-content:center;font-size:0.68rem;color:#888;margin-top:8px;">
-        <span>Goal:</span><input type="number" id="actGoal_week" class="tile-cp-input" style="width:48px;" placeholder="20" min="0" oninput="saveActGoalAndRender('week')"> mi/wk
-      </div>
-      <div id="actGoalBarWrap_week" style="display:none;margin-top:4px;">
-        <div style="background:#e8e8e8;border-radius:6px;height:6px;overflow:hidden;"><div id="actGoalBar_week" style="height:100%;width:0%;background:#e67e22;border-radius:6px;transition:width .3s;"></div></div>
-        <div id="actGoalLbl_week" style="font-size:0.64rem;color:#999;margin-top:2px;"></div>
-      </div>
-    </div>
-    <div style="flex:1;min-width:120px;background:linear-gradient(135deg,#eaf3fb,#d6eaf8);border:1px solid #a9cce3;border-radius:10px;padding:10px 12px;text-align:center;">
-      <div style="font-size:0.72rem;font-weight:700;color:#1a5276;text-transform:uppercase;letter-spacing:.04em;">Last Week</div>
-      <div id="mileLastWeek" style="font-size:1.3rem;font-weight:700;color:#1a5276;">—</div>
-      <div style="font-size:0.7rem;color:#888;">miles</div>
-      <div class="activity-period-details">
-        <div><span>Avg pace</span><strong id="paceLastWeek">—</strong></div>
-        <div><span>Avg power</span><strong id="wattsLastWeek">—</strong></div>
-        <div><span>Exercise time</span><strong id="timeLastWeek">—</strong></div>
-      </div>
-    </div>
-    <div style="flex:1;min-width:120px;background:linear-gradient(135deg,#fef9e7,#fdebd0);border:1px solid #f0c080;border-radius:10px;padding:10px 12px;text-align:center;">
-      <div style="font-size:0.72rem;font-weight:700;color:#d35400;text-transform:uppercase;letter-spacing:.04em;">Month to Date</div>
-      <div id="mileMTD" style="font-size:1.3rem;font-weight:700;color:#1a5276;">—</div>
-      <div style="font-size:0.7rem;color:#888;">miles</div>
-      <div class="activity-period-details">
-        <div><span>Avg pace</span><strong id="paceMTD">—</strong></div>
-        <div><span>Avg power</span><strong id="wattsMTD">—</strong></div>
-        <div><span>Exercise time</span><strong id="timeMTD">—</strong></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:4px;justify-content:center;font-size:0.68rem;color:#888;margin-top:8px;">
-        <span>Goal:</span><input type="number" id="actGoal_month" class="tile-cp-input" style="width:48px;" placeholder="80" min="0" oninput="saveActGoalAndRender('month')"> mi/mo
-      </div>
-      <div id="actGoalBarWrap_month" style="display:none;margin-top:4px;">
-        <div style="background:#e8e8e8;border-radius:6px;height:6px;overflow:hidden;"><div id="actGoalBar_month" style="height:100%;width:0%;background:#e67e22;border-radius:6px;transition:width .3s;"></div></div>
-        <div id="actGoalLbl_month" style="font-size:0.64rem;color:#999;margin-top:2px;"></div>
-      </div>
-    </div>
-    <div style="flex:1;min-width:120px;background:linear-gradient(135deg,#f5eef8,#e8daef);border:1px solid #c39bd3;border-radius:10px;padding:10px 12px;text-align:center;">
-      <div style="font-size:0.72rem;font-weight:700;color:#6c3483;text-transform:uppercase;letter-spacing:.04em;">Year to Date</div>
-      <div id="mileYTD" style="font-size:1.3rem;font-weight:700;color:#1a5276;">—</div>
-      <div style="font-size:0.7rem;color:#888;">miles</div>
-      <div class="activity-period-details">
-        <div><span>Avg pace</span><strong id="paceYTD">—</strong></div>
-        <div><span>Avg power</span><strong id="wattsYTD">—</strong></div>
-        <div><span>Exercise time</span><strong id="timeYTD">—</strong></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:4px;justify-content:center;font-size:0.68rem;color:#888;margin-top:8px;">
-        <span>Goal:</span><input type="number" id="actGoal_year" class="tile-cp-input" style="width:52px;" placeholder="1000" min="0" oninput="saveActGoalAndRender('year')"> mi/yr
-      </div>
-      <div id="actGoalBarWrap_year" style="display:none;margin-top:4px;">
-        <div style="background:#e8e8e8;border-radius:6px;height:6px;overflow:hidden;"><div id="actGoalBar_year" style="height:100%;width:0%;background:#e67e22;border-radius:6px;transition:width .3s;"></div></div>
-        <div id="actGoalLbl_year" style="font-size:0.64rem;color:#999;margin-top:2px;"></div>
-      </div>
-    </div>
-  </div>
-  <!-- Training Zones reference (Heart Rate + Power), under the mileage tiles -->
-  <div style="background:linear-gradient(135deg,#fdf2f8,#fce7f3);border:1px solid #f3b4d8;border-radius:10px;padding:10px 12px;margin-bottom:12px;">
-    <div style="font-size:0.72rem;font-weight:700;color:#9d174d;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">&#x1F3AF; Training Zones</div>
-    <div style="display:flex;flex-wrap:wrap;gap:14px;">
-      <div style="flex:1;min-width:200px;">
-        <div style="font-size:0.7rem;font-weight:700;color:#555;margin-bottom:2px;">&#x2764;&#xFE0F; Heart Rate (Karvonen)</div>
-        <div id="hrZonesSub" style="font-size:0.8rem;font-weight:600;color:#777;margin-bottom:5px;"></div>
-        <div id="hrZonesTable" style="display:flex;flex-direction:column;gap:3px;"></div>
-      </div>
-      <div style="flex:1;min-width:200px;">
-        <div style="font-size:0.7rem;font-weight:700;color:#555;margin-bottom:4px;">&#x26A1; Power (% of Critical Power)</div>
-        <div id="powerZonesTable" style="display:flex;flex-direction:column;gap:3px;"></div>
-      </div>
-    </div>
-  </div>
-  <!-- Shoe Tracker -->
-  <div style="margin-bottom:12px;">
-    <div class="act-section-toggle" onclick="toggleShoeTracker()" style="display:flex;align-items:center;justify-content:space-between;">
-      <span><span id="shoeTrackerArrow">&#x25B6;</span> &#x1F45F; Shoe Tracker</span>
-      <button onclick="event.stopPropagation();openAddShoeModal()" style="background:#e67e22;color:#fff;border:none;border-radius:6px;padding:3px 10px;font-size:0.75rem;cursor:pointer;font-weight:600;">+ Add Shoe</button>
-    </div>
-    <div id="shoeTrackerPanel" style="display:none;margin-top:10px;">
-      <div id="shoeList" style="display:flex;flex-direction:column;gap:10px;"></div>
-      <div id="shoeEmpty" style="font-size:0.82rem;color:#94a3b8;text-align:center;padding:14px 0;">No shoes added yet. Tap <strong>+ Add Shoe</strong> to get started.</div>
-    </div>
-  </div>
-
-  <!-- Add / Edit Shoe Modal -->
-  <div id="shoeModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;align-items:center;justify-content:center;">
-    <div style="background:#fff;border-radius:14px;padding:22px 24px;width:min(94vw,420px);box-shadow:0 8px 32px rgba(0,0,0,0.22);max-height:90vh;overflow-y:auto;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-        <h3 id="shoeModalTitle" style="margin:0;color:#e67e22;font-size:1rem;">&#x1F45F; Add Shoe</h3>
-        <button onclick="closeShoeModal()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#aaa;line-height:1;">&#x2715;</button>
-      </div>
-      <input type="hidden" id="shoeEditId">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
-        <div style="grid-column:1/-1;">
-          <label style="font-size:0.78rem;font-weight:600;color:#555;display:block;margin-bottom:3px;">Shoe Name / Model *</label>
-          <input type="text" id="shoeNameInput" placeholder="e.g. Nike Pegasus 41" style="width:100%;border:1px solid #ddd;border-radius:7px;padding:8px 10px;font-size:0.88rem;box-sizing:border-box;outline:none;">
-        </div>
-        <div>
-          <label style="font-size:0.78rem;font-weight:600;color:#555;display:block;margin-bottom:3px;">Brand</label>
-          <input type="text" id="shoeBrandInput" placeholder="e.g. Nike" style="width:100%;border:1px solid #ddd;border-radius:7px;padding:8px 10px;font-size:0.88rem;box-sizing:border-box;outline:none;">
-        </div>
-        <div>
-          <label style="font-size:0.78rem;font-weight:600;color:#555;display:block;margin-bottom:3px;">Color</label>
-          <input type="text" id="shoeColorInput" placeholder="e.g. Black/White" style="width:100%;border:1px solid #ddd;border-radius:7px;padding:8px 10px;font-size:0.88rem;box-sizing:border-box;outline:none;">
-        </div>
-        <div>
-          <label style="font-size:0.78rem;font-weight:600;color:#555;display:block;margin-bottom:3px;">Date Added</label>
-          <input type="date" id="shoeStartDateInput" style="width:100%;border:1px solid #ddd;border-radius:7px;padding:8px 10px;font-size:0.88rem;box-sizing:border-box;outline:none;background:#fff;">
-        </div>
-        <div>
-          <label style="font-size:0.78rem;font-weight:600;color:#555;display:block;margin-bottom:3px;">Max Miles (retire at)</label>
-          <input type="number" id="shoeMaxMilesInput" placeholder="e.g. 500" min="0" style="width:100%;border:1px solid #ddd;border-radius:7px;padding:8px 10px;font-size:0.88rem;box-sizing:border-box;outline:none;">
-        </div>
-        <div>
-          <label style="font-size:0.78rem;font-weight:600;color:#555;display:block;margin-bottom:3px;">Starting Miles (prior use)</label>
-          <input type="number" id="shoeOffsetMilesInput" placeholder="0" min="0" style="width:100%;border:1px solid #ddd;border-radius:7px;padding:8px 10px;font-size:0.88rem;box-sizing:border-box;outline:none;">
-        </div>
-        <div style="grid-column:1/-1;">
-          <label style="font-size:0.78rem;font-weight:600;color:#555;display:block;margin-bottom:3px;">Notes</label>
-          <textarea id="shoeNotesInput" rows="2" placeholder="Any notes about this shoe..." style="width:100%;border:1px solid #ddd;border-radius:7px;padding:8px 10px;font-size:0.88rem;box-sizing:border-box;outline:none;resize:vertical;font-family:inherit;"></textarea>
-        </div>
-      </div>
-      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px;">
-        <button onclick="closeShoeModal()" style="background:#f0f0f0;color:#555;border:none;padding:8px 16px;border-radius:7px;cursor:pointer;font-size:0.88rem;">Cancel</button>
-        <button onclick="saveShoe()" style="background:#e67e22;color:#fff;border:none;padding:8px 18px;border-radius:7px;cursor:pointer;font-size:0.88rem;font-weight:700;">Save Shoe</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Text training plan upload: intentionally placed after the complete Shoe Tracker component -->
-  <div class="act-section-toggle" onclick="toggleTrainingPlan()" style="margin-top:4px;margin-bottom:8px;" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTrainingPlan();}">
-    <span id="tpArrow">&#x25B6;</span> &#x1F4C2; Upload Plan from Text File
-  </div>
-  <div id="tpSection" style="display:none;padding:2px 0 12px;">
-    <label style="display:inline-flex;align-items:center;gap:7px;margin:0 8px 7px 0;font-size:0.78rem;font-weight:700;color:#475467;">Plan start date
-      <input type="date" id="tpUploadStartDate" style="border:1px solid #b8c1cc;border-radius:6px;padding:6px;font:inherit;">
-    </label>
-    <label style="display:flex;align-items:center;gap:6px;margin:0 0 9px;font-size:0.78rem;color:#475467;cursor:pointer;">
-      <input type="checkbox" id="tpSaveAsUpcoming" style="width:15px;height:15px;cursor:pointer;flex-shrink:0;">
-      Save as a second plan for later (keeps your current active plan running)
-    </label>
-    <label style="display:inline-block;background:#166534;color:#fff;padding:7px 16px;border-radius:6px;font-size:0.78rem;font-weight:700;cursor:pointer;">
-      &#x1F4C4; Choose .txt or .pdf File
-      <input type="file" accept=".txt,.pdf" style="display:none;" onchange="uploadPlanFromFile(event)">
-    </label>
-    <div id="tpUploadStatus" style="margin-top:7px;font-size:0.74rem;color:#667085;">Accepts .txt or .pdf (text-based, not a scanned image). Dated workouts are imported onto their exact calendar dates. The start date is used only when the file is organized by week and weekday.</div>
-  </div>
-
-  <!-- Today's Workout card: contained within the Activities tab -->
-  <div id="todayWorkoutCard" style="display:none;margin:8px 0 12px;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.12);">
-    <div class="tw-header" style="background:linear-gradient(135deg,#667eea,#764ba2);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;">
-      <div style="display:flex;flex-direction:column;gap:2px;">
-        <span style="color:#fff;font-weight:700;font-size:.95rem;">&#x1F3C3; Training Plan &mdash; <span id="twDayLabel"></span></span>
-        <span id="twRaceCountdown" style="color:rgba(255,255,255,.8);font-size:.78rem;display:none;"></span>
-      </div>
-      <div style="display:flex;gap:6px;align-items:center;">
-        <button id="twLoadBtn" onclick="loadTodayWorkout()" style="background:rgba(255,255,255,.25);border:none;color:#fff;font-size:.8rem;padding:4px 10px;border-radius:20px;cursor:pointer;font-weight:600;">Load Workout</button>
-        <button onclick="refreshTodayWorkout()" title="Re-fetch workout for this day" style="background:rgba(255,255,255,.2);border:none;color:#fff;font-size:.9rem;width:28px;height:28px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">&#x21BA;</button>
-        <button onclick="editWorkoutStartDate()" title="Edit plan start date" style="background:rgba(255,255,255,.2);border:none;color:#fff;font-size:.85rem;width:28px;height:28px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">&#x270F;&#xFE0F;</button>
-        <button id="twCollapseBtn" onclick="toggleWorkoutCard()" title="Collapse/Expand" style="background:rgba(255,255,255,.2);border:none;color:#fff;font-size:1.1rem;width:28px;height:28px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">&#x25BE;</button>
-      </div>
-    </div>
-    <div id="twStartDateRow" style="display:none;background:#fff8e1;padding:8px 14px;font-size:.82rem;color:#795548;border-bottom:1px solid #ffe082;">
-      <div style="margin-bottom:4px;">&#x26A0;&#xFE0F; Plan start date:&nbsp;
-        <input type="date" id="twStartDateInput" style="font-size:.82rem;padding:2px 6px;border:1px solid #ffb300;border-radius:6px;">
-        <button onclick="setWorkoutStartDate()" style="background:#f59e0b;color:#fff;border:none;padding:3px 10px;border-radius:6px;font-size:.8rem;font-weight:600;cursor:pointer;margin-left:4px;">Save Start</button>
-      </div>
-      <div>&#x1F3C1; Race date:&nbsp;
-        <input type="date" id="twRaceDateInput" style="font-size:.82rem;padding:2px 6px;border:1px solid #ffb300;border-radius:6px;">
-        <button onclick="setWorkoutRaceDate()" style="background:#764ba2;color:#fff;border:none;padding:3px 10px;border-radius:6px;font-size:.8rem;font-weight:600;cursor:pointer;margin-left:4px;">Save Race Date</button>
-      </div>
-    </div>
-    <div id="twBody" style="background:#f0f4ff;padding:12px 14px;font-size:.88rem;color:#333;line-height:1.5;white-space:pre-wrap;">Tap &ldquo;Load Workout&rdquo; to see today&rsquo;s scheduled session.</div>
-  </div>
-
-  <div class="act-section-toggle" onclick="toggleActivitiesLog()" role="button" tabindex="0" aria-expanded="false" aria-controls="activitiesLogSection" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleActivitiesLog();}" style="background:#fffaf5;border:1px solid #f3dcc7;border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:1rem;">
-    <span id="activitiesLogArrow">&#x25B6;</span> &#x1F3C3; Activities
-  </div>
-  <div id="activitiesLogSection" style="display:none;overflow-anchor:none;">
-  <!-- Header actions -->
-  <div class="act-header-clean">
-    <div class="act-header-actions">
-      <button class="lib-add-btn" onclick="toggleAddActivity()">+ Add</button>
-      <details class="act-import-menu">
-        <summary>&#x1F4E5; Import</summary>
-        <div class="act-import-options">
-          <label class="lib-add-btn" style="background:#00b2e3;cursor:pointer;" title="Import Garmin Connect CSV">Garmin CSV<input type="file" accept=".csv" style="display:none" onchange="importActivities(event,'garmin');this.closest('details').removeAttribute('open')"></label>
-          <label class="lib-add-btn" style="background:#ff6b35;cursor:pointer;" title="Import Stryd CSV">Stryd CSV<input type="file" accept=".csv" style="display:none" onchange="importActivities(event,'stryd');this.closest('details').removeAttribute('open')"></label>
-          <label class="lib-add-btn" style="background:#fc4c02;cursor:pointer;" title="Import Strava bulk-export CSV (activities.csv)">Strava CSV<input type="file" accept=".csv" style="display:none" onchange="importActivities(event,'strava');this.closest('details').removeAttribute('open')"></label>
-        </div>
-      </details>
-      <button class="lib-add-btn" style="background:#27ae60;" onclick="exportActivities()">&#x1F4BE; Export</button>
-      <button class="lib-add-btn" style="background:#2980b9;" onclick="printActivities()" title="Print or copy your training log as text to paste into an AI tool">&#x1F5A8;&#xFE0F; Print</button>
-      <button id="actExpandAllBtn" style="display:none;background:#e67e22;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:0.75rem;cursor:pointer;" onclick="expandAllActs()">&#x229E; Expand</button>
-      <button id="actCollapseAllBtn" style="display:none;background:#888;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:0.75rem;cursor:pointer;" onclick="collapseAllActs()">&#x229F; Collapse</button>
-      <button id="actCompareBtn" style="background:#7c3aed;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:0.75rem;cursor:pointer;" onclick="toggleCompareMode()">&#x2696;&#xFE0F; Compare</button>
-    </div>
-  </div>
-
-  <!-- Add/Edit form -->
-  <div id="addActivityForm" style="display:none;background:#fff8f0;border:1px solid #ffd5a8;border-radius:10px;padding:14px;margin-bottom:14px;">
-    <div style="font-size:0.85rem;font-weight:700;color:#e67e22;margin-bottom:10px;" id="actFormTitle">&#x2795; Add Activity</div>
-    <div style="margin-bottom:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-      <button type="button" onclick="document.getElementById('actScreenshotInput').click()" id="actScreenshotBtn" style="background:#8e44ad;color:#fff;border:none;padding:7px 14px;border-radius:6px;cursor:pointer;font-size:0.82rem;font-weight:600;">📷 Scan Screenshot</button>
-      <input type="file" id="actScreenshotInput" accept="image/png,image/jpeg,image/webp,image/gif" style="display:none;" onchange="handleActivityScreenshotFile(event)">
-      <span id="actScreenshotStatus" style="font-size:0.78rem;color:#666;"></span>
-    </div>
-    <div style="display:flex;align-items:center;gap:6px;font-size:0.76rem;color:#888;margin-bottom:10px;flex-wrap:wrap;">
-      <span>&#x2696;&#xFE0F; Your weight:</span>
-      <input type="number" id="actUserWeight" class="act-input" style="width:60px;display:inline-block;" placeholder="160" min="50" max="500" oninput="localStorage.setItem('act_weight_lbs',this.value||'');updateActCaloriesPlaceholder();">
-      <span>lbs — used only to auto-estimate Calories when you leave that field blank</span>
-    </div>
-    <div class="act-form-grid">
-      <div><label class="act-label">Date</label><input type="date" id="actDate" class="act-input" onchange="syncActWeightFromWellness()"></div>
-      <div><label class="act-label">Type</label>
-        <select id="actType" class="act-input" onchange="handleActTypeChange()">
-          <option value="Run">Run</option><option value="Ride">Ride</option>
-          <option value="Walk">Walk</option><option value="Swim">Swim</option>
-          <option value="Strength">Strength</option><option value="Rest Day">Rest Day</option>
-          <option value="Other">Other</option>
-        </select>
-      </div>
-      <div><label class="act-label">Title / Name</label><input type="text" id="actTitle" class="act-input" placeholder="e.g. Morning Run"></div>
-      <div><label class="act-label">Distance (miles)</label><input type="number" id="actDistance" class="act-input" placeholder="0.0" step="0.01" oninput="updateActCaloriesPlaceholder()"></div>
-      <div><label class="act-label">Time (MM:SS, H:MM:SS, or minutes)</label><input type="text" id="actDuration" class="act-input" placeholder="32:15 or 1:32:15 or 32 min" title="Enter MM:SS for under an hour, H:MM:SS for over an hour, or a plain number of minutes" oninput="updateActCaloriesPlaceholder()"></div>
-      <div><label class="act-label">Avg Pace (MM:SS/mi)</label><input type="text" id="actPace" class="act-input" placeholder="8:30"></div>
-      <div><label class="act-label">Avg Power (W)</label><input type="number" id="actPower" class="act-input" placeholder="0" oninput="updateActCaloriesPlaceholder()"></div>
-      <div><label class="act-label">Air Power (%)</label><input type="number" id="actAirPower" class="act-input" placeholder="e.g. 2.8" min="0" max="100" step="0.1" inputmode="decimal" title="Stryd Air Power: the percentage of your running power spent overcoming air resistance"></div>
-      <div><label class="act-label">Avg HR (bpm)</label><input type="number" id="actHR" class="act-input" placeholder="0"></div>
-      <div><label class="act-label">Cadence (spm)</label><input type="number" id="actCadence" class="act-input" placeholder="0"></div>
-      <div><label class="act-label">Calories</label><input type="number" id="actCalories" class="act-input" placeholder="0" oninput="updateActCaloriesPlaceholder()" title="Leave blank to auto-estimate from distance/duration/power"></div>
-      <div><label class="act-label">Elev Gain (ft)</label><input type="number" id="actElevGain" class="act-input" placeholder="0" oninput="updateActCaloriesPlaceholder()"></div>
-      <div><label class="act-label">Temp (°F)</label><input type="number" id="actTemp" class="act-input" placeholder="e.g. 68"></div>
-      <div><label class="act-label">Humidity (%)</label><input type="number" id="actHumidity" class="act-input" placeholder="e.g. 55" min="0" max="100" step="1" inputmode="numeric" title="Enter the relative humidity during the activity (0–100%)"></div>
-      <div><label class="act-label">AQI (Air Quality)</label><input type="number" id="actAQI" class="act-input" placeholder="e.g. 42" min="0" max="500" title="Enter the Air Quality Index during the workout (0–500)"></div>
-      <div style="display:none;"><label class="act-label">Execution Score (0-100)</label><input type="number" id="actExecScore" class="act-input" placeholder="0-100" min="0" max="100"></div>
-      <div style="display:none;"><label class="act-label">Run Map / Route Link</label><input type="url" id="actRouteUrl" class="act-input" inputmode="url" placeholder="Garmin, Strava, Google Maps, etc."></div>
-      <div><label class="act-label">Source</label>
-        <select id="actSource" class="act-input">
-          <option value="manual">Manual</option><option value="garmin">Garmin</option><option value="stryd" hidden>Stryd</option><option value="gear2" hidden>Gear Tracker II</option><option value="watch">BeyondStride</option>
-        </select>
-      </div>
-    </div>
-    <script>document.getElementById('actUserWeight').value=localStorage.getItem('act_weight_lbs')||'';window.addEventListener('load',function(){var w=document.getElementById('wWghtVal');if(w)w.addEventListener('change',function(){setTimeout(syncActWeightFromWellness,0);});try{syncActWeightFromWellness();}catch(e){}});</script>
-    <div><label class="act-label">Notes</label><textarea id="actNotes" class="act-input" style="height:90px;resize:vertical;font-family:inherit;font-size:0.85rem;line-height:1.45;" placeholder="Any notes..." oninput="this.style.height='auto';this.style.height=Math.min(Math.max(this.scrollHeight+4,90),520)+'px'"></textarea></div>
-    <div style="margin-top:9px;"><label class="act-label">Injury Report</label><textarea id="actInjuryReport" class="act-input" style="height:60px;resize:vertical;font-family:inherit;" placeholder="Pain, soreness, location, severity, or changes during the workout..."></textarea></div>
-    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px;">
-      <button onclick="cancelAddActivity()" style="background:#f0f0f0;color:#555;border:none;padding:7px 14px;border-radius:6px;cursor:pointer;font-size:0.88rem;">Cancel</button>
-      <button onclick="saveActivity()" style="background:#e67e22;color:white;border:none;padding:7px 16px;border-radius:6px;cursor:pointer;font-size:0.88rem;font-weight:600;" id="actSaveBtn">Save Activity</button>
-    </div>
-  </div>
-
-  <!-- Stats bar -->
-  <div class="act-stats-bar" id="actStatsBar" style="display:none;">
-    <div class="sb-item"><div class="sb-val" id="sbMiles">—</div><div class="sb-lbl">Miles</div></div>
-    <div class="sb-item"><div class="sb-val" id="sbTime">—</div><div class="sb-lbl">Time</div></div>
-    <div class="sb-item"><div class="sb-val" id="sbAvgPace">—</div><div class="sb-lbl">Avg Pace</div></div>
-    <div class="sb-item"><div class="sb-val" id="sbAvgPower">—</div><div class="sb-lbl">Avg Power</div></div>
-    <div class="sb-item"><div class="sb-val" id="sbCal">—</div><div class="sb-lbl">Calories</div></div>
-    <div class="sb-item"><div class="sb-val" id="sbCount">—</div><div class="sb-lbl">Activities</div></div>
-  </div>
-
-  <!-- Streak + Weekly Load -->
-  <div class="act-load-card">
-    <div class="act-streak-row">
-      <span class="act-streak-chip" id="actStreakChip" style="display:none;"></span>
-    </div>
-    <div class="act-load-bar" id="actLoadBar"></div>
-  </div>
-
-  <!-- Training Load Ratio (ACWR) -->
-  <div id="actACWRCard" style="display:none;background:white;border:1px solid #e9ecef;border-radius:10px;padding:12px 14px;margin:12px 0;"></div>
-
-  <!-- Personal Records -->
-  <div id="actPRSection" style="display:none;margin-top:4px;">
-    <div class="act-section-toggle" onclick="togglePRs()"><span id="prArrow">&#x25B6;</span> &#x1F3C6; Personal Records</div>
-    <div class="act-pr-grid" id="actPRGrid" style="display:none;"></div>
-  </div>
-
-  <!-- Race Predictor -->
-  <div id="actRacePredictCard" style="display:none;background:white;border:1px solid #e9ecef;border-radius:10px;padding:12px 14px;margin-bottom:14px;"></div>
-
-  <!-- 26-Week Volume Chart -->
-  <div class="act-chart-wrap">
-    <div class="act-chart-title">
-      <span>&#x1F4CA; 26-Week Volume</span>
-      <div class="act-chart-toggle">
-        <button id="chartMiBtn" class="active" onclick="setChartMode('miles')">Miles</button>
-        <button id="chartPwBtn" onclick="setChartMode('power')">Power</button>
-      </div>
-    </div>
-    <div style="display:flex;align-items:flex-end;height:100px;gap:2px;" id="actChartBars"></div>
-    <div style="display:flex;gap:2px;margin-top:4px;" id="actChartLabels"></div>
-  </div>
-
-  <!-- Activities charts (Daily Miles chart, relocated here at runtime by relocateDashboardCharts() so it sits right below 26-Week Volume) -->
-  <div id="activityChartsHome" style="margin:16px 0 18px;"></div>
-
-  <!-- Cardiovascular Drift: Heart Rate Elevation in the Heat -->
-  <div style="margin-bottom:14px;">
-    <div class="act-section-toggle" onclick="toggleCardioDrift()" role="button" tabindex="0" aria-expanded="false" aria-controls="cvdSection" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCardioDrift();}"><span id="cvdArrow">&#x25B6;</span> &#x2764;&#xFE0F;&#x1F321;&#xFE0F; Cardiovascular Drift</div>
-    <div id="cvdSection" style="display:none;background:#fff8f0;border:1px solid #ffd5a8;border-radius:10px;padding:14px;">
-      <div style="font-size:0.78rem;color:#888;margin-bottom:10px;line-height:1.4;">Average heart rate by temperature, measured against your heart-rate training zones. Heat makes the heart work harder to cool the body, so a climb across these bars is expected &mdash; a climb that keeps getting steeper over time can be an early sign of heat strain or fading heat acclimation.</div>
-      <div style="height:220px;"><canvas id="cvdChart"></canvas></div>
-      <div id="cvdZoneLegend" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:8px;font-size:0.68rem;color:#888;"></div>
-      <div id="cvdInsight" style="margin-top:10px;font-size:0.8rem;color:#7d4800;text-align:center;line-height:1.4;"></div>
-    </div>
-  </div>
-
-  <!-- Heat Acclimation: Garmin Enduro/Fenix-style heat-load estimate -->
-  <div style="margin-bottom:14px;">
-    <div class="act-section-toggle" onclick="toggleHeatAcclimation()" role="button" tabindex="0" aria-expanded="false" aria-controls="haSection" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleHeatAcclimation();}"><span id="haArrow">&#x25B6;</span> &#x1F321;&#xFE0F;&#x1F4A7; Heat Acclimation</div>
-    <div id="haSection" style="display:none;background:#fff8f0;border:1px solid #ffd5a8;border-radius:10px;padding:14px;">
-      <div style="font-size:0.78rem;color:#888;margin-bottom:12px;line-height:1.4;">Estimated from the temperature and duration you log on each activity &mdash; similar to the Heat Acclimation status on higher-end Garmin watches (Enduro, Fenix, Epix), but built from your logged data rather than a core-temperature sensor. It builds up with repeated time spent training in the heat and fades within a couple of weeks without it.</div>
-      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:10px;">
-        <div id="haPercent" style="font-size:2.1rem;font-weight:800;color:#c2410c;min-width:64px;">&mdash;</div>
-        <div style="flex:1;min-width:160px;">
-          <div id="haStatusLabel" style="font-size:0.88rem;font-weight:700;color:#7d4800;margin-bottom:4px;">&mdash;</div>
-          <div style="height:11px;position:relative;border-radius:999px;background:linear-gradient(90deg,#dc2626 0%,#f97316 25%,#facc15 50%,#84cc16 75%,#16a34a 100%);box-shadow:inset 0 0 0 1px rgba(15,23,42,.12);" role="meter" aria-label="Heat acclimation percentage" aria-valuemin="0" aria-valuemax="100" id="haTrack">
-            <span id="haMarker" style="position:absolute;top:50%;left:0%;width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #0f172a;box-sizing:border-box;transform:translate(-50%,-50%);box-shadow:0 1px 3px rgba(15,23,42,.35);"></span>
-          </div>
-        </div>
-      </div>
-      <div style="height:160px;"><canvas id="haChart"></canvas></div>
-      <div id="haSummary" style="margin-top:10px;font-size:0.8rem;color:#7d4800;text-align:center;line-height:1.4;"></div>
-    </div>
-  </div>
-
-  <!-- Humidity Impact: how humidity correlates with pace -->
-  <div style="margin-bottom:14px;">
-    <div class="act-section-toggle" onclick="toggleHumidityImpact()" role="button" tabindex="0" aria-expanded="false" aria-controls="humSection" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleHumidityImpact();}"><span id="humArrow">&#x25B6;</span> &#x1F4A7;&#x1F4CA; Humidity Impact</div>
-    <div id="humSection" style="display:none;background:#fff8f0;border:1px solid #ffd5a8;border-radius:10px;padding:14px;">
-      <div style="font-size:0.78rem;color:#888;margin-bottom:10px;line-height:1.4;">Average pace grouped by the humidity you logged for each run. Humid air makes it harder for sweat to evaporate and cool the body, so pace tends to slow as humidity climbs &mdash; this is a rough correlation across your own logged runs, not a controlled comparison (temperature and effort still vary run to run).</div>
-      <div style="height:220px;"><canvas id="humChart"></canvas></div>
-      <div id="humInsight" style="margin-top:10px;font-size:0.8rem;color:#7d4800;text-align:center;line-height:1.4;"></div>
-    </div>
-  </div>
-
-  <!-- Filters -->
-  <div class="act-search-row">
-    <input type="text" id="actSearch" placeholder="&#x1F50D; Search activities..." oninput="renderActivities()">
-    <button onclick="toggleRunMetrics(this)" style="border:1px solid #f0c080;border-radius:8px;padding:7px 11px;font-size:0.8rem;color:#b45309;background:#fffaf0;cursor:pointer;font-weight:700;white-space:nowrap;">&#x1F4CA; Metrics <span id="metricsChev" style="font-size:0.7rem;color:#999;">&#x25BC;</span></button>
-  </div>
-  <details class="act-filter-shell">
-    <summary class="act-filter-summary">Filters and sorting</summary>
-    <div class="act-filter-body">
-  <div class="act-filter">
-    <select id="actFilterType" onchange="renderActivities()">
-      <option value="">All Types</option>
-      <option value="Run">Run</option><option value="Ride">Ride</option>
-      <option value="Walk">Walk</option><option value="Swim">Swim</option>
-      <option value="Strength">Strength</option><option value="Rest Day">Rest Day</option>
-      <option value="Other">Other</option>
-    </select>
-    <select id="actFilterSource" onchange="renderActivities()">
-      <option value="all">All Sources</option>
-      <option value="garmin">Garmin</option>
-      <option value="watch">BeyondStride</option>
-      <option value="manual">Manual</option>
-    </select>
-    <select id="actSort" onchange="renderActivities()">
-      <option value="newest">&#x1F4C5; Newest</option>
-      <option value="oldest">&#x1F4C5; Oldest</option>
-      <option value="distance">&#x1F4CF; Distance ↓</option>
-      <option value="pace">&#x1F3C3; Best Pace</option>
-      <option value="power">&#x26A1; Power ↓</option>
-      <option value="duration">&#x23F3; Duration ↓</option>
-      <option value="heartrate">&#x2764; Heart Rate ↓</option>
-      <option value="elevation">&#x26F0; Elevation ↓</option>
-    </select>
-  </div>
-  <div class="act-filter" style="margin-top:-4px;">
-    <label style="font-size:0.8rem;color:#888;">From:</label>
-    <input type="date" id="actDateFrom" style="border:1px solid #e9ecef;border-radius:6px;padding:5px 8px;font-size:0.84rem;outline:none;background:white;" onchange="renderActivities()">
-    <label style="font-size:0.8rem;color:#888;">To:</label>
-    <input type="date" id="actDateTo" style="border:1px solid #e9ecef;border-radius:6px;padding:5px 8px;font-size:0.84rem;outline:none;background:white;" onchange="renderActivities()">
-    <button onclick="document.getElementById('actDateFrom').value='';document.getElementById('actDateTo').value='';renderActivities();" style="font-size:0.78rem;padding:4px 10px;border-radius:6px;border:1px solid #e9ecef;background:white;cursor:pointer;color:#888;">✕ Clear</button>
-    <label style="font-size:0.8rem;color:#888;margin-left:4px;">Group by day</label>
-    <input type="checkbox" id="actGroupDay" onchange="renderActivities()" style="width:16px;height:16px;cursor:pointer;">
-  </div>
-    </div>
-  </details>
-
-  <!-- Weekly Run Notes -->
-  <div style="margin-bottom:14px;">
-    <div class="act-section-toggle" onclick="toggleWeekRunNotes()"><span id="wrnArrow">&#x25B6;</span> &#x1F4DD; Weekly Run Notes</div>
-    <div id="wrnSection" style="display:none;background:#fff8f0;border:1px solid #ffd5a8;border-radius:10px;padding:12px;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
-        <button onclick="changeWrnWeek(-1)" style="background:#e67e22;color:#fff;border:none;border-radius:6px;padding:3px 10px;cursor:pointer;font-size:0.85rem;">&#8249;</button>
-        <span id="wrnWeekLabel" style="font-weight:700;font-size:0.87rem;color:#7d4800;flex:1;text-align:center;"></span>
-        <button onclick="changeWrnWeek(1)" style="background:#e67e22;color:#fff;border:none;border-radius:6px;padding:3px 10px;cursor:pointer;font-size:0.85rem;">&#8250;</button>
-      </div>
-      <textarea id="wrnNote" rows="5" style="width:100%;border:1px solid #ffd5a8;border-radius:8px;padding:8px;font-size:0.87rem;font-family:inherit;resize:vertical;box-sizing:border-box;" placeholder="Reflect on this week's runs — effort, progress, how your body felt, what to focus on next week..."></textarea>
-      <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">
-        <button onclick="saveWrnNote()" style="background:#e67e22;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:0.84rem;cursor:pointer;font-weight:600;">&#x1F4BE; Save Note</button>
-        <button onclick="aiWeeklyRunWrapUp(this)" style="background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:0.84rem;cursor:pointer;font-weight:600;">&#x2728; AI Weekly Run Wrap-Up</button>
-        <button onclick="clearWrnNote()" style="background:#f0f0f0;color:#555;border:none;border-radius:7px;padding:6px 12px;font-size:0.84rem;cursor:pointer;">&#x1F5D1; Clear</button>
-        <span id="wrnSaved" style="color:#27ae60;font-size:0.8rem;align-self:center;display:none;">Saved ✓</span>
-      </div>
-    </div>
-  </div>
-
-  <div id="runMetricsPanel" style="display:none;background:#fff8f0;border:1px solid #f5cba7;border-radius:10px;padding:14px 16px;margin-bottom:12px;"></div>
-
-  <!-- Compare selection bar -->
-  <div id="actCompareBar" style="display:none;align-items:center;gap:8px;background:#f3e8ff;border:1px solid #d8b4fe;border-radius:8px;padding:8px 12px;margin-bottom:10px;flex-wrap:wrap;">
-    <span id="actCompareCount" style="font-size:0.82rem;font-weight:700;color:#6d28d9;">0 selected</span>
-    <button onclick="showActivityCompare()" style="background:#7c3aed;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:0.8rem;cursor:pointer;font-weight:600;">&#x1F4CA; Compare Now</button>
-    <button onclick="clearCompareSelection()" style="background:#f0f0f0;color:#555;border:none;border-radius:6px;padding:5px 12px;font-size:0.8rem;cursor:pointer;">Clear</button>
-  </div>
-  <div id="activityComparePanel" style="display:none;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;margin-bottom:14px;"></div>
-
-  <div id="activityList"></div>
-  </div>
-
-  <!-- Archived Plans -->
-  <div id="tpArchiveSection" style="display:none;margin-top:12px;">
-    <div class="act-section-toggle" onclick="toggleArchivedPlans()"><span id="archiveArrow">&#x25B6;</span> &#x1F4BC; Archived Plans</div>
-    <div id="tpArchiveList" style="display:none;"></div>
-  </div>
-
-</div></div>
 <!-- BIBLE NOTES TAB -->
 <div class="tab-panel" id="tab-bible">
   <div style="padding:12px;max-width:700px;margin:0 auto;">
@@ -2787,11 +2154,11 @@ html[data-theme="halloween"] .header{
     <div class="section" style="border:1px solid #f0f0f0;border-radius:10px;">
       <div class="task-row"><div class="tri-check" data-key="wBP" onclick="triClick(this)"></div><label>BP:</label><input type="text" id="wBPVal" placeholder="120/80"></div>
       <div class="task-row sub-row"><label for="wPulseVal">&#x1F493; Pulse:</label><input type="text" id="wPulseVal" placeholder="bpm"></div>
-      <div class="task-row sub-row"><label for="wRestHRVal">&#x1FAC0; Resting HR:</label><input type="text" id="wRestHRVal" placeholder="bpm"></div>
+      <div class="task-row sub-row"><label for="wRestHRVal">&#x1FAC0; Morning HR:</label><input type="text" id="wRestHRVal" placeholder="bpm"></div>
       <div class="task-row"><div class="tri-check" data-key="wMeds" onclick="triClick(this)"></div><label>Meds:</label><input type="text" id="wMedsVal" placeholder="HCTZ, Rosuvastatin..."></div>
       <div class="task-row"><div class="tri-check" data-key="wWght" onclick="triClick(this)"></div><label>Weight:</label><input type="text" id="wWghtVal" placeholder="lbs"></div>
       <div class="task-row"><div class="tri-check" data-key="wSleep" onclick="triClick(this)"></div><label>Sleep:</label><input type="text" id="wSleepVal" placeholder="hrs (e.g. 7.5 or 6:30)"></div>
-      <div class="task-row sub-row"><label for="wSleepScore">&#x231B; Garmin Score:</label><input type="number" id="wSleepScore" placeholder="0-100" min="0" max="100" style="width:60px;border:none;border-bottom:1px solid #e9ecef;outline:none;font-size:0.95rem;background:transparent;"></div>
+      <div class="task-row sub-row"><label for="wSleepScore">&#x231B; Samsung Score:</label><input type="number" id="wSleepScore" placeholder="0-100" min="0" max="100" style="width:60px;border:none;border-bottom:1px solid #e9ecef;outline:none;font-size:0.95rem;background:transparent;"></div>
     </div>
     <div id="wellnessChartsHome" style="margin-top:16px;"></div>
   </div>
@@ -2919,17 +2286,6 @@ html[data-theme="halloween"] .header{
   </div>
 </div>
 
-<!-- Micronutrient Source Breakdown Modal -->
-<div class="modal-overlay" id="microSourceModal" style="display:none;z-index:10025;">
-  <div class="modal" style="max-width:460px;max-height:80vh;display:flex;flex-direction:column;">
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:4px;">
-      <h2 id="microSourceModalTitle" style="margin:0;font-size:1.05rem;">Nutrient sources today</h2>
-      <button type="button" class="btn-secondary" onclick="closeMicroSourceModal()">Close</button>
-    </div>
-    <p id="microSourceModalSummary" style="font-size:.8rem;color:#667085;line-height:1.45;margin:4px 0 10px;"></p>
-    <div id="microSourceModalBody" style="overflow-y:auto;min-height:60px;"></div>
-  </div>
-</div>
 
 <!-- Journal Search Modal -->
 <div class="modal-overlay" id="journalSearchModal" style="display:none;">
@@ -3008,28 +2364,6 @@ html[data-theme="halloween"] .header{
 
 <!-- Bible Image Viewer Modal -->
 
-<!-- Save Meal Modal -->
-<div id="saveMealModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9100;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;" onclick="if(event.target===this)this.style.display='none'">
-  <div style="background:#fff;border-radius:14px;padding:20px;max-width:380px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,0.25);">
-    <h3 style="margin:0 0 14px;font-size:1rem;color:#e67e22;">&#x1F37D;&#xFE0F; Save as Meal</h3>
-    <label style="font-size:0.82rem;font-weight:600;color:#555;display:block;margin-bottom:4px;">Meal Name:</label>
-    <input type="text" id="saveMealName" placeholder="e.g. Pre-run Breakfast" style="width:100%;border:1px solid #ddd;border-radius:6px;padding:8px 10px;font-size:0.9rem;box-sizing:border-box;margin-bottom:10px;" onkeydown="if(event.key==='Enter')confirmSaveMeal()">
-    <label style="font-size:0.82rem;font-weight:600;color:#555;display:block;margin-bottom:4px;">Save to Meal Category:</label>
-    <select id="saveMealTarget" style="width:100%;border:1px solid #ddd;border-radius:6px;padding:8px 10px;font-size:0.9rem;box-sizing:border-box;margin-bottom:14px;">
-      <option value="breakfast">&#x1F305; Breakfast</option>
-      <option value="lunch">&#x1F957; Lunch</option>
-      <option value="dinner">&#x1F37D;&#xFE0F; Dinner</option>
-      <option value="snack">&#x1F34E; Snacks</option>
-      <option value="liquids">&#x1F4A7; Liquids</option>
-      <option value="sports">&#x1F4AA; Sports Nutrition</option>
-      <option value="supplements">&#x1F48A; Supplements</option>
-    </select>
-    <div style="display:flex;gap:8px;">
-      <button onclick="confirmSaveMeal()" style="flex:1;background:#e67e22;color:#fff;border:none;padding:9px;border-radius:6px;font-size:0.9rem;cursor:pointer;font-weight:600;">&#x1F4BE; Save</button>
-      <button onclick="document.getElementById('saveMealModal').style.display='none'" style="flex:1;background:#eee;color:#555;border:none;padding:9px;border-radius:6px;font-size:0.9rem;cursor:pointer;">Cancel</button>
-    </div>
-  </div>
-</div>
 <!-- BP Report Modal -->
 <div id="bpReportModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9000;align-items:flex-start;justify-content:center;padding:20px;box-sizing:border-box;overflow-y:auto;" onclick="if(event.target===this)closeBPReport()">
   <div style="background:#fff;border-radius:14px;padding:20px;max-width:600px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,0.3);">
@@ -3144,468 +2478,21 @@ html[data-theme="halloween"] .header{
   <div id="skillLogContainer"></div>
 </div></div>
 
-<!-- ═══════════════════════════════ NUTRITION TAB ═══════════════════════════════ -->
-<div class="tab-panel" id="tab-nutrition"><div class="panel">
-  <!-- NUTRITION / FOOD LOG -->
-  <div class="section-title orange" style="margin-bottom:7px;"><span>&#x1F957; Nutrition</span></div>
-  <div id="dailyCalorieAdvisor" style="background:linear-gradient(135deg,#fff7ed,#f0fdf4);border:1px solid #fdba74;border-radius:12px;padding:13px 14px;margin-bottom:16px;box-shadow:0 1px 3px rgba(154,52,18,.2),0 8px 16px rgba(154,52,18,.24),0 26px 50px rgba(154,52,18,.28);">
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:9px;">
-      <div>
-        <div style="font-size:.9rem;font-weight:800;color:#9a3412;">&#x1F525; Daily Calorie Intake Target</div>
-        <div id="calorieAdvisorDate" style="font-size:.7rem;color:#78716c;margin-top:2px;"></div>
-      </div>
-      <button type="button" onclick="refreshNutritionTargets(true)" style="background:#0f766e;color:#fff;border:0;border-radius:7px;padding:7px 12px;font-size:.76rem;font-weight:800;cursor:pointer;">Recalculate</button>
-    </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:end;">
-      <label style="flex:1 1 160px;font-size:.7rem;font-weight:700;color:#57534e;">Rest-day target
-        <input id="calorieBaseTarget" type="number" min="1000" max="5000" step="50" placeholder="Automatic" onchange="saveCalorieAdvisorSettings();refreshNutritionTargets()" style="display:block;width:100%;box-sizing:border-box;margin-top:3px;border:1px solid #fed7aa;border-radius:6px;padding:6px 8px;font-size:.8rem;background:#fff;">
-      </label>
-      <label style="flex:1 1 135px;font-size:.7rem;font-weight:700;color:#57534e;">Goal
-        <select id="calorieGoal" onchange="saveCalorieAdvisorSettings();refreshNutritionTargets()" style="display:block;width:100%;box-sizing:border-box;margin-top:3px;border:1px solid #fed7aa;border-radius:6px;padding:6px 8px;font-size:.8rem;background:#fff;">
-          <option value="maintain">Maintain weight</option><option value="loss">Gradual loss</option><option value="gain">Gradual gain</option>
-        </select>
-      </label>
-      <label style="flex:1 1 135px;font-size:.7rem;font-weight:700;color:#57534e;">Replace workout calories
-        <select id="calorieRefuelPct" onchange="saveCalorieAdvisorSettings();refreshNutritionTargets()" style="display:block;width:100%;box-sizing:border-box;margin-top:3px;border:1px solid #fed7aa;border-radius:6px;padding:6px 8px;font-size:.8rem;background:#fff;">
-          <option value="100">100%</option><option value="85">85%</option><option value="75">75%</option><option value="50">50%</option>
-        </select>
-      </label>
-    </div>
-    <div id="calorieAdvisorResult" style="background:rgba(255,255,255,.82);border:1px solid #bbf7d0;border-radius:9px;padding:10px 12px;color:#14532d;font-size:.8rem;line-height:1.55;"></div>
-    <div style="font-size:.64rem;color:#78716c;margin-top:7px;">Estimate only. It uses your logged Activities and current weight when available; medical conditions and individual metabolism can change your needs.</div>
-  </div>
-  <div id="preRunMealIdeas" style="display:none;background:linear-gradient(135deg,#eff6ff,#f5f3ff);border:1px solid #93c5fd;border-radius:12px;padding:13px 14px;margin-bottom:16px;box-shadow:0 1px 3px rgba(30,58,138,.18),0 8px 16px rgba(30,58,138,.22);">
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:7px;">
-      <div id="preRunMealIdeasTitle" style="font-size:.9rem;font-weight:800;color:#1e3a8a;">🍽️ Pre-Run Meal Ideas</div>
-      <button type="button" onclick="shuffleMealIdeas()" style="background:#1e3a8a;color:#fff;border:0;border-radius:7px;padding:6px 10px;font-size:.72rem;font-weight:800;cursor:pointer;">🔀 Shuffle</button>
-    </div>
-    <div style="font-size:.68rem;color:#475569;margin-bottom:9px;line-height:1.35;">Built from your Healthy 7+ foods to help fuel tomorrow's workout.</div>
-    <div id="preRunMealIdeasBody" style="display:grid;gap:8px;"></div>
-  </div>
-  <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:16px;width:100%;">
-    <label title="Take a photo of the Nutrition Facts and ingredients" style="flex:1 1 0;min-width:88px;text-align:center;white-space:nowrap;background:#e67e22;color:#fff;border:none;padding:6px 3px;border-radius:6px;font-size:0.67rem;font-weight:700;cursor:pointer;">&#x1F4F7; Camera<input type="file" id="foodLabelCamera" accept="image/*" capture="environment" style="display:none" onchange="scanFoodLabel(event)"></label>
-    <label title="Upload an existing photo or screenshot of Nutrition Facts and ingredients" style="flex:1 1 0;min-width:88px;text-align:center;white-space:nowrap;background:#c2650f;color:#fff;border:none;padding:6px 3px;border-radius:6px;font-size:0.67rem;font-weight:700;cursor:pointer;">&#x1F5BC; Upload<input type="file" id="foodLabelScan" accept="image/*" style="display:none" onchange="scanFoodLabel(event)"></label>
-    <button onclick="openBarcodeScanner()" title="Scan a packaged food barcode" style="flex:1 1 0;min-width:88px;white-space:nowrap;background:#0f766e;color:#fff;border:none;padding:6px 3px;border-radius:6px;font-size:0.67rem;font-weight:700;cursor:pointer;">&#x25A5; Barcode</button>
-    <button onclick="openMacroMealsModal()" title="Healthy meal ideas at 20% protein / 60% carbs / 20% fat" style="flex:1 1 0;min-width:88px;white-space:nowrap;background:#059669;color:#fff;border:none;padding:6px 3px;border-radius:6px;font-size:0.67rem;font-weight:700;cursor:pointer;">🥗 Meal Ideas</button>
-  <button onclick="openFuelAIModal()" title="Analyze how a day's nutrition affected the next day's run" style="flex:1 1 0;min-width:88px;white-space:nowrap;background:#8e44ad;color:#fff;border:none;padding:6px 3px;border-radius:6px;font-size:0.67rem;font-weight:700;cursor:pointer;">&#x1F9E0; Fuel AI</button>
-    <button onclick="openCopyDayModal()" style="flex:1 1 0;min-width:88px;white-space:nowrap;background:#16a085;color:#fff;border:none;padding:6px 3px;border-radius:6px;font-size:0.67rem;font-weight:700;cursor:pointer;">&#x1F4C5; Copy Day</button>
-  </div>
-  <!-- Meal sections -->
-  <div id="mealSections" style="margin-bottom:16px;max-height:55vh;overflow-y:auto;-webkit-overflow-scrolling:touch;">
-    <div class="meal-section" id="ms-breakfast" data-meal="breakfast">
-      <div class="meal-header" onclick="toggleMealSection('breakfast')">
-        <span>🌅 Breakfast</span><div class="meal-right"><span class="meal-subtotal" id="st-breakfast" style="font-size:0.75rem;color:#888;"></span><button onclick="event.stopPropagation();saveMealFromSection('breakfast')" class="meal-action-btn" title="Save meal" aria-label="Save breakfast meal">&#x1F4BE;</button><button onclick="event.stopPropagation();addFoodItem('breakfast')" class="meal-add-btn">+ Add</button><span class="meal-chevron" id="chev-breakfast">▸</span></div>
-      </div>
-      <div class="meal-body" id="mb-breakfast" style="display:none;"><div id="foodList-breakfast"></div>
-        <div style="padding:6px 8px 8px;"><textarea id="mnotes-breakfast" rows="1" placeholder="Breakfast notes..." oninput="save()" style="width:100%;border:1px solid #e9ecef;border-radius:5px;padding:4px 8px;font-size:0.78rem;resize:vertical;font-family:inherit;box-sizing:border-box;background:#fafafa;color:#555;"></textarea><div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;"><button onclick="openCopyMealToDate('breakfast')" class="meal-action-btn">&#x1F4C5; Copy to Date</button></div></div>
-      </div>
-    </div>
-    <div class="meal-section" id="ms-lunch" data-meal="lunch">
-      <div class="meal-header" onclick="toggleMealSection('lunch')">
-        <span>🥗 Lunch</span><div class="meal-right"><span class="meal-subtotal" id="st-lunch" style="font-size:0.75rem;color:#888;"></span><button onclick="event.stopPropagation();saveMealFromSection('lunch')" class="meal-action-btn" title="Save meal" aria-label="Save lunch meal">&#x1F4BE;</button><button onclick="event.stopPropagation();addFoodItem('lunch')" class="meal-add-btn">+ Add</button><span class="meal-chevron" id="chev-lunch">▸</span></div>
-      </div>
-      <div class="meal-body" id="mb-lunch" style="display:none;"><div id="foodList-lunch"></div>
-        <div style="padding:6px 8px 8px;"><textarea id="mnotes-lunch" rows="1" placeholder="Lunch notes..." oninput="save()" style="width:100%;border:1px solid #e9ecef;border-radius:5px;padding:4px 8px;font-size:0.78rem;resize:vertical;font-family:inherit;box-sizing:border-box;background:#fafafa;color:#555;"></textarea><div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;"><button onclick="openCopyMealToDate('lunch')" class="meal-action-btn">&#x1F4C5; Copy to Date</button></div></div>
-      </div>
-    </div>
-    <div class="meal-section" id="ms-dinner" data-meal="dinner">
-      <div class="meal-header" onclick="toggleMealSection('dinner')">
-        <span>🍽️ Dinner</span><div class="meal-right"><span class="meal-subtotal" id="st-dinner" style="font-size:0.75rem;color:#888;"></span><button onclick="event.stopPropagation();saveMealFromSection('dinner')" class="meal-action-btn" title="Save meal" aria-label="Save dinner meal">&#x1F4BE;</button><button onclick="event.stopPropagation();addFoodItem('dinner')" class="meal-add-btn">+ Add</button><span class="meal-chevron" id="chev-dinner">▸</span></div>
-      </div>
-      <div class="meal-body" id="mb-dinner" style="display:none;"><div id="foodList-dinner"></div>
-        <div style="padding:6px 8px 8px;"><textarea id="mnotes-dinner" rows="1" placeholder="Dinner notes..." oninput="save()" style="width:100%;border:1px solid #e9ecef;border-radius:5px;padding:4px 8px;font-size:0.78rem;resize:vertical;font-family:inherit;box-sizing:border-box;background:#fafafa;color:#555;"></textarea><div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;"><button onclick="openCopyMealToDate('dinner')" class="meal-action-btn">&#x1F4C5; Copy to Date</button></div></div>
-      </div>
-    </div>
-    <div class="meal-section" id="ms-snack" data-meal="snack">
-      <div class="meal-header" onclick="toggleMealSection('snack')">
-        <span>🍎 Snacks</span><div class="meal-right"><span class="meal-subtotal" id="st-snack" style="font-size:0.75rem;color:#888;"></span><button onclick="event.stopPropagation();saveMealFromSection('snack')" class="meal-action-btn" title="Save meal" aria-label="Save snack meal">&#x1F4BE;</button><button onclick="event.stopPropagation();addFoodItem('snack')" class="meal-add-btn">+ Add</button><span class="meal-chevron" id="chev-snack">▸</span></div>
-      </div>
-      <div class="meal-body" id="mb-snack" style="display:none;"><div id="foodList-snack"></div>
-        <div style="padding:6px 8px 8px;"><textarea id="mnotes-snack" rows="1" placeholder="Snack notes..." oninput="save()" style="width:100%;border:1px solid #e9ecef;border-radius:5px;padding:4px 8px;font-size:0.78rem;resize:vertical;font-family:inherit;box-sizing:border-box;background:#fafafa;color:#555;"></textarea><div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;"><button onclick="openCopyMealToDate('snack')" class="meal-action-btn">&#x1F4C5; Copy to Date</button></div></div>
-      </div>
-    </div>
-    <div class="meal-section" id="ms-liquids" data-meal="liquids">
-      <div class="meal-header" onclick="toggleMealSection('liquids')">
-        <span>💧 Liquids</span><div class="meal-right"><span class="meal-subtotal" id="st-liquids" style="font-size:0.75rem;color:#888;"></span><button onclick="event.stopPropagation();saveMealFromSection('liquids')" class="meal-action-btn" title="Save meal" aria-label="Save liquids meal">&#x1F4BE;</button><button onclick="event.stopPropagation();addFoodItem('liquids')" class="meal-add-btn">+ Add</button><span class="meal-chevron" id="chev-liquids">▸</span></div>
-      </div>
-      <div class="meal-body" id="mb-liquids" style="display:none;"><div id="foodList-liquids"></div>
-        <div style="padding:6px 8px 8px;"><textarea id="mnotes-liquids" rows="1" placeholder="Liquids notes..." oninput="save()" style="width:100%;border:1px solid #e9ecef;border-radius:5px;padding:4px 8px;font-size:0.78rem;resize:vertical;font-family:inherit;box-sizing:border-box;background:#fafafa;color:#555;"></textarea></div>
-      </div>
-    </div>
-    <div class="meal-section" id="ms-sports" data-meal="sports">
-      <div class="meal-header" onclick="toggleMealSection('sports')">
-        <span>💪 Sports Nutrition</span><div class="meal-right"><span class="meal-subtotal" id="st-sports" style="font-size:0.75rem;color:#888;"></span><button onclick="event.stopPropagation();saveMealFromSection('sports')" class="meal-action-btn" title="Save meal" aria-label="Save sports nutrition meal">&#x1F4BE;</button><button onclick="event.stopPropagation();addFoodItem('sports')" class="meal-add-btn">+ Add</button><span class="meal-chevron" id="chev-sports">▸</span></div>
-      </div>
-      <div class="meal-body" id="mb-sports" style="display:none;"><div id="foodList-sports"></div>
-        <div style="padding:8px;margin:4px 8px 0;background:#fff8ec;border:1px solid #fbd38d;border-radius:7px;">
-          <div style="font-size:0.78rem;font-weight:800;color:#b45309;margin-bottom:6px;">&#x26A1; Sports Nutrition Quick Add</div>
-          <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:5px;">
-            <select id="gusisBrandFilter" onchange="renderGusisPicker()" style="flex:1;min-width:90px;border:1px solid #fbd38d;border-radius:5px;padding:5px 6px;font-size:0.78rem;background:#fff;">
-              <option value="">All Brands</option>
-              <option value="GU">GU Energy</option>
-              <option value="SiS">SiS</option>
-              <option value="Premier Protein">Premier Protein</option>
-            </select>
-            <select id="gusisCategoryFilter" onchange="renderGusisPicker()" style="flex:1;min-width:110px;border:1px solid #fbd38d;border-radius:5px;padding:5px 6px;font-size:0.78rem;background:#fff;"><option value="">All Types</option></select>
-          </div>
-          <select id="gusisProductSelect" onchange="gusisUpdatePreview()" style="width:100%;border:1px solid #fbd38d;border-radius:5px;padding:6px 7px;font-size:0.8rem;background:#fff;margin-bottom:5px;box-sizing:border-box;"></select>
-          <div id="gusisPreview" style="font-size:0.7rem;color:#b45309;margin-bottom:6px;min-height:1em;"></div>
-          <button type="button" onclick="gusisQuickAdd()" style="width:100%;background:#d97706;color:#fff;border:none;border-radius:6px;padding:7px;font-size:0.8rem;font-weight:700;cursor:pointer;">+ Add to Sports Nutrition</button>
-          <div id="gusisAddFlash" style="display:none;margin-top:5px;color:#b45309;font-size:0.78rem;font-weight:700;"></div>
-        </div>
-        <div style="padding:6px 8px 8px;"><textarea id="mnotes-sports" rows="1" placeholder="Sports nutrition notes..." oninput="save()" style="width:100%;border:1px solid #e9ecef;border-radius:5px;padding:4px 8px;font-size:0.78rem;resize:vertical;font-family:inherit;box-sizing:border-box;background:#fafafa;color:#555;"></textarea><div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;"><button onclick="openCopyMealToDate('sports')" class="meal-action-btn">&#x1F4C5; Copy to Date</button></div></div>
-      </div>
-    </div>
-    <div class="meal-section" id="ms-supplements" data-meal="supplements">
-      <div class="meal-header" onclick="toggleMealSection('supplements')">
-        <span>💊 Supplements</span><div class="meal-right"><span class="meal-subtotal" id="st-supplements" style="font-size:0.75rem;color:#888;"></span><button onclick="event.stopPropagation();saveMealFromSection('supplements')" class="meal-action-btn" title="Save meal" aria-label="Save supplements">&#x1F4BE;</button><button onclick="event.stopPropagation();addFoodItem('supplements')" class="meal-add-btn">+ Add</button><span class="meal-chevron" id="chev-supplements">▸</span></div>
-      </div>
-      <div class="meal-body" id="mb-supplements" style="display:none;"><div id="foodList-supplements"></div>
-        <div style="padding:8px;margin:4px 8px 0;background:#f5f5f6;border:1px solid #d4d4d8;border-radius:7px;">
-          <div style="font-size:0.78rem;font-weight:800;color:#3f3f46;margin-bottom:6px;">&#x1F48A; Supplements Quick Add</div>
-          <select id="suppProductSelect" onchange="supplementUpdatePreview()" style="width:100%;border:1px solid #d4d4d8;border-radius:5px;padding:6px 7px;font-size:0.8rem;background:#fff;margin-bottom:5px;box-sizing:border-box;"></select>
-          <div id="suppPreview" style="font-size:0.7rem;color:#3f3f46;margin-bottom:6px;min-height:1em;"></div>
-          <button type="button" onclick="supplementQuickAdd()" style="width:100%;background:#3f3f46;color:#fff;border:none;border-radius:6px;padding:7px;font-size:0.8rem;font-weight:700;cursor:pointer;">+ Add to Supplements</button>
-          <div id="suppAddFlash" style="display:none;margin-top:5px;color:#3f3f46;font-size:0.78rem;font-weight:700;"></div>
-        </div>
-        <div style="padding:6px 8px 8px;"><textarea id="mnotes-supplements" rows="1" placeholder="Supplement notes (dose, timing)..." oninput="save()" style="width:100%;border:1px solid #e9ecef;border-radius:5px;padding:4px 8px;font-size:0.78rem;resize:vertical;font-family:inherit;box-sizing:border-box;background:#fafafa;color:#555;"></textarea><div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;"><button onclick="openCopyMealToDate('supplements')" class="meal-action-btn">&#x1F4C5; Copy to Date</button></div></div>
-      </div>
-    </div>
-  </div>
-  <!-- Legacy flat list (hidden, kept for compat) -->
-  <div id="foodItemsList" style="display:none;"></div>
-  <!-- Favorites / Meals panel -->
-  <div id="favMealPanel" style="display:block;background:#fffdf5;border:1px solid #f0c080;border-radius:10px;padding:10px 12px;margin-bottom:16px;box-shadow:0 1px 3px rgba(154,105,20,.18),0 8px 16px rgba(154,105,20,.22),0 26px 48px rgba(154,105,20,.26);">
-    <div style="display:flex;gap:8px;margin-bottom:8px;">
-      <button onclick="showFavTab('favs')" id="favTabBtn" style="flex:1;background:#f39c12;color:#fff;border:none;padding:5px;border-radius:6px;font-size:0.8rem;cursor:pointer;font-weight:700;">⭐ Food Database (<span id="favoriteFoodsCount">0</span>)</button>
-      <button onclick="showFavTab('healthy')" id="healthyTabBtn" style="flex:1;background:#e9ecef;color:#555;border:none;padding:5px;border-radius:6px;font-size:0.8rem;cursor:pointer;font-weight:700;">✅ Healthy 7+ (<span id="healthyFoodsCount">0</span>)</button>
-      <button onclick="showFavTab('meals')" id="mealTabBtn" style="flex:1;background:#e9ecef;color:#555;border:none;padding:5px;border-radius:6px;font-size:0.8rem;cursor:pointer;">🍲 Saved Meals</button>
-    </div>
-    <div style="margin-bottom:6px;">
-      <input type="text" id="favSearch" placeholder="🔍 Search saved foods..." oninput="renderFoodLibrarySearch()" style="width:100%;border:1px solid #e9c87b;border-radius:6px;padding:5px 8px;font-size:0.8rem;box-sizing:border-box;margin-bottom:6px;">
-      <select id="favSortBy" onchange="renderFoodLibrarySearch()" style="width:100%;border:1px solid #e9c87b;border-radius:6px;padding:5px 8px;font-size:0.8rem;box-sizing:border-box;margin-bottom:6px;">
-        <option value="">Sort: as saved</option>
-        <option value="prot_desc">🥩 Highest protein</option>
-        <option value="carbs_desc">🍞 Highest carbs</option>
-        <option value="fat_asc">🥑 Lowest fat</option>
-        <option value="iron_desc">🩸 Highest iron</option>
-        <option value="calcium_desc">🦴 Highest calcium</option>
-        <option value="vitD_desc">☀️ Highest vitamin D</option>
-        <option value="magnesium_desc">💪 Highest magnesium</option>
-        <option value="vitB12_desc">⚡ Highest vitamin B12</option>
-      </select>
-      <select id="favTargetMeal" style="width:100%;border:1px solid #e9c87b;border-radius:6px;padding:5px 8px;font-size:0.8rem;box-sizing:border-box;">
-        <option value="breakfast">🌅 Add to Breakfast</option>
-        <option value="lunch">🥗 Add to Lunch</option>
-        <option value="dinner">🍽️ Add to Dinner</option>
-        <option value="snack">🍎 Add to Snacks</option>
-        <option value="liquids">💧 Add to Liquids</option>
-        <option value="sports">💪 Add to Sports Nutrition</option>
-        <option value="supplements">💊 Add to Supplements</option>
-      </select>
-    </div>
-    <div id="favsList" style="max-height:180px;overflow-y:auto;"></div>
-    <div id="healthyFoodsList" style="display:none;max-height:220px;overflow-y:auto;"></div>
-    <div id="mealsList" style="display:none;max-height:200px;overflow-y:auto;"></div>
-  </div>
-  <!-- AI Food Search -->
-  <div id="aiFoodSearchPanel" style="background:#f0f4ff;border:1px solid #c7d2fe;border-radius:10px;padding:10px 12px;margin-bottom:16px;box-shadow:0 1px 3px rgba(67,56,202,.18),0 8px 16px rgba(67,56,202,.22),0 26px 48px rgba(67,56,202,.26);">
-    <div style="font-size:0.82rem;font-weight:700;color:#4338ca;margin-bottom:7px;">&#x1F50D; AI Food Search</div>
-    <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:6px;">
-      <input type="text" id="aiFoodQuery" placeholder="Search any food..." style="width:100%;border:1px solid #a5b4fc;border-radius:6px;padding:6px 9px;font-size:0.82rem;box-sizing:border-box;" onkeydown="if(event.key==='Enter')aiSearchFood()"/>
-      <div style="display:flex;gap:6px;">
-        <select id="aiFoodTargetMeal" style="flex:1;border:1px solid #a5b4fc;border-radius:6px;padding:5px 7px;font-size:0.8rem;background:#fff;min-width:0;">
-          <option value="breakfast">&#x1F305; Breakfast</option>
-          <option value="lunch">&#x1F957; Lunch</option>
-          <option value="dinner">&#x1F37D;&#xFE0F; Dinner</option>
-          <option value="snack">&#x1F34E; Snacks</option>
-          <option value="liquids">&#x1F4A7; Liquids</option>
-          <option value="sports">&#x1F4AA; Sports</option>
-          <option value="supplements">&#x1F48A; Supplements</option>
-        </select>
-        <button onclick="aiSearchFood()" style="background:#4338ca;color:#fff;border:none;border-radius:6px;padding:5px 14px;font-size:0.82rem;cursor:pointer;white-space:nowrap;flex-shrink:0;">Search</button>
-      </div>
-    </div>
-    <div id="aiFoodResults" style="display:none;"></div>
-  </div>
-  <!-- Macro totals bar -->
-  <div id="macroTotalsBar" style="display:block;background:#f8f9fa;border:1px solid #e9ecef;border-radius:8px;padding:8px 10px;margin-bottom:16px;font-size:0.8rem;box-shadow:0 1px 3px rgba(15,23,42,.16),0 8px 16px rgba(15,23,42,.2),0 26px 48px rgba(15,23,42,.24);">
-    <div style="font-weight:700;color:#555;margin-bottom:4px;">Daily Totals</div>
-    <div id="macroRatioWrap" style="margin-top:8px;padding-top:7px;border-top:1px dashed #dcdcdc;">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:5px;">
-        <div><strong style="font-size:0.86rem;color:#334155;">Daily Macro Ratio</strong><div id="macroTrainingLabel" style="font-size:0.7rem;color:#475569;margin-top:2px;">Rest-day target</div><div id="performanceFuelNote" style="display:none;font-size:0.68rem;color:#1e40af;margin-top:4px;line-height:1.35;"></div></div>
-        <button type="button" onclick="toggleMacroRatioEditor()" style="border:1px solid #94a3b8;background:#fff;color:#475569;border-radius:6px;padding:4px 8px;font-size:.68rem;font-weight:800;cursor:pointer;">Change Ratio</button>
-      </div>
-      <div id="macroRatioEditor" style="display:none;background:#fff;border:1px solid #cbd5e1;border-radius:8px;padding:8px;margin-bottom:8px;">
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
-          <label style="font-size:.66rem;font-weight:800;color:#991b1b;">Protein %<input id="macroCustomProt" type="number" min="5" max="80" step="1" style="width:100%;box-sizing:border-box;margin-top:3px;padding:5px;border:1px solid #fecaca;border-radius:5px;"></label>
-          <label style="font-size:.66rem;font-weight:800;color:#a16207;">Carbs %<input id="macroCustomCarbs" type="number" min="5" max="80" step="1" style="width:100%;box-sizing:border-box;margin-top:3px;padding:5px;border:1px solid #fde047;border-radius:5px;"></label>
-          <label style="font-size:.66rem;font-weight:800;color:#1e40af;">Fat %<input id="macroCustomFat" type="number" min="5" max="80" step="1" style="width:100%;box-sizing:border-box;margin-top:3px;padding:5px;border:1px solid #bfdbfe;border-radius:5px;"></label>
-        </div>
-        <div id="macroRatioEditorTotal" style="font-size:.66rem;color:#64748b;margin-top:5px;">Total must equal 100%.</div>
-        <div style="display:flex;gap:6px;margin-top:7px;"><button type="button" onclick="saveCustomMacroRatio()" style="flex:1;border:0;background:#0f766e;color:#fff;border-radius:6px;padding:6px;font-size:.7rem;font-weight:800;">Save Ratio</button><button type="button" onclick="useAutomaticMacroRatio()" style="flex:1;border:1px solid #cbd5e1;background:#fff;color:#475569;border-radius:6px;padding:6px;font-size:.7rem;font-weight:800;">Use Automatic</button></div>
-      </div>
-      <div class="macro-target-grid">
-        <div class="macro-target-card" role="button" tabindex="0" aria-label="Protein - tap to see contributing foods" onclick="showMicroSourceBreakdown('prot','Protein','g')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showMicroSourceBreakdown('prot','Protein','g');}" style="border-color:#fecaca;cursor:pointer;"><strong style="color:#991b1b;">Protein</strong><div><span id="targetActualProt">0%</span> <small>/ <span id="targetProt">25%</span> target</small></div><p><span id="remainProt">0g</span> remaining</p><span id="statusProt" class="macro-status low">Low</span> <span style="color:#cbd5e1;font-size:.62rem;">&rsaquo;</span></div>
-        <div class="macro-target-card" role="button" tabindex="0" aria-label="Carbs - tap to see contributing foods" onclick="showMicroSourceBreakdown('carbs','Carbs','g')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showMicroSourceBreakdown('carbs','Carbs','g');}" style="border-color:#fde047;cursor:pointer;"><strong style="color:#a16207;">Carbs</strong><div><span id="targetActualCarbs">0%</span> <small>/ <span id="targetCarbs">45%</span> target</small></div><p><span id="remainCarbs">0g</span> remaining</p><span id="statusCarbs" class="macro-status low">Low</span> <span style="color:#cbd5e1;font-size:.62rem;">&rsaquo;</span></div>
-        <div class="macro-target-card" role="button" tabindex="0" aria-label="Fat - tap to see contributing foods" onclick="showMicroSourceBreakdown('fat','Fat','g')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showMicroSourceBreakdown('fat','Fat','g');}" style="border-color:#bfdbfe;cursor:pointer;"><strong style="color:#1e40af;">Fat</strong><div><span id="targetActualFat">0%</span> <small>/ <span id="targetFat">30%</span> target</small></div><p><span id="remainFat">0g</span> remaining</p><span id="statusFat" class="macro-status low">Low</span> <span style="color:#cbd5e1;font-size:.62rem;">&rsaquo;</span></div>
-      </div>
-      <details class="macro-meal-details">
-        <summary>Meal Macro Distribution</summary>
-        <div id="macroMealDistribution" class="meal-macro-grid"></div>
-      </details>
-      <style>
-        .macro-source-details,.macro-meal-details{margin-top:9px;border-top:1px dashed #d8dee8;padding-top:7px}.macro-source-details>summary,.macro-meal-details>summary{cursor:pointer;color:#475569;font-size:.74rem;font-weight:800;list-style-position:inside}.source-detail-grid>div>div:first-child{display:none!important}.source-detail-grid>div>div:last-child{height:auto!important}
-        .macro-target-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:8px}.macro-target-card{min-width:0;background:#fff;border:1px solid #e2e8f0;border-radius:9px;padding:8px}.macro-target-card>strong{display:block;font-size:.72rem}.macro-target-card>div{font-size:.86rem;font-weight:900;margin-top:3px;font-variant-numeric:tabular-nums}.macro-target-card small{font-size:.6rem;color:#64748b}.macro-target-card p{font-size:.67rem;font-weight:700;color:#64748b;margin:4px 0}.macro-status{display:inline-block;border-radius:999px;padding:3px 8px;font-size:.74rem;font-weight:800}.macro-status.on{background:#dcfce7;color:#166534}.macro-status.low{background:#fef3c7;color:#92400e}.macro-status.high{background:#fee2e2;color:#991b1b}.meal-macro-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:8px}.meal-macro-chip{min-height:55px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f8fafc;border:1px solid #e2e8f0;border-radius:9px;padding:7px 6px;text-align:center;font-size:.69rem;font-weight:750;line-height:1.35;color:#475569;font-variant-numeric:tabular-nums}.meal-macro-chip strong{display:block;margin-bottom:2px;color:#1e293b;font-size:.75rem}@media(max-width:430px){.macro-target-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.macro-target-card{min-height:91px;padding:8px 5px}.macro-target-card:last-child{grid-column:auto}.macro-target-card>strong{font-size:.72rem}.macro-target-card>div{font-size:.86rem;margin-top:4px}.macro-target-card small{font-size:.6rem;margin-top:1px}.macro-target-card p{font-size:.69rem;margin:5px 0}.macro-status{padding:3px 8px;font-size:.74rem}.meal-macro-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.meal-macro-chip{min-height:60px;padding:8px 6px;font-size:.74rem;line-height:1.4}.meal-macro-chip strong{font-size:.82rem;margin-bottom:2px}}
-        #ratioCarbsBar { background:#eab308 !important; }
-        #macroRatioWrap div:has(> #ratioCarbs) { color:#a16207 !important; }
-        #macroRatioWrap div:has(> #ratioCarbs) + div { border-color:#fde047 !important; }
-        #macroRatioWrap div:has(> #ratioCarbs) + div > strong { color:#a16207 !important; }
-        #macroRatioWrap div:has(> strong[id^="source"]) { grid-template-columns:minmax(0,1fr) !important; gap:2px !important; margin-bottom:5px; }
-        #macroRatioWrap div:has(> strong[id^="source"]) > span { font-size:0.82rem; line-height:1.25; }
-        #macroRatioWrap strong[id^="source"] { justify-self:start; text-align:left !important; font-size:0.86rem !important; }
-      </style>
-      <details class="macro-source-details" hidden aria-hidden="true">
-      <div class="source-detail-grid" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:8px;align-items:stretch;">
-        <div style="min-width:0;"><div style="display:flex;justify-content:space-between;gap:4px;color:#991b1b;font-size:0.82rem;font-weight:800;margin:0 2px 5px;"><span>&#x25CF; Protein</span><span id="ratioProt">0%</span></div><div style="height:calc(100% - 24px);box-sizing:border-box;background:#fff;border:1px solid #fecaca;border-radius:8px;padding:8px;"><strong style="display:block;color:#991b1b;font-size:0.78rem;margin-bottom:6px;line-height:1.2;">Sources</strong><div style="display:grid;gap:5px;font-size:0.74rem;color:#475569;line-height:1.3;"><div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px;align-items:start;"><span>Lean / plant</span><strong id="sourceProtSupport" style="min-width:36px;text-align:right;white-space:nowrap;font-size:0.78rem;font-variant-numeric:tabular-nums;">0%</strong></div><div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px;align-items:start;"><span>Higher-fat / processed</span><strong id="sourceProtLimit" style="min-width:36px;text-align:right;white-space:nowrap;font-size:0.78rem;font-variant-numeric:tabular-nums;">0%</strong></div><div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px;align-items:start;"><span>Unclassified</span><strong id="sourceProtUnknown" style="min-width:36px;text-align:right;white-space:nowrap;font-size:0.78rem;font-variant-numeric:tabular-nums;">0%</strong></div></div></div></div>
-        <div style="min-width:0;"><div style="display:flex;justify-content:space-between;gap:4px;color:#92400e;font-size:0.82rem;font-weight:800;margin:0 2px 5px;"><span>&#x25CF; Carbs</span><span id="ratioCarbs">0%</span></div><div style="height:calc(100% - 24px);box-sizing:border-box;background:#fff;border:1px solid #fed7aa;border-radius:8px;padding:8px;"><strong style="display:block;color:#92400e;font-size:0.78rem;margin-bottom:6px;line-height:1.2;">Sources</strong><div style="display:grid;gap:5px;font-size:0.74rem;color:#475569;line-height:1.3;"><div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px;align-items:start;"><span>Complex / fiber-rich</span><strong id="sourceCarbSupport" style="min-width:36px;text-align:right;white-space:nowrap;font-size:0.78rem;font-variant-numeric:tabular-nums;">0%</strong></div><div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px;align-items:start;"><span>Simple / refined</span><strong id="sourceCarbLimit" style="min-width:36px;text-align:right;white-space:nowrap;font-size:0.78rem;font-variant-numeric:tabular-nums;">0%</strong></div><div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px;align-items:start;"><span>Unclassified</span><strong id="sourceCarbUnknown" style="min-width:36px;text-align:right;white-space:nowrap;font-size:0.78rem;font-variant-numeric:tabular-nums;">0%</strong></div></div></div></div>
-        <div style="min-width:0;"><div style="display:flex;justify-content:space-between;gap:4px;color:#1e40af;font-size:0.82rem;font-weight:800;margin:0 2px 5px;"><span>&#x25CF; Fat</span><span id="ratioFat">0%</span></div><div style="height:calc(100% - 24px);box-sizing:border-box;background:#fff;border:1px solid #bfdbfe;border-radius:8px;padding:8px;"><strong style="display:block;color:#1e40af;font-size:0.78rem;margin-bottom:6px;line-height:1.2;">Sources</strong><div style="display:grid;gap:5px;font-size:0.74rem;color:#475569;line-height:1.3;"><div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px;align-items:start;"><span>Unsaturated</span><strong id="sourceFatSupport" style="min-width:36px;text-align:right;white-space:nowrap;font-size:0.78rem;font-variant-numeric:tabular-nums;">0%</strong></div><div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px;align-items:start;"><span>Saturated / trans</span><strong id="sourceFatLimit" style="min-width:36px;text-align:right;white-space:nowrap;font-size:0.78rem;font-variant-numeric:tabular-nums;">0%</strong></div><div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px;align-items:start;"><span>Unclassified</span><strong id="sourceFatUnknown" style="min-width:36px;text-align:right;white-space:nowrap;font-size:0.78rem;font-variant-numeric:tabular-nums;">0%</strong></div></div></div></div>
-      </div>
-      <details style="margin-top:6px;"><summary style="cursor:pointer;font-size:.66rem;color:#64748b;font-weight:700;">&#9432; How source classifications work</summary><div style="font-size:0.64rem;color:#64748b;margin-top:5px;line-height:1.35;">Source mix is not a medical “good/bad” score. Simple carbohydrates can be useful around training. Foods are classified automatically from their names and available ingredient information; use each food’s dropdowns to correct mixed or unusual foods.</div></details>
-      </details>
-    </div>
-    <div id="dailyFoodQuality" style="display:none;margin:6px 0 8px;padding:8px 9px;background:#fff;border:1px solid #dbe3ec;border-radius:8px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.76rem;font-weight:800;color:#334155;margin-bottom:6px;">
-        <span>Daily food quality</span><span id="dailyFoodQualityLabel">—</span>
-      </div>
-      <div style="height:11px;position:relative;border-radius:999px;background:linear-gradient(90deg,#dc2626 0%,#f97316 25%,#facc15 50%,#84cc16 75%,#16a34a 100%);box-shadow:inset 0 0 0 1px rgba(15,23,42,.12);" role="meter" aria-label="Overall runner food quality for all meals" aria-valuemin="1" aria-valuemax="10" id="dailyFoodQualityTrack">
-        <span id="dailyFoodQualityMarker" style="position:absolute;top:50%;left:0%;width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #0f172a;box-sizing:border-box;transform:translate(-50%,-50%);box-shadow:0 1px 3px rgba(15,23,42,.35);"></span>
-      </div>
-      <div id="dailyFoodQualityNote" style="font-size:.66rem;color:#64748b;line-height:1.35;margin-top:5px;">Across all meals today</div>
-    </div>
-    <div style="display:flex;gap:12px;flex-wrap:wrap;">
-      <span>&#x1F525; <strong id="totCal">0</strong> kcal</span>
-      <span>&#x1F969; <strong id="totProt">0</strong>g protein</span>
-      <span>&#x1F9C8; <strong id="totFat">0</strong>g fat</span>
-      <span>&#x1F35E; <strong id="totCarbs">0</strong>g carbs</span>
-    </div>
-    <div id="calorieOverIndicator" role="status" aria-live="polite" style="display:none;margin-top:8px;border:1px solid #fca5a5;border-radius:8px;background:#fee2e2;color:#991b1b;padding:8px 10px;font-size:.8rem;font-weight:900;"></div>
-    <div id="topMicroQuality" style="display:none;margin-top:8px;padding:8px 9px;background:#fff;border:1px solid #dbe3ec;border-radius:8px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.76rem;font-weight:800;color:#334155;margin-bottom:6px;">
-        <span>Top 7 micronutrient quality</span><span id="topMicroQualityLabel">—</span>
-      </div>
-      <div id="topMicroQualityTrack" role="meter" aria-label="Combined daily iron, calcium, vitamin D, magnesium, vitamin B12, sodium, and potassium target completion" aria-valuemin="1" aria-valuemax="10" style="height:11px;position:relative;border-radius:999px;background:linear-gradient(90deg,#dc2626 0%,#f97316 25%,#facc15 50%,#84cc16 75%,#16a34a 100%);box-shadow:inset 0 0 0 1px rgba(15,23,42,.12);">
-        <span id="topMicroQualityMarker" style="position:absolute;top:50%;left:0%;width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #0f172a;box-sizing:border-box;transform:translate(-50%,-50%);box-shadow:0 1px 3px rgba(15,23,42,.35);"></span>
-      </div>
-      <div id="topMicroQualityNote" style="font-size:.66rem;color:#64748b;line-height:1.35;margin-top:5px;">Iron, calcium, vitamin D, magnesium, vitamin B12, sodium, and potassium target coverage</div>
-      <div id="topMicroBreakdown" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:9px;padding-top:8px;border-top:1px dashed #dbe3ec;"></div>
-    </div>
-    <details style="margin-top:6px;padding-bottom:6px;">
-      <summary style="cursor:pointer;font-size:.72rem;color:#64748b;font-weight:800;">Nutrient Interactions</summary>
-      <div style="font-size:.62rem;color:#94a3b8;margin:7px 0 6px;line-height:1.35;">How these 12 can affect each other -- mostly meal-timing or supplement-dose issues, not a concern from food alone.</div>
-      <table style="width:100%;border-collapse:collapse;font-size:.72rem;">
-        <thead>
-          <tr style="background:#eef2f7;">
-            <th style="text-align:left;padding:5px 7px;color:#334155;font-weight:800;border-bottom:1px solid #dbe3ec;">Nutrients</th>
-            <th style="text-align:left;padding:5px 7px;color:#334155;font-weight:800;border-bottom:1px solid #dbe3ec;">Interaction</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;font-weight:700;color:#334155;vertical-align:top;">Calcium + Iron</td><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;color:#475569;">Calcium blocks iron absorption when eaten together. Take iron-rich food or a supplement 2+ hours apart from calcium.</td></tr>
-          <tr><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;font-weight:700;color:#334155;vertical-align:top;">Sodium &rarr; Calcium</td><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;color:#475569;">High sodium increases how much calcium is lost in urine. A long-term bone-health concern, not an immediate one.</td></tr>
-          <tr><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;font-weight:700;color:#334155;vertical-align:top;">Magnesium &rarr; Potassium</td><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;color:#475569;">Low magnesium makes it hard for the kidneys to retain potassium. Low potassium that won't correct on its own often means magnesium needs fixing first.</td></tr>
-          <tr><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;font-weight:700;color:#334155;vertical-align:top;">Calcium + Magnesium</td><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;color:#475569;">Share gut absorption pathways. High-dose supplements of one can modestly reduce absorption of the other; minor from food alone.</td></tr>
-          <tr><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;font-weight:700;color:#334155;vertical-align:top;">Vitamin D + Calcium</td><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;color:#475569;">Vitamin D improves calcium absorption. A helpful pairing, not a conflict.</td></tr>
-          <tr><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;font-weight:700;color:#334155;vertical-align:top;">Magnesium &rarr; Vitamin D</td><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;color:#475569;">Magnesium is needed to activate vitamin D. Low magnesium can blunt vitamin D's effectiveness even when vitamin D intake looks fine.</td></tr>
-          <tr><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;font-weight:700;color:#334155;vertical-align:top;">Vitamin C + Iron</td><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;color:#475569;">Vitamin C improves absorption of plant-based (non-heme) iron when eaten together. Pair iron-rich meals with a vitamin C-rich food for better uptake.</td></tr>
-          <tr><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;font-weight:700;color:#334155;vertical-align:top;">Zinc + Iron</td><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;color:#475569;">High-dose iron supplements (25mg+) can reduce zinc absorption when taken together. Space iron and zinc supplements a few hours apart; iron from fortified food isn't a concern.</td></tr>
-          <tr><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;font-weight:700;color:#334155;vertical-align:top;">Fiber &rarr; Iron, Zinc</td><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;color:#475569;">Phytates in whole grains, beans, and nuts bind iron and zinc, reducing absorption from high-fiber plant meals. Not a concern as part of a varied diet overall.</td></tr>
-          <tr><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;font-weight:700;color:#334155;vertical-align:top;">Caffeine &rarr; Calcium</td><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;color:#475569;">Caffeine modestly increases calcium loss in urine, roughly offset by 1-2 tablespoons of milk per cup. Not established as a bone-health risk if calcium intake is otherwise adequate.</td></tr>
-          <tr><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;font-weight:700;color:#334155;vertical-align:top;">Caffeine &rarr; Iron</td><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;color:#475569;">Coffee and tea can cut non-heme (plant-based) iron absorption by roughly 60-80% when drunk with a meal. Wait 1-2 hours after iron-rich food before coffee or tea.</td></tr>
-          <tr><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;font-weight:700;color:#334155;vertical-align:top;">Vitamin B12</td><td style="padding:6px 7px;border-bottom:1px solid #eef2f7;color:#475569;">No meaningful interaction with the other eleven nutrients at normal intake levels.</td></tr>
-          <tr><td style="padding:6px 7px;font-weight:700;color:#334155;vertical-align:top;">Sugar</td><td style="padding:6px 7px;color:#475569;">No meaningful absorption interaction with the other tracked nutrients -- tracked separately as a diet-quality marker, not a mineral/vitamin interaction.</td></tr>
-        </tbody>
-      </table>
-    </details>
-  </div>
-  <!-- AI Fuel insight box -->
-  <div id="nutritionAIBox" class="ai-box" style="display:none;margin-bottom:16px;"></div>
-  <!-- Water intake -->
-  <div class="water-row" style="margin-top:0;margin-bottom:16px;padding:12px 14px;background:#fff;border:1px solid #f0e8d8;border-radius:10px;box-shadow:0 1px 3px rgba(15,23,42,.16),0 8px 16px rgba(15,23,42,.2),0 26px 48px rgba(15,23,42,.24);">
-    <label style="font-size:0.92rem;color:#555;font-weight:600;">&#x1F4A7; Water Intake:</label>
-    <div class="water-ctrl" style="margin-top:4px;">
-      <button class="water-pm" onclick="changeWater(-1)">&#x2212;</button>
-      <span id="waterDisplay" style="min-width:110px;text-align:center;font-size:0.88rem;color:#333;font-weight:600;">0 oz (0.0 cups)</span>
-      <button class="water-pm" onclick="changeWater(1)">+</button>
-    </div>
-  </div>
-  <div class="water-row" style="margin-top:0;margin-bottom:16px;padding:12px 14px;background:#fff;border:1px solid #f0e8d8;border-radius:10px;box-shadow:0 1px 3px rgba(15,23,42,.16),0 8px 16px rgba(15,23,42,.2),0 26px 48px rgba(15,23,42,.24);">
-    <label style="font-size:0.92rem;color:#555;font-weight:600;">&#x1F3C3; Sports Nutrition Drinks:</label>
-    <div class="water-ctrl" style="margin-top:4px;">
-      <button class="water-pm" onclick="changeSportsDrinks(-1)">&#x2212;</button>
-      <span id="sportsDrinksDisplay" style="min-width:110px;text-align:center;font-size:0.88rem;color:#333;font-weight:600;">0 oz (0.0 cups)</span>
-      <button class="water-pm" onclick="changeSportsDrinks(1)">+</button>
-    </div>
-  </div>
-  <div class="water-row" style="margin-top:0;margin-bottom:16px;padding:12px 14px;background:#fff;border:1px solid #f0e8d8;border-radius:10px;box-shadow:0 1px 3px rgba(15,23,42,.16),0 8px 16px rgba(15,23,42,.2),0 26px 48px rgba(15,23,42,.24);">
-    <label style="font-size:0.92rem;color:#555;font-weight:600;">&#x1F964; Other Drinks <span style="font-weight:400;color:#888;">(coffee, tea, juice, soda, etc.)</span>:</label>
-    <div class="water-ctrl" style="margin-top:4px;">
-      <button class="water-pm" onclick="changeOtherLiquids(-1)">&#x2212;</button>
-      <span id="otherLiquidsDisplay" style="min-width:110px;text-align:center;font-size:0.88rem;color:#333;font-weight:600;">0 oz (0.0 cups)</span>
-      <button class="water-pm" onclick="changeOtherLiquids(1)">+</button>
-    </div>
-  </div>
-  <!-- Legacy totals (hidden, kept for save/load compat) -->
-  <input type="hidden" id="nuCalVal"><input type="hidden" id="nuProtVal"><input type="hidden" id="nuFatVal"><input type="hidden" id="nuCarbsVal">
-
-  <!-- Nutrition charts -->
-  <div id="nutritionChartsGrid" class="dash-grid" style="padding:0;margin-top:4px;"></div>
-
-</div></div>
-<!-- ═══════════════════════════════ END NUTRITION TAB ═══════════════════════════════ -->
-
-<!-- Fuel AI Modal -->
-<div id="fuelAIModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9300;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;" onclick="if(event.target===this)closeFuelAIModal()">
-  <div style="background:#fff;border-radius:14px;width:100%;max-width:420px;box-shadow:0 8px 32px rgba(0,0,0,0.22);overflow:hidden;">
-    <div style="padding:14px 18px 10px;border-bottom:1px solid #f0e8ff;display:flex;justify-content:space-between;align-items:center;background:#faf5ff;">
-      <span style="font-weight:700;color:#8e44ad;font-size:1rem;">&#x1F9E0; Fuel AI Analysis</span>
-      <button onclick="closeFuelAIModal()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#aaa;">&#x2715;</button>
-    </div>
-    <div style="padding:16px 18px;">
-      <p style="font-size:0.82rem;color:#666;margin:0 0 14px;">Analyze how a day's nutrition affected the next day's run.</p>
-      <label style="font-size:0.8rem;font-weight:700;color:#555;display:block;margin-bottom:4px;">Nutrition Date</label>
-      <input type="date" id="fuelNutrDate" style="width:100%;border:1px solid #d0d0ff;border-radius:6px;padding:7px 10px;font-size:0.9rem;margin-bottom:12px;box-sizing:border-box;font-family:inherit;">
-      <label style="font-size:0.8rem;font-weight:700;color:#555;display:block;margin-bottom:4px;">Activity / Run Date</label>
-      <input type="date" id="fuelRunDate" style="width:100%;border:1px solid #d0d0ff;border-radius:6px;padding:7px 10px;font-size:0.9rem;margin-bottom:12px;box-sizing:border-box;font-family:inherit;">
-      <label style="font-size:0.8rem;font-weight:700;color:#555;display:block;margin-bottom:4px;">Extra Context <span style="font-weight:400;color:#aaa;">(optional)</span></label>
-      <textarea id="fuelExtraContext" rows="2" placeholder="e.g. Long run, felt sluggish at mile 8, heat was 85°F…" style="width:100%;border:1px solid #d0d0ff;border-radius:6px;padding:7px 10px;font-size:0.82rem;box-sizing:border-box;font-family:inherit;resize:vertical;margin-bottom:16px;"></textarea>
-      <div style="display:flex;gap:10px;">
-        <button onclick="closeFuelAIModal()" style="flex:1;padding:9px;border-radius:8px;border:1px solid #ddd;background:#f5f5f5;color:#555;font-size:0.88rem;cursor:pointer;">Cancel</button>
-        <button onclick="aiNutritionCorrelation()" style="flex:2;padding:9px;border-radius:8px;border:none;background:#8e44ad;color:#fff;font-size:0.88rem;font-weight:700;cursor:pointer;">&#x1F9E0; Analyze</button>
-      </div>
-    </div>
-  </div>
-</div>
 <div id="bibleImageModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9999;align-items:center;justify-content:center;" onclick="closeBibleImageModal()">
   <img id="bibleImageModalImg" style="max-width:95vw;max-height:90vh;border-radius:8px;object-fit:contain;" src="" onclick="event.stopPropagation()">
   <button onclick="closeBibleImageModal()" style="position:absolute;top:16px;right:16px;background:#fff;border:none;border-radius:50%;width:36px;height:36px;font-size:1.2rem;cursor:pointer;">✕</button>
 </div>
 
-<!-- Copy Day Modal -->
-<div id="copyDayModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
-  <div style="background:#fff;border-radius:12px;padding:22px;width:90%;max-width:340px;box-shadow:0 4px 24px rgba(0,0,0,0.18);">
-    <h3 id="copyDayModalTitle" style="margin:0 0 14px;font-size:1rem;color:#2c3e50;">&#x1F4C5; Copy Food Between Days</h3>
-    <label style="font-size:0.82rem;color:#555;display:block;margin-bottom:6px;">Copy FROM date:</label>
-    <input type="date" id="copyDayFrom" onchange="updateCopyDayFoodList()" style="width:100%;border:1px solid #ddd;border-radius:6px;padding:7px;font-size:0.9rem;margin-bottom:12px;box-sizing:border-box;">
-    <label style="font-size:0.82rem;color:#555;display:block;margin-bottom:6px;">Copy TO date:</label>
-    <input type="date" id="copyDayTo" style="width:100%;border:1px solid #ddd;border-radius:6px;padding:7px;font-size:0.9rem;margin-bottom:12px;box-sizing:border-box;">
-    <label style="font-size:0.82rem;color:#555;display:block;margin-bottom:6px;">Which meals to copy:</label>
-    <select id="copyDayMeal" onchange="updateCopyDayFoodList()" style="width:100%;border:1px solid #ddd;border-radius:6px;padding:7px;font-size:0.9rem;margin-bottom:12px;box-sizing:border-box;">
-      <option value="all">All meals</option>
-      <option value="breakfast">🌅 Breakfast</option>
-      <option value="lunch">🥗 Lunch</option>
-      <option value="dinner">🍽️ Dinner</option>
-      <option value="snack">🍎 Snacks</option>
-      <option value="liquids">💧 Liquids</option>
-      <option value="sports">💪 Sports Nutrition</option>
-      <option value="supplements">💊 Supplements</option>
-    </select>
-    <div id="copyDayFoodRow" style="display:none;">
-      <label style="font-size:0.82rem;color:#555;display:block;margin-bottom:6px;">Which food item:</label>
-      <select id="copyDayFood" style="width:100%;border:1px solid #ddd;border-radius:6px;padding:7px;font-size:0.9rem;margin-bottom:12px;box-sizing:border-box;">
-        <option value="all">All foods in meal</option>
-      </select>
-    </div>
-    <label style="font-size:0.82rem;color:#555;display:block;margin-bottom:10px;">
-      <input type="checkbox" id="copyDayReplace" style="margin-right:6px;">Replace existing food on destination day
-    </label>
-    <div style="display:flex;gap:10px;">
-      <button onclick="confirmCopyDay()" style="flex:1;background:#16a085;color:#fff;border:none;padding:9px;border-radius:6px;font-size:0.9rem;cursor:pointer;font-weight:600;">&#x2705; Copy</button>
-      <button onclick="document.getElementById('copyDayModal').style.display='none'" style="flex:1;background:#95a5a6;color:#fff;border:none;padding:9px;border-radius:6px;font-size:0.9rem;cursor:pointer;">Cancel</button>
-    </div>
-  </div>
-</div>
 
 
-  <div id="macroMealsModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
-    <div style="background:#fff;border-radius:12px;padding:20px;width:92%;max-width:480px;max-height:84vh;overflow-y:auto;box-shadow:0 4px 24px rgba(0,0,0,0.18);">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:4px;">
-        <h3 style="margin:0;font-size:1rem;color:#166534;">🥗 Healthy Meals · 20% Protein / 60% Carbs / 20% Fat</h3>
-        <button onclick="document.getElementById('macroMealsModal').style.display='none'" aria-label="Close" style="background:none;border:none;font-size:1.2rem;color:#64748b;cursor:pointer;line-height:1;">✕</button>
-      </div>
-      <div style="font-size:.72rem;color:#78716c;margin-bottom:10px;line-height:1.4;">Whole-food meals calculated so their calories break down to roughly 20% protein, 60% carbs and 20% fat — a high-carb split. Each has a real gram amount and a rough kitchen measure; small amounts (a teaspoon, a few grams) are normal since they're solved to hit the ratio exactly.</div>
-      <div style="border-top:1px solid #e2e8f0;margin-bottom:10px;padding-top:10px;">
-        <strong style="font-size:.8rem;color:#166534;">⭐ From Your Foods</strong>
-        <div style="font-size:.68rem;color:#78716c;margin:2px 0 8px;line-height:1.35;">Closest 20/60/20 matches built from your Food Database and Healthy 7+ list, in addition to the AI ideas below.</div>
-        <div id="macroMealsPersonalList"></div>
-      </div>
-      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;">
-        <button type="button" onclick="filterMacroMeals('all')" class="mm-filter-btn" data-mm-filter="all" style="flex:1 1 0;min-width:60px;background:#0f766e;color:#fff;border:none;padding:5px 4px;border-radius:6px;font-size:.68rem;font-weight:700;cursor:pointer;">All</button>
-        <button type="button" onclick="filterMacroMeals('breakfast')" class="mm-filter-btn" data-mm-filter="breakfast" style="flex:1 1 0;min-width:60px;background:#e9ecef;color:#555;border:none;padding:5px 4px;border-radius:6px;font-size:.68rem;font-weight:700;cursor:pointer;">🌅 Breakfast</button>
-        <button type="button" onclick="filterMacroMeals('lunch')" class="mm-filter-btn" data-mm-filter="lunch" style="flex:1 1 0;min-width:60px;background:#e9ecef;color:#555;border:none;padding:5px 4px;border-radius:6px;font-size:.68rem;font-weight:700;cursor:pointer;">🥗 Lunch</button>
-        <button type="button" onclick="filterMacroMeals('dinner')" class="mm-filter-btn" data-mm-filter="dinner" style="flex:1 1 0;min-width:60px;background:#e9ecef;color:#555;border:none;padding:5px 4px;border-radius:6px;font-size:.68rem;font-weight:700;cursor:pointer;">🍽️ Dinner</button>
-        <button type="button" onclick="filterMacroMeals('snack')" class="mm-filter-btn" data-mm-filter="snack" style="flex:1 1 0;min-width:60px;background:#e9ecef;color:#555;border:none;padding:5px 4px;border-radius:6px;font-size:.68rem;font-weight:700;cursor:pointer;">🍎 Snack</button>
-      </div>
-      <div id="macroMealsList"></div>
-      <div style="border-top:1px solid #f0f0f0;margin-top:10px;padding-top:10px;">
-        <button type="button" onclick="applyTodayMacroRatio(20,60,20)" style="width:100%;background:#0f766e;color:#fff;border:none;padding:8px;border-radius:6px;font-size:.78rem;font-weight:700;cursor:pointer;">🎯 Also set today's Daily Macro Ratio target to 20/60/20</button>
-      </div>
-    </div>
-  </div>
-
-<!-- Barcode Scanner Modal -->
-<div id="barcodeScannerModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.62);z-index:9250;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;" onclick="if(event.target===this)closeBarcodeScanner()">
-  <div style="background:#fff;border-radius:14px;padding:18px;max-width:400px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.28);">
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;"><strong style="color:#0f766e;font-size:1rem;">&#x25A5; Scan Food Barcode</strong><button onclick="closeBarcodeScanner()" aria-label="Close barcode scanner" style="background:none;border:none;font-size:1.2rem;color:#64748b;cursor:pointer;">&#x2715;</button></div>
-    <video id="barcodeVideo" playsinline muted style="display:none;width:100%;max-height:245px;object-fit:cover;background:#111;border-radius:9px;"></video>
-    <div id="barcodeStatus" style="font-size:.78rem;color:#475569;background:#f0fdfa;border:1px solid #ccfbf1;border-radius:7px;padding:8px;margin:9px 0;">Starting the rear camera…</div>
-    <label style="display:block;font-size:.72rem;font-weight:700;color:#475569;margin-bottom:4px;">Or enter the barcode number</label>
-    <div style="display:flex;gap:6px;"><input id="barcodeManualInput" inputmode="numeric" pattern="[0-9]*" placeholder="UPC / EAN barcode" onkeydown="if(event.key==='Enter')lookupFoodBarcode()" style="flex:1;min-width:0;border:1px solid #cbd5e1;border-radius:7px;padding:8px;font-size:.9rem;"><button onclick="lookupFoodBarcode()" style="background:#0f766e;color:#fff;border:none;border-radius:7px;padding:8px 12px;font-weight:700;cursor:pointer;">Look Up</button></div>
-    <div style="font-size:.64rem;color:#64748b;margin-top:8px;line-height:1.35;">Product information comes from Open Food Facts. Always verify the serving size and label values before saving.</div>
-  </div>
-</div>
-
-<!-- Scan Confirm Modal -->
-<div id="scanConfirmModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9200;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;" onclick="if(event.target===this)this.style.display='none'">
-  <div style="background:#fff;border-radius:14px;padding:20px;max-width:380px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,0.25);">
-    <h3 id="scanConfirmTitle" style="margin:0 0 10px;font-size:1rem;color:#e67e22;">&#x1F4F7; Food Scanned</h3>
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-      <div id="scanFoodPhotoPreview" style="width:64px;height:64px;border:1px solid #dbe4ea;border-radius:9px;background:#f8fafc;display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:1.5rem;flex:0 0 auto;">🍽️</div>
-      <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:6px;">
-        <label style="background:#ecfdf5;color:#166534;border:1px solid #86efac;border-radius:7px;padding:7px 5px;font-size:.7rem;font-weight:800;text-align:center;cursor:pointer;">📷 Take Photo<input type="file" accept="image/*" capture="environment" style="display:none" onchange="attachPendingFoodPhoto(event)"></label>
-        <label style="background:#eff6ff;color:#1d4ed8;border:1px solid #93c5fd;border-radius:7px;padding:7px 5px;font-size:.7rem;font-weight:800;text-align:center;cursor:pointer;">🖼 Choose Existing<input type="file" accept="image/*" style="display:none" onchange="attachPendingFoodPhoto(event)"></label>
-      </div>
-    </div>
-    <div id="scanResultName" style="font-weight:700;font-size:1rem;margin-bottom:4px;color:#333;"></div>
-    <div id="scanResultMacros" style="font-size:0.82rem;color:#666;background:#f8f8f8;border-radius:6px;padding:7px 10px;margin-bottom:12px;"></div>
-    <label style="font-size:0.82rem;font-weight:600;color:#555;display:block;margin-bottom:4px;">Add to Meal:</label>
-    <select id="scanMealTarget" style="width:100%;border:1px solid #ddd;border-radius:6px;padding:8px 10px;font-size:0.9rem;box-sizing:border-box;margin-bottom:14px;">
-      <option value="breakfast">&#x1F305; Breakfast</option>
-      <option value="lunch">&#x1F957; Lunch</option>
-      <option value="dinner">&#x1F37D;&#xFE0F; Dinner</option>
-      <option value="snack">&#x1F34E; Snacks</option>
-      <option value="liquids">&#x1F4A7; Liquids</option>
-      <option value="sports">&#x1F4AA; Sports Nutrition</option>
-      <option value="supplements">&#x1F48A; Supplements</option>
-    </select>
-    <div style="display:flex;gap:8px;">
-      <button onclick="confirmScanAdd()" style="flex:1;background:#e67e22;color:#fff;border:none;padding:9px;border-radius:6px;font-size:0.9rem;cursor:pointer;font-weight:600;">&#x2795; Add Food</button>
-      <button onclick="document.getElementById('scanConfirmModal').style.display='none'" style="flex:1;background:#eee;color:#555;border:none;padding:9px;border-radius:6px;font-size:0.9rem;cursor:pointer;">Cancel</button>
-    </div>
-  </div>
-</div>
-<script src="daily-planner-core.js?v=2026-11-02-2-calendarrunfix"></script>
-<script src="daily-planner-food-log.js?v=2026-11-01-1-naturalsugar"></script>
-<script src="daily-planner-bible.js?v=2026-10-31-2-airpower"></script>
-<script src="daily-planner-meditation.js?v=2026-10-15-7"></script>
-<script src="daily-planner-journal-archive.js?v=2026-10-15-6"></script>
-<script src="daily-planner-file-uploads.js?v=2026-10-15-6"></script>
-<script src="daily-planner-shoe-tracker.js?v=2026-10-15-6"></script>
-<script src="daily-planner-misc.js?v=2026-11-03-3-beyondstridepill"></script>
-<script src="daily-planner-exercises.js?v=2026-11-03-1"></script>
-<script src="daily-planner-journal-experience.js?v=2026-11-04-2-worktime930"></script>
+<script src="daily-planner-core.js?v=2026-11-11-7"></script>
+<script src="daily-planner-bible.js?v=2026-11-10-1"></script>
+<script src="daily-planner-meditation.js?v=2026-11-08-3-habitsmove"></script>
+<script src="daily-planner-journal-archive.js?v=2026-11-08-3-habitsmove"></script>
+<script src="daily-planner-file-uploads.js?v=2026-10-15-6"></script><script src="daily-planner-misc.js?v=2026-11-10-1"></script><script src="daily-planner-journal-experience.js?v=2026-11-10-2"></script>
 <script src="master-backup-shared.js?v=2026-10-15-7"></script>
-<script src="daily-planner-storage-qol.js?v=2026-10-15-7-nofocus"></script>
+<script src="daily-planner-beyondstride-review.js?v=2026-11-11-1"></script>
+<script src="daily-planner-storage-qol.js?v=2026-11-08-2-removeactivities"></script>
 <button class="journal-float-top" id="journalFloatTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">&#x2191; Top</button>
 <div id="v26Toast" class="v26-toast" role="status" aria-live="polite"></div>
 </body>

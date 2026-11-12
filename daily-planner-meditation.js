@@ -417,8 +417,6 @@ async function hydrateActivitiesStorage(){
     await journalLargeStoreSet('activities_data',merged);
     localStorage.removeItem('activities_data');
   }catch(ignore){}
-  try{renderActivities();}catch(ignore2){}
-  try{refreshNutritionTargets();}catch(ignore3){}
   try{var weeklyPanel=document.getElementById('tab-weekly');if(weeklyPanel&&weeklyPanel.classList.contains('active')){renderWeekly();renderGoals();}}catch(ignoreWeekly){}
   // Habits reads activities via getActivities(), which falls back to an empty list until
   // this async IndexedDB hydration finishes. If the Habits screen already rendered before
@@ -431,14 +429,6 @@ async function hydrateActivitiesStorage(){
   // for things like "is there a run today" — same stale-empty-list race as Habits above, so
   // re-render it too once the real activities are in memory.
   try{if(typeof renderJournalHome==='function')renderJournalHome();}catch(ignoreHome){}
-  // The Daily Miles chart (renderMilesChart, via renderActivitySectionCharts) reads
-  // getActivities() too, and has the exact same stale-empty-list race: if the Activities
-  // tab is opened (or was already open) before this hydration finishes, the chart renders
-  // against a temporarily-empty list and shows "No mileage logged in the last 60 days" —
-  // then never redraws, because nothing else triggers it again. Re-render it now so it
-  // self-corrects just like Habits/My Schedule above, instead of staying wrong until the
-  // next unrelated tab switch.
-  try{if(typeof renderActivitySectionCharts==='function')renderActivitySectionCharts();}catch(ignoreMiles){}
   return merged;
 }
 async function hydrateBibleReadingArchiveStorage(){
@@ -1342,7 +1332,7 @@ function renderWeeklyGrowthTable(start,end,days,labels){
   host.innerHTML='<table class="summary-table"><thead><tr><th>Period</th><th>Financial Videos</th><th>Udemy</th><th>Gun Range</th><th>Language</th><th>Reading / Audiobook</th></tr></thead><tbody>'+rows.join('')+'</tbody></table>'+detailHtml;
 }
 
-var _hmTabs=['nutrition','habits2','meditate','bible','library','activities','wellness','file-uploads'];
+var _hmTabs=['habits2','meditate','bible','library','wellness','file-uploads'];
 var _cardTabs=['weekly','monthly','yearly','dashboard'].concat(_hmTabs);
 function toggleHamburger(e){
   if(e)e.stopPropagation();
@@ -1391,9 +1381,7 @@ function switchTab(tab,e){
   if(tab==='weekly')renderWeekly();if(tab==='monthly')renderMonthly();
   if(tab==='yearly')renderYearly();if(tab==='dashboard')renderDashboard();
   if(tab==='review')renderReview();if(tab==='library'){renderLibrary();renderLibrarySectionCharts();}
-  if(tab==='activities'){_actFirstLoad=true;collapseAllActs();resetActivityAdvancedPanels();loadCurrentPlan();refreshTrainingPreview();renderActivitySectionCharts();initTodayWorkoutCard();updateCompactSectionCounts();}
   if(tab==='bible')renderBibleTab();
-  if(tab==='nutrition'){renderFoodItems();renderFavsList();calculateDailyCalorieTarget();renderNutritionSectionCharts();}
   if(tab==='habits2')h2Render();
   if(tab==='meditate'){meditInitTab();}
   if(tab==='wellness'){var wdl=document.getElementById('wellnessTabDate');if(wdl)wdl.textContent=today.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});renderWellnessSectionCharts();}

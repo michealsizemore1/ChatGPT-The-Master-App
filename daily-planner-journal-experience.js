@@ -1,6 +1,6 @@
 var JOURNAL_UI_CONFIG={
-  homeCards:['priorities','checkins','training','wellness','nutrition','notes','streaks'],
-  homeLabels:{priorities:'Priorities & Goals',checkins:'Daily Check-In',training:'Today’s Training',wellness:'Wellness',nutrition:'Nutrition',notes:'Notes & Review',streaks:'Current Streaks'}
+  homeCards:['priorities','checkins','training','wellness','notes','streaks'],
+  homeLabels:{priorities:'Priorities & Goals',checkins:'Daily Check-In',training:'Today’s Training',wellness:'Wellness',notes:'Notes & Review',streaks:'Current Streaks'}
 };
 function journalPrefs(){
   var defaults={homeCards:JOURNAL_UI_CONFIG.homeCards.slice(),aiContext:true,backupDays:7};
@@ -9,6 +9,15 @@ function journalPrefs(){
     if(!localStorage.getItem('journal_home_streaks_migrated')){
       if(Array.isArray(prefs.homeCards)&&prefs.homeCards.indexOf('streaks')<0)prefs.homeCards.push('streaks');
       localStorage.setItem('journal_ui_prefs',JSON.stringify(prefs));localStorage.setItem('journal_home_streaks_migrated','1');
+    }
+    // Nutrition moved to a different app; drop any leftover 'nutrition' card from a
+    // previously-stored preference order so it doesn't leave an invisible phantom entry.
+    if(!localStorage.getItem('journal_home_nutrition_removed')){
+      if(Array.isArray(prefs.homeCards)){
+        var idx=prefs.homeCards.indexOf('nutrition');
+        if(idx!==-1){prefs.homeCards.splice(idx,1);localStorage.setItem('journal_ui_prefs',JSON.stringify(prefs));}
+      }
+      localStorage.setItem('journal_home_nutrition_removed','1');
     }
     return prefs;
   }catch(e){return defaults;}
@@ -37,7 +46,9 @@ function journalTodayTrainingSummary(){
   var text='';
   try{
     var raw=localStorage.getItem('current_training_plan'),plan=raw?JSON.parse(raw):null;
-    if(plan&&plan.text&&plan.startDate)text=extractWorkoutFromActivePlan(plan,today)||'';
+    // BeyondStride's plan: show its own workout name ("Recovery 3 miles"), not a guessed category.
+    if(typeof bsPlanCovers==='function'&&bsPlanCovers(dateKey)){var bt=bsPlanText(dateKey);if(!bt)return'Rest Day';var hl=journalTrainingHeadline(bt);if(hl)return hl;text=bt;}
+    else if(plan&&plan.text&&plan.startDate)text=extractWorkoutFromActivePlan(plan,today)||'';
   }catch(e){}
   if(!text)text=localStorage.getItem('workout_cache_'+dateKey)||'';
   if(!text)return acts.length?(acts[0].title||acts[0].type||'Activity logged'):'No workout scheduled';
@@ -101,8 +112,7 @@ function journalHomeStreakSummary(){
     {label:'Bible',fn:function(d){return d.spBibleAudio==='green';}},
     {label:'Worship',fn:function(d){return d.spWorship==='green';}},
     {label:'Prayer',fn:function(d){return d.spAIPrayer==='green';}},
-    {label:'Running',fn:function(d,dateKey){return !!actIdx.run[dateKey];}},
-    {label:'Water',fn:function(d){return(parseFloat(d.waterOz)||parseFloat(d.waterCount)*8||0)>=64;}}
+    {label:'Running',fn:function(d,dateKey){return !!actIdx.run[dateKey];}}
   ];
   return defs.map(function(item){return'<span style="white-space:nowrap;"><strong>'+streak(item.fn,cache)+'</strong> '+item.label+'</span>';}).join(' &nbsp;•&nbsp; ');
 }
@@ -173,7 +183,7 @@ function journalScheduleDetailHtml(kind,data){
       +[5,10,15,20].map(function(m){return'<button type="button" class="journal-schedule-medit-btn" onclick="journalMeditationQuickStart(event,'+m+')">'+m+'m</button>';}).join('')
       +'</div></div>';
   }
-  var rows=kind==='faith'?[['Daily Bread','spDailyBread','bible'],['Bible reading','spBibleAudio','bible'],['Worship','spWorship','bible'],['Prayer','spAIPrayer','bible']]:kind==='wellness'?[['Blood pressure','wBP','wellness'],['Medications','wMeds','wellness'],['Weight','wWght','wellness'],['Sleep','wSleep','wellness']]:[['Strength','exStrength','activities'],['Walk','exWalk','activities'],['Dog walk','exDogWalk','activities'],['10,000 steps','exStepsCheck','activities']];
+  var rows=kind==='faith'?[['Daily Bread','spDailyBread','bible'],['Bible reading','spBibleAudio','bible'],['Worship','spWorship','bible'],['Prayer','spAIPrayer','bible']]:kind==='wellness'?[['Blood pressure','wBP','wellness'],['Medications','wMeds','wellness'],['Weight','wWght','wellness'],['Sleep','wSleep','wellness']]:[['Dog walk','exDogWalk','daily'],['10,000 steps','exStepsCheck','daily']];
   return'<div class="journal-schedule-detail-panel">'+rows.map(function(row){var status=journalCheckState(data,row[1]);return'<button type="button" class="journal-schedule-detail-row" onclick="journalOpenDailyCheck(event,\''+row[2]+'\',\''+row[1]+'\')"><i class="journal-schedule-detail-dot '+status+'"></i><span>'+row[0]+'</span></button>';}).join('')+'</div>';
 }
 function journalToggleHiddenCheck(event,id){if(event){event.preventDefault();event.stopPropagation();}var target=document.getElementById(id);if(target){target.checked=!target.checked;save();renderJournalSchedule();}}
@@ -408,7 +418,7 @@ function journalScheduleCardClick(action){if(Date.now()<_journalScheduleSuppress
 function renderJournalSchedule(){
   var body=document.getElementById('journalScheduleBody'),summary=document.getElementById('journalScheduleSummary');if(!body)return;
   removeObsoleteQuickGrowthEntries();
-  var d=journalViewData(),dateKey=dk(today),foods=Array.isArray(d.foodLog)?d.foodLog:[],water=parseFloat(d.waterOz)||(parseFloat(d.waterCount)*8||0),training=journalTodayTrainingSummary(),growth=journalScheduleGrowth(dateKey);
+  var d=journalViewData(),dateKey=dk(today),training=journalTodayTrainingSummary(),growth=journalScheduleGrowth(dateKey);
   var languageEntries=getSkillEntries().filter(function(entry){return entry.date===dateKey&&entry.category==='Language';});if(languageEntries.length>1)languageEntries=[languageEntries[languageEntries.length-1]];
   var languageDone=languageEntries.length>0;
   var languageDetail=languageDone?languageEntries.map(function(entry){return entry.name+(entry.time?' ('+entry.time+')':'');}).join(', '):'Add today\'s language practice from My Schedule';
@@ -416,15 +426,6 @@ function renderJournalSchedule(){
   var readingEntries=getSkillEntries().filter(function(entry){return entry.date===dateKey&&/^(reading \/ audiobook|reading|audiobook)$/i.test(String(entry.category||''));});
   var languageMinutes=languageEntries.reduce(function(total,entry){return total+parseSkillTimeMins(entry.time);},0),guitarMinutes=guitarEntries.reduce(function(total,entry){return total+parseSkillTimeMins(entry.time);},0),readingMinutes=readingEntries.length?parseSkillTimeMins(readingEntries[readingEntries.length-1].time):0;
   var now=new Date(),isSelectedToday=dk(now)===dateKey,currentMinutes=now.getHours()*60+now.getMinutes(),selectedDay=new Date(dateKey+'T00:00:00'),realDay=new Date(now.getFullYear(),now.getMonth(),now.getDate()),isPastDay=selectedDay<realDay;
-  function mealLogged(meal){
-    meal=String(meal||'').toLowerCase();
-    return foods.some(function(item){return String((item&&item.meal)||'').toLowerCase()===meal;});
-  }
-  function mealComplete(meal,mins){
-    // A meal is complete as soon as food is recorded. The schedule time is a
-    // planning aid and should not keep an entered meal gray earlier in the day.
-    return mealLogged(meal);
-  }
   var wellnessKeys=['wBP','wMeds','wWght','wSleep'],wellnessRecorded=journalLinkedGreenCount(wellnessKeys,d);
   var faithKeys=['spDailyBread','spBibleAudio','spWorship','spAIPrayer'],faithDone=journalLinkedGreenCount(faithKeys,d);
   var loggedRun=(getActivities()||[]).some(function(activity){return activity&&activity.date===dateKey&&/run/i.test([activity.type,activity.title].filter(Boolean).join(' '));});
@@ -443,13 +444,9 @@ function renderJournalSchedule(){
     {time:'8:15 AM',mins:495,label:'Meditation',detail:journalMeditationTodayLine(),done:d.spMeditation==='green',tab:'meditate',detailKind:'meditation',linkedCheckKey:'spMeditation'},
     {time:'8:20 AM',mins:500,label:'Wellness check and water',detail:wellnessRecorded+' of 4 wellness items complete',done:wellnessRecorded===4,partial:wellnessRecorded>0&&wellnessRecorded<4,tab:'wellness',detailKind:'wellness'},
     {time:'8:30 AM',mins:510,label:'Bible, worship & prayer',detail:faithDone+' of 4 faith practices complete',done:faithDone===4,partial:faithDone>0&&faithDone<4,tab:'bible',detailKind:'faith'},
-    {time:'8:45 AM',mins:525,label:'Breakfast',detail:'Recovery meal and hydration after training',done:mealComplete('breakfast',345),tab:'nutrition'},
     {time:'9:30 AM',mins:570,label:'Work',detail:'9:30 AM – 6:00 PM',done:true,tab:'daily',skip:!(today.getDay()>=1&&today.getDay()<=5),fixed:true},
-    {time:'12:00 PM',mins:720,label:'Walk Buddy',detail:'Take Buddy for a walk',done:d.exDogWalk==='green',tab:'activities',linkedCheckKey:'exDogWalk'},
-    {time:'3:00 PM',mins:900,label:'Water checkpoint: 32 oz',detail:'Cumulative total: reach 32 ounces by noon',done:water>=32,tab:'nutrition'},
-    {time:'3:00 PM',mins:900,label:'Lunch',detail:'Midday meal and hydration',done:mealComplete('lunch',720),tab:'nutrition'},
-    {time:'8:30 PM',mins:1230,label:'Dinner',detail:'Evening meal and nutrition update',done:mealComplete('dinner',1050),tab:'nutrition'},
-    {time:journalMinsToClock(trainingStartMins),mins:trainingStartMins,label:restDay?'Rest day — no training scheduled':'Today’s training',detail:restDay?'Automatically complete because no workout is scheduled':training,done:activityDone,tab:'activities'},
+    {time:'12:00 PM',mins:720,label:'Walk Buddy',detail:'Take Buddy for a walk',done:d.exDogWalk==='green',tab:'daily',linkedCheckKey:'exDogWalk'},
+    {time:journalMinsToClock(trainingStartMins),mins:trainingStartMins,label:restDay?'Rest day — no training scheduled':'Today’s training',detail:restDay?'Automatically complete because no workout is scheduled':training,done:activityDone,tab:'daily'},
     {time:'11:30 PM',mins:1410,label:'Prepare priorities for tomorrow',detail:'Close the day intentionally',done:localStorage.getItem('schedule_eveningPlanning_'+dateKey)==='1'||!!d.prepJournalCheck,tab:'daily',manual:'eveningPlanning'}
   ].filter(function(item){return !item.skip;});
   // Growth habits are placed directly onto My Schedule on the days selected in Habits. A manually
@@ -550,8 +547,6 @@ function renderJournalHome(){
   cards.training=journalHomeCard('training','Today’s Training',escHtml(String(training).slice(0,150)));
   var wellness=[d.wBPVal?'BP '+d.wBPVal:'',d.wSleepVal?'Sleep '+d.wSleepVal+' hr':'',d.wWghtVal?'Weight '+d.wWghtVal:''].filter(Boolean);
   cards.wellness=journalHomeCard('wellness','Wellness',wellness.length?escHtml(wellness.join(' • ')):'No wellness metrics entered');
-  var foods=Array.isArray(d.foodLog)?d.foodLog:[],water=parseFloat(d.waterOz)||0;
-  cards.nutrition=journalHomeCard('nutrition','Nutrition','<strong>'+foods.length+'</strong> food item'+(foods.length===1?'':'s')+' &nbsp;•&nbsp; <strong>'+water+'</strong> oz water');
   var hasReflection=[d.jAccomplish,d.jImprov,d.jGratitude,d.jNotes].some(function(v){return v&&String(v).trim();});
   var handwritingRaw=localStorage.getItem('handwriting_'+dk(today)),hasHandwriting=false;
   try{hasHandwriting=Array.isArray(JSON.parse(handwritingRaw||'[]'))&&JSON.parse(handwritingRaw||'[]').length>0;}catch(error){}
@@ -611,9 +606,8 @@ function renderJournalRecentUpdates(){
   var el=document.getElementById('journalRecentUpdates');if(!el)return;
   var acts=[];try{acts=getActivities()||[];}catch(ignore){}var skills=[];try{skills=getSkillEntries()||[];}catch(ignore2){}
   function newestDate(items,field){var values=items.map(function(x){return x&&x[field];}).filter(Boolean).sort();return values.length?values[values.length-1]:'';}
-  var nutrition='';for(var i=0;i<localStorage.length;i++){var key=localStorage.key(i)||'';if(key.indexOf('planner_')!==0)continue;try{var row=JSON.parse(localStorage.getItem(key)||'{}');if((row.foodLog&&row.foodLog.length)||(parseFloat(row.waterOz)||0)>0)nutrition=nutrition>key.slice(8)?nutrition:key.slice(8);}catch(ignore3){}}
   var rows=[
-    ['Activities',newestDate(acts,'date')],['Skills',newestDate(skills,'date')],['Nutrition',nutrition],
+    ['Activities',newestDate(acts,'date')],['Skills',newestDate(skills,'date')],
     ['Local save',localStorage.getItem('journal_last_saved')],['Recovery backup',localStorage.getItem('journal_last_automatic_backup')||localStorage.getItem('last_backup_ts')]
   ];
   el.innerHTML='<strong style="display:block;color:#0a3161;margin-bottom:5px;">Recently updated</strong>'+rows.map(function(row){return'<div style="display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px solid #eef2f6;"><span>'+row[0]+'</span><span style="text-align:right;color:#475569;">'+escHtml(journalStatusTime(row[1]))+'</span></div>';}).join('');
@@ -663,7 +657,6 @@ function journalAIContext(){
   if(d.wSleepVal)parts.push('sleep '+d.wSleepVal+' hours');
   if(d.wWghtVal)parts.push('weight '+d.wWghtVal);
   if(d.wBPVal)parts.push('BP '+d.wBPVal);
-  if(d.waterOz)parts.push('water '+d.waterOz+' oz');
   if(d.jNotes)parts.push('journal note: '+String(d.jNotes).slice(0,240));
   var acts=getActivities().filter(function(a){return a.date===dk(today);});
   if(acts.length)parts.push('today activity: '+[acts[0].title,acts[0].distance?acts[0].distance+' mi':'',acts[0].pace?acts[0].pace+'/mi':''].filter(Boolean).join(', '));
