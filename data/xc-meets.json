@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-12T00:50:53+00:00",
+  "updatedAt": "2026-11-12T11:29:26+00:00",
   "source": "Google News searches for cross country meet results",
   "page": "https://michealsizemore1.github.io/ChatGPT-The-Master-App/cross-country.html",
   "meets": [
@@ -58,6 +58,12 @@
   ],
   "results": [
     {
+      "date": "2026-11-12",
+      "headline": "Follow the 2026 NCAA Cross Country Mountain Regional Championships live results, team scores, race start times",
+      "source": "World-Track",
+      "url": "https://news.google.com/rss/articles/CBMiygFBVV95cUxNNVEyNlNXYlZXZjRkcWhQRlotOGlySExqRzFVY1liUHZEeDdMRzFnT3NQdkNaQnVleW1TV2p4cmEyRVhNTmNEODBIYmo5YTFwVy1xX0R5Uk8tR2FkN3ZUR1ZDWDFRWjFua3JOMjFfRTlnNzZVa3JfY056aENGZnZoTDMxdXJjN19FdVZpSGdYc2NMYUF6Qm9mcTFRM3BVT0paZEZPb3ZhbTEwNkZ5aEtvcV9UcE9pWU1IUmJYRUcxNl8wbDNjV2RBMEZR?oc=5"
+    },
+    {
       "date": "2026-11-11",
       "headline": "When is the NCAA Great Lakes Regional cross country 2026? Follow live results, team scores, and track runners",
       "source": "World-Track",
@@ -68,12 +74,6 @@
       "headline": "Women's Cross Country Out to Defend NCAA East Region Title on Saturday",
       "source": "Tufts Athletics",
       "url": "https://news.google.com/rss/articles/CBMitwFBVV95cUxQOXdjODhhT0x0S0JTVHhkVVI0NkQwa2ZrUXI1ektZeTZfXzl3a003WGJEM0NSbUJ0UEFmd3JId09SeDM3NjU5c3B6eXJIS3Y0YlI3aUdISUpNbnZ6aE55TEpJcm1nVzZtWkZnY0plRmNRYUxzVEFGNWQxal9mTlRNVFJobHNRNFd0YlBhbldOWHNsdWxJNFhXMml1cFM1TFkxSWFWemFmQXh1WkQ4R1QzTk5TMy1zS28?oc=5"
-    },
-    {
-      "date": "2026-11-10",
-      "headline": "Kellogg CC had championship performances in the fall, including soccer, cross country",
-      "source": "Battle Creek Enquirer",
-      "url": "https://news.google.com/rss/articles/CBMi3wFBVV95cUxOSVB5blFJSkJkMkRmd3ljaEN6V2Y0RWl1Rm8yRW5SbENZdXRQdFFIQTRXUFN3NERjYkI2cktCZGNTcUt4Qlk4OVpRUEZ3SGF5eTNFTXpEeG5nRC01R19zaEl5QXhFWGt1Rk9yaFFNaGVVM0RsWU5sMnRiVk1jRTZiYmxUWVFwX2xJbVdDblBBRUhIR1lmc3VyMl93MTFhUlBidDFxekVDMTRIQ2g5RE9fcEhOVF9ZNW1CNk5oOUdiR2k0M3h6ZGJEM1k3M01uZmVYekdqUXdaYnd6TFF1VFBz?oc=5"
     },
     {
       "date": "2026-11-10",
@@ -90,20 +90,8 @@
     {
       "date": "2026-11-08",
       "headline": "OHSAA Cross Country Championships results, how Stark-area athletes fared",
-      "source": "Canton Repository",
-      "url": "https://news.google.com/rss/articles/CBMi-gFBVV95cUxQMnczOURwVElsTTZzYzYwbTNGN3JBTm5EbjhPQ0t4d1d6bUVQV2RuaFFWLW9heFR6QXdDU1NfSklZUWJFQno0ZkRULWZHRGFvTDBfRlBuYWJoTU9KMmlJYVdGZnRSYWFOTWd3ZXdLNHhkV3c2VW92UVFWMm1YNG1WNDhYXzhMRGZOMmZlaFNkOHp6aVRjSVZ3REhhZ1VaVVlCVXNvMEVIQ1N2Nm05LUxqeW1aTnIwbV9JbFRUQlIwWkM2RjNxRjdVaDNmakpfcE5IaGg4YWdFZ3k5eEU1QjRNTzdmVXdLdUx3dlQyT05fOG10S29KUXpSNU9B?oc=5"
-    },
-    {
-      "date": "2026-11-08",
-      "headline": "UCLA cross country improves on last year’s results at Big Ten Championships",
-      "source": "Daily Bruin",
-      "url": "https://news.google.com/rss/articles/CBMirAFBVV95cUxON0pZY1FQeDliV1hCUzgzSUhlc29jZjBNYVY5ckZEbXFwcWNpQVVmNjFBNldjeUFxWHFZV1g1SVd1QUI0ZWF5aTJoUnJVWUJFQUdxMjhNS0ZaajlfWmdSUHNWYVI3cDlaZFA3TmMzcVBVcTFXbV9HbUoxREZ5dWRaVFFYUEFVS09nRE42Q29mTF9vTzhvS0JPY20wZ0l5ZzhzUWRPYW1MQ0wyZ3kt?oc=5"
-    },
-    {
-      "date": "2026-11-08",
-      "headline": "UMD Cross Country Teams Run to Strong Finishes at NSIC Conference Championship Meet",
-      "source": "UMD Bulldogs",
-      "url": "https://news.google.com/rss/articles/CBMi3wFBVV95cUxPWWU4LUJ5ckl1ZnpCbVhFYTNoNkliQWZXcmNVT21fQ1dpVl9LQm1Falp1YUFTcmhIQ0MwMWdNb3BnRDl2bTBKME9ZeFpzLXktYzJOSUZkM2ozUXhGTGxHV0xDd3ZRSTZCZDY0NkIwYkJYRl9iXzFnTEg1ZlVoYnpOTlQ5ZGUyblQ2azZ1QzJkYzRvblZ1aEkyeTNYV3VRR29xckJscXRNbXpsWE0wZEFqQ3lsT005ZVBfQlhvNzZQVDJDQ21wNVpGWUFDdFNreG1pX2FRckdKckZEMnhSc0M0?oc=5"
+      "source": "Yahoo Sports",
+      "url": "https://news.google.com/rss/articles/CBMilAFBVV95cUxOcUkyVzJKdWNlalJuc25FSkxXUnhTdmhjdTJLVFBPbHdvLVlHU0ZqY29QZ1VCd1Y0M2h3MHZLM1JmQV9LR09tQmdZampwckdSTl9XclNEaVBXTm9DWnRLM3hRazZOcmtSTVBKOUcyQ3VJLW5VTzVlemJUbFQ1WDZZUEhaZkM0cjNpTEZmcGNpY2cwNEdo?oc=5"
     },
     {
       "date": "2026-11-04",
@@ -125,12 +113,6 @@
     },
     {
       "date": "2026-11-02",
-      "headline": "Louisiana women's cross country wins 2026 Sun Belt Conference Championship",
-      "source": "Yahoo Sports",
-      "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxQaUdaVDJ1SjBlYnhjQkZKdUdzZWpFQXdwNTR0cXppSU8zbkZOdG5KSHFzUWV3bE96ZzFYVzZ5Nm8yTnhaZ3FxQXBWQUxiVjBIUlJEWC1oVUpqTmRzVXUxLWtKc2lFZ3V0WnJqV1NiWHpST2xCd2NiSG9mc2hDa0NHa1pXVTNYUEwxZTlVXw?oc=5"
-    },
-    {
-      "date": "2026-11-02",
       "headline": "Jane Hedengren, BYU women win Big 12 cross country conference championship; BYU men place third",
       "source": "Yahoo Sports",
       "url": "https://news.google.com/rss/articles/CBMigwFBVV95cUxQSEtfcmNwckZ6QVFRckNxc0ZZQWs4V01NZjc1Rk1hNGJCVVl3QnNIUm90M0xFby1NSEROekl4amFRX1JSUDU2WnAxWUN0cGo4dkw2dlN2WUR0dDc1OGFxdjZYVzJJZWQ4d3JuUnFqclNucEVzaHZFeHl3XzRhdWMxbkU3QQ?oc=5"
@@ -146,6 +128,24 @@
       "headline": "American Cross Country Championships Return To New Orleans",
       "source": "American Conference",
       "url": "https://news.google.com/rss/articles/CBMipgFBVV95cUxNTnJsVFZ3WExyRUdxNzN3MzRxZkhpYmxpUHZkQk1zZWgwamMwb2RieHNSOENZbW5wOS13a3pBbU5XeW1RUFhvZHVtdlBEMUpHb2phU2dZcVdodFBDd1Q0cWJjdkkxSUUxSXRGQW9USXpkNHQ1Z3dJT1ZqZjliMkhXUEs0ZGVVbjRmMHpGaVRUVHRtZUVUU2Z5dlNHVVBUdzZrUmFxUkt3?oc=5"
+    },
+    {
+      "date": "2026-10-30",
+      "headline": "2026 Big Sky Cross Country Championships",
+      "source": "Big Sky Conference",
+      "url": "https://news.google.com/rss/articles/CBMiVEFVX3lxTE92NVpfc3EweEZzb2Y1X1BlZ19FZlcyWGdEbmZEOHFDdFl4MzRsNmFMS1EzY0RLRUFsZWZ0OHJiMHVzX1dQdVVHVUhSYW9rcXJtQ0JWQw?oc=5"
+    },
+    {
+      "date": "2026-10-30",
+      "headline": "Rachael Withrow Wins Gold, Becomes Second Women’s XC Conference Champion in Program History",
+      "source": "Marshall University Athletics",
+      "url": "https://news.google.com/rss/articles/CBMi1wFBVV95cUxQQ1V0QU5Za2FZbzllWW8tNWhLOWszbEtTZ2FMUjgxWjN6UTVlZ2hLbG5VSS1BdG5kS3Q3UjBTeFZUcXRmUGE1RThlcnctRU5wQ2paWmpSZGludmpzbkRyeHJYc0hoWGlZQWc5c1hJcEk2VWtLZ20wcEZwUXVFdzhvY1hRXzhIeXFXbFBqNnpBRGpMLVVoWFZuSmU2OHcwc3J5ZTVPS19PS3B5Zjd2RURJZjgxc3FoejRoa29PbHpuai1WQTR4X0FsZ2otdl9qYUdEM0FtWDJXQQ?oc=5"
+    },
+    {
+      "date": "2026-10-30",
+      "headline": "Women’s Cross Country Wins Back-to-Back MEAC Championships",
+      "source": "Howard University Athletics",
+      "url": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxONi1wbTVfODBCajRVMXdJdUowRHBSMzJJZ19pUDBJNzMzVzRXZzNRQnJ5ODZzT0g0aV95RU16OWp1ZWV0YV81WklIbm5mZVZoQTluNkYwVHIxckc3NTRvU3VLQXZscEItLXVLQ2g4VkZUcjNlY2RQRDhOS1lvTnpuMWg0TXdwWmxIU2Z1M2Z1Z0JfMHdLVElIemR0MDVwVTFGZklQQTFhczBWc3dHYlRhb3hoNjBnZEFmazZv?oc=5"
     }
   ]
 }
