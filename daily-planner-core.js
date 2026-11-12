@@ -1198,6 +1198,21 @@ function sleepingHrColumn(keys,hostId){
   var avg=all.length?all.reduce(function(a,b){return a+b;},0)/all.length:0;
   var head=t.querySelector('thead tr');if(head){var th=document.createElement('th');th.textContent='Sleeping HR';th.setAttribute('data-shr','1');head.appendChild(th);}
   t.querySelectorAll('tbody tr').forEach(function(tr,i){var td=document.createElement('td');var v=i<vals.length?vals[i]:avg;td.textContent=v?Math.round(v):'-';tr.appendChild(td);});
+  hrvColumn(keys,hostId);
+  // Fill any days not read yet from BeyondStride (then this table redraws).
+  try{if(window.bsWellnessFetch){var flat=[];keys.forEach(function(k){(Array.isArray(k)?k:[k]).forEach(function(x){flat.push(x);});});
+    window.bsWellnessFetch(flat,function(){try{if(hostId==='wWellness')renderWeekly();else if(hostId==='mWellness')renderMonthly();else if(hostId==='yWellness')renderYearly();}catch(e){}});}}catch(eF){}
+}
+// 💓 HRV (BeyondStride morning check, ms) right after Sleep Score in the Wellness tables.
+function hrvColumn(keys,hostId){
+  var t=document.querySelector('#'+hostId+' table');if(!t||t.querySelector('th[data-hrv]'))return;
+  var cache={};try{cache=JSON.parse(localStorage.getItem('bs_daily_hrv')||'{}')||{};}catch(e){}
+  function grp(k){var arr=Array.isArray(k)?k:[k],v=arr.map(function(x){return cache[x];}).filter(function(x){return x>0;});return v.length?v.reduce(function(a,b){return a+b;},0)/v.length:0;}
+  var vals=keys.map(grp),all=[];keys.forEach(function(k){(Array.isArray(k)?k:[k]).forEach(function(x){if(cache[x]>0)all.push(cache[x]);});});
+  var avg=all.length?all.reduce(function(a,b){return a+b;},0)/all.length:0;
+  var at=4; // Period, Weight, Sleep, Sleep Score | HRV
+  var head=t.querySelector('thead tr');if(head){var th=document.createElement('th');th.textContent='HRV';th.setAttribute('data-hrv','1');head.insertBefore(th,head.children[at]||null);}
+  t.querySelectorAll('tbody tr').forEach(function(tr,i){var td=document.createElement('td');var v=i<vals.length?vals[i]:avg;td.textContent=v?Math.round(v):'-';tr.insertBefore(td,tr.children[at]||null);});
 }
 // 📚 Reading / Audible minutes as the last column of the Weekly Spirituality table.
 function weeklyReadingColumn(keys,hostId){

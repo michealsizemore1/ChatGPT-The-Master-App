@@ -94,16 +94,34 @@
     return n.cal?n:null;
   }
   var nuFetched={};
+  /** Saves Sleeping HR and HRV from BeyondStride's daily summaries; true when something new arrived. */
+  function keepWellness(o){
+    var changed=false;
+    [['bs_daily_sleephr','sleepHr'],['bs_daily_hrv','hrv']].forEach(function(p){
+      var c={};try{c=JSON.parse(localStorage.getItem(p[0])||'{}')||{};}catch(e){}var ch=false;
+      Object.keys(o||{}).forEach(function(k){var v=((o[k]||{}).wellness||{})[p[1]];if(v&&c[k]!==v){c[k]=v;ch=true;}});
+      if(ch){try{localStorage.setItem(p[0],JSON.stringify(c));}catch(e1){}changed=true;}
+    });
+    return changed;
+  }
+  // Monthly / Yearly Wellness: read the days it hasn't seen (at most every 10 minutes per range).
+  var wFetched={};
+  window.bsWellnessFetch=function(keys,redraw){
+    var c=cfg();if(!c||!c.db||!c.key||!keys||!keys.length)return;
+    var ks=keys.slice().sort(),from=ks[0],to=ks[ks.length-1],today=new Date().toISOString().slice(0,10);if(to>today)to=today;if(from>to)return;
+    var sig=from+to;if(wFetched[sig]&&Date.now()-wFetched[sig]<10*60000)return;wFetched[sig]=Date.now();
+    fetch(c.db+'/nutrition/'+encodeURIComponent(c.key)+'/beyondstride/daily.json?orderBy=%22%24key%22&startAt=%22'+from+'%22&endAt=%22'+to+'%22').then(function(r){return r.ok?r.json():null;}).then(function(o){
+      if(o&&keepWellness(o)&&redraw)redraw();
+    }).catch(function(){});
+  };
   window.bsWeeklyNutrition=function(keys,labels){
     nuTables(keys,labels);
     var c=cfg();if(!c||!c.db||!c.key||!keys.length)return;
     var from=keys[0],to=keys[keys.length-1],sig=from+to;if(nuFetched[sig]&&Date.now()-nuFetched[sig]<2*60000)return;nuFetched[sig]=Date.now();
     fetch(c.db+'/nutrition/'+encodeURIComponent(c.key)+'/beyondstride/daily.json?orderBy=%22%24key%22&startAt=%22'+from+'%22&endAt=%22'+to+'%22').then(function(r){return r.ok?r.json():null;}).then(function(o){
       if(!o)return;var cache=nuCache(),changed=false;
-      // Sleeping HR for the Wellness tables.
-      var sh={};try{sh=JSON.parse(localStorage.getItem('bs_daily_sleephr')||'{}')||{};}catch(e0){}var shChanged=false;
-      Object.keys(o).forEach(function(k){var v=((o[k]||{}).wellness||{}).sleepHr;if(v&&sh[k]!==v){sh[k]=v;shChanged=true;}});
-      if(shChanged){try{localStorage.setItem('bs_daily_sleephr',JSON.stringify(sh));}catch(e1){}try{if(typeof renderWeekly==='function')renderWeekly();}catch(e2){}}
+      // Sleeping HR and HRV for the Wellness tables.
+      if(keepWellness(o)){try{if(typeof renderWeekly==='function')renderWeekly();}catch(e2){}}
       Object.keys(o).forEach(function(k){var n=(o[k]||{}).nutrition||fromText((o[k]||{}).text);if(n&&JSON.stringify(cache[k])!==JSON.stringify(n)){cache[k]=n;changed=true;}});
       if(!changed)return;
       // Keep about four months.
