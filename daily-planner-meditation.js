@@ -1378,6 +1378,7 @@ function switchTab(tab,e){
   if(isDaily){load();renderDailyCheckOverview();}
   document.getElementById('streakBar').style.display=isDaily?'flex':'none';
   document.getElementById('aiToolbar').style.display=isDaily?'block':'none';
+  var jc=document.getElementById('journalCalendar');if(jc)jc.style.display=isDaily?'':'none';
   if(tab==='weekly')renderWeekly();if(tab==='monthly')renderMonthly();
   if(tab==='yearly')renderYearly();if(tab==='dashboard')renderDashboard();
   if(tab==='review')renderReview();if(tab==='library'){renderLibrary();renderLibrarySectionCharts();}
