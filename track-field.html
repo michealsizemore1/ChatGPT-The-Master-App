@@ -311,7 +311,7 @@ html{font-size:14px}
 
 <script src="version-check.js"></script>
 <script>
-const APP_VERSION='2026-11-06-1';
+const APP_VERSION='2026-11-12-1';
 checkForNewerAppVersion(APP_VERSION, 'tf');
 
 // [name, country, ranking score, 2026 season best]  "rd" marks a road time used where there is no track mark.
@@ -371,14 +371,14 @@ const ULTRA_NOTES={
 // [name, country, ITRA index, age group]
 const ULTRA={
  men:{
-  '50K':[['Frederic Tranchand','FRA',944,'35-39'],['Cristian Minoggio','ITA',940,'40-44'],['Daniel Pattis','ITA',940,'23-34'],['Andrzej Witek','POL',932,'23-34'],['Francesco Puppi','ITA',930,'23-34'],['Nashon Kiplimo','KEN',925,'23-34'],['William Boffelli','ITA',923,'23-34'],['Rongchao Gu','CHN',920,'35-39'],['Tao Luo','CHN',918,'23-34'],['Jim Walmsley','USA',917,'35-39']],
-  '100K':[['Cristian Minoggio','ITA',945,'40-44'],['Ben Dhiman','USA',941,'23-34'],['Louison Coiffet','FRA',937,'23-34'],['Jim Walmsley','USA',930,'35-39'],['Francesco Puppi','ITA',928,'23-34'],['Andreas Reiterer','ITA',927,'23-34'],['Rongchao Gu','CHN',927,'35-39'],['Jonathan Albon','GBR',926,'35-39'],['Hannes Namberger','GER',926,'35-39'],['Jianjian Yang','CHN',923,'23-34']],
-  '100M':[['Ben Dhiman','USA',962,'23-34'],['Caleb Olson','USA',944,'23-34'],['Hugo Deck','FRA',937,'23-34'],['Baptiste Chassagne','FRA',936,'23-34'],['Vincent Bouillard','FRA',933,'23-34'],['Thomas Evans','GBR',932,'23-34'],['Francesco Puppi','ITA',927,'23-34'],['Virgile Moriset','FRA',925,'23-34'],['Ryan Montgomery','USA',924,'23-34'],['Ludovic Pommeret','FRA',923,'50-54']]
+  '50K':[['Frederic Tranchand','FRA',944,'35-39'],['Cristian Minoggio','ITA',940,'40-44'],['Daniel Pattis','ITA',940,'23-34'],['Andrzej Witek','POL',932,'23-34'],['Francesco Puppi','ITA',930,'23-34'],['Andreas Reiterer','ITA',928,'23-34'],['Chunlong Yang','CHN',928,'23-34'],['Nashon Kiplimo','KEN',925,'23-34'],['Luca Del Pero','ITA',923,'23-34'],['William Boffelli','ITA',923,'23-34']],
+  '100K':[['Cristian Minoggio','ITA',945,'40-44'],['Ben Dhiman','USA',941,'35-39'],['Louison Coiffet','FRA',937,'23-34'],['Jim Walmsley','USA',930,'35-39'],['Francesco Puppi','ITA',928,'23-34'],['Andreas Reiterer','ITA',927,'23-34'],['Rongchao Gu','CHN',927,'35-39'],['Hannes Namberger','GER',926,'35-39'],['Jonathan Albon','GBR',924,'35-39'],['Jianjian Yang','CHN',923,'23-34']],
+  '100M':[['Ben Dhiman','USA',962,'35-39'],['Caleb Olson','USA',944,'23-34'],['Hugo Deck','FRA',937,'23-34'],['Chris Myers','USA',937,'23-34'],['Baptiste Chassagne','FRA',936,'23-34'],['Vincent Bouillard','FRA',933,'23-34'],['Thomas Evans','GBR',932,'23-34'],['Francesco Puppi','ITA',927,'23-34'],['Karol Siola','POL',925,'23-34'],['Virgile Moriset','FRA',925,'23-34']]
  },
  women:{
-  '50K':[['Miao Yao','CHN',823,'23-34'],['Tove Alexandersson','SWE',818,'23-34'],['Judith Wyder','SUI',817,'35-39'],['Ikram Rharsalla Laktab','ESP',811,'23-34'],['Maude Mathys','SUI',804,'35-39'],['Nuria Gil Clapera','ESP',796,'23-34'],['Ida Amelie Robsahm','NOR',796,'23-34'],['Yngvild Kaspersen','NOR',795,'23-34'],['Mar\u00eda Teresa La Chica Lho\u00ebst','ESP',790,'23-34'],['Sara Alonso','ESP',789,'23-34']],
-  '100K':[['Jennifer Lichter','USA',823,'23-34'],['Anne Flower','USA',821,'35-39'],['Katie Schide','USA',813,'23-34'],['Miao Yao','CHN',812,'23-34'],['Sunmaya Budha','NEP',810,'23-34'],['Yngvild Kaspersen','NOR',803,'23-34'],['Lucy Bartholomew','AUS',801,'23-34'],['Antonina Iushina','RUS',801,'23-34'],['Eszter Csillag','HUN',800,'40-44'],['Toni McCann','RSA',799,'23-34']],
-  '100M':[['Katie Schide','USA',830,'23-34'],['Jennifer Lichter','USA',830,'23-34'],['Courtney Dauwalter','USA',828,'40-44'],['Riley Brady','USA',817,'23-34'],['Antonina Iushina','RUS',816,'23-34'],['Tara Dower','USA',812,'23-34'],['Marianne Hogan','CAN',809,'35-39'],['Fuzhao Xiang','CHN',806,'23-34'],['Caitlin Fielder','NZL',805,'23-34'],["Blandine L'Hirondel",'FRA',803,'35-39']]
+  '50K':[['Tove Alexandersson','SWE',864,'23-34'],['Miao Yao','CHN',823,'23-34'],['Judith Wyder','SUI',817,'35-39'],['Ikram Rharsalla Laktab','ESP',811,'23-34'],['Maude Mathys','SUI',804,'35-39'],['Nuria Gil Clapera','ESP',796,'23-34'],['Ida Amelie Robsahm','NOR',796,'23-34'],['María Teresa La Chica Lhoëst','ESP',790,'23-34'],['Sara Alonso','ESP',788,'23-34'],['Agnieszka Dygacz','POL',786,'40-44']],
+  '100K':[['Jennifer Lichter','USA',823,'23-34'],['Anne Flower','USA',821,'35-39'],['Katie Schide','USA',813,'23-34'],['Miao Yao','CHN',812,'23-34'],['Sunmaya Budha','NEP',809,'23-34'],['Yngvild Kaspersen','NOR',803,'23-34'],['Lucy Bartholomew','AUS',801,'23-34'],['Antonina Iushina','RUS',801,'23-34'],['Eszter Csillag','HUN',800,'40-44'],['Toni McCann','RSA',799,'23-34']],
+  '100M':[['Katie Schide','USA',830,'23-34'],['Jennifer Lichter','USA',830,'23-34'],['Courtney Dauwalter','USA',828,'40-44'],['Antonina Iushina','RUS',818,'23-34'],['Riley Brady','USA',817,'23-34'],['Tara Dower','USA',812,'23-34'],['Marianne Hogan','CAN',809,'35-39'],['Ruth Croft','NZL',806,'35-39'],['Fuzhao Xiang','CHN',806,'35-39'],['Caitlin Fielder','NZL',805,'23-34']]
  }
 };
 // TCS New York City Marathon final results (men and women); race run 1 Nov 2026.
@@ -474,7 +474,7 @@ const ENTRIES={
 };
 const ENTRIES_PENDING=[
  ['Shanghai Marathon','Dec 6','Elite field announced closer to race day.'],
- ['Valencia Marathon','Dec 6','Elite field usually announced in November; Kejelcha and Tesfay already confirmed to lead the lineup.']
+ ['Valencia Marathon','Dec 6','Preliminary field published 6 Nov — Kejelcha, Korir, Jepkosgei and Tesfay among those confirmed; organizers say an updated roster is coming soon.']
 ];
 const UPCOMING=[
  {d:'Dec 6',y:'2026',name:'Shanghai Marathon',where:'Shanghai, China',detail:'A candidate race under assessment to join the majors in 2027.',watch:'Broadcast details not yet announced',tag:'Candidate major',cls:'',links:[['Race details & schedule','https://www.watchathletics.com/schedule/watchlive/11238'],['Bid to join the World Marathon Majors','https://marathonhandbook.com/shanghai-marathon-is-one-race-away-from-joining-the-worlds-most-exclusive-running-club/']]},
@@ -491,23 +491,23 @@ const DL_SEASON=[
 ];
 
 // Section news. [ISO date, headline, publisher, url, one-line summary]
-// Checked 2 November 2026; the twice-weekly refresh replaces these.
-const NEWS_CHECKED='2026-11-06';
+// Checked 12 November 2026; the twice-weekly refresh replaces these.
+const NEWS_CHECKED='2026-11-12';
 const NEWS={
  track:[
+  ['2026-11-09','Ratified world records: Dos Santos, Kejelcha, Kerr, Russell','World Athletics','https://worldathletics.org/news/press-releases/ratified-world-records-dos-santos-kejelcha-kerr-russell','World Athletics formally ratified four 2026 marks: Josh Kerr’s mile world record (3:42.66), Yomif Kejelcha’s half marathon world record (56:51), Alison dos Santos’s 400m hurdles world record (45.80), and Masai Russell’s 100m hurdles world record (12.09).'],
   ['2026-11-03','Patience pays off for new king of the hurdles Dos Santos','Diamond League','https://www.diamondleague.com/patience-pays-off-for-new-king-of-the-hurdles-dos-santos/','Alison dos Santos broke the 400m hurdles world record with 45.80 in Zurich, beat rival Karsten Warholm in all five of their Diamond League meetings this season, and claimed his third Diamond League title.'],
-  ['2026-10-29','2026 Season Review Part VI: drama, records and new champions in Brussels','Diamond League','https://www.diamondleague.com/part-vi-drama-records-and-new-champions-in-brussels/','The season-ending retrospective recaps the Brussels Diamond League Final, where Chase Jackson and Collen Kebinatshipi set meeting records and 21 athletes won their first Diamond League titles.'],
-  ['2026-10-26','The record-breaking rise of Audrey Werro','Diamond League','https://www.diamondleague.com/the-record-breaking-rise-of-audrey-werro/','The Swiss 800m runner swept European and Diamond League titles with near-record times in 2026, and is now favoured to end Jarmila Kratochvílová’s 43-year-old world record.']
+  ['2026-10-29','2026 Season Review Part VI: drama, records and new champions in Brussels','Diamond League','https://www.diamondleague.com/part-vi-drama-records-and-new-champions-in-brussels/','The season-ending retrospective recaps the Brussels Diamond League Final, where Chase Jackson and Collen Kebinatshipi set meeting records and 21 athletes won their first Diamond League titles.']
  ],
  road:[
+  ['2026-11-06','A preliminary view of Valencia Marathon’s international elite field','Athletics Illustrated','https://athleticsillustrated.com/a-preliminary-view-of-valencia-marathons-international-elite-field/','Yomif Kejelcha and Fotyen Tesfay headline the first names revealed for the Dec 6 Valencia field, joined by defending champions John Korir and Joyciline Jepkosgei, with organizers planning to add more contenders soon.'],
   ['2026-11-01','Almgren stuns in NYC debut as Chepkirui denies Obiri a third title','Marathon Journal','https://marathonjournal.com/2026-new-york-city-marathon-results/','The Swede out-kicked Yemaneberhan Crippa and Kamohelo Mofolo to win New York in 2:06:01 as defending champion Benson Kipruto faded to fourth, while Sheila Chepkirui (2:24:36) held off a fast-closing Jessica McClain and Hellen Obiri.'],
-  ['2026-10-28','Claudio Berardelli Unfiltered: Jepchirchir’s doping, Sawe’s sub-2, and Wanyonyi’s future','LetsRun.com','https://www.letsrun.com/news/2026/10/claudio-berardelli-unfiltered-jepchirchirs-doping-sawes-sub-2-and-wanyonyis-800-1500-future/','Coach Claudio Berardelli says “justice has been done” on training-mate Peres Jepchirchir’s EPO case and reveals that world record holder Sabastian Sawe was drug-tested every three days during his sub-2-hour marathon build.'],
-  ['2026-10-23','Olympic and world marathon champion Peres Jepchirchir provisionally suspended for EPO','LetsRun.com','https://www.letsrun.com/news/2026/10/another-titan-falls-what-olympic-champion-peres-jepchirchirs-epo-ban-means-for-the-sport/','The Athletics Integrity Unit flagged a sample taken before her Sydney Marathon win, putting that title in jeopardy and making her the tenth World Marathon Majors champion suspended since 2017.']
+  ['2026-10-28','Claudio Berardelli Unfiltered: Jepchirchir’s doping, Sawe’s sub-2, and Wanyonyi’s future','LetsRun.com','https://www.letsrun.com/news/2026/10/claudio-berardelli-unfiltered-jepchirchirs-doping-sawes-sub-2-and-wanyonyis-800-1500-future/','Coach Claudio Berardelli says “justice has been done” on training-mate Peres Jepchirchir’s EPO case and reveals that world record holder Sabastian Sawe was drug-tested every three days during his sub-2-hour marathon build.']
  ],
  ultra:[
+  ['2026-11-09','This Week In Running: November 9, 2026','iRunFar','https://www.irunfar.com/this-week-in-running-november-9-2026','Manuel Merillas and Sara Alonso won the Marató dels Dements Skymasters to clinch the 2026 Skyrunner World Series overall titles, Chris Myers set the first sub-20-hour Grampians Peak Trail 100 Mile mark, and Antonina Iushina won that race’s women’s division.'],
   ['2026-11-02','Javelina and Tsaigu headline a loaded ultra weekend','iRunFar','https://www.irunfar.com/this-week-in-running-november-2-2026','Rob Molke (12:11) and Heather Jackson won a wind-down Javelina 100 Mile in Arizona, while Jim Walmsley returned to form to win China’s Tsaigu Trail 105k in 10:53 and Tove Alexandersson took its women’s 50k.'],
-  ['2026-10-26','Golden Trail World Series finale in Muju: Elazzaoui’s third straight title, Kolbeinsdóttir’s surprise win','iRunFar','https://www.irunfar.com/this-week-in-running-october-26-2026','Elhousine Elazzaoui topped a rainy, technical Muju Trail Grand Finale to claim his third consecutive series title, while Iceland’s Andrea Kolbeinsdóttir won the women’s race by almost six minutes; Frédéric Tranchand also set a course record at Spain’s Sobrescobio Skyrace.'],
-  ['2026-10-22','Geerts and Steyaert break the backyard ultra world record together','iRunFar','https://www.irunfar.com/merijn-geerts-ivo-steyaert-backyard-ultra-record-2026','The Belgian pair each completed 124 laps (516.7 miles) at the Big Dog’s Backyard Ultra World Team Championships, breaking Phil Gore’s 119-lap individual record.']
+  ['2026-10-26','Golden Trail World Series finale in Muju: Elazzaoui’s third straight title, Kolbeinsdóttir’s surprise win','iRunFar','https://www.irunfar.com/this-week-in-running-october-26-2026','Elhousine Elazzaoui topped a rainy, technical Muju Trail Grand Finale to claim his third consecutive series title, while Iceland’s Andrea Kolbeinsdóttir won the women’s race by almost six minutes; Frédéric Tranchand also set a course record at Spain’s Sobrescobio Skyrace.']
  ],
  entries:[
   ['2026-11-03','24-year-old charity runner Rachel Apa dies after collapsing near the NYC Marathon finish','WSB-TV','https://www.wsbtv.com/sports/woman-running-nyc/3TZ4OJ2N6MZJVIFVIWLZKPIYKY/','The Pennsylvania runner, racing her first New York City Marathon to raise money for Parkinson’s research, collapsed about two miles from the finish and died later at a hospital.'],
@@ -524,9 +524,9 @@ const NEWS={
 
 // World records. [event, mark, athlete, country, venue, date, note]
 // Track and road from the World Athletics world-record tables; ultra from the IAU record lists.
-// Both read 29 October 2026 (full men's and women's tables on both sites cross-checked
-// against the entries below; no changes for the events tracked here).
-const RECORDS_CHECKED='2026-11-06';
+// Both read 12 November 2026 (full men's and women's tables on both sites cross-checked
+// against the entries below; Kerr's mile and Kejelcha's half marathon marks are now ratified).
+const RECORDS_CHECKED='2026-11-12';
 const RECORDS={
  track:{
   men:[
@@ -536,7 +536,7 @@ const RECORDS={
    ['800m','1:40.91','David Rudisha','KEN','London','9 Aug 2012',''],
    ['1000m','2:11.83','Emmanuel Wanyonyi','KEN','Monaco','10 Jul 2026','previous record Noah Ngeny 2:11.96, Rieti, 5 Sep 1999'],
    ['1500m','3:26.00','Hicham El Guerrouj','MAR','Rome','14 Jul 1998',''],
-   ['Mile','3:42.66','Josh Kerr','GBR','London','18 Jul 2026','previous record Hicham El Guerrouj 3:43.13, Rome, 7 Jul 1999','pending'],
+   ['Mile','3:42.66','Josh Kerr','GBR','London','18 Jul 2026','previous record Hicham El Guerrouj 3:43.13, Rome, 7 Jul 1999'],
    ['2000m','4:43.13','Jakob Ingebrigtsen','NOR','Brussels','8 Sep 2023',''],
    ['3000m','7:17.55','Jakob Ingebrigtsen','NOR','Chorzow','25 Aug 2024',''],
    ['2 miles','7:54.10','Jakob Ingebrigtsen','NOR','Paris','9 Jun 2023','world best, not a ratified record'],
@@ -562,7 +562,7 @@ const RECORDS={
   men:[
    ['5km','12:49','Berihu Aregawi','ETH','Barcelona','31 Dec 2021',''],
    ['10km','26:31','Yomif Kejelcha','ETH','Castellon','16 Feb 2025',''],
-   ['Half marathon','56:51','Yomif Kejelcha','ETH','Buenos Aires','23 Aug 2026','previous record Jacob Kiplimo 57:20, Lisbon, 8 Mar 2026','pending'],
+   ['Half marathon','56:51','Yomif Kejelcha','ETH','Buenos Aires','23 Aug 2026','previous record Jacob Kiplimo 57:20, Lisbon, 8 Mar 2026'],
    ['Marathon','1:59:30','Sabastian Sawe','KEN','London','26 Apr 2026','']
   ],
   women:[
