@@ -1849,7 +1849,7 @@ function getReviewWeekJournalText(){
   }
   return entries.join('\n');
 }
-// Tonight's to-dos (bedtime, bedtime snack…) belong to the Evening Report — the Day and Weekly reviews leave them out,
+// Tonight's to-dos (bedtime, bedtime snack…) stay out of the Day and Weekly reviews (they're reflective records) —
 // both from what the AI reads and from what it writes (in a mixed line only the tonight part is cut).
 var REVIEW_TONIGHT=/lights?[- ]?out|bed ?time|before bed|go(ing)? to bed|to bed early|bedtime snack|recovery snack|evening snack|lay out (your )?gear|sleep tonight/i;
 function noTonightInput(t){return String(t||'').split('\n').filter(function(l){return !REVIEW_TONIGHT.test(l);}).join('\n');}
@@ -1893,7 +1893,7 @@ function aiFillEntireReview(btn){
   },function(err){var a=btn.__auto;weeklyAutoDone(btn);btn.disabled=false;btn.innerHTML=original;if(a)v26Toast('Automatic Weekly Review: AI error — '+err);else alert('AI error: '+err);});
 }
 // 🗓️ Automatic Weekly Review: on Sunday (the last day of the week), at the same time as the Day Review (5 minutes before
-// the Evening Report, or once tonight's report was asked for early), fill and save this week's review when it's empty.
+// 10:55 PM), fill and save this week's review when it's empty.
 // If the Command Center wasn't open then, last week's empty review is filled the next time it's opened.
 // A review you've written yourself is never replaced; each week is done once.
 function weeklyAutoDone(btn){if(!btn.__auto)return;btn.__auto=false;if(typeof btn.__restore==='number'){revOff2=btn.__restore;btn.__restore=null;try{renderReview();}catch(e){}}}
@@ -1991,7 +1991,7 @@ function renderDayReview(){
   setTimeout(applyPhoneDayReview,raw?0:1500);
 }
 // 🌙 Backup: when a day's review is still empty, fill it (once) from the one BeyondStride wrote on the phone just before
-// the Evening Report — so it's there even if the Command Center wasn't open that night.
+// 10:55 PM — so it's there even if the Command Center wasn't open that night.
 function applyPhoneDayReview(){
   try{
     var k=dk(today),flag='bsPhoneRev_'+k;if(localStorage.getItem(flag)||typeof window.bsPhoneReview!=='function')return;
@@ -2046,7 +2046,7 @@ function aiFillEntireDayReview(btn){
     +'{"wins":"","improve":"","focus":"","lessons":""}\n\n'
     +'Writing requirements:\n- wins: 1-3 specific achievements or positive moments from today\n- improve: 1-3 constructive, realistic improvements\n- focus: 1-2 specific priorities for tomorrow\n- lessons: 1-3 concise takeaways from today\n'
     +'Use short bullet-style lines inside each string. Do not invent events or accomplishments. If information is limited, acknowledge that briefly and make cautious suggestions.\n'
-    +'This is a reflective record of the day, kept for later. The Evening Report on the phone already covers tonight\'s to-dos, so do NOT repeat them: no lights-out / bedtime times, no bedtime or recovery snack, no "drink a glass before bed", no laying out gear. Focus for tomorrow is about the day itself (training, eating habits, work, faith, family), not tonight. Prefer patterns and lessons over restating numbers.\n'
+    +'This is a reflective record of the day, kept for later. Do NOT include tonight\'s to-dos: no lights-out / bedtime times, no bedtime or recovery snack, no "drink a glass before bed", no laying out gear. Focus for tomorrow is about the day itself (training, eating habits, work, faith, family), not tonight. Prefer patterns and lessons over restating numbers.\n'
     +'Use numbers exactly as written; never guess or calculate a score that is not given (HRV in ms is not a readiness score). When the journal and BeyondStride give different numbers (for example sleep), BeyondStride is the watch / app measurement for sleep, HRV, heart rate, runs and food logged; mention both only if the difference matters.\n'
     +(dk(today)===dk(new Date())?'It is now '+new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})+' and the day is not over: a planned workout not done yet is still to do today (not missed), and food totals are only so far.\n\n':'\n')
     +'DAILY JOURNAL:\n'+(journal||'No written journal notes available for today')
@@ -2064,7 +2064,7 @@ function aiFillEntireDayReview(btn){
     btn.__auto=false;btn.disabled=false;btn.innerHTML=original;
   },function(err){var a=btn.__auto;btn.__auto=false;btn.disabled=false;btn.innerHTML=original;if(a)v26Toast('Automatic Day Review: AI error — '+err);else alert('AI error: '+err);});
 }
-// 🌙 Automatic Day Review: just before the Evening Report (5 minutes before BeyondStride's report time, 10:55 PM by
+// 🌙 Automatic Day Review: at 10:55 PM (formerly tied to BeyondStride's evening report, now removed; still 10:55 PM by
 // default — or right away once you've asked for tonight's report early), fill and save today's review when it's empty.
 // Runs while the Command Center is open, or the first time it's opened after that time (same day). A review you've
 // written yourself is never replaced.
