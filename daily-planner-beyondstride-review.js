@@ -136,9 +136,9 @@
     }).catch(function(){});
   };
 
-  // Wellness: Sleep, Weight, Resting HR and Steps (Samsung, under Dog Walk) fill in from BeyondStride. A value you typed yourself is never replaced;
+  // Wellness: Sleep, Weight, Resting HR, Blood pressure + Pulse (cuff) and Steps (Samsung, under Dog Walk) fill in from BeyondStride. A value you typed yourself is never replaced;
   // one BeyondStride filled earlier is kept up to date.
-  var FIELDS={sleep:'wSleepVal',weight:'wWghtVal',restHr:'wRestHRVal',steps:'exSteps'};
+  var FIELDS={sleep:'wSleepVal',weight:'wWghtVal',restHr:'wRestHRVal',steps:'exSteps',bp:'wBPVal',pulse:'wPulseVal'};
   function fillWellness(k,data){
     var w=data&&data.wellness;if(!w||typeof dk!=='function'||dk(today)!==k)return;
     var store='bsAutoWellness_'+k,prev={};try{prev=JSON.parse(localStorage.getItem(store)||'{}');}catch(e){}
@@ -151,11 +151,14 @@
       if(cur!==v){el.value=v;el.dispatchEvent(new Event('input',{bubbles:true}));changed=true;}
       prev[f]=v;
     });
+    // Blood pressure taken: tick BP (unless you've marked it yourself).
+    try{var bc=document.querySelector('.tri-check[data-key="wBP"]');
+      if(bc&&w.bp&&!bc.dataset.state){bc.dataset.state='green';if(typeof save==='function')save();if(typeof renderDailyCheckOverview==='function')renderDailyCheckOverview();changed=true;}}catch(eB){}
     // 10,000 steps reached: tick the goal (unless you've marked it yourself).
     try{var sc=document.querySelector('.tri-check[data-key="exStepsCheck"]');
       if(sc&&Number(w.steps)>=10000&&!sc.dataset.state){sc.dataset.state='green';if(typeof save==='function')save();if(typeof renderDailyCheckOverview==='function')renderDailyCheckOverview();changed=true;}}catch(eS){}
     try{localStorage.setItem(store,JSON.stringify(prev));}catch(e){}
-    if(changed&&typeof v26Toast==='function')v26Toast('Filled from BeyondStride (sleep / weight / resting HR / steps)');
+    if(changed&&typeof v26Toast==='function')v26Toast('Filled from BeyondStride (sleep / weight / resting HR / steps / BP)');
   }
 
   // "From BeyondStride" box in the Daily AI Review (collapsed; tap to open).
