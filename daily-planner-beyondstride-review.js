@@ -28,7 +28,7 @@
       if(done)return;done=true;clearTimeout(t);
       if(!o){cb('');return;}
       var keys=Object.keys(o).sort();
-      if(keys.length===1)lastDay={key:keys[0],data:o[keys[0]]};
+      if(keys.length===1){lastDay={key:keys[0],data:o[keys[0]]};var ev=(o[keys[0]]||{}).evening;if(ev)window.bsEvening={date:keys[0],time:ev.time||0,early:!!ev.early};}
       cb(keys.map(function(k){return (keys.length>1?nice(k)+':\n':'')+String((o[k]||{}).text||'').trim();}).join('\n\n'));
     }).catch(function(){if(!done){done=true;clearTimeout(t);cb('');}});
   };

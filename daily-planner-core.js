@@ -2001,11 +2001,32 @@ function aiFillEntireDayReview(btn){
       var start=cleaned.indexOf('{'),end=cleaned.lastIndexOf('}');if(start>=0&&end>=start)cleaned=cleaned.slice(start,end+1);
       var result=JSON.parse(cleaned),map={wins:'dayRevWins',improve:'dayRevImprove',focus:'dayRevFocus',lessons:'dayRevLessons'};
       Object.keys(map).forEach(function(key){var el=document.getElementById(map[key]);if(el&&result[key]!=null){el.value=String(result[key]).trim();el.dispatchEvent(new Event('input'));}});
-      v26Toast('Day Review filled — edit it, then tap Save Review to keep it');
-    }catch(e){alert('The AI response could not be placed into the Review fields. Please try again.');}
-    btn.disabled=false;btn.innerHTML=original;
-  },function(err){btn.disabled=false;btn.innerHTML=original;alert('AI error: '+err);});
+      if(btn.__auto){saveDayReview(true);v26Toast('🌙 Day Review filled and saved automatically for tonight');}
+      else v26Toast('Day Review filled — edit it, then tap Save Review to keep it');
+    }catch(e){if(btn.__auto)v26Toast('Automatic Day Review: the AI answer could not be read — tap AI Fill Day Review to try again');else alert('The AI response could not be placed into the Review fields. Please try again.');}
+    btn.__auto=false;btn.disabled=false;btn.innerHTML=original;
+  },function(err){var a=btn.__auto;btn.__auto=false;btn.disabled=false;btn.innerHTML=original;if(a)v26Toast('Automatic Day Review: AI error — '+err);else alert('AI error: '+err);});
 }
+// 🌙 Automatic Day Review: just before the Evening Report (5 minutes before BeyondStride's report time, 10:55 PM by
+// default — or right away once you've asked for tonight's report early), fill and save today's review when it's empty.
+// Runs while the Command Center is open, or the first time it's opened after that time (same day). A review you've
+// written yourself is never replaced.
+function autoDayReviewCheck(){
+  try{
+    var now=new Date(),k=dk(now);if(dk(today)!==k)return;
+    var ev=window.bsEvening&&window.bsEvening.date===k?window.bsEvening:null;
+    var at=(ev&&ev.time>0?ev.time:23*60)-5,mins=now.getHours()*60+now.getMinutes();
+    if(mins<at&&!(ev&&ev.early))return;
+    var flag='autoDayRev_'+k;if(localStorage.getItem(flag))return;
+    if(!journalAIKey())return;
+    var empty=DAY_REV_IDS.every(function(id){var e=document.getElementById(id);return !e||!e.value.trim();});
+    if(!empty){localStorage.setItem(flag,'written');return;}
+    var btn=document.getElementById('aiFillDayReviewBtn');if(!btn||btn.disabled)return;
+    localStorage.setItem(flag,'auto');btn.__auto=true;aiFillEntireDayReview(btn);
+  }catch(e){}
+}
+setInterval(autoDayReviewCheck,60000);setTimeout(autoDayReviewCheck,8000);
+document.addEventListener('visibilitychange',function(){if(!document.hidden)setTimeout(autoDayReviewCheck,3000);});
 function aiReviewField(type,btn){
   const key=journalAIKey();
   if(!key){alert('Add your AI key first.');return;}
