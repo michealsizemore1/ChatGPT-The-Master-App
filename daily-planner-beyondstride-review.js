@@ -94,6 +94,11 @@
     return n.cal?n:null;
   }
   var nuFetched={};
+  /** The Day Review BeyondStride wrote on the phone for [k] (yyyy-mm-dd), or null. */
+  window.bsPhoneReview=function(k,cb){
+    var c=cfg();if(!c||!c.db||!c.key){cb(null);return;}
+    fetch(c.db+'/nutrition/'+encodeURIComponent(c.key)+'/beyondstride/review/'+k+'.json').then(function(r){return r.ok?r.json():null;}).then(function(o){cb(o&&(o.wins||o.improve||o.focus||o.lessons)?o:null);}).catch(function(){cb(null);});
+  };
   /** Saves Sleeping HR and HRV from BeyondStride's daily summaries; true when something new arrived. */
   function keepWellness(o){
     var changed=false;

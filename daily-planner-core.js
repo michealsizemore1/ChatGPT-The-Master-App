@@ -1951,6 +1951,23 @@ function renderDayReview(){
     if(!v||key!=='dayreview_'+dk(today))return;
     DAY_REV_IDS.forEach(function(id){const e=document.getElementById(id);if(e&&!e.value){e.value=v[id]||'';autoGrowReviewField(e);}});
   }).catch(function(){});
+  setTimeout(applyPhoneDayReview,raw?0:1500);
+}
+// 🌙 Backup: when a day's review is still empty, fill it (once) from the one BeyondStride wrote on the phone just before
+// the Evening Report — so it's there even if the Command Center wasn't open that night.
+function applyPhoneDayReview(){
+  try{
+    var k=dk(today),flag='bsPhoneRev_'+k;if(localStorage.getItem(flag)||typeof window.bsPhoneReview!=='function')return;
+    var empty=function(){return DAY_REV_IDS.every(function(id){var e=document.getElementById(id);return !e||!e.value.trim();});};
+    if(!empty())return;
+    window.bsPhoneReview(k,function(o){
+      if(!o||dk(today)!==k||!empty())return;
+      var map={wins:'dayRevWins',improve:'dayRevImprove',focus:'dayRevFocus',lessons:'dayRevLessons'};
+      Object.keys(map).forEach(function(f){var e=document.getElementById(map[f]);if(e&&o[f]){e.value=String(o[f]).trim();autoGrowReviewField(e);}});
+      saveDayReview(true);try{localStorage.setItem(flag,'1');localStorage.setItem('autoDayRev_'+k,'phone');}catch(e){}
+      if(typeof v26Toast==='function')v26Toast('🌙 Day Review filled from BeyondStride');
+    });
+  }catch(e){}
 }
 function clearDayReview(){
   if(!confirm('Clear today\'s AI Review (Wins, What to Improve, Focus, Lessons)?'))return;
@@ -2022,10 +2039,11 @@ function autoDayReviewCheck(){
     var empty=DAY_REV_IDS.every(function(id){var e=document.getElementById(id);return !e||!e.value.trim();});
     if(!empty){localStorage.setItem(flag,'written');return;}
     var btn=document.getElementById('aiFillDayReviewBtn');if(!btn||btn.disabled)return;
-    localStorage.setItem(flag,'auto');btn.__auto=true;aiFillEntireDayReview(btn);
+    localStorage.setItem(flag,'auto');btn.__auto=true;aiFillEntireDayReview(btn);   // richer (has your journal); the phone's is the backup
   }catch(e){}
 }
 setInterval(autoDayReviewCheck,60000);setTimeout(autoDayReviewCheck,8000);
+setInterval(function(){try{var n=new Date();if(dk(today)!==dk(n)||n.getHours()>=21)applyPhoneDayReview();}catch(e){}},5*60000);
 document.addEventListener('visibilitychange',function(){if(!document.hidden)setTimeout(autoDayReviewCheck,3000);});
 function aiReviewField(type,btn){
   const key=journalAIKey();
