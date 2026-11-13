@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-13T11:14:27+00:00",
+  "updatedAt": "2026-11-13T19:51:51+00:00",
   "source": "Google News searches for cross country meet results",
   "page": "https://michealsizemore1.github.io/ChatGPT-The-Master-App/cross-country.html",
   "meets": [
@@ -59,8 +59,44 @@
   "results": [
     {
       "date": "2026-11-13",
+      "headline": "No. 9 Men’s Cross Country Repeats as NCAA Southeast Regional Team Champions; Women Finish 10th",
+      "source": "Wake Forest University Athletics",
+      "url": "https://news.google.com/rss/articles/CBMixgFBVV95cUxPQ1VLQm5XZWJ3blNTNUdrWHdMX3FVbk5rN2NnTHVHclhaaHNibzNZVEp2TnpuLW1LQ0J3ajVma1hwVGZjR0ZVM290TTl1S1hCbHBmR3NFRUlncHhGSUtJdkZ4MDF3Qy1CY3gtVUNKVjNRRTF4OE5wVzJ3T3g3NEJZVUlONXBJb3VTRzYwRy1HcjBfMktNb25oeWhGTmVGdFh5N2Q4cnI4YVpuS3JnLUpWcTg4N1BIWWpKbWRhRmNRaExZZGc0Mnc?oc=5"
+    },
+    {
+      "date": "2026-11-13",
+      "headline": "Women's Cross Country Finishes Fall Season at NCAA Southeast Regionals",
+      "source": "Charleston Southern University Athletics",
+      "url": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxPaS1VdXliYmNvZFU5MlVEbmdSOGZCQ3EzRmhjSXpjSGJsVFRVaXpyc1d0Y2RVa2I2Y3BKRl9kb1NiUlBWTG5sOVB1Y0gzUFR6LVllbE9aUUcwblc2bUtBbkRLRUVWVWg3VzZ3RW9QSXd1UDBTSnJ4enZldVVfSlQ0ZHk1eGZzdlZlVEh5ZlBHSlI0ZzVfS3FEUzFENlF0dlRsWlgwMnV3NTJnZXM?oc=5"
+    },
+    {
+      "date": "2026-11-13",
+      "headline": "Cross Country Brings Home NCAA South Regional Titles",
+      "source": "Alabama Athletics",
+      "url": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxPenBJR2FGUmQ1bE00NHJFQlVxcy02S1pxakNWaC14cDVEeTZjZEJvVzJQeU5Qd1VGMi1YOTNRcS1sckMxTVpnMnpqTlNZWlh3MVNrb2JDX2oxanlnMm02eXJHX3NETkFETzMxaGxuWnRZTHdzWXo5ZjVybHhEQWgxMnY3Wk9zeUJ6dndvT2s0bXpmR1pVbGtvNUl5UVdHTmR2aTMxVzRKQmlPS2xxMk04eGFNcTdJa2YzR0dOVHF2MV8?oc=5"
+    },
+    {
+      "date": "2026-11-13",
+      "headline": "NCAA Southeast Regional Cross Country 2026 Results: NC State and Wake Forest Qualify for Nationals",
+      "source": "World-Track",
+      "url": "https://news.google.com/rss/articles/CBMiiwFBVV95cUxPNnhQSXNZWWJPQS05WHUwQ1lWVkhTNjVNemRMSlozaGE1cmpKdmZFdlQ0cUFGaUpwLUJYRHNJdXJNQ0lENGczR2VWVVZtcXpDUzRsOXhadTBVUWdyMndIZ2FUdGdKMmJmVXVNWl9uMmY1Rmw4NUR5WHZPMW1BNld0RThMZ3FIZWRMeW1v?oc=5"
+    },
+    {
+      "date": "2026-11-13",
+      "headline": "Cross Country Captures Six All-Region Honors",
+      "source": "Seminoles.com",
+      "url": "https://news.google.com/rss/articles/CBMiigFBVV95cUxOb203ejQyTjAzRmFaV25BWDQzV0czWjJuZ0NVc1dfTU12bU1wejNjT28wYmRBc2o0R3licXZ4UjZJYXhDZ19HWExhQmprRzMtTTZYMEhZM1NnamhnbmdDMWktZTdMSS1VTWhHaU9lNXdOeEFJcDBHOHJIeTVBQjFscnlxUVhxSzYtcXc?oc=5"
+    },
+    {
+      "date": "2026-11-13",
+      "headline": "NCAA South Regional Cross Country 2026 Results: Alabama Men and Women Qualify for Nationals",
+      "source": "World-Track",
+      "url": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxPWU1va0g5R0h0R01PMVRpZ1dOcldwNHdDOHU2Szl6b3JDQWhyWnJUdnVfVXRKbzhmVXhpYkhyZ1BHSGhvZl9CQVV2SkF4VG9tRU04alotY3RhUDdtU2RPUG5KLTNlYl8wQjYyS1FqN0JqVXdoSk1URGVZLWNsMWFwOFU5SzdZSnpvQnpJUzVmR3MybUlYZExGWm0xVFFIdnhHbk9kMXBMMDlkdFdlMmFLSzIzdVlreGxSekZvNzUtTG8?oc=5"
+    },
+    {
+      "date": "2026-11-13",
       "headline": "South Region NCAA Cross Country Championships Box Numbers",
-      "source": "world-track.org",
+      "source": "World-Track",
       "url": "https://news.google.com/rss/articles/CBMilAFBVV95cUxOdHlpZEljUm5kRjYtdGhLR0RyZ1BkZWlLbEhxZnoycWlULXNPQVc5NUM4eTI5bkpYMlRTSWNsMzhDTDA1cW12WVN0QzNId3M1N1V5T3VhTHVFOGFFVTh1ZXJ4eklaT3A3OFV3M3k3M2RlMi1BRDBETUVoVV9BbHIxVkU3OFVyblIxTjhBd1pCSTE3Wndp?oc=5"
     },
     {
@@ -68,12 +104,6 @@
       "headline": "Northern Section cross country champions are crowned",
       "source": "Record Searchlight",
       "url": "https://news.google.com/rss/articles/CBMiwgFBVV95cUxQN3NpWENUc3hDbldvS250RDZZS3B3ZGdZSGRhZnZEM1VYUTN5Y0IyckZFam56QUNNd2k5WUt5TTJIR0pGdlc1Y094Uy12LTI0MDIzZklsUVlMV2xQdDd5RTZYVGtXa1hoVFZDTjdCd3cwV3YzVDQ4SEI2V0tNZ21ra0ZON2toNllzYzUyN1g2X3Z5RmhGRS03YjJVbkNESDBZN2pnbGR2aHQzRkZYd1JIaXJZOGhOSWxqS1NLMGcwbTh0dw?oc=5"
-    },
-    {
-      "date": "2026-11-12",
-      "headline": "Follow the 2026 NCAA Midwest Cross Country Regional Live Results, Scoreboard Tracker",
-      "source": "World-Track",
-      "url": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxQWTc3ZWVCSXdKX2dZaENsckR2a3JnTmVnOVlMdUxCVTZvXzRMLU1lZkM0NkJaMFZtcF9zaTVsRVBrNTEwSS1raC1ZVFBITVduTlpOSUJwazJWRFlWT1lGZVVXcm1XblBtRlQ1Wm54dmdDQXZJNENmRzVYNzJUMzhkS0RoZ0ttTi00WDZDNmowVFZPY01GRHhScC1ydW5STFA5R3B2cGl2X0s?oc=5"
     },
     {
       "date": "2026-11-12",
@@ -95,21 +125,9 @@
     },
     {
       "date": "2026-11-12",
-      "headline": "Follow the 2026 NCAA Cross Country Mountain Regional Championships live results, team scores, race start times",
-      "source": "World-Track",
-      "url": "https://news.google.com/rss/articles/CBMiygFBVV95cUxNNVEyNlNXYlZXZjRkcWhQRlotOGlySExqRzFVY1liUHZEeDdMRzFnT3NQdkNaQnVleW1TV2p4cmEyRVhNTmNEODBIYmo5YTFwVy1xX0R5Uk8tR2FkN3ZUR1ZDWDFRWjFua3JOMjFfRTlnNzZVa3JfY056aENGZnZoTDMxdXJjN19FdVZpSGdYc2NMYUF6Qm9mcTFRM3BVT0paZEZPb3ZhbTEwNkZ5aEtvcV9UcE9pWU1IUmJYRUcxNl8wbDNjV2RBMEZR?oc=5"
-    },
-    {
-      "date": "2026-11-11",
-      "headline": "When is the NCAA Great Lakes Regional cross country 2026? Follow live results, team scores, and track runners",
-      "source": "World-Track",
-      "url": "https://news.google.com/rss/articles/CBMimwFBVV95cUxOeXhFVllaUVU1ZVZRT2tUb2cxTjl1U1ZKWG1rQkV3QW9ieDZYRjlvWmp6TmFYMGRFaXBaVkU1Nm4wUmpfNmZTeXJaN19YblFXYVBrRmdJVDhQd0FLbThNOUMxbHB3ZldnT1NaMmVMWVo2NWRXbVRaVWlQWTIzTFhUZUhvNTNqbnRrRXh0X3I5UkNlS01VNm9QRVNnVQ?oc=5"
-    },
-    {
-      "date": "2026-11-10",
-      "headline": "Women's Cross Country Out to Defend NCAA East Region Title on Saturday",
-      "source": "Tufts Athletics",
-      "url": "https://news.google.com/rss/articles/CBMitwFBVV95cUxQOXdjODhhT0x0S0JTVHhkVVI0NkQwa2ZrUXI1ektZeTZfXzl3a003WGJEM0NSbUJ0UEFmd3JId09SeDM3NjU5c3B6eXJIS3Y0YlI3aUdISUpNbnZ6aE55TEpJcm1nVzZtWkZnY0plRmNRYUxzVEFGNWQxal9mTlRNVFJobHNRNFd0YlBhbldOWHNsdWxJNFhXMml1cFM1TFkxSWFWemFmQXh1WkQ4R1QzTk5TMy1zS28?oc=5"
+      "headline": "BIG EAST Cross Country Teams Set for 2026 NCAA Regional Championships",
+      "source": "Big East Conference",
+      "url": "https://news.google.com/rss/articles/CBMitAFBVV95cUxPeDc2SnFyMFBMY284RzlLZEVVUVdyNVYyS0tSUURuVHM4dDB3QktvcTFfZHYzLWN2eHdZdERIZGZyN1dKejdOa0k4VmdsVlZSVUVrUE1CaGJDaHNtVlZYQ0pocGtSdnoxNHMzNXhfWG0tR2JFS2U4U3VqTjk5Y1BtbnFoQ3FZQU9uUF9qSl9RTzJvVWJ5YWh0NC05OG1sazN4WUpsbXhzeWdpaFVmZmxIYjdmbGc?oc=5"
     },
     {
       "date": "2026-11-10",
@@ -124,28 +142,10 @@
       "url": "https://news.google.com/rss/articles/CBMilAFBVV95cUxOcUkyVzJKdWNlalJuc25FSkxXUnhTdmhjdTJLVFBPbHdvLVlHU0ZqY29QZ1VCd1Y0M2h3MHZLM1JmQV9LR09tQmdZampwckdSTl9XclNEaVBXTm9DWnRLM3hRazZOcmtSTVBKOUcyQ3VJLW5VTzVlemJUbFQ1WDZZUEhaZkM0cjNpTEZmcGNpY2cwNEdo?oc=5"
     },
     {
-      "date": "2026-11-04",
-      "headline": "Oregon Ducks B1G Conference Championship Cross Country Recap",
-      "source": "Yahoo Sports",
-      "url": "https://news.google.com/rss/articles/CBMikwFBVV95cUxQTl8wUy0zWHFjRndqV1J3MmFjNk9sQzI2SzZ2bzBLY29NemZNUVpFblFhOUk0RHBoaFJVX1BwOElTVmlUTm1keUZ2T1dCY3Q3aVA1S3F1UHFuVDUtam1IV0FXbXhHLU52NGY0dDZ4b1lwbE4wMjVDNXJDX2JJUHRHelRkXzA1OXNuTlZEX1dqOVFRQzQ?oc=5"
-    },
-    {
-      "date": "2026-11-04",
-      "headline": "Elon women’s cross country claims CAA championship for 2nd straight year",
-      "source": "Elon News Network",
-      "url": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxPTnFTQVNwdDNjbllYbFVucWNTQVhyT3BYbndzRHBuSUZVbzY3MndwQnNlazhhVmZROVlESlpLMWJlTXBnTDNCRjI0U2pmb1gzQTc5bjN5aFZHcUdCMl9NUGdoZUlwWnJrTktUX1FrQkR0YWwtdG9oXzBPc2d0akJmRmtlcVZlNEk0QmhDSzBBOEU3OGw2cFJxbFo2YzVXT1hpc0QwWUNudEhuYTVQVW9KQUpsNDFDWXB3N1cw?oc=5"
-    },
-    {
-      "date": "2026-11-03",
-      "headline": "10 Takeaways from cross country conference championships before regionals",
-      "source": "NCAA.com",
-      "url": "https://news.google.com/rss/articles/CBMixAFBVV95cUxPVW50UjRKX1NSZkNSTm9WRWVsRmNtcGJYMHlaelgwXzJZS05sd0ZDZGgwMi14c0x5V0tIbm5ja29zSGVSQ2VLTkd1V2xQQTEyRmNRcjhySVdVM09DcDV1T2RkMVVsdjUyaUE5THJUNWNRN3hsTk1PaGR2QU10YWp0b0hlM3F5bTkwb2h5YVZ6b21sU1NKYkdJRVotREJ2d3pBZnBrQUF2bUFnekUxd3BtRnhsSUJyTUZjSnIyZlRXZ2RVNkNU0gHKAUFVX3lxTE1DYXJ3b3pvb0N0Y0pOUHZnYWJRNjB6UkZSZ1RvTUk5QklUUFJwMTB0dnRNTGhBMEw0YkZoVmh2ZDZWLTFNVk40dF9pRHB2STZ1NWhKZVZqTTFESDVaNXRxcUdXREtCTFVRUkV1VmYxenhCT3ZYNTAxTm1oZUd2N1o0MDZXSTFZdmMyYkZMODZvZXlQS2EteDhPenYzOFdHSEhYQlBOMkxLV3lFOVc0ZS1TcTNneTU2MmxXQ3RKaU9CSXpVa0k0QV9oa0E?oc=5"
-    },
-    {
-      "date": "2026-11-02",
-      "headline": "Jane Hedengren, BYU women win Big 12 cross country conference championship; BYU men place third",
-      "source": "Deseret News",
-      "url": "https://news.google.com/rss/articles/CBMisgFBVV95cUxQSlEwaGxDRFkycjMxLVdxTk9sWlBDZndvSGFmdl8yazlNc3hHb1VLTDR1VE9uaUZVYjluZ0VXOVU4alpuQl9wemIyRldoWndrcDdvaWtmQXRoQzJkbGxqWGVnSEpidWVtaVVSTzdQTEpFRVU3WnNsbVpfZU04d2R6Q0lsSUdGb1FZcVBhdkEya2hqbzh6MktNdVVEVnRpRlRYQWNISFdjeVRrUWRtaWtJSjd3?oc=5"
+      "date": "2026-11-07",
+      "headline": "BACK-TO-BACK: SCSU Women's Cross Country Wins Second Straight NE10 Championship",
+      "source": "Southern Connecticut State University Athletics",
+      "url": "https://news.google.com/rss/articles/CBMiswFBVV95cUxQSVV3UEVEb2tRV1JRaVhYM2FvSXlNczF6cWtLcXVRNDhLcmdUQ1JuclczbWU2T2o3TkRxdk5meENZaEFicWhvaUMteVNxQnFPamtuTG43ZnFFa3lBM09mVjhvZno3bGtIVnhweHpFVTVhVlBEbmFValdxMjN2MjdlNmtTY0VwdXBjLXlTNnZ1YTFBQ0NPQmFuRm02dXVGNDZ6UGkxMXBLVjNJNFVPUVltd3BQUQ?oc=5"
     }
   ]
 }
