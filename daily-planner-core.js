@@ -1854,7 +1854,9 @@ function aiFillEntireReview(btn){
   const ws=wkStart(revOff2),we=new Date(ws);we.setDate(ws.getDate()+6);
   // BeyondStride's day-by-day training / nutrition / recovery for the week (read-only), fetched first.
   if(typeof window.bsReviewFetch==='function'&&!btn.__bsReady){btn.disabled=true;window.bsReviewFetch(dk(ws),dk(we),function(t){btn.__bsText=t||'';btn.__bsReady=true;btn.disabled=false;aiFillEntireReview(btn);});return;}
-  const bsText=btn.__bsText||'';btn.__bsReady=false;btn.__bsText='';
+  // Tonight's to-dos belong to the Evening Report — keep them out of the review (what the AI reads and what it writes).
+  const TONIGHT=/lights?[- ]?out|bed ?time|before bed|go(ing)? to bed|to bed early|bedtime snack|recovery snack|evening snack|lay out (your )?gear|sleep tonight/i;
+  const bsText=String(btn.__bsText||'').split('\n').filter(function(l){return !TONIGHT.test(l);}).join('\n');btn.__bsReady=false;btn.__bsText='';
   const weekLabel=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' - '+we.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
   const journal=getReviewWeekJournalText();
   const injuries=reviewInjuryText();
@@ -1873,7 +1875,10 @@ function aiFillEntireReview(btn){
       var cleaned=String(text||'').trim().replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'');
       var start=cleaned.indexOf('{'),end=cleaned.lastIndexOf('}');if(start>=0&&end>=start)cleaned=cleaned.slice(start,end+1);
       var result=JSON.parse(cleaned),map={wins:'revWins',improve:'revImprove',focus:'revFocus',lessons:'revLessons'};
-      Object.keys(map).forEach(function(key){var el=document.getElementById(map[key]);if(el&&result[key]!=null){el.value=String(result[key]).trim();el.dispatchEvent(new Event('input'));}});
+      Object.keys(map).forEach(function(key){var el=document.getElementById(map[key]);if(el&&result[key]!=null){
+        // Drop any line that's still about tonight; in a mixed line, cut the tonight part off.
+        var lines=String(result[key]).split('\n').map(function(l){if(!TONIGHT.test(l))return l;var cut=l.split(/\s*[—–;]\s*|,\s+/).filter(function(x){return !TONIGHT.test(x);}).join(', ').trim();return /[a-z]{4}/i.test(cut.replace(/^[•\-\s]+/,''))&&cut.replace(/^[•\-\s]+/,'').length>25?cut:'';}).filter(function(l){return l.trim();});
+        el.value=lines.join('\n').trim();el.dispatchEvent(new Event('input'));}});
       v26Toast('Weekly Review filled — edit it, then tap Save Review to keep it');
     }catch(e){alert('The AI response could not be placed into the Review fields. Please try again.');}
     btn.disabled=false;btn.innerHTML=original;
