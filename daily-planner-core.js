@@ -435,6 +435,8 @@ function load(){
     const pjc=document.getElementById('prepJournalCheck');if(pjc)pjc.checked=!!d.prepJournalCheck;
     // Text fields
     TXS.forEach(id=>{const e=document.getElementById(id);if(e)e.value=d[id]||'';});
+    // Meds: today's line starts as "HCTZ, Vitamins" (your daily ones) — change or clear it any time; it's only filled when empty.
+    try{const mv=document.getElementById('wMedsVal'),mk='medsAuto_'+dk(today);if(mv&&!d.wMedsVal&&dk(today)===dk(new Date())&&!localStorage.getItem(mk)){mv.value='HCTZ, Vitamins';localStorage.setItem(mk,'1');setTimeout(function(){try{save();}catch(eM){}},0);}}catch(eMeds){}
     NMS.forEach(id=>{const e=document.getElementById(id);if(e)e.value=d[id]||'';});
     const dailyMassage=document.getElementById('dailyMassageMinutes');if(dailyMassage)dailyMassage.value=d.exMassageMinutes||'';
     const jcEl=document.getElementById('jCombined');if(jcEl)jcEl.value=buildJournalCombined();
