@@ -2000,7 +2000,7 @@ function applyPhoneDayReview(){
     window.bsPhoneReview(k,function(o){
       if(!o||dk(today)!==k||!empty())return;
       var map={wins:'dayRevWins',improve:'dayRevImprove',focus:'dayRevFocus',lessons:'dayRevLessons'};
-      Object.keys(map).forEach(function(f){var e=document.getElementById(map[f]);if(e&&o[f]){e.value=String(o[f]).trim();autoGrowReviewField(e);}});
+      Object.keys(map).forEach(function(f){var e=document.getElementById(map[f]);if(e&&o[f]){e.value=noTonightOutput(o[f]);autoGrowReviewField(e);}});
       saveDayReview(true);try{localStorage.setItem(flag,'1');localStorage.setItem('autoDayRev_'+k,'phone');}catch(e){}
       if(typeof v26Toast==='function')v26Toast('🌙 Day Review filled from BeyondStride');
     });
@@ -2008,6 +2008,8 @@ function applyPhoneDayReview(){
 }
 function clearDayReview(){
   if(!confirm('Clear today\'s AI Review (Wins, What to Improve, Focus, Lessons)?'))return;
+  // Cleared on purpose: don't refill it from the phone's backup copy.
+  try{localStorage.setItem('bsPhoneRev_'+dk(today),'cleared');}catch(eC){}
   DAY_REV_IDS.forEach(function(id){const e=document.getElementById(id);if(e){e.value='';autoGrowReviewField(e);}});
   saveDayReview();
 }
