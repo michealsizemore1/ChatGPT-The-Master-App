@@ -1849,14 +1849,23 @@ function getReviewWeekJournalText(){
   }
   return entries.join('\n');
 }
+// Tonight's to-dos (bedtime, bedtime snack…) belong to the Evening Report — the Day and Weekly reviews leave them out,
+// both from what the AI reads and from what it writes (in a mixed line only the tonight part is cut).
+var REVIEW_TONIGHT=/lights?[- ]?out|bed ?time|before bed|go(ing)? to bed|to bed early|bedtime snack|recovery snack|evening snack|lay out (your )?gear|sleep tonight/i;
+function noTonightInput(t){return String(t||'').split('\n').filter(function(l){return !REVIEW_TONIGHT.test(l);}).join('\n');}
+function noTonightOutput(t){
+  return String(t||'').split('\n').map(function(l){
+    if(!REVIEW_TONIGHT.test(l))return l;
+    var cut=l.split(/\s*[—–;]\s*|,\s+/).filter(function(x){return !REVIEW_TONIGHT.test(x);}).join(', ').trim(),body=cut.replace(/^[•\-\s]+/,'');
+    return body.length>12?cut:'';
+  }).filter(function(l){return l.trim();}).join('\n').trim();
+}
 function aiFillEntireReview(btn){
   if(!journalAIKey()){alert('Add your Anthropic API key in Settings first.');return;}
   const ws=wkStart(revOff2),we=new Date(ws);we.setDate(ws.getDate()+6);
   // BeyondStride's day-by-day training / nutrition / recovery for the week (read-only), fetched first.
   if(typeof window.bsReviewFetch==='function'&&!btn.__bsReady){btn.disabled=true;window.bsReviewFetch(dk(ws),dk(we),function(t){btn.__bsText=t||'';btn.__bsReady=true;btn.disabled=false;aiFillEntireReview(btn);});return;}
-  // Tonight's to-dos belong to the Evening Report — keep them out of the review (what the AI reads and what it writes).
-  const TONIGHT=/lights?[- ]?out|bed ?time|before bed|go(ing)? to bed|to bed early|bedtime snack|recovery snack|evening snack|lay out (your )?gear|sleep tonight/i;
-  const bsText=String(btn.__bsText||'').split('\n').filter(function(l){return !TONIGHT.test(l);}).join('\n');btn.__bsReady=false;btn.__bsText='';
+  const bsText=noTonightInput(btn.__bsText);btn.__bsReady=false;btn.__bsText='';
   const weekLabel=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' - '+we.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
   const journal=getReviewWeekJournalText();
   const injuries=reviewInjuryText();
@@ -1866,7 +1875,7 @@ function aiFillEntireReview(btn){
     +'{"wins":"","improve":"","focus":"","lessons":""}\n\n'
     +'Writing requirements:\n- wins: 2-4 specific achievements or positive patterns\n- improve: 2-4 constructive, realistic improvements\n- focus: 1-3 specific priorities for next week\n- lessons: 2-4 concise takeaways from the week\n'
     +'Use short bullet-style lines inside each string. Do not invent events or accomplishments. If information is limited, acknowledge that briefly and make cautious suggestions.\n'
-    +'This is a reflective record of the day, kept for later. The Evening Report on the phone already covers tonight\'s to-dos, so do NOT repeat them: no lights-out / bedtime times, no bedtime or recovery snack, no "drink a glass before bed", no laying out gear. Focus for tomorrow is about the day itself (training, eating habits, work, faith, family), not tonight. Prefer patterns and lessons over restating numbers.\n'
+    +'This is a reflective record of the week, kept for later. Do not include tonight\'s to-dos (lights-out / bedtime times, bedtime or recovery snacks). Prefer patterns across the week and lessons over restating single numbers.\n'
     +'Use numbers exactly as written; never guess or calculate a score that is not given. When the journal and BeyondStride differ, BeyondStride is the watch / app measurement for sleep, HRV, heart rate, runs and food logged.\n\n'
     +'WEEKLY STATISTICS:\n'+(stats||'No statistics available')+'\n\nINJURY REPORT WEEKLY ROLL-UP:\n'+injuries+'\n\nDAILY JOURNAL:\n'+(journal||'No written daily notes available')+'\n\nTRAINING, NUTRITION & RECOVERY BY DAY (BeyondStride app):\n'+(bsText||'Not available')+'\n\nEXISTING REVIEW NOTES:\n'+(current||'None');
   const original=btn.innerHTML;btn.disabled=true;btn.innerHTML='&#x23F3; Filling Review...';
@@ -1876,14 +1885,34 @@ function aiFillEntireReview(btn){
       var start=cleaned.indexOf('{'),end=cleaned.lastIndexOf('}');if(start>=0&&end>=start)cleaned=cleaned.slice(start,end+1);
       var result=JSON.parse(cleaned),map={wins:'revWins',improve:'revImprove',focus:'revFocus',lessons:'revLessons'};
       Object.keys(map).forEach(function(key){var el=document.getElementById(map[key]);if(el&&result[key]!=null){
-        // Drop any line that's still about tonight; in a mixed line, cut the tonight part off.
-        var lines=String(result[key]).split('\n').map(function(l){if(!TONIGHT.test(l))return l;var cut=l.split(/\s*[—–;]\s*|,\s+/).filter(function(x){return !TONIGHT.test(x);}).join(', ').trim();return /[a-z]{4}/i.test(cut.replace(/^[•\-\s]+/,''))&&cut.replace(/^[•\-\s]+/,'').length>25?cut:'';}).filter(function(l){return l.trim();});
-        el.value=lines.join('\n').trim();el.dispatchEvent(new Event('input'));}});
-      v26Toast('Weekly Review filled — edit it, then tap Save Review to keep it');
-    }catch(e){alert('The AI response could not be placed into the Review fields. Please try again.');}
-    btn.disabled=false;btn.innerHTML=original;
-  },function(err){btn.disabled=false;btn.innerHTML=original;alert('AI error: '+err);});
+        el.value=noTonightOutput(result[key]);el.dispatchEvent(new Event('input'));}});
+      if(btn.__auto){saveReview();v26Toast('🗓️ Weekly Review filled and saved automatically');}
+      else v26Toast('Weekly Review filled — edit it, then tap Save Review to keep it');
+    }catch(e){if(btn.__auto)v26Toast('Automatic Weekly Review: the AI answer could not be read — tap AI Fill Review to try again');else alert('The AI response could not be placed into the Review fields. Please try again.');}
+    weeklyAutoDone(btn);btn.disabled=false;btn.innerHTML=original;
+  },function(err){var a=btn.__auto;weeklyAutoDone(btn);btn.disabled=false;btn.innerHTML=original;if(a)v26Toast('Automatic Weekly Review: AI error — '+err);else alert('AI error: '+err);});
 }
+// 🗓️ Automatic Weekly Review: on Sunday (the last day of the week), at the same time as the Day Review (5 minutes before
+// the Evening Report, or once tonight's report was asked for early), fill and save this week's review when it's empty.
+// If the Command Center wasn't open then, last week's empty review is filled the next time it's opened.
+// A review you've written yourself is never replaced; each week is done once.
+function weeklyAutoDone(btn){if(!btn.__auto)return;btn.__auto=false;if(typeof btn.__restore==='number'){revOff2=btn.__restore;btn.__restore=null;try{renderReview();}catch(e){}}}
+function autoWeeklyReviewCheck(){
+  try{
+    if(!journalAIKey())return;
+    var btn=document.getElementById('aiFillReviewBtn');if(!btn||btn.disabled||btn.__auto)return;
+    var now=new Date(),mins=now.getHours()*60+now.getMinutes();
+    var ev=window.bsEvening&&window.bsEvening.date===dk(now)?window.bsEvening:null,at=(ev&&ev.time>0?ev.time:23*60)-5;
+    var offs=[-1];if(now.getDay()===0&&(mins>=at||(ev&&ev.early)))offs.unshift(0);
+    for(var i=0;i<offs.length;i++){
+      var off=offs[i],wk=dk(wkStart(off)),flag='autoWeekRev_'+wk;if(localStorage.getItem(flag))continue;
+      var rv={};try{rv=JSON.parse(localStorage.getItem('review_'+wk)||'{}')||{};}catch(e){}
+      if(['revWins','revImprove','revFocus','revLessons'].some(function(id){return String(rv[id]||'').trim();})){localStorage.setItem(flag,'written');continue;}
+      localStorage.setItem(flag,'auto');btn.__restore=revOff2;revOff2=off;renderReview();btn.__auto=true;aiFillEntireReview(btn);return;
+    }
+  }catch(e){}
+}
+setInterval(autoWeeklyReviewCheck,60000);setTimeout(autoWeeklyReviewCheck,20000);
 function getDayActivityNotesText(d){
   const dateKey=dk(d);
   function normalizedDate(value){const text=String(value||'').trim(),match=text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);if(match)return match[3]+'-'+match[1].padStart(2,'0')+'-'+match[2].padStart(2,'0');return text.slice(0,10);}
@@ -2007,7 +2036,7 @@ function aiFillEntireDayReview(btn){
   if(!journalAIKey()){alert('Add your Anthropic API key in Settings first.');return;}
   // BeyondStride's training / nutrition / recovery summary for the day (read-only), fetched first.
   if(typeof window.bsReviewFetch==='function'&&!btn.__bsReady){var _k=dk(today);btn.disabled=true;window.bsReviewFetch(_k,_k,function(t){btn.__bsText=t||'';btn.__bsReady=true;btn.disabled=false;aiFillEntireDayReview(btn);});return;}
-  const bsText=btn.__bsText||'';btn.__bsReady=false;btn.__bsText='';
+  const bsText=noTonightInput(btn.__bsText);btn.__bsReady=false;btn.__bsText='';
   const dayLabel=today.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric',year:'numeric'});
   const journal=getDayJournalText(today);
   const current=['dayRevWins','dayRevImprove','dayRevFocus','dayRevLessons'].map(function(id){var el=document.getElementById(id);return el&&el.value.trim()?id+': '+el.value.trim():'';}).filter(Boolean).join('\n');
@@ -2015,6 +2044,7 @@ function aiFillEntireDayReview(btn){
     +'{"wins":"","improve":"","focus":"","lessons":""}\n\n'
     +'Writing requirements:\n- wins: 1-3 specific achievements or positive moments from today\n- improve: 1-3 constructive, realistic improvements\n- focus: 1-2 specific priorities for tomorrow\n- lessons: 1-3 concise takeaways from today\n'
     +'Use short bullet-style lines inside each string. Do not invent events or accomplishments. If information is limited, acknowledge that briefly and make cautious suggestions.\n'
+    +'This is a reflective record of the day, kept for later. The Evening Report on the phone already covers tonight\'s to-dos, so do NOT repeat them: no lights-out / bedtime times, no bedtime or recovery snack, no "drink a glass before bed", no laying out gear. Focus for tomorrow is about the day itself (training, eating habits, work, faith, family), not tonight. Prefer patterns and lessons over restating numbers.\n'
     +'Use numbers exactly as written; never guess or calculate a score that is not given (HRV in ms is not a readiness score). When the journal and BeyondStride give different numbers (for example sleep), BeyondStride is the watch / app measurement for sleep, HRV, heart rate, runs and food logged; mention both only if the difference matters.\n'
     +(dk(today)===dk(new Date())?'It is now '+new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})+' and the day is not over: a planned workout not done yet is still to do today (not missed), and food totals are only so far.\n\n':'\n')
     +'DAILY JOURNAL:\n'+(journal||'No written journal notes available for today')
@@ -2025,7 +2055,7 @@ function aiFillEntireDayReview(btn){
       var cleaned=String(text||'').trim().replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'');
       var start=cleaned.indexOf('{'),end=cleaned.lastIndexOf('}');if(start>=0&&end>=start)cleaned=cleaned.slice(start,end+1);
       var result=JSON.parse(cleaned),map={wins:'dayRevWins',improve:'dayRevImprove',focus:'dayRevFocus',lessons:'dayRevLessons'};
-      Object.keys(map).forEach(function(key){var el=document.getElementById(map[key]);if(el&&result[key]!=null){el.value=String(result[key]).trim();el.dispatchEvent(new Event('input'));}});
+      Object.keys(map).forEach(function(key){var el=document.getElementById(map[key]);if(el&&result[key]!=null){el.value=noTonightOutput(result[key]);el.dispatchEvent(new Event('input'));}});
       if(btn.__auto){saveDayReview(true);v26Toast('🌙 Day Review filled and saved automatically for tonight');}
       else v26Toast('Day Review filled — edit it, then tap Save Review to keep it');
     }catch(e){if(btn.__auto)v26Toast('Automatic Day Review: the AI answer could not be read — tap AI Fill Day Review to try again');else alert('The AI response could not be placed into the Review fields. Please try again.');}
