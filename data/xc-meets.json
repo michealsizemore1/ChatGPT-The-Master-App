@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-12T20:07:00+00:00",
+  "updatedAt": "2026-11-13T01:56:33+00:00",
   "source": "Google News searches for cross country meet results",
   "page": "https://michealsizemore1.github.io/ChatGPT-The-Master-App/cross-country.html",
   "meets": [
@@ -59,9 +59,27 @@
   "results": [
     {
       "date": "2026-11-12",
+      "headline": "Follow the 2026 NCAA Midwest Cross Country Regional Live Results, Scoreboard Tracker",
+      "source": "World-Track",
+      "url": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxQWTc3ZWVCSXdKX2dZaENsckR2a3JnTmVnOVlMdUxCVTZvXzRMLU1lZkM0NkJaMFZtcF9zaTVsRVBrNTEwSS1raC1ZVFBITVduTlpOSUJwazJWRFlWT1lGZVVXcm1XblBtRlQ1Wm54dmdDQXZJNENmRzVYNzJUMzhkS0RoZ0ttTi00WDZDNmowVFZPY01GRHhScC1ydW5STFA5R3B2cGl2X0s?oc=5"
+    },
+    {
+      "date": "2026-11-12",
+      "headline": "UTSA to compete at NCAA South Central Regional Cross Country Championships",
+      "source": "UTSA Athletics",
+      "url": "https://news.google.com/rss/articles/CBMirgFBVV95cUxPeEstWVVsQ2lOOHJGSkNxVFk2NGw1R2E2bk56SHVFQVhhTkx5RDBWQ0R2VXkydmdTanowWVBjNDV2amxmYXM4amF3MVZpZ2tsMnlYRUd5M0dHZ0I3WVUtbG9JeWZQYTBSZ013bWFnTG5uTG4yRlptWGY2djRDaDJRak5sXzZzSTNMVjJXdmRWSmh4Rm5iRWlVbktRWkg3cmthWi1FdWlfRllRSkwydHc?oc=5"
+    },
+    {
+      "date": "2026-11-12",
       "headline": "Lobos Host NCAA Mountain Regional XC Championships Friday at the North Course",
       "source": "New Mexico Lobos",
       "url": "https://news.google.com/rss/articles/CBMidEFVX3lxTFBSenBMZW1PQ0YzbWxlMDQ3NHhYM0JaeEJMOC1zeU9uZ1F0TmlWZHVUYllKWWl3NnREenhnQk16dHZkbGhsMDZrekRkTktDWDNFb2xBbWI2Nkh6Mkh1X045WFFvOURVLUgwNWItcFNlUUkteWFf?oc=5"
+    },
+    {
+      "date": "2026-11-12",
+      "headline": "Bears Set for NCAA South Central Cross Country Championship",
+      "source": "University of Central Arkansas Athletics",
+      "url": "https://news.google.com/rss/articles/CBMivgFBVV95cUxNWUF6d2FNVHJvc1JTN1Rid2hmOXVkcXI5dlhWTTYwOWF4YWdkME5CNkpOajg3czZvWkoydlotTXB0REVPZ3BIOExWZUV6TGFRRmJoV1U3MW1NSDUwMjh5ZFVBV0phd1JURDd5ZEdGUWdWMTZnN19rbko4LWRmV1dwVnJtaWJxNkVEa00wQ3lXbWU2QUxnMmVma29yZTREeDc1TDAyS0NlaU9jSlhWOVo5Z3h3bjZKVnlnMXZ4cURR?oc=5"
     },
     {
       "date": "2026-11-12",
@@ -86,12 +104,6 @@
       "headline": "Top DI cross country individual championship contenders entering regionals",
       "source": "NCAA.com",
       "url": "https://news.google.com/rss/articles/CBMi1gFBVV95cUxPcElMZ1QxWUY5ZVRUSU42TFhPa29WRDJpcVRKVmNtdUh5b2dUNzNkazVsUEx4Z0hzSU14b2NOQXVwMDZqLUJWeHdvblJPWDgwXzJMSXdJeTNiZUdLM0hsSEF1c1NMWUpSNWtJWURmT0xGMElQWTNyUWI5MEJxcE82aDZpZVU5SnZsT1o5NXZEcFc2TnIzak5uZkJDbW9SWlJyZkVYU0xBejBqVlZNLV82Z2hwaVUxYm9KVlhiMk9ncnJyWllCTHF6dU1iYVItYTBEb1V2MVVR0gHbAUFVX3lxTFBuOHN6dFAzdDRLNXM1ZWxBYnFhV3ZCZXBaeXYzUXlJdGdRb1FkS21Dd2RHOGswQU5wRENrOXRrYy0yTC1INmV6bkt4TWZ2UHgydnV1MEhwVTJfaHBYN0RJd1psT2tzODB3Q21PMGkwZXVVX2dnOE5NT2xHSHU4YnZBQ2JBc01iWGNUU2J0NDRCRnhFV3d4OFZTdjJ2VzY2M3I1QXF4Y3NQc1pVUks5X2pNUmpmYzBsT1NUckJ6VVNFanJHbTVMSFY2RkNQM1pHQ2x6SldETWFkYi1FYw?oc=5"
-    },
-    {
-      "date": "2026-11-09",
-      "headline": "Ryu Medina, Ashley Galaz lead local runners at NMAA State XC Championships",
-      "source": "Las Cruces Sun-News",
-      "url": "https://news.google.com/rss/articles/CBMixwFBVV95cUxQNDJGOW9Wejg5SGlfOTFEVDgxSXotWHJEMEdpcjEzNm00X21oaTNScUthMXlXbUpWVlVoV2o4dFlacFVSRkZlUjlCcGVPMlBUM1hCMnhXLThOS3otTW4xYU9jRUpaY3JJRkMzMVQtVlBnNklYNEdGNFlldUtxS1BETVlDbURjaEY5elQ1YzRKZW1VaVZaVlNDTHU3TmF4ZmNSUm5aV2lLSWhUMi1XZEVyQVBoc0MzSkRIUUhfN21oa2VXcDc4MGVv?oc=5"
     },
     {
       "date": "2026-11-08",
@@ -120,8 +132,8 @@
     {
       "date": "2026-11-02",
       "headline": "Jane Hedengren, BYU women win Big 12 cross country conference championship; BYU men place third",
-      "source": "Yahoo Sports",
-      "url": "https://news.google.com/rss/articles/CBMigwFBVV95cUxQSEtfcmNwckZ6QVFRckNxc0ZZQWs4V01NZjc1Rk1hNGJCVVl3QnNIUm90M0xFby1NSEROekl4amFRX1JSUDU2WnAxWUN0cGo4dkw2dlN2WUR0dDc1OGFxdjZYVzJJZWQ4d3JuUnFqclNucEVzaHZFeHl3XzRhdWMxbkU3QQ?oc=5"
+      "source": "Deseret News",
+      "url": "https://news.google.com/rss/articles/CBMisgFBVV95cUxQSlEwaGxDRFkycjMxLVdxTk9sWlBDZndvSGFmdl8yazlNc3hHb1VLTDR1VE9uaUZVYjluZ0VXOVU4alpuQl9wemIyRldoWndrcDdvaWtmQXRoQzJkbGxqWGVnSEpidWVtaVVSTzdQTEpFRVU3WnNsbVpfZU04d2R6Q0lsSUdGb1FZcVBhdkEya2hqbzh6MktNdVVEVnRpRlRYQWNISFdjeVRrUWRtaWtJSjd3?oc=5"
     },
     {
       "date": "2026-10-31",
@@ -134,18 +146,6 @@
       "headline": "American Cross Country Championships Return To New Orleans",
       "source": "American Conference",
       "url": "https://news.google.com/rss/articles/CBMipgFBVV95cUxNTnJsVFZ3WExyRUdxNzN3MzRxZkhpYmxpUHZkQk1zZWgwamMwb2RieHNSOENZbW5wOS13a3pBbU5XeW1RUFhvZHVtdlBEMUpHb2phU2dZcVdodFBDd1Q0cWJjdkkxSUUxSXRGQW9USXpkNHQ1Z3dJT1ZqZjliMkhXUEs0ZGVVbjRmMHpGaVRUVHRtZUVUU2Z5dlNHVVBUdzZrUmFxUkt3?oc=5"
-    },
-    {
-      "date": "2026-10-30",
-      "headline": "2026 Big Sky Cross Country Championships",
-      "source": "Big Sky Conference",
-      "url": "https://news.google.com/rss/articles/CBMiVEFVX3lxTE92NVpfc3EweEZzb2Y1X1BlZ19FZlcyWGdEbmZEOHFDdFl4MzRsNmFMS1EzY0RLRUFsZWZ0OHJiMHVzX1dQdVVHVUhSYW9rcXJtQ0JWQw?oc=5"
-    },
-    {
-      "date": "2026-10-30",
-      "headline": "Rachael Withrow Wins Gold, Becomes Second Women’s XC Conference Champion in Program History",
-      "source": "Marshall University Athletics",
-      "url": "https://news.google.com/rss/articles/CBMi1wFBVV95cUxQQ1V0QU5Za2FZbzllWW8tNWhLOWszbEtTZ2FMUjgxWjN6UTVlZ2hLbG5VSS1BdG5kS3Q3UjBTeFZUcXRmUGE1RThlcnctRU5wQ2paWmpSZGludmpzbkRyeHJYc0hoWGlZQWc5c1hJcEk2VWtLZ20wcEZwUXVFdzhvY1hRXzhIeXFXbFBqNnpBRGpMLVVoWFZuSmU2OHcwc3J5ZTVPS19PS3B5Zjd2RURJZjgxc3FoejRoa29PbHpuai1WQTR4X0FsZ2otdl9qYUdEM0FtWDJXQQ?oc=5"
     }
   ]
 }
