@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-13T01:56:33+00:00",
+  "updatedAt": "2026-11-13T11:14:27+00:00",
   "source": "Google News searches for cross country meet results",
   "page": "https://michealsizemore1.github.io/ChatGPT-The-Master-App/cross-country.html",
   "meets": [
@@ -58,6 +58,18 @@
   ],
   "results": [
     {
+      "date": "2026-11-13",
+      "headline": "South Region NCAA Cross Country Championships Box Numbers",
+      "source": "world-track.org",
+      "url": "https://news.google.com/rss/articles/CBMilAFBVV95cUxOdHlpZEljUm5kRjYtdGhLR0RyZ1BkZWlLbEhxZnoycWlULXNPQVc5NUM4eTI5bkpYMlRTSWNsMzhDTDA1cW12WVN0QzNId3M1N1V5T3VhTHVFOGFFVTh1ZXJ4eklaT3A3OFV3M3k3M2RlMi1BRDBETUVoVV9BbHIxVkU3OFVyblIxTjhBd1pCSTE3Wndp?oc=5"
+    },
+    {
+      "date": "2026-11-13",
+      "headline": "Northern Section cross country champions are crowned",
+      "source": "Record Searchlight",
+      "url": "https://news.google.com/rss/articles/CBMiwgFBVV95cUxQN3NpWENUc3hDbldvS250RDZZS3B3ZGdZSGRhZnZEM1VYUTN5Y0IyckZFam56QUNNd2k5WUt5TTJIR0pGdlc1Y094Uy12LTI0MDIzZklsUVlMV2xQdDd5RTZYVGtXa1hoVFZDTjdCd3cwV3YzVDQ4SEI2V0tNZ21ra0ZON2toNllzYzUyN1g2X3Z5RmhGRS03YjJVbkNESDBZN2pnbGR2aHQzRkZYd1JIaXJZOGhOSWxqS1NLMGcwbTh0dw?oc=5"
+    },
+    {
       "date": "2026-11-12",
       "headline": "Follow the 2026 NCAA Midwest Cross Country Regional Live Results, Scoreboard Tracker",
       "source": "World-Track",
@@ -71,15 +83,15 @@
     },
     {
       "date": "2026-11-12",
-      "headline": "Lobos Host NCAA Mountain Regional XC Championships Friday at the North Course",
-      "source": "New Mexico Lobos",
-      "url": "https://news.google.com/rss/articles/CBMidEFVX3lxTFBSenBMZW1PQ0YzbWxlMDQ3NHhYM0JaeEJMOC1zeU9uZ1F0TmlWZHVUYllKWWl3NnREenhnQk16dHZkbGhsMDZrekRkTktDWDNFb2xBbWI2Nkh6Mkh1X045WFFvOURVLUgwNWItcFNlUUkteWFf?oc=5"
+      "headline": "XC Central: 2026 NCAA South Region Championships",
+      "source": "University of Tennessee Athletics",
+      "url": "https://news.google.com/rss/articles/CBMinwFBVV95cUxObXFXYjY4NzBnemRFZkNreFlIY1o5TFJ5LUZTSU83YTZiSVg5TThsTDlaZmtpRUVRemZraGRFa3lhUVo0a0Z3T0x0TzJfUFpTZUZpZk5QbGdzM1BhOXFuVFBRdzN0TGlhUkJqY25oNWIzbDRfZ3JBcE5mclhlb2FyamItWTZkZmpWR1BjRUlkbF9JV21rVG9VZDktdnFCVDA?oc=5"
     },
     {
       "date": "2026-11-12",
-      "headline": "Bears Set for NCAA South Central Cross Country Championship",
-      "source": "University of Central Arkansas Athletics",
-      "url": "https://news.google.com/rss/articles/CBMivgFBVV95cUxNWUF6d2FNVHJvc1JTN1Rid2hmOXVkcXI5dlhWTTYwOWF4YWdkME5CNkpOajg3czZvWkoydlotTXB0REVPZ3BIOExWZUV6TGFRRmJoV1U3MW1NSDUwMjh5ZFVBV0phd1JURDd5ZEdGUWdWMTZnN19rbko4LWRmV1dwVnJtaWJxNkVEa00wQ3lXbWU2QUxnMmVma29yZTREeDc1TDAyS0NlaU9jSlhWOVo5Z3h3bjZKVnlnMXZ4cURR?oc=5"
+      "headline": "Lobos Host NCAA Mountain Regional XC Championships Friday at the North Course",
+      "source": "New Mexico Lobos",
+      "url": "https://news.google.com/rss/articles/CBMidEFVX3lxTFBSenBMZW1PQ0YzbWxlMDQ3NHhYM0JaeEJMOC1zeU9uZ1F0TmlWZHVUYllKWWl3NnREenhnQk16dHZkbGhsMDZrekRkTktDWDNFb2xBbWI2Nkh6Mkh1X045WFFvOURVLUgwNWItcFNlUUkteWFf?oc=5"
     },
     {
       "date": "2026-11-12",
@@ -134,18 +146,6 @@
       "headline": "Jane Hedengren, BYU women win Big 12 cross country conference championship; BYU men place third",
       "source": "Deseret News",
       "url": "https://news.google.com/rss/articles/CBMisgFBVV95cUxQSlEwaGxDRFkycjMxLVdxTk9sWlBDZndvSGFmdl8yazlNc3hHb1VLTDR1VE9uaUZVYjluZ0VXOVU4alpuQl9wemIyRldoWndrcDdvaWtmQXRoQzJkbGxqWGVnSEpidWVtaVVSTzdQTEpFRVU3WnNsbVpfZU04d2R6Q0lsSUdGb1FZcVBhdkEya2hqbzh6MktNdVVEVnRpRlRYQWNISFdjeVRrUWRtaWtJSjd3?oc=5"
-    },
-    {
-      "date": "2026-10-31",
-      "headline": "California Baptist Men, Utah Valley Women Capture Team Titles at 2026 Big West Cross Country Championships",
-      "source": "The Big West",
-      "url": "https://news.google.com/rss/articles/CBMiuAJBVV95cUxQLWl4OXAwZTJMZnlsX2tOSFNaZEwzdi1vYkIzNW04ZkJwQ2FTd2RQSU05X01aQ2ZsZVRrN3Yxb0RxWjM4MVF2Ml84Q2U5V0QzYkRhOXVGd3RkWVVmcUtZaDVWbXVIOVlvTnZjWUdmak1yeXFNWHlRdmJESUZjb21rbGYzbjhqOUdsclZVYTlxQWVpc3czNWRhQ2pERE1GQXhjMmRDNnJiUlRyRUt6QlRUU1p4SUFWUmZZZ2dwa1JHbmFBckEzaFoxMzd1enNRbmtFTnF4R1hWMnQ4c2NyMWhfRDBDOTJOdU5IaWlzWndISnJqc3Z3a01PNUZZSkEzRzNNdi05Sk5fMlVnNUt5b2UteUljN1dPY2o3cDB2Ry1lUFN1QXZGUWlxU3FjNWpydUNhMGVBVVd0dTE?oc=5"
-    },
-    {
-      "date": "2026-10-30",
-      "headline": "American Cross Country Championships Return To New Orleans",
-      "source": "American Conference",
-      "url": "https://news.google.com/rss/articles/CBMipgFBVV95cUxNTnJsVFZ3WExyRUdxNzN3MzRxZkhpYmxpUHZkQk1zZWgwamMwb2RieHNSOENZbW5wOS13a3pBbU5XeW1RUFhvZHVtdlBEMUpHb2phU2dZcVdodFBDd1Q0cWJjdkkxSUUxSXRGQW9USXpkNHQ1Z3dJT1ZqZjliMkhXUEs0ZGVVbjRmMHpGaVRUVHRtZUVUU2Z5dlNHVVBUdzZrUmFxUkt3?oc=5"
     }
   ]
 }
