@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-14T18:17:30+00:00",
+  "updatedAt": "2026-11-14T22:34:17+00:00",
   "source": "Google News searches for cross country meet results",
   "page": "https://michealsizemore1.github.io/ChatGPT-The-Master-App/cross-country.html",
   "meets": [
@@ -57,6 +57,18 @@
     }
   ],
   "results": [
+    {
+      "date": "2026-11-14",
+      "headline": "SUNY Geneseo Sweeps as Empire 8 Student-Athletes Excel at 2026 NCAA Cross Country Regionals",
+      "source": "Empire 8 Athletic Conference",
+      "url": "https://news.google.com/rss/articles/CBMi5gFBVV95cUxNVGNiNU1Kd29Sa3JtbnFqbHFIeU1uaEtqdGM2WFVxV25EZW14SkgtSGE2RTlUNEpYZ2o2MnA4eW5BVEptY2x4dVlOcmc3dVgzUG1QWWxWQ2Vmd1RMSnRwNW5RbWZQazYtcUtqSXpsWi1vcENBX3dyanZtOUxOWlo3MEliNDBvdWE1ZXhodV9hWHIzWXRxM1lfTnhKZGxIVmRjWHRxSU1XS192NEJoUnZ6UzY4TkxueG5reXIwTXVkUGRoM1RTbFBqaDFDQVF3X0hhQnVwYVhrYlUtWXVYNEQ4LVc3OUVIdw?oc=5"
+    },
+    {
+      "date": "2026-11-14",
+      "headline": "Ocean's Starkey wins cross country Meet of Champions in record time",
+      "source": "Asbury Park Press",
+      "url": "https://news.google.com/rss/articles/CBMi3AFBVV95cUxOLVEyZ3FtbmppV2d1SWlzZ3ZmUzFNR1V0TklUaGJlRUNTc1RqYWFMaG5ULTdCRl9lRHVnTm5lMFNvNFlGbEJTQ0dYa3BSeTVBZlV6WTdpZGxlalBPR1d4YmsyWWM2eklPYjh2TnZ3YXJMaGluUDlqWlBPa3pHREhTZWljd1Y5RzBWVlZMRXR0enpCb1RFNkI2VzdacnNWZjdIc0YyMEI2RVU3dWpqWFRqZDg2OUxMR2RrN1FMYURtaktTZzd1UXFqb21pTEt5Y1ZmUlhmdGZySTFzRDR1?oc=5"
+    },
     {
       "date": "2026-11-14",
       "headline": "Cross country - Check out results from the state public school meet",
@@ -134,18 +146,6 @@
       "headline": "NCAA Southeast Regional Cross Country 2026 Results: NC State and Wake Forest Qualify for Nationals",
       "source": "World-Track",
       "url": "https://news.google.com/rss/articles/CBMiiwFBVV95cUxPNnhQSXNZWWJPQS05WHUwQ1lWVkhTNjVNemRMSlozaGE1cmpKdmZFdlQ0cUFGaUpwLUJYRHNJdXJNQ0lENGczR2VWVVZtcXpDUzRsOXhadTBVUWdyMndIZ2FUdGdKMmJmVXVNWl9uMmY1Rmw4NUR5WHZPMW1BNld0RThMZ3FIZWRMeW1v?oc=5"
-    },
-    {
-      "date": "2026-11-13",
-      "headline": "Cross Country Captures Six All-Region Honors",
-      "source": "Seminoles.com",
-      "url": "https://news.google.com/rss/articles/CBMiigFBVV95cUxOb203ejQyTjAzRmFaV25BWDQzV0czWjJuZ0NVc1dfTU12bU1wejNjT28wYmRBc2o0R3licXZ4UjZJYXhDZ19HWExhQmprRzMtTTZYMEhZM1NnamhnbmdDMWktZTdMSS1VTWhHaU9lNXdOeEFJcDBHOHJIeTVBQjFscnlxUVhxSzYtcXc?oc=5"
-    },
-    {
-      "date": "2026-11-12",
-      "headline": "UTSA to compete at NCAA South Central Regional Cross Country Championships",
-      "source": "UTSA Athletics",
-      "url": "https://news.google.com/rss/articles/CBMirgFBVV95cUxPeEstWVVsQ2lOOHJGSkNxVFk2NGw1R2E2bk56SHVFQVhhTkx5RDBWQ0R2VXkydmdTanowWVBjNDV2amxmYXM4amF3MVZpZ2tsMnlYRUd5M0dHZ0I3WVUtbG9JeWZQYTBSZ013bWFnTG5uTG4yRlptWGY2djRDaDJRak5sXzZzSTNMVjJXdmRWSmh4Rm5iRWlVbktRWkg3cmthWi1FdWlfRllRSkwydHc?oc=5"
     }
   ]
 }
