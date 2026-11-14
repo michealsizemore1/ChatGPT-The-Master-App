@@ -1893,7 +1893,7 @@ function aiFillEntireReview(btn){
   },function(err){var a=btn.__auto;weeklyAutoDone(btn);btn.disabled=false;btn.innerHTML=original;if(a)v26Toast('Automatic Weekly Review: AI error — '+err);else alert('AI error: '+err);});
 }
 // 🗓️ Automatic Weekly Review: on Sunday (the last day of the week), at the same time as the Day Review (5 minutes before
-// 10:55 PM), fill and save this week's review when it's empty.
+// 11:50 PM), fill and save this week's review when it's empty.
 // If the Command Center wasn't open then, last week's empty review is filled the next time it's opened.
 // A review you've written yourself is never replaced; each week is done once.
 function weeklyAutoDone(btn){if(!btn.__auto)return;btn.__auto=false;if(typeof btn.__restore==='number'){revOff2=btn.__restore;btn.__restore=null;try{renderReview();}catch(e){}}}
@@ -1902,7 +1902,7 @@ function autoWeeklyReviewCheck(){
     if(!journalAIKey())return;
     var btn=document.getElementById('aiFillReviewBtn');if(!btn||btn.disabled||btn.__auto)return;
     var now=new Date(),mins=now.getHours()*60+now.getMinutes();
-    var ev=window.bsEvening&&window.bsEvening.date===dk(now)?window.bsEvening:null,at=(ev&&ev.time>0?ev.time:23*60)-5;
+    var ev=window.bsEvening&&window.bsEvening.date===dk(now)?window.bsEvening:null,at=REVIEW_AT;
     var offs=[-1];if(now.getDay()===0&&(mins>=at||(ev&&ev.early)))offs.unshift(0);
     for(var i=0;i<offs.length;i++){
       var off=offs[i],wk=dk(wkStart(off)),flag='autoWeekRev_'+wk;if(localStorage.getItem(flag))continue;
@@ -1991,7 +1991,7 @@ function renderDayReview(){
   setTimeout(applyPhoneDayReview,raw?0:1500);
 }
 // 🌙 Backup: when a day's review is still empty, fill it (once) from the one BeyondStride wrote on the phone just before
-// 10:55 PM — so it's there even if the Command Center wasn't open that night.
+// 11:50 PM — so it's there even if the Command Center wasn't open that night.
 function applyPhoneDayReview(){
   try{
     var k=dk(today),flag='bsPhoneRev_'+k;if(localStorage.getItem(flag)||typeof window.bsPhoneReview!=='function')return;
@@ -2064,15 +2064,16 @@ function aiFillEntireDayReview(btn){
     btn.__auto=false;btn.disabled=false;btn.innerHTML=original;
   },function(err){var a=btn.__auto;btn.__auto=false;btn.disabled=false;btn.innerHTML=original;if(a)v26Toast('Automatic Day Review: AI error — '+err);else alert('AI error: '+err);});
 }
-// 🌙 Automatic Day Review: at 10:55 PM (formerly tied to BeyondStride's evening report, now removed; still 10:55 PM by
-// default — or right away once you've asked for tonight's report early), fill and save today's review when it's empty.
+// 🌙 Automatic Day Review at 11:50 PM (catches almost the whole day — on an early night, tap AI Fill Day Review
+// yourself): fill and save today's review when it's empty.
 // Runs while the Command Center is open, or the first time it's opened after that time (same day). A review you've
 // written yourself is never replaced.
+var REVIEW_AT=23*60+50;   // also used by the automatic Weekly Review (Sunday)
 function autoDayReviewCheck(){
   try{
     var now=new Date(),k=dk(now);if(dk(today)!==k)return;
     var ev=window.bsEvening&&window.bsEvening.date===k?window.bsEvening:null;
-    var at=(ev&&ev.time>0?ev.time:23*60)-5,mins=now.getHours()*60+now.getMinutes();
+    var at=REVIEW_AT,mins=now.getHours()*60+now.getMinutes();
     if(mins<at&&!(ev&&ev.early))return;
     var flag='autoDayRev_'+k;if(localStorage.getItem(flag))return;
     if(!journalAIKey())return;
