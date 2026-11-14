@@ -159,11 +159,15 @@
     if(!w||typeof dk!=='function'||dk(today)!==k)return;
     var store='bsAutoWellness_'+k,prev={};try{prev=JSON.parse(localStorage.getItem(store)||'{}');}catch(e){}
     var changed=false;
+    // One-time (Nov 14, 2026, asked for): replace today's typed BP / pulse with the average of today's readings,
+    // once the phone sends the averaged value (bpN = how many readings it averaged).
+    var forceBp=k==='2026-11-14'&&w.bpN&&!localStorage.getItem('bsForceBp_'+k);
+    if(forceBp){prev.bp=(document.getElementById('wBPVal')||{}).value||'';prev.pulse=(document.getElementById('wPulseVal')||{}).value||'';try{localStorage.setItem('bsForceBp_'+k,'1');}catch(eF){}}
     Object.keys(FIELDS).forEach(function(f){
       if(w[f]==null||w[f]==='')return;
       var el=document.getElementById(FIELDS[f]);if(!el)return;
       var v=String(w[f]),cur=el.value.trim();
-      if(cur!==''&&cur!==String(prev[f]||''))return;   // typed by hand: leave it
+      if(cur!==''&&cur!==String(prev[f]||'').trim())return;   // typed by hand: leave it
       if(cur!==v){el.value=v;el.dispatchEvent(new Event('input',{bubbles:true}));changed=true;}
       prev[f]=v;
     });
