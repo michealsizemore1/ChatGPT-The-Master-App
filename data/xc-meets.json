@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-14T01:29:27+00:00",
+  "updatedAt": "2026-11-14T10:40:00+00:00",
   "source": "Google News searches for cross country meet results",
   "page": "https://michealsizemore1.github.io/ChatGPT-The-Master-App/cross-country.html",
   "meets": [
@@ -59,6 +59,12 @@
   "results": [
     {
       "date": "2026-11-14",
+      "headline": "Cornejo Qualifies for NCAA XC Championships; Men Place 13th at Regionals, Women 14th",
+      "source": "Cal Poly Athletics",
+      "url": "https://news.google.com/rss/articles/CBMiywFBVV95cUxOUEp6dC1uM0VyUmNVX2NYcEFBRlowVFRZeTJBLUtYVHBVQ3NIdWhaYTc4QWRTWmx5aV9JdjFoY1RsWWYzaUt0M3hFMndIWk51SVdUYmdmVzFqYlMxSkNSVUlsVUYzLTNCaFBuUUFkMlZYVWlHSWxXeEJSM3M0U3phZDByWXdaVm9vUjVUWGZxb0I1YWktR2g1OE1uS3BwMWhQcG1jeENrTWJYSWJoT1RibmNka0xNUnJlVHR5TWhQWHNwMDFVbW5iQlFvYw?oc=5"
+    },
+    {
+      "date": "2026-11-14",
       "headline": "These Are 2026 NCAA Division I Cross Country Championships Automatic Qualifiers",
       "source": "World-Track",
       "url": "https://news.google.com/rss/articles/CBMilgFBVV95cUxPYm9tMEppLVV5VFlhbmJFYkRuQ1BURHp6emgyTkJsa1BxOGN1TjA0Z1VyMjdENi1xaVFYU1ZQb2tBVkQ1blVKaTVSVllOTzlQeC00dWpVSGZ5LWRIeDFoTktJVXEwQk9KRDhySFdlbHdxMTZBUi1NNC1POU44ZFlNdGctbDdjdVpkRGZxWHNHeThSZ0pxVEE?oc=5"
@@ -77,6 +83,12 @@
     },
     {
       "date": "2026-11-13",
+      "headline": "Zag Cross Country takes 6th and 7th team finishes at NCAA West",
+      "source": "Gonzaga University Athletics",
+      "url": "https://news.google.com/rss/articles/CBMingFBVV95cUxPZjZiZ2FKNTFfcFlIQXNEY0NlUXl4RXNDYnBKQ0pqRWFFTDNkM201TFhRUVJLYnpkd01qU1hnblM0cGhRY1l1RGs5ZWRFUEUyOUpfcXZJQjd0TkhCaWNoTmZ0eW1zVHVhMnAyM014ZnRadEx6SVNyb2w4R2I2cDdqa1dMTzVWUmdWWGFHM2dCZEpfYUZnSmRpYVEyZ2dfQQ?oc=5"
+    },
+    {
+      "date": "2026-11-13",
       "headline": "NCAA DI Great Lakes Regional Cross Country 2026 Results: Toledo Qualify for Nationals",
       "source": "World-Track",
       "url": "https://news.google.com/rss/articles/CBMikgFBVV95cUxOTUoxR2RTSHc1blJIaTBjNjFmLXVwdkpFbFJRVS16bHFBb3FKZzg2TTNHM2lrSVJSU1NXQlY1Snpxc0tud1JvZFF0Yy1jeXhRRDFja3B5V0xMUHY3U3Rwb1V6WlNUcWh5d013RGZnazN6WFB3VDFnLVJ1eDdQS3d1Qnc3c1RkQXpLZngxakZ6b0p6QQ?oc=5"
@@ -86,12 +98,6 @@
       "headline": "Strong Showing Places No. 16 Utah Cross Country Fourth at NCAA Mountain Regionals",
       "source": "University of Utah Athletics",
       "url": "https://news.google.com/rss/articles/CBMiuAFBVV95cUxQa0ZzaHZrbGx0QW40VkVFZUt2Y3EycWFLc2V4c3o0TmROTXF0Z2RNMkxodmNZdk4yWWk1c1lXTUlFNWNNeHBzUHExRU1jUmRJRk1mb2NrTzd0QlNzdkJ2bnZvMTN2LW5PWEs5S0k1VlE5TENrODdhdTc3aEU4Qlk0cTROVHpRWnlJVWdxSjhWY041RnJ6bTFPc1dyOHBBcWNFd01Gd1h4aE9MZS1hZWhYcThsZHdOT2o4?oc=5"
-    },
-    {
-      "date": "2026-11-13",
-      "headline": "Zag Cross Country takes 6th and 7th team finishes at NCAA West",
-      "source": "Gonzaga University Athletics",
-      "url": "https://news.google.com/rss/articles/CBMingFBVV95cUxPZjZiZ2FKNTFfcFlIQXNEY0NlUXl4RXNDYnBKQ0pqRWFFTDNkM201TFhRUVJLYnpkd01qU1hnblM0cGhRY1l1RGs5ZWRFUEUyOUpfcXZJQjd0TkhCaWNoTmZ0eW1zVHVhMnAyM014ZnRadEx6SVNyb2w4R2I2cDdqa1dMTzVWUmdWWGFHM2dCZEpfYUZnSmRpYVEyZ2dfQQ?oc=5"
     },
     {
       "date": "2026-11-13",
@@ -113,6 +119,12 @@
     },
     {
       "date": "2026-11-13",
+      "headline": "Women's Cross Country Finishes Fall Season at NCAA Southeast Regionals",
+      "source": "Charleston Southern University Athletics",
+      "url": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxPaS1VdXliYmNvZFU5MlVEbmdSOGZCQ3EzRmhjSXpjSGJsVFRVaXpyc1d0Y2RVa2I2Y3BKRl9kb1NiUlBWTG5sOVB1Y0gzUFR6LVllbE9aUUcwblc2bUtBbkRLRUVWVWg3VzZ3RW9QSXd1UDBTSnJ4enZldVVfSlQ0ZHk1eGZzdlZlVEh5ZlBHSlI0ZzVfS3FEUzFENlF0dlRsWlgwMnV3NTJnZXM?oc=5"
+    },
+    {
+      "date": "2026-11-13",
       "headline": "NCAA Southeast Regional Cross Country 2026 Results: NC State and Wake Forest Qualify for Nationals",
       "source": "World-Track",
       "url": "https://news.google.com/rss/articles/CBMiiwFBVV95cUxPNnhQSXNZWWJPQS05WHUwQ1lWVkhTNjVNemRMSlozaGE1cmpKdmZFdlQ0cUFGaUpwLUJYRHNJdXJNQ0lENGczR2VWVVZtcXpDUzRsOXhadTBVUWdyMndIZ2FUdGdKMmJmVXVNWl9uMmY1Rmw4NUR5WHZPMW1BNld0RThMZ3FIZWRMeW1v?oc=5"
@@ -130,22 +142,10 @@
       "url": "https://news.google.com/rss/articles/CBMi1wFBVV95cUxPRWp5aURDZzZmcnRnRjI2Ykxqb2RKX0NqYm82S0lXb0NCMWdhbHpmR2NLaldsRkNxWHNBbDVWNHlnam4wLUFKOUxGU0lMUVdPX2Z2azE3dlB3U0JQRW9fUjhEVFdPR2xhaDdONm1UR1NxeGlyZ3dUN0theEJvZ01ZUFlkaFYzWExZNkI3UFFDTmtkSEEteXpsX01wWkkzMDF3Q2N2aWZzNEIwTTVRa2xTc2o0VFBydWtxSHJPbmFjT2pYRk1iVlJObEpJbnF0ellOTm8wdFJsMNIB3AFBVV95cUxQbVZmbE5YTHl0S2tFeElhSXNKd1JZYlpRZjR6TkV2aDMxeExvRWxUZTJTNXlkZzVLVENiSDZEOVl4ZWxRUDN3RFRQanBjYkZSendhV25BQmVfNjk5RC1fN0xGR21Ma3RTRmtiSFA4V09yZHk2MW1pYm91YkU3Qll0My1lSU1NREtzOFhyQUp5VDgwTnIzNnBiSFBONVJtVjBBN1ZYeVpsQlVTejR1V2c5dWdtQm9sUlNjdDlVR2h6QVlad0VJWW1veTNHb1A5LU5wOVk2RWdyZURSUEIt?oc=5"
     },
     {
-      "date": "2026-11-13",
-      "headline": "Northern Section cross country champions are crowned",
-      "source": "Record Searchlight",
-      "url": "https://news.google.com/rss/articles/CBMiwgFBVV95cUxQN3NpWENUc3hDbldvS250RDZZS3B3ZGdZSGRhZnZEM1VYUTN5Y0IyckZFam56QUNNd2k5WUt5TTJIR0pGdlc1Y094Uy12LTI0MDIzZklsUVlMV2xQdDd5RTZYVGtXa1hoVFZDTjdCd3cwV3YzVDQ4SEI2V0tNZ21ra0ZON2toNllzYzUyN1g2X3Z5RmhGRS03YjJVbkNESDBZN2pnbGR2aHQzRkZYd1JIaXJZOGhOSWxqS1NLMGcwbTh0dw?oc=5"
-    },
-    {
       "date": "2026-11-12",
       "headline": "UTSA to compete at NCAA South Central Regional Cross Country Championships",
       "source": "UTSA Athletics",
       "url": "https://news.google.com/rss/articles/CBMirgFBVV95cUxPeEstWVVsQ2lOOHJGSkNxVFk2NGw1R2E2bk56SHVFQVhhTkx5RDBWQ0R2VXkydmdTanowWVBjNDV2amxmYXM4amF3MVZpZ2tsMnlYRUd5M0dHZ0I3WVUtbG9JeWZQYTBSZ013bWFnTG5uTG4yRlptWGY2djRDaDJRak5sXzZzSTNMVjJXdmRWSmh4Rm5iRWlVbktRWkg3cmthWi1FdWlfRllRSkwydHc?oc=5"
-    },
-    {
-      "date": "2026-11-12",
-      "headline": "XC Central: 2026 NCAA South Region Championships",
-      "source": "University of Tennessee Athletics",
-      "url": "https://news.google.com/rss/articles/CBMinwFBVV95cUxObXFXYjY4NzBnemRFZkNreFlIY1o5TFJ5LUZTSU83YTZiSVg5TThsTDlaZmtpRUVRemZraGRFa3lhUVo0a0Z3T0x0TzJfUFpTZUZpZk5QbGdzM1BhOXFuVFBRdzN0TGlhUkJqY25oNWIzbDRfZ3JBcE5mclhlb2FyamItWTZkZmpWR1BjRUlkbF9JV21rVG9VZDktdnFCVDA?oc=5"
     }
   ]
 }
