@@ -102,7 +102,7 @@
   /** Saves Sleeping HR and HRV from BeyondStride's daily summaries; true when something new arrived. */
   function keepWellness(o){
     var changed=false;
-    [['bs_daily_sleephr','sleepHr'],['bs_daily_hrv','hrv']].forEach(function(p){
+    [['bs_daily_sleephr','sleepHr'],['bs_daily_hrv','hrv'],['bs_daily_deep','deep'],['bs_daily_rem','rem'],['bs_daily_sleepscore','sleepScore']].forEach(function(p){
       var c={};try{c=JSON.parse(localStorage.getItem(p[0])||'{}')||{};}catch(e){}var ch=false;
       Object.keys(o||{}).forEach(function(k){var v=((o[k]||{}).wellness||{})[p[1]];if(v&&c[k]!==v){c[k]=v;ch=true;}});
       if(ch){try{localStorage.setItem(p[0],JSON.stringify(c));}catch(e1){}changed=true;}
@@ -138,7 +138,7 @@
 
   // Wellness: Sleep, Weight, Resting HR, Blood pressure + Pulse (cuff) and Steps (Samsung, under Dog Walk) fill in from BeyondStride. A value you typed yourself is never replaced;
   // one BeyondStride filled earlier is kept up to date.
-  var FIELDS={sleep:'wSleepVal',weight:'wWghtVal',restHr:'wRestHRVal',steps:'exSteps',bp:'wBPVal',pulse:'wPulseVal'};
+  var FIELDS={sleep:'wSleepVal',weight:'wWghtVal',restHr:'wRestHRVal',steps:'exSteps',bp:'wBPVal',pulse:'wPulseVal',sleepScore:'wSleepScore'};
   function fillWellness(k,data){
     var w=data&&data.wellness;if(!w||typeof dk!=='function'||dk(today)!==k)return;
     var store='bsAutoWellness_'+k,prev={};try{prev=JSON.parse(localStorage.getItem(store)||'{}');}catch(e){}
@@ -158,7 +158,7 @@
     try{var sc=document.querySelector('.tri-check[data-key="exStepsCheck"]');
       if(sc&&Number(w.steps)>=10000&&!sc.dataset.state){sc.dataset.state='green';if(typeof save==='function')save();if(typeof renderDailyCheckOverview==='function')renderDailyCheckOverview();changed=true;}}catch(eS){}
     try{localStorage.setItem(store,JSON.stringify(prev));}catch(e){}
-    if(changed&&typeof v26Toast==='function')v26Toast('Filled from BeyondStride (sleep / weight / resting HR / steps / BP)');
+    if(changed&&typeof v26Toast==='function')v26Toast('Filled from BeyondStride (sleep / sleep score / weight / resting HR / steps / BP)');
   }
 
   // "From BeyondStride" box in the Daily AI Review (collapsed; tap to open).
