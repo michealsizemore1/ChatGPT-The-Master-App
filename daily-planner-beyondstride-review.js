@@ -139,8 +139,24 @@
   // Wellness: Sleep, Weight, Resting HR, Blood pressure + Pulse (cuff) and Steps (Samsung, under Dog Walk) fill in from BeyondStride. A value you typed yourself is never replaced;
   // one BeyondStride filled earlier is kept up to date.
   var FIELDS={sleep:'wSleepVal',weight:'wWghtVal',restHr:'wRestHRVal',steps:'exSteps',bp:'wBPVal',pulse:'wPulseVal',sleepScore:'wSleepScore'};
+  // 😴 Last night's breakdown (read-only) under Sleep Score: BeyondStride's score, deep / REM / light / awake, bed–wake.
+  function showSleepDetail(w){
+    try{
+      var sc=document.getElementById('wSleepScore');if(!sc)return;var row=sc.closest('.task-row')||sc.parentNode;
+      var box=document.getElementById('bsSleepDetail');
+      if(!box){box=document.createElement('div');box.id='bsSleepDetail';box.style.cssText='font-size:0.82rem;color:#6b7280;margin:2px 0 6px 34px;line-height:1.4;';row.parentNode.insertBefore(box,row.nextSibling);}
+      function hm(m){m=Math.round(Number(m)||0);return m>=60?Math.floor(m/60)+'h '+(m%60)+'m':m+'m';}
+      var parts=[];
+      if(w&&w.sleepScore)parts.push('BeyondStride score '+w.sleepScore);
+      if(w&&(w.deep||w.rem)){parts.push('Deep '+hm(w.deep));parts.push('REM '+hm(w.rem));if(w.light)parts.push('Light '+hm(w.light));}
+      if(w&&w.awake!=null&&w.awake!=='')parts.push('Awake '+hm(w.awake));
+      if(w&&w.bed&&w.wake)parts.push(w.bed+'–'+w.wake);
+      box.textContent=parts.length?'😴 '+parts.join(' · '):'';box.style.display=parts.length?'':'none';
+    }catch(e){}
+  }
   function fillWellness(k,data){
-    var w=data&&data.wellness;if(!w||typeof dk!=='function'||dk(today)!==k)return;
+    var w=data&&data.wellness;if(typeof dk==='function'&&dk(today)===k)showSleepDetail(w);
+    if(!w||typeof dk!=='function'||dk(today)!==k)return;
     var store='bsAutoWellness_'+k,prev={};try{prev=JSON.parse(localStorage.getItem(store)||'{}');}catch(e){}
     var changed=false;
     Object.keys(FIELDS).forEach(function(f){
