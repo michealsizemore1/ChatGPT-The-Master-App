@@ -87,3 +87,23 @@ window.openAiTool=function(which){
   }catch(e){}
 };
 window.closeAiTools=function(){window.__aiToolsOpen=false;var bar=document.getElementById('aiToolbar');if(bar)bar.style.display='none';};
+
+/* 🧹 One-time cleanup (Nov 15 2026): two leftover keys from the old food tracker that nothing reads anymore
+ * (favorites_data, healthy_foods_7plus — nutrition lives in BeyondStride now). A copy is kept in the browser's
+ * large storage first ("cleanup_2026-11-15"), then they're removed to free journal space. */
+(function(){
+  var FLAG='cleanup_food_leftovers_2026-11-15',KEYS=['favorites_data','healthy_foods_7plus'];
+  function run(){
+    try{
+      if(localStorage.getItem(FLAG))return;
+      var copy={},any=false;KEYS.forEach(function(k){var v=localStorage.getItem(k);if(v!=null){copy[k]=v;any=true;}});
+      if(!any){localStorage.setItem(FLAG,'1');return;}
+      if(typeof journalLargeStoreSet!=='function')return;
+      Promise.resolve(journalLargeStoreSet('cleanup_2026-11-15',copy)).then(function(){
+        KEYS.forEach(function(k){try{localStorage.removeItem(k);}catch(e){}});
+        try{localStorage.setItem(FLAG,'1');}catch(e){}
+      }).catch(function(){});
+    }catch(e){}
+  }
+  setTimeout(run,4000);
+})();

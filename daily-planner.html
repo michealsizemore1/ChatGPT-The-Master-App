@@ -2216,23 +2216,12 @@ html[data-theme="halloween"] .header{
           </select>
         </label>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:9px;">
-          <button class="btn-secondary" onclick="exportBackup()">Backup Now</button>
-          <button class="btn-secondary" onclick="document.getElementById('importFile').click()">Restore</button>
-          <button class="btn-secondary" type="button" onclick="journalCreateAutomaticBackup(true)">Create Recovery Point</button>
+          <!-- Backup Now / Restore are in ☰ Tools; Create Recovery Point, Check Journal and Storage Breakdown removed (Nov 15 2026) -->
           <button class="btn-secondary" type="button" onclick="openAutomaticBackups()">Daily Recovery Backups</button>
-          <button class="btn-secondary" onclick="journalConsistencyCheck()">Check Journal</button>
-          <button class="btn-secondary" type="button" onclick="openStorageBreakdown()">Storage Breakdown</button>
         </div>
         <div id="journalStorageHealth" class="storage-health">Checking journal storage...</div>
       </div>
-      <div class="journal-settings-group">
-        <h3>Local Storage</h3>
-        <div style="font-size:.8rem;color:#667085;line-height:1.45;">Your journal saves automatically on this device. Download regular backups so you can restore it if the browser or phone is replaced.</div>
-        <div class="cloud-account-bar">
-          <span class="cloud-status-dot ok"></span>
-          <span style="font-size:.8rem;color:#475569;">Local-only mode active</span>
-        </div>
-      </div>
+      <!-- Local Storage info card removed (Nov 15 2026) -->
     </div>
     <div class="journal-settings-group" style="margin-bottom:12px;">
       <h3>AI Connection</h3>
@@ -2492,7 +2481,7 @@ html[data-theme="halloween"] .header{
 <script src="daily-planner-beyondstride-review.js?v=2026-11-15-2"></script>
 <script src="daily-planner-storage-qol.js?v=2026-11-08-2-removeactivities"></script>
 <script src="daily-planner-rows.js?v=2026-11-14-1"></script>
-<script src="daily-planner-autocheck.js?v=2026-11-15-4"></script>
+<script src="daily-planner-autocheck.js?v=2026-11-15-5"></script>
 <button class="journal-float-top" id="journalFloatTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">&#x2191; Top</button>
 <div id="v26Toast" class="v26-toast" role="status" aria-live="polite"></div>
 </body>
