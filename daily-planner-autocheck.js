@@ -56,3 +56,17 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(check,1500);});else setTimeout(check,1500);
   window.autoTickCheck=check;
 })();
+/* 🎯 Today's Focus opens each time the page loads (tap the header to fold it for now). */
+(function(){
+  var userClosed=false;
+  document.addEventListener('click',function(e){if(e.isTrusted&&e.target&&e.target.closest&&e.target.closest('[aria-controls="todayFocusBody"]'))userClosed=true;},true);
+  function openFocus(){
+    if(userClosed)return;
+    var b=document.getElementById('todayFocusBody'),a=document.getElementById('todayFocusArrow'),t=document.querySelector('[aria-controls="todayFocusBody"]');
+    if(!b)return;
+    if(b.style.display!=='block'){b.style.display='block';if(a)a.innerHTML='&#x25BC;';if(t)t.setAttribute('aria-expanded','true');}
+  }
+  function run(){openFocus();[800,2500,6000].forEach(function(ms){setTimeout(openFocus,ms);});}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run);else run();
+  window.addEventListener('pageshow',function(){userClosed=false;run();});
+})();
