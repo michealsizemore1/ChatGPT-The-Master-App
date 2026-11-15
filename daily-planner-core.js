@@ -210,8 +210,7 @@ function collectDailyChecks(){
   });
   var selectedKey=dk(today);
   var skillEntries=getSkillEntries();
-  var hasLanguage=skillEntries.some(function(entry){return entry.date===selectedKey&&entry.category==='Language';});
-  items.push({key:'',id:'journalScheduleBody',tab:'daily',group:'Growth',status:hasLanguage?'green':'blank',label:'Language'});
+  // Language / Guitar removed (Nov 2026).
   return items;
 }
 function renderDailyCheckOverview(){

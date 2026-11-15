@@ -458,7 +458,7 @@ function renderJournalSchedule(){
     language:{time:'7:00 PM',mins:1140,label:'Language Practice',detail:languageMinutes?fmtMinsSeconds(languageMinutes)+' logged':'Tap to log the language session',done:d.gaLanguage==='green',tab:'skill-log'},
     guitar:{time:'7:45 PM',mins:1185,label:'Guitar',detail:guitarMinutes?fmtMinsSeconds(guitarMinutes)+' logged':'Tap to log guitar practice',done:d.gaGuitar==='green',tab:'skill-log'}
   };
-  ['reading','language','guitar'].forEach(function(kind){
+  ['reading'].forEach(function(kind){   // Language / Guitar removed (Nov 2026)
     if(!dueGrowthKinds.has(kind)&&localStorage.getItem(journalScheduleGrowthKey(kind,dateKey))!=='1'&&!growthScheduleSpecs[kind].done)return;
     items.push(Object.assign({id:journalScheduleGrowthId(kind),growthKind:kind},growthScheduleSpecs[kind]));
   });
@@ -493,7 +493,7 @@ function renderJournalSchedule(){
   items=journalScheduleApplyOrder(items,dateKey);
   _journalScheduleItemsById={};items.forEach(function(item){_journalScheduleItemsById[item.id]=item;});
   var growthPoolStatus=document.getElementById('financialVideoScheduleStatus');if(growthPoolStatus)growthPoolStatus.textContent='Scheduled activities appear first';
-  ['language','guitar','reading'].forEach(function(kind){var card=document.querySelector('.journal-growth-pool-card[data-growth-kind="'+kind+'"]');if(card)card.style.display='grid';});
+  ['reading'].forEach(function(kind){var card=document.querySelector('.journal-growth-pool-card[data-growth-kind="'+kind+'"]');if(card)card.style.display='grid';});
   var languageStatus=document.getElementById('growthLanguageStatus');if(languageStatus)languageStatus.textContent=(languageMinutes?fmtMinsSeconds(languageMinutes):'No time logged')+(localStorage.getItem(journalScheduleGrowthKey('language',dateKey))==='1'?' • scheduled':'');
   var guitarStatus=document.getElementById('growthGuitarStatus');if(guitarStatus)guitarStatus.textContent=(guitarMinutes?fmtMinsSeconds(guitarMinutes):'No time logged')+(localStorage.getItem(journalScheduleGrowthKey('guitar',dateKey))==='1'?' • scheduled':'');
   var readingStatus=document.getElementById('growthReadingStatus');if(readingStatus)readingStatus.textContent=(readingMinutes?fmtMinsSeconds(readingMinutes):'No Library time logged')+(localStorage.getItem(journalScheduleGrowthKey('reading',dateKey))==='1'?' · scheduled':'');

@@ -1637,8 +1637,6 @@ html[data-theme="halloween"] .header{
   <div class="journal-schedule-body" id="journalScheduleBody"></div>
   <div class="journal-growth-pool" style="display:none"><!-- Growth Activities hidden at Michael's request (Nov 2026); elements kept so scripts still find them -->
     <div class="journal-growth-pool-title"><span>Growth Activities</span><span id="financialVideoScheduleStatus" style="font-size:.62rem;color:#7c3aed;text-transform:none;"></span></div>
-    <div class="journal-growth-pool-card" data-growth-kind="language" style="grid-template-columns:19px minmax(120px,1fr) minmax(80px,auto) auto;"><div class="tri-check" data-key="gaLanguage" onclick="triClick(this)" title="Mark Language Practice complete"></div><strong style="font-size:.76rem;">Language Practice</strong><span class="journal-growth-status" id="growthLanguageStatus"></span><button type="button" class="journal-growth-add" onclick="journalOpenGrowthLog('language')">Schedule / Log</button></div>
-    <div class="journal-growth-pool-card" data-growth-kind="guitar" style="grid-template-columns:19px minmax(120px,1fr) minmax(80px,auto) auto;"><div class="tri-check" data-key="gaGuitar" onclick="triClick(this)" title="Mark Guitar complete"></div><strong style="font-size:.76rem;">Guitar</strong><span class="journal-growth-status" id="growthGuitarStatus"></span><button type="button" class="journal-growth-add" onclick="journalOpenGrowthLog('guitar')">Schedule / Log</button></div>
     <div class="journal-growth-help" style="margin-top:7px;font-size:.64rem;color:#7c6f98;">Choose Schedule / Log to place an activity on My Schedule. Time spent is optional until you complete the activity; completed time appears under Growth / Skills in the Weekly, Monthly and Yearly screens.</div>
   </div>
   </details>
@@ -1646,7 +1644,7 @@ html[data-theme="halloween"] .header{
   <div class="modal" style="max-width:520px;">
     <div class="journal-growth-header" style="display:flex;justify-content:space-between;align-items:center;gap:10px;"><h2 id="journalGrowthLogTitle" style="margin:0;font-size:1.05rem;">Log Learning &amp; Growth</h2><div style="display:flex;gap:7px;"><button type="button" class="btn-secondary" onclick="journalCloseGrowthLog()">Close</button><button type="button" class="btn-primary" onclick="journalSaveGrowthLog()">Save</button></div></div>
     <div class="lib-form-grid" style="margin-top:14px;">
-      <div><label>Category</label><select id="journalGrowthLogCategory" class="act-input"><option>Language</option><option>Guitar</option><option>Reading / Audiobook</option></select></div>
+      <div><label>Category</label><select id="journalGrowthLogCategory" class="act-input"><option>Reading / Audiobook</option></select></div>
       <div><label>Time Spent (optional until completed)</label><input id="journalGrowthLogTime" class="act-input" placeholder="Add after completion: 12:49 or 45 min" title="Leave blank while scheduling. After completion, use minutes:seconds or enter whole minutes."></div>
       <div><label>Scheduled Date</label><input type="date" id="journalGrowthLogDate" class="act-input"></div>
       <div><label>Start Time</label><input type="time" id="journalGrowthLogStartTime" class="act-input"></div>
@@ -2418,9 +2416,7 @@ html[data-theme="halloween"] .header{
       <div><label>Category</label>
         <select id="skCategory" class="act-input">
           <option value="Udemy">&#x1F393; Udemy</option>
-          <option value="Language">&#x1F5E3; Language</option>
           <option value="Gun Range">&#x1F3AF; Gun Range</option>
-          <option value="Guitar">&#x1F3B8; Guitar</option>
           <option value="Finance">&#x1F4B0; Finance / Investing</option>
           <option value="Design">&#x1F3A8; Design</option>
           <option value="Writing">&#x270F;&#xFE0F; Writing</option>
@@ -2473,16 +2469,16 @@ html[data-theme="halloween"] .header{
 
 
 
-<script src="daily-planner-core.js?v=2026-11-15-2"></script>
+<script src="daily-planner-core.js?v=2026-11-15-3"></script>
 <script src="daily-planner-bible.js?v=2026-11-10-1"></script>
 <script src="daily-planner-meditation.js?v=2026-11-15-1"></script>
 <script src="daily-planner-journal-archive.js?v=2026-11-08-3-habitsmove"></script>
-<script src="daily-planner-file-uploads.js?v=2026-10-15-6"></script><script src="daily-planner-misc.js?v=2026-11-10-1"></script><script src="daily-planner-journal-experience.js?v=2026-11-15-1"></script>
+<script src="daily-planner-file-uploads.js?v=2026-10-15-6"></script><script src="daily-planner-misc.js?v=2026-11-10-1"></script><script src="daily-planner-journal-experience.js?v=2026-11-15-2"></script>
 <script src="master-backup-shared.js?v=2026-10-15-7"></script>
 <script src="daily-planner-beyondstride-review.js?v=2026-11-15-2"></script>
 <script src="daily-planner-storage-qol.js?v=2026-11-08-2-removeactivities"></script>
 <script src="daily-planner-rows.js?v=2026-11-14-1"></script>
-<script src="daily-planner-autocheck.js?v=2026-11-15-6"></script>
+<script src="daily-planner-autocheck.js?v=2026-11-15-7"></script>
 <button class="journal-float-top" id="journalFloatTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">&#x2191; Top</button>
 <div id="v26Toast" class="v26-toast" role="status" aria-live="polite"></div>
 </body>

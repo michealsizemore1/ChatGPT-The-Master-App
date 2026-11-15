@@ -40,12 +40,19 @@
    * no Dog Walk entered and the box still blank → red checkmark. Entering a walk later turns it green. */
   window.autoTickReviewWritten=function(){
     try{
-      var d=dayKey();if(!d)return;
-      var box=document.querySelector('.tri-check[data-key="exDogWalk"]'),inp=document.getElementById('exDogWalkVal');
-      if(!box||!inp||box.dataset.state||String(inp.value||'').trim())return;
-      if(typeof applyTriState==='function')applyTriState(box,'red');else{box.dataset.state='red';box.classList.add('red');box.textContent='✓';}
-      try{localStorage.setItem('autoRed_'+d+'_exDogWalk','1');}catch(e){}
-      refresh();
+      var d=dayKey();if(!d)return;var changed=false;
+      // Every blank Wellness / Movement / Audiobook check that isn't done → red. Meds stays yours.
+      ITEMS.concat([['gaAudiobook','',function(){return window.audiobookDone&&window.audiobookDone();}]]).forEach(function(it){
+        if(it[0]==='exBike')return;
+        var box=document.querySelector('.tri-check[data-key="'+it[0]+'"]');if(!box||box.dataset.state)return;
+        var inp=it[1]?document.getElementById(it[1]):null;if(it[2](String(inp?inp.value||'':'')))return;
+        // Planned rest day: steps short of 10,000 are N/A, not missed.
+        if(it[0]==='exStepsCheck'){try{if(typeof journalTodayTrainingSummary==='function'&&journalTodayTrainingSummary()==='Rest Day'){applyTriState(box,'black');changed=true;return;}}catch(eR){}}
+        if(typeof applyTriState==='function')applyTriState(box,'red');else{box.dataset.state='red';box.classList.add('red');box.textContent='✓';}
+        try{localStorage.setItem('autoRed_'+d+'_'+it[0],'1');}catch(e){}
+        changed=true;
+      });
+      if(changed)refresh();
     }catch(e){}
   };
   var t=null;function soon(){clearTimeout(t);t=setTimeout(check,400);}
@@ -130,4 +137,80 @@ window.closeAiTools=function(){window.__aiToolsOpen=false;var bar=document.getEl
     }catch(e){}
   }
   setInterval(check,8000);setTimeout(check,2500);
+})();
+
+/* ⏭️ Unfinished tasks / goals carry over: the first time today's page opens, any of yesterday's Priority Tasks or Goals
+ * that weren't finished (not green, not N/A) fill today's empty lines. Once per day. */
+(function(){
+  function run(){
+    try{
+      if(typeof dk!=='function'||typeof today==='undefined')return;
+      var now=new Date(),d=dk(now);if(dk(today)!==d)return;
+      var flag='carryOver_'+d;if(localStorage.getItem(flag))return;
+      var y=new Date(now);y.setDate(y.getDate()-1);
+      var prev={};try{prev=JSON.parse(localStorage.getItem('planner_'+dk(y))||'{}')||{};}catch(e){}
+      var moved=0;
+      [['pt0','pt1','pt2'],['dg0','dg1','dg2']].forEach(function(group){
+        var left=group.map(function(id){return {t:String(prev[id+'t']||'').trim(),st:prev[id+'c']||''};}).filter(function(x){return x.t&&x.st!=='green'&&x.st!=='black';});
+        var have=group.map(function(id){var e=document.getElementById(id+'t');return e?String(e.value||'').trim():'';});
+        left=left.filter(function(x){return have.indexOf(x.t)===-1;});
+        group.forEach(function(id){
+          var e=document.getElementById(id+'t');if(!e||String(e.value||'').trim()||!left.length)return;
+          e.value=left.shift().t;e.dispatchEvent(new Event('input',{bubbles:true}));moved++;
+        });
+      });
+      localStorage.setItem(flag,String(moved));
+      if(moved){try{save();}catch(e){}try{updateCompactSectionCounts();}catch(e){}if(typeof v26Toast==='function')v26Toast('⏭️ Carried over '+moved+' unfinished item'+(moved>1?'s':'')+' from yesterday');}
+    }catch(e){}
+  }
+  setTimeout(run,2200);
+})();
+
+/* 🎧 Audiobook: 30+ minutes logged today (Library / Reading log, or the Audiobook time box) → Audiobook check green,
+ * and a goal like "Audible for 30 minutes" ticks once that many minutes are logged. */
+(function(){
+  function minsToday(){
+    var m=0;
+    try{var d=dk(today);(getSkillEntries()||[]).forEach(function(e){if(e&&e.date===d&&/^(reading \/ audiobook|reading|audiobook)$/i.test(String(e.category||'')))m+=parseSkillTimeMins(e.time)||0;});}catch(e){}
+    try{var t=document.getElementById('gaAudiobookTime');if(t&&t.value)m=Math.max(m,parseSkillTimeMins(t.value)||0);}catch(e){}
+    return m;
+  }
+  window.audiobookDone=function(){return minsToday()>=30;};
+  function check(){
+    try{
+      if(typeof dk!=='function'||typeof today==='undefined')return;
+      var d=dk(today),m=minsToday();if(m<=0)return;var changed=false;
+      var box=document.querySelector('.tri-check[data-key="gaAudiobook"]');
+      if(box&&m>=30){
+        var st=box.dataset.state||'',wasAutoRed=st==='red'&&localStorage.getItem('autoRed_'+d+'_gaAudiobook');
+        if((!st||wasAutoRed)&&!localStorage.getItem('autoTick_'+d+'_gaAudiobook')){applyTriState(box,'green');localStorage.setItem('autoTick_'+d+'_gaAudiobook','1');localStorage.removeItem('autoRed_'+d+'_gaAudiobook');changed=true;}
+      }
+      ['pt0','pt1','pt2','dg0','dg1','dg2'].forEach(function(id){
+        var inp=document.getElementById(id+'t'),b=document.querySelector('.tri-check[data-key="'+id+'c"]');if(!inp||!b)return;
+        var t=String(inp.value||'');if(!/audible|audiobook|listen/i.test(t))return;
+        var need=parseInt((t.match(/(\d+)\s*(?:min|minutes)/i)||[])[1]||'30',10);
+        var st=b.dataset.state||'';if((st&&st!=='purple')||m<need||localStorage.getItem('autoBook_'+d+'_'+id))return;
+        applyTriState(b,'green');localStorage.setItem('autoBook_'+d+'_'+id,'1');changed=true;
+      });
+      if(changed){try{save();}catch(e){}try{renderDailyCheckOverview();}catch(e){}try{updateCompactSectionCounts();}catch(e){}}
+    }catch(e){}
+  }
+  setInterval(check,8000);setTimeout(check,3000);
+})();
+
+/* 😴 Planned rest day: run goals / tasks are marked N/A (black) instead of counting as missed (the 10,000-step goal
+ * becomes N/A at review time if it wasn't reached). Only blank boxes; once a day. */
+(function(){
+  var RUN_ITEM=/\b(complete|finish|do|get in|hit)\b.*\brun|\bscheduled runs?\b|\brun(s)? (today|as planned|done)\b|^\s*run\b/i;
+  function check(){
+    try{
+      if(typeof dk!=='function'||typeof journalTodayTrainingSummary!=='function')return;
+      if(journalTodayTrainingSummary()!=='Rest Day')return;
+      var d=dk(today),changed=false;
+      function na(box,key){if(!box||box.dataset.state||localStorage.getItem('autoRest_'+d+'_'+key))return;applyTriState(box,'black');localStorage.setItem('autoRest_'+d+'_'+key,'1');changed=true;}
+      ['pt0','pt1','pt2','dg0','dg1','dg2'].forEach(function(id){var inp=document.getElementById(id+'t');if(inp&&RUN_ITEM.test(String(inp.value||'')))na(document.querySelector('.tri-check[data-key="'+id+'c"]'),id);});
+      if(changed){try{save();}catch(e){}try{renderDailyCheckOverview();}catch(e){}try{updateCompactSectionCounts();}catch(e){}}
+    }catch(e){}
+  }
+  setInterval(check,15000);setTimeout(check,3500);
 })();
