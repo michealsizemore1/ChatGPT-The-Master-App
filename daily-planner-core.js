@@ -2017,6 +2017,7 @@ function applyPhoneDayReview(){
       var map={wins:'dayRevWins',improve:'dayRevImprove',focus:'dayRevFocus',lessons:'dayRevLessons'};
       Object.keys(map).forEach(function(f){var e=document.getElementById(map[f]);if(e&&o[f]){e.value=noTonightOutput(o[f]);autoGrowReviewField(e);}});
       saveDayReview(true);try{localStorage.setItem(flag,'1');localStorage.setItem('autoDayRev_'+k,'phone');}catch(e){}
+      try{if(typeof window.autoTickReviewWritten==='function')window.autoTickReviewWritten();}catch(eT){}
       if(typeof v26Toast==='function')v26Toast('🌙 Day Review filled from BeyondStride');
     });
   }catch(e){}
@@ -2073,6 +2074,7 @@ function aiFillEntireDayReview(btn){
       var start=cleaned.indexOf('{'),end=cleaned.lastIndexOf('}');if(start>=0&&end>=start)cleaned=cleaned.slice(start,end+1);
       var result=JSON.parse(cleaned),map={wins:'dayRevWins',improve:'dayRevImprove',focus:'dayRevFocus',lessons:'dayRevLessons'};
       Object.keys(map).forEach(function(key){var el=document.getElementById(map[key]);if(el&&result[key]!=null){el.value=noTonightOutput(result[key]);el.dispatchEvent(new Event('input'));}});
+      try{if(typeof window.autoTickReviewWritten==='function')window.autoTickReviewWritten();}catch(eT){}
       if(btn.__auto){saveDayReview(true);v26Toast('🌙 Day Review filled and saved automatically for tonight');}
       else v26Toast('Day Review filled — edit it, then tap Save Review to keep it');
     }catch(e){if(btn.__auto)v26Toast('Automatic Day Review: the AI answer could not be read — tap AI Fill Day Review to try again');else alert('The AI response could not be placed into the Review fields. Please try again.');}

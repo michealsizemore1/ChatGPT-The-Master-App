@@ -18,6 +18,9 @@
       var box=document.querySelector('.tri-check[data-key="'+it[0]+'"]'),inp=document.getElementById(it[1]);
       if(!box||!inp)return;
       var flag='autoTick_'+d+'_'+it[0];
+      // Marked red automatically for a missed dog walk, then filled in later: turn it green.
+      try{if(box.dataset.state==='red'&&localStorage.getItem('autoRed_'+d+'_'+it[0])&&it[2](String(inp.value||''))){
+        if(typeof applyTriState==='function')applyTriState(box,'green');localStorage.removeItem('autoRed_'+d+'_'+it[0]);localStorage.setItem(flag,'1');changed=true;return;}}catch(e){}
       if(box.dataset.state)return;                       // already marked by you (or before)
       try{if(localStorage.getItem(flag))return;}catch(e){}
       if(!it[2](String(inp.value||'')))return;
@@ -26,8 +29,25 @@
       try{localStorage.setItem(flag,'1');}catch(e){}
       changed=true;
     });
-    if(changed){try{if(typeof save==='function')save();}catch(e){}try{if(typeof renderDailyCheckOverview==='function')renderDailyCheckOverview();}catch(e){}}
+    if(changed)refresh();
   }
+  function refresh(){
+    try{if(typeof save==='function')save();}catch(e){}
+    try{if(typeof renderDailyCheckOverview==='function')renderDailyCheckOverview();}catch(e){}
+    try{if(typeof updateCompactSectionCounts==='function')updateCompactSectionCounts();}catch(e){}
+  }
+  /* 🐕 When the Daily AI Review is written (AI Fill, the 11:50 PM automatic one, or the phone's copy):
+   * no Dog Walk entered and the box still blank → red checkmark. Entering a walk later turns it green. */
+  window.autoTickReviewWritten=function(){
+    try{
+      var d=dayKey();if(!d)return;
+      var box=document.querySelector('.tri-check[data-key="exDogWalk"]'),inp=document.getElementById('exDogWalkVal');
+      if(!box||!inp||box.dataset.state||String(inp.value||'').trim())return;
+      if(typeof applyTriState==='function')applyTriState(box,'red');else{box.dataset.state='red';box.classList.add('red');box.textContent='✓';}
+      try{localStorage.setItem('autoRed_'+d+'_exDogWalk','1');}catch(e){}
+      refresh();
+    }catch(e){}
+  };
   var t=null;function soon(){clearTimeout(t);t=setTimeout(check,400);}
   document.addEventListener('input',function(e){if(e.target&&ITEMS.some(function(it){return it[1]===e.target.id;}))soon();},true);
   document.addEventListener('change',function(e){if(e.target&&ITEMS.some(function(it){return it[1]===e.target.id;}))soon();},true);
