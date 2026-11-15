@@ -107,3 +107,27 @@ window.closeAiTools=function(){window.__aiToolsOpen=false;var bar=document.getEl
   }
   setTimeout(run,4000);
 })();
+
+/* 🏃 A task or goal like "Complete scheduled runs" ticks green once today's run is logged (BeyondStride / Activities).
+ * Blank or partly-done (purple) boxes only; red / black ones you set are left alone. */
+(function(){
+  var RUN_ITEM=/\b(complete|finish|do|get in|hit)\b.*\brun|\bscheduled runs?\b|\brun(s)? (today|as planned|done)\b|^\s*run\b/i;
+  function check(){
+    try{
+      if(typeof dk!=='function'||typeof today==='undefined'||typeof hasRunOnDate!=='function')return;
+      var d=dk(today);if(!hasRunOnDate(d))return;var changed=false;
+      ['pt0','pt1','pt2','dg0','dg1','dg2'].forEach(function(id){
+        var inp=document.getElementById(id+'t'),box=document.querySelector('.tri-check[data-key="'+id+'c"]');
+        if(!inp||!box||!RUN_ITEM.test(String(inp.value||'')))return;
+        var st=box.dataset.state||'';if(st&&st!=='purple')return;
+        try{if(localStorage.getItem('autoRun_'+d+'_'+id))return;}catch(e){}   // once a day: if you change it back, it stays
+        if(typeof applyTriState==='function')applyTriState(box,'green');
+        var row=box.closest('.priority-item');if(row)row.classList.add('done');
+        try{localStorage.setItem('autoRun_'+d+'_'+id,'greenx');}catch(e){}
+        changed=true;
+      });
+      if(changed){try{save();}catch(e){}try{renderDailyCheckOverview();}catch(e){}try{updateCompactSectionCounts();}catch(e){}}
+    }catch(e){}
+  }
+  setInterval(check,8000);setTimeout(check,2500);
+})();
