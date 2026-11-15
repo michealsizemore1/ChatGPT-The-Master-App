@@ -1644,14 +1644,16 @@ html[data-theme="halloween"] .header{
 </div>
 <input type="checkbox" id="reviewCheck" hidden>
 <input type="checkbox" id="prepJournalCheck" hidden>
-<div class="daily-grid">
-  <div class="col">
-    <!-- Daily Movement (Dog Walk, Steps) moved into the Wellness tab, Nov 15 2026 -->
-    <div class="section">
-      <div class="section-title compact-toggle" role="button" tabindex="0" aria-expanded="false" aria-controls="dailyTasksBody" onclick="toggleCompactSection('dailyTasksBody','dailyTasksArrow',this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCompactSection('dailyTasksBody','dailyTasksArrow',this);}">
-        <span id="dailyTasksArrow">&#x25B6;</span><span>&#x2705; Daily Priority Tasks</span><span class="compact-toggle-count" id="dailyTasksCount">0/3</span>
-      </div>
-      <div id="dailyTasksBody" class="compact-body">
+<div class="daily-grid" id="todayFocusGrid" style="display:block;">
+  <!-- Daily Movement (Dog Walk, Steps) moved into the Wellness tab, Nov 15 2026 -->
+  <!-- 🎯 Today's Focus: Daily Priority Tasks + Daily Goals in one card, open by default (Nov 15 2026) -->
+  <div class="section" id="todayFocusSection">
+    <div class="section-title compact-toggle" role="button" tabindex="0" aria-expanded="true" aria-controls="todayFocusBody" onclick="toggleCompactSection('todayFocusBody','todayFocusArrow',this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
+      <span id="todayFocusArrow">&#x25BC;</span><span>&#x1F3AF; Today's Focus</span><span class="compact-toggle-count" id="todayFocusCount">0/6</span>
+    </div>
+    <div id="todayFocusBody" class="compact-body" style="display:block;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin:2px 0 4px;"><span style="font-size:.8rem;font-weight:700;color:#4f46e5;">&#x2705; Priority Tasks</span><span id="dailyTasksCount" style="font-size:.78rem;color:#98a2b3;font-weight:600;">0/3</span></div>
+      <div id="dailyTasksBody">
       <div class="priority-item" id="pt0"><div class="tri-check" data-key="pt0c" onclick="triClickPriority(this,'pt0')"></div><input type="text" id="pt0t" placeholder="Task 1..."></div>
       <div class="priority-item" id="pt1"><div class="tri-check" data-key="pt1c" onclick="triClickPriority(this,'pt1')"></div><input type="text" id="pt1t" placeholder="Task 2..."></div>
       <div class="priority-item" id="pt2"><div class="tri-check" data-key="pt2c" onclick="triClickPriority(this,'pt2')"></div><input type="text" id="pt2t" placeholder="Task 3..."></div>
@@ -1660,15 +1662,8 @@ html[data-theme="halloween"] .header{
         <span id="copyTasksConfirm" style="font-size:0.78rem;color:#16a34a;display:none;">✓ Copied!</span>
       </div>
       </div>
-    </div>
-  </div>
-
-  <div class="col">
-    <div class="section">
-      <div class="section-title purple compact-toggle" role="button" tabindex="0" aria-expanded="false" aria-controls="dailyGoalsBody" onclick="toggleCompactSection('dailyGoalsBody','dailyGoalsArrow',this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCompactSection('dailyGoalsBody','dailyGoalsArrow',this);}">
-        <span id="dailyGoalsArrow">&#x25B6;</span><span>&#x1F3AF; Daily Goals</span><span class="compact-toggle-count" id="dailyGoalsCount">0/3</span>
-      </div>
-      <div id="dailyGoalsBody" class="compact-body">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin:14px 0 4px;padding-top:10px;border-top:1px solid #eef0f4;"><span style="font-size:.8rem;font-weight:700;color:#7c3aed;">&#x1F3AF; Goals</span><span id="dailyGoalsCount" style="font-size:.78rem;color:#98a2b3;font-weight:600;">0/3</span></div>
+      <div id="dailyGoalsBody">
       <div class="priority-item" id="dg0"><div class="tri-check" data-key="dg0c" onclick="triClickPriority(this,'dg0')"></div><input type="text" id="dg0t" placeholder="Goal 1..."></div>
       <div class="priority-item" id="dg1"><div class="tri-check" data-key="dg1c" onclick="triClickPriority(this,'dg1')"></div><input type="text" id="dg1t" placeholder="Goal 2..."></div>
       <div class="priority-item" id="dg2"><div class="tri-check" data-key="dg2c" onclick="triClickPriority(this,'dg2')"></div><input type="text" id="dg2t" placeholder="Goal 3..."></div>
@@ -2483,7 +2478,7 @@ html[data-theme="halloween"] .header{
 
 
 
-<script src="daily-planner-core.js?v=2026-11-15-1"></script>
+<script src="daily-planner-core.js?v=2026-11-15-2"></script>
 <script src="daily-planner-bible.js?v=2026-11-10-1"></script>
 <script src="daily-planner-meditation.js?v=2026-11-12-1"></script>
 <script src="daily-planner-journal-archive.js?v=2026-11-08-3-habitsmove"></script>

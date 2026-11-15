@@ -135,6 +135,8 @@ function updateCompactSectionCounts(){
   if(task)task.textContent=compactDoneCount(['pt0c','pt1c','pt2c'])+'/3';
   if(goals)goals.textContent=compactDoneCount(['dg0c','dg1c','dg2c'])+'/3';
   if(physical)physical.textContent=compactDoneCount(['exDogWalk','exStepsCheck'])+'/2';
+  var focus=document.getElementById('todayFocusCount');
+  if(focus)focus.textContent=compactDoneCount(['pt0c','pt1c','pt2c','dg0c','dg1c','dg2c'])+'/6';
 }
 function toggleAITools(){
   toggleCompactSection('aiToolsBody','aiToolsArrow',document.getElementById('aiToolsToggle'));
