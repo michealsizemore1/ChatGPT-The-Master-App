@@ -49,6 +49,8 @@
     var val=v<10?(Math.round(v*10)/10):Math.round(v).toLocaleString('en-US');
     if(!t||!t.t)return'<td>'+val+'</td>';
     st=st||status(v,t);var pct=Math.floor(v/t.t*100);
+    // High: red background, white text.
+    if(st==='High')return'<td style="background:#dc2626;color:#fff;font-weight:700;">'+val+'<div style="font-size:.72em;font-weight:700;color:#fff;white-space:nowrap;">'+pct+'% · High</div></td>';
     return'<td>'+val+'<div style="font-size:.72em;font-weight:600;color:'+(ST_COLOR[st]||'#64748b')+';white-space:nowrap;">'+pct+'% · '+st+'</div></td>';
   }
   function nuTables(keys,labels){
@@ -61,6 +63,7 @@
     function calCell(n){if(!n.cal)return'<td>-</td>';var h=fmtN(n.cal);if(!n.target)return'<td>'+h+'</td>';var r=n.cal/n.target,c=(r>=0.9&&r<=1.1)?G:(r>=0.75&&r<=1.25)?A:R;
       return'<td><span style="color:'+c+';font-weight:700;">'+h+'</span> <span style="color:#94a3b8;font-size:.8em;">/ '+fmtN(n.target)+'</span>'+sub(Math.round(r*100)+'% of target',c)+'</td>';}
     function macroCell(g,m){if(!g)return'<td>-</td>';if(!m)return'<td>'+fmtN(g)+'</td>';var c=m.status==='On target'?G:m.status==='High'?R:A;
+      if(m.status==='High')return'<td style="background:#dc2626;color:#fff;font-weight:700;">'+fmtN(g)+sub(m.pct.toFixed(1)+'% / '+m.goal+'% · High','#fff')+'</td>';
       return'<td>'+fmtN(g)+sub(m.pct.toFixed(1)+'% / '+m.goal+'% · '+m.status,c)+'</td>';}
     function fluidCell(n){if(!n.water)return'<td>-</td>';if(!n.fluidTarget)return'<td>'+fmtN(n.water)+'</td>';var p=Math.floor(n.water/n.fluidTarget*100),c=p>=100?G:p>=75?A:R;
       return'<td>'+fmtN(n.water)+sub(p+'% of '+n.fluidTarget+' oz',c)+'</td>';}
