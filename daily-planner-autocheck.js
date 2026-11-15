@@ -70,3 +70,20 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run);else run();
   window.addEventListener('pageshow',function(){userClosed=false;run();});
 })();
+
+/* ✨ AI Tools from the ☰ Tools menu (any tab). */
+window.openAiTool=function(which){
+  try{
+    var bar=document.getElementById('aiToolbar'),body=document.getElementById('aiToolsBody'),tg=document.getElementById('aiToolsToggle');
+    // Search and Saved open as pop-ups; Ask AI opens its panel under the header.
+    if(which==='search'&&typeof openJournalSearch==='function'){openJournalSearch();return;}
+    if(which==='saved'&&typeof openAIArchive==='function'){openAIArchive();return;}
+    if(!bar||!body)return;
+    window.__aiToolsOpen=true;bar.style.display='block';body.style.display='block';if(tg)tg.style.display='none';
+    if(which==='ask'&&typeof openAskJournal==='function')openAskJournal();
+    else if(which==='search'&&typeof openJournalSearch==='function')openJournalSearch();
+    else if(which==='saved'&&typeof openAIArchive==='function')openAIArchive();
+    setTimeout(function(){try{bar.scrollIntoView({behavior:'smooth',block:'start'});var i=document.getElementById(which==='ask'?'askJournalInput':'journalSearchInput');if(i&&i.offsetParent)i.focus();}catch(e){}},80);
+  }catch(e){}
+};
+window.closeAiTools=function(){window.__aiToolsOpen=false;var bar=document.getElementById('aiToolbar');if(bar)bar.style.display='none';};

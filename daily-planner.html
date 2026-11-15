@@ -1477,6 +1477,10 @@ html[data-theme="halloween"] .header{
             <span class="header-tools-status-title">Journal status</span>
             <span class="v26-save header-save-status" title="Your entries save automatically on this device"><span class="v26-save-dot"></span><span id="v26SaveText">Saved on this device</span></span>
           </div>
+          <!-- ✨ AI Tools (moved here from the Daily page, Nov 15 2026): open from any tab. -->
+          <button type="button" onclick="openAiTool('ask');closeHeaderTools()">&#x1F4AC; Ask AI</button>
+          <button type="button" onclick="openAiTool('search');closeHeaderTools()">&#x1F50D; Search journal</button>
+          <button type="button" onclick="openAiTool('saved');closeHeaderTools()">&#x1F4C1; Saved AI answers</button>
           <button type="button" onclick="exportBackup();closeHeaderTools()">&#x1F4BE; Backup</button>
           <button type="button" onclick="document.getElementById('importFile').click();closeHeaderTools()">&#x1F4C2; Restore</button>
           <button type="button" onclick="printView('daily');closeHeaderTools()">&#x1F5A8; PDF &mdash; Daily</button>
@@ -1548,11 +1552,12 @@ html[data-theme="halloween"] .header{
   </div>
 </details>
 <!-- AI toolbar (shown only on Daily tab, sits above Streaks) -->
-<div class="tab-toolbar" id="aiToolbar">
-  <div class="compact-toggle" id="aiToolsToggle" role="button" tabindex="0" aria-expanded="false" aria-controls="aiToolsBody" onclick="toggleAITools()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleAITools();}" style="width:100%;color:#7c3aed;font-weight:700;">
+<div class="tab-toolbar" id="aiToolbar" style="display:none;">
+  <div class="compact-toggle" id="aiToolsToggle" data-moved="tools-menu" role="button" tabindex="0" aria-expanded="false" aria-controls="aiToolsBody" onclick="toggleAITools()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleAITools();}" style="width:100%;color:#7c3aed;font-weight:700;">
     <span id="aiToolsArrow">&#x25B6;</span><span>&#x2728; AI Tools</span><span class="compact-toggle-count">Ask &amp; search</span>
   </div>
   <div id="aiToolsBody" class="compact-body" style="width:100%;padding-top:8px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><strong style="font-size:.95rem;color:#1f2937;">&#x2728; AI Tools</strong><button type="button" onclick="closeAiTools()" style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:999px;padding:4px 12px;font-size:.8rem;cursor:pointer;">&#x2715; Close</button></div>
   <div style="display:flex;gap:8px;flex-wrap:wrap;">
     <button type="button" class="ai-btn" style="background:#8e44ad;" onclick="openAskJournal()">&#x1F4AC; Ask AI</button>
     <button class="ai-btn" style="background:#2980b9;" onclick="openJournalSearch()">&#x1F50D; Search</button>
@@ -2480,14 +2485,14 @@ html[data-theme="halloween"] .header{
 
 <script src="daily-planner-core.js?v=2026-11-15-2"></script>
 <script src="daily-planner-bible.js?v=2026-11-10-1"></script>
-<script src="daily-planner-meditation.js?v=2026-11-12-1"></script>
+<script src="daily-planner-meditation.js?v=2026-11-15-1"></script>
 <script src="daily-planner-journal-archive.js?v=2026-11-08-3-habitsmove"></script>
 <script src="daily-planner-file-uploads.js?v=2026-10-15-6"></script><script src="daily-planner-misc.js?v=2026-11-10-1"></script><script src="daily-planner-journal-experience.js?v=2026-11-10-2"></script>
 <script src="master-backup-shared.js?v=2026-10-15-7"></script>
 <script src="daily-planner-beyondstride-review.js?v=2026-11-15-2"></script>
 <script src="daily-planner-storage-qol.js?v=2026-11-08-2-removeactivities"></script>
 <script src="daily-planner-rows.js?v=2026-11-14-1"></script>
-<script src="daily-planner-autocheck.js?v=2026-11-15-3"></script>
+<script src="daily-planner-autocheck.js?v=2026-11-15-4"></script>
 <button class="journal-float-top" id="journalFloatTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">&#x2191; Top</button>
 <div id="v26Toast" class="v26-toast" role="status" aria-live="polite"></div>
 </body>

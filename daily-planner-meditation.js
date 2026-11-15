@@ -1377,7 +1377,8 @@ function switchTab(tab,e){
   const isDaily=tab==='daily';
   if(isDaily){load();renderDailyCheckOverview();}
   document.getElementById('streakBar').style.display=isDaily?'flex':'none';
-  document.getElementById('aiToolbar').style.display=isDaily?'block':'none';
+  // AI Tools now open from ☰ Tools on any tab (and stay open across tabs until closed).
+  document.getElementById('aiToolbar').style.display=window.__aiToolsOpen?'block':'none';
   var jc=document.getElementById('journalCalendar');if(jc)jc.style.display=isDaily?'':'none';
   if(tab==='weekly')renderWeekly();if(tab==='monthly')renderMonthly();
   if(tab==='yearly')renderYearly();if(tab==='dashboard')renderDashboard();
