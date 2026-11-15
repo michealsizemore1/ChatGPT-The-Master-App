@@ -587,9 +587,14 @@ function journalStorageHealth(){
     if(k&&k.indexOf('planner_')===0){planner++;try{JSON.parse(v);}catch(e){invalid++;}}
   }
   sizes.sort(function(a,b){return b.bytes-a.bytes;});
-  var top=sizes.slice(0,5).filter(function(s){return s.bytes>1024;}).map(function(s){return escHtml(s.key)+': '+(s.bytes/1024).toFixed(0)+' KB';}).join('<br>');
+  // For a big daily entry, name the field taking most of the room (a photo or drawing, usually).
+  function biggestField(key){try{var o=JSON.parse(localStorage.getItem(key)||'{}'),best='',bl=0;Object.keys(o).forEach(function(f){var l=JSON.stringify(o[f]).length;if(l>bl){bl=l;best=f;}});return best&&bl>20000?' (mostly “'+escHtml(best)+'”, '+Math.round(bl*2/1024)+' KB)':'';}catch(e){return'';}}
+  var top=sizes.slice(0,5).filter(function(s){return s.bytes>1024;}).map(function(s){return escHtml(s.key)+': '+(s.bytes/1024).toFixed(0)+' KB'+(s.key.indexOf('planner_')===0?biggestField(s.key):'');}).join('<br>');
   var mb=(bytes/1048576).toFixed(2),last=localStorage.getItem('last_backup_ts'),lastText=last?new Date(last).toLocaleDateString():'Never';
-  var nearQuota=bytes>4500000;
+  // Chrome / Samsung Internet allow about 5.2 million characters per site (≈10 MB the way it's counted here, 2 bytes each).
+  // The old warning came on at 4.5 MB (under half full). Now it shows how full it really is and warns at 80%.
+  var QUOTA=10485760,pctFull=Math.round((bytes+externalBytes)/QUOTA*100),nearQuota=pctFull>=80;
+  mb+=' ('+pctFull+'% of the browser\'s space)';
   var el=document.getElementById('journalStorageHealth');
   if(el)el.innerHTML='<strong>'+(invalid?'Attention needed':nearQuota?'Storage nearly full':'Journal healthy')+'</strong><br>'+planner+' daily entries • about '+mb+' MB of journal data • last backup: '+lastText+(externalBytes?'<br><span style="color:#667085;">Separate apps: '+(externalBytes/1048576).toFixed(2)+' MB (not included or synchronized)</span>':'')+(invalid?'<br>'+invalid+' unreadable daily record(s) found.':'')+(nearQuota?'<br><span style="color:#b91c1c;">You are close to the browser\'s storage limit — back up now, then consider trimming old data.</span>':'')+(top?'<div style="margin-top:6px;font-size:.7rem;color:#78716c;"><strong>Largest journal items:</strong><br>'+top+'</div>':'');
   return{bytes:bytes,externalBytes:externalBytes,planner:planner,invalid:invalid,sizes:sizes};
