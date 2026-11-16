@@ -41,12 +41,26 @@
   function segLabel(s){return s.b+' '+s.c1+(s.v1?':'+s.v1:'')+(s.c2!==s.c1?'–'+s.c2+(s.v2?':'+s.v2:''):(s.v2&&s.v2!==s.v1?'–'+s.v2:''));}
   function segQuery(s){return s.b+' '+s.c1+(s.v1?':'+s.v1:'')+(s.c2!==s.c1||(s.v2&&s.v2!==s.v1)?'-'+(s.c2!==s.c1?s.c2+(s.v2?':'+s.v2:''):s.v2):'');}
   var cache={};
-  function fetchSeg(s){
-    var q=segQuery(s);if(cache[q])return Promise.resolve(cache[q]);
-    return fetch('https://bible-api.com/'+encodeURIComponent(q).replace(/%20/g,'+')+'?translation=web').then(function(r){if(!r.ok)throw new Error('Scripture lookup failed for '+q+' ('+r.status+')');return r.json();})
-      .then(function(j){var v=(j.verses||[]).map(function(x){return {b:s.b,c:x.chapter,v:x.verse,t:String(x.text||'').replace(/\s+/g,' ').trim()};});cache[q]=v;return v;});
+  // One whole chapter at a time (bible-api.com rejects long ranges like "1 Thessalonians 1:1-5:11"), cached; then trimmed
+  // to the segment. A different spelling of the book is tried if the first fails.
+  function getJSON(u){return fetch(u).then(function(r){if(!r.ok){var e=new Error('HTTP '+r.status);e.status=r.status;throw e;}return r.json();});}
+  function fetchChapter(book,ch){
+    var k=book+' '+ch;if(cache[k])return Promise.resolve(cache[k]);
+    function url(name){return 'https://bible-api.com/'+encodeURIComponent(name+' '+ch).replace(/%20/g,'+')+'?translation=web';}
+    var alt=book.replace(/^([1-3]) /,'$1').replace('Song of Solomon','Song of Songs');
+    return getJSON(url(book)).catch(function(e){if(alt!==book)return getJSON(url(alt));throw e;})
+      .then(function(j){var v=(j.verses||[]).map(function(x){return {b:book,c:x.chapter||ch,v:x.verse,t:String(x.text||'').replace(/\s+/g,' ').trim()};});cache[k]=v;return v;});
   }
-  function fetchAll(segs){return Promise.all(segs.map(fetchSeg));}
+  function fetchSeg(s){
+    var chs=[];for(var c=s.c1;c<=s.c2;c++)chs.push(c);
+    return Promise.all(chs.map(function(c){return fetchChapter(s.b,c);})).then(function(lists){
+      var out=[];lists.forEach(function(list){list.forEach(function(v){var a=v.c*1000+v.v;
+        if(a>=s.c1*1000+(s.v1||1)&&a<=s.c2*1000+(s.v2||999))out.push(v);});});
+      if(!out.length)throw new Error('Scripture lookup failed for '+segLabel(s));return out;
+    }).catch(function(e){throw new Error('Scripture lookup failed for '+segLabel(s)+(e.status?' ('+e.status+')':''));});
+  }
+  // A passage that can't be loaded doesn't stop the study: its list is empty and "Read in NLT" covers it.
+  function fetchAll(segs){return Promise.all(segs.map(function(sg){return fetchSeg(sg).catch(function(){return [];});}));}
   function nltLink(segs){return 'https://www.biblegateway.com/passage/?search='+encodeURIComponent(segs.map(segLabel).join('; ').replace(/–/g,'-'))+'&version=NLT';}
 
   // ── AI ──
@@ -109,7 +123,7 @@
         +'<a class="bs-btn2" target="_blank" rel="noopener" href="'+nltLink(S.segs)+'">Read in NLT ↗</a></div>'
         +'<div class="bs-note">Text below: World English Bible. The highlighted section is today\'s study focus'+(S.key?'; the gold verse is the key verse':'')+'.</div>';
       if(!S.verses){h+='<div class="bs-load">⏳ Loading today\'s passages…</div>';loadVerses();}
-      else h+=S.verses.map(function(list,i){var sg=S.segs[i];return '<div class="bs-card bs-scripture"><div class="bs-h">'+esc(segLabel(sg))+'</div>'
+      else h+=S.verses.map(function(list,i){var sg=S.segs[i];if(!list.length)return '<div class="bs-card"><div class="bs-h">'+esc(segLabel(sg))+'</div><div class="bs-note">Couldn\'t load this passage here — <a target="_blank" rel="noopener" href="'+nltLink([sg])+'">read it in the NLT ↗</a>.</div></div>';return '<div class="bs-card bs-scripture"><div class="bs-h">'+esc(segLabel(sg))+'</div>'
         +list.map(function(v,j){var head=(j===0||list[j-1].c!==v.c)&&(sg.c1!==sg.c2||j===0)?'<b class="bs-ch">'+v.c+'</b>':'';return head+'<span class="'+(isKey(v)?'kv':inFocus(v)?'fo':'')+'"><sup>'+v.v+'</sup> '+esc(v.t)+' </span>';}).join('')+'</div>';}).join('');
     }else if(S.step===2){
       var a=S.answers;
@@ -140,7 +154,7 @@
     if(S._preparing)return;S._preparing=true;
     fetchAll(S.segs).then(function(lists){
       S.verses=lists;
-      var text=lists.map(function(list,i){return '['+segLabel(S.segs[i])+'] '+list.map(function(v){return v.c+':'+v.v+' '+v.t;}).join(' ');}).join('\n');
+      var text=lists.map(function(list,i){return '['+segLabel(S.segs[i])+'] '+(list.length?list.map(function(v){return v.c+':'+v.v+' '+v.t;}).join(' '):'(text not available here — use your knowledge of this passage)');}).join('\n');
       var hist=[];try{for(var i=1;i<=6;i++){var d=new Date(S.date+'T12:00');d.setDate(d.getDate()-i);var o=ls(sessionKey(dk(d)));if(o&&o.study)hist.push((o.segs||[]).map(segLabel).join('; ')+(o.study.theme?' ('+o.study.theme+')':''));}}catch(e){}
       var many=lists.reduce(function(n,l){return n+l.length;},0)>30;
       var prompt='You are leading a personal daily Bible study for a Christian man (a runner, husband and father) who is reading through the One Year Chronological Bible (NLT). '
