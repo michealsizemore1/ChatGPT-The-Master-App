@@ -1890,7 +1890,7 @@ function aiFillEntireReview(btn){
   if(typeof window.bsReviewFetch==='function'&&!btn.__bsReady){btn.disabled=true;window.bsReviewFetch(dk(ws),dk(we),function(t){btn.__bsText=t||'';btn.__bsReady=true;btn.disabled=false;aiFillEntireReview(btn);});return;}
   const bsText=noTonightInput(btn.__bsText);btn.__bsReady=false;btn.__bsText='';
   const weekLabel=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' - '+we.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-  const journal=getReviewWeekJournalText();
+  const journal=getReviewWeekJournalText()+(typeof window.bibleStudyWeekText==='function'?window.bibleStudyWeekText(dk(ws),dk(we)):'');
   const injuries=reviewInjuryText();
   const stats=(document.getElementById('revStats')||{}).innerText||'';
   const current=['revWins','revImprove','revFocus','revLessons'].map(function(id){var el=document.getElementById(id);return el&&el.value.trim()?id+': '+el.value.trim():'';}).filter(Boolean).join('\n');
@@ -2114,7 +2114,7 @@ document.addEventListener('visibilitychange',function(){if(!document.hidden)setT
 function aiReviewField(type,btn){
   const key=journalAIKey();
   if(!key){alert('Add your AI key first.');return;}
-  const journal=getReviewWeekJournalText();
+  const journal=getReviewWeekJournalText()+(typeof window.bibleStudyWeekText==='function'?window.bibleStudyWeekText(dk(ws),dk(we)):'');
   const injuries=reviewInjuryText();
   const wins=(document.getElementById('revWins').value||'').trim();
   const improve=(document.getElementById('revImprove').value||'').trim();
