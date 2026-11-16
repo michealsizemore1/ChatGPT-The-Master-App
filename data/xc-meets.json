@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-15T22:58:01+00:00",
+  "updatedAt": "2026-11-16T06:47:46+00:00",
   "source": "Google News searches for cross country meet results",
   "page": "https://michealsizemore1.github.io/ChatGPT-The-Master-App/cross-country.html",
   "meets": [
@@ -58,6 +58,12 @@
   ],
   "results": [
     {
+      "date": "2026-11-16",
+      "headline": "November 15: Sophie Gibbens is fourth in the Eastern Cross Country Championships",
+      "source": "Milton Keynes Athletic Club",
+      "url": "https://news.google.com/rss/articles/CBMirAFBVV95cUxOdzA3QXN0UUNwbzZxX0lQanRRdGZIX0FQOGJuMWVKSkE0S1VvYWFBWUwwMExzWUIxbXBiMHNCWmxTOF9CMGpzTFowRUM0RnpPVG1GQTR3bjYxTFJiRmNoMmJMMUIyLUNhN0tCLTVJSVV2aHNKRXdmX2kybkliM2hidlhTNTUySU9kUGh2VHBZUGpQUE80Y2FRbFR2QUlhUUVoTjQ1MUtKOVYwM2dJ?oc=5"
+    },
+    {
       "date": "2026-11-15",
       "headline": "NCAA Cross Country Championships Qualifiers Announced",
       "source": "Wisconsin Intercollegiate Athletic Conference",
@@ -68,6 +74,12 @@
       "headline": "She's In! Ellis Qualifies for NCAA Division III Women's Cross Country Championships",
       "source": "generalssports.com",
       "url": "https://news.google.com/rss/articles/CBMixwFBVV95cUxNMkNPRTJwZWVmRU5RRkdNZHRkNGN3bHdyOWliaHNZOUpaVHY5TndWenNlaVZwRkNZc1lZYnFjck44Rll4elNOTFJWdGJvWjdDZHYyUW9FcGQ4dTQwNmxiXzloTjJybW5WM0hlaWVfQzFFc2V3OUNIRVo2TmR3RFJ6RGFERTJfOUp0QWpvdDVEal9udlNnTUxjeHVEYTM3Z24tMGExS05veWlfMXBoRldTTVlPbWU5X1VIY0dQaDhvdjk1WlM3RFhF?oc=5"
+    },
+    {
+      "date": "2026-11-15",
+      "headline": "NCAA DIII men's and women's cross country championship qualifiers announced",
+      "source": "NCAA.com",
+      "url": "https://news.google.com/rss/articles/CBMi0gFBVV95cUxQVTExSVI0SHNEX2g3RVd4c1BkVmJTbE1YRXU2cFRtY0J6SHJwbFpfWXFfNk5RWFdPeDZlaVVuN25samprN3ZnUlEyUERwdjhWNWw2Mk1LZ3J4NFdXV2NPOXRrVWxwdG5qTXhFbXZOV3VfcTFhTjkyck9sTmUwel9jOThpYmVIeExOS000b1E3czdJYWZfXzJIYmNBd3ZZRzBjemY0aWloT0RmcWQ5V2c3eXJNZFBrckU4ZkkxRmc4ZS1uV2ktZUFMMGYzdTlwWDJZQmfSAdcBQVVfeXFMTldQakVCeGhlODlNM0hMTUVOOVM3enBFRUlSQmltTTlPNnpPNVA0bXAyYlc3RVU0Y1lnY1R4OWNpdUI2ekUtV01mTjMwY1VCX21MOUotaGV0Qzhvc3FCVTNqMmJ5Z3hjbjFWeTRvb1NjeUFMcmhfRzdOenJtNy1wdzZrQjNDYnV5TmtnYndjV2xjWUlJWnVZOVNsN3NlbUhZdU9qU1ppRnNvQzhpeF9ZZnhTRzlLX3MwVFE4cjRmS3BSME9RaGlrZUZjam9za0puVE1xZnptQWc?oc=5"
     },
     {
       "date": "2026-11-15",
@@ -83,9 +95,9 @@
     },
     {
       "date": "2026-11-15",
-      "headline": "2026 NCAA D1 XC Regionals: Great Lakes Region Results",
+      "headline": "2026 NCAA Southeast Regional Cross Country Results",
       "source": "FloTrack",
-      "url": "https://news.google.com/rss/articles/CBMimwFBVV95cUxNZVVBMmJVc0dGN3hTa1h0Tzd6eU9haERNeERRaG5BelA0SEZVd1pabkYyREowU1NYWk9PU3lNSDNja0JfQ1pWY1pmMTIxY1dpYmZQV1lHX1hlTmhrcGVRbXZsQ3JKSmNyZjJITUJEbktQdGJMWkFEdG1zOGxNaEdSRTFQVG9CendIamROTnJZVVZNdnRwdUFGdFZjRQ?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMimAFBVV95cUxQTGRDTVlFaER4QUtMRUo3eDl3MzdmLXg4bDN4X2gtYXdINGVWa3pEa05VUTB3dUZQdXFOQWlLNVFhN0RiallTNmxIYU9ULU1SYXFKWnhMdTRfVk8wT181ZXNlS25fNThZdXFWVGJtbzQ1M2JNY19zRWZVLXlUTUg3djZvNGlYZ3BwRlNHZmJRTGtKZ0d3QnFCYg?oc=5"
     },
     {
       "date": "2026-11-15",
@@ -98,12 +110,6 @@
       "headline": "Men's cross country places fourth in NCAA Niagara Regional Championships",
       "source": "Hamilton College",
       "url": "https://news.google.com/rss/articles/CBMi2gFBVV95cUxNQU5zTW5BMTQ2Sk55clVnOENZU29VUkVmMnBvb2NwMXlZX2Rfc1VhMTJINjZjbVVkSjBBMUNjWUF4U1haWVVOeFJ1X2xfMU51bW9ydzE4Z0I3azg0TUpBSzJTaWtEV1E4akxuQUxZTGhsUTIyUWh4WE81VnJhRFB1bHU0SmJHa19IT2puNDdhRDBhdDFmN2U1LXdEQUwwYzZxZDRzZDFZc05RN2RmcV9qc3B5c1hjLURxQjdoMHBjcXJFWEZZZG4xZWNlXzJydGJTX2tRY09rdm9tZw?oc=5"
-    },
-    {
-      "date": "2026-11-15",
-      "headline": "Iowa State Women, Oklahoma State Men Lead NCAA Midwest Regional Cross Country Results",
-      "source": "Yahoo Sports",
-      "url": "https://news.google.com/rss/articles/CBMihwFBVV95cUxOdUNZTVhNYWNScVZMcDNldVd3bGhsY19zTnhTQkZtSEplN0toSWdhYlFkSHJNQkJNYVFNWlBLUXVKblhrbFVyMFNLa1cwaW55SFRNLTQwamdlbzAwMjRJNExmWGg0ZE5tNEJGRElFU0pnc29RUlBuZ08wQkloZlZRNTRPM2hVVEU?oc=5"
     },
     {
       "date": "2026-11-15",
@@ -140,12 +146,6 @@
       "headline": "Villa selected for NCAA Cross Country Championships",
       "source": "UTSA Athletics",
       "url": "https://news.google.com/rss/articles/CBMijwFBVV95cUxPajlzZ3Y2dWhmWDRjWWV2dW5KUDh2SjBvbFJlbEVCU2JQcS1PaF9lR05uVHNyamtmalJjTnBzWkRHcmFyaWFWWTJicG9EXzJqeWJiOFhDRXJDLW5hZ2Etb2ZXZTJ6ZTRGM3dCZVFxUTFtZDZXNjJvZnY4MkduZEFRUXNMQ2pYQXdudHIydnZxQQ?oc=5"
-    },
-    {
-      "date": "2026-11-14",
-      "headline": "Star N.J. runner wins XC Meet of Champions, leads team in one of closest title wins in state history",
-      "source": "NJ.com",
-      "url": "https://news.google.com/rss/articles/CBMi3wFBVV95cUxOdjM2emYwM3c4QzBhTGY2d0RBY0t2a0NDNVFBQVZBUUFmNFRUa0tnU1pxSFhieEhlbGIyU0hlUXNEeFBPbE1IcG9Odnp0Q2ZwZ0EwOUFQNl9VaThmV3lNekdfS243MVRXcURZUmpiUVJKZ3RVUXpWc0pGVDNRRzNjQXg1aWZSU01lN2xvTkhEZ3Zqdlpld2d0SE5uZmdnVDcwLS1BTHdOSEZ6c3ZGV3ZtWHhWS3RQTExJX3pxWUNMek0zWERscnYwWHViM0lwQVJ4bXFzNzU1ZmJ1d255eXpZ?oc=5"
     }
   ]
 }
