@@ -1,3 +1,10 @@
+// Until daily-planner-misc.js loads (a moment later), anything that asks for activities gets the saved list instead of
+// failing with "getActivities is not defined". misc.js replaces this with the full version.
+if(typeof window.getActivities!=='function')window.getActivities=function(){
+  var own=[],bs=[];try{own=JSON.parse(localStorage.getItem('activities_data')||'[]')||[];}catch(e){}
+  try{var o=JSON.parse(localStorage.getItem('bs_activities')||'null');bs=((o&&o.list)||[]).map(function(a){var c=Object.assign({},a);c._bs=true;return c;});}catch(e2){}
+  return Array.isArray(own)?own.concat(bs):bs;
+};
 
 let today=new Date();const _realToday=new Date(today);// snapshot of actual launch date — never changes with navigation
 const charts={};let scoreVal=0,copiedDayData=null;
