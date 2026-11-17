@@ -1380,6 +1380,8 @@ function switchTab(tab,e){
   // AI Tools now open from ☰ Tools on any tab (and stay open across tabs until closed).
   document.getElementById('aiToolbar').style.display=window.__aiToolsOpen?'block':'none';
   var jc=document.getElementById('journalCalendar');if(jc)jc.style.display=isDaily?'':'none';
+  // Show the week / month / year that holds the header's date.
+  try{var _n=new Date();weekOff2=Math.round((wkStartOf(today)-wkStartOf(_n))/(7*864e5));monthOff2=(today.getFullYear()*12+today.getMonth())-(_n.getFullYear()*12+_n.getMonth());yearOff2=today.getFullYear()-_n.getFullYear();}catch(eOff){}
   if(tab==='weekly')renderWeekly();if(tab==='monthly')renderMonthly();
   if(tab==='yearly')renderYearly();if(tab==='dashboard')renderDashboard();
   if(tab==='review')renderReview();if(tab==='library'){renderLibrary();renderLibrarySectionCharts();}

@@ -942,7 +942,28 @@ function updateMobileYearProgress(){
   display.textContent='Day '+day+'/'+total;
   display.title=percent+'% of '+date.getFullYear()+' complete';
 }
-function changeDay(n){today.setDate(today.getDate()+n);load();}
+// The header ‹ › arrows follow the tab you're on: a day on Daily, a week on Weekly, a month on Monthly, a year on Yearly.
+// The Weekly / Monthly / Yearly views always show the period that holds the header's date (Nov 2026).
+function activeTabName(){var t=document.querySelector('.tab-panel.active');return t?t.id.replace('tab-',''):'daily';}
+function syncPeriodsToDay(){
+  try{var now=new Date();
+    weekOff2=Math.round((wkStartOf(today)-wkStartOf(now))/(7*864e5));
+    monthOff2=(today.getFullYear()*12+today.getMonth())-(now.getFullYear()*12+now.getMonth());
+    yearOff2=today.getFullYear()-now.getFullYear();
+    var tab=activeTabName();
+    if(tab==='weekly'){renderWeekly();if(typeof renderGoals==='function')renderGoals();}
+    else if(tab==='monthly')renderMonthly();
+    else if(tab==='yearly')renderYearly();
+  }catch(e){}
+}
+function changeDay(n){
+  var tab=activeTabName();
+  if(tab==='weekly')today.setDate(today.getDate()+7*n);
+  else if(tab==='monthly'){var d=today.getDate();today.setDate(1);today.setMonth(today.getMonth()+n);today.setDate(Math.min(d,new Date(today.getFullYear(),today.getMonth()+1,0).getDate()));}
+  else if(tab==='yearly')today.setFullYear(today.getFullYear()+n);
+  else today.setDate(today.getDate()+n);
+  load();syncPeriodsToDay();
+}
 
 // Streak: counts consecutive qualifying days going backward.
 // If today is not yet done (or has no entry), starts counting from yesterday
@@ -1249,7 +1270,7 @@ function weeklyReadingColumn(keys,hostId){
   var rows=t.querySelectorAll('tbody tr');
   rows.forEach(function(tr,i){var td=document.createElement('td');var v=i<mins.length?mins[i]:total;td.innerHTML=v?fmtMinsSeconds(v):'-';tr.appendChild(td);});
 }
-function changeWeekOff(n){weekOff2+=n;renderWeekly();renderGoals();}
+function changeWeekOff(n){today.setDate(today.getDate()+7*n);load();syncPeriodsToDay();if(activeTabName()!=='weekly'){weekOff2=Math.round((wkStartOf(today)-wkStartOf(new Date()))/(7*864e5));renderWeekly();renderGoals();}}
 let monthOff2=0;
 function renderMonthly(){const now=new Date(),ref=new Date(now.getFullYear(),now.getMonth()+monthOff2,1);const yr=ref.getFullYear(),mo=ref.getMonth(),dim=new Date(yr,mo+1,0).getDate();const wmap={};for(let d=1;d<=dim;d++){const dt=new Date(yr,mo,d);const ws=wkStartOf(dt);const k=dk(ws),dateKey=dk(dt);if(!wmap[k])wmap[k]={ws,ms:[]};const r=localStorage.getItem('planner_'+dateKey);wmap[k].ms.push(getDM(r?JSON.parse(r):{},dateKey));}document.getElementById('monthLabel').textContent=ref.toLocaleDateString('en-US',{month:'long',year:'numeric'});const wks=Object.values(wmap).sort((a,b)=>a.ws-b.ws),allM=[],gR=[],fR=[],wR=[];wks.forEach(({ws,ms})=>{const we=new Date(ws);we.setDate(ws.getDate()+6);const lb=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+'-'+we.toLocaleDateString('en-US',{day:'numeric'});const a=agg(ms);allM.push(...ms);gR.push(gRow('Wk '+lb,a));fR.push(fRow('Wk '+lb,a));wR.push(wRow('Wk '+lb,a));});const tot=agg(allM);document.getElementById('mGrowth').innerHTML=mkT(gH,gR,gRow('TOTAL',tot,true));document.getElementById('mFitness').innerHTML=mkT(fH,fR,fRow('TOTAL/AVG',tot,true));document.getElementById('mWellness').innerHTML=mkT(wH,wR,wRow('TOTAL/AVG',tot,true));
   const mWkKeys=[],mWkLbls=[],mGrowthPeriods=[],monthStartKey=dk(new Date(yr,mo,1)),monthEndKey=dk(new Date(yr,mo,dim));wks.forEach(({ws,ms})=>{const we=new Date(ws);we.setDate(ws.getDate()+6);const lb=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+'-'+we.toLocaleDateString('en-US',{day:'numeric'});const keys=[];for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);keys.push(dk(d));}mWkKeys.push(keys);mWkLbls.push('Wk '+lb);mGrowthPeriods.push({label:'Wk '+lb,start:dk(ws)<monthStartKey?monthStartKey:dk(ws),end:dk(we)>monthEndKey?monthEndKey:dk(we)});});/* Growth (Language, Guitar) no longer shown; Reading / Audible joins Spirituality */renderSpirit(mWkKeys,mWkLbls,'mSpirituality');weeklyReadingColumn(mWkKeys,'mSpirituality');sleepingHrColumn(mWkKeys,'mWellness');
@@ -1284,14 +1305,14 @@ function renderMonthly(){const now=new Date(),ref=new Date(now.getFullYear(),now
     }
   }
 }
-function changeMonthOff(n){monthOff2+=n;renderMonthly();}
+function changeMonthOff(n){var d=today.getDate();today.setDate(1);today.setMonth(today.getMonth()+n);today.setDate(Math.min(d,new Date(today.getFullYear(),today.getMonth()+1,0).getDate()));load();syncPeriodsToDay();if(activeTabName()!=='monthly')renderMonthly();}
 let yearOff2=0;
 function renderYearly(){const yr=new Date().getFullYear()+yearOff2;document.getElementById('yearLabel').textContent=yr;const mns=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],allM=[],gR=[],fR=[],wR=[];mns.forEach((mn,mi)=>{const dim=new Date(yr,mi+1,0).getDate(),ms=[];for(let d=1;d<=dim;d++){const dt=new Date(yr,mi,d),dateKey=dk(dt);const r=localStorage.getItem('planner_'+dateKey);ms.push(getDM(r?JSON.parse(r):{},dateKey));}allM.push(...ms);const a=agg(ms);gR.push(gRow(mn,a));fR.push(fRow(mn,a));wR.push(wRow(mn,a));});const tot=agg(allM);document.getElementById('yGrowth').innerHTML=mkT(gH,gR,gRow('TOTAL',tot,true));document.getElementById('yFitness').innerHTML=mkT(fH,fR,fRow('TOTAL/AVG',tot,true));document.getElementById('yWellness').innerHTML=mkT(wH,wR,wRow('TOTAL/AVG',tot,true));
   const yr2=new Date().getFullYear()+yearOff2;
   const yMoKeys=[],yMoLbls=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const yGrowthPeriods=[];for(let mi=0;mi<12;mi++){const dim=new Date(yr2,mi+1,0).getDate();const keys=[];for(let d=1;d<=dim;d++)keys.push(dk(new Date(yr2,mi,d)));yMoKeys.push(keys);yGrowthPeriods.push({label:yMoLbls[mi],start:dk(new Date(yr2,mi,1)),end:dk(new Date(yr2,mi,dim))});}
   renderSpirit(yMoKeys,yMoLbls,'ySpirituality');weeklyReadingColumn(yMoKeys,'ySpirituality');sleepingHrColumn(yMoKeys,'yWellness');}
-function changeYearOff(n){yearOff2+=n;renderYearly();}
+function changeYearOff(n){today.setFullYear(today.getFullYear()+n);load();syncPeriodsToDay();if(activeTabName()!=='yearly')renderYearly();}
 let dashOff2=0;
 function renderDashboard(){
   const ws=wkStart(dashOff2),we=new Date(ws);we.setDate(ws.getDate()+6);
