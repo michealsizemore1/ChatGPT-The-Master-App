@@ -119,12 +119,12 @@
         +'<div class="bs-note">Today\'s theme: <b>'+esc(st.theme||'')+'</b>'+(st.focus_label?' · Focus passage: <b>'+esc(st.focus_label)+'</b>':'')+'</div>'
         +(st.overview?'<div class="bs-card"><div class="bs-h">Today\'s reading at a glance</div><div class="bs-text">'+esc(st.overview)+'</div></div>':'');
     }else if(S.step===1){
-      h='<div class="bs-row"><button class="bs-btn2" id="bsListen" onclick="bibleStudy.listen()">🎧 Read aloud</button><button class="bs-btn2" onclick="bibleStudy.listened()">'+(S.done.audio?'✓ Listened':'✓ I listened in my Bible app')+'</button>'
+      h='<div class="bs-row"><button class="bs-btn2" id="bsListen" onclick="bibleStudy.listen()">🎧 Read aloud</button><button class="bs-btn2" onclick="bibleStudy.listenedApp()">'+(S.done.audio?'✓ Listened':'✓ I listened in my Bible app')+'</button>'
         +'<a class="bs-btn2" target="_blank" rel="noopener" href="'+nltLink(S.segs)+'">Read in NLT ↗</a></div>'
-        +'<div class="bs-note">Text below: World English Bible. The highlighted section is today\'s study focus'+(S.key?'; the gold verse is the key verse':'')+'.</div>';
+        +'<div class="bs-note">Already listened to today\'s audiobook? Tap <b>✓ I listened</b> — you don\'t need to read it again; it skips to the study. Text below: World English Bible. The highlighted section is today\'s study focus'+(S.key?'; the gold verse is the key verse':'')+'.</div>';
       if(!S.verses){h+='<div class="bs-load">⏳ Loading today\'s passages…</div>';loadVerses();}
       else h+=S.verses.map(function(list,i){var sg=S.segs[i];if(!list.length)return '<div class="bs-card"><div class="bs-h">'+esc(segLabel(sg))+'</div><div class="bs-note">Couldn\'t load this passage here — <a target="_blank" rel="noopener" href="'+nltLink([sg])+'">read it in the NLT ↗</a>.</div></div>';return '<div class="bs-card bs-scripture"><div class="bs-h">'+esc(segLabel(sg))+'</div>'
-        +list.map(function(v,j){var head=(j===0||list[j-1].c!==v.c)&&(sg.c1!==sg.c2||j===0)?'<b class="bs-ch">'+v.c+'</b>':'';return head+'<span class="'+(isKey(v)?'kv':inFocus(v)?'fo':'')+'"><sup>'+v.v+'</sup> '+esc(v.t)+' </span>';}).join('')+'</div>';}).join('');
+        +list.map(function(v,j){var head=(j===0||list[j-1].c!==v.c)&&(sg.c1!==sg.c2||j===0)?'<b class="bs-ch">'+v.c+'</b>':'';return head+'<span id="bsV'+i+'_'+j+'" class="bs-v '+(isKey(v)?'kv':inFocus(v)?'fo':'')+'"><sup>'+v.v+'</sup> '+v.t.split(/\s+/).map(function(w){return '<span class="w">'+esc(w)+'</span>';}).join(' ')+' </span>';}).join('')+'</div>';}).join('');
     }else if(S.step===2){
       var a=S.answers;
       h='<div class="bs-card"><div class="bs-h">Context</div><div class="bs-text">'+esc(st.context||'')+'</div></div>'
@@ -212,15 +212,35 @@
     close();
   }
   var speaking=false;
+  // 🎧 Read aloud verse by verse: the verse being read is shaded and scrolled into view, and — where the phone's voice
+  // reports word positions — the word being spoken is highlighted too.
   function listen(){
     var b=document.getElementById('bsListen');
     if(!('speechSynthesis' in window)){alert('Read-aloud isn\'t available in this browser.');return;}
-    if(speaking){speechSynthesis.cancel();speaking=false;if(b)b.textContent='🎧 Read aloud';return;}
-    var text=(S.verses||[]).map(function(l,i){return segLabel(S.segs[i])+'. '+l.map(function(v){return v.t;}).join(' ');}).join(' ');
-    var parts=text.match(/[^.!?]+[.!?]+["”’)]*\s*|[^.!?]+$/g)||[text];speechSynthesis.cancel();speaking=true;if(b)b.textContent='⏹ Stop';
-    parts.forEach(function(p,i){var u=new SpeechSynthesisUtterance(p);u.rate=0.95;if(i===parts.length-1)u.onend=function(){speaking=false;if(b)b.textContent='🎧 Read aloud';listened();};speechSynthesis.speak(u);});
+    if(speaking){speechSynthesis.cancel();speaking=false;clearMarks();if(b)b.textContent='🎧 Read aloud';return;}
+    var q=[];(S.verses||[]).forEach(function(l,i){l.forEach(function(v,j){q.push({i:i,j:j,t:v.t});});});
+    if(!q.length)return;
+    speechSynthesis.cancel();speaking=true;if(b)b.textContent='⏹ Stop';
+    var idx=0;
+    function next(){
+      if(!speaking)return;
+      if(idx>=q.length){speaking=false;clearMarks();if(b)b.textContent='🎧 Read aloud';listened();return;}
+      var item=q[idx++],el=document.getElementById('bsV'+item.i+'_'+item.j);
+      var words=el?el.querySelectorAll('.w'):[],starts=[],pos=0;
+      item.t.split(/\s+/).forEach(function(w){var k=item.t.indexOf(w,pos);starts.push(k);pos=k+w.length;});
+      var u=new SpeechSynthesisUtterance(item.t);u.rate=0.95;
+      u.onstart=function(){clearMarks();if(el){el.classList.add('reading');try{el.scrollIntoView({behavior:'smooth',block:'center'});}catch(e){}}};
+      u.onboundary=function(ev){if(ev.name&&ev.name!=='word')return;var c=ev.charIndex,w=0;for(var k=0;k<starts.length;k++){if(starts[k]<=c)w=k;else break;}
+        var on=el&&el.querySelector('.w.on');if(on)on.classList.remove('on');if(words[w])words[w].classList.add('on');};
+      u.onend=function(){next();};u.onerror=function(){next();};
+      speechSynthesis.speak(u);
+    }
+    next();
   }
+  function clearMarks(){document.querySelectorAll('#bsBody .reading,#bsBody .w.on').forEach(function(e){e.classList.remove('reading');e.classList.remove('on');});}
   function listened(){tick('spBibleAudio');if(S){S.done.audio=true;S.done[1]=true;persist();if(S.step===1)render();}}
+  // Listened to the audiobook: no need to read it again here — on to the Study step.
+  function listenedApp(){listened();if(S&&S.step===1){toast('🎧 Bible Audio ✓ — on to the study');stepTo(2);}}
   function xref(i){
     var el=document.getElementById('bsX'+i);if(!el)return;if(el.innerHTML){el.innerHTML='';return;}
     var r=parseSeg(String(S.study.crossrefs[i]).split(/\s+[—–-]\s+/)[0]);if(!r){el.textContent='(couldn\'t read that reference)';return;}
@@ -321,10 +341,11 @@
     +'.bs-scripture{font-family:Georgia,serif;font-size:1.02rem;line-height:1.75;color:#1f1147}.bs-scripture sup{color:#a78bfa;font-size:.65em;margin-right:2px}.bs-scripture .kv{background:#fef3c7;border-radius:4px}'
     +'.bs-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}.bs-load{padding:30px 10px;text-align:center;color:#6d28d9}.bs-link{background:none;border:none;color:#7c3aed;font-weight:700;cursor:pointer;padding:4px 0}'
     +'.bs-scripture .fo{background:#ede9fe;border-radius:4px}.bs-ch{display:inline-block;color:#7c3aed;font-family:system-ui;margin:0 4px 0 2px}'
+    +'.bs-v.reading{background:#e0f2fe;border-radius:4px}.w.on{background:#7c3aed;color:#fff;border-radius:3px;padding:0 1px}'
     +'.bs-xref{color:#6d28d9;font-weight:600;cursor:pointer;padding:5px 0}.bs-xtext{font-family:Georgia,serif;font-size:.9rem;color:#374151;line-height:1.6}';
   var st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
 
-  window.bibleStudy={open:open,close:close,step:function(d){stepTo(S.step+d);},go:function(i){stepTo(i);},listen:listen,listened:listened,xref:xref,plan:choosePlan,journal:journal,day:pickDay,fix:fixReading,
+  window.bibleStudy={open:open,close:close,step:function(d){stepTo(S.step+d);},go:function(i){stepTo(i);},listen:listen,listened:listened,listenedApp:listenedApp,xref:xref,plan:choosePlan,journal:journal,day:pickDay,fix:fixReading,
     retry:function(){S._preparing=false;render();}};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(renderCard,800);});else setTimeout(renderCard,800);
 })();
