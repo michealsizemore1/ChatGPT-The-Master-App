@@ -297,6 +297,17 @@
     draw('');document.getElementById('bsSearch').addEventListener('input',function(e){draw(e.target.value);});
   }
 
+  // ── Daily AI Review input: today's study (passage, theme, key verse, SOAP answers, steps done) ──
+  window.bibleStudyDayText=function(date){
+    try{var o=ls('bstudy_'+date);if(!o)return '';var st=o.study||{},a=o.answers||{},out=[];
+      out.push('Reading: '+((o.segs||[]).map(segLabel).join('; ')||o.label||''));
+      if(st.focus_label)out.push('Study focus: '+st.focus_label);
+      if(st.theme)out.push('Theme: '+st.theme);
+      if(st.key_verse)out.push('Key verse: '+(st.key_verse.ref||st.key_verse.text||st.key_verse));
+      ['s','o','a','p'].forEach(function(k){var v=a[k];if(Array.isArray(v))v=v.filter(Boolean).join(' / ');if(v)out.push({s:'Scripture noted',o:'Observation',a:'Application',p:'Prayer'}[k]+': '+v);});
+      out.push(o.finished?'Status: study finished':'Status: started, not finished');
+      return out.join('\n');}catch(e){return '';}
+  };
   // ── Weekly AI Review input ──
   window.bibleStudyWeekText=function(from,to){
     var out=[];try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);var m=k&&k.match(/^bstudy_(\d{4}-\d{2}-\d{2})$/);if(m&&m[1]>=from&&m[1]<=to){var o=ls(k);if(o&&o.study){var a=o.answers||{};
