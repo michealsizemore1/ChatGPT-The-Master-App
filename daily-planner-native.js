@@ -27,10 +27,24 @@
     return list.filter(function(i){return !/^(?:pt|dg)[0-2]c$/.test(i.key||'');}).map(function(i){
       return {key:i.key||'',id:i.id||'',group:i.group,label:String(i.label||'').replace(/\s*-\s*Actual\s*$/i,''),state:i.status==='blank'?'':i.status};});
   }
+  function schedule(){
+    goRealDay();
+    try{renderJournalSchedule();}catch(e){}
+    var map=window._journalScheduleItemsById||{},items=Object.keys(map).map(function(id){return map[id];});
+    var now=new Date(),cur=now.getHours()*60+now.getMinutes(),next=-1;
+    for(var i=0;i<items.length;i++){if(!items[i].fixed&&!items[i].done&&Number(items[i].mins)>=cur){next=i;break;}}
+    if(next<0)next=items.findIndex(function(it){return !it.fixed&&!it.done;});
+    return items.map(function(it,i){
+      var st=it.scheduleStatus||(it.done?'green':'');if(st==='blank')st='';
+      return {id:it.id,time:it.time||'',label:String(it.label||''),detail:String(it.detail||'').replace(/<[^>]*>/g,''),done:!!it.done,
+        partial:!!it.partial,fixed:!!it.fixed,state:st,next:i===next};});
+  }
   window.ccNative={
-    version:2,
+    version:3,
     /** Everything the native Today screen shows: {date, focus:[…], checks:[{key|id, group, label, state}]} */
-    all:function(){goRealDay();var f=JSON.parse(window.ccNative.focus());f.checks=checks();return JSON.stringify(f);},
+    all:function(){goRealDay();var f=JSON.parse(window.ccNative.focus());f.checks=checks();f.schedule=schedule();return JSON.stringify(f);},
+    /** My Schedule: tap cycles done → not done → not marked, exactly like the Command Center's own button. */
+    scheduleTap:function(id){goRealDay();try{renderJournalSchedule();journalScheduleCycleStatus(null,id);}catch(e){return false;}refresh();try{if(window.BSNative&&BSNative.changed)BSNative.changed();}catch(e){}return true;},
     /** Set a daily check (tri-check key like 'wBP') to '', green, black, purple or red. */
     setCheck:function(key,state){
       if(!key||STATES.indexOf(state)<0)return false;goRealDay();
