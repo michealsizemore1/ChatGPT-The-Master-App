@@ -141,8 +141,27 @@
     weekOff2=keep;try{if(activeTabName()==='weekly'){renderWeekly();renderGoals();}}catch(e){}
     return out;
   }
+  // 📚 Library: today's listening, the finish-by plan, and your finished books.
+  function library(){
+    goRealDay();
+    var ck=document.querySelector('.tri-check[data-key="gaAudiobook"]');
+    try{if(typeof renderAudiobookFinishPlan==='function')renderAudiobookFinishPlan();}catch(e){}
+    var pr=document.getElementById('audioPlanResult'),plan=pr&&pr.style.display!=='none'?String(pr.innerText||'').replace(/\n{2,}/g,'\n').trim().slice(0,600):'';
+    var books=[];try{books=getBooks();}catch(e){}
+    var yr=String(new Date().getFullYear());
+    var done=books.filter(function(b){return b.dateCompleted;}).sort(function(a,b){return String(b.dateCompleted).localeCompare(String(a.dateCompleted));});
+    return {state:ck?(ck.dataset.state||''):'',text:(document.getElementById('gaAudiobookText')||{}).value||'',time:(document.getElementById('gaAudiobookTime')||{}).value||'',
+      plan:plan,count:books.length,year:done.filter(function(b){return String(b.dateCompleted).slice(0,4)===yr;}).length,
+      recent:done.slice(0,8).map(function(b){return {title:b.title||'',author:b.author||'',date:b.dateCompleted||'',rating:Number(b.rating)||0};})};
+  }
   window.ccNative={
-    version:10,
+    version:11,
+    library:function(){return JSON.stringify(library());},
+    /** Today's listening: 'gaAudiobookText' (what) or 'gaAudiobookTime' (time, e.g. 45 or 1:10:00). */
+    setListen:function(id,value){if(id!=='gaAudiobookText'&&id!=='gaAudiobookTime')return false;goRealDay();var el=document.getElementById(id);if(!el)return false;
+      el.value=String(value||'');try{el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));}catch(e){}try{save();}catch(e){}refresh();return true;},
+    addBook:function(title,author,date,rating){title=String(title||'').trim();if(!title)return false;var b=getBooks();
+      b.unshift({id:Date.now(),title:title,author:String(author||'').trim(),dateCompleted:String(date||''),rating:Number(rating)||0,notes:''});saveBooks(b);try{renderLibrary();}catch(e){}return true;},
     weekTab:function(off){return JSON.stringify(weekTab(off));},
     /** Weekly targets: {Miles, Bible, Prayer, Exercise, Audible} (0 / empty = no goal). */
     setGoals:function(json){var g={};try{g=JSON.parse(localStorage.getItem('weekly_goals')||'{}')||{};}catch(e){}
@@ -194,7 +213,7 @@
     reviewFill:function(){goRealDay();var b=document.getElementById('aiFillDayReviewBtn');if(!b||b.disabled)return false;
       if(!(typeof journalAIKey==='function'&&journalAIKey()))return 'nokey';aiFillEntireDayReview(b);return true;},
     /** Everything the native Today screen shows: {date, focus:[…], checks:[{key|id, group, label, state}]} */
-    all:function(){goRealDay();var f=JSON.parse(window.ccNative.focus());f.checks=checks();f.schedule=schedule();f.review=review();f.wellness=wellness();f.bible=bible();f.meditation=meditation();f.weekly=weekly();f.journal=journalText();return JSON.stringify(f);},
+    all:function(){goRealDay();var f=JSON.parse(window.ccNative.focus());f.checks=checks();f.schedule=schedule();f.review=review();f.wellness=wellness();f.bible=bible();f.meditation=meditation();f.weekly=weekly();f.journal=journalText();f.library=library();return JSON.stringify(f);},
     /** My Schedule: tap cycles done → not done → not marked, exactly like the Command Center's own button. */
     scheduleTap:function(id){goRealDay();try{renderJournalSchedule();journalScheduleCycleStatus(null,id);}catch(e){return false;}refresh();try{if(window.BSNative&&BSNative.changed)BSNative.changed();}catch(e){}return true;},
     /** Set a daily check (tri-check key like 'wBP') to '', green, black, purple or red. */
