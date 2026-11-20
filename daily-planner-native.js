@@ -111,8 +111,34 @@
     }
     return out;
   }
+  // 📅 Calendar: month grid status + events (yours, training plan, habits, bills) like the Daily page calendar.
+  function calMonth(y,m){
+    var acts=new Set();try{(getActivities()||[]).forEach(function(a){if(a&&a.date)acts.add(a.date);});}catch(e){}
+    var ev=new Set();try{journalCalendarCombinedEvents().forEach(function(e){ev.add(e.date);});}catch(e){}
+    var first=new Date(y,m,1),dim=new Date(y,m+1,0).getDate(),days=[];
+    for(var d=1;d<=dim;d++){var k=dk(new Date(y,m,d)),st='';try{st=journalCalendarStatus(k,acts);}catch(e){}days.push({d:d,date:k,status:st,event:ev.has(k)});}
+    return {title:first.toLocaleDateString('en-US',{month:'long',year:'numeric'}),lead:(first.getDay()+6)%7,days:days,today:dk(new Date())};
+  }
+  function calEvents(date){
+    var list=[];try{list=journalCalendarCombinedEvents().filter(function(e){return e.date===date;});}catch(e){}
+    list.sort(function(a,b){return(a.time||'99:99').localeCompare(b.time||'99:99');});
+    return list.map(function(e){var r=Number(e.reminderMinutes||0);return {id:e.id,date:e.date,time:e.time||'',timeLabel:e.time?journalFormatEventTime(e.time):'All day',title:e.title||'Untitled event',note:e.note||'',
+      kind:e.trainingPlan?'training':e.habitGrowth?'habit':e.moneyEvent?'money':'mine',reminder:(e.noReminder||!e.time)?-1:r};});
+  }
+  function calSave(list){journalCalendarEventsSave(list);try{decorateMyCalendarEvents();}catch(e){}try{checkCalendarReminders();}catch(e){}}
   window.ccNative={
-    version:8,
+    version:9,
+    calendar:function(y,m){return JSON.stringify(calMonth(Number(y),Number(m)));},
+    events:function(date){return JSON.stringify(calEvents(String(date)));},
+    /** Add or update one of your events (id empty = new). reminder: minutes before, -1 = none. */
+    saveEvent:function(id,date,title,time,note,reminder){
+      title=String(title||'').trim();if(!title)return false;time=String(time||'');reminder=time?Number(reminder):-1;
+      var patch={date:String(date),time:time,title:title,note:String(note||'').trim(),reminderMinutes:reminder,noReminder:!time||reminder<0};
+      var list=journalCalendarEventsAll();
+      if(id)list=list.map(function(e){return e.id===id?Object.assign({},e,patch):e;});else list.push(Object.assign({id:'ev-'+Date.now()},patch));
+      calSave(list);return true;
+    },
+    deleteEvent:function(id){calSave(journalCalendarEventsAll().filter(function(e){return e.id!==id;}));return true;},
     period:function(kind,off){return JSON.stringify(period(kind==='yearly'?'yearly':'monthly',off));},
     /** ✍️ Daily Journal (today). */
     setJournal:function(value){goRealDay();var el=document.getElementById('jNotes');if(!el)return false;value=String(value||'');if(el.value===value)return true;
