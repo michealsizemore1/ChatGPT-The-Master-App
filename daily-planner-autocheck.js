@@ -8,7 +8,6 @@
     ['wWght','wWghtVal',function(v){return parseFloat(v)>0;}],
     ['wSleep','wSleepVal',function(v){return /\d/.test(v);}],
     ['exDogWalk','exDogWalkVal',function(v){return v.trim()!=='';}],
-    ['exBike','exBikeVal',function(v){return v.trim()!=='';}],
     ['exStepsCheck','exSteps',function(v){return Number(v)>=10000;}]
   ];
   function dayKey(){try{return typeof dk==='function'&&typeof today!=='undefined'?dk(today):'';}catch(e){return '';}}
@@ -43,7 +42,6 @@
       var d=dayKey();if(!d)return;var changed=false;
       // Every blank Wellness / Movement / Audiobook check that isn't done → red. Meds stays yours.
       ITEMS.concat([['gaAudiobook','',function(){return window.audiobookDone&&window.audiobookDone();}]]).forEach(function(it){
-        if(it[0]==='exBike')return;
         var box=document.querySelector('.tri-check[data-key="'+it[0]+'"]');if(!box||box.dataset.state)return;
         var inp=it[1]?document.getElementById(it[1]):null;if(it[2](String(inp?inp.value||'':'')))return;
         // Planned rest day: steps short of 10,000 are N/A, not missed.

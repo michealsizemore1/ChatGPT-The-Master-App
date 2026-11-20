@@ -53,8 +53,7 @@
     ['wWght','Weight',[['wWghtVal','Weight','lbs']]],
     ['wSleep','Sleep',[['wSleepVal','Sleep','hrs (7.5 or 6:30)'],['wSleepScore','Sleep score','0-100']]],
     ['exDogWalk','Dog Walk',[['exDogWalkVal','Dog walk','duration / notes']]],
-    ['exStepsCheck','10,000 steps',[['exSteps','Steps','steps']]],
-    ['exBike','Bike',[['exBikeVal','Bike','distance / time']]]];
+    ['exStepsCheck','10,000 steps',[['exSteps','Steps','steps']]]];
   var WELL_IDS={};WELL.forEach(function(w){w[2].forEach(function(f){WELL_IDS[f[0]]=1;});});
   function wellness(){
     goRealDay();
