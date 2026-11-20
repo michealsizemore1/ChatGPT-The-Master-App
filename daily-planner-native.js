@@ -154,8 +154,27 @@
       plan:plan,count:books.length,year:done.filter(function(b){return String(b.dateCompleted).slice(0,4)===yr;}).length,
       recent:done.slice(0,8).map(function(b){return {title:b.title||'',author:b.author||'',date:b.dateCompleted||'',rating:Number(b.rating)||0};})};
   }
+  // 🌱 Habits: today's habits with their controls, like the Habits tab.
+  function habits(){
+    try{h2ViewDate=new Date();h2SyncFromJournal();}catch(e){}
+    var state;try{state=h2State();}catch(e){return null;}
+    var key=h2Key(new Date()),now=new Date(),list=[],due=0,doneN=0,best=0;
+    state.habits.forEach(function(h){
+      var log=h2Log(state,h.id,key),isDue=h2IsDue(h,now,state),done=h2IsComplete(h,log),st={};try{st=h2HabitStats(state,h)||{};}catch(e){}
+      if(isDue){due++;if(done)doneN++;}best=Math.max(best,st.streak||0);
+      var kind=h.autoSource==='steps'||h.autoSource==='hydration'||h.autoSource==='sleep-routine'||h.autoSource==='udemy'||h.autoSource==='training'?'auto':h.type==='check'?'check':'count';
+      var valText=h.autoSource==='sleep-routine'?Number(log.value||0)+' / 6 routine steps':h.autoSource==='steps'?Number(log.value||0).toLocaleString()+' / '+Number(h.target||10000).toLocaleString()+' steps':
+        h.autoSource==='hydration'?Number(log.value||0)+' / '+Number(h.target||75)+' oz':kind==='count'?Number(log.value||0)+' / '+Number(h.target||1)+(h.type==='duration'?' min':''):'';
+      list.push({id:h.id,name:h.name||'',category:h.category||'',schedule:h2ScheduleLabel(h),type:h2TypeLabel(h),kind:kind,due:isDue,done:done,status:log.status||'',value:valText,streak:st.streak||0});
+    });
+    return {due:due,done:doneN,best:best,list:list};
+  }
   window.ccNative={
-    version:11,
+    version:12,
+    habits:function(){return JSON.stringify(habits());},
+    /** Check habit: status 'done' / 'partial' / 'skip' (tapping the same again clears it). Count / minutes habit: delta ±1. */
+    habitLog:function(id,status){try{h2ViewDate=new Date();h2SetLog(id,status);}catch(e){return false;}return true;},
+    habitAdjust:function(id,delta){try{h2ViewDate=new Date();h2Adjust(id,Number(delta)||0);}catch(e){return false;}return true;},
     library:function(){return JSON.stringify(library());},
     /** Today's listening: 'gaAudiobookText' (what) or 'gaAudiobookTime' (time, e.g. 45 or 1:10:00). */
     setListen:function(id,value){if(id!=='gaAudiobookText'&&id!=='gaAudiobookTime')return false;goRealDay();var el=document.getElementById(id);if(!el)return false;
