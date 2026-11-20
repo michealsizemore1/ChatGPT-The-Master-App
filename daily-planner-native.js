@@ -85,8 +85,12 @@
       busy:!!(btn&&btn.disabled),hasKey:typeof journalAIKey==='function'&&!!journalAIKey(),
       fields:WREV.map(function(r){var el=document.getElementById(r[0]),v=el?el.value:'';return {id:r[0],label:r[1],value:v,unsaved:(saved[r[0]]||'')!==v};})};
   }
+  function journalText(){goRealDay();var el=document.getElementById('jNotes');return el?el.value:'';}
   window.ccNative={
-    version:6,
+    version:7,
+    /** ✍️ Daily Journal (today). */
+    setJournal:function(value){goRealDay();var el=document.getElementById('jNotes');if(!el)return false;value=String(value||'');if(el.value===value)return true;
+      el.value=value;try{el.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}try{save();}catch(e){}return true;},
     /** 📖 Bible Study / 🧘 Meditation: open the Command Center's own guided session or meditation screen. */
     bibleOpen:function(){goRealDay();if(!(typeof journalAIKey==='function'&&journalAIKey()))return 'nokey';openTab('bible');try{bibleStudy.open();}catch(e){return false;}return true;},
     meditOpen:function(){goRealDay();openTab('meditate');return true;},
@@ -117,7 +121,7 @@
     reviewFill:function(){goRealDay();var b=document.getElementById('aiFillDayReviewBtn');if(!b||b.disabled)return false;
       if(!(typeof journalAIKey==='function'&&journalAIKey()))return 'nokey';aiFillEntireDayReview(b);return true;},
     /** Everything the native Today screen shows: {date, focus:[…], checks:[{key|id, group, label, state}]} */
-    all:function(){goRealDay();var f=JSON.parse(window.ccNative.focus());f.checks=checks();f.schedule=schedule();f.review=review();f.wellness=wellness();f.bible=bible();f.meditation=meditation();f.weekly=weekly();return JSON.stringify(f);},
+    all:function(){goRealDay();var f=JSON.parse(window.ccNative.focus());f.checks=checks();f.schedule=schedule();f.review=review();f.wellness=wellness();f.bible=bible();f.meditation=meditation();f.weekly=weekly();f.journal=journalText();return JSON.stringify(f);},
     /** My Schedule: tap cycles done → not done → not marked, exactly like the Command Center's own button. */
     scheduleTap:function(id){goRealDay();try{renderJournalSchedule();journalScheduleCycleStatus(null,id);}catch(e){return false;}refresh();try{if(window.BSNative&&BSNative.changed)BSNative.changed();}catch(e){}return true;},
     /** Set a daily check (tri-check key like 'wBP') to '', green, black, purple or red. */
