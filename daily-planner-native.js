@@ -46,8 +46,34 @@
     var fields=REV.map(function(r){var el=document.getElementById(r[0]),v=el?el.value:'';return {id:r[0],label:r[1],value:v,unsaved:(saved[r[0]]||'')!==v};});
     return {fields:fields,busy:!!(btn&&btn.disabled),hasKey:typeof journalAIKey==='function'&&!!journalAIKey()};
   }
+  // Wellness tab: each check with the numbers that go with it.
+  var WELL=[
+    ['wBP','BP',[['wBPVal','BP','120/80'],['wPulseVal','Pulse','bpm'],['wRestHRVal','Morning HR','bpm']]],
+    ['wMeds','Meds',[['wMedsVal','Meds','HCTZ, Rosuvastatin…']]],
+    ['wWght','Weight',[['wWghtVal','Weight','lbs']]],
+    ['wSleep','Sleep',[['wSleepVal','Sleep','hrs (7.5 or 6:30)'],['wSleepScore','Sleep score','0-100']]],
+    ['exDogWalk','Dog Walk',[['exDogWalkVal','Dog walk','duration / notes']]],
+    ['exStepsCheck','10,000 steps',[['exSteps','Steps','steps']]],
+    ['exBike','Bike',[['exBikeVal','Bike','distance / time']]]];
+  var WELL_IDS={};WELL.forEach(function(w){w[2].forEach(function(f){WELL_IDS[f[0]]=1;});});
+  function wellness(){
+    goRealDay();
+    return WELL.map(function(w){
+      var ck=document.querySelector('.tri-check[data-key="'+w[0]+'"]');
+      return {key:w[0],label:w[1],state:ck?(ck.dataset.state||''):'',fields:w[2].map(function(f){var el=document.getElementById(f[0]);
+        return {id:f[0],label:f[1],hint:f[2],value:el?el.value:'',number:!!(el&&el.type==='number')};})};
+    }).filter(function(w){return document.querySelector('.tri-check[data-key="'+w.key+'"]');});
+  }
   window.ccNative={
-    version:4,
+    version:5,
+    /** Change a Wellness value (BP, weight, sleep, steps…) — the Command Center's auto-checks react as if typed there. */
+    setField:function(id,value){
+      if(!WELL_IDS[id])return false;goRealDay();
+      var el=document.getElementById(id);if(!el)return false;value=String(value==null?'':value);if(el.value===value)return true;
+      el.value=value;
+      try{el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));}catch(e){}
+      try{save();}catch(e){}refresh();return true;
+    },
     /** Daily AI Review: change a field (saved like typing in the Command Center). */
     setReview:function(id,value){
       if(!REV.some(function(r){return r[0]===id;}))return false;goRealDay();
@@ -60,7 +86,7 @@
     reviewFill:function(){goRealDay();var b=document.getElementById('aiFillDayReviewBtn');if(!b||b.disabled)return false;
       if(!(typeof journalAIKey==='function'&&journalAIKey()))return 'nokey';aiFillEntireDayReview(b);return true;},
     /** Everything the native Today screen shows: {date, focus:[…], checks:[{key|id, group, label, state}]} */
-    all:function(){goRealDay();var f=JSON.parse(window.ccNative.focus());f.checks=checks();f.schedule=schedule();f.review=review();return JSON.stringify(f);},
+    all:function(){goRealDay();var f=JSON.parse(window.ccNative.focus());f.checks=checks();f.schedule=schedule();f.review=review();f.wellness=wellness();return JSON.stringify(f);},
     /** My Schedule: tap cycles done → not done → not marked, exactly like the Command Center's own button. */
     scheduleTap:function(id){goRealDay();try{renderJournalSchedule();journalScheduleCycleStatus(null,id);}catch(e){return false;}refresh();try{if(window.BSNative&&BSNative.changed)BSNative.changed();}catch(e){}return true;},
     /** Set a daily check (tri-check key like 'wBP') to '', green, black, purple or red. */
