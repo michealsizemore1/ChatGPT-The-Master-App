@@ -126,8 +126,29 @@
       kind:e.trainingPlan?'training':e.habitGrowth?'habit':e.moneyEvent?'money':'mine',reminder:(e.noReminder||!e.time)?-1:r};});
   }
   function calSave(list){journalCalendarEventsSave(list);try{decorateMyCalendarEvents();}catch(e){}try{checkCalendarReminders();}catch(e){}}
+  // 📊 Weekly tab: goal bars, the week's digest and its tables, for any week offset (0 = this week).
+  function weekTab(off){
+    off=Number(off)||0;var keep=weekOff2;weekOff2=off;
+    try{renderWeekly();}catch(e){}try{renderGoals();}catch(e){}
+    var out={off:off,label:(document.getElementById('weekLabel')||{}).textContent||'',goals:[],sections:[]};
+    document.querySelectorAll('#goalBars .goal-row').forEach(function(r){
+      var sp=r.querySelectorAll('.goal-label span'),fill=r.querySelector('.goal-bar-fill');
+      out.goals.push({label:sp[0]?sp[0].textContent.trim():'',value:sp[1]?sp[1].textContent.trim().replace(/\s*\d+%$/,''):'',pct:fill?parseInt(fill.style.width,10)||0:0,reached:r.classList.contains('goal-reached')});
+    });
+    var dg=document.getElementById('wDigest');out.digest=dg?String(dg.innerText||'').replace(/\n{2,}/g,'\n').trim().slice(0,1200):'';
+    [['wFitness','🏃 Fitness'],['wWellness','💚 Wellness'],['wSpirituality','📖 Spirituality & Reading'],['wNutrition','🍎 Nutrition'],['wNutritionMicro','🧪 Micronutrients']].forEach(function(x){var d=tableData(x[0]);if(d&&d.rows.length)out.sections.push({title:x[1],head:d.head,rows:d.rows});});
+    try{out.targets=JSON.parse(localStorage.getItem('weekly_goals')||'{}');}catch(e){out.targets={};}
+    weekOff2=keep;try{if(activeTabName()==='weekly'){renderWeekly();renderGoals();}}catch(e){}
+    return out;
+  }
   window.ccNative={
-    version:9,
+    version:10,
+    weekTab:function(off){return JSON.stringify(weekTab(off));},
+    /** Weekly targets: {Miles, Bible, Prayer, Exercise, Audible} (0 / empty = no goal). */
+    setGoals:function(json){var g={};try{g=JSON.parse(localStorage.getItem('weekly_goals')||'{}')||{};}catch(e){}
+      var n=JSON.parse(json||'{}');['Miles','Bible','Prayer','Exercise','Audible'].forEach(function(k){if(k in n){var v=parseFloat(n[k]);if(v>0)g[k]=v;else delete g[k];}});
+      ['Miles','Bible','Prayer','Exercise','Audible'].forEach(function(k){var el=document.getElementById('g'+k);if(el)el.value=g[k]||'';});
+      try{saveGoals();}catch(e){localStorage.setItem('weekly_goals',JSON.stringify(g));}return true;},
     calendar:function(y,m){return JSON.stringify(calMonth(Number(y),Number(m)));},
     events:function(date){return JSON.stringify(calEvents(String(date)));},
     /** Add or update one of your events (id empty = new). reminder: minutes before, -1 = none. */
