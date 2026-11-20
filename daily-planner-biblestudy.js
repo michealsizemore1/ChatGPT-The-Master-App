@@ -356,7 +356,15 @@
     +'.bs-xref{color:#6d28d9;font-weight:600;cursor:pointer;padding:5px 0}.bs-xtext{font-family:Georgia,serif;font-size:.9rem;color:#374151;line-height:1.6}';
   var st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
 
-  window.bibleStudy={open:open,close:close,step:function(d){stepTo(S.step+d);},go:function(i){stepTo(i);},listen:listen,listened:listened,listenedApp:listenedApp,xref:xref,plan:choosePlan,journal:journal,day:pickDay,fix:fixReading,
+  // For BeyondStride's Life tab: today's study at a glance (same facts as the Bible Study card).
+  function info(){
+    var sv=ls(sessionKey()),dayPick=(ls('bstudy_day')||{}).date===todayKey()?(ls('bstudy_day')||{}).day:'';
+    var r=sv&&sv.segs?{label:sv.label,text:sv.segs.map(segLabel).join('; ')}:readingFor(todayKey(),dayPick);
+    var steps=['Open','Read','Study','Worship','Close'],done=sv&&sv.done?Object.keys(sv.done).filter(function(k){return sv.done[k];}).length:0;
+    return {status:sv&&sv.finished?'done':sv&&sv.study?'progress':'new',label:r.label||'',passages:parseSegs(r.text||'').map(segLabel).join('; ')||r.text||'',
+      memory:memoryLine(),step:sv&&typeof sv.step==='number'?steps[sv.step]||'':'',hasKey:!!journalAIKey()};
+  }
+  window.bibleStudy={info:info,open:open,close:close,step:function(d){stepTo(S.step+d);},go:function(i){stepTo(i);},listen:listen,listened:listened,listenedApp:listenedApp,xref:xref,plan:choosePlan,journal:journal,day:pickDay,fix:fixReading,
     retry:function(){S._preparing=false;render();}};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(renderCard,800);});else setTimeout(renderCard,800);
 })();

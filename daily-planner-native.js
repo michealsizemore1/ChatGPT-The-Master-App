@@ -64,8 +64,40 @@
         return {id:f[0],label:f[1],hint:f[2],value:el?el.value:'',number:!!(el&&el.type==='number')};})};
     }).filter(function(w){return document.querySelector('.tri-check[data-key="'+w.key+'"]');});
   }
+  function openTab(name){
+    var b=document.getElementById('hm-'+name)||document.querySelector('button.tab-btn[onclick*="\''+name+'\'"]');
+    if(b)b.click();else{try{switchTab(name,{currentTarget:null,target:null,preventDefault:function(){}});}catch(e){}}
+    window.scrollTo(0,0);
+  }
+  function bible(){try{return window.bibleStudy&&bibleStudy.info?bibleStudy.info():null;}catch(e){return null;}}
+  function meditation(){
+    goRealDay();var ck=document.querySelector('.tri-check[data-key="spMeditation"]'),line='',streak='';
+    try{line=journalMeditationTodayLine();}catch(e){}
+    var mins=0,n=0;try{var ss=JSON.parse(localStorage.getItem('medit_sessions')||'[]'),wk=typeof wkStartOf==='function'?dk(wkStartOf(new Date())):'';
+      ss.forEach(function(x){if(x&&x.date&&(!wk||x.date>=wk)){mins+=Number(x.dur)||0;n++;}});}catch(e){}
+    return {state:ck?(ck.dataset.state||''):'',line:line,weekMins:mins,weekSessions:n,scripture:localStorage.getItem('medit_scripture')||''};
+  }
+  var WREV=[['revWins','Wins This Week'],['revImprove','What to Improve'],['revFocus','Focus for Next Week'],['revLessons','Lessons Learned']];
+  function weekly(){
+    try{renderReview();}catch(e){}
+    var btn=document.getElementById('aiFillReviewBtn'),lab=document.getElementById('revLabel'),stats=document.getElementById('revStats');
+    var saved={};try{var ws=wkStart(revOff2);saved=JSON.parse(localStorage.getItem('review_'+dk(ws))||'{}')||{};}catch(e){}
+    return {label:lab?lab.textContent:'',off:typeof revOff2==='number'?revOff2:0,stats:stats?String(stats.innerText||'').replace(/\s+/g,' ').replace(/(\d)([A-Za-z])/g,'$1 $2').replace(/([a-z])\s?(\d)/g,'$1 · $2').trim().slice(0,400):'',
+      busy:!!(btn&&btn.disabled),hasKey:typeof journalAIKey==='function'&&!!journalAIKey(),
+      fields:WREV.map(function(r){var el=document.getElementById(r[0]),v=el?el.value:'';return {id:r[0],label:r[1],value:v,unsaved:(saved[r[0]]||'')!==v};})};
+  }
   window.ccNative={
-    version:5,
+    version:6,
+    /** 📖 Bible Study / 🧘 Meditation: open the Command Center's own guided session or meditation screen. */
+    bibleOpen:function(){goRealDay();if(!(typeof journalAIKey==='function'&&journalAIKey()))return 'nokey';openTab('bible');try{bibleStudy.open();}catch(e){return false;}return true;},
+    meditOpen:function(){goRealDay();openTab('meditate');return true;},
+    /** 📅 Weekly review (this week = 0, last week = -1 …). */
+    weekly:function(){return JSON.stringify(weekly());},
+    weeklyShift:function(n){try{changeRevOff(n);}catch(e){}return JSON.stringify(weekly());},
+    setWeekly:function(id,value){if(!WREV.some(function(r){return r[0]===id;}))return false;var el=document.getElementById(id);if(!el)return false;
+      el.value=String(value||'');try{if(typeof autoGrowReviewField==='function')autoGrowReviewField(el);}catch(e){}try{saveReview();}catch(e){}return true;},
+    saveWeekly:function(){try{saveReview();}catch(e){return false;}return true;},
+    weeklyFill:function(){var b=document.getElementById('aiFillReviewBtn');if(!b||b.disabled)return false;if(!(typeof journalAIKey==='function'&&journalAIKey()))return 'nokey';aiFillEntireReview(b);return true;},
     /** Change a Wellness value (BP, weight, sleep, steps…) — the Command Center's auto-checks react as if typed there. */
     setField:function(id,value){
       if(!WELL_IDS[id])return false;goRealDay();
@@ -86,7 +118,7 @@
     reviewFill:function(){goRealDay();var b=document.getElementById('aiFillDayReviewBtn');if(!b||b.disabled)return false;
       if(!(typeof journalAIKey==='function'&&journalAIKey()))return 'nokey';aiFillEntireDayReview(b);return true;},
     /** Everything the native Today screen shows: {date, focus:[…], checks:[{key|id, group, label, state}]} */
-    all:function(){goRealDay();var f=JSON.parse(window.ccNative.focus());f.checks=checks();f.schedule=schedule();f.review=review();f.wellness=wellness();return JSON.stringify(f);},
+    all:function(){goRealDay();var f=JSON.parse(window.ccNative.focus());f.checks=checks();f.schedule=schedule();f.review=review();f.wellness=wellness();f.bible=bible();f.meditation=meditation();f.weekly=weekly();return JSON.stringify(f);},
     /** My Schedule: tap cycles done → not done → not marked, exactly like the Command Center's own button. */
     scheduleTap:function(id){goRealDay();try{renderJournalSchedule();journalScheduleCycleStatus(null,id);}catch(e){return false;}refresh();try{if(window.BSNative&&BSNative.changed)BSNative.changed();}catch(e){}return true;},
     /** Set a daily check (tri-check key like 'wBP') to '', green, black, purple or red. */
