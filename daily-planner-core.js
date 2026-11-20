@@ -2045,6 +2045,7 @@ function renderDayReview(){
 }
 // 🌙 Backup: when a day's review is still empty, fill it (once) from the one BeyondStride wrote on the phone just before
 // 11:50 PM — so it's there even if the Command Center wasn't open that night.
+function dayRevJoined(){return DAY_REV_IDS.map(function(id){var e=document.getElementById(id);return e?e.value.trim():'';}).join('\u241E');}
 function applyPhoneDayReview(){
   try{
     var k=dk(today),flag='bsPhoneRev_'+k;if(localStorage.getItem(flag)||typeof window.bsPhoneReview!=='function')return;
@@ -2054,7 +2055,7 @@ function applyPhoneDayReview(){
       if(!o||dk(today)!==k||!empty())return;
       var map={wins:'dayRevWins',improve:'dayRevImprove',focus:'dayRevFocus',lessons:'dayRevLessons'};
       Object.keys(map).forEach(function(f){var e=document.getElementById(map[f]);if(e&&o[f]){e.value=noTonightOutput(o[f]);autoGrowReviewField(e);}});
-      saveDayReview(true);try{localStorage.setItem(flag,'1');localStorage.setItem('autoDayRev_'+k,'phone');}catch(e){}
+      saveDayReview(true);try{localStorage.setItem(flag,'1');localStorage.setItem('autoDayRev_'+k,'phone');localStorage.setItem('bsPhoneRevText_'+k,dayRevJoined());}catch(e){}
       try{if(typeof window.autoTickReviewWritten==='function')window.autoTickReviewWritten();}catch(eT){}
       if(typeof v26Toast==='function')v26Toast('🌙 Day Review filled from BeyondStride');
     });
@@ -2100,7 +2101,11 @@ function aiFillEntireDayReview(btn){
   const current=['dayRevWins','dayRevImprove','dayRevFocus','dayRevLessons'].map(function(id){var el=document.getElementById(id);return el&&el.value.trim()?id+': '+el.value.trim():'';}).filter(Boolean).join('\n');
   const prompt='You are completing a personal daily review for '+dayLabel+'. Use only the supplied journal entry, training / nutrition / recovery data from the BeyondStride app, and existing review notes. Return ONLY one valid JSON object with exactly these four string keys:\n'
     +'{"wins":"","improve":"","focus":"","lessons":""}\n\n'
-    +'Writing requirements:\n- wins: 1-3 specific achievements or positive moments from today\n- improve: 1-3 constructive, realistic improvements\n- focus: 1-2 specific priorities for tomorrow\n- lessons: 1-3 concise takeaways from today\n'
+    +'Writing requirements:\n- wins: 2-4 specific achievements or positive moments from today\n- improve: 2-4 constructive, realistic improvements\n- focus: 1-3 specific priorities for tomorrow\n- lessons: 1-3 concise takeaways from today\n'
+    +'Cover the WHOLE day, not just running and food — training/nutrition get at most two lines per section. You MUST include:\n'
+    +'  * Faith: when a Bible study is listed below, a line in wins about it (the passage or theme, and the application or prayer if given); if spiritual checks (Bible audio, prayer, worship, Daily Bread, meditation) are done, credit them; if they are red / not done, note it in improve or focus.\n'
+    +'  * Wellness checks: mention the Wellness items (blood pressure, weight, sleep, meds, steps, dog walk, etc.) — credit the ones done (use the values in the journal when given, e.g. BP reading) and name any marked red / not done in improve.\n'
+    +'  Do not count blank (not marked yet) items as missed while the day is still going.\n'
     +'Use short bullet-style lines inside each string. Do not invent events or accomplishments. If information is limited, acknowledge that briefly and make cautious suggestions.\n'
     +'This is a reflective record of the day, kept for later. Do NOT include tonight\'s to-dos: no lights-out / bedtime times, no bedtime or recovery snack, no "drink a glass before bed", no laying out gear. Focus for tomorrow is about the day itself (training, eating habits, work, faith, family), not tonight. Prefer patterns and lessons over restating numbers.\n'
     +'Use numbers exactly as written; never guess or calculate a score that is not given (HRV in ms is not a readiness score). When the journal and BeyondStride give different numbers (for example sleep), BeyondStride is the watch / app measurement for sleep, HRV, heart rate, runs and food logged; mention both only if the difference matters.\n'
@@ -2132,9 +2137,13 @@ function autoDayReviewCheck(){
     var ev=window.bsEvening&&window.bsEvening.date===k?window.bsEvening:null;
     var at=REVIEW_AT,mins=now.getHours()*60+now.getMinutes();
     if(mins<at&&!(ev&&ev.early))return;
-    var flag='autoDayRev_'+k;if(localStorage.getItem(flag))return;
+    var flag='autoDayRev_'+k,fv=localStorage.getItem(flag);
+    // The phone's backup review (training & food only) is upgraded to this fuller one — Bible study, Wellness &
+    // Spiritual checks, journal — unless you've edited it.
+    var phoneOnly=fv==='phone'&&localStorage.getItem('bsPhoneRevText_'+k)===dayRevJoined();
+    if(fv&&!phoneOnly)return;
     if(!journalAIKey())return;
-    var empty=DAY_REV_IDS.every(function(id){var e=document.getElementById(id);return !e||!e.value.trim();});
+    var empty=phoneOnly||DAY_REV_IDS.every(function(id){var e=document.getElementById(id);return !e||!e.value.trim();});
     if(!empty){localStorage.setItem(flag,'written');return;}
     var btn=document.getElementById('aiFillDayReviewBtn');if(!btn||btn.disabled)return;
     localStorage.setItem(flag,'auto');btn.__auto=true;aiFillEntireDayReview(btn);   // richer (has your journal); the phone's is the backup
