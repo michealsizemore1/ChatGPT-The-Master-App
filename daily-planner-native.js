@@ -86,8 +86,34 @@
       fields:WREV.map(function(r){var el=document.getElementById(r[0]),v=el?el.value:'';return {id:r[0],label:r[1],value:v,unsaved:(saved[r[0]]||'')!==v};})};
   }
   function journalText(){goRealDay();var el=document.getElementById('jNotes');return el?el.value:'';}
+  // 📆 Monthly / Yearly: the same tables and heat map as those tabs, for any month/year offset (0 = this one).
+  function tableData(id){
+    var el=document.getElementById(id),t=el&&el.querySelector('table');if(!t)return null;
+    var head=[].map.call(t.querySelectorAll('thead th'),function(th){return th.textContent.trim();});
+    var rows=[].map.call(t.querySelectorAll('tbody tr, tfoot tr'),function(tr){return [].map.call(tr.children,function(td){return td.textContent.trim();});});
+    return {head:head,rows:rows};
+  }
+  function period(kind,off){
+    off=Number(off)||0;var out={kind:kind,off:off,sections:[]};
+    if(kind==='monthly'){
+      var keep=monthOff2;monthOff2=off;
+      try{renderMonthly();}catch(e){}
+      out.label=(document.getElementById('monthLabel')||{}).textContent||'';
+      [['mFitness','🏃 Fitness'],['mWellness','💚 Wellness'],['mSpirituality','📖 Spirituality & Reading']].forEach(function(x){var d=tableData(x[0]);if(d)out.sections.push({title:x[1],head:d.head,rows:d.rows});});
+      out.heat=[].map.call(document.querySelectorAll('#hmGrid > .heatmap-cell'),function(c){var cn=c.className||'',m=cn.match(/\bhm(\d)\b/);return /hm-empty/.test(cn)?'e':/hm-future/.test(cn)?'f':(m?m[1]:'0');}).join('');
+      monthOff2=keep;try{if(activeTabName()==='monthly')renderMonthly();}catch(e){}
+    }else{
+      var keepY=yearOff2;yearOff2=off;
+      try{renderYearly();}catch(e){}
+      out.label=(document.getElementById('yearLabel')||{}).textContent||'';
+      [['yFitness','🏃 Fitness'],['yWellness','💚 Wellness'],['ySpirituality','📖 Spirituality & Reading']].forEach(function(x){var d=tableData(x[0]);if(d)out.sections.push({title:x[1],head:d.head,rows:d.rows});});
+      yearOff2=keepY;try{if(activeTabName()==='yearly')renderYearly();}catch(e){}
+    }
+    return out;
+  }
   window.ccNative={
-    version:7,
+    version:8,
+    period:function(kind,off){return JSON.stringify(period(kind==='yearly'?'yearly':'monthly',off));},
     /** ✍️ Daily Journal (today). */
     setJournal:function(value){goRealDay();var el=document.getElementById('jNotes');if(!el)return false;value=String(value||'');if(el.value===value)return true;
       el.value=value;try{el.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}try{save();}catch(e){}return true;},
