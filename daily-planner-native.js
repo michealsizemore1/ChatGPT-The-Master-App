@@ -39,10 +39,28 @@
       return {id:it.id,time:it.time||'',label:String(it.label||''),detail:String(it.detail||'').replace(/<[^>]*>/g,''),done:!!it.done,
         partial:!!it.partial,fixed:!!it.fixed,state:st,next:i===next};});
   }
+  var REV=[['dayRevWins','Wins Today'],['dayRevImprove','What to Improve'],['dayRevFocus','Focus for Tomorrow'],['dayRevLessons','Lessons Learned']];
+  function review(){
+    goRealDay();var btn=document.getElementById('aiFillDayReviewBtn');
+    var saved={};try{saved=JSON.parse(localStorage.getItem('dayreview_'+realKey())||'{}')||{};}catch(e){}
+    var fields=REV.map(function(r){var el=document.getElementById(r[0]),v=el?el.value:'';return {id:r[0],label:r[1],value:v,unsaved:(saved[r[0]]||'')!==v};});
+    return {fields:fields,busy:!!(btn&&btn.disabled),hasKey:typeof journalAIKey==='function'&&!!journalAIKey()};
+  }
   window.ccNative={
-    version:3,
+    version:4,
+    /** Daily AI Review: change a field (saved like typing in the Command Center). */
+    setReview:function(id,value){
+      if(!REV.some(function(r){return r[0]===id;}))return false;goRealDay();
+      var el=document.getElementById(id);if(!el)return false;el.value=String(value||'');
+      try{if(typeof autoGrowReviewField==='function')autoGrowReviewField(el);}catch(e){}
+      try{saveDayReview(true);}catch(e){}return true;
+    },
+    saveReview:function(){goRealDay();try{saveDayReview(true);}catch(e){return false;}try{if(window.BSNative&&BSNative.changed)BSNative.changed();}catch(e){}return true;},
+    /** ✨ AI Fill Day Review — the Command Center's own button (its AI key, its full prompt). */
+    reviewFill:function(){goRealDay();var b=document.getElementById('aiFillDayReviewBtn');if(!b||b.disabled)return false;
+      if(!(typeof journalAIKey==='function'&&journalAIKey()))return 'nokey';aiFillEntireDayReview(b);return true;},
     /** Everything the native Today screen shows: {date, focus:[…], checks:[{key|id, group, label, state}]} */
-    all:function(){goRealDay();var f=JSON.parse(window.ccNative.focus());f.checks=checks();f.schedule=schedule();return JSON.stringify(f);},
+    all:function(){goRealDay();var f=JSON.parse(window.ccNative.focus());f.checks=checks();f.schedule=schedule();f.review=review();return JSON.stringify(f);},
     /** My Schedule: tap cycles done → not done → not marked, exactly like the Command Center's own button. */
     scheduleTap:function(id){goRealDay();try{renderJournalSchedule();journalScheduleCycleStatus(null,id);}catch(e){return false;}refresh();try{if(window.BSNative&&BSNative.changed)BSNative.changed();}catch(e){}return true;},
     /** Set a daily check (tri-check key like 'wBP') to '', green, black, purple or red. */
@@ -100,6 +118,12 @@
     var wrapped=function(){var r=orig.apply(this,arguments);try{if(window.BSNative&&BSNative.changed)BSNative.changed();}catch(e){}return r;};
     wrapped.__native=true;window.save=wrapped;
   }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',hook);else hook();
+  function hookRev(){
+    if(typeof window.saveDayReview!=='function'||window.saveDayReview.__native)return;
+    var o=window.saveDayReview,w=function(){var r=o.apply(this,arguments);try{if(window.BSNative&&BSNative.changed)BSNative.changed();}catch(e){}return r;};
+    w.__native=true;window.saveDayReview=w;
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){hook();hookRev();});else{hook();hookRev();}
+  setTimeout(hookRev,1500);
   setTimeout(hook,1500);
 })();
