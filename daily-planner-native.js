@@ -169,8 +169,18 @@
     });
     return {due:due,done:doneN,best:best,list:list};
   }
+  // 📈 Dashboard: day-by-day numbers for the charts (same math as the Dashboard / summary tables).
+  function dash(days){
+    days=Math.max(7,Math.min(365,Number(days)||30));var out=[],now=new Date();
+    for(var i=days-1;i>=0;i--){var d=new Date(now);d.setDate(now.getDate()-i);var k=dk(d),raw=localStorage.getItem('planner_'+k),m={};
+      try{m=getDM(raw?JSON.parse(raw):{},k)||{};}catch(e){}
+      out.push({d:k,weight:+(m.weight||0).toFixed(1),sleep:+((m.sleep||0)/60).toFixed(2),sleepScore:Math.round(m.sleepScore||0),sys:Math.round(m.bpSys||0),dia:Math.round(m.bpDia||0),
+        pulse:Math.round(m.pulse||0),restHR:Math.round(m.restHR||0),miles:+(m.miles||0).toFixed(2),steps:Math.round(m.steps||0)});}
+    return out;
+  }
   window.ccNative={
-    version:12,
+    version:13,
+    dash:function(days){return JSON.stringify(dash(days));},
     habits:function(){return JSON.stringify(habits());},
     /** Check habit: status 'done' / 'partial' / 'skip' (tapping the same again clears it). Count / minutes habit: delta ±1. */
     habitLog:function(id,status){try{h2ViewDate=new Date();h2SetLog(id,status);}catch(e){return false;}return true;},
