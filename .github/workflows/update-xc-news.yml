@@ -3,8 +3,8 @@ name: Update XC news
 on:
   workflow_dispatch:
   schedule:
-    # Sundays at 17:00 UTC (after the weekend's meets have been covered).
-    - cron: "0 17 * * 0"
+    # Every 6 hours (like track & field news), so meet-week stories and results show up the same day.
+    - cron: "17 */6 * * *"
 
 permissions:
   contents: write
