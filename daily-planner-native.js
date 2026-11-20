@@ -178,8 +178,73 @@
         pulse:Math.round(m.pulse||0),restHR:Math.round(m.restHR||0),miles:+(m.miles||0).toFixed(2),steps:Math.round(m.steps||0)});}
     return out;
   }
+  // 🔍 Journal search (same places as the Command Center's search: day entries, Bible notes, activities, archived files).
+  function search(q){
+    q=String(q||'').toLowerCase().trim();if(q.length<2)return [];var out=[];
+    function snip(v){v=String(v);var i=v.toLowerCase().indexOf(q);var a=Math.max(0,i-60);return (a>0?'…':'')+v.slice(a,i+q.length+120).replace(/\s+/g,' ')+(i+q.length+120<v.length?'…':'');}
+    for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);
+      if(/^planner_\d{4}-\d\d-\d\d$/.test(k)){var d;try{d=JSON.parse(localStorage.getItem(k));}catch(e){continue;}
+        var date=k.slice(8),f={'Journal':d.jNotes,'Running Log':d.jRunLog,'Accomplishments':d.jAccomplish,'Improvements':d.jImprov,'Daily Bread':d.spDailyBreadText,'Meditation':d.spMeditationText,
+          'Audiobook':d.gaAudiobookText,'Priority':[d.pt0t,d.pt1t,d.pt2t].filter(Boolean).join(' · '),'Goals':[d.dg0t,d.dg1t,d.dg2t].filter(Boolean).join(' · ')};
+        try{var rv=JSON.parse(localStorage.getItem('dayreview_'+date)||'{}');f['Daily review']=[rv.dayRevWins,rv.dayRevImprove,rv.dayRevFocus,rv.dayRevLessons].filter(Boolean).join('\n');}catch(e){}
+        Object.keys(f).forEach(function(l){if(f[l]&&String(f[l]).toLowerCase().indexOf(q)>=0)out.push({date:date,where:l,text:snip(f[l])});});}
+      else if(/^bible_\d{4}-\d\d-\d\d$/.test(k)){var b;try{b=JSON.parse(localStorage.getItem(k));}catch(e){continue;}
+        ['sermonTitle','sermonNotes','scripture','keyVerse','theme','notes','application','prayer'].forEach(function(x){if(b[x]&&String(b[x]).toLowerCase().indexOf(q)>=0)out.push({date:k.slice(6),where:'Bible notes',text:snip(b[x])});});}
+      else if(/^bstudy_\d{4}-\d\d-\d\d$/.test(k)){var st;try{st=JSON.parse(localStorage.getItem(k));}catch(e){continue;}
+        var a=st&&st.answers?[st.answers.s,(st.answers.o||[]).join(' '),(st.answers.a||[]).join(' '),st.answers.p].join('\n'):'';if(a.toLowerCase().indexOf(q)>=0)out.push({date:k.slice(7),where:'Bible Study',text:snip(a)});}
+    }
+    try{getActivities().forEach(function(a){var t=[a.type,a.notes,a.injuryReport].filter(Boolean).join(' · ');if(t.toLowerCase().indexOf(q)>=0)out.push({date:a.date||'',where:'Activity',text:snip(t)});});}catch(e){}
+    out.sort(function(x,y){return String(y.date).localeCompare(String(x.date));});
+    return out.slice(0,150);
+  }
+  // 📁 Files (Uploads page): async — results come back through BSNative.files(json) / BSNative.file(name, type, base64).
+  function idb(name,store){return new Promise(function(res,rej){var r=indexedDB.open(name,1);r.onupgradeneeded=function(e){var db=e.target.result;if(!db.objectStoreNames.contains(store))db.createObjectStore(store,{keyPath:'id',autoIncrement:true});};r.onsuccess=function(e){res(e.target.result);};r.onerror=function(){rej(r.error);};});}
+  function all(name,store){return idb(name,store).then(function(db){return new Promise(function(res){var q=db.transaction(store,'readonly').objectStore(store).getAll();q.onsuccess=function(){res(q.result||[]);};q.onerror=function(){res([]);};});}).catch(function(){return [];});}
+  function back(fn,arg){try{if(window.BSNative&&BSNative[fn])BSNative[fn].apply(BSNative,arg);}catch(e){}}
+  var FILES={ou:['OtherUploadsDB','files'],ja:['JournalArchiveDB','journals']};
   window.ccNative={
-    version:13,
+    version:14,
+    search:function(q){return JSON.stringify(search(q));},
+    /** ✨ Saved AI answers. */
+    archive:function(){try{return JSON.stringify(JSON.parse(localStorage.getItem('ai_archive')||'[]'));}catch(e){return '[]';}},
+    archiveDelete:function(i){var a=JSON.parse(localStorage.getItem('ai_archive')||'[]');a.splice(Number(i),1);localStorage.setItem('ai_archive',JSON.stringify(a));return true;},
+    /** 💬 Ask AI about your journal (the Command Center's own Ask AI: all your days, reviews and runs). */
+    ask:function(q){q=String(q||'').trim();if(!q)return false;if(!(typeof journalAIKey==='function'&&journalAIKey()))return 'nokey';
+      var el=document.getElementById('askJournalInput');if(!el)return false;el.value=q;try{_aiLastShown.askJournalResult=null;}catch(e){}submitAskJournal();return true;},
+    askState:function(){var b=document.getElementById('askJournalSubmitBtn'),r=document.getElementById('askJournalResult'),last=(window._aiLastShown||{}).askJournalResult;
+      try{last=_aiLastShown.askJournalResult;}catch(e){}
+      return JSON.stringify({busy:!!(b&&b.disabled),answer:last&&last.text||'',status:r&&!last?String(r.textContent||'').slice(0,200):''});},
+    askSave:function(){try{archiveAIResp('askJournalResult');}catch(e){return false;}return true;},
+    /** 🧘 Meditation: recent sessions; log a finished session (ticks Meditation like the timer). */
+    meditSessions:function(){try{return JSON.stringify(JSON.parse(localStorage.getItem('medit_sessions')||'[]').slice(0,30));}catch(e){return '[]';}},
+    meditLog:function(mins,notes){mins=Math.round(Number(mins)||0);if(mins<=0)return false;goRealDay();var k=dk(new Date()),ss=JSON.parse(localStorage.getItem('medit_sessions')||'[]');
+      var i=ss.findIndex(function(x){return x.date===k;}),rec={dur:mins,notes:String(notes||''),verse:localStorage.getItem('medit_scripture')||'',ts:Date.now()};
+      if(i>=0)ss[i]=Object.assign(ss[i],rec,{dur:(Number(ss[i].dur)||0)+mins});else ss.unshift(Object.assign({date:k},rec));if(ss.length>60)ss=ss.slice(0,60);
+      localStorage.setItem('medit_sessions',JSON.stringify(ss));
+      document.querySelectorAll('.tri-check[data-key="spMeditation"]').forEach(function(e){applyTriState(e,'green');});try{save();}catch(e){}refresh();
+      try{if(typeof renderMeditLog==='function')renderMeditLog();}catch(e){}return true;},
+    /** ⚙️ Settings this Command Center keeps (the AI key stays in this browser only). */
+    settings:function(){var h=document.getElementById('journalStorageHealth');try{journalStorageHealth();}catch(e){}
+      return JSON.stringify({hasKey:typeof journalAIKey==='function'&&!!journalAIKey(),aiContext:(function(){try{return journalPrefs().aiContext!==false;}catch(e){return true;}})(),
+        storage:h?String(h.innerText||'').replace(/\s+/g,' ').trim().slice(0,300):'',sync:window.ccSync?{linked:ccSync.linked(),pending:ccSync.pending()}:null,
+        status:(document.getElementById('v26SaveText')||{}).textContent||''});},
+    setKey:function(k){k=String(k||'').trim();if(k)localStorage.setItem('ai_key',k);else localStorage.removeItem('ai_key');return true;},
+    setAIContext:function(on){var p={};try{p=JSON.parse(localStorage.getItem('journal_ui_prefs')||'{}')||{};}catch(e){}p.aiContext=!!on;localStorage.setItem('journal_ui_prefs',JSON.stringify(p));var el=document.getElementById('settingAIContext');if(el)el.checked=!!on;return true;},
+    syncNow:function(){if(window.ccSync)ccSync.now();return true;},
+    filesLoad:function(){Promise.all([all.apply(null,FILES.ou),all.apply(null,FILES.ja)]).then(function(r){
+      function m(x,src){return {src:src,id:x.id,name:x.name||'file',type:x.type||'',size:x.size||0,date:String(x.uploadDate||'').slice(0,10),note:x.note||''};}
+      back('files',[JSON.stringify(r[0].map(function(x){return m(x,'ou');}).concat(r[1].map(function(x){return m(x,'ja');})))]);});return true;},
+    fileGet:function(src,id){var f=FILES[src];if(!f)return false;idb(f[0],f[1]).then(function(db){var q=db.transaction(f[1],'readonly').objectStore(f[1]).get(Number(id));
+      q.onsuccess=function(){var r=q.result;if(!r)return;var blob=r.blob||(r.data?dataURLtoBlob(r.data):null);if(!blob)return;var fr=new FileReader();
+        fr.onload=function(){back('file',[r.name||'file',r.type||'application/octet-stream',String(fr.result).split(',')[1]||'']);};fr.readAsDataURL(blob instanceof Blob?blob:new Blob([blob],{type:r.type}));};});return true;},
+    fileDelete:function(src,id){var f=FILES[src];if(!f)return false;idb(f[0],f[1]).then(function(db){db.transaction(f[1],'readwrite').objectStore(f[1]).delete(Number(id)).onsuccess=function(){window.ccNative.filesLoad();try{ouRenderList();jaRenderList();}catch(e){}};});return true;},
+    /** Add a file picked on the phone to Uploads (base64 sent in pieces: fileStart → filePart… → fileEnd). */
+    fileStart:function(){window.__ccUp=[];return true;},
+    filePart:function(b64){window.__ccUp.push(b64);return true;},
+    fileEnd:function(name,type){var bin=atob((window.__ccUp||[]).join(''));window.__ccUp=null;var u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
+      var blob=new Blob([u],{type:type||'application/octet-stream'});
+      idb('OtherUploadsDB','files').then(function(db){var tx=db.transaction('files','readwrite');tx.objectStore('files').add({name:name,type:blob.type,blob:blob,uploadDate:new Date().toISOString(),size:blob.size,note:''});
+        tx.oncomplete=function(){window.ccNative.filesLoad();try{ouRenderList();}catch(e){}};});return true;},
     dash:function(days){return JSON.stringify(dash(days));},
     habits:function(){return JSON.stringify(habits());},
     /** Check habit: status 'done' / 'partial' / 'skip' (tapping the same again clears it). Count / minutes habit: delta ±1. */
