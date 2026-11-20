@@ -2053,6 +2053,16 @@ function applyPhoneDayReview(force){
     var k=dk(today),flag='bsPhoneRev_'+k;if(localStorage.getItem(flag))return;
     // Today's review waits for 11:50 PM (or your tap on AI Fill Day Review). This ran every time the review was shown
     // (and every 5 minutes after 9 PM), so it wrote the review early in the evening on its own.
+    // A day that hasn't happened yet never gets an automatic review. One written that way earlier (and not edited
+    // since) is cleared, so that day's own 11:50 PM review still runs.
+    if(k>dk(new Date())){
+      var fv0=localStorage.getItem('autoDayRev_'+k);
+      if((fv0==='auto'||fv0==='early')&&localStorage.getItem('autoRevText_'+k)===dayRevJoined()){
+        DAY_REV_IDS.forEach(function(id){var e=document.getElementById(id);if(e){e.value='';autoGrowReviewField(e);}});
+        saveDayReview(true);localStorage.removeItem('autoDayRev_'+k);localStorage.removeItem('autoRevText_'+k);
+      }
+      return;
+    }
     if(!force&&k===dk(new Date())){var nm=new Date();if(nm.getHours()*60+nm.getMinutes()<(typeof REVIEW_AT==="number"?REVIEW_AT:23*60+50))return;}
     var empty=function(){return DAY_REV_IDS.every(function(id){var e=document.getElementById(id);return !e||!e.value.trim();});};
     if(!empty())return;
