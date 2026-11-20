@@ -2046,11 +2046,21 @@ function renderDayReview(){
 // 🌙 Backup: when a day's review is still empty, fill it (once) from the one BeyondStride wrote on the phone just before
 // 11:50 PM — so it's there even if the Command Center wasn't open that night.
 function dayRevJoined(){return DAY_REV_IDS.map(function(id){var e=document.getElementById(id);return e?e.value.trim():'';}).join('\u241E');}
-function applyPhoneDayReview(){
+// The full Command Center review (journal, Bible study, Wellness & Spiritual checks, training & food) is used
+// whenever there's an AI key; the phone's training-&-food review is only the backup if that fails.
+function applyPhoneDayReview(force){
   try{
-    var k=dk(today),flag='bsPhoneRev_'+k;if(localStorage.getItem(flag)||typeof window.bsPhoneReview!=='function')return;
+    var k=dk(today),flag='bsPhoneRev_'+k;if(localStorage.getItem(flag))return;
     var empty=function(){return DAY_REV_IDS.every(function(id){var e=document.getElementById(id);return !e||!e.value.trim();});};
     if(!empty())return;
+    var btn=document.getElementById('aiFillDayReviewBtn');
+    if(!force&&btn&&btn.disabled)return;   // a review is being written right now
+    if(!force&&journalAIKey()&&btn&&!btn.disabled){
+      var real=dk(today)===dk(new Date());
+      localStorage.setItem('autoDayRev_'+k,real?'early':'auto');btn.__auto=true;btn.__fallback=function(){applyPhoneDayReview(true);};
+      aiFillEntireDayReview(btn);return;
+    }
+    if(typeof window.bsPhoneReview!=='function')return;
     window.bsPhoneReview(k,function(o){
       if(!o||dk(today)!==k||!empty())return;
       var map={wins:'dayRevWins',improve:'dayRevImprove',focus:'dayRevFocus',lessons:'dayRevLessons'};
@@ -2120,11 +2130,11 @@ function aiFillEntireDayReview(btn){
       var result=JSON.parse(cleaned),map={wins:'dayRevWins',improve:'dayRevImprove',focus:'dayRevFocus',lessons:'dayRevLessons'};
       Object.keys(map).forEach(function(key){var el=document.getElementById(map[key]);if(el&&result[key]!=null){el.value=noTonightOutput(result[key]);el.dispatchEvent(new Event('input'));}});
       try{if(typeof window.autoTickReviewWritten==='function')window.autoTickReviewWritten();}catch(eT){}
-      if(btn.__auto){saveDayReview(true);v26Toast('🌙 Day Review filled and saved automatically for tonight');}
+      if(btn.__auto){saveDayReview(true);try{localStorage.setItem('autoRevText_'+dk(today),dayRevJoined());}catch(eS){}btn.__fallback=null;v26Toast('🌙 Day Review filled and saved automatically');}
       else v26Toast('Day Review filled — edit it, then tap Save Review to keep it');
-    }catch(e){if(btn.__auto)v26Toast('Automatic Day Review: the AI answer could not be read — tap AI Fill Day Review to try again');else alert('The AI response could not be placed into the Review fields. Please try again.');}
+    }catch(e){if(btn.__auto&&btn.__fallback){var fb=btn.__fallback;btn.__fallback=null;btn.__auto=false;btn.disabled=false;btn.innerHTML=original;fb();return;}if(btn.__auto)v26Toast('Automatic Day Review: the AI answer could not be read — tap AI Fill Day Review to try again');else alert('The AI response could not be placed into the Review fields. Please try again.');}
     btn.__auto=false;btn.disabled=false;btn.innerHTML=original;
-  },function(err){var a=btn.__auto;btn.__auto=false;btn.disabled=false;btn.innerHTML=original;if(a)v26Toast('Automatic Day Review: AI error — '+err);else alert('AI error: '+err);});
+  },function(err){if(btn.__auto&&btn.__fallback){var fb=btn.__fallback;btn.__fallback=null;btn.__auto=false;btn.disabled=false;btn.innerHTML=original;fb();return;}var a=btn.__auto;btn.__auto=false;btn.disabled=false;btn.innerHTML=original;if(a)v26Toast('Automatic Day Review: AI error — '+err);else alert('AI error: '+err);});
 }
 // 🌙 Automatic Day Review at 11:50 PM (catches almost the whole day — on an early night, tap AI Fill Day Review
 // yourself): fill and save today's review when it's empty.
@@ -2133,17 +2143,22 @@ function aiFillEntireDayReview(btn){
 var REVIEW_AT=23*60+50;   // also used by the automatic Weekly Review (Sunday)
 function autoDayReviewCheck(){
   try{
-    var now=new Date(),k=dk(now);if(dk(today)!==k)return;
-    var ev=window.bsEvening&&window.bsEvening.date===k?window.bsEvening:null;
-    var at=REVIEW_AT,mins=now.getHours()*60+now.getMinutes();
-    if(mins<at&&!(ev&&ev.early))return;
+    var now=new Date(),k=dk(today),past=k<dk(now);if(k>dk(now))return;
     var flag='autoDayRev_'+k,fv=localStorage.getItem(flag);
     // The phone's backup review (training & food only) is upgraded to this fuller one — Bible study, Wellness &
-    // Spiritual checks, journal — unless you've edited it.
+    // Spiritual checks, journal — unless you've edited it. Works on any day you're looking at (e.g. yesterday's).
     var phoneOnly=fv==='phone'&&localStorage.getItem('bsPhoneRevText_'+k)===dayRevJoined();
-    if(fv&&!phoneOnly)return;
+    // A review filled early in the evening is redone at 11:50 PM (if you haven't edited it) to catch the rest of the day.
+    var early=fv==='early'&&localStorage.getItem('autoRevText_'+k)===dayRevJoined();
+    if(!past){
+      var ev=window.bsEvening&&window.bsEvening.date===k?window.bsEvening:null;
+      var mins=now.getHours()*60+now.getMinutes();
+      if(mins<REVIEW_AT&&!(ev&&ev.early)&&!phoneOnly)return;
+      if(phoneOnly&&mins<21*60)return;
+    }else if(!phoneOnly&&!early)return;
+    if(fv&&!phoneOnly&&!early)return;
     if(!journalAIKey())return;
-    var empty=phoneOnly||DAY_REV_IDS.every(function(id){var e=document.getElementById(id);return !e||!e.value.trim();});
+    var empty=phoneOnly||early||DAY_REV_IDS.every(function(id){var e=document.getElementById(id);return !e||!e.value.trim();});
     if(!empty){localStorage.setItem(flag,'written');return;}
     var btn=document.getElementById('aiFillDayReviewBtn');if(!btn||btn.disabled)return;
     localStorage.setItem(flag,'auto');btn.__auto=true;aiFillEntireDayReview(btn);   // richer (has your journal); the phone's is the backup
