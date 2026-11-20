@@ -85,7 +85,7 @@
 
   // ── Session ──
   var S=null; // {date, source, day, text, label, segs, key{b,c,v}, focus{b,c1,v1,c2,v2}, study, answers{s,o[],a[],p}, step, done{}, finished, closing}
-  function persist(){if(!S)return;var c=Object.assign({},S);delete c.verses;delete c._preparing;delete c._closing;ls(sessionKey(S.date),c);}
+  function persist(){if(!S)return;var c=Object.assign({},S);delete c.verses;delete c._preparing;delete c._closing;delete c._err;delete c._x;delete c._loading;ls(sessionKey(S.date),c);}
   function open(date,day){
     if(!journalAIKey()){alert('Add your Anthropic API key in Settings first.');return;}
     date=date||todayKey();
@@ -148,7 +148,7 @@
     body.querySelectorAll('textarea').forEach(function(t){t.addEventListener('input',function(){var k=t.dataset.k;if(k==='s'||k==='p')S.answers[k]=t.value;else{S.answers[k[0]][+k.slice(1)]=t.value;}persist();});});
   }
   function memoryLine(){var m=ls('bstudy_mem_'+weekKey());return m?('“'+m.text+'” — '+m.ref):'';}
-  function loadVerses(){if(S._loading)return;S._loading=true;fetchAll(S.segs).then(function(v){S.verses=v;S._loading=false;render();}).catch(function(e){S._loading=false;var b=document.getElementById('bsBody');if(b)b.innerHTML='<div class="bs-load">Couldn\'t load the passages ('+esc(e.message)+').<br><br><a class="bs-btn" target="_blank" rel="noopener" href="'+nltLink(S.segs)+'">Read in NLT ↗</a></div>';});}
+  function loadVerses(){if(S._loading)return;S._loading=true;fetchAll(S.segs).then(function(v){S.verses=v;S._loading=false;render();}).catch(function(e){S._loading=false;S._err=e.message;var b=document.getElementById('bsBody');if(b)b.innerHTML='<div class="bs-load">Couldn\'t load the passages ('+esc(e.message)+').<br><br><a class="bs-btn" target="_blank" rel="noopener" href="'+nltLink(S.segs)+'">Read in NLT ↗</a></div>';});}
 
   function prepare(){
     if(S._preparing)return;S._preparing=true;
@@ -179,7 +179,7 @@
         if(!S.key&&j.key_verse){var k=parseSeg(j.key_verse);if(k)S.key={b:k.b,c:k.c1,v:k.v1};}
         setMemory(j.memory_verse);S._preparing=false;persist();render();
       });
-    }).catch(function(e){S._preparing=false;var b=document.getElementById('bsBody');if(b)b.innerHTML='<div class="bs-load">Couldn\'t prepare the study: '+esc(e.message)+'<br><br><button class="bs-btn" onclick="bibleStudy.retry()">Try again</button></div>';});
+    }).catch(function(e){S._preparing=false;S._err=e.message;var b=document.getElementById('bsBody');if(b)b.innerHTML='<div class="bs-load">Couldn\'t prepare the study: '+esc(e.message)+'<br><br><button class="bs-btn" onclick="bibleStudy.retry()">Try again</button></div>';});
   }
   function setMemory(mv){
     var wk=weekKey(),k='bstudy_mem_'+wk;if(ls(k)||!mv)return;
@@ -364,7 +364,37 @@
     return {status:sv&&sv.finished?'done':sv&&sv.study?'progress':'new',label:r.label||'',passages:parseSegs(r.text||'').map(segLabel).join('; ')||r.text||'',
       memory:memoryLine(),step:sv&&typeof sv.step==='number'?steps[sv.step]||'':'',hasKey:!!journalAIKey()};
   }
-  window.bibleStudy={info:info,open:open,close:close,step:function(d){stepTo(S.step+d);},go:function(i){stepTo(i);},listen:listen,listened:listened,listenedApp:listenedApp,xref:xref,plan:choosePlan,journal:journal,day:pickDay,fix:fixReading,
+  // ── For BeyondStride's native Bible Study screen: the same session, driven without this page's overlay. ──
+  // Same prompts, same saved session (bstudy_<date>), same checks ticked; the phone draws the screens.
+  function nStart(){
+    if(!journalAIKey())return 'nokey';
+    var date=todayKey(),saved=ls(sessionKey(date));
+    if(!S||S.date!==date){
+      if(saved&&saved.segs)S=saved;
+      else{var dp=(ls('bstudy_day')||{}).date===date?(ls('bstudy_day')||{}).day:'';var r=readingFor(date,dp);
+        S={date:date,source:r.source,day:r.day||'',text:r.text,label:r.label,segs:parseSegs(r.text),key:r.key||null,focus:null,study:null,answers:{s:'',o:[],a:[],p:''},step:0,done:{},finished:false};}
+    }
+    if(!S.segs||!S.segs.length){S=null;return 'noreading';}
+    S._err='';if(!S.study)prepare();
+    return 'ok';
+  }
+  function nState(){
+    if(!S)return JSON.stringify({none:true});
+    if(S.study&&S.step===1&&!S.verses)loadVerses();
+    if(S.study&&S.step===4&&!S.closing)closing();
+    var st=S.study,v=null;
+    if(S.verses)v=S.verses.map(function(list,i){return {ref:segLabel(S.segs[i]),nlt:nltLink([S.segs[i]]),verses:list.map(function(x){return {c:x.c,v:x.v,t:x.t,k:isKey(x)?1:inFocus(x)?2:0};})};});
+    return JSON.stringify({date:S.date,label:S.label,ref:refText(),step:S.step,done:S.done,finished:!!S.finished,study:st||null,answers:S.answers,closing:S.closing||'',
+      preparing:!!S._preparing,error:S._err||'',verses:v,loadingVerses:!!S._loading,nlt:nltLink(S.segs),memory:memoryLine(),xref:S._x||{}});
+  }
+  function nAnswer(k,val){if(!S)return false;if(k==='s'||k==='p')S.answers[k]=String(val||'');else{var arr=S.answers[k[0]];if(!arr)return false;arr[+k.slice(1)]=String(val||'');}persist();return true;}
+  function nXref(i){
+    if(!S||!S.study)return false;S._x=S._x||{};if(S._x[i]){delete S._x[i];return true;}
+    var r=parseSeg(String(S.study.crossrefs[i]).split(/\s+[—–-]\s+/)[0]);if(!r){S._x[i]='(couldn\'t read that reference)';return true;}
+    S._x[i]='⏳';fetchSeg(r).then(function(vs){S._x[i]=vs.map(function(v){return v.v+' '+v.t;}).join(' ')||'(not found)';}).catch(function(){S._x[i]='(couldn\'t load)';});return true;
+  }
+  window.bibleStudy={info:info,nStart:nStart,nState:nState,nStep:function(i){stepTo(i);return nState();},nAnswer:nAnswer,nXref:nXref,
+    nListened:function(){listened();return true;},nListenedApp:function(){listened();if(S&&S.step===1)stepTo(2);return true;},nRetry:function(){if(S){S._err='';S._preparing=false;if(!S.study)prepare();}return true;},open:open,close:close,step:function(d){stepTo(S.step+d);},go:function(i){stepTo(i);},listen:listen,listened:listened,listenedApp:listenedApp,xref:xref,plan:choosePlan,journal:journal,day:pickDay,fix:fixReading,
     retry:function(){S._preparing=false;render();}};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(renderCard,800);});else setTimeout(renderCard,800);
 })();
