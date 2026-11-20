@@ -170,7 +170,11 @@
       if(w[f]==null||w[f]==='')return;
       var el=document.getElementById(FIELDS[f]);if(!el)return;
       var v=String(w[f]),cur=el.value.trim();
-      if(cur!==''&&cur!==String(prev[f]||'').trim())return;   // typed by hand: leave it
+      // Steps only go up during the day, so a higher count from BeyondStride always wins. (The "typed by hand" memory
+      // below is kept per browser, so a count filled on another device or restored by cloud sync looked hand-typed
+      // and froze the field.) A higher number typed by hand is still kept.
+      var stepsUp=f==='steps'&&Number(v)>(parseFloat(cur.replace(/,/g,''))||0);
+      if(!stepsUp&&cur!==''&&cur!==String(prev[f]||'').trim())return;   // typed by hand: leave it
       if(cur!==v){el.value=v;el.dispatchEvent(new Event('input',{bubbles:true}));changed=true;}
       prev[f]=v;
     });
