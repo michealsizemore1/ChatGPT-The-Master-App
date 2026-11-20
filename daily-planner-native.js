@@ -19,8 +19,34 @@
     try{if(typeof journalCloudSchedule==='function')journalCloudSchedule();}catch(e){}
     return true;
   }
+  // The native Today screen always shows the real today; bring the page there if it's on another date.
+  function goRealDay(){if(!onRealDay()){try{today=new Date();load();if(typeof syncPeriodsToDay==='function')syncPeriodsToDay();}catch(e){}}}
+  function checks(){
+    goRealDay();
+    var list=typeof collectDailyChecks==='function'?collectDailyChecks():[];
+    return list.filter(function(i){return !/^(?:pt|dg)[0-2]c$/.test(i.key||'');}).map(function(i){
+      return {key:i.key||'',id:i.id||'',group:i.group,label:String(i.label||'').replace(/\s*-\s*Actual\s*$/i,''),state:i.status==='blank'?'':i.status};});
+  }
   window.ccNative={
-    version:1,
+    version:2,
+    /** Everything the native Today screen shows: {date, focus:[…], checks:[{key|id, group, label, state}]} */
+    all:function(){goRealDay();var f=JSON.parse(window.ccNative.focus());f.checks=checks();return JSON.stringify(f);},
+    /** Set a daily check (tri-check key like 'wBP') to '', green, black, purple or red. */
+    setCheck:function(key,state){
+      if(!key||STATES.indexOf(state)<0)return false;goRealDay();
+      var els=document.querySelectorAll('.tri-check[data-key="'+key+'"]');if(!els.length)return false;
+      els.forEach(function(e){applyTriState(e,state);});
+      try{save();}catch(e){}refresh();
+      try{var wt=document.getElementById('tab-weekly');if(wt&&wt.classList.contains('active')&&typeof renderWeekly==='function')renderWeekly();}catch(e){}
+      return true;
+    },
+    /** Plain checkboxes (Planning & Review). */
+    setBox:function(id,on){
+      if(id!=='reviewCheck'&&id!=='prepJournalCheck')return false;goRealDay();
+      var el=document.getElementById(id);if(!el)return false;
+      if(el.checked!==!!on){el.checked=!!on;try{el.dispatchEvent(new Event('change',{bubbles:true}));}catch(e){}try{save();}catch(e){}refresh();}
+      return true;
+    },
     /** Today's Focus for the real today: {date, items:[{id, kind, text, state}]} */
     focus:function(){
       var live=onRealDay(),d=live?null:stored(),out=[];
