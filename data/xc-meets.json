@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-20T20:31:50+00:00",
+  "updatedAt": "2026-11-21T02:30:11+00:00",
   "source": "Google News searches for cross country meet results",
   "page": "https://michealsizemore1.github.io/ChatGPT-The-Master-App/cross-country.html",
   "meets": [
@@ -59,9 +59,33 @@
   "results": [
     {
       "date": "2026-11-20",
-      "headline": "Eagles Finish 13th at NAIA Men's Cross Country National Championship",
+      "headline": "Results and Team Scores: 2026 NAIA Cross Country Championships; Jaynie Halterman Three-Peat",
+      "source": "World-Track",
+      "url": "https://news.google.com/rss/articles/CBMiugFBVV95cUxPMWRZNmdVcmx2a2RtQTdTSDdQNXVwQUJkWE5iMExBTnRSVG9JUGoyc2d3a3MzVTRLU2tCb3VyT25SVEVBLUJwWVg4dkd1MXdDYVZrOVpua3pqTFFuc3k0VXJveURMSlNQWTQ2MVFVNlZUcnpUcTFSV3JhZUNHTU5jRHh1VmpWS05DM2psdDdrYllhdVN3QUxtYzFhbmdRMFRsSnNOblBxdUFQdldGWnhoUGdQWExFclVaTUE?oc=5"
+    },
+    {
+      "date": "2026-11-20",
+      "headline": "SEC cross country teams prepare for 2026 NCAA Championships",
+      "source": "Southeastern Conference",
+      "url": "https://news.google.com/rss/articles/CBMinwFBVV95cUxPUWdnSy1iNVJyakJ3TE14OTFLRmNOLXZSeUdCZnNpbnh3TTUweGF3Z09sUWhrT0xMVzJmeTBQdUViQ2NJTTBQZjRINEFrWVJoa1VzWVBsZjBTY3RFWWZHOGp2Z0NwaXpBZ1BsRWtkN0lsSUtiUjhvdk9JLWNLck5uMXQzenZGcDlGMEkxM08tUjBOMlRGMFhZNi1Sc3FNODg?oc=5"
+    },
+    {
+      "date": "2026-11-20",
+      "headline": "XC Central: 2026 NCAA Cross Country Championships",
+      "source": "University of Tennessee Athletics",
+      "url": "https://news.google.com/rss/articles/CBMijgFBVV95cUxQMXRLbVZiTmpTNEktcUJtWFEwc0s0RVJRUzFZb2YxLXk0bzlMNnF6Q0NqWXFBeV9XZ3E1bHJrRmt1Q0ZQTzYtNkhTX1FzcUVTYzJtWjZVUGtFbjgtVjA5dFhzR0hmeHkzVzY1Yk1SQjFPN0F3akFqX3hEc2hHeWNuT1FPYWNOdHk4SEJRNnBB?oc=5"
+    },
+    {
+      "date": "2026-11-20",
+      "headline": "Embry-Riddle Women Finish 11th Nationally at NAIA Cross Country Championships",
       "source": "Eagles Online",
-      "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxQYWd6ZHlmcXRwWDVqRWxDYUoxUFV3NUFjRDdIYUw5U2x2WTBTeGkzMFhwazRXV0NTTlJiVHhrYTRUOHdkMk03anlES0t2WFhjQTdaZDRyZ1A5dEczMGp0RXZRTng0SUM1eEtjTjlzckx6M1lfNXRnWW5JcGRpZDk1RjRfellnTmZVU0lHaDRveG1kVjVnbm83OFptckEyR2UzOFlLLTRXMFRCUldOS0VtZA?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMi2gFBVV95cUxQUHhlV1NNS0dVMldwOUN1RV8zVVg4OHRwenJXcXZ5TVZLNFZ3S0ZLUGpuck41QVkwS0J3bzBjcXlsUlczMlNGQWxqTXBXSGRJdThhNUFjY0t5OUJvTk9SSl9IaDlCd0pDSGszSkJ3MWJzdWRnQ2o4Y1pRRzBjcnhHUzN2U0xWZENEMmJZYkY1Z0JrclU2eERER2ltWU11MU1uV2ItS05ZRzd3VzRWNnJRdlVoWEZ4dnBjTFFpdFJRcWo2NHVFYVB0U3VMUm5odDZIOHZfN3dIRjBxUQ?oc=5"
+    },
+    {
+      "date": "2026-11-20",
+      "headline": "Cross Country Competes at NCAA Championships in Terre Haute",
+      "source": "Mizzou Athletics",
+      "url": "https://news.google.com/rss/articles/CBMinAFBVV95cUxPRnJpdDZHZXVqYW4zWE52Uzl1SVVrT3R3UnZqdE02SkpoNWxZNmlLZjZHRlhxN2ROZlB2V2VhcHdhTmpVblRMUVhfQmZ0bURhaEM0SlVsY0tXZ2lueXU4YUwtNExUY1BkNm1PNTd5cU8wSWpMdTdJMUpfcktxNXI4X1JPMTZZNGNKRU0xTnlIQm5SYzhLYWVhM3FMRUg?oc=5"
     },
     {
       "date": "2026-11-20",
@@ -71,9 +95,21 @@
     },
     {
       "date": "2026-11-20",
+      "headline": "Villa set for 2026 NCAA Cross Country Championships",
+      "source": "UTSA Athletics",
+      "url": "https://news.google.com/rss/articles/CBMijwFBVV95cUxQOFU5TEhyZi1GNTBLNUwtOEtzT1JsUTlnYnZjS21VQlFlZlR3Zms0eGJUMFJuVXNlYWFxTXJUdUdXaUc5QmFObk9nUzAxTi1RTVRhWDRRNkMtUDNnaWZidTNXak9HemVMZy1VSkRhOHl1dWtKWkFFcnc3aWQxLXdTSGs1Y2x0U0wzbUJlUXZtRQ?oc=5"
+    },
+    {
+      "date": "2026-11-20",
       "headline": "Friar Women’s Cross Country Team To Compete At NCAA Championship on Nov. 21 - Providence College Athletics",
       "source": "Providence College Athletics",
       "url": "https://news.google.com/rss/articles/CBMiyAFBVV95cUxOMUJtWmh6dm9NaG10emdQVDBuSksxNEVWejdVNVk4ajNmcDBuNzZlZjFvLTEydXQxdTVJaDBrdXhwdTB3ckpqT3hTeDVnWnRScEdpYTdrTEV3SlM5UjRLeUhKWlRScG1hU1VpbFhNOTVBMk5GZTlDZThwc2pwZEREeHhrUFljR09fWE80TWVkbG1QaHZyQUV4d3lhd0JabjlzZzE3Snd1UGw3bF9XNURGN2x1eTVhQ3MyY1VJeUQ0alE3d2gtdGZrNg?oc=5"
+    },
+    {
+      "date": "2026-11-20",
+      "headline": "NCAA Cross Country Championships 2026: Women’s Teams to Watch, Top 10 Favorites",
+      "source": "World-Track",
+      "url": "https://news.google.com/rss/articles/CBMirgFBVV95cUxPcjkxT1ZaYWdtNTVka25GcndlYzN3VjlWSExRdnVrMzNIR1UzUWd2c2ZVZ1FqMlBlbFRHRDlqcGlpS0JYVjM1WGRtWlhKT1ZPVy1weWowamEzN0FzbTUwTjBsdlVuRXpiUWFGSGRsV2RVU0pNbi1Fam84bnMxQWRWeldkVTRJZHV3TnZDM2xCdDkzOFdGYk44QTVMRThRUUVVQXY2R0ZuNHR4WlV4Smc?oc=5"
     },
     {
       "date": "2026-11-19",
@@ -86,18 +122,6 @@
       "headline": "NAIA Women’s Cross Country Championships 2026: Top 10 Teams to Watch",
       "source": "World-Track",
       "url": "https://news.google.com/rss/articles/CBMilwFBVV95cUxPU2piVkk4Y3RNTkx0YzVyTDhsbmNWbHJ6WjBMdzNpWUhZaWpMa3JjUDM4UFBjNTJsZDZZR1JrR0o5UEZtTjZzSjZVcWxIdzNIa1JRX3A2M1ZyQXlTbTZ0cUFicmx0LW9ITW51NEJTc0MtSndXT2I1dGEzQW5hZ3AwZ2Y1Y2JJcGtoZUJ5cy02WkFFdGZ4cVRJ?oc=5"
-    },
-    {
-      "date": "2026-11-19",
-      "headline": "NAIA Men’s Cross Country Championships 2026: Top 10 Teams to Watch",
-      "source": "World-Track",
-      "url": "https://news.google.com/rss/articles/CBMilAFBVV95cUxQUHpwWjBqYmV0a1FWRlAyT1Zfd3R3OWdzekdYUG5lN2tQSndtZnZZbHRRd0lWTXpUMl9VdkZQcV8tbmoxLW13dksxN0tRTlAwaVNZUFZ2UUxwTEdtSDJJZFhMaS1yUVc3TDNHdTFsNHJENzFzUFluM1NtNUZNOV82amswMUwxeDI4TUpaSG12RDRWVTJP?oc=5"
-    },
-    {
-      "date": "2026-11-19",
-      "headline": "NCAA Cross Country Championships 2026: Men’s Teams to Watch, Top 10 Favorites",
-      "source": "World-Track",
-      "url": "https://news.google.com/rss/articles/CBMilAFBVV95cUxQdnJ1YklpbUNNRkZkUUZicE5XNzNKQWpvSlhibTMtS2hiWFRlS2pXZXdybnF4NGduOURrV3doOUdDRUlzRXgtVXFDenZJdkhkNWNucnJvUjR2MXlwdkRoTUM1R2oxWGxzSVozRF96bjAwYTJUZVN2cmo4Q2pJakxWOGhSRXg3SHRnYmxWWDh0c3p0MjZJ?oc=5"
     },
     {
       "date": "2026-11-19",
@@ -122,30 +146,6 @@
       "headline": "Trinity Cross Country men’s and women’s teams win the SAA Conference",
       "source": "Trinitonian",
       "url": "https://news.google.com/rss/articles/CBMipAFBVV95cUxNNTVWZDl0RHJpRHJqZG11MndaOVptOElPWmFqTVJxaldXZk5Hc29zVGtkUi1GTHNtZWFUSzdmdmZlZ0wyWXRHRW5Tc2VrR0dIOE95emZ2bk9ON2pIdEJfWDUxenBvX21xUXBBREh2c2V0OU41VGRpOXR5RXVMdUNmaENUYmIyMXJUX1hFcEdaaGQ0OWt5QTRKVGVXdm0zTGtfUjRKLQ?oc=5"
-    },
-    {
-      "date": "2026-11-18",
-      "headline": "NCAA Division II Cross Country Atlantic Region Championships set for Saturday, Nov. 21",
-      "source": "PSAC",
-      "url": "https://news.google.com/rss/articles/CBMiywFBVV95cUxQZkcwcnlrNHZHSEcyLUhoRkZLal9TT1FDVFVrMlFpbTJYb2hrZ0hiNF9nb083WkxtcktQU1ZJZ1V2ZjBaVUhGU3lTZTNuRjRUckp2cHo4cE9HcHNrZzNUQ0hJVk9nMEZwenJBRHVISlE0NWRKYUVVUU90amsxWjlxVHRZN3h6Y2xEREprTVl1TnFMTkYxMHFYZXZ2amV1NXRMTWl5YnhrcENocmgzZHRLajExNXpNUk55QXhYSjdZVlh2NlprdnQ4WHVtYw?oc=5"
-    },
-    {
-      "date": "2026-11-18",
-      "headline": "Cougars Head to NCAA Cross Country Championships",
-      "source": "Washington State University Athletics",
-      "url": "https://news.google.com/rss/articles/CBMikAFBVV95cUxNM29kdWN6TnBhVnQ4Qm40S1pCMTFXLVp2V2dHd2NMcGotTmZJeVNVWGtENkg0REdQUDFZa2w1emtMOG1INEN4TjZ3OXFXWkFkSXNkWE5DZFFZOG15LWdDdzBTa2U3WnlkZjl0cmZwQ0dYNHhFRGpPcTM2NnF3QUhvaDNRNFZmMnI4dXhXUmhRWm4?oc=5"
-    },
-    {
-      "date": "2026-11-15",
-      "headline": "NCAA West Regional Cross Country Results 2026: Oregon Sweeps Team Titles",
-      "source": "FloTrack",
-      "url": "https://news.google.com/rss/articles/CBMikgFBVV95cUxQN05qR3pkUVBod0xNUGJOLUxUMHh2UC1lNmxlSXRKMjhfQ1JRNm1HQVZxV3A1Tjg0cE5BZ1VfVm1EbC1CRW1abGxzYjl5SmJyS3dOY25sRWRYRTJqd1FlZ2doY3FJQ1RFcmVVd3NGWlA0QVRqMXVvelFYOGN2RnNNa0pkUDBUT0VTUmRaRzZCYUZvUQ?oc=5"
-    },
-    {
-      "date": "2026-11-15",
-      "headline": "2026 NCAA D1 XC Regionals: Great Lakes Region Results",
-      "source": "FloTrack",
-      "url": "https://news.google.com/rss/articles/CBMimwFBVV95cUxNZVVBMmJVc0dGN3hTa1h0Tzd6eU9haERNeERRaG5BelA0SEZVd1pabkYyREowU1NYWk9PU3lNSDNja0JfQ1pWY1pmMTIxY1dpYmZQV1lHX1hlTmhrcGVRbXZsQ3JKSmNyZjJITUJEbktQdGJMWkFEdG1zOGxNaEdSRTFQVG9CendIamROTnJZVVZNdnRwdUFGdFZjRQ?oc=5"
     }
   ]
 }
