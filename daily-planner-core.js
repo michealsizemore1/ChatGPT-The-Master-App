@@ -1,9 +1,8 @@
 // Until daily-planner-misc.js loads (a moment later), anything that asks for activities gets the saved list instead of
 // failing with "getActivities is not defined". misc.js replaces this with the full version.
 if(typeof window.getActivities!=='function')window.getActivities=function(){
-  var own=[],bs=[];try{own=JSON.parse(localStorage.getItem('activities_data')||'[]')||[];}catch(e){}
-  try{var o=JSON.parse(localStorage.getItem('bs_activities')||'null');bs=((o&&o.list)||[]).map(function(a){var c=Object.assign({},a);c._bs=true;return c;});}catch(e2){}
-  return Array.isArray(own)?own.concat(bs):bs;
+  var own=[];try{own=JSON.parse(localStorage.getItem('activities_data')||'[]')||[];}catch(e){}
+  return Array.isArray(own)?own:[];
 };
 
 let today=new Date();const _realToday=new Date(today);// snapshot of actual launch date — never changes with navigation
@@ -589,10 +588,7 @@ function journalTrainingCalendarLabel(section){
   for(var i=0;i<labels.length;i++)if(labels[i][0].test(text))return labels[i][1];
   return /\b\d+(?:\.\d+)?\s*(?:mi|miles?|km)\b/i.test(text)?'Scheduled Run':'';
 }
-// BeyondStride's plan text for a day (yyyy-mm-dd), '' when it hasn't shared that day.
-function bsPlanText(dateKey){try{var bs=JSON.parse(localStorage.getItem('bs_plan_days')||'null');return bs&&bs.days&&bs.days[dateKey]?String(bs.days[dateKey]):'';}catch(e){return'';}}
-function bsPlanCovers(dateKey){try{var bs=JSON.parse(localStorage.getItem('bs_plan_days')||'null');if(!bs||!bs.days)return false;if(!bs.at)return !!bs.days[dateKey];var from=new Date();from.setDate(from.getDate()-7);var to=new Date();to.setDate(to.getDate()+21);return dateKey>=journalCalendarRealDateKey(from)&&dateKey<=journalCalendarRealDateKey(to);}catch(e){return false;}}
-// Today's workout as BeyondStride's plan has it ("Recovery 3 miles"), without the date or markdown.
+// Today's workout as the plan has it ("Recovery 3 miles"), without the date or markdown.
 function journalTrainingHeadline(section){
   var line=String(section||'').split(/\r?\n/).map(function(l){return l.trim();}).filter(function(l){return l&&!/^[↪⇄↘＋]/.test(l);})[0]||'';
   line=line.replace(/^[#*>\-\s]+/,'').replace(/\*\*/g,'').replace(/^(mon|tue|wed|thu|fri|sat|sun)[a-z]*\.?,?\s+[a-z]{3,9}\.?\s+\d{1,2}(,\s*\d{4})?\s*[:\-–—]\s*/i,'').replace(/^(day\s*\d+|mon|tue|wed|thu|fri|sat|sun)[a-z]*\s*[:\-–—]\s*/i,'');
@@ -602,18 +598,8 @@ function journalTrainingCalendarEvents(){
   var plan=null;try{plan=JSON.parse(localStorage.getItem('current_training_plan')||'null');}catch(ignore){}
   var schedule={};
   if(plan&&plan.text&&plan.startDate)schedule=plan.schedule&&Object.keys(plan.schedule).length?plan.schedule:buildUploadedTrainingSchedule(plan.text,plan.startDate,plan.weeks||1).schedule;
-  // BeyondStride holds the training plan now: its days win (a week back, three weeks ahead).
-  var bs=null;try{bs=JSON.parse(localStorage.getItem('bs_plan_days')||'null');}catch(ignoreBs){}
-  if(bs&&bs.days){
-    schedule=Object.assign({},schedule||{});
-    var from=new Date();from.setDate(from.getDate()-7);var to=new Date();to.setDate(to.getDate()+21);
-    var f=journalCalendarRealDateKey(from),t=journalCalendarRealDateKey(to);
-    if(bs.at)Object.keys(schedule).forEach(function(d){if(d>=f&&d<=t&&!bs.days[d])delete schedule[d];});
-    Object.keys(bs.days).forEach(function(d){schedule[d]=bs.days[d];});
-  }
   if(!schedule||!Object.keys(schedule).length)return[];
-  var bsDays=(bs&&bs.days)||{};
-  return Object.keys(schedule||{}).map(function(date){var section=String(schedule[date]||''),bsDay=!!bsDays[date],label=journalTrainingCalendarLabel(section),hasRunWords=/\b(run|runs|running|jog|race|intervals?|repeats?|speed\s*work|tempo|threshold|recovery|progression|strides|fartlek|hill\s*repeats?|marathon\s*pace)\b/i.test(section)||/\beasy\s+\d+\s*min/i.test(section)||/\b\d+(?:\.\d+)?\s*(?:E|EZ|M|MP|T|LT|I|R|L|LR|MLR|GA)\b/.test(section)||/\b\d+(?:\.\d+)?\s*(?:mi|miles?|km|k)\b/i.test(section);if(!label&&hasRunWords&&bsDay)label='Scheduled Run';if(!label||(/\b(rest\s*day|no\s+(?:workout|run))\b/i.test(section)&&!hasRunWords)||(/\bwalk(?:ing)?\b/i.test(section)&&!hasRunWords)||(/\b(strength|cross[- ]training)\b/i.test(section)&&!hasRunWords))return null;var detail=section.replace(/\*\*/g,'').split(/\r?\n/).map(function(line){return line.trim();}).filter(Boolean).slice(0,3).join(' · ');return{id:'training-plan-'+date,date:date,time:'',title:(journalTrainingHeadline(section)||label),note:detail+' · Add the start time in My Schedule',noReminder:true,trainingPlan:true};}).filter(Boolean);
+  return Object.keys(schedule||{}).map(function(date){var section=String(schedule[date]||''),label=journalTrainingCalendarLabel(section),hasRunWords=/\b(run|runs|running|jog|race|intervals?|repeats?|speed\s*work|tempo|threshold|recovery|progression|strides|fartlek|hill\s*repeats?|marathon\s*pace)\b/i.test(section)||/\beasy\s+\d+\s*min/i.test(section)||/\b\d+(?:\.\d+)?\s*(?:E|EZ|M|MP|T|LT|I|R|L|LR|MLR|GA)\b/.test(section)||/\b\d+(?:\.\d+)?\s*(?:mi|miles?|km|k)\b/i.test(section);if(!label||(/\b(rest\s*day|no\s+(?:workout|run))\b/i.test(section)&&!hasRunWords)||(/\bwalk(?:ing)?\b/i.test(section)&&!hasRunWords)||(/\b(strength|cross[- ]training)\b/i.test(section)&&!hasRunWords))return null;var detail=section.replace(/\*\*/g,'').split(/\r?\n/).map(function(line){return line.trim();}).filter(Boolean).slice(0,3).join(' · ');return{id:'training-plan-'+date,date:date,time:'',title:(journalTrainingHeadline(section)||label),note:detail+' · Add the start time in My Schedule',noReminder:true,trainingPlan:true};}).filter(Boolean);
 }
 function journalGrowthHabitCalendarInfo(habit){
   var source=String(habit.autoSource||'').toLowerCase(),name=String(habit.name||'').toLowerCase();
@@ -1217,7 +1203,7 @@ function renderWeeklyDigest(days,tot,wDayKeys,lbls){
   var cards=[['&#x1F3AF; Goals on Track',goalText],['&#x2B50; Strongest Area',strongest],['&#x1F50E; Needs Attention',attention],['&#x2194;&#xFE0F; Change from Last Week',changeText]];
   el.innerHTML='<div class="wdig-title">&#x1F4CA; Weekly Snapshot</div><div class="wdig-chips">'+cards.map(function(card){return '<div class="wdig-chip"><strong>'+card[0]+'</strong>'+escHtml(card[1])+'</div>';}).join('')+'</div>';
 }
-function renderWeekly(){const ws=wkStart(weekOff2),days=[],lbls=[];for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);const r=localStorage.getItem('planner_'+dk(d));var _dk=dk(d);days.push(getDM(r?JSON.parse(r):{},_dk));lbls.push(d.toLocaleDateString('en-US',{weekday:'short',month:'numeric',day:'numeric'}));}const we=new Date(ws);we.setDate(ws.getDate()+6);document.getElementById('weekLabel').textContent=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' - '+we.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});const tot=agg(days);document.getElementById('wGrowth').innerHTML=mkT(gH,days.map((m,i)=>gRow(lbls[i],m)),gRow('TOTAL',tot,true));document.getElementById('wFitness').innerHTML=mkT(fH,days.map((m,i)=>fRow(lbls[i],m)),fRow('TOTAL/AVG',tot,true));try{if(window.bsWeeklyNutrition){const nk=[];for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);nk.push(dk(d));}window.bsWeeklyNutrition(nk,lbls);}}catch(eNu){}document.getElementById('wWellness').innerHTML=mkT(wH,days.map((m,i)=>wRow(lbls[i],m)),wRow('TOTAL/AVG',tot,true));
+function renderWeekly(){const ws=wkStart(weekOff2),days=[],lbls=[];for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);const r=localStorage.getItem('planner_'+dk(d));var _dk=dk(d);days.push(getDM(r?JSON.parse(r):{},_dk));lbls.push(d.toLocaleDateString('en-US',{weekday:'short',month:'numeric',day:'numeric'}));}const we=new Date(ws);we.setDate(ws.getDate()+6);document.getElementById('weekLabel').textContent=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' - '+we.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});const tot=agg(days);document.getElementById('wGrowth').innerHTML=mkT(gH,days.map((m,i)=>gRow(lbls[i],m)),gRow('TOTAL',tot,true));document.getElementById('wFitness').innerHTML=mkT(fH,days.map((m,i)=>fRow(lbls[i],m)),fRow('TOTAL/AVG',tot,true));document.getElementById('wWellness').innerHTML=mkT(wH,days.map((m,i)=>wRow(lbls[i],m)),wRow('TOTAL/AVG',tot,true));
   renderWeeklyGrowthTable(ws,we,days,lbls);
   // Growth / Skills (Language, Guitar) is no longer shown on Weekly; Reading / Audible joins the Spirituality table.
   const wDayKeys=[];for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);wDayKeys.push(dk(d));}renderSpirit(wDayKeys,lbls,'wSpirituality');weeklyReadingColumn(wDayKeys);sleepingHrColumn(wDayKeys,'wWellness');}
@@ -1232,9 +1218,6 @@ function sleepingHrColumn(keys,hostId){
   t.querySelectorAll('tbody tr').forEach(function(tr,i){var td=document.createElement('td');var v=i<vals.length?vals[i]:avg;td.textContent=v?Math.round(v):'-';tr.appendChild(td);});
   sleepStageColumns(keys,hostId);
   hrvColumn(keys,hostId);
-  // Fill any days not read yet from BeyondStride (then this table redraws).
-  try{if(window.bsWellnessFetch){var flat=[];keys.forEach(function(k){(Array.isArray(k)?k:[k]).forEach(function(x){flat.push(x);});});
-    window.bsWellnessFetch(flat,function(){try{if(hostId==='wWellness')renderWeekly();else if(hostId==='mWellness')renderMonthly();else if(hostId==='yWellness')renderYearly();}catch(e){}});}}catch(eF){}
 }
 // A day's value BeyondStride sent (sleep score, deep / REM minutes…), from its local cache; 0 if none.
 function bsDailyVal(store,k){try{if(!window.__bsDV)window.__bsDV={};var c=window.__bsDV[store];if(!c||Date.now()-c.at>5000){c={at:Date.now(),v:JSON.parse(localStorage.getItem(store)||'{}')||{}};window.__bsDV[store]=c;}return Number(c.v[k])||0;}catch(e){return 0;}}
@@ -1908,22 +1891,19 @@ function noTonightOutput(t){
 function aiFillEntireReview(btn){
   if(!journalAIKey()){alert('Add your Anthropic API key in Settings first.');return;}
   const ws=wkStart(revOff2),we=new Date(ws);we.setDate(ws.getDate()+6);
-  // BeyondStride's day-by-day training / nutrition / recovery for the week (read-only), fetched first.
-  if(typeof window.bsReviewFetch==='function'&&!btn.__bsReady){btn.disabled=true;window.bsReviewFetch(dk(ws),dk(we),function(t){btn.__bsText=t||'';btn.__bsReady=true;btn.disabled=false;aiFillEntireReview(btn);});return;}
-  const bsText=noTonightInput(btn.__bsText);btn.__bsReady=false;btn.__bsText='';
   const revKey=dk(today);   // the day this review is for — the page may move to another day before the AI answers
   const weekLabel=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' - '+we.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
   const journal=getReviewWeekJournalText()+(typeof window.bibleStudyWeekText==='function'?window.bibleStudyWeekText(dk(ws),dk(we)):'');
   const injuries=reviewInjuryText();
   const stats=(document.getElementById('revStats')||{}).innerText||'';
   const current=['revWins','revImprove','revFocus','revLessons'].map(function(id){var el=document.getElementById(id);return el&&el.value.trim()?id+': '+el.value.trim():'';}).filter(Boolean).join('\n');
-  const prompt='You are completing a personal weekly review for '+weekLabel+'. Use only the supplied weekly statistics, journal entries, day-by-day training / nutrition / recovery data from the BeyondStride app, and existing review notes. Return ONLY one valid JSON object with exactly these four string keys:\n'
+  const prompt='You are completing a personal weekly review for '+weekLabel+'. Use only the supplied weekly statistics, journal entries and existing review notes. Return ONLY one valid JSON object with exactly these four string keys:\n'
     +'{"wins":"","improve":"","focus":"","lessons":""}\n\n'
     +'Writing requirements:\n- wins: 2-4 specific achievements or positive patterns\n- improve: 2-4 constructive, realistic improvements\n- focus: 1-3 specific priorities for next week\n- lessons: 2-4 concise takeaways from the week\n'
     +'Cover the whole day, not just training and food: include faith (Bible study — passage, theme, what was applied — prayer, worship, Daily Bread) and wellness (blood pressure, weight, sleep, meds, dog walk, steps) from the daily checks and Bible study sections. Name a completed Bible study or full set of wellness checks as a win; name checks left red or blank as something to improve only if they matter.\n'+'Use short bullet-style lines inside each string. Do not invent events or accomplishments. If information is limited, acknowledge that briefly and make cautious suggestions.\n'
     +'This is a reflective record of the week, kept for later. Do not include tonight\'s to-dos (lights-out / bedtime times, bedtime or recovery snacks). Prefer patterns across the week and lessons over restating single numbers.\n'
-    +'Use numbers exactly as written; never guess or calculate a score that is not given. When the journal and BeyondStride differ, BeyondStride is the watch / app measurement for sleep, HRV, heart rate, runs and food logged.\n\n'
-    +'WEEKLY STATISTICS:\n'+(stats||'No statistics available')+'\n\nINJURY REPORT WEEKLY ROLL-UP:\n'+injuries+'\n\nDAILY JOURNAL:\n'+(journal||'No written daily notes available')+'\n\nTRAINING, NUTRITION & RECOVERY BY DAY (BeyondStride app):\n'+(bsText||'Not available')+'\n\nEXISTING REVIEW NOTES:\n'+(current||'None');
+    +'Use numbers exactly as written; never guess or calculate a score that is not given.\n\n'
+    +'WEEKLY STATISTICS:\n'+(stats||'No statistics available')+'\n\nINJURY REPORT WEEKLY ROLL-UP:\n'+injuries+'\n\nDAILY JOURNAL:\n'+(journal||'No written daily notes available')+'\n\nEXISTING REVIEW NOTES:\n'+(current||'None');
   const original=btn.innerHTML;btn.disabled=true;btn.innerHTML='&#x23F3; Filling Review...';
   aiCall(prompt,2400,function(text){
     try{
@@ -2074,15 +2054,6 @@ function applyPhoneDayReview(force){
       localStorage.setItem('autoDayRev_'+k,real?'early':'auto');btn.__auto=true;btn.__fallback=function(){applyPhoneDayReview(true);};
       aiFillEntireDayReview(btn);return;
     }
-    if(typeof window.bsPhoneReview!=='function')return;
-    window.bsPhoneReview(k,function(o){
-      if(!o||dk(today)!==k||!empty())return;
-      var map={wins:'dayRevWins',improve:'dayRevImprove',focus:'dayRevFocus',lessons:'dayRevLessons'};
-      Object.keys(map).forEach(function(f){var e=document.getElementById(map[f]);if(e&&o[f]){e.value=noTonightOutput(o[f]);autoGrowReviewField(e);}});
-      saveDayReview(true);try{localStorage.setItem(flag,'1');localStorage.setItem('autoDayRev_'+k,'phone');localStorage.setItem('bsPhoneRevText_'+k,dayRevJoined());}catch(e){}
-      try{if(typeof window.autoTickReviewWritten==='function')window.autoTickReviewWritten();}catch(eT){}
-      if(typeof v26Toast==='function')v26Toast('🌙 Day Review filled from BeyondStride');
-    });
   }catch(e){}
 }
 function clearDayReview(){
@@ -2115,15 +2086,12 @@ function saveDayReview(quiet){
   clearTimeout(t);t=setTimeout(function(){saveDayReview(true);},800);},true);})();
 function aiFillEntireDayReview(btn){
   if(!journalAIKey()){alert('Add your Anthropic API key in Settings first.');return;}
-  // BeyondStride's training / nutrition / recovery summary for the day (read-only), fetched first.
-  if(typeof window.bsReviewFetch==='function'&&!btn.__bsReady){var _k=dk(today);btn.disabled=true;window.bsReviewFetch(_k,_k,function(t){btn.__bsText=t||'';btn.__bsReady=true;btn.disabled=false;aiFillEntireDayReview(btn);});return;}
-  const bsText=noTonightInput(btn.__bsText);btn.__bsReady=false;btn.__bsText='';
   const dayLabel=today.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric',year:'numeric'});
   const journal=getDayJournalText(today);
   const checksText=dayChecksText();
   const studyText=(typeof window.bibleStudyDayText==='function'?window.bibleStudyDayText(dk(today)):'');
   const current=['dayRevWins','dayRevImprove','dayRevFocus','dayRevLessons'].map(function(id){var el=document.getElementById(id);return el&&el.value.trim()?id+': '+el.value.trim():'';}).filter(Boolean).join('\n');
-  const prompt='You are completing a personal daily review for '+dayLabel+'. Use only the supplied journal entry, training / nutrition / recovery data from the BeyondStride app, and existing review notes. Return ONLY one valid JSON object with exactly these four string keys:\n'
+  const prompt='You are completing a personal daily review for '+dayLabel+'. Use only the supplied journal entry and existing review notes. Return ONLY one valid JSON object with exactly these four string keys:\n'
     +'{"wins":"","improve":"","focus":"","lessons":""}\n\n'
     +'Writing requirements:\n- wins: 2-4 specific achievements or positive moments from today\n- improve: 2-4 constructive, realistic improvements\n- focus: 1-3 specific priorities for tomorrow\n- lessons: 1-3 concise takeaways from today\n'
     +'Cover the WHOLE day, not just running and food — training/nutrition get at most two lines per section. You MUST include:\n'
@@ -2132,10 +2100,10 @@ function aiFillEntireDayReview(btn){
     +'  Do not count blank (not marked yet) items as missed while the day is still going.\n'
     +'Use short bullet-style lines inside each string. Do not invent events or accomplishments. If information is limited, acknowledge that briefly and make cautious suggestions.\n'
     +'This is a reflective record of the day, kept for later. Do NOT include tonight\'s to-dos: no lights-out / bedtime times, no bedtime or recovery snack, no "drink a glass before bed", no laying out gear. Focus for tomorrow is about the day itself (training, eating habits, work, faith, family), not tonight. Prefer patterns and lessons over restating numbers.\n'
-    +'Use numbers exactly as written; never guess or calculate a score that is not given (HRV in ms is not a readiness score). When the journal and BeyondStride give different numbers (for example sleep), BeyondStride is the watch / app measurement for sleep, HRV, heart rate, runs and food logged; mention both only if the difference matters.\n'
+    +'Use numbers exactly as written; never guess or calculate a score that is not given (HRV in ms is not a readiness score).\n'
     +(dk(today)===dk(new Date())?'It is now '+new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})+' and the day is not over: a planned workout not done yet is still to do today (not missed), and food totals are only so far.\n\n':'\n')
     +'DAILY JOURNAL:\n'+(journal||'No written journal notes available for today')
-    +'\n\nDAILY CHECKS (Wellness, Spiritual, Daily Movement, etc. — green = done, red = not done, partial, N/A, blank = not marked yet):\n'+(checksText||'Not available')+(studyText?'\n\nBIBLE STUDY TODAY (One Year Chronological Bible):\n'+studyText:'')+'\n\nTRAINING, NUTRITION & RECOVERY (BeyondStride app):\n'+(bsText||'Not available')+'\n\nEXISTING REVIEW NOTES:\n'+(current||'None');
+    +'\n\nDAILY CHECKS (Wellness, Spiritual, Daily Movement, etc. — green = done, red = not done, partial, N/A, blank = not marked yet):\n'+(checksText||'Not available')+(studyText?'\n\nBIBLE STUDY TODAY (One Year Chronological Bible):\n'+studyText:'')+'\n\nEXISTING REVIEW NOTES:\n'+(current||'None');
   const original=btn.innerHTML;btn.disabled=true;btn.innerHTML='&#x23F3; Filling Review...';
   aiCall(prompt,2000,function(text){
     try{
