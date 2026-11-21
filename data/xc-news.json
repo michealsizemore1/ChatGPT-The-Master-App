@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-20T15:35:28+00:00",
+  "updatedAt": "2026-11-21T00:02:03+00:00",
   "source": "Google News search: NCAA cross country",
   "items": [
     [
@@ -44,5 +44,6 @@
       "https://news.google.com/rss/articles/CBMikAFBVV95cUxPVGlLbmdBZ293ekROMWhPel92M0dlUURrdU9RUXAwLWJjMGRPdDVyOFlQamtxdHFXX2NGeDR0NHZIWHVOWFdxQXh2MW5INXg2ZS1FNU1JcGdWNDRpWktYTlBvRVFUTGs2anhsRW5sOFRwT19ZZW4xc1BybmI5Qno0eVN2SDY3VU1nSHVmQ0pxV1c?oc=5",
       ""
     ]
-  ]
+  ],
+  "error": "HTTP Error 503: Service Unavailable"
 }
