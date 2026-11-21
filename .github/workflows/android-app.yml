@@ -17,6 +17,7 @@ on:
       - receipt-scanner.js
       - master-backup-shared.js
       - vendor/**
+      - android-app/**
       - .github/workflows/android-app.yml
 
 permissions:
@@ -166,7 +167,7 @@ jobs:
           cat > app/src/main/res/drawable/ic_bg.xml <<'EOF'
           <?xml version="1.0" encoding="utf-8"?>
           <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
-              <gradient android:angle="315" android:startColor="#6366F1" android:endColor="#14B8A6" />
+              <gradient android:angle="315" android:startColor="#065F46" android:endColor="#10B981" />
           </shape>
           EOF
 
@@ -175,6 +176,7 @@ jobs:
           <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
               <background android:drawable="@drawable/ic_bg" />
               <foreground android:drawable="@drawable/ic_fg" />
+              <monochrome android:drawable="@drawable/ic_mono" />
           </adaptive-icon>
           EOF
 
@@ -510,29 +512,11 @@ jobs:
           })();
           EOF
 
-      - name: Make app icons
+      - name: Add app icons
         run: |
-          pip install --quiet pillow
-          python3 - <<'EOF'
-          from PIL import Image, ImageDraw, ImageFont
-          R = "android-build/app/src/main/res/"
-          def font(px):
-              try:
-                  return ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", px)
-              except Exception:
-                  return ImageFont.load_default(size=px)
-          def text(img, frac):
-              d = ImageDraw.Draw(img); s = img.size[0]; f = font(int(s * frac))
-              b = d.textbbox((0, 0), "M&C", font=f)
-              d.text(((s - (b[2] - b[0])) / 2 - b[0], (s - (b[3] - b[1])) / 2 - b[1]), "M&C", font=f, fill="white")
-          fg = Image.new("RGBA", (432, 432), (0, 0, 0, 0)); text(fg, 0.17); fg.save(R + "drawable-nodpi/ic_fg.png")
-          s = 192; img = Image.new("RGB", (s, s)); px = img.load()
-          for y in range(s):
-              for x in range(s):
-                  t = (x + y) / (2 * s)
-                  px[x, y] = (int(99 + (20 - 99) * t), int(102 + (184 - 102) * t), int(241 + (166 - 241) * t))
-          text(img, 0.27); img.save(R + "mipmap-xxxhdpi/ic_launcher.png")
-          EOF
+          R=android-build/app/src/main/res
+          cp android-app/icon/ic_fg.xml android-app/icon/ic_mono.xml $R/drawable/
+          cp android-app/icon/ic_launcher.png $R/mipmap-xxxhdpi/ic_launcher.png
 
       - name: Copy the budget app into the APK
         run: |
