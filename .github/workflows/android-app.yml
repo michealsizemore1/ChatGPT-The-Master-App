@@ -5,7 +5,7 @@
 #   Name:  APP_SIGNING_PASSWORD     Value: any password (6+ characters). Keep it forever.
 #
 # Every time the budget files change (or you press "Run workflow" on the Actions tab),
-# a new APK appears under Releases. Install it over the old one; your data stays.
+# a new APK appears under Releases (the latest one is always at the top). Install it over the old one; your data stays.
 name: Build Android app
 
 on:
@@ -17,6 +17,7 @@ on:
       - receipt-scanner.js
       - master-backup-shared.js
       - vendor/**
+      - .github/workflows/android-app.yml
 
 permissions:
   contents: write
