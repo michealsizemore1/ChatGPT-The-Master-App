@@ -1,0 +1,572 @@
+# Builds "M&C Money" as a real Android app (APK) from budget-tracker.html.
+# The whole app is packed inside the APK - it does not load anything from the website.
+#
+# One-time setup: Settings > Secrets and variables > Actions > New repository secret
+#   Name:  APP_SIGNING_PASSWORD     Value: any password (6+ characters). Keep it forever.
+#
+# Every time the budget files change (or you press "Run workflow" on the Actions tab),
+# a new APK appears under Releases. Install it over the old one; your data stays.
+name: Build Android app
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - budget-tracker.html
+      - budget-app.js
+      - receipt-scanner.js
+      - master-backup-shared.js
+      - vendor/**
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-app
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
+      - name: Prepare signing key
+        env:
+          PW: ${{ secrets.APP_SIGNING_PASSWORD }}
+        run: |
+          if [ -z "$PW" ] || [ ${#PW} -lt 6 ]; then
+            echo "::error::Add a repository secret named APP_SIGNING_PASSWORD (6+ characters) under Settings > Secrets and variables > Actions, then run this again."
+            exit 1
+          fi
+          KS="$RUNNER_TEMP/app.keystore"
+          if [ -f android-signing/key.enc ]; then
+            openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in android-signing/key.enc -out "$KS" -pass env:PW \
+              || { echo "::error::APP_SIGNING_PASSWORD doesn't match the saved signing key."; exit 1; }
+          else
+            keytool -genkeypair -keystore "$KS" -storetype PKCS12 -alias mcmoney -keyalg RSA -keysize 2048 \
+              -validity 10000 -storepass "$PW" -keypass "$PW" -dname "CN=M&C Money, O=Personal"
+            mkdir -p android-signing
+            openssl enc -aes-256-cbc -pbkdf2 -iter 200000 -salt -in "$KS" -out android-signing/key.enc -pass env:PW
+            git config user.name "github-actions[bot]"
+            git config user.email "41898237+github-actions[bot]@users.noreply.github.com"
+            git add android-signing/key.enc
+            git commit -m "Save encrypted Android signing key (needed for app updates)"
+            git push
+          fi
+          echo "KEYSTORE_FILE=$KS" >> "$GITHUB_ENV"
+
+      - name: Create Android project
+        run: |
+          A=android-build/app/src/main
+          mkdir -p $A/java/com/sizemore/mcmoney $A/assets/www $A/res/values $A/res/mipmap-anydpi-v26 \
+                   $A/res/mipmap-xxxhdpi $A/res/drawable $A/res/drawable-nodpi
+          cd android-build
+
+          cat > settings.gradle <<'EOF'
+          pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
+          dependencyResolutionManagement { repositories { google(); mavenCentral() } }
+          rootProject.name = "MCMoney"
+          include ':app'
+          EOF
+
+          cat > build.gradle <<'EOF'
+          plugins { id 'com.android.application' version '8.5.2' apply false }
+          EOF
+
+          echo "org.gradle.jvmargs=-Xmx2g" > gradle.properties
+
+          cat > app/build.gradle <<'EOF'
+          plugins { id 'com.android.application' }
+          android {
+              namespace 'com.sizemore.mcmoney'
+              compileSdk 34
+              defaultConfig {
+                  applicationId 'com.sizemore.mcmoney'
+                  minSdk 24
+                  targetSdk 34
+                  versionCode Integer.parseInt(System.getenv('VERSION_CODE') ?: '1')
+                  versionName "1." + (System.getenv('VERSION_CODE') ?: '1')
+              }
+              signingConfigs {
+                  release {
+                      storeFile file(System.getenv('KEYSTORE_FILE'))
+                      storePassword System.getenv('APP_SIGNING_PASSWORD')
+                      keyAlias 'mcmoney'
+                      keyPassword System.getenv('APP_SIGNING_PASSWORD')
+                  }
+              }
+              buildTypes {
+                  release {
+                      minifyEnabled false
+                      signingConfig signingConfigs.release
+                  }
+              }
+              compileOptions {
+                  sourceCompatibility JavaVersion.VERSION_17
+                  targetCompatibility JavaVersion.VERSION_17
+              }
+          }
+          EOF
+
+          cat > app/src/main/AndroidManifest.xml <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+              <uses-permission android:name="android.permission.INTERNET" />
+              <queries>
+                  <intent><action android:name="android.media.action.IMAGE_CAPTURE" /></intent>
+              </queries>
+              <application
+                  android:label="M&amp;C Money"
+                  android:icon="@mipmap/ic_launcher"
+                  android:allowBackup="true"
+                  android:hardwareAccelerated="true"
+                  android:theme="@style/AppTheme">
+                  <activity
+                      android:name=".MainActivity"
+                      android:exported="true"
+                      android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboard|keyboardHidden|uiMode|density"
+                      android:windowSoftInputMode="adjustResize">
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
+                      </intent-filter>
+                  </activity>
+                  <provider
+                      android:name=".CaptureProvider"
+                      android:authorities="com.sizemore.mcmoney.capture"
+                      android:exported="false"
+                      android:grantUriPermissions="true" />
+              </application>
+          </manifest>
+          EOF
+
+          cat > app/src/main/res/values/styles.xml <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <color name="app_bg">#F5F7FB</color>
+              <style name="AppTheme" parent="android:Theme.Material.Light.NoActionBar">
+                  <item name="android:statusBarColor">#0F172A</item>
+                  <item name="android:navigationBarColor">#0F172A</item>
+                  <item name="android:windowBackground">@color/app_bg</item>
+              </style>
+          </resources>
+          EOF
+
+          cat > app/src/main/res/drawable/ic_bg.xml <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+              <gradient android:angle="315" android:startColor="#6366F1" android:endColor="#14B8A6" />
+          </shape>
+          EOF
+
+          cat > app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+              <background android:drawable="@drawable/ic_bg" />
+              <foreground android:drawable="@drawable/ic_fg" />
+          </adaptive-icon>
+          EOF
+
+          cat > app/src/main/java/com/sizemore/mcmoney/MainActivity.java <<'EOF'
+          package com.sizemore.mcmoney;
+
+          import android.app.Activity;
+          import android.content.ClipData;
+          import android.content.ContentValues;
+          import android.content.Intent;
+          import android.content.pm.PackageManager;
+          import android.content.pm.ResolveInfo;
+          import android.net.Uri;
+          import android.os.Build;
+          import android.os.Bundle;
+          import android.os.Environment;
+          import android.provider.MediaStore;
+          import android.util.Base64;
+          import android.webkit.CookieManager;
+          import android.webkit.JavascriptInterface;
+          import android.webkit.ValueCallback;
+          import android.webkit.WebChromeClient;
+          import android.webkit.WebResourceRequest;
+          import android.webkit.WebSettings;
+          import android.webkit.WebView;
+          import android.webkit.WebViewClient;
+          import android.widget.Toast;
+          import java.io.File;
+          import java.io.FileOutputStream;
+          import java.io.OutputStream;
+          import java.util.ArrayList;
+          import java.util.List;
+
+          public class MainActivity extends Activity {
+              private static final int FILE_REQUEST = 1001;
+              private static final String START_URL = "file:///android_asset/www/index.html";
+              private WebView web;
+              private ValueCallback<Uri[]> pendingFiles;
+              private Uri cameraUri;
+
+              @Override
+              protected void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+                  web = new WebView(this);
+                  setContentView(web);
+
+                  WebSettings s = web.getSettings();
+                  s.setJavaScriptEnabled(true);
+                  s.setDomStorageEnabled(true);
+                  s.setDatabaseEnabled(true);
+                  s.setAllowFileAccess(true);
+                  s.setAllowFileAccessFromFileURLs(true);
+                  s.setAllowUniversalAccessFromFileURLs(true);
+                  s.setTextZoom(100);
+
+                  web.addJavascriptInterface(new Bridge(), "AndroidApp");
+
+                  web.setWebViewClient(new WebViewClient() {
+                      @Override
+                      public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                          Uri u = request.getUrl();
+                          String scheme = u.getScheme();
+                          if ("file".equals(scheme)) {
+                              String path = u.getPath();
+                              // Stay on the budget page; other pages of the website don't exist inside the app.
+                              return path == null || !path.endsWith("/www/index.html");
+                          }
+                          if ("http".equals(scheme) || "https".equals(scheme) || "mailto".equals(scheme) || "tel".equals(scheme)) {
+                              try { startActivity(new Intent(Intent.ACTION_VIEW, u)); } catch (Exception ignored) { }
+                          }
+                          return true;
+                      }
+                  });
+
+                  web.setWebChromeClient(new WebChromeClient() {
+                      @Override
+                      public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> callback, FileChooserParams params) {
+                          return openFileChooser(callback, params);
+                      }
+                  });
+
+                  if (savedInstanceState == null || web.restoreState(savedInstanceState) == null) {
+                      web.loadUrl(START_URL);
+                  }
+              }
+
+              private boolean openFileChooser(ValueCallback<Uri[]> callback, WebChromeClient.FileChooserParams params) {
+                  if (pendingFiles != null) pendingFiles.onReceiveValue(null);
+                  pendingFiles = callback;
+                  cameraUri = null;
+
+                  boolean images = false;
+                  String[] accept = params.getAcceptTypes();
+                  if (accept != null) {
+                      for (String a : accept) {
+                          if (a != null && a.trim().startsWith("image")) images = true;
+                      }
+                  }
+
+                  Intent pick = new Intent(Intent.ACTION_GET_CONTENT);
+                  pick.addCategory(Intent.CATEGORY_OPENABLE);
+                  pick.setType(images ? "image/*" : "*/*");
+                  if (params.getMode() == WebChromeClient.FileChooserParams.MODE_OPEN_MULTIPLE) {
+                      pick.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                  }
+
+                  Intent camera = null;
+                  if (images) {
+                      cameraUri = CaptureProvider.newPhotoUri(this);
+                      camera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                      camera.putExtra(MediaStore.EXTRA_OUTPUT, cameraUri);
+                      camera.setClipData(ClipData.newRawUri("photo", cameraUri));
+                      camera.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                      List<ResolveInfo> cams = getPackageManager().queryIntentActivities(camera, PackageManager.MATCH_DEFAULT_ONLY);
+                      for (ResolveInfo ri : cams) {
+                          grantUriPermission(ri.activityInfo.packageName, cameraUri,
+                                  Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                      }
+                      if (cams.isEmpty()) camera = null;
+                  }
+
+                  Intent launch;
+                  if (camera != null && params.isCaptureEnabled()) {
+                      launch = camera;
+                  } else {
+                      launch = Intent.createChooser(pick, images ? "Add a photo" : "Choose a file");
+                      if (camera != null) launch.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{camera});
+                  }
+
+                  try {
+                      startActivityForResult(launch, FILE_REQUEST);
+                  } catch (Exception e) {
+                      pendingFiles.onReceiveValue(null);
+                      pendingFiles = null;
+                      toast("No app available to pick a file");
+                  }
+                  return true;
+              }
+
+              @Override
+              protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+                  if (requestCode != FILE_REQUEST) {
+                      super.onActivityResult(requestCode, resultCode, data);
+                      return;
+                  }
+                  if (pendingFiles == null) return;
+                  Uri[] result = null;
+                  if (resultCode == RESULT_OK) {
+                      List<Uri> uris = new ArrayList<>();
+                      if (data != null && data.getClipData() != null) {
+                          ClipData clip = data.getClipData();
+                          for (int i = 0; i < clip.getItemCount(); i++) {
+                              Uri u = clip.getItemAt(i).getUri();
+                              if (u != null) uris.add(u);
+                          }
+                      }
+                      if (uris.isEmpty() && data != null && data.getData() != null) uris.add(data.getData());
+                      if (uris.isEmpty() && cameraUri != null && CaptureProvider.hasPhoto(this, cameraUri)) uris.add(cameraUri);
+                      if (!uris.isEmpty()) result = uris.toArray(new Uri[0]);
+                  }
+                  pendingFiles.onReceiveValue(result);
+                  pendingFiles = null;
+              }
+
+              @Override
+              protected void onSaveInstanceState(Bundle outState) {
+                  super.onSaveInstanceState(outState);
+                  web.saveState(outState);
+              }
+
+              @Override
+              protected void onPause() {
+                  super.onPause();
+                  CookieManager.getInstance().flush();
+              }
+
+              @Override
+              public void onBackPressed() {
+                  if (web.canGoBack()) web.goBack();
+                  else super.onBackPressed();
+              }
+
+              private void toast(final String msg) {
+                  runOnUiThread(new Runnable() {
+                      @Override public void run() { Toast.makeText(MainActivity.this, msg, Toast.LENGTH_LONG).show(); }
+                  });
+              }
+
+              /** Lets the page save backups and CSV exports into the phone's Downloads folder. */
+              public class Bridge {
+                  @JavascriptInterface
+                  public boolean saveFile(String name, String mime, String base64) {
+                      try {
+                          byte[] bytes = Base64.decode(base64, Base64.DEFAULT);
+                          String safe = (name == null || name.trim().isEmpty() ? "download" : name).replaceAll("[\\\\/:*?\"<>|]", "_");
+                          String type = (mime == null || mime.isEmpty()) ? "application/octet-stream" : mime;
+                          String where;
+                          if (Build.VERSION.SDK_INT >= 29) {
+                              ContentValues cv = new ContentValues();
+                              cv.put(MediaStore.MediaColumns.DISPLAY_NAME, safe);
+                              cv.put(MediaStore.MediaColumns.MIME_TYPE, type);
+                              cv.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/MC Money");
+                              Uri uri = getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, cv);
+                              if (uri == null) throw new Exception("Downloads folder unavailable");
+                              OutputStream os = getContentResolver().openOutputStream(uri);
+                              try { os.write(bytes); } finally { os.close(); }
+                              where = "Downloads/MC Money";
+                          } else {
+                              File dir = new File(getExternalFilesDir(null), "Downloads");
+                              dir.mkdirs();
+                              FileOutputStream os = new FileOutputStream(new File(dir, safe));
+                              try { os.write(bytes); } finally { os.close(); }
+                              where = dir.getAbsolutePath();
+                          }
+                          toast("Saved " + safe + " to " + where);
+                          return true;
+                      } catch (Exception e) {
+                          toast("Couldn't save file: " + e.getMessage());
+                          return false;
+                      }
+                  }
+              }
+          }
+          EOF
+
+          cat > app/src/main/java/com/sizemore/mcmoney/CaptureProvider.java <<'EOF'
+          package com.sizemore.mcmoney;
+
+          import android.content.ContentProvider;
+          import android.content.ContentValues;
+          import android.content.Context;
+          import android.database.Cursor;
+          import android.database.MatrixCursor;
+          import android.net.Uri;
+          import android.os.ParcelFileDescriptor;
+          import android.provider.OpenableColumns;
+          import java.io.File;
+          import java.io.FileNotFoundException;
+
+          /** Gives the camera app a place to write a full-size photo for receipt scanning. */
+          public class CaptureProvider extends ContentProvider {
+              static final String AUTHORITY = "com.sizemore.mcmoney.capture";
+
+              static Uri newPhotoUri(Context c) {
+                  File dir = new File(c.getCacheDir(), "capture");
+                  dir.mkdirs();
+                  File[] old = dir.listFiles();
+                  if (old != null) for (File f : old) f.delete();
+                  return Uri.parse("content://" + AUTHORITY + "/photo_" + System.currentTimeMillis() + ".jpg");
+              }
+
+              static boolean hasPhoto(Context c, Uri u) {
+                  File f = fileFor(c, u);
+                  return f != null && f.length() > 0;
+              }
+
+              private static File fileFor(Context c, Uri u) {
+                  String name = u.getLastPathSegment();
+                  if (c == null || name == null || name.contains("/") || name.contains("..")) return null;
+                  return new File(new File(c.getCacheDir(), "capture"), name);
+              }
+
+              @Override public boolean onCreate() { return true; }
+
+              @Override
+              public ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
+                  File f = fileFor(getContext(), uri);
+                  if (f == null) throw new FileNotFoundException(String.valueOf(uri));
+                  f.getParentFile().mkdirs();
+                  return ParcelFileDescriptor.open(f, ParcelFileDescriptor.parseMode(mode));
+              }
+
+              @Override
+              public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+                  File f = fileFor(getContext(), uri);
+                  MatrixCursor c = new MatrixCursor(new String[]{OpenableColumns.DISPLAY_NAME, OpenableColumns.SIZE});
+                  if (f != null) c.addRow(new Object[]{f.getName(), f.length()});
+                  return c;
+              }
+
+              @Override public String getType(Uri uri) { return "image/jpeg"; }
+              @Override public Uri insert(Uri uri, ContentValues values) { return null; }
+              @Override public int delete(Uri uri, String selection, String[] selectionArgs) { return 0; }
+              @Override public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) { return 0; }
+          }
+          EOF
+
+          cat > app/src/main/assets/www/android-bridge.js <<'EOF'
+          // Runs only inside the Android app: routes "download" links (backups, CSV exports)
+          // to the phone's Downloads folder, since an app has no browser download manager.
+          (function () {
+            if (!window.AndroidApp) return;
+            var blobs = {};
+            var realCreate = URL.createObjectURL.bind(URL);
+            var realRevoke = URL.revokeObjectURL.bind(URL);
+            URL.createObjectURL = function (obj) {
+              var url = realCreate(obj);
+              try { if (obj instanceof Blob) blobs[url] = obj; } catch (e) {}
+              return url;
+            };
+            URL.revokeObjectURL = function (url) {
+              setTimeout(function () { delete blobs[url]; realRevoke(url); }, 60000);
+            };
+            function save(blob, name) {
+              var reader = new FileReader();
+              reader.onload = function () {
+                var s = String(reader.result);
+                window.AndroidApp.saveFile(name, blob.type || "", s.slice(s.indexOf(",") + 1));
+              };
+              reader.readAsDataURL(blob);
+            }
+            function handle(a) {
+              var name = a.getAttribute("download");
+              if (name === null) return false;
+              var href = a.href || "";
+              name = name || "download";
+              if (blobs[href]) { save(blobs[href], name); return true; }
+              if (href.indexOf("data:") === 0 || href.indexOf("blob:") === 0) {
+                fetch(href).then(function (r) { return r.blob(); }).then(function (b) { save(b, name); });
+                return true;
+              }
+              return false;
+            }
+            var realClick = HTMLAnchorElement.prototype.click;
+            HTMLAnchorElement.prototype.click = function () {
+              if (handle(this)) return;
+              return realClick.apply(this, arguments);
+            };
+            document.addEventListener("click", function (e) {
+              var a = e.target && e.target.closest ? e.target.closest("a[download]") : null;
+              if (a && handle(a)) e.preventDefault();
+            }, true);
+          })();
+          EOF
+
+      - name: Make app icons
+        run: |
+          pip install --quiet pillow
+          python3 - <<'EOF'
+          from PIL import Image, ImageDraw, ImageFont
+          R = "android-build/app/src/main/res/"
+          def font(px):
+              try:
+                  return ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", px)
+              except Exception:
+                  return ImageFont.load_default(size=px)
+          def text(img, frac):
+              d = ImageDraw.Draw(img); s = img.size[0]; f = font(int(s * frac))
+              b = d.textbbox((0, 0), "M&C", font=f)
+              d.text(((s - (b[2] - b[0])) / 2 - b[0], (s - (b[3] - b[1])) / 2 - b[1]), "M&C", font=f, fill="white")
+          fg = Image.new("RGBA", (432, 432), (0, 0, 0, 0)); text(fg, 0.17); fg.save(R + "drawable-nodpi/ic_fg.png")
+          s = 192; img = Image.new("RGB", (s, s)); px = img.load()
+          for y in range(s):
+              for x in range(s):
+                  t = (x + y) / (2 * s)
+                  px[x, y] = (int(99 + (20 - 99) * t), int(102 + (184 - 102) * t), int(241 + (166 - 241) * t))
+          text(img, 0.27); img.save(R + "mipmap-xxxhdpi/ic_launcher.png")
+          EOF
+
+      - name: Copy the budget app into the APK
+        run: |
+          python3 - <<'EOF'
+          import os, re, shutil
+          dst = "android-build/app/src/main/assets/www"
+          html = open("budget-tracker.html", encoding="utf-8").read()
+          html = re.sub(r'<link[^>]*rel="manifest"[^>]*>\s*', "", html)
+          html = re.sub(r'<script[^>]*home-button\.js[^>]*>\s*</script>\s*', "", html)
+          html = re.sub(r'(src="[^"?]+\.js)\?[^"]*"', r'\1"', html)
+          html = html.replace("<head>", '<head>\n<script src="android-bridge.js"></script>', 1)
+          for src in re.findall(r'<script[^>]*src="([^"]+)"', html):
+              if src.startswith(("http:", "https:", "//")) or src == "android-bridge.js":
+                  continue
+              rel = os.path.normpath(src)
+              os.makedirs(os.path.join(dst, os.path.dirname(rel)), exist_ok=True)
+              shutil.copy(rel, os.path.join(dst, rel))
+              print("bundled", rel)
+          open(os.path.join(dst, "index.html"), "w", encoding="utf-8").write(html)
+          EOF
+
+      - name: Build APK
+        env:
+          APP_SIGNING_PASSWORD: ${{ secrets.APP_SIGNING_PASSWORD }}
+          VERSION_CODE: ${{ github.run_number }}
+        run: |
+          cd android-build
+          gradle --no-daemon assembleRelease
+          cp app/build/outputs/apk/release/app-release.apk "$GITHUB_WORKSPACE/MC-Money.apk"
+
+      - name: Publish to Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "money-app-${{ github.run_number }}" MC-Money.apk \
+            --title "M&C Money app v1.${{ github.run_number }}" \
+            --notes "Download MC-Money.apk on your phone and open it to install or update." \
+            --latest --target "$(git rev-parse HEAD)"
