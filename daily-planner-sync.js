@@ -1,6 +1,5 @@
-/* 🔄 Command Center sync (Nov 2026) — keeps Chrome and the computer matched. (BeyondStride's Life tab used to join in;
- * it was removed from the app in Nov 2026.) Uses your private Firebase spot (the link saved as "beyondstride_sync" — the
- * name is left as it was so nothing has to be linked again), under nutrition/<key>/ccsync.
+/* 🔄 Command Center sync (Nov 2026) — keeps Chrome, the computer and BeyondStride's Life tab matched.
+ * Uses the same private Firebase spot BeyondStride already uses (the link in "beyondstride_sync"), under nutrition/<key>/ccsync (next to the plans the Command Center already shares there).
  * Each saved item (a day, a review, settings, activities, the Bible reading archive…) is synced on its own:
  *  - a change uploads ~2 s later; other devices pick it up within ~30 s, or right away when the page is opened/shown;
  *  - if the same item changed on two devices, the newer change wins (only that item).

@@ -147,27 +147,26 @@ function getActivitiesOwn(){
   if(Array.isArray(_activitiesLargeCache))return _activitiesLargeCache;
   try{const r=localStorage.getItem('activities_data');return r?JSON.parse(r):[];}catch(e){return[];}
 }
-function getActivities(){return getActivitiesOwn();}
-// BeyondStride was disconnected (Nov 2026). Once: the runs it had shared (shown in Activities until now) are kept in
-// this page's own list — one already here (same day, same distance) is not repeated — then its shared copies go.
-function bsDisconnectCleanup(tries){
+// BeyondStride's activities (read-only, shared by the phone) are shown alongside the ones saved here.
+// They're never written into this page's own list; one already here (same day, same distance) is not repeated.
+var _bsActsCache=null,_bsActsRaw=null;
+function bsActivities(){
   var raw=null;try{raw=localStorage.getItem('bs_activities');}catch(e){}
-  function drop(){['bs_activities','bs_plan_days'].forEach(function(k){try{localStorage.removeItem(k);}catch(e){}});}
-  if(!raw){drop();return;}
-  // Activities load asynchronously from on-device storage; wait for them first (and try again next visit if they don't come).
-  if(!Array.isArray(_activitiesLargeCache)){if((tries||0)<60)setTimeout(function(){bsDisconnectCleanup((tries||0)+1);},250);return;}
-  var list=[];try{var o=JSON.parse(raw);list=(o&&o.list)||[];}catch(e2){}
-  var own=_activitiesLargeCache;
-  function key(a){return String(a.date||'').slice(0,10);}
-  var extra=list.filter(function(b){var m=parseFloat(b.distance)||0;return !own.some(function(a){if(key(a)!==key(b))return false;var d=parseFloat(a.distance)||0;return (m<=0&&d<=0&&String(a.type||'')===String(b.type||''))||(m>0&&Math.abs(d-m)/m<0.05);});})
-    .map(function(a){var c=Object.assign({},a);if(!c.id)c.id='bs-'+a.date+'-'+a.distance;return c;});
-  if(!extra.length){drop();return;}
-  saveActivities(own.concat(extra)).then(drop).catch(function(){});
+  if(raw===_bsActsRaw&&_bsActsCache)return _bsActsCache;
+  _bsActsRaw=raw;var list=[];try{var o=JSON.parse(raw||'null');list=(o&&o.list)||[];}catch(e2){}
+  _bsActsCache=list.map(function(a){var c=Object.assign({},a);c._bs=true;c.id='bs-'+(a.id||a.date+'-'+a.distance);return c;});
+  return _bsActsCache;
 }
-window.addEventListener('load',function(){setTimeout(bsDisconnectCleanup,600);});
+function getActivities(){
+  var own=getActivitiesOwn(),bs=bsActivities();if(!bs.length)return own;
+  function key(a){return String(a.date||'').slice(0,10);}
+  var extra=bs.filter(function(b){var m=parseFloat(b.distance)||0;return !own.some(function(a){if(key(a)!==key(b))return false;var d=parseFloat(a.distance)||0;return (m<=0&&d<=0&&String(a.type||'')===String(b.type||''))||(m>0&&Math.abs(d-m)/m<0.05);});});
+  return extra.length?own.concat(extra):own;
+}
 function saveActivities(a){
+  if(Array.isArray(a))a=a.filter(function(x){return !(x&&x._bs);});
   _activitiesLargeCache=Array.isArray(a)?a:[];
-  return journalLargeStoreSet('activities_data',_activitiesLargeCache).then(function(){
+  journalLargeStoreSet('activities_data',_activitiesLargeCache).then(function(){
     try{localStorage.removeItem('activities_data');}catch(ignore){}
     if(journalCloudUser&&journalCloudReady){
       try{localStorage.setItem('journal_cloud_dirty','1');journalCloudSchedule();}
@@ -176,7 +175,6 @@ function saveActivities(a){
   }).catch(function(err){
     console.error('Large activity storage error:',err);
     alert('The activity could not be stored on this device. Please use Backup and try again.');
-    throw err;
   });
 }
 
@@ -430,9 +428,11 @@ function renderGoals(){
     if(dd.spBibleAudio==='green')bibleD++;
     if(dd.spAIPrayer==='green')prayerD++;
   }
-  // Run days: days with a run this week vs your goal.
+  // Run days: days with a run this week vs the run days in BeyondStride's plan (or your goal).
   const runDays=Object.keys(weekRuns.reduce(function(m,r){m[String(r.date||'').slice(0,10)]=1;return m;},{})).length;
   let planRunDays=0,planMiles=0;
+  if(typeof bsPlanText==='function')for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);const t=bsPlanText(dk(d));
+    if(!t||/rest\s*day|no\s+(workout|run)/i.test(t.split('\n')[0]))continue;const hl=(typeof journalTrainingHeadline==='function'?journalTrainingHeadline(t):t);const m=hl.match(/(\d+(?:\.\d+)?)\s*(?:mi|miles?)\b/i);if(m){planRunDays++;planMiles+=parseFloat(m[1]);}}
   const runTarget=planRunDays||g.Exercise||0;
   if(planRunDays)g.Exercise=planRunDays;
   const actuals=[
@@ -483,6 +483,64 @@ function loadAllTabNotes(){
 
 /* ===== Journal experience module: home, preferences, navigation, reliability ===== */
 
+// ── Runs from the Galaxy Watch Run app ──
+// The phone's Running section opens this page as daily-planner.html#watchruns=<base64url JSON>.
+// Each run carries a stable id (its start time), so sending the same run twice never duplicates it.
+function importWatchRunsFromLink(){
+  var m=(location.hash||'').match(/[#&]watchruns=([A-Za-z0-9_-]+)/);
+  if(!m)return;
+  var runs;
+  try{
+    var b64=m[1].replace(/-/g,'+').replace(/_/g,'/');while(b64.length%4)b64+='=';
+    var bin=atob(b64),bytes=new Uint8Array(bin.length);
+    for(var i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+    runs=JSON.parse(new TextDecoder().decode(bytes));
+  }catch(e){alert('Could not read the runs sent from the watch app: '+e.message);return;}
+  if(!Array.isArray(runs)||!runs.length)return;
+  importWatchRuns(runs,{fromLink:true});
+}
+// Adds runs from BeyondStride to Activities (from the link above).
+// opts.fromLink: also clear the link and open Activities.
+// opts.done(added, updated) runs after saving.
+function importWatchRuns(runs,opts){
+  opts=opts||{};
+  var tries=0;
+  (function waitForActivities(){
+    // Activities load asynchronously from on-device storage; wait for them first.
+    if(!Array.isArray(_activitiesLargeCache)&&tries++<60){setTimeout(waitForActivities,250);return;}
+    var acts=getActivities().slice(),added=0,updated=0;
+    runs.forEach(function(r){
+      if(!r||!r.id||!r.date)return;
+      if(!r.calories&&typeof estimateCalories==='function'){
+        try{r.calories=estimateCalories({type:r.type||'Run',distance:r.distance||0,duration:r.duration||'',power:r.power||0,elevGain:r.elevGain||0});}catch(ignore){}
+      }
+      var idx=acts.findIndex(function(a){return String(a.id)===String(r.id);});
+      if(idx===-1){acts.push(r);added++;}
+      else{
+        // Keep anything added by hand (notes, weather, Air Power…); refresh watch-recorded numbers.
+        var keep=acts[idx];
+        ['distance','duration','pace','power','heartRate','cadence'].forEach(function(k){if(r[k])keep[k]=r[k];});
+        if(r.routeUrl&&!keep.routeUrl)keep.routeUrl=r.routeUrl;
+        // An automatic name ("Evening Run") is replaced by the planned workout's name; a name you typed is kept.
+        if(r.title&&(!keep.title||/^(Morning|Afternoon|Evening|Night) Run$/.test(keep.title)))keep.title=r.title;
+        // Stryd extras and weather (temp, humidity, AQI) fill in blanks only, so hand-entered values are never overwritten.
+        ['elevGain','temp','humidity','aqi','airPower','rss'].forEach(function(k){if(r[k]&&!keep[k])keep[k]=r[k];});
+        // Notes written by the watch app get refreshed; notes you edited by hand are kept.
+        if(r.notes&&(!keep.notes||keep.notes.indexOf('Recorded on Galaxy Watch')!==-1))keep.notes=r.notes;
+        updated++;
+      }
+    });
+    saveActivities(acts);
+    if(opts.fromLink){
+      try{history.replaceState(null,'',location.pathname+location.search);}catch(ignore3){}
+    }
+    var msg=added?(added+' BeyondStride run'+(added===1?'':'s')+' added to Activities'):(opts.fromLink?'Those runs were already in Activities':'');
+    if(updated&&added)msg+=' ('+updated+' already there)';
+    if(msg){if(typeof v26Toast==='function')v26Toast(msg);else if(opts.fromLink)alert(msg);}
+    if(typeof opts.done==='function')opts.done(added,updated);
+  })();
+}
+window.addEventListener('load',function(){setTimeout(importWatchRunsFromLink,300);});
 // ── Generic #tab=<name> deep link: jump straight to that tab ──
 function openTabFromLink(){
   var m=(location.hash||'').match(/[#&]tab=([a-z0-9]+)/);
@@ -491,4 +549,8 @@ function openTabFromLink(){
 }
 window.addEventListener('load',function(){setTimeout(openTabFromLink,350);});
 window.addEventListener('hashchange',openTabFromLink);
+window.addEventListener('hashchange',importWatchRunsFromLink);
 
+// ── Send a training plan to BeyondStride on the phone (and from there to the watch) ──
+// Opens beyondstride://localhost/plan#<base64url {date: that day's plan text}> — BeyondStride
+// turns each day into a guided workout. Only today and later are sent.
