@@ -976,12 +976,6 @@
     background:linear-gradient(135deg,var(--service-blue),#356b9d);
     box-shadow:0 5px 14px rgba(16,42,67,.18);
   }
-  .coach-secondary-btn{
-    border:1px solid var(--border);
-    background:#eef3f8;
-    color:var(--pine);
-    box-shadow:none;
-  }
   .dollar-toggle-btn.active{background:var(--flag-red);}
   .note,
   .shared-notes-card{
@@ -1009,29 +1003,6 @@
   .floating-ai-header > span,
   .floating-ai-header .floating-ai-close{color:#fff;}
   .floating-ai-header .floating-ai-clear{border-color:rgba(255,255,255,.38);color:#fff;}
-  .coach-question-station{
-    padding:18px;
-    border:1px solid #bdcad9;
-    border-radius:16px;
-    background:
-      linear-gradient(90deg,var(--service-blue) 0 34%,#fff 34% 66%,var(--flag-red) 66% 100%) top left/100% 5px no-repeat,
-      linear-gradient(145deg,#fff,#edf3f8);
-  }
-  .coach-question-station label{
-    display:block;
-    margin-bottom:8px;
-    color:var(--pine);
-    font-weight:800;
-  }
-  .coach-question-station textarea{
-    width:100%;
-    min-height:110px;
-    resize:vertical;
-    padding:12px 13px;
-    font:inherit;
-  }
-  .coach-question-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;}
-  .coach-question-hint{margin:10px 0 0;color:var(--muted);font-size:14px;line-height:1.45;}
 
   /* ---------- Print: "Print Full Plan" (Settings page) ---------- */
   /* Screen-only layout normally shows one .page at a time (display:none on the rest) and hides a
@@ -1047,7 +1018,7 @@
     .chart-range-nav, .range-readout,
     .remove-btn, .add-btn, .withdraw-order-arrows,
     input[type="file"], input[type="range"],
-    .chat-box, #vaultAiGate, #vaultSearchInput, #vaultUploadStatus,
+    .chat-box, #vaultSearchInput, #vaultUploadStatus,
     .open-btn, .wellness-link,
     .print-sensitive,
     .shared-notes-card small{ display:none !important; }
@@ -1936,6 +1907,7 @@
           <input type="file" id="vaultFileInput" multiple accept=".pdf,.docx,.txt" onchange="handleVaultUpload(event)">
         </div>
         <p id="vaultUploadStatus" style="font-size:15.5px;color:var(--muted);margin:8px 0 0;line-height:1.5;"></p>
+        <p style="font-size:15.5px;color:var(--muted);margin:8px 0 0;line-height:1.5;">To ask questions about these documents, use the ✦ Ask AI button. It includes the parts of your documents that match your question.</p>
         <div style="display:flex;justify-content:space-between;padding:10px 0 0;color:var(--muted);font-size:15.5px;"><span>Storage used</span><span id="vaultStorageUsage">0 KB of ~150 MB</span></div>
         <div style="background:rgba(120,120,120,0.18);border-radius:6px;height:6px;overflow:hidden;margin-top:4px;"><div id="vaultStorageBar" style="height:100%;width:0%;background:#3f9c7a;transition:width 0.3s;"></div></div>
       </div>
@@ -1953,17 +1925,6 @@
         <div id="vaultSearchResults"></div>
       </div>
 
-      <div class="card">
-        <h3 onclick="toggleCard(this)">Ask AI about your documents<span class="sub-label">Uses your Anthropic API key (Settings) to answer questions in plain English</span></h3>
-        <div id="vaultAiGate"></div>
-        <div class="chat-box" id="vaultChatBox" style="display:none;">
-          <div class="chat-log" id="vaultChatLog"></div>
-          <div class="chat-input-row">
-            <textarea id="vaultChatInput" placeholder="e.g. What's the coverage amount on my VGLI policy?"></textarea>
-            <button class="chat-send-btn" id="vaultChatSend" onclick="sendVaultChatMessage()">Ask</button>
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- ================= TAXES ================= -->
@@ -2313,24 +2274,10 @@
       <div class="wellness-grid" id="financialWellnessMetrics"></div>
       <div class="note"><b>How to read this page:</b> Strong means the measure is within a generally favorable planning range; Watch means it deserves monitoring; Attention means it may warrant a closer review. These are planning signals, not guarantees or individualized tax, investment, legal, or insurance advice. Survivorship remains a separate what-if analysis and never changes the main plan.</div>
 
-      <div class="page-header"><h2>Coach</h2><p>Automated suggestions based on your current plan, plus an optional AI chat for open-ended questions.</p></div>
-
-      <div class="card no-autocollapse coach-question-card">
-        <h3>Ask Coach AI<span class="sub-label">Type your question below—the question box always remains open</span></h3>
-        <p style="font-size:16px;color:var(--muted);margin:0 0 12px;line-height:1.55;">Ask a question here or use the floating Ask AI button from any other section. Your current plan is included automatically as context.</p>
-        <div class="coach-question-station" style="display:block !important;">
-          <label for="coachPageQuestion">What would you like to explore?</label>
-          <textarea id="coachPageQuestion" rows="4" placeholder="For example: Which changes would improve my plan without reducing travel spending?"></textarea>
-          <div class="coach-question-actions">
-            <button class="add-btn" onclick="askFromCoachPage()">Ask Coach</button>
-            <button class="add-btn coach-secondary-btn" onclick="toggleFloatingAi(true)">View conversation</button>
-          </div>
-          <p class="coach-question-hint">The response opens in the conversation panel and is saved on this device.</p>
-        </div>
-      </div>
+      <div class="page-header"><h2>Coach</h2><p>Automated suggestions based on your current plan. To talk any of them through, use the ✦ Ask AI button.</p></div>
 
       <div class="card">
-        <h3 onclick="toggleCard(this)">Next Steps<span class="sub-label">Use the plan-health measures above to pick priorities, then test or discuss them here</span></h3>
+        <h3 onclick="toggleCard(this)">Next Steps<span class="sub-label">Use the plan-health measures above to pick priorities, then test them in Explorers</span></h3>
         <div id="coachTips"></div>
       </div>
     </div>
@@ -2503,8 +2450,8 @@
           <details class="manual-topic">
             <summary>8. Plan Health &amp; Coach, Document Vault</summary>
             <div class="manual-body">
-              <p><b>Document Vault:</b> Files and keyword search remain in the current browser and do not affect calculations. AI document questions send relevant text to Anthropic. Keep originals separately.</p>
-              <p><b>Coach / Ask AI:</b> Enter the Anthropic key in Settings on each device. The key, conversation, and Vault files are excluded from JSON backups, GitHub source, and printing. AI answers never change plan inputs automatically.</p>
+              <p><b>Document Vault:</b> Files and keyword search remain in the current browser and do not affect calculations. When you use Ask AI, only the parts of your documents that match your question are sent to Anthropic, along with the list of document names. Keep originals separately.</p>
+              <p><b>Coach &amp; Ask AI:</b> Coach shows automated suggestions; the ✦ Ask AI button is the one AI chat, covering your plan and your Document Vault. Enter the Anthropic key in Settings on each device. The key, conversation, and Vault files are excluded from JSON backups, GitHub source, and printing. AI answers never change plan inputs automatically.</p>
               <p><b>Plan Health:</b> Separates strengths and pressure points without creating a blended score. Resolve coverage, account-access, tax, medical, and data-quality issues first.</p>
             </div>
           </details>
@@ -2599,19 +2546,11 @@
       </div>
 
       <div class="card print-sensitive no-autocollapse">
-        <h3>Coach AI Chat<span class="sub-label">Question box remains open on Settings</span></h3>
+        <h3>Ask AI<span class="sub-label">Your Anthropic API key for the ✦ Ask AI button</span></h3>
         <div class="field"><label>Anthropic API key</label><input type="password" id="anthropicApiKey" placeholder="sk-ant-..." autocomplete="off" oninput="saveAnthropicApiKeyLocal()"></div>
         <div class="sub-label" style="margin:-4px 0 8px;">Stored only in this browser&#39;s local storage &mdash; avoid entering it on a shared or public device.</div>
         <button type="button" class="add-btn" style="margin:0 0 10px;background:#fdf3f1;color:var(--danger);" onclick="clearAnthropicApiKeyLocal()">Remove saved API key from this device</button>
-        <div class="coach-question-station" style="display:block !important;margin:4px 0 12px;">
-          <label for="coachSettingsQuestion">Ask Coach AI a question</label>
-          <textarea id="coachSettingsQuestion" rows="4" placeholder="Type your retirement-planning question here…"></textarea>
-          <div class="coach-question-actions">
-            <button type="button" class="add-btn" onclick="askFromSettingsPage()">Ask Coach</button>
-            <button type="button" class="add-btn coach-secondary-btn" onclick="toggleFloatingAi(true)">View conversation</button>
-          </div>
-        </div>
-        <p style="font-size:16.5px;color:var(--muted);margin:0;line-height:1.55;">This file has no backend — adding a key here lets the Ask AI panel (and the Coach section) call the Anthropic API directly from your browser. The key is saved only in this device's browser so it survives a refresh. It is excluded from JSON backups, GitHub source, and printing; enter it separately on each device. Each question sends a full snapshot of your plan to Anthropic's servers. The conversation itself is saved locally; use "New chat" to clear it. Leave the key blank to keep the AI fully offline.</p>
+        <p style="font-size:16.5px;color:var(--muted);margin:0;line-height:1.55;">This file has no backend — adding a key here lets the Ask AI button call the Anthropic API directly from your browser. The key is saved only in this device's browser so it survives a refresh. It is excluded from JSON backups, GitHub source, and printing; enter it separately on each device. Each question sends a full snapshot of your plan to Anthropic's servers. The conversation itself is saved locally; use "New chat" to clear it. Leave the key blank to keep the AI fully offline.</p>
       </div>
     </div>
 
@@ -2622,7 +2561,7 @@
 <button class="ask-ai-fab" id="askAiFab" onclick="toggleFloatingAi()" aria-label="Ask AI">✦ Ask AI</button>
 <div class="floating-ai-panel" id="floatingAiPanel" style="display:none;">
   <div class="floating-ai-header">
-    <span>Ask AI<span class="sub-label" style="display:block; text-transform:none; font-weight:400; font-size:16.5px; margin-top:2px;">Answered using a full snapshot of your current plan as context</span></span>
+    <span>Ask AI<span class="sub-label" style="display:block; text-transform:none; font-weight:400; font-size:16.5px; margin-top:2px;">Answered using your current plan and relevant Document Vault excerpts</span></span>
     <div class="floating-ai-header-actions">
       <button class="floating-ai-clear" id="coachChatClearBtn" onclick="clearCoachChat()" title="Start a new conversation" style="display:none;">New chat</button>
       <button class="floating-ai-close" onclick="toggleFloatingAi(false)" aria-label="Close">×</button>
@@ -2632,23 +2571,23 @@
   <div class="chat-box" id="coachChatBox" style="display:none;">
     <div class="chat-log" id="coachChatLog"></div>
     <div class="chat-input-row">
-      <textarea id="coachChatInput" placeholder="e.g. Should I pay off the car loan faster, or keep funding the brokerage pies?"></textarea>
+      <textarea id="coachChatInput" placeholder="e.g. Should I pay off the car loan faster? What does my VGLI policy pay?"></textarea>
       <button class="chat-send-btn" id="coachChatSend" onclick="sendCoachChatMessage()">Ask</button>
     </div>
   </div>
 </div>
 
-<script src="retirement-planner-core.js?v=2026-11-21-combine"></script>
-<script src="retirement-planner-tax-and-social-security.js?v=2026-11-21-combine"></script>
-<script src="retirement-planner-navigation-and-charts.js?v=2026-11-21-combine"></script>
-<script src="retirement-planner-storage-and-notes.js?v=2026-11-21-combine"></script>
-<script src="retirement-planner-money-inputs.js?v=2026-11-21-combine"></script>
-<script src="retirement-planner-debt-and-inputs.js?v=2026-11-21-combine"></script>
-<script src="retirement-planner-projection-engine.js?v=2026-11-21-combine"></script>
-<script src="retirement-planner-explorers-and-analysis.js?v=2026-11-21-combine"></script>
-<script src="retirement-planner-charts.js?v=2026-11-21-combine"></script>
-<script src="retirement-planner-savings-and-coach.js?v=2026-11-21-combine"></script>
-<script src="retirement-planner-vault-settings-and-reports.js?v=2026-11-21-combine"></script>
+<script src="retirement-planner-core.js?v=2026-11-21-oneai"></script>
+<script src="retirement-planner-tax-and-social-security.js?v=2026-11-21-oneai"></script>
+<script src="retirement-planner-navigation-and-charts.js?v=2026-11-21-oneai"></script>
+<script src="retirement-planner-storage-and-notes.js?v=2026-11-21-oneai"></script>
+<script src="retirement-planner-money-inputs.js?v=2026-11-21-oneai"></script>
+<script src="retirement-planner-debt-and-inputs.js?v=2026-11-21-oneai"></script>
+<script src="retirement-planner-projection-engine.js?v=2026-11-21-oneai"></script>
+<script src="retirement-planner-explorers-and-analysis.js?v=2026-11-21-oneai"></script>
+<script src="retirement-planner-charts.js?v=2026-11-21-oneai"></script>
+<script src="retirement-planner-savings-and-coach.js?v=2026-11-21-oneai"></script>
+<script src="retirement-planner-vault-settings-and-reports.js?v=2026-11-21-oneai"></script>
 <script src="master-backup-shared.js"></script>
 </body>
 </html>

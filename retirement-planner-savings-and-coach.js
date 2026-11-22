@@ -170,13 +170,12 @@ function renderCoachTips() {
     ${tipsHtml}
     <div style="display:flex;flex-wrap:wrap;gap:10px;">
       <button type="button" class="add-btn" onclick="showExplorerAnalysis('retirementtiming')">Test Retirement Timing</button>
-      <button type="button" class="add-btn" onclick="toggleFloatingAi(true)">Discuss With Ask AI</button>
     </div>`;
 }
 
-// ---------- Coach: optional AI chat (direct browser call to Anthropic API, only if a key is set) ----------
-// Global "Ask AI" floating panel: available on every page via the fixed bottom-right button,
-// so the user doesn't have to navigate to the Coach page just to ask a question.
+// ---------- Ask AI: the planner's one AI chat (direct browser call to Anthropic API, only if a key is set) ----------
+// Floating panel available on every page. Each question carries the plan snapshot plus any Document
+// Vault excerpts that match it (see buildVaultExcerptsForAI).
 function toggleFloatingAi(forceOpen) {
   const panel = els('floatingAiPanel');
   if (!panel) return;
@@ -190,32 +189,6 @@ function toggleFloatingAi(forceOpen) {
     if (input) input.focus();
   }
 }
-
-// The Coach page has its own full-size question field. It feeds the same saved conversation used by
-// the floating Ask AI panel so there is one continuous chat history, regardless of where a question starts.
-function askFromQuestionField(fieldId) {
-  const pageInput = els(fieldId);
-  const question = (pageInput && pageInput.value || '').trim();
-  if (!question) {
-    if (pageInput) pageInput.focus();
-    return;
-  }
-
-  toggleFloatingAi(true);
-  const chatInput = els('coachChatInput');
-  if (!chatInput) return;
-  chatInput.value = question;
-
-  // Keep the question visible on the Coach page if a key has not been entered yet. The open
-  // conversation panel explains where to add it, and no text is lost while the user does that.
-  const key = (els('anthropicApiKey') && els('anthropicApiKey').value || '').trim();
-  if (!key) return;
-
-  pageInput.value = '';
-  sendCoachChatMessage();
-}
-function askFromCoachPage() { askFromQuestionField('coachPageQuestion'); }
-function askFromSettingsPage() { askFromQuestionField('coachSettingsQuestion'); }
 
 function renderCoachAiGate() {
   const gate = els('coachAiGate');
@@ -350,6 +323,58 @@ function clearCoachChat() {
   renderCoachChatLog();
 }
 
+// Document Vault excerpts for one Ask AI request. Only text that matches the question is sent (whole
+// short documents, or windows around each match in long ones), so unrelated files never leave the
+// browser. A follow-up like "what about the premium on it?" also matches the previous question. The
+// list of document names is always included so the AI knows what's on file.
+const VAULT_AI_STOPWORDS = new Set(('about above after again also because been before being below between both could does doing ' +
+  'during each from further have having here into itself just more most other over same should some such than that their them ' +
+  'then there these they this those through under until very what when where which while will with would your yours what\'s ' +
+  'much many does tell show give need want know my me our plan').split(' '));
+function buildVaultExcerptsForAI(history) {
+  if (typeof vaultDocuments === 'undefined' || !vaultDocuments.length) return '';
+  const userTurns = history.filter(m => m.role === 'user').map(m => m.content.toLowerCase());
+  const latest = userTurns[userTurns.length - 1] || '';
+  const isFollowUp = /\b(it|its|that|this|those|them|they|what about|how about|and the)\b/.test(latest);
+  const recentQuestions = (isFollowUp && userTurns.length > 1 ? userTurns[userTurns.length - 2] + ' ' : '') + latest;
+  const terms = Array.from(new Set(recentQuestions.match(/[a-z0-9$][a-z0-9$.\-]{2,}/g) || []))
+    .map(t => t.replace(/[.\-]+$/, ''))
+    .filter(t => t.length >= 3 && !VAULT_AI_STOPWORDS.has(t));
+  const names = vaultDocuments.map(d => d.name).join('; ');
+  const asksAboutDocs = /\b(document|documents|vault|file|files|uploaded|policy|statement|will|trust)\b/.test(recentQuestions);
+  const MAX_CHARS = 40000, WINDOW = 700, SHORT_DOC = 6000;
+  const scored = vaultDocuments.map(d => {
+    const text = d.extractedText || '';
+    const lower = text.toLowerCase();
+    const nameLower = (d.name || '').toLowerCase();
+    let hits = 0;
+    terms.forEach(t => { if (nameLower.includes(t)) hits += 5; let i = lower.indexOf(t); let c = 0; while (i !== -1 && c < 20) { hits++; c++; i = lower.indexOf(t, i + t.length); } });
+    return { d, text, lower, hits };
+  }).filter(x => x.hits > 0 || (asksAboutDocs && vaultDocuments.length <= 3))
+    .sort((a, b) => b.hits - a.hits);
+  if (!scored.length) return `DOCUMENT VAULT: ${vaultDocuments.length} document(s) on file (${names}). None matched this question, so no document text was included.`;
+  let used = 0;
+  const parts = [];
+  for (const x of scored) {
+    if (used >= MAX_CHARS) break;
+    let chunk;
+    if (x.text.length <= SHORT_DOC) chunk = x.text;
+    else {
+      const spans = [];
+      terms.forEach(t => { let i = x.lower.indexOf(t); let c = 0; while (i !== -1 && c < 4) { spans.push([Math.max(0, i - WINDOW), Math.min(x.text.length, i + t.length + WINDOW)]); c++; i = x.lower.indexOf(t, i + t.length); } });
+      if (!spans.length) spans.push([0, Math.min(x.text.length, SHORT_DOC)]);
+      spans.sort((a, b) => a[0] - b[0]);
+      const merged = [];
+      spans.forEach(sp => { const last = merged[merged.length - 1]; if (last && sp[0] <= last[1]) last[1] = Math.max(last[1], sp[1]); else merged.push(sp.slice()); });
+      chunk = merged.map(([a, b]) => (a > 0 ? '…' : '') + x.text.slice(a, b) + (b < x.text.length ? '…' : '')).join('\n');
+    }
+    chunk = chunk.slice(0, MAX_CHARS - used);
+    parts.push(`=== ${x.d.name} ===\n${chunk}`);
+    used += chunk.length;
+  }
+  return `DOCUMENT VAULT: ${vaultDocuments.length} document(s) on file (${names}). Excerpts that match the question:\n\n${parts.join('\n\n')}`;
+}
+
 async function sendCoachChatMessage() {
   const input = els('coachChatInput');
   const question = (input.value || '').trim();
@@ -369,6 +394,7 @@ async function sendCoachChatMessage() {
   const clearBtn = els('coachChatClearBtn');
   if (clearBtn) clearBtn.style.display = 'inline-block';
 
+  const vaultContext = buildVaultExcerptsForAI(coachChatHistory);
   try {
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -382,7 +408,7 @@ async function sendCoachChatMessage() {
         model: 'claude-sonnet-4-5',
         max_tokens: 4096,
         stream: true,
-        system: `You are a sharp, candid financial planning analyst embedded in a personal retirement planner web app, with full access to the user's actual plan data below. Answer like a knowledgeable advisor who has genuinely reviewed their numbers — be specific, reference their real figures (dollar amounts, ages, percentages) rather than speaking in generalities, and give thorough, well-reasoned analysis when the question calls for it rather than a shallow summary. Use markdown formatting (headers, bold, bullet/numbered lists, tables) where it makes a longer answer easier to scan. Use general financial knowledge for anything outside the plan snapshot. This is not licensed financial advice — you can note that briefly once near the start of the conversation, not on every message.\n\nPLAN SNAPSHOT:\n${buildPlanSummaryForAI()}`,
+        system: `You are a sharp, candid financial planning analyst embedded in a personal retirement planner web app, with full access to the user's actual plan data below. Answer like a knowledgeable advisor who has genuinely reviewed their numbers — be specific, reference their real figures (dollar amounts, ages, percentages) rather than speaking in generalities, and give thorough, well-reasoned analysis when the question calls for it rather than a shallow summary. Use markdown formatting (headers, bold, bullet/numbered lists, tables) where it makes a longer answer easier to scan. Use general financial knowledge for anything outside the plan snapshot. When the question is about the user's own documents, answer from the Document Vault excerpts below, quote the relevant part when useful, and say plainly if the answer isn't in them rather than guessing. This is not licensed financial advice — you can note that briefly once near the start of the conversation, not on every message.\n\nPLAN SNAPSHOT:\n${buildPlanSummaryForAI()}${vaultContext ? '\n\n' + vaultContext : ''}`,
         messages: coachChatHistory
       })
     });

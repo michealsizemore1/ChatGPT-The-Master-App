@@ -5,7 +5,6 @@ const VAULT_MAX_FILE_BYTES = 25 * 1024 * 1024;    // ~25 MB per original file �
 const VAULT_MAX_TEXT_BYTES = 1024 * 1024;         // ~1 MB of extracted text kept per document for search/Ask AI — the original file is always saved in full regardless of this cap
 const VAULT_MAX_TOTAL_BYTES = 150 * 1024 * 1024;  // ~150 MB total across all original files — well inside IndexedDB's real-world quota
 let vaultDocuments = [];
-let vaultChatHistory = [];
 let vaultDBPromise = null;
 
 function vaultEsc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -89,7 +88,6 @@ async function initVaultStorage() {
   }
   renderVaultDocuments();
   renderVaultSearch();
-  renderVaultAiGate();
 }
 
 function fmtBytes(n) {
@@ -171,7 +169,6 @@ async function handleVaultUpload(event) {
   }
   renderVaultDocuments();
   renderVaultSearch();
-  renderVaultAiGate();
   event.target.value = '';
 }
 
@@ -179,7 +176,6 @@ async function removeVaultDocument(id) {
   vaultDocuments = vaultDocuments.filter(d => d.id !== id);
   renderVaultDocuments();
   renderVaultSearch();
-  renderVaultAiGate();
   try { await vaultDBDelete(id); }
   catch (e) { console.error('Failed to remove document from storage:', e); }
 }
@@ -262,88 +258,6 @@ function renderVaultSearch() {
       ${h.snippets.map(s => `<div class="vault-search-hit-snippet">${s}</div>`).join('')}
     </div>
   `).join('');
-}
-
-function renderVaultAiGate() {
-  const gate = els('vaultAiGate');
-  const box = els('vaultChatBox');
-  if (!gate || !box) return;
-  const key = (els('anthropicApiKey') && els('anthropicApiKey').value || '').trim();
-  if (key) {
-    gate.innerHTML = vaultDocuments.length ? '' : '<p style="font-size:16px;color:var(--muted);line-height:1.55;margin:0;">Upload at least one document above before asking a question.</p>';
-    box.style.display = vaultDocuments.length ? 'block' : 'none';
-  } else {
-    gate.innerHTML = '<p style="font-size:16px;color:var(--muted);line-height:1.55;margin:0;">Add your own Anthropic API key on the <b>Settings</b> page to turn this on. Nothing is sent anywhere until you do.</p>';
-    box.style.display = 'none';
-  }
-}
-
-function buildVaultContextForAI() {
-  // Budget the combined document text so a big vault doesn't blow past a reasonable request size —
-  // includes as many full documents as fit, in upload order, truncating only the last one if needed.
-  const MAX_CONTEXT_CHARS = 60000;
-  let used = 0;
-  const parts = [];
-  for (const d of vaultDocuments) {
-    const text = d.extractedText || '';
-    const remaining = MAX_CONTEXT_CHARS - used;
-    if (remaining <= 0) break;
-    const chunk = text.length > remaining ? text.slice(0, remaining) + '\n[...truncated...]' : text;
-    parts.push(`=== Document: ${d.name} ===\n${chunk}`);
-    used += chunk.length;
-  }
-  return parts.join('\n\n');
-}
-
-async function sendVaultChatMessage() {
-  const input = els('vaultChatInput');
-  const question = (input.value || '').trim();
-  if (!question) return;
-  const key = (els('anthropicApiKey').value || '').trim();
-  if (!key) { renderVaultAiGate(); return; }
-
-  const log = els('vaultChatLog');
-  const sendBtn = els('vaultChatSend');
-  vaultChatHistory.push({ role: 'user', content: question });
-  log.innerHTML += `<div class="chat-msg user">${vaultEsc(question)}</div>`;
-  input.value = '';
-  sendBtn.disabled = true;
-  log.innerHTML += `<div class="chat-msg ai" id="vaultChatPending">Thinking…</div>`;
-  log.scrollTop = log.scrollHeight;
-
-  try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
-        max_tokens: 700,
-        system: `You are a helpful document assistant embedded in a personal retirement planner web app. Answer the user's question using ONLY the document text below as context — if the answer isn't in these documents, say so plainly rather than guessing. Be concise, and quote the relevant part of the document when useful.\n\nUPLOADED DOCUMENTS:\n${buildVaultContextForAI()}`,
-        messages: vaultChatHistory
-      })
-    });
-    const data = await resp.json();
-    const pending = els('vaultChatPending');
-    if (!resp.ok) {
-      const msg = (data && data.error && data.error.message) || `Request failed (${resp.status})`;
-      if (pending) pending.outerHTML = `<div class="chat-msg ai">Error: ${vaultEsc(msg)}</div>`;
-    } else {
-      const text = (data.content && data.content[0] && data.content[0].text) || '(no response)';
-      vaultChatHistory.push({ role: 'assistant', content: text });
-      if (pending) pending.outerHTML = `<div class="chat-msg ai">${vaultEsc(text).replace(/\n/g,'<br>')}</div>`;
-    }
-  } catch (e) {
-    const pending = els('vaultChatPending');
-    if (pending) pending.outerHTML = `<div class="chat-msg ai">Couldn't reach the API from this browser (${vaultEsc(e.message)}). This may be blocked by CORS depending on your browser/extensions.</div>`;
-  } finally {
-    sendBtn.disabled = false;
-    log.scrollTop = log.scrollHeight;
-  }
 }
 
 // ---------- Settings: backup / restore / reset ----------
@@ -1287,7 +1201,7 @@ function render() {
   }
   if (activePage && activePage.dataset.page === 'explorers') renderExplorers();
   if (activePage && activePage.dataset.page === 'wellness') { renderCoachTips(); renderCoachAiGate(); }
-  if (activePage && activePage.dataset.page === 'estate') { renderVaultDocuments(); renderVaultAiGate(); }
+  if (activePage && activePage.dataset.page === 'estate') renderVaultDocuments();
   if (activePage && activePage.dataset.page === 'savings') renderSavingsPage();
 
   saveState();

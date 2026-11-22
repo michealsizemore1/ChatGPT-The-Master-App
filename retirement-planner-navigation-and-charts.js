@@ -376,7 +376,7 @@ function showPage(pageId, persistPage = true) {
   if (lastSnapshot) refreshSectionCharts(pageId, lastSnapshot);
   if (pageId === 'explorers') renderExplorers();
   if (pageId === 'wellness') { renderCoachTips(); renderCoachAiGate(); }
-  if (pageId === 'estate') { renderVaultDocuments(); renderVaultAiGate(); renderVaultSearch(); }
+  if (pageId === 'estate') { renderVaultDocuments(); renderVaultSearch(); }
   if (pageId === 'savings') renderSavingsPage();
   closeMenu();
 }
