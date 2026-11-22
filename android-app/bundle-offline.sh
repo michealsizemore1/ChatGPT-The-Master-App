@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Puts the receipt reader (Tesseract) and the Inter font inside the app so they work without internet.
 # Usage: bundle-offline.sh <www folder that already holds index.html>
+# Called by .github/workflows/android-app.yml.
 set -euo pipefail
 WWW="$1"
 TMP="$(mktemp -d)"
