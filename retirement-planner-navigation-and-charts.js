@@ -192,12 +192,12 @@ function expenseValForBasis(e) {
 
 const PAGE_LABELS = {
   dashboard:'Overview', personal:'Personal & Family', income:'Income', survivorship:'Survivorship', moneyflows:'Money Flows',
-  investments:'Investments', housing:'Housing', expenses:'Expenses', debt:'Debt',
-  gap:'Income, Expenses & Withdrawals', medical:'Medical', estate:'Estate Planning', vault:'Document Vault', insurance:'Insurance',
+  investments:'Investments', housing:'Housing & Debt', expenses:'Expenses & Insurance',
+  gap:'Income, Expenses & Withdrawals', medical:'Medical', estate:'Estate & Documents',
   taxes:'Taxes', assumptions:'Assumptions & Guardrails',
-  explorers:'Explorers', coach:'Coach', wellness:'Financial Wellness', savings:'Savings', settings:'Settings'
+  explorers:'Explorers', wellness:'Plan Health & Coach', savings:'Savings', settings:'Settings'
 };
-const MY_PLAN_PAGES = ['personal','income','expenses','insurance','investments','assumptions','estate','debt','moneyflows','medical','housing'];
+const MY_PLAN_PAGES = ['personal','income','expenses','investments','assumptions','moneyflows','medical','housing'];
 const INSIGHTS_PAGES = ['gap','savings','taxes'];
 const EXPLORER_ANALYSIS_KEY = 'retirementPlannerExplorerAnalysis_v1';
 const EXPLORER_ANALYSES = {
@@ -320,8 +320,8 @@ function activatePageShell(pageId) {
   return pageId;
 }
 
-// Income vs Expenses was merged into the Gap page; old links and saved sections open the merged page.
-const MERGED_PAGES = { incomeexpenses: 'gap' };
+// Sections that were merged into another; old links and saved sections open the combined page.
+const MERGED_PAGES = { incomeexpenses: 'gap', coach: 'wellness', debt: 'housing', insurance: 'expenses', vault: 'estate' };
 function readInitialPage() {
   let pageId = '';
   try { pageId = decodeURIComponent(location.hash.slice(1)).split('/')[0]; } catch (e) { pageId = ''; }
@@ -375,8 +375,8 @@ function showPage(pageId, persistPage = true) {
   if (activePage) collapsePlannerCards(activePage);
   if (lastSnapshot) refreshSectionCharts(pageId, lastSnapshot);
   if (pageId === 'explorers') renderExplorers();
-  if (pageId === 'coach') { renderCoachTips(); renderCoachAiGate(); }
-  if (pageId === 'vault') { renderVaultDocuments(); renderVaultAiGate(); renderVaultSearch(); }
+  if (pageId === 'wellness') { renderCoachTips(); renderCoachAiGate(); }
+  if (pageId === 'estate') { renderVaultDocuments(); renderVaultAiGate(); renderVaultSearch(); }
   if (pageId === 'savings') renderSavingsPage();
   closeMenu();
 }

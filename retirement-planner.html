@@ -1137,20 +1137,16 @@
     <div class="nav-submenu" id="myPlanSubmenu">
       <button type="button" class="nav-subitem" data-page="personal" onclick="showPage('personal')">Personal &amp; Family</button>
       <button type="button" class="nav-subitem" data-page="income" onclick="showPage('income')">Income</button>
-      <button type="button" class="nav-subitem" data-page="expenses" onclick="showPage('expenses')">Expenses</button>
-      <button type="button" class="nav-subitem" data-page="insurance" onclick="showPage('insurance')">Insurance</button>
+      <button type="button" class="nav-subitem" data-page="expenses" onclick="showPage('expenses')">Expenses &amp; Insurance</button>
       <button type="button" class="nav-subitem" data-page="investments" onclick="showPage('investments')">Investments</button>
       <button type="button" class="nav-subitem" data-page="assumptions" onclick="showPage('assumptions')">Assumptions &amp; Guardrails</button>
-      <button type="button" class="nav-subitem" data-page="estate" onclick="showPage('estate')">Estate Planning</button>
-      <button type="button" class="nav-subitem" data-page="debt" onclick="showPage('debt')">Debt</button>
       <button type="button" class="nav-subitem" data-page="moneyflows" onclick="showPage('moneyflows')">Money Flows</button>
       <button type="button" class="nav-subitem" data-page="medical" onclick="showPage('medical')">Medical</button>
-      <button type="button" class="nav-subitem" data-page="housing" onclick="showPage('housing')">Housing</button>
+      <button type="button" class="nav-subitem" data-page="housing" onclick="showPage('housing')">Housing &amp; Debt</button>
     </div>
   </div>
-  <div class="nav-item" data-page="vault" onclick="showPage('vault')"><svg class="nav-icon" aria-hidden="true"><use href="#navIconVault"></use></svg><span>Document Vault</span></div>
-  <div class="nav-item" data-page="coach" onclick="showPage('coach')"><svg class="nav-icon" aria-hidden="true"><use href="#navIconCoach"></use></svg><span>Coach</span></div>
-  <div class="nav-item" data-page="wellness" onclick="showPage('wellness')"><svg class="nav-icon" aria-hidden="true"><use href="#navIconWellness"></use></svg><span>Financial Wellness</span></div>
+  <div class="nav-item" data-page="estate" onclick="showPage('estate')"><svg class="nav-icon" aria-hidden="true"><use href="#navIconVault"></use></svg><span>Estate &amp; Documents</span></div>
+  <div class="nav-item" data-page="wellness" onclick="showPage('wellness')"><svg class="nav-icon" aria-hidden="true"><use href="#navIconWellness"></use></svg><span>Plan Health &amp; Coach</span></div>
   <div class="nav-dropdown" id="insightsNavGroup">
     <button type="button" class="nav-item nav-dropdown-toggle" id="insightsNavToggle" onclick="toggleInsightsMenu(event)"><span class="nav-label"><svg class="nav-icon" aria-hidden="true"><use href="#navIconInsights"></use></svg><span>Insights</span></span><span class="nav-caret">&#9662;</span></button>
     <div class="nav-submenu" id="insightsSubmenu">
@@ -1465,7 +1461,7 @@
 
       <div class="card">
         <h3 onclick="toggleCard(this)">Survivorship: Expense Adjustments<span class="sub-label">What changes about your spouse's costs once you're gone</span></h3>
-        <p style="font-size:16.5px;color:var(--muted);margin:0 0 10px;line-height:1.6;">Every recurring cost — housing, medical, and everything from the Expenses, Debt, and Insurance pages — is listed below, checked "continues" by default with its current amount. Uncheck anything that stops once you're gone (paid off by a life insurance payout, a debt that was solely yours, a subscription only you used), or edit the amount if it would change rather than disappear (a smaller place, a new cost like paid help). This feeds both the numbers below and the real projection on the Explorers page.</p>
+        <p style="font-size:16.5px;color:var(--muted);margin:0 0 10px;line-height:1.6;">Every recurring cost — housing, medical, and everything from the Expenses &amp; Insurance and Housing &amp; Debt pages — is listed below, checked "continues" by default with its current amount. Uncheck anything that stops once you're gone (paid off by a life insurance payout, a debt that was solely yours, a subscription only you used), or edit the amount if it would change rather than disappear (a smaller place, a new cost like paid help). This feeds both the numbers below and the real projection on the Explorers page.</p>
         <div class="mini-label" style="margin-bottom:2px;">Housing</div>
         <div class="checkbox-row"><input type="checkbox" id="survivorHousingContinues" onchange="render()"><label for="survivorHousingContinues">Housing (rent or mortgage/property tax/insurance) continues</label></div>
         <div class="field"><label>Override housing cost once you're gone ($/mo, today's $ — leave blank to use the actual projected cost)</label><input type="number" id="survivorHousingAmountOverride" value="0" placeholder="Use projected cost" step="25"></div>
@@ -1676,7 +1672,7 @@
         <div class="dn-hdr"><span>&#x1F4DD; Notes</span><small>auto-saved, same on every page</small></div>
         <textarea class="shared-notes-textarea" oninput="updateSharedNotes(this.value)" placeholder="Jot down anything — questions for your financial advisor, things to double-check, reminders…" rows="3"></textarea>
       </div>
-      <div class="page-header"><h2>Housing</h2><p>Currently renting — optionally model a future purchase.</p></div>
+      <div class="page-header"><h2>Housing &amp; Debt</h2><p>Currently renting — optionally model a future purchase.</p></div>
       <div class="mini-chart-card"><canvas id="chart_housing"></canvas></div>
       <div class="mini-chart-card"><div class="mini-label" style="margin-bottom:8px;">Housing cost by year</div><canvas id="chart_housing_yearly"></canvas><div class="chart-range-nav" data-chart="housing_yearly"><button class="range-nav-btn range-prev" onclick="chartRangeNav('housing_yearly','prev')">« <span class="range-nav-label">Age</span></button><button class="range-nav-btn lifetime active" onclick="chartRangeNav('housing_yearly','lifetime')">Lifetime</button><button class="range-nav-btn range-next" onclick="chartRangeNav('housing_yearly','next')"><span class="range-nav-label">Age</span> »</button></div><div class="range-readout" data-chart="housing_yearly"></div></div>
 
@@ -1709,57 +1705,7 @@
           <div class="field"><label>Home appreciation (%/yr)</label><input type="number" id="homeAppreciation" value="3" step="0.1"></div>
         </div>
       </div>
-    </div>
 
-    <!-- ================= EXPENSES ================= -->
-    <div class="page" data-page="expenses">
-      <div class="shared-notes-card">
-        <div class="dn-hdr"><span>&#x1F4DD; Notes</span><small>auto-saved, same on every page</small></div>
-        <textarea class="shared-notes-textarea" oninput="updateSharedNotes(this.value)" placeholder="Jot down anything — questions for your financial advisor, things to double-check, reminders…" rows="3"></textarea>
-      </div>
-      <div class="page-header"><h2>Expenses</h2><p>Recurring monthly bills, in today's dollars. Amounts are entered monthly and annualized automatically for the projection. The Healthcare category grows using the Medical Inflation Rate (set on the Assumptions page); every other category uses General Inflation.</p></div>
-      <div class="mini-chart-card chart-horizontal"><canvas id="chart_expenses"></canvas></div>
-      <div class="mini-chart-card"><div class="mini-label" style="margin-bottom:8px;">Expenses by year</div><canvas id="chart_expenses_yearly"></canvas><div class="chart-range-nav" data-chart="expenses_yearly"><button class="range-nav-btn range-prev" onclick="chartRangeNav('expenses_yearly','prev')">« <span class="range-nav-label">Age</span></button><button class="range-nav-btn lifetime active" onclick="chartRangeNav('expenses_yearly','lifetime')">Lifetime</button><button class="range-nav-btn range-next" onclick="chartRangeNav('expenses_yearly','next')"><span class="range-nav-label">Age</span> »</button></div><div class="range-readout" data-chart="expenses_yearly"></div></div>
-
-      <div class="note" style="margin-top:0;">Don't add rent/mortgage here — that's on the <b>Housing</b> page. Don't add TSP/brokerage contributions here either — those are on <b>Money Flows</b>. This page is for everything else that isn't already covered elsewhere, so nothing gets double-counted.</div>
-
-
-      <div class="card">
-        <h3 onclick="toggleCard(this)">All Household Expenses<span class="sub-label">Combined view only — each item is still entered and edited on its own page; this just lets you see them side by side</span></h3>
-        <div style="display:flex;justify-content:space-between;padding:6px 0;color:var(--muted);font-size:16.5px;"><span>Recurring expenses (below)</span><span id="combinedExpenses">$0/mo</span></div>
-        <div style="display:flex;justify-content:space-between;padding:6px 0;color:var(--muted);font-size:16.5px;"><span>Housing (Housing page)</span><span id="combinedHousing">$0/mo</span></div>
-        <div style="display:flex;justify-content:space-between;padding:6px 0;color:var(--muted);font-size:16.5px;"><span>Debt payments (Debt page)</span><span id="combinedDebt">$0/mo</span></div>
-        <div style="display:flex;justify-content:space-between;padding:6px 0;color:var(--muted);font-size:16.5px;"><span>Insurance premiums (Insurance page)</span><span id="combinedInsurance">$0/mo</span></div>
-        <div class="total-row"><span>Combined monthly total</span><span id="combinedGrandTotal">$0/mo</span></div>
-        <p style="font-size:16.5px;color:var(--muted);margin:8px 0 0;line-height:1.5;">This card only displays numbers already entered elsewhere — it doesn't add anything to the projection itself. Housing shows today's rent (or mortgage + property tax/insurance once you buy, if that's modeled); Debt shows today's monthly loan payments; Insurance shows today's premium total. Each is counted exactly once in the Monte Carlo engine, from its own page — not from this card.</p>
-      </div>
-
-      <div class="card">
-        <h3 onclick="toggleCard(this)">Recurring Monthly Expenses</h3>
-        <div class="row-header cols-expense"><span>Name</span><span>Category</span><span>Must Spend</span><span>Like to Spend</span><span></span></div>
-        <div class="row-list" id="expenseRows"></div>
-        <button class="add-btn" onclick="addExpense()">+ Add expense</button>
-        <div class="total-row"><span>Must Spend total (excl. housing)</span><span id="expenseMustSpendTotal">$0</span></div>
-        <div class="total-row"><span>Like to Spend total (excl. housing)</span><span id="expenseTotal">$0</span></div>
-        <p style="font-size:15.5px;color:var(--muted);margin:8px 0 0;line-height:1.5;">The <b>Must Spend / Like to Spend</b> toggle in the header picks which of these two columns actually drives the whole projection — the dashboard, guardrails, the Gap page, Explorers, and every Monte Carlo run all switch together. The Must Spend column still matters even when it isn't selected: when dynamic spending guardrails (Assumptions page) cut spending in a down market, the cut never pushes recurring expenses below the Must Spend total — housing, debt, insurance, and medical premiums are already treated as 100% essential and are never cut. Each row also has its own <b>Starts / Ends</b> date pickers below it — leave both blank for an expense that applies the whole plan (the default), or set one or both for something that begins or ends partway through retirement (childcare ending, a car payment finishing, a hobby starting once you have more free time).</p>
-      </div>
-
-      <div class="card">
-        <h3 onclick="toggleCard(this)">Future / One-Time Expenses<span class="sub-label">Planned costs that hit at a specific age — new roof, a wedding, a 2nd pet, etc.</span></h3>
-        <div class="row-header cols-future"><span>Description</span><span>Age</span><span>Amount ($)</span><span>Frequency</span><span></span></div>
-        <div class="row-list" id="futureExpenseRows"></div>
-        <button class="add-btn" onclick="addFutureExpense()">+ Add future expense</button>
-        <p style="font-size:16.5px;color:var(--muted);margin:6px 0 0;line-height:1.5;">One-time items hit once at the age you set; "Yearly until" repeats every year from that age through the end age, both grown by General Inflation.</p>
-      </div>
-
-    </div>
-
-    <!-- ================= DEBT ================= -->
-    <div class="page" data-page="debt">
-      <div class="shared-notes-card">
-        <div class="dn-hdr"><span>&#x1F4DD; Notes</span><small>auto-saved, same on every page</small></div>
-        <textarea class="shared-notes-textarea" oninput="updateSharedNotes(this.value)" placeholder="Jot down anything — questions for your financial advisor, things to double-check, reminders…" rows="3"></textarea>
-      </div>
       <div class="page-header"><h2>Debt</h2><p>Loans and balances, amortized and paid off over time.</p></div>
       <div class="mini-chart-card chart-horizontal"><canvas id="chart_debt"></canvas></div>
 
@@ -1787,6 +1733,60 @@
       </div>
     </div>
 
+    <!-- ================= EXPENSES ================= -->
+    <div class="page" data-page="expenses">
+      <div class="shared-notes-card">
+        <div class="dn-hdr"><span>&#x1F4DD; Notes</span><small>auto-saved, same on every page</small></div>
+        <textarea class="shared-notes-textarea" oninput="updateSharedNotes(this.value)" placeholder="Jot down anything — questions for your financial advisor, things to double-check, reminders…" rows="3"></textarea>
+      </div>
+      <div class="page-header"><h2>Expenses &amp; Insurance</h2><p>Recurring monthly bills, in today's dollars. Amounts are entered monthly and annualized automatically for the projection. The Healthcare category grows using the Medical Inflation Rate (set on the Assumptions page); every other category uses General Inflation.</p></div>
+      <div class="mini-chart-card chart-horizontal"><canvas id="chart_expenses"></canvas></div>
+      <div class="mini-chart-card"><div class="mini-label" style="margin-bottom:8px;">Expenses by year</div><canvas id="chart_expenses_yearly"></canvas><div class="chart-range-nav" data-chart="expenses_yearly"><button class="range-nav-btn range-prev" onclick="chartRangeNav('expenses_yearly','prev')">« <span class="range-nav-label">Age</span></button><button class="range-nav-btn lifetime active" onclick="chartRangeNav('expenses_yearly','lifetime')">Lifetime</button><button class="range-nav-btn range-next" onclick="chartRangeNav('expenses_yearly','next')"><span class="range-nav-label">Age</span> »</button></div><div class="range-readout" data-chart="expenses_yearly"></div></div>
+
+      <div class="note" style="margin-top:0;">Don't add rent/mortgage here — that's on the <b>Housing</b> page. Don't add TSP/brokerage contributions here either — those are on <b>Money Flows</b>. This page is for everything else that isn't already covered elsewhere, so nothing gets double-counted.</div>
+
+
+      <div class="card">
+        <h3 onclick="toggleCard(this)">All Household Expenses<span class="sub-label">Combined view only — each item is still entered and edited on its own page; this just lets you see them side by side</span></h3>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;color:var(--muted);font-size:16.5px;"><span>Recurring expenses (below)</span><span id="combinedExpenses">$0/mo</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;color:var(--muted);font-size:16.5px;"><span>Housing (Housing &amp; Debt page)</span><span id="combinedHousing">$0/mo</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;color:var(--muted);font-size:16.5px;"><span>Debt payments (Housing &amp; Debt page)</span><span id="combinedDebt">$0/mo</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;color:var(--muted);font-size:16.5px;"><span>Insurance premiums (Insurance, below)</span><span id="combinedInsurance">$0/mo</span></div>
+        <div class="total-row"><span>Combined monthly total</span><span id="combinedGrandTotal">$0/mo</span></div>
+        <p style="font-size:16.5px;color:var(--muted);margin:8px 0 0;line-height:1.5;">This card only displays numbers already entered elsewhere — it doesn't add anything to the projection itself. Housing shows today's rent (or mortgage + property tax/insurance once you buy, if that's modeled); Debt shows today's monthly loan payments; Insurance shows today's premium total. Each is counted exactly once in the Monte Carlo engine, from its own page — not from this card.</p>
+      </div>
+
+      <div class="card">
+        <h3 onclick="toggleCard(this)">Recurring Monthly Expenses</h3>
+        <div class="row-header cols-expense"><span>Name</span><span>Category</span><span>Must Spend</span><span>Like to Spend</span><span></span></div>
+        <div class="row-list" id="expenseRows"></div>
+        <button class="add-btn" onclick="addExpense()">+ Add expense</button>
+        <div class="total-row"><span>Must Spend total (excl. housing)</span><span id="expenseMustSpendTotal">$0</span></div>
+        <div class="total-row"><span>Like to Spend total (excl. housing)</span><span id="expenseTotal">$0</span></div>
+        <p style="font-size:15.5px;color:var(--muted);margin:8px 0 0;line-height:1.5;">The <b>Must Spend / Like to Spend</b> toggle in the header picks which of these two columns actually drives the whole projection — the dashboard, guardrails, the Gap page, Explorers, and every Monte Carlo run all switch together. The Must Spend column still matters even when it isn't selected: when dynamic spending guardrails (Assumptions page) cut spending in a down market, the cut never pushes recurring expenses below the Must Spend total — housing, debt, insurance, and medical premiums are already treated as 100% essential and are never cut. Each row also has its own <b>Starts / Ends</b> date pickers below it — leave both blank for an expense that applies the whole plan (the default), or set one or both for something that begins or ends partway through retirement (childcare ending, a car payment finishing, a hobby starting once you have more free time).</p>
+      </div>
+
+      <div class="card">
+        <h3 onclick="toggleCard(this)">Future / One-Time Expenses<span class="sub-label">Planned costs that hit at a specific age — new roof, a wedding, a 2nd pet, etc.</span></h3>
+        <div class="row-header cols-future"><span>Description</span><span>Age</span><span>Amount ($)</span><span>Frequency</span><span></span></div>
+        <div class="row-list" id="futureExpenseRows"></div>
+        <button class="add-btn" onclick="addFutureExpense()">+ Add future expense</button>
+        <p style="font-size:16.5px;color:var(--muted);margin:6px 0 0;line-height:1.5;">One-time items hit once at the age you set; "Yearly until" repeats every year from that age through the end age, both grown by General Inflation.</p>
+      </div>
+
+      <div class="page-header"><h2>Insurance</h2><p>A policy tracker. Total monthly premiums below are added to your spending every year (growing with General Inflation) in both the deterministic projection and the Monte Carlo simulation — coverage amounts are informational only.</p></div>
+      <div class="mini-chart-card chart-horizontal"><canvas id="chart_insurance"></canvas></div>
+
+      <div class="card">
+        <h3 onclick="toggleCard(this)">Insurance Policies</h3>
+        <div class="row-header cols-insurance"><span>Policy</span><span>Type</span><span>Premium ($/mo)</span><span>Coverage ($)</span><span></span></div>
+        <div class="row-list" id="insuranceRows"></div>
+        <button class="add-btn" onclick="addInsurancePolicy()">+ Add policy</button>
+        <div class="total-row"><span>Total premiums</span><span id="insuranceTotal">$0/mo</span></div>
+        <p style="font-size:16.5px;color:var(--muted);margin:8px 0 0;line-height:1.5;">This is the only place insurance premiums are tracked — the Expenses page no longer has a separate Insurance category, so there's no risk of double-counting a policy in both places.</p>
+      </div>
+    </div>
+
     <!-- ================= INCOME GAP & WITHDRAWALS ================= -->
     <div class="page" data-page="gap">
       <div class="shared-notes-card">
@@ -1795,7 +1795,7 @@
       </div>
       <div class="page-header"><h2>Income, Expenses &amp; Withdrawals</h2><p>How much of each year's spending your income covers, and what has to come out of your accounts when it doesn't. The first chart compares income (job + guaranteed sources, before tax) with total expenses; the rest show the after-tax surplus or gap and the withdrawals that cover it, year by year.</p></div>
       <div class="mini-chart-card"><div class="mini-label" style="margin-bottom:8px;">Income vs Expenses by year</div><canvas id="chart_incomeexpenses_yearly"></canvas><div class="chart-range-nav" data-chart="incomeexpenses_yearly"><button class="range-nav-btn range-prev" onclick="chartRangeNav('incomeexpenses_yearly','prev')">« <span class="range-nav-label">Age</span></button><button class="range-nav-btn lifetime active" onclick="chartRangeNav('incomeexpenses_yearly','lifetime')">Lifetime</button><button class="range-nav-btn range-next" onclick="chartRangeNav('incomeexpenses_yearly','next')"><span class="range-nav-label">Age</span> »</button></div><div class="range-readout" data-chart="incomeexpenses_yearly"></div></div>
-      <div class="note" style="margin-top:0;">Income (green) is job income plus every guaranteed income source, before it's reduced by taxes. Expenses (red) is every recurring bill, housing cost, debt payment, and insurance/medical premium in the plan, plus any Future/One-Time Expenses (Vehicle Purchase, Vacations, etc.) active that year. Hover a bar in a year with an active Future/One-Time Expense or Debt payment (including a future-dated loan started via Start age on the Debt page) to see it itemized by name and amount, so you can confirm it's actually being counted. Where the red bar is taller than the green bar for a given year, that year's gap is covered by a portfolio withdrawal — the table below shows exactly which account(s) it came from.</div>
+      <div class="note" style="margin-top:0;">Income (green) is job income plus every guaranteed income source, before it's reduced by taxes. Expenses (red) is every recurring bill, housing cost, debt payment, and insurance/medical premium in the plan, plus any Future/One-Time Expenses (Vehicle Purchase, Vacations, etc.) active that year. Hover a bar in a year with an active Future/One-Time Expense or Debt payment (including a future-dated loan started via Start age on the Housing &amp; Debt page) to see it itemized by name and amount, so you can confirm it's actually being counted. Where the red bar is taller than the green bar for a given year, that year's gap is covered by a portfolio withdrawal — the table below shows exactly which account(s) it came from.</div>
       <div class="mini-chart-card"><div class="mini-label" style="margin-bottom:8px;">Surplus / (gap) &amp; withdrawals by year</div><canvas id="chart_gap_yearly"></canvas><div class="chart-range-nav" data-chart="gap_yearly"><button class="range-nav-btn range-prev" onclick="chartRangeNav('gap_yearly','prev')">« <span class="range-nav-label">Age</span></button><button class="range-nav-btn lifetime active" onclick="chartRangeNav('gap_yearly','lifetime')">Lifetime</button><button class="range-nav-btn range-next" onclick="chartRangeNav('gap_yearly','next')"><span class="range-nav-label">Age</span> »</button></div><div class="range-readout" data-chart="gap_yearly"></div></div>
 
       <div class="card">
@@ -1840,13 +1840,6 @@
         <div class="two-col">
           <div class="field"><label>Your Part B premium ($/mo, today's $)</label><input type="number" id="partBUserMonthly" value="202.90" step="0.10"></div>
           <div class="field"><label>Spouse's Part B premium ($/mo, today's $)</label><input type="number" id="partBSpouseMonthly" value="202.90" step="0.10"></div>
-        </div>
-        <hr class="divider">
-        <div class="mini-label" style="margin-bottom:2px;">RMDs &amp; IRMAA</div>
-        <div class="field">
-          <label>Required Minimum Distribution start age</label>
-          <input type="number" id="rmdAge" value="75" min="70" max="85">
-          <div style="font-size:16.5px;color:var(--muted);margin-top:4px;line-height:1.5;">75 for anyone born 1960 or later under current law (73 for 1951–1959). Once you reach this age, a mandatory % of your Traditional TSP is withdrawn and taxed every year whether you need it or not — modeled automatically using the IRS Uniform Lifetime Table, with any amount beyond that year's spending swept into Brokerage. Also drives the automatic IRMAA (Medicare Part B surcharge) estimate below each Part B premium once your income crosses the published thresholds — both are projection estimates only, not tax advice.</div>
         </div>
         <hr class="divider">
         <div class="mini-label" style="margin-bottom:2px;">FEDVIP</div>
@@ -1906,7 +1899,7 @@
         <div class="dn-hdr"><span>&#x1F4DD; Notes</span><small>auto-saved, same on every page</small></div>
         <textarea class="shared-notes-textarea" oninput="updateSharedNotes(this.value)" placeholder="Jot down anything — questions for your financial advisor, things to double-check, reminders…" rows="3"></textarea>
       </div>
-      <div class="page-header"><h2>Estate Planning</h2><p>A checklist — informational, doesn't feed the projection math.</p></div>
+      <div class="page-header"><h2>Estate &amp; Documents</h2><p>A checklist — informational, doesn't feed the projection math.</p></div>
 
       <div class="card">
         <h3 onclick="toggleCard(this)">Estate Planning Checklist</h3>
@@ -1931,14 +1924,7 @@
           </table>
         </div>
       </div>
-    </div>
 
-    <!-- ================= DOCUMENT VAULT ================= -->
-    <div class="page" data-page="vault">
-      <div class="shared-notes-card">
-        <div class="dn-hdr"><span>&#x1F4DD; Notes</span><small>auto-saved, same on every page</small></div>
-        <textarea class="shared-notes-textarea" oninput="updateSharedNotes(this.value)" placeholder="Jot down anything — questions for your financial advisor, things to double-check, reminders…" rows="3"></textarea>
-      </div>
       <div class="page-header"><h2>Document Vault</h2><p>Upload important documents (PDF, Word, or plain text) to keep them searchable — informational only, doesn't feed the projection math.</p></div>
 
       <div class="note" style="margin-top:0;"><b>Not password-protected or encrypted:</b> anyone who can use this browser profile can open these files, the same as any other page in this app — treat it as a filing folder, not a safe. The original file is saved (up to ~25 MB each) so you can open or download it again later, alongside its extracted <b>text</b> for search and Ask AI (up to ~1 MB of text per document — very long documents just won't be fully searchable past that point, but the original file itself is never truncated). Stored in this browser's own document storage, separate from the rest of your plan data. Everything stays in this browser only, unless you use Ask AI below with your own Anthropic API key, in which case the relevant document text is sent to Anthropic to answer your question.</div>
@@ -1977,25 +1963,6 @@
             <button class="chat-send-btn" id="vaultChatSend" onclick="sendVaultChatMessage()">Ask</button>
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- ================= INSURANCE ================= -->
-    <div class="page" data-page="insurance">
-      <div class="shared-notes-card">
-        <div class="dn-hdr"><span>&#x1F4DD; Notes</span><small>auto-saved, same on every page</small></div>
-        <textarea class="shared-notes-textarea" oninput="updateSharedNotes(this.value)" placeholder="Jot down anything — questions for your financial advisor, things to double-check, reminders…" rows="3"></textarea>
-      </div>
-      <div class="page-header"><h2>Insurance</h2><p>A policy tracker. Total monthly premiums below are added to your spending every year (growing with General Inflation) in both the deterministic projection and the Monte Carlo simulation — coverage amounts are informational only.</p></div>
-      <div class="mini-chart-card chart-horizontal"><canvas id="chart_insurance"></canvas></div>
-
-      <div class="card">
-        <h3 onclick="toggleCard(this)">Insurance Policies</h3>
-        <div class="row-header cols-insurance"><span>Policy</span><span>Type</span><span>Premium ($/mo)</span><span>Coverage ($)</span><span></span></div>
-        <div class="row-list" id="insuranceRows"></div>
-        <button class="add-btn" onclick="addInsurancePolicy()">+ Add policy</button>
-        <div class="total-row"><span>Total premiums</span><span id="insuranceTotal">$0/mo</span></div>
-        <p style="font-size:16.5px;color:var(--muted);margin:8px 0 0;line-height:1.5;">This is the only place insurance premiums are tracked — the Expenses page no longer has a separate Insurance category, so there's no risk of double-counting a policy in both places.</p>
       </div>
     </div>
 
@@ -2063,6 +2030,15 @@
       </div>
 
       <div class="card">
+        <h3 onclick="toggleCard(this)">Required Minimum Distributions</h3>
+        <div class="field">
+          <label>Required Minimum Distribution start age</label>
+          <input type="number" id="rmdAge" value="75" min="70" max="85">
+          <div style="font-size:16.5px;color:var(--muted);margin-top:4px;line-height:1.5;">75 for anyone born 1960 or later under current law (73 for 1951–1959). Once you reach this age, a mandatory % of your Traditional TSP is withdrawn and taxed every year whether you need it or not — modeled automatically using the IRS Uniform Lifetime Table, with any amount beyond that year's spending swept into Brokerage. Also drives the automatic IRMAA (Medicare Part B surcharge) estimate below each Part B premium once your income crosses the published thresholds — both are projection estimates only, not tax advice.</div>
+        </div>
+      </div>
+
+      <div class="card">
         <h3 onclick="toggleCard(this)">Roth Conversion Planner<span class="sub-label">Move Traditional TSP into Roth TSP a bit at a time, on your terms</span></h3>
         <p style="font-size:16.5px;color:var(--muted);margin:0 0 12px;line-height:1.55;">Converts a set dollar amount from Traditional to Roth TSP every year during the window below, paying the resulting tax bill from a separate account instead of out of the TSP itself — so the full converted amount actually lands in Roth. Off by default; turning it on only affects this plan, nothing else changes until you enable it.</p>
         <div class="checkbox-row">
@@ -2110,7 +2086,7 @@
         <div class="field"><label>General Inflation Rate (%/yr)</label><input type="number" id="inflation" value="3" step="0.1"></div>
         <div class="field"><label>Medical Inflation Rate (%/yr)</label><input type="number" id="medicalInflation" value="5" step="0.1"></div>
         <div class="field"><label>Social Security COLA (%/yr)</label><input type="number" id="ssCola" value="2.5" step="0.1"></div>
-        <p style="font-size:16.5px;color:var(--muted);margin:6px 0 0;line-height:1.5;">General Inflation grows every Expenses category except Healthcare. Medical Inflation grows Healthcare only. Social Security COLA grows your SS and spousal benefit (each pension has its own yearly increase % instead, set in the Pensions &amp; VA Disability section of the Income page). Housing Appreciation lives on the Housing page and only shows up in the chart below if you model a future purchase.</p>
+        <p style="font-size:16.5px;color:var(--muted);margin:6px 0 0;line-height:1.5;">General Inflation grows every Expenses category except Healthcare. Medical Inflation grows Healthcare only. Social Security COLA grows your SS and spousal benefit (each pension has its own yearly increase % instead, set in the Pensions &amp; VA Disability section of the Income page). Housing Appreciation lives on the Housing &amp; Debt page and only shows up in the chart below if you model a future purchase.</p>
       </div>
 
       <div class="card">
@@ -2322,12 +2298,21 @@
       <div class="note">Each scenario re-runs your full plan with one change applied (or, for market risk, a specific sequence of returns/inflation pinned in). "Confidence Score" is a 1000-simulation Monte Carlo success rate for that scenario alone — the same simulation count as your baseline score on the Overview, so every number on this page is directly comparable. The Sensitivity Analysis and Social Security Claiming Age cards use fewer/more simulations respectively (see each card), which is why they run on demand instead of automatically. The Historical Backtest isn't Monte Carlo at all — each bar is a single deterministic run using one real historical sequence of market returns, not a simulated one.</div>
     </div>
 
-    <!-- ================= COACH ================= -->
-    <div class="page" data-page="coach">
+    <!-- ================= FINANCIAL WELLNESS ================= -->
+    <div class="page" data-page="wellness">
       <div class="shared-notes-card">
         <div class="dn-hdr"><span>&#x1F4DD; Notes</span><small>auto-saved, same on every page</small></div>
         <textarea class="shared-notes-textarea" oninput="updateSharedNotes(this.value)" placeholder="Jot down anything — questions for your financial advisor, things to double-check, reminders…" rows="3"></textarea>
       </div>
+      <div class="page-header"><h2>Plan Health &amp; Coach</h2><p>A diagnostic view of the plan's individual strengths and pressure points. These measurements explain the plan; they do not change your projection or Monte Carlo score.</p></div>
+      <div class="card wellness-summary no-autocollapse">
+        <h3>Plan Health Snapshot</h3>
+        <div class="wellness-summary-line" id="wellnessSummaryLine">Calculating your current plan…</div>
+        <div class="wellness-summary-detail" id="wellnessSummaryDetail">Each measure is rated separately so one strong number cannot conceal an unrelated risk.</div>
+      </div>
+      <div class="wellness-grid" id="financialWellnessMetrics"></div>
+      <div class="note"><b>How to read this page:</b> Strong means the measure is within a generally favorable planning range; Watch means it deserves monitoring; Attention means it may warrant a closer review. These are planning signals, not guarantees or individualized tax, investment, legal, or insurance advice. Survivorship remains a separate what-if analysis and never changes the main plan.</div>
+
       <div class="page-header"><h2>Coach</h2><p>Automated suggestions based on your current plan, plus an optional AI chat for open-ended questions.</p></div>
 
       <div class="card no-autocollapse coach-question-card">
@@ -2345,25 +2330,9 @@
       </div>
 
       <div class="card">
-        <h3 onclick="toggleCard(this)">Next Steps<span class="sub-label">Use Financial Wellness to identify priorities, then test or discuss them here</span></h3>
+        <h3 onclick="toggleCard(this)">Next Steps<span class="sub-label">Use the plan-health measures above to pick priorities, then test or discuss them here</span></h3>
         <div id="coachTips"></div>
       </div>
-    </div>
-
-    <!-- ================= FINANCIAL WELLNESS ================= -->
-    <div class="page" data-page="wellness">
-      <div class="shared-notes-card">
-        <div class="dn-hdr"><span>&#x1F4DD; Notes</span><small>auto-saved, same on every page</small></div>
-        <textarea class="shared-notes-textarea" oninput="updateSharedNotes(this.value)" placeholder="Jot down anything — questions for your financial advisor, things to double-check, reminders…" rows="3"></textarea>
-      </div>
-      <div class="page-header"><h2>Financial Wellness</h2><p>A diagnostic view of the plan's individual strengths and pressure points. These measurements explain the plan; they do not change your projection or Monte Carlo score.</p></div>
-      <div class="card wellness-summary no-autocollapse">
-        <h3>Plan Health Snapshot</h3>
-        <div class="wellness-summary-line" id="wellnessSummaryLine">Calculating your current plan…</div>
-        <div class="wellness-summary-detail" id="wellnessSummaryDetail">Each measure is rated separately so one strong number cannot conceal an unrelated risk.</div>
-      </div>
-      <div class="wellness-grid" id="financialWellnessMetrics"></div>
-      <div class="note"><b>How to read this page:</b> Strong means the measure is within a generally favorable planning range; Watch means it deserves monitoring; Attention means it may warrant a closer review. These are planning signals, not guarantees or individualized tax, investment, legal, or insurance advice. Survivorship remains a separate what-if analysis and never changes the main plan.</div>
     </div>
 
     <!-- ================= SAVINGS ================= -->
@@ -2466,7 +2435,7 @@
           <details class="manual-topic">
             <summary>2. Header, Navigation &amp; Shared Controls</summary>
             <div class="manual-body">
-              <p>The hamburger menu opens the section list. My Plan, Insights, and Explorers are grouped menus. The sticky bar keeps the current section and sync status visible.</p>
+              <p>The hamburger menu opens the section list. My Plan, Insights, and Explorers are grouped menus. Some sections share a page: Expenses &amp; Insurance, Housing &amp; Debt, Estate &amp; Documents (with the Document Vault), and Plan Health &amp; Coach. The sticky bar keeps the current section and sync status visible.</p>
               <p>On larger screens, planner sections use nearly the full available width so cards, tables, charts, and forms have room to breathe. On phones and narrow windows, the same sections remain responsive and stack as needed.</p>
               <ul>
                 <li><b>Today's $</b> removes modeled inflation; <b>Future $</b> shows nominal future dollars.</li>
@@ -2511,7 +2480,7 @@
           </details>
 
           <details class="manual-topic">
-            <summary>6. My Plan: Estate, Debt &amp; Money Flows</summary>
+            <summary>6. Estate, Debt &amp; Money Flows</summary>
             <div class="manual-body">
               <p><b>Estate Planning:</b> The checklist is informational. The inheritance estimate applies the heir tax rate to Traditional TSP, treats Roth accounts as tax-free in the simplified estimate, assumes a taxable-account step-up, and subtracts debts.</p>
               <p><b>Debt:</b> Enter balance, APR, payment, timing, optional term, and vehicle value. The payoff view uses highest APR first. Vehicle value affects net worth but is not spendable cash. Do not also enter the same payment in Expenses.</p>
@@ -2522,7 +2491,7 @@
           <details class="manual-topic">
             <summary>7. My Plan: Medical, Long-Term Care &amp; Housing</summary>
             <div class="manual-body">
-              <p><b>Medical:</b> Enter recurring premiums, each spouse's Medicare Part B timing, IRMAA/RMD assumptions, and spouse LTC. Medical costs grow with Medical Inflation.</p>
+              <p><b>Medical:</b> Enter recurring premiums, each spouse's Medicare Part B timing, and spouse LTC (IRMAA is calculated automatically; the RMD start age is on Taxes). Medical costs grow with Medical Inflation.</p>
               <ul>
                 <li>The $201.41 VA dependent-spouse addition may be used alone or with part-time in-home care while the veteran is alive, subject to VA approval.</li>
                 <li>For the Medicaid option, enter the expected annual out-of-pocket amount before Medicaid coverage—not the full facility price if Medicaid is expected to pay it.</li>
@@ -2532,11 +2501,11 @@
           </details>
 
           <details class="manual-topic">
-            <summary>8. Document Vault, Coach &amp; Financial Wellness</summary>
+            <summary>8. Plan Health &amp; Coach, Document Vault</summary>
             <div class="manual-body">
               <p><b>Document Vault:</b> Files and keyword search remain in the current browser and do not affect calculations. AI document questions send relevant text to Anthropic. Keep originals separately.</p>
               <p><b>Coach / Ask AI:</b> Enter the Anthropic key in Settings on each device. The key, conversation, and Vault files are excluded from JSON backups, GitHub source, and printing. AI answers never change plan inputs automatically.</p>
-              <p><b>Financial Wellness:</b> Separates strengths and pressure points without creating a blended score. Resolve coverage, account-access, tax, medical, and data-quality issues first.</p>
+              <p><b>Plan Health:</b> Separates strengths and pressure points without creating a blended score. Resolve coverage, account-access, tax, medical, and data-quality issues first.</p>
             </div>
           </details>
 
@@ -2642,7 +2611,7 @@
             <button type="button" class="add-btn coach-secondary-btn" onclick="toggleFloatingAi(true)">View conversation</button>
           </div>
         </div>
-        <p style="font-size:16.5px;color:var(--muted);margin:0;line-height:1.55;">This file has no backend — adding a key here lets the Ask AI panel (and the Coach page) call the Anthropic API directly from your browser. The key is saved only in this device's browser so it survives a refresh. It is excluded from JSON backups, GitHub source, and printing; enter it separately on each device. Each question sends a full snapshot of your plan to Anthropic's servers. The conversation itself is saved locally; use "New chat" to clear it. Leave the key blank to keep the AI fully offline.</p>
+        <p style="font-size:16.5px;color:var(--muted);margin:0;line-height:1.55;">This file has no backend — adding a key here lets the Ask AI panel (and the Coach section) call the Anthropic API directly from your browser. The key is saved only in this device's browser so it survives a refresh. It is excluded from JSON backups, GitHub source, and printing; enter it separately on each device. Each question sends a full snapshot of your plan to Anthropic's servers. The conversation itself is saved locally; use "New chat" to clear it. Leave the key blank to keep the AI fully offline.</p>
       </div>
     </div>
 
@@ -2669,17 +2638,17 @@
   </div>
 </div>
 
-<script src="retirement-planner-core.js?v=2026-11-21-dedupe2"></script>
-<script src="retirement-planner-tax-and-social-security.js?v=2026-11-21-dedupe2"></script>
-<script src="retirement-planner-navigation-and-charts.js?v=2026-11-21-dedupe2"></script>
-<script src="retirement-planner-storage-and-notes.js?v=2026-11-21-dedupe2"></script>
-<script src="retirement-planner-money-inputs.js?v=2026-11-21-dedupe2"></script>
-<script src="retirement-planner-debt-and-inputs.js?v=2026-11-21-dedupe2"></script>
-<script src="retirement-planner-projection-engine.js?v=2026-11-21-dedupe2"></script>
-<script src="retirement-planner-explorers-and-analysis.js?v=2026-11-21-dedupe2"></script>
-<script src="retirement-planner-charts.js?v=2026-11-21-dedupe2"></script>
-<script src="retirement-planner-savings-and-coach.js?v=2026-11-21-dedupe2"></script>
-<script src="retirement-planner-vault-settings-and-reports.js?v=2026-11-21-dedupe2"></script>
+<script src="retirement-planner-core.js?v=2026-11-21-combine"></script>
+<script src="retirement-planner-tax-and-social-security.js?v=2026-11-21-combine"></script>
+<script src="retirement-planner-navigation-and-charts.js?v=2026-11-21-combine"></script>
+<script src="retirement-planner-storage-and-notes.js?v=2026-11-21-combine"></script>
+<script src="retirement-planner-money-inputs.js?v=2026-11-21-combine"></script>
+<script src="retirement-planner-debt-and-inputs.js?v=2026-11-21-combine"></script>
+<script src="retirement-planner-projection-engine.js?v=2026-11-21-combine"></script>
+<script src="retirement-planner-explorers-and-analysis.js?v=2026-11-21-combine"></script>
+<script src="retirement-planner-charts.js?v=2026-11-21-combine"></script>
+<script src="retirement-planner-savings-and-coach.js?v=2026-11-21-combine"></script>
+<script src="retirement-planner-vault-settings-and-reports.js?v=2026-11-21-combine"></script>
 <script src="master-backup-shared.js"></script>
 </body>
 </html>

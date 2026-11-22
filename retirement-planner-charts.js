@@ -320,7 +320,7 @@ function ensureOrUpdateChart(pageId, snap) {
 // ---------- Per-section "by year" charts, for sections with inflation-adjusted dollar items ----------
 // Each series pulls straight from the deterministic projection rows, so bars reflect that item's own
 // growth assumption (General/Medical Inflation, SS COLA, or its own yearly-increase %) compounding over time.
-const YEARLY_CHART_PAGES = ['income', 'moneyflows', 'housing', 'expenses', 'medical', 'gap', 'taxes', 'incomeexpenses']; // 'incomeexpenses' renders on the Gap page
+const YEARLY_CHART_PAGES = ['income', 'moneyflows', 'housing', 'expenses', 'medical', 'gap', 'taxes', 'incomeexpenses'];
 
 function yearlyBarConfig(ages, series, opts) {
   opts = opts || {};
@@ -593,10 +593,15 @@ function ensureOrUpdatePieChart(pageId, snap) {
 function refreshSectionCharts(pageId, snap) {
   ensureOrUpdateChart(pageId, snap);
   ensureOrUpdateYearlyChart(pageId, snap);
-  // The Gap page also hosts the Income vs Expenses chart (chart key 'incomeexpenses_yearly').
-  if (pageId === 'gap') ensureOrUpdateYearlyChart('incomeexpenses', snap);
   ensureOrUpdatePieChart(pageId, snap);
+  // Combined pages also draw the charts of the sections merged into them.
+  (HOSTED_CHART_SECTIONS[pageId] || []).forEach(guest => {
+    ensureOrUpdateChart(guest, snap);
+    ensureOrUpdateYearlyChart(guest, snap);
+  });
 }
+// Chart keys keep their original section names (e.g. chart_debt) after a merge.
+const HOSTED_CHART_SECTIONS = { gap: ['incomeexpenses'], housing: ['debt'], expenses: ['insurance'] };
 
 // ---------- Allocation Explorer: life-stage allocation comparison ----------
 const ALLOCATION_STAGE_INFO = [

@@ -891,7 +891,7 @@ function renderFinancialWellness(inputs, ctx, result, confidenceScore) {
     pc(debtPaymentRatio),
     debtStatus,
     `${fmtMoney(currentDebtPaymentAnnual)}/yr of payments on tracked non-mortgage debts active today divided by current gross household income. Future-dated debts and housing costs are excluded because housing is measured separately.`,
-    'debt', 'Review debts'
+    'housing', 'Review debts'
   ));
 
   const housingStatus = housingRatio == null ? 'info' : housingRatio <= 0.25 ? 'strong' : housingRatio <= 0.35 ? 'watch' : 'attention';
@@ -1286,8 +1286,8 @@ function render() {
     refreshSectionCharts(activePage.dataset.page, lastSnapshot);
   }
   if (activePage && activePage.dataset.page === 'explorers') renderExplorers();
-  if (activePage && activePage.dataset.page === 'coach') { renderCoachTips(); renderCoachAiGate(); }
-  if (activePage && activePage.dataset.page === 'vault') { renderVaultDocuments(); renderVaultAiGate(); }
+  if (activePage && activePage.dataset.page === 'wellness') { renderCoachTips(); renderCoachAiGate(); }
+  if (activePage && activePage.dataset.page === 'estate') { renderVaultDocuments(); renderVaultAiGate(); }
   if (activePage && activePage.dataset.page === 'savings') renderSavingsPage();
 
   saveState();

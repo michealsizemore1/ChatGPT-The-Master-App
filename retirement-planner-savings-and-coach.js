@@ -168,9 +168,7 @@ function renderCoachTips() {
   } catch (e) { /* never let a scoring hiccup blank out the whole Coach page */ }
   container.innerHTML = `
     ${tipsHtml}
-    <p style="font-size:16px;color:var(--muted);line-height:1.55;margin:0 0 14px;">Emergency reserve, tax diversification and other plan measures are on Financial Wellness.</p>
     <div style="display:flex;flex-wrap:wrap;gap:10px;">
-      <button type="button" class="add-btn" onclick="showPage('wellness')">Review Financial Wellness</button>
       <button type="button" class="add-btn" onclick="showExplorerAnalysis('retirementtiming')">Test Retirement Timing</button>
       <button type="button" class="add-btn" onclick="toggleFloatingAi(true)">Discuss With Ask AI</button>
     </div>`;
