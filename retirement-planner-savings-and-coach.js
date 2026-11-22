@@ -487,8 +487,4 @@ async function sendCoachChatMessage() {
 // a meaningful share of free disk space, easily hundreds of MB or more, vs. localStorage's usual 5-10 MB).
 // Nothing here ever leaves the browser except the specific document text sent to Anthropic if you use
 // Ask AI below (and only after you've added your own API key on Settings).
-// Note: a plain `esc()` HTML-escaping helper already exists elsewhere in this file, but it's defined
-// inside the embedded credit-card tracker sub-app (only decoded/loaded once you visit Accounts & Cards),
-// so it can't be relied on here — this exact kind of "defined only if another page happened to load
-// first" bug bit an earlier chart (see the esc() ReferenceError fix). vaultEsc() below is this section's
-// own, always-available copy.
+// vaultEsc() below is this section's own HTML-escaping helper.

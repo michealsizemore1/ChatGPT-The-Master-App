@@ -1,191 +1,6 @@
-let trackerFrameLoaded = false;
-let trackerShadowRoot = null;
-function loadTrackerFrame() {
-  if (trackerFrameLoaded) return;
-  const host = els('trackerHost');
-  if (!host) return;
-  const shadow = host.attachShadow({ mode: 'open' });
-  trackerShadowRoot = shadow;
-
-  const styleMatch = TRACKER_HTML.match(/<style>([\s\S]*?)<\/style>/);
-  const bodyMatch = TRACKER_HTML.match(/<body>([\s\S]*?)<script>/);
-  const scriptMatch = TRACKER_HTML.match(/<script>([\s\S]*?)<\/script>/);
-  if (!styleMatch || !bodyMatch || !scriptMatch) return;
-
-  // The tracker's own top-level CSS was written for a standalone page (:root for its color
-  // variables, html,body for full-viewport flex layout) — neither selector matches anything
-  // inside a shadow root, so both are rewritten to :host, which is the shadow-root equivalent.
-  const scopedCss = styleMatch[1]
-    .replace(':root', ':host')
-    .split('html,body').join(':host');
-  shadow.innerHTML = '<style>' + scopedCss + '</style>' + bodyMatch[1];
-
-  window.__trackerDoc = {
-    getElementById: id => shadow.getElementById(id),
-    querySelector: sel => shadow.querySelector(sel),
-    querySelectorAll: sel => shadow.querySelectorAll(sel),
-    createElement: tag => document.createElement(tag),
-    addEventListener: (...args) => document.addEventListener(...args),
-    body: document.body,
-    head: document.head
-  };
-
-  // innerHTML never executes <script> tags (by design, everywhere on the web) — so the tracker's
-  // script is pulled out and re-created as a real <script> element, which does execute on insert.
-  let scriptSrc = scriptMatch[1];
-  scriptSrc = scriptSrc.replace('(function(){', '(function(document){');
-  scriptSrc = scriptSrc.replace(/\}\)\(\);\s*$/, '})(window.__trackerDoc);');
-  const s = document.createElement('script');
-  s.textContent = scriptSrc;
-  document.body.appendChild(s);
-  document.body.removeChild(s);
-
-  trackerFrameLoaded = true;
-}
-// Accounts & Cards (the credit card/bank register tracker below) is a standalone tool for tracking
-// real day-to-day transactions — it is deliberately NOT wired into the retirement projection or Monte
-// Carlo in any way. An earlier version of this page synced the Bank Accounts fields (checkingBalance/
-// savingsBalance/hysaBalance) live from the tracker's own registers on every render(), which meant
-// adding or editing a transaction on the Accounts & Cards page silently changed those three balances,
-// which changed readInputs()'s output, which changed runMonteCarlo()'s seed (built from JSON.stringify
-// of the full inputs object) — so the Monte Carlo score could visibly shift even though nothing on any
-// retirement-planning page itself had been touched. That sync has been removed entirely: Checking/
-// Savings/HYSA on the Investments page are now always plain, manually-edited fields, exactly like every
-// other balance in the plan, and nothing entered on the Accounts & Cards page reaches the engine.
-// The 'storage' event only fires in OTHER windows/tabs than the one that made the change — kept here
-// (render() alone now, no tracker sync) purely so this planner stays visually current if it's ever open
-// in two browser tabs at once and a field is changed in one of them.
+// The 'storage' event only fires in OTHER windows/tabs than the one that made the change, so this
+// keeps the planner visually current if it's open in two tabs and a field changes in one of them.
 window.addEventListener('storage', () => { render(); });
-
-// ---------- Credit Card spending breakdown (category / merchant pie charts) ----------
-// Reads straight from the 'cc-register' localStorage key the embedded tracker itself reads and
-// writes — same document, same storage, so this is always the true current data with no dependency
-// on the tracker's own render cycle or any cross-context event.
-function readCCExpenses() {
-  let txns = [];
-  try { txns = JSON.parse(localStorage.getItem('cc-register') || '[]'); } catch (e) { txns = []; }
-  return txns.filter(t => t.type === 'expense');
-}
-
-function trackerBankBalance(prefix) {
-  let txns = [], opening = 0;
-  try {
-    txns = JSON.parse(localStorage.getItem(prefix + '-register') || '[]');
-    opening = +(localStorage.getItem(prefix + '-open-bal') || 0);
-  } catch (e) { return null; }
-  if (!Array.isArray(txns)) return null;
-  return opening + txns.reduce((sum, t) => sum + (t.type === 'deposit' ? (+t.amount || 0) : -(+t.amount || 0)), 0);
-}
-
-function syncSavingsAndHysaFromTracker() {
-  const savings = trackerBankBalance('savings'), hysa = trackerBankBalance('hysa');
-  if (savings == null || hysa == null) { alert('Accounts & Cards balances could not be read.'); return; }
-  if (!confirm(`Replace the Investments balances with Accounts & Cards?\n\nSavings: ${fmtMoney(savings)}\nHYSA: ${fmtMoney(hysa)}`)) return;
-  els('savingsBalance').value = Math.round(savings * 100) / 100;
-  els('hysaBalance').value = Math.round(hysa * 100) / 100;
-  const status = els('accountSyncStatus');
-  if (status) status.textContent = `Synced ${new Date().toLocaleString()}: Savings ${fmtMoney(savings)}, HYSA ${fmtMoney(hysa)}.`;
-  saveState(); render();
-}
-// Groups a list of expense transactions by whatever keyFn returns (category text, or merchant/
-// description text), summing amounts per group, sorted largest-first. Caps the slice count at
-// maxSlices by folding the smallest groups into a single "Other" slice, since merchant names in
-// particular can vary a lot and a 20-slice pie chart isn't readable.
-function groupSum(items, keyFn, maxSlices) {
-  const totals = {};
-  items.forEach(t => {
-    const raw = (keyFn(t) || '').trim();
-    const k = raw || 'Uncategorized';
-    totals[k] = (totals[k] || 0) + (+t.amount || 0);
-  });
-  let entries = Object.entries(totals).sort((a, b) => b[1] - a[1]);
-  if (maxSlices && entries.length > maxSlices) {
-    const head = entries.slice(0, maxSlices - 1);
-    const otherTotal = entries.slice(maxSlices - 1).reduce((s, e) => s + e[1], 0);
-    entries = head.concat([['Other', otherTotal]]);
-  }
-  return entries;
-}
-function ccPieConfig(entries) {
-  return {
-    type: 'pie',
-    data: {
-      labels: entries.map(e => e[0]),
-      datasets: [{
-        data: entries.map(e => e[1]),
-        backgroundColor: entries.map((_, i) => CHART_COLORS[i % CHART_COLORS.length]),
-        borderWidth: 1,
-        borderColor: '#fff',
-        // Read by the pieValueLabels plugin (registered above) to draw $ + % on each slice.
-        showValues: true, valueFormatter: fmtMoney
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 12 } } },
-        tooltip: {
-          callbacks: {
-            label: ctx => {
-              const total = ctx.dataset.data.reduce((s, v) => s + v, 0);
-              const pct = total ? Math.round(ctx.parsed / total * 100) : 0;
-              return ' ' + ctx.label + ': ' + fmtMoney(ctx.parsed) + ' (' + pct + '%)';
-            }
-          }
-        }
-      }
-    }
-  };
-}
-function renderCCSpendingCharts() {
-  const catCanvas = els('ccCategoryChart');
-  const merchCanvas = els('ccMerchantChart');
-  const emptyNote = els('ccChartsEmptyNote');
-  if (!catCanvas || !merchCanvas) return;
-  const expenses = readCCExpenses();
-  const hasData = expenses.length > 0;
-  catCanvas.parentElement.style.display = hasData ? '' : 'none';
-  merchCanvas.parentElement.style.display = hasData ? '' : 'none';
-  if (emptyNote) emptyNote.style.display = hasData ? 'none' : 'block';
-  if (!hasData) return;
-
-  const categoryExpenses = [];
-  expenses.forEach(t => {
-    if (Array.isArray(t.splits) && t.splits.length) t.splits.forEach(s => categoryExpenses.push({ cat:s.cat, amount:+s.amount||0 }));
-    else if (typeof t.cat === 'string' && t.cat.includes(',')) {
-      const cats = t.cat.split(',').map(c => c.trim()).filter(Boolean);
-      const rawAmounts = typeof t.catAmts === 'string' ? t.catAmts.split(',').map(a => a.trim()) : [];
-      const amounts = cats.map((_, i) => rawAmounts[i] === '' || rawAmounts[i] == null ? null : +rawAmounts[i]);
-      const specified = amounts.reduce((sum, amount) => sum + (Number.isFinite(amount) ? amount : 0), 0);
-      const unspecifiedCount = amounts.filter(amount => !Number.isFinite(amount)).length;
-      const unallocated = Math.max(0, (+t.amount || 0) - specified);
-      cats.forEach((cat, i) => categoryExpenses.push({
-        cat,
-        amount: Number.isFinite(amounts[i]) ? amounts[i] : (unspecifiedCount ? unallocated / unspecifiedCount : 0)
-      }));
-    } else categoryExpenses.push(t);
-  });
-  const catEntries = groupSum(categoryExpenses, t => t.cat, 8);
-  const merchEntries = groupSum(expenses, t => t.desc, 8);
-
-  if (charts.ccCategory) charts.ccCategory.destroy();
-  charts.ccCategory = new Chart(catCanvas.getContext('2d'), ccPieConfig(catEntries));
-  if (charts.ccMerchant) charts.ccMerchant.destroy();
-  charts.ccMerchant = new Chart(merchCanvas.getContext('2d'), ccPieConfig(merchEntries));
-}
-// Transactions added/edited inside the embedded tracker don't fire any event this page can listen
-// for, so while the Accounts & Cards page is the one on screen, re-check every couple seconds and
-// redraw if anything changed — cheap, and means the pies stay current without a manual refresh.
-let lastCCExpenseSnapshot = '';
-setInterval(() => {
-  const activePage = document.querySelector('.page.active');
-  if (!activePage || activePage.dataset.page !== 'accounts') return;
-  const snapshot = localStorage.getItem('cc-register') || '';
-  if (snapshot === lastCCExpenseSnapshot) return;
-  lastCCExpenseSnapshot = snapshot;
-  renderCCSpendingCharts();
-}, 1500);
 
 function setRetirementAge(age) {
   const ageInput = els('retirementAge');
@@ -481,17 +296,13 @@ function cloudStorageGet(key) {
 function cloudStorageSet(key, value) {
   try { localStorage.setItem(key, value); } catch (e) { /* storage unavailable */ }
 }
-function cloudStorageRemove(key) {
-  try { localStorage.removeItem(key); } catch (e) { /* storage unavailable */ }
-}
 function rememberRetirementAgeSelection(age) {
   const selectedAge = Number(age);
   if (!Number.isFinite(selectedAge)) return;
   const selectedAt = new Date().toISOString();
-  cloudStorageSet(RETIREMENT_AGE_PENDING_KEY, JSON.stringify({ age:selectedAge, selectedAt }));
   // A retirement-age button can be selected while the page is still starting up, and that deliberate
   // selection must win over whatever loadState() is about to restore.
-  cloudStorageSet(CLOUD_DIRTY_KEY, selectedAt);
+  cloudStorageSet(RETIREMENT_AGE_PENDING_KEY, JSON.stringify({ age:selectedAge, selectedAt }));
 }
 function readPendingRetirementAgeSelection() {
   try {
@@ -504,10 +315,9 @@ function readPendingRetirementAgeSelection() {
     return null;
   }
 }
-function applyPendingRetirementAgeSelection(remoteUpdatedAt = null) {
+function applyPendingRetirementAgeSelection() {
   const pending = readPendingRetirementAgeSelection();
   if (!pending) return false;
-  if (remoteUpdatedAt && !timestampAfter(pending.selectedAt, remoteUpdatedAt, 0)) return false;
   const ageEl = els('retirementAge');
   if (!ageEl) return false;
   ageEl.value = pending.age;
@@ -515,11 +325,6 @@ function applyPendingRetirementAgeSelection(remoteUpdatedAt = null) {
   // halfway through startup before the rest of loadState()'s fields have been restored.
   syncRetirementDateFromAge(false);
   return true;
-}
-function timestampAfter(a, b, toleranceMs = 1000) {
-  const ta = a ? new Date(a).getTime() : 0;
-  const tb = b ? new Date(b).getTime() : 0;
-  return isFinite(ta) && isFinite(tb) && ta > tb + toleranceMs;
 }
 async function initPlannerCloudSync() {
   // One-time cleanup: earlier builds stored network cloud-sync session data under these keys. The

@@ -463,20 +463,3 @@ function showPage(pageId, persistPage = true) {
   if (pageId === 'savings') renderSavingsPage();
   closeMenu();
 }
-
-// ---------- Accounts & Cards: embedded credit-card/checking/savings/HYSA tracker ----------
-// The tracker is a full standalone app in its own right (its own <html>/<head>/<script>, own
-// render loop, own "categories"/"transactions"/"$"/"save" globals, etc). It used to run inside an
-// iframe via srcdoc, which was supposed to inherit this page's origin and share localStorage with
-// it — but on a file:// page, real-world browser behavior for srcdoc iframes turned out to be
-// unreliable (isolated storage, blocked file pickers), not the spec-ideal same-origin behavior.
-// So instead, the tracker's markup and CSS are attached directly into THIS page via a Shadow DOM,
-// which is genuinely part of the same document — there is no origin question at all, storage is
-// automatically shared, and file dialogs work normally. Shadow DOM keeps the tracker's CSS (.card,
-// .btn, .modal-ov, etc — all names this page also uses) fully scoped so nothing bleeds through in
-// either direction. The one thing Shadow DOM doesn't do for free is JS: the tracker's ~1300 lines
-// call plain document.getElementById/querySelector to find ITS OWN elements, and the real global
-// document can't see inside a shadow root. Rather than editing all of that code, its own top-level
-// IIFE is given a substitute "document" as a parameter — one whose lookup methods are redirected
-// into the shadow root, while everything else (creating elements, the global Escape-key handler)
-// still goes to the real document, since those aren't shadow-root-specific.

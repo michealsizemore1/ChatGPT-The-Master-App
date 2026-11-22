@@ -377,17 +377,13 @@ function restoreFromFile(file) {
     try {
       const state = JSON.parse(e.target.result);
       applyState(state);
-      // Notes, the Checkpoint Tracker, and Accounts & Cards data are the fields applyState() deliberately
+      // Notes and the Checkpoint Tracker are the fields applyState() deliberately
       // doesn't touch on a normal boot (see the comment there) — an explicit restore is the one
       // legitimate case where the backup's copy SHOULD overwrite whatever is currently in this browser,
       // so they're synced here instead.
       if (typeof state.sharedNotesText === 'string') updateSharedNotes(state.sharedNotesText);
       if (state.checkpointBaseline !== undefined) { checkpointBaseline = state.checkpointBaseline; persistCheckpointBaseline(); }
       if (Array.isArray(state.checkpointHistory)) { checkpointHistory = state.checkpointHistory; persistCheckpointHistory(); }
-      // Writes straight to the Accounts & Cards register's own localStorage keys — if that page's tracker
-      // hasn't loaded yet this session, it'll pick up the restored data the first time it's visited, same
-      // as any fresh page load. If it was already open before this restore, a page refresh is needed for
-      // it to pick up the change (its shadow-DOM tracker can only be attached once per page load).
       renderExpenseRows(); renderBrokeragePieRows(); renderPieContributionRows(); renderDebtRows();
       renderFutureExpenseRows(); renderWindfallRows(); renderInsuranceRows();
       saveState();
@@ -1377,10 +1373,10 @@ function render() {
   saveState();
 }
 
-const hadSavedState = loadState();
+loadState();
 applySharedInvestmentsToPlanner();
-// Restore an age-button selection before the first calculation even if the previous cloud attempt
-// ended during refresh. The pending marker is removed only after legacy online service confirms the saved plan.
+// Restore the most recent retirement-age selection before the first calculation, in case it was
+// made while the page was still starting up and loadState() restored an older value.
 applyPendingRetirementAgeSelection();
 // loadState() never touches sharedNotesText (see applyState()) — notes live only in their own
 // dedicated key, always updated on every keystroke, so this is the one and only source of truth for
@@ -1465,8 +1461,7 @@ window.addEventListener('storage', function(event) {
 // It only looked like it "worked" when some other action nearby (a checkbox, a row edit, a pill
 // click) happened to trigger render() shortly after and incidentally picked up the live DOM value.
 // One delegated listener on .shell, covering every plain input/select inside the main planner
-// (not the Shadow DOM tracker, whose native change/input events don't cross the shadow boundary
-// anyway), fixes every field at once instead of just the one that got reported.
+// fixes every field at once instead of just the one that got reported.
 const shellEl = document.querySelector('.shell');
 if (shellEl) {
   let pendingFieldSave = null;
@@ -1510,8 +1505,7 @@ function persistBeforeLeaving() {
       if (location.hash !== pageHash) history.replaceState(null, '', pageHash);
     }
   } catch (e) { /* storage unavailable, ignore */ }
-  // Save the final DOM values locally without creating a brand-new cloud-dirty marker merely because
-  // the page is unloading. Real edits already mark themselves dirty in their input/change handlers.
+  // Save the final DOM values without flashing the "Saving..." badge just because the page is unloading.
   saveState(false, true);
 }
 window.addEventListener('pagehide', persistBeforeLeaving);

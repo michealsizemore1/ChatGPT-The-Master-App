@@ -49,30 +49,6 @@ function dismissBackupReminder() {
   if (banner) banner.style.display = 'none';
 }
 
-// Every localStorage key prefix the standalone Accounts & Cards tracker (see TRACKER_HTML) uses for its
-// own data — credit card register/categories, the four bank account registers and their opening
-// balances, per-account notes, trip tracking, and receipt attachments (dynamically keyed per-receipt).
-// The tracker manages all of this itself via its own private sGet/sSet helpers (a separate closure this
-// script can't call into), but localStorage itself is just a page-level Web API, not scoped to any
-// particular <script> block or closure — so it's read/written directly here instead.
-const ACCOUNTS_CARDS_STORAGE_PREFIXES = ['cc-', 'chk-', 'mike-', 'savings-', 'hysa-', 'active-trip', 'rcpt-'];
-function readAccountsCardsBackup() {
-  const backup = {};
-  try {
-    Object.keys(localStorage).forEach(k => {
-      if (ACCOUNTS_CARDS_STORAGE_PREFIXES.some(p => k === p || k.startsWith(p))) backup[k] = localStorage.getItem(k);
-    });
-  } catch (e) { /* storage unavailable, ignore */ }
-  return backup;
-}
-function restoreAccountsCardsBackup(backup) {
-  if (!backup || typeof backup !== 'object') return;
-  try {
-    Object.keys(localStorage).filter(k => ACCOUNTS_CARDS_STORAGE_PREFIXES.some(p => k === p || k.startsWith(p)))
-      .forEach(k => localStorage.removeItem(k));
-    Object.keys(backup).forEach(k => { if (backup[k] != null) localStorage.setItem(k, backup[k]); });
-  } catch (e) { /* storage unavailable, ignore */ }
-}
 
 function saveState(includePortableData = false, suppressCloudSync = false) {
   const fields = {};
@@ -724,17 +700,6 @@ function recomputeAgesFromDates() {
   renderExpenseRows();
   renderFutureExpenseRows();
   renderWindfallRows();
-}
-// Inverse of monthToAge: given a whole-years-away target age (e.g. a debt payoff age from the
-// year-resolution amortization schedule), return a human "Mon YYYY" estimate of the calendar date —
-// anchored on the person's actual birth month, not whatever calendar month it happens to be today.
-function ageToMonthYear(currentAge, targetAge, birthMonth) {
-  if (targetAge === null || targetAge === undefined || isNaN(targetAge)) return '';
-  const yearsAway = Math.round(targetAge - currentAge);
-  const today = new Date();
-  const bm = birthMonth || (today.getMonth() + 1);
-  const target = new Date(today.getFullYear() + yearsAway, bm - 1, 1);
-  return target.toLocaleString('en-US', { month: 'short', year: 'numeric' });
 }
 function setFutureExpenseAgeFromDate(i, monthVal) {
   if (!monthVal) return;

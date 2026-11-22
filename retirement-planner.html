@@ -119,50 +119,6 @@
   .cloud-sync-badge[data-state="error"] .cloud-sync-dot{background:#f49a8f;}
   @keyframes cloudPulse{50%{opacity:.35;transform:scale(.75);}}
 
-  .cloud-auth-overlay{
-    position:fixed;
-    inset:0;
-    z-index:2500;
-    display:none;
-    align-items:center;
-    justify-content:center;
-    padding:22px;
-    background:linear-gradient(145deg, rgba(19,42,62,.98), rgba(22,70,78,.98));
-  }
-  .cloud-auth-card{
-    width:min(440px,100%);
-    max-height:calc(100vh - 44px);
-    overflow-y:auto;
-    padding:28px;
-    border:1px solid rgba(255,255,255,.18);
-    border-radius:16px;
-    background:#fff;
-    box-shadow:0 20px 60px rgba(0,0,0,.35);
-  }
-  .cloud-auth-card h2{margin:0 0 7px;color:var(--navy);font-size:27px;}
-  .cloud-auth-card > p{margin:0 0 20px;color:var(--muted);font-size:15.5px;line-height:1.5;}
-  .cloud-auth-card .field{margin-bottom:13px;}
-  .cloud-auth-card .auth-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:17px;}
-  .cloud-auth-card .auth-primary{flex:1 1 180px;}
-  .cloud-auth-card .auth-secondary{background:#eef3f5;color:var(--navy);}
-  .link-btn{border:0;background:transparent;color:var(--teal);font-family:inherit;font-size:14px;font-weight:600;padding:3px 0;cursor:pointer;text-decoration:underline;}
-  .cloud-auth-message{display:none;margin:12px 0 0;padding:9px 11px;border-radius:8px;background:#fff4e5;color:#83550c;font-size:14px;line-height:1.4;}
-  .cloud-auth-message.error{background:#fdf0ee;color:#9f3025;}
-  .cloud-account-summary{
-    display:flex;
-    align-items:flex-start;
-    justify-content:space-between;
-    gap:12px;
-    padding:13px 14px;
-    border:1px solid var(--border);
-    border-radius:9px;
-    background:#f8fafb;
-    margin-bottom:13px;
-  }
-  .cloud-account-summary strong{display:block;color:var(--navy);font-size:16px;}
-  .cloud-account-summary span{display:block;color:var(--muted);font-size:14px;margin-top:3px;overflow-wrap:anywhere;}
-  .cloud-status-detail{font-size:14.5px;color:var(--muted);line-height:1.5;margin:9px 0 0;}
-
   .header-bar{display:flex; align-items:flex-start; gap:14px; flex-wrap:wrap;}
   .header-titles{flex:1 1 220px; min-width:220px;}
   .dollar-toggle{display:flex; border:1px solid rgba(255,255,255,0.3); border-radius:20px; overflow:hidden; flex-shrink:0; margin-top:2px;}
@@ -367,7 +323,6 @@
   .row-list{margin-top:8px;}
   .row-item{display:grid; grid-template-columns:1.3fr 0.9fr 26px; gap:8px; align-items:center; margin-bottom:8px;}
   .row-item.debt-row{grid-template-columns:1.1fr 0.8fr 0.55fr 0.4fr 0.45fr 0.45fr 0.55fr 0.6fr 0.5fr 26px;}
-  .row-item.tx-row{grid-template-columns:0.85fr 1.1fr 0.65fr 0.9fr 0.65fr 26px;}
   .row-item.expense-row{grid-template-columns:1.1fr 1fr 0.7fr 0.7fr 0.7fr 26px;}
   /* Starts/Ends date pickers for a recurring expense — a separate full-width row directly under each
      .row-item.expense-row rather than 2 more columns squeezed into that already-tight 6-column grid.
@@ -428,11 +383,9 @@
     .withdraw-order-balance{margin-left:auto;}
   }
   .row-header{display:grid; gap:8px; margin-bottom:6px; font-size:16.5px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.03em;}
-  .row-header.cols-2{grid-template-columns:1.3fr 0.9fr 26px;}
   .row-header.cols-pie{grid-template-columns:1.05fr 0.62fr 0.78fr 0.78fr 0.52fr 0.48fr 26px;}
   .row-item.pie-row{grid-template-columns:1.05fr 0.62fr 0.78fr 0.78fr 0.52fr 0.48fr 26px;}
   .row-header.cols-debt{grid-template-columns:1.1fr 0.8fr 0.55fr 0.4fr 0.45fr 0.45fr 0.55fr 0.6fr 0.5fr 26px;}
-  .row-header.cols-tx{grid-template-columns:0.85fr 1.1fr 0.65fr 0.9fr 0.65fr 26px;}
   .row-header.cols-contrib{grid-template-columns:1.6fr 0.9fr;}
   .row-header.cols-future{grid-template-columns:1.4fr 0.6fr 0.7fr 0.8fr 26px;}
   .row-header.cols-windfall{grid-template-columns:1.3fr 0.5fr 0.7fr 0.8fr 26px;}
@@ -632,8 +585,6 @@
   @media (max-width:1700px){ .shared-notes-card{padding-left:24px; padding-right:24px;} }
 
   .tip{display:flex; gap:12px; padding:14px 16px; border-radius:8px; margin-bottom:10px; border:1px solid var(--border); background:#fbfcfc; align-items:flex-start;}
-  .tip .tip-icon{font-size:20px; flex-shrink:0; line-height:1.4;}
-  .tip .tip-text{font-size:16.5px; line-height:1.55; color:var(--text);}
   .tip.high{border-color:#f0c3bb; background:#fdf3f1;}
   .tip.medium{border-color:#f0ddb5; background:#fffaf0;}
   .tip.good{border-color:#c9e4de; background:var(--teal-light);}
@@ -700,7 +651,6 @@
     .sticky-app-bar .hamburger-btn{width:44px; height:44px;}
     .sticky-app-bar .current-page-label{font-size:17px;}
     .cloud-sync-badge{padding:6px 8px;font-size:11.5px;}
-    .cloud-auth-card{padding:22px 18px;}
     header{padding:16px 16px;}
     header h1{font-size:20px;}
     header p{font-size:14px;}
@@ -1119,7 +1069,7 @@
      completely unaffected, since @media print never matches outside of an actual print/print-preview. */
   @media print {
     body{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-    header, .sticky-app-bar, .cloud-auth-overlay, .sidenav, .nav-overlay, .ask-ai-fab, .floating-ai-panel,
+    header, .sticky-app-bar, .sidenav, .nav-overlay, .ask-ai-fab, .floating-ai-panel,
     #backupReminderBanner, .info-banner-close,
     .chart-range-nav, .range-readout,
     .remove-btn, .add-btn, .withdraw-order-arrows,
@@ -1127,8 +1077,7 @@
     .chat-box, #vaultAiGate, #vaultSearchInput, #vaultUploadStatus,
     .open-btn, .wellness-link,
     .print-sensitive,
-    .shared-notes-card small
-    { display:none !important; }
+    .shared-notes-card small{ display:none !important; }
 
     .shell{ max-width:none !important; padding:0 !important; margin:0 !important; }
 
@@ -1762,31 +1711,6 @@
       </div>
     </div>
 
-    <!-- Retired transaction tracker retained only as inert legacy markup so existing browser data is not disturbed. -->
-    <template id="retiredAccountsCardsFeature">
-      <div class="shared-notes-card">
-        <div class="dn-hdr"><span>&#x1F4DD; Notes</span><small>auto-saved, same on every page</small></div>
-        <textarea class="shared-notes-textarea" oninput="updateSharedNotes(this.value)" placeholder="Jot down anything — questions for your financial advisor, things to double-check, reminders…" rows="3"></textarea>
-      </div>
-      <div class="page-header"><h2>Accounts &amp; Cards</h2><p>Your household transaction registers — credit card, both checking accounts, savings, and HYSA. This section remains fully separate from retirement balances, projections, and Monte Carlo calculations.</p></div>
-      <div class="card" style="padding:0;overflow:hidden;">
-        <div id="trackerHost" style="width:100%;height:82vh;min-height:560px;overflow:hidden;background:#fff;"></div>
-      </div>
-      <div class="card no-autocollapse">
-        <h3 onclick="toggleCard(this)">Credit Card Spending Breakdown<span class="sub-label">All-time expenses by category and by merchant</span></h3>
-        <div style="display:grid;grid-template-columns:1fr;gap:24px;">
-          <div>
-            <div style="text-align:center;font-weight:600;margin-bottom:8px;">By Category</div>
-            <div style="position:relative;height:320px;"><canvas id="ccCategoryChart"></canvas></div>
-          </div>
-          <div>
-            <div style="text-align:center;font-weight:600;margin-bottom:8px;">By Merchant</div>
-            <div style="position:relative;height:320px;"><canvas id="ccMerchantChart"></canvas></div>
-          </div>
-        </div>
-        <p id="ccChartsEmptyNote" style="display:none;color:var(--muted);text-align:center;padding:20px 0 4px;">No credit card expenses recorded yet — add some on the register above and this will fill in.</p>
-      </div>
-    </template>
 
     <!-- ================= HOUSING ================= -->
     <div class="page" data-page="housing">
