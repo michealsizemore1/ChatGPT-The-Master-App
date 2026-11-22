@@ -192,22 +192,23 @@ function expenseValForBasis(e) {
 
 const PAGE_LABELS = {
   dashboard:'Overview', personal:'Personal & Family', income:'Income', survivorship:'Survivorship', moneyflows:'Money Flows',
-  investments:'Investments', housing:'Housing', expenses:'Expenses', incomeexpenses:'Income vs Expenses', debt:'Debt',
-  gap:'Income Gap & Withdrawals', medical:'Medical', estate:'Estate Planning', vault:'Document Vault', insurance:'Insurance',
+  investments:'Investments', housing:'Housing', expenses:'Expenses', debt:'Debt',
+  gap:'Income, Expenses & Withdrawals', medical:'Medical', estate:'Estate Planning', vault:'Document Vault', insurance:'Insurance',
   taxes:'Taxes', assumptions:'Assumptions & Guardrails',
   explorers:'Explorers', coach:'Coach', wellness:'Financial Wellness', savings:'Savings', settings:'Settings'
 };
 const MY_PLAN_PAGES = ['personal','income','expenses','insurance','investments','assumptions','estate','debt','moneyflows','medical','housing'];
-const INSIGHTS_PAGES = ['incomeexpenses','gap','savings','taxes'];
+const INSIGHTS_PAGES = ['gap','savings','taxes'];
 const EXPLORER_ANALYSIS_KEY = 'retirementPlannerExplorerAnalysis_v1';
 const EXPLORER_ANALYSES = {
-  whatif:'What If I...', retirementtiming:'Retirement Timing', market:'Market Explorer', allocation:'Allocation Explorer',
+  retirementtiming:'Retirement Timing', market:'Market Explorer', allocation:'Allocation Explorer',
   historical:'Historical Backtest', socialsecurity:'Social Security Claiming',
   sustainablespending:'Sustainable Spending',
-  comparison:'Scenario Comparison', whatifresults:'What-If Scenario Results',
-  marketrisk:'Market Risk Scenarios', sensitivity:'Sensitivity Analysis'
+  comparison:'Scenario Comparison', sensitivity:'Sensitivity Analysis'
 };
-let selectedExplorerAnalysis = 'whatif';
+// Also where saved links to the removed What If I... / What-If Scenarios / Market Risk tools now land.
+const DEFAULT_EXPLORER_ANALYSIS = 'comparison';
+let selectedExplorerAnalysis = DEFAULT_EXPLORER_ANALYSIS;
 
 function toggleMenu() {
   collapseNavDropdowns();
@@ -253,10 +254,10 @@ function readInitialExplorerAnalysis() {
     try { analysisId = localStorage.getItem(EXPLORER_ANALYSIS_KEY) || ''; } catch (e) { analysisId = ''; }
   }
   if (!isKnownExplorerAnalysis(analysisId) && isKnownExplorerAnalysis(selectedExplorerAnalysis)) analysisId = selectedExplorerAnalysis;
-  return isKnownExplorerAnalysis(analysisId) ? analysisId : 'whatif';
+  return isKnownExplorerAnalysis(analysisId) ? analysisId : DEFAULT_EXPLORER_ANALYSIS;
 }
 function activateExplorerAnalysis(analysisId, scrollToSection = true, persist = true) {
-  if (!isKnownExplorerAnalysis(analysisId)) analysisId = 'whatif';
+  if (!isKnownExplorerAnalysis(analysisId)) analysisId = DEFAULT_EXPLORER_ANALYSIS;
   selectedExplorerAnalysis = analysisId;
   const page = document.querySelector('.page[data-page="explorers"]');
   if (!page) return;
@@ -319,11 +320,15 @@ function activatePageShell(pageId) {
   return pageId;
 }
 
+// Income vs Expenses was merged into the Gap page; old links and saved sections open the merged page.
+const MERGED_PAGES = { incomeexpenses: 'gap' };
 function readInitialPage() {
   let pageId = '';
   try { pageId = decodeURIComponent(location.hash.slice(1)).split('/')[0]; } catch (e) { pageId = ''; }
+  pageId = MERGED_PAGES[pageId] || pageId;
   if (!isKnownPage(pageId)) {
     try { pageId = localStorage.getItem(ACTIVE_PAGE_KEY) || ''; } catch (e) { pageId = ''; }
+    pageId = MERGED_PAGES[pageId] || pageId;
   }
   return isKnownPage(pageId) ? pageId : '';
 }

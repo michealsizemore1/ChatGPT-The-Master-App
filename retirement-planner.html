@@ -443,9 +443,7 @@
   .wellness-link{align-self:flex-start;margin-top:12px;border:0;background:transparent;color:var(--teal);font:inherit;font-size:14px;font-weight:700;padding:0;cursor:pointer;}
   .wellness-link:hover{text-decoration:underline;}
 
-  /* "What If I..." card selector (Explorers page) — a Boldin-style single-select grid of quick
-     stress-test scenarios. Clicking a card toggles it on/off; the radio circle fills in teal when
-     selected, matching the checked look of a real radio button without needing an actual <input>. */
+  /* Selectable scenario cards (Scenario Comparison): the radio circle fills in teal when selected. */
   .whatif-card-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:14px; margin-bottom:16px;}
   .whatif-card{
     display:flex; justify-content:space-between; align-items:flex-start; gap:12px;
@@ -1156,8 +1154,7 @@
   <div class="nav-dropdown" id="insightsNavGroup">
     <button type="button" class="nav-item nav-dropdown-toggle" id="insightsNavToggle" onclick="toggleInsightsMenu(event)"><span class="nav-label"><svg class="nav-icon" aria-hidden="true"><use href="#navIconInsights"></use></svg><span>Insights</span></span><span class="nav-caret">&#9662;</span></button>
     <div class="nav-submenu" id="insightsSubmenu">
-      <button type="button" class="nav-subitem" data-page="incomeexpenses" onclick="showPage('incomeexpenses')">Income vs Expenses</button>
-      <button type="button" class="nav-subitem" data-page="gap" onclick="showPage('gap')">Income Gap &amp; Withdrawals</button>
+      <button type="button" class="nav-subitem" data-page="gap" onclick="showPage('gap')">Income, Expenses &amp; Withdrawals</button>
       <button type="button" class="nav-subitem" data-page="savings" onclick="showPage('savings')">Savings</button>
       <button type="button" class="nav-subitem" data-page="taxes" onclick="showPage('taxes')">Taxes</button>
     </div>
@@ -1165,7 +1162,6 @@
   <div class="nav-dropdown" id="explorerNavGroup">
     <button type="button" class="nav-item nav-dropdown-toggle" data-page="explorers" onclick="toggleExplorerMenu(event)"><span class="nav-label"><svg class="nav-icon" aria-hidden="true"><use href="#navIconExplorers"></use></svg><span>Explorers</span></span><span class="nav-caret">&#9662;</span></button>
     <div class="nav-submenu" id="explorerSubmenu">
-      <button type="button" class="nav-subitem" data-explorer-nav="whatif" onclick="showExplorerAnalysis('whatif')">What If I...</button>
       <button type="button" class="nav-subitem" data-explorer-nav="retirementtiming" onclick="showExplorerAnalysis('retirementtiming')">Retirement Timing</button>
       <button type="button" class="nav-subitem" data-explorer-nav="market" onclick="showExplorerAnalysis('market')">Market Explorer</button>
       <button type="button" class="nav-subitem" data-explorer-nav="allocation" onclick="showExplorerAnalysis('allocation')">Allocation Explorer</button>
@@ -1173,8 +1169,6 @@
       <button type="button" class="nav-subitem" data-explorer-nav="socialsecurity" onclick="showExplorerAnalysis('socialsecurity')">Social Security Claiming</button>
       <button type="button" class="nav-subitem" data-explorer-nav="sustainablespending" onclick="showExplorerAnalysis('sustainablespending')">Sustainable Spending</button>
       <button type="button" class="nav-subitem" data-explorer-nav="comparison" onclick="showExplorerAnalysis('comparison')">Scenario Comparison</button>
-      <button type="button" class="nav-subitem" data-explorer-nav="whatifresults" onclick="showExplorerAnalysis('whatifresults')">What-If Scenario Results</button>
-      <button type="button" class="nav-subitem" data-explorer-nav="marketrisk" onclick="showExplorerAnalysis('marketrisk')">Market Risk Scenarios</button>
       <button type="button" class="nav-subitem" data-explorer-nav="sensitivity" onclick="showExplorerAnalysis('sensitivity')">Sensitivity Analysis</button>
     </div>
   </div>
@@ -1322,7 +1316,7 @@
       <div class="mini-chart-card chart-horizontal"><canvas id="chart_income"></canvas></div>
       <div class="mini-chart-card"><div class="mini-label" style="margin-bottom:8px;">Income by year</div><canvas id="chart_income_yearly"></canvas><div class="chart-range-nav" data-chart="income_yearly"><button class="range-nav-btn range-prev" onclick="chartRangeNav('income_yearly','prev')">« <span class="range-nav-label">Age</span></button><button class="range-nav-btn lifetime active" onclick="chartRangeNav('income_yearly','lifetime')">Lifetime</button><button class="range-nav-btn range-next" onclick="chartRangeNav('income_yearly','next')"><span class="range-nav-label">Age</span> »</button></div><div class="range-readout" data-chart="income_yearly"></div></div>
 
-      <div class="note" style="margin-top:0;">At retirement, guaranteed income vs. spending nets to a <b><span id="incomePageSurplusNote">—</span></b> surplus/(gap), with <b><span id="incomePageWithdrawalNote">—</span></b> drawn from your accounts that year. Full year-by-year surplus/gap and withdrawal detail (with its own charts) is on the <b>Income Gap &amp; Withdrawals</b> page.</div>
+      <div class="note" style="margin-top:0;">At retirement, guaranteed income vs. spending nets to a <b><span id="incomePageSurplusNote">—</span></b> surplus/(gap), with <b><span id="incomePageWithdrawalNote">—</span></b> drawn from your accounts that year. Full year-by-year surplus/gap and withdrawal detail (with its own charts) is on the <b>Income, Expenses &amp; Withdrawals</b> page.</div>
 
       <div class="card">
         <h3 onclick="toggleCard(this)">Income</h3>
@@ -1360,7 +1354,7 @@
           </div>
           <div class="field"><label>VA yearly increase (%)</label><input type="number" id="vaDisabilityGrowth" value="2.5" step="0.1"></div>
         </div>
-        <p style="font-size:16.5px;color:var(--muted);margin:6px 0 0;line-height:1.6;">Both pensions and VA disability are treated as already active today if their start age is at or before your current age. Federal + Idaho income tax applies to both pensions before comparing guaranteed income to spending (see the Income Gap &amp; Withdrawals page) — VA disability stays fully tax-free.</p>
+        <p style="font-size:16.5px;color:var(--muted);margin:6px 0 0;line-height:1.6;">Both pensions and VA disability are treated as already active today if their start age is at or before your current age. Federal + Idaho income tax applies to both pensions before comparing guaranteed income to spending (see the Income, Expenses &amp; Withdrawals page) — VA disability stays fully tax-free.</p>
       </div>
 
       <div class="note">Guaranteed Income — Social Security, spousal benefit, and annuity below, each with its own yearly increase rate (SS and the spousal benefit grow using Social Security COLA, set on the Assumptions page). Pensions and VA disability are in the Pensions &amp; VA Disability card near the top of this page.</div>
@@ -1734,7 +1728,7 @@
 
       <div class="note" style="margin-top:0;">Don't add rent/mortgage here — that's on the <b>Housing</b> page. Don't add TSP/brokerage contributions here either — those are on <b>Money Flows</b>. This page is for everything else that isn't already covered elsewhere, so nothing gets double-counted.</div>
 
-      <div class="note">At retirement, total spending vs. guaranteed income nets to a <b><span id="expensesPageSurplusNote">—</span></b> surplus/(gap), with <b><span id="expensesPageWithdrawalNote">—</span></b> drawn from your accounts that year. Full year-by-year surplus/gap and withdrawal detail (with its own charts) is on the <b>Income Gap &amp; Withdrawals</b> page.</div>
+      <div class="note">At retirement, total spending vs. guaranteed income nets to a <b><span id="expensesPageSurplusNote">—</span></b> surplus/(gap), with <b><span id="expensesPageWithdrawalNote">—</span></b> drawn from your accounts that year. Full year-by-year surplus/gap and withdrawal detail (with its own charts) is on the <b>Income, Expenses &amp; Withdrawals</b> page.</div>
 
       <div class="card">
         <h3 onclick="toggleCard(this)">All Household Expenses<span class="sub-label">Combined view only — each item is still entered and edited on its own page; this just lets you see them side by side</span></h3>
@@ -1764,17 +1758,6 @@
         <p style="font-size:16.5px;color:var(--muted);margin:6px 0 0;line-height:1.5;">One-time items hit once at the age you set; "Yearly until" repeats every year from that age through the end age, both grown by General Inflation.</p>
       </div>
 
-    </div>
-
-    <!-- ================= INCOME VS EXPENSES ================= -->
-    <div class="page" data-page="incomeexpenses">
-      <div class="shared-notes-card">
-        <div class="dn-hdr"><span>&#x1F4DD; Notes</span><small>auto-saved, same on every page</small></div>
-        <textarea class="shared-notes-textarea" oninput="updateSharedNotes(this.value)" placeholder="Jot down anything — questions for your financial advisor, things to double-check, reminders…" rows="3"></textarea>
-      </div>
-      <div class="page-header"><h2>Income vs Expenses</h2><p>Job income and guaranteed income (Social Security, spousal benefit, both pensions, VA disability, annuity) side by side with total expenses (recurring bills, housing, debt payments, insurance, medical premiums) for the same year — one bar chart, the whole plan, so you can see at a glance which years income covers expenses on its own and which years lean on savings. Portfolio withdrawals aren't counted as income here (unlike the Income page's own chart) — the point of this view is to isolate how much of spending is actually covered by income you don't have to draw down for. For the year-by-year withdrawal detail behind any gap, see the <b>Income Gap &amp; Withdrawals</b> page.</p></div>
-      <div class="mini-chart-card"><div class="mini-label" style="margin-bottom:8px;">Income vs Expenses by year</div><canvas id="chart_incomeexpenses_yearly"></canvas><div class="chart-range-nav" data-chart="incomeexpenses_yearly"><button class="range-nav-btn range-prev" onclick="chartRangeNav('incomeexpenses_yearly','prev')">« <span class="range-nav-label">Age</span></button><button class="range-nav-btn lifetime active" onclick="chartRangeNav('incomeexpenses_yearly','lifetime')">Lifetime</button><button class="range-nav-btn range-next" onclick="chartRangeNav('incomeexpenses_yearly','next')"><span class="range-nav-label">Age</span> »</button></div><div class="range-readout" data-chart="incomeexpenses_yearly"></div></div>
-      <div class="note" style="margin-top:0;">Income (green) is job income plus every guaranteed income source, before it's reduced by taxes. Expenses (red) is every recurring bill, housing cost, debt payment, and insurance/medical premium in the plan, plus any Future/One-Time Expenses (Vehicle Purchase, Vacations, etc.) active that year. Hover a bar in a year with an active Future/One-Time Expense or Debt payment (including a future-dated loan started via Start age on the Debt page) to see it itemized by name and amount, so you can confirm it's actually being counted. Where the red bar is taller than the green bar for a given year, that year's gap is covered by a portfolio withdrawal — see the Income Gap &amp; Withdrawals page for exactly which account(s) it came from.</div>
     </div>
 
     <!-- ================= DEBT ================= -->
@@ -1816,7 +1799,9 @@
         <div class="dn-hdr"><span>&#x1F4DD; Notes</span><small>auto-saved, same on every page</small></div>
         <textarea class="shared-notes-textarea" oninput="updateSharedNotes(this.value)" placeholder="Jot down anything — questions for your financial advisor, things to double-check, reminders…" rows="3"></textarea>
       </div>
-      <div class="page-header"><h2>Income Gap &amp; Withdrawals</h2><p>Whenever guaranteed income — Social Security, spousal benefit, both pensions, VA disability, annuity, after income tax — falls short of spending, the shortfall (the gap) has to come out of your accounts. This page shows the surplus/gap and the resulting portfolio withdrawal side by side, year by year.</p></div>
+      <div class="page-header"><h2>Income, Expenses &amp; Withdrawals</h2><p>How much of each year's spending your income covers, and what has to come out of your accounts when it doesn't. The first chart compares income (job + guaranteed sources, before tax) with total expenses; the rest show the after-tax surplus or gap and the withdrawals that cover it, year by year.</p></div>
+      <div class="mini-chart-card"><div class="mini-label" style="margin-bottom:8px;">Income vs Expenses by year</div><canvas id="chart_incomeexpenses_yearly"></canvas><div class="chart-range-nav" data-chart="incomeexpenses_yearly"><button class="range-nav-btn range-prev" onclick="chartRangeNav('incomeexpenses_yearly','prev')">« <span class="range-nav-label">Age</span></button><button class="range-nav-btn lifetime active" onclick="chartRangeNav('incomeexpenses_yearly','lifetime')">Lifetime</button><button class="range-nav-btn range-next" onclick="chartRangeNav('incomeexpenses_yearly','next')"><span class="range-nav-label">Age</span> »</button></div><div class="range-readout" data-chart="incomeexpenses_yearly"></div></div>
+      <div class="note" style="margin-top:0;">Income (green) is job income plus every guaranteed income source, before it's reduced by taxes. Expenses (red) is every recurring bill, housing cost, debt payment, and insurance/medical premium in the plan, plus any Future/One-Time Expenses (Vehicle Purchase, Vacations, etc.) active that year. Hover a bar in a year with an active Future/One-Time Expense or Debt payment (including a future-dated loan started via Start age on the Debt page) to see it itemized by name and amount, so you can confirm it's actually being counted. Where the red bar is taller than the green bar for a given year, that year's gap is covered by a portfolio withdrawal — the table below shows exactly which account(s) it came from.</div>
       <div class="mini-chart-card"><canvas id="chart_gap"></canvas></div>
       <div class="mini-chart-card"><div class="mini-label" style="margin-bottom:8px;">Surplus / (gap) &amp; withdrawals by year</div><canvas id="chart_gap_yearly"></canvas><div class="chart-range-nav" data-chart="gap_yearly"><button class="range-nav-btn range-prev" onclick="chartRangeNav('gap_yearly','prev')">« <span class="range-nav-label">Age</span></button><button class="range-nav-btn lifetime active" onclick="chartRangeNav('gap_yearly','lifetime')">Lifetime</button><button class="range-nav-btn range-next" onclick="chartRangeNav('gap_yearly','next')"><span class="range-nav-label">Age</span> »</button></div><div class="range-readout" data-chart="gap_yearly"></div></div>
 
@@ -2237,15 +2222,6 @@
       </div>
       <div class="page-header"><h2>Explorers</h2><p>What-if and market-risk scenarios, each compared against your current plan. Dollar columns respect the Today's $ / Future $ toggle in the header.</p></div>
 
-      <div class="card" data-explorer-analysis="whatif">
-        <h3 onclick="toggleCard(this)">What If I...<span class="sub-label">Pick a quick scenario and see the impact on your savings over time</span></h3>
-        <p style="margin:0 0 16px;font-size:16.5px;color:var(--muted);">Explore these common "what if" scenarios and see the impact on your savings over time. Pick one to compare it against your current plan below — click it again to go back to just your current plan.</p>
-        <div class="whatif-card-grid" id="whatIfCardGrid"></div>
-        <div class="mini-label" style="margin-bottom:8px;">My Savings Projection</div>
-        <div class="mini-chart-card"><canvas id="chart_whatif_savings"></canvas><div class="chart-range-nav" data-chart="whatif_savings"><button class="range-nav-btn range-prev" onclick="chartRangeNav('whatif_savings','prev')">« <span class="range-nav-label">Age</span></button><button class="range-nav-btn lifetime active" onclick="chartRangeNav('whatif_savings','lifetime')">Lifetime</button><button class="range-nav-btn range-next" onclick="chartRangeNav('whatif_savings','next')"><span class="range-nav-label">Age</span> »</button></div><div class="range-readout" data-chart="whatif_savings"></div></div>
-        <p style="font-size:15.5px;color:var(--muted);margin:0;">"Savings" here is your investable balance plus cash (TSP, brokerage, checking/savings/HYSA) — it doesn't include home equity.</p>
-      </div>
-
       <div class="card" data-explorer-analysis="retirementtiming">
         <h3 onclick="toggleCard(this)">Retirement Timing<span class="sub-label">Compare retiring at ages 55 through 59</span></h3>
         <p style="margin:0 0 16px;font-size:16.5px;color:var(--muted);line-height:1.55;">Runs the same complete plan at five possible retirement ages so you can compare investable savings, deterministic longevity, and Monte Carlo confidence. This is analysis only and does not change your selected retirement age.</p>
@@ -2338,28 +2314,6 @@
             </table>
           </div>
           <p style="font-size:15px;color:var(--muted);margin:8px 0 0;">Bold row (always first) is your current plan — every scenario below it is compared against that same baseline.</p>
-        </div>
-      </div>
-
-      <div class="card" data-explorer-analysis="whatifresults">
-        <h3 onclick="toggleCard(this)">What-If Scenarios<span class="sub-label">Single-lever changes to your plan</span></h3>
-        <div class="mini-chart-card chart-horizontal"><canvas id="chart_whatif"></canvas></div>
-        <div class="table-scroll">
-          <table id="whatIfTable">
-            <thead><tr><th>Scenario</th><th>Investable at Retirement</th><th>Ending Investable Balance</th><th>Ending Net Worth</th><th>Runs Out At</th><th>Confidence Score</th></tr></thead>
-            <tbody id="whatIfRows"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="card" data-explorer-analysis="marketrisk">
-        <h3 onclick="toggleCard(this)">Market Risk Scenarios<span class="sub-label">Stress-tests using return shocks, weak markets, or high inflation</span></h3>
-        <div class="mini-chart-card chart-horizontal"><canvas id="chart_marketrisk"></canvas></div>
-        <div class="table-scroll">
-          <table id="marketRiskTable">
-            <thead><tr><th>Scenario</th><th>Investable at Retirement</th><th>Ending Investable Balance</th><th>Ending Net Worth</th><th>Runs Out At</th><th>Confidence Score</th></tr></thead>
-            <tbody id="marketRiskRows"></tbody>
-          </table>
         </div>
       </div>
 
@@ -2599,8 +2553,7 @@
             <summary>9. Insights</summary>
             <div class="manual-body">
               <ul>
-                <li><b>Income vs Expenses</b> compares recurring income with spending; portfolio withdrawals are excluded from income.</li>
-                <li><b>Income Gap &amp; Withdrawals</b> shows the after-tax gap and accounts used to close it.</li>
+                <li><b>Income, Expenses &amp; Withdrawals</b> compares income with expenses (portfolio withdrawals aren't counted as income), then shows the after-tax gap and the accounts used to close it.</li>
                 <li><b>Savings</b> traces balances, contributions, returns, withdrawals, and transfers by account and year.</li>
                 <li><b>Taxes</b> estimates federal ordinary tax, capital gains, Idaho tax, FICA, IRMAA, RMDs, and Roth conversions.</li>
               </ul>
@@ -2613,11 +2566,11 @@
             <div class="manual-body">
               <p>Explorer results are temporary comparisons and do not permanently rewrite My Plan.</p>
               <ul>
-                <li>What If I... tests one quick change; Retirement Timing compares ages 55–59.</li>
+                <li>Retirement Timing compares ages 55–59.</li>
                 <li>Market Explorer applies a selected decline; Allocation Explorer compares allocation paths.</li>
                 <li>Historical Backtest runs available historical sequences; Social Security Claiming compares claim ages.</li>
                 <li>Sustainable Spending estimates spending at confidence targets.</li>
-                <li>Scenario Comparison, What-If Results, Market Risk, and Sensitivity compare stresses and influential assumptions.</li>
+                <li>Scenario Comparison tests any mix of plan changes and market stresses side by side; Sensitivity shows which assumptions matter most.</li>
               </ul>
             </div>
           </details>
@@ -2669,7 +2622,7 @@
               <ol>
                 <li>Confirm both HTML files have the same build; restore the newest JSON and export a dated recovery copy.</li>
                 <li>Audit dates, income, three expense alternatives, insurance, investments, withdrawals, debt, medical/LTC, taxes, and survivorship.</li>
-                <li>Confirm only the selected spending basis is counted and trace bridge years through Income Gap and Savings.</li>
+                <li>Confirm only the selected spending basis is counted and trace bridge years through Income, Expenses &amp; Withdrawals and Savings.</li>
                 <li>Compare Enhanced, Standard, first failure reason/age, and the deterministic ending balance.</li>
                 <li>Refresh, confirm the section and values persist, then download the final JSON backup.</li>
               </ol>
@@ -2725,17 +2678,17 @@
   </div>
 </div>
 
-<script src="retirement-planner-core.js?v=2026-11-21-nolosejob"></script>
-<script src="retirement-planner-tax-and-social-security.js?v=2026-11-21-nolosejob"></script>
-<script src="retirement-planner-navigation-and-charts.js?v=2026-11-21-nolosejob"></script>
-<script src="retirement-planner-storage-and-notes.js?v=2026-11-21-nolosejob"></script>
-<script src="retirement-planner-money-inputs.js?v=2026-11-21-nolosejob"></script>
-<script src="retirement-planner-debt-and-inputs.js?v=2026-11-21-nolosejob"></script>
-<script src="retirement-planner-projection-engine.js?v=2026-11-21-nolosejob"></script>
-<script src="retirement-planner-explorers-and-analysis.js?v=2026-11-21-nolosejob"></script>
-<script src="retirement-planner-charts.js?v=2026-11-21-nolosejob"></script>
-<script src="retirement-planner-savings-and-coach.js?v=2026-11-21-nolosejob"></script>
-<script src="retirement-planner-vault-settings-and-reports.js?v=2026-11-21-nolosejob"></script>
+<script src="retirement-planner-core.js?v=2026-11-21-dedupe"></script>
+<script src="retirement-planner-tax-and-social-security.js?v=2026-11-21-dedupe"></script>
+<script src="retirement-planner-navigation-and-charts.js?v=2026-11-21-dedupe"></script>
+<script src="retirement-planner-storage-and-notes.js?v=2026-11-21-dedupe"></script>
+<script src="retirement-planner-money-inputs.js?v=2026-11-21-dedupe"></script>
+<script src="retirement-planner-debt-and-inputs.js?v=2026-11-21-dedupe"></script>
+<script src="retirement-planner-projection-engine.js?v=2026-11-21-dedupe"></script>
+<script src="retirement-planner-explorers-and-analysis.js?v=2026-11-21-dedupe"></script>
+<script src="retirement-planner-charts.js?v=2026-11-21-dedupe"></script>
+<script src="retirement-planner-savings-and-coach.js?v=2026-11-21-dedupe"></script>
+<script src="retirement-planner-vault-settings-and-reports.js?v=2026-11-21-dedupe"></script>
 <script src="master-backup-shared.js"></script>
 </body>
 </html>

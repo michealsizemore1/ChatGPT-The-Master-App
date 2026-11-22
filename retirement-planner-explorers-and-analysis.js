@@ -153,26 +153,13 @@ function renderHistoricalBacktest(inputs, ctx) {
   }
 }
 
-// ---------- Explorers: What-If and Market Risk scenario libraries ----------
-const WHAT_IF_SCENARIOS = [
-  { name: 'Retire 2 years earlier', apply: inp => ({ ...inp, retirementAge: inp.retirementAge - 2 }) },
-  { name: 'Retire 2 years later', apply: inp => ({ ...inp, retirementAge: inp.retirementAge + 2 }) },
-  { name: 'Spend 10% less in retirement', apply: inp => ({ ...inp, spendingMultiplier: 0.9 }) },
-  { name: 'Spend 10% more in retirement', apply: inp => ({ ...inp, spendingMultiplier: 1.1 }) },
-  { name: 'Claim Social Security at 62', apply: inp => ({ ...inp, ssAge: 62, ssMonthly: ssMonthlyAtAge(inp, 62) }) },
-  { name: 'Delay Social Security to 70', apply: inp => ({ ...inp, ssAge: 70, ssMonthly: ssMonthlyAtAge(inp, 70) }) },
-  { name: 'Contribute 5% more to TSP', apply: inp => ({ ...inp, tradPct: inp.tradPct + 0.05 }) },
-  { name: 'Pay off all debt today', special: 'payoffDebt' }
-];
+// ---------- Explorers: shared scenario helpers ----------
+// Market Explorer's "three year sequence" preset; the same shocks back Scenario Comparison's
+// "Sequence of returns risk" entry so the two stay identical.
+const SEQUENCE_OF_RETURNS_SHOCKS = { post: { 0: -0.25, 1: -0.15, 2: 0.05 } };
 
-const MARKET_RISK_SCENARIOS = [
-  { name: 'Sequence of returns risk (rough first 3 yrs)', shocks: { post: { 0: -0.25, 1: -0.15, 2: 0.05 } } },
-  { name: '2008-style crash right after retiring', shocks: { post: { 1: -0.37 } } },
-  { name: 'Prolonged bear market (returns -3%/yr)', apply: inp => ({ ...inp, preReturn: inp.preReturn - 0.03, postReturn: inp.postReturn - 0.03 }) },
-  { name: 'High inflation (+3% general & medical)', apply: inp => ({ ...inp, inflation: inp.inflation + 0.03, medicalInflation: inp.medicalInflation + 0.03, ssCola: inp.ssCola + 0.01 }) },
-  { name: 'Stagflation (weak returns + high inflation)', apply: inp => ({ ...inp, preReturn: inp.preReturn - 0.03, postReturn: inp.postReturn - 0.03, inflation: inp.inflation + 0.03, medicalInflation: inp.medicalInflation + 0.03, ssCola: inp.ssCola + 0.01 }) }
-];
-
+// One scenario ({ name, apply?, special?, shocks? }) through a deterministic run plus a 1000-sim Monte
+// Carlo. Used by Social Security Claiming.
 function runExplorerScenario(scenario, baseInputs, baseCtx) {
   let inputs = baseInputs, ctx = baseCtx;
   if (scenario.special === 'payoffDebt') {
@@ -417,8 +404,21 @@ const COMPARE_SCENARIO_LIBRARY = [
     build: (inputs, ctx) => ({ inputs, ctx: { ...ctx, futureExpensesOverride: [...futureExpenses, { name: 'Unexpected expense', age: inputs.currentAge + 5, amount: 50000, recurring: false }] } }) },
   { name: '2008-style crash right after retiring', build: (inputs, ctx) => ({ inputs, ctx, shocks: { post: { 1: -0.37 } } }) },
   { name: 'Prolonged bear market (-3%/yr)', build: (inputs, ctx) => ({ inputs: { ...inputs, preReturn: inputs.preReturn - 0.03, postReturn: inputs.postReturn - 0.03 }, ctx }) },
-  { name: 'High inflation (+3%)', build: (inputs, ctx) => ({ inputs: { ...inputs, inflation: inputs.inflation + 0.03, medicalInflation: inputs.medicalInflation + 0.03, ssCola: inputs.ssCola + 0.01 }, ctx }) }
+  { name: 'High inflation (+3%)', build: (inputs, ctx) => ({ inputs: { ...inputs, inflation: inputs.inflation + 0.03, medicalInflation: inputs.medicalInflation + 0.03, ssCola: inputs.ssCola + 0.01 }, ctx }) },
+  { name: 'Sequence of returns risk (rough first 3 yrs)', build: (inputs, ctx) => ({ inputs, ctx, shocks: SEQUENCE_OF_RETURNS_SHOCKS }) },
+  { name: 'Stagflation (weak returns + high inflation)', build: (inputs, ctx) => ({ inputs: { ...inputs, preReturn: inputs.preReturn - 0.03, postReturn: inputs.postReturn - 0.03, inflation: inputs.inflation + 0.03, medicalInflation: inputs.medicalInflation + 0.03, ssCola: inputs.ssCola + 0.01 }, ctx }) }
 ];
+// The library plus, once a death age is set on the Survivorship page, the survivorship what-if
+// (never part of the baseline plan or the confidence score).
+function compareScenarioList() {
+  const deathAgeEl = els('survivorshipDeathAge');
+  const deathAge = deathAgeEl ? (+deathAgeEl.value || 0) : 0;
+  if (!(deathAge > 0)) return COMPARE_SCENARIO_LIBRARY;
+  return [...COMPARE_SCENARIO_LIBRARY, {
+    name: `You predecease your spouse at age ${deathAge} (SBP + DIC)`,
+    build: (inputs, ctx) => ({ inputs: { ...inputs, survivorshipEnabled: true }, ctx })
+  }];
+}
 let selectedCompareScenarios = [];
 function toggleCompareScenario(idx) {
   const pos = selectedCompareScenarios.indexOf(idx);
@@ -428,7 +428,10 @@ function toggleCompareScenario(idx) {
 function renderCompareCardGrid() {
   const grid = els('compareCardGrid');
   if (!grid) return;
-  grid.innerHTML = COMPARE_SCENARIO_LIBRARY.map((s, i) => `
+  // Drop a selected survivorship entry if the death age was cleared since it was picked.
+  const list = compareScenarioList();
+  selectedCompareScenarios = selectedCompareScenarios.filter(i => i < list.length);
+  grid.innerHTML = list.map((s, i) => `
     <div class="whatif-card multi ${selectedCompareScenarios.includes(i) ? 'selected' : ''}" onclick="toggleCompareScenario(${i})">
       <span>${s.name}</span>
       <span class="whatif-radio"></span>
@@ -451,8 +454,9 @@ function runComparisonEntry(name, inputs, ctx, shocks) {
 }
 function runScenarioCompare(baseInputs, baseCtx, selectedIndices) {
   const entries = [runComparisonEntry('Current Plan', baseInputs, baseCtx)];
+  const list = compareScenarioList();
   selectedIndices.forEach(i => {
-    const s = COMPARE_SCENARIO_LIBRARY[i];
+    const s = list[i];
     if (!s) return;
     const built = s.build(baseInputs, baseCtx);
     entries.push(runComparisonEntry(s.name, built.inputs, built.ctx, built.shocks));
@@ -838,81 +842,6 @@ function renderInheritedAccountBreakdown(inputs, rows) {
   }
 }
 
-// ---------- "What If I..." card selector (Explorers page, mimics Boldin's own What-If screen) ----------
-// Each card's build(inputs, ctx) returns a fresh {inputs, ctx} without changing anything shared.
-const WHATIF_CARDS = [
-  { name: 'Live 5 years longer than expected',
-    build: (inputs) => { const newInputs = { ...inputs, lifeExpectancy: inputs.lifeExpectancy + 5 }; return { inputs: newInputs, ctx: buildContext(newInputs) }; } },
-  { name: 'Achieve 1% higher average rate of return',
-    build: (inputs, ctx) => ({ inputs: { ...inputs, preReturn: inputs.preReturn + 0.01, postReturn: inputs.postReturn + 0.01 }, ctx }) },
-  { name: 'Achieve 1% lower average rate of return',
-    build: (inputs, ctx) => ({ inputs: { ...inputs, preReturn: inputs.preReturn - 0.01, postReturn: inputs.postReturn - 0.01 }, ctx }) },
-  { name: 'Take out a $50k loan',
-    // A 5-year personal loan at a representative 9% APR — proceeds land in HYSA (spendable cash) the
-    // same year, and its payment schedule is added alongside your real debts via a cloned ctx, so trying
-    // this never touches what's actually entered on the Debt page.
-    build: (inputs, ctx) => {
-      const payment = mortgagePayment(50000, 9, 5);
-      const loanSchedule = buildDebtSchedule({ apr: 9, balance: 50000, payment }, ctx.maxYears);
-      return { inputs: { ...inputs, hysaBalance: inputs.hysaBalance + 50000 }, ctx: { ...ctx, debtSchedules: [...ctx.debtSchedules, loanSchedule] } };
-    } },
-  { name: 'Have an unexpected $50k expense in 5 years',
-    build: (inputs, ctx) => ({ inputs, ctx: { ...ctx, futureExpensesOverride: [...futureExpenses, { name: 'Unexpected expense', age: inputs.currentAge + 5, amount: 50000, recurring: false }] } }) }
-];
-let selectedWhatIfCard = null;
-function selectWhatIfCard(idx) {
-  selectedWhatIfCard = (selectedWhatIfCard === idx) ? null : idx;
-  // Paint the selected radio state immediately, then rebuild only this deterministic chart. Calling
-  // the full planner render here needlessly reran every Monte Carlo explorer before the browser could
-  // display the click, making the control appear unresponsive.
-  renderWhatIfCards();
-  const inputs = readInputs();
-  renderWhatIfSavingsChart(inputs, buildContext(inputs));
-}
-function renderWhatIfCards() {
-  const grid = els('whatIfCardGrid');
-  if (!grid) return;
-  grid.innerHTML = WHATIF_CARDS.map((s, i) => `
-    <button type="button" class="whatif-card ${selectedWhatIfCard === i ? 'selected' : ''}" onclick="selectWhatIfCard(${i})">
-      <span>${s.name}</span>
-      <span class="whatif-radio"></span>
-    </button>
-  `).join('');
-}
-// "My Savings Projection" — baseline alone when nothing's selected (matching Boldin's own default state),
-// or baseline vs. the selected card side by side once one is picked, so the comparison itself is visible
-// rather than just the modified line on its own.
-function renderWhatIfSavingsChart(inputs, ctx) {
-  const canvas = els('chart_whatif_savings');
-  if (!canvas) return;
-  const baseRows = projectRun(inputs, ctx, false).rows;
-  let scenarioRows = null, scenarioName = null;
-  if (selectedWhatIfCard != null && WHATIF_CARDS[selectedWhatIfCard]) {
-    const scenario = WHATIF_CARDS[selectedWhatIfCard];
-    const built = scenario.build(inputs, ctx);
-    scenarioRows = projectRun(built.inputs, built.ctx, false).rows;
-    scenarioName = scenario.name;
-  }
-  // "Live 5 years longer" runs more rows than the baseline (a longer horizon), so the two series can
-  // come back different lengths — use whichever is longer for the age labels and pad the shorter one
-  // with nulls (Chart.js just skips drawing a bar there) rather than assuming they line up 1:1.
-  const longerRows = (scenarioRows && scenarioRows.length > baseRows.length) ? scenarioRows : baseRows;
-  const ages = longerRows.map(r => r.age);
-  const savingsByYear = rows => ages.map((age, i) => rows[i] ? dv(rows[i].investable + rows[i].cash, rows[i].age, inputs) : null);
-  // Canvas fillStyle can't resolve a CSS var() reference, so this is the actual hex behind --navy,
-  // matching the dark charcoal-navy bars Boldin itself uses for this chart.
-  const series = [{ label: 'Current Plan — Savings', data: savingsByYear(baseRows), backgroundColor: '#132a3e' }];
-  if (scenarioRows) {
-    series.push({ label: scenarioName + ' — Savings', data: savingsByYear(scenarioRows), backgroundColor: CHART_COLORS[0] });
-  }
-  const key = 'whatif_savings';
-  const config = yearlyBarConfig(ages, series);
-  if (charts[key]) charts[key].destroy();
-  ensureChartHorizontalScroll(canvas, ages.length * 13);
-  charts[key] = new Chart(canvas.getContext('2d'), config);
-  applyChartRange(key);
-}
-
 // ---------- Market Explorer (Explorers page, mimics Boldin's own Market Downturn tab) ----------
 // Shocks object pinning `returnDuringDownturn` for `durationYears` from `startAge`, split into pre/post
 // retirement buckets automatically.
@@ -962,16 +891,14 @@ function renderMarketExplorerCards() {
   const panel = els('marketExplorerCustomPanel');
   if (panel) panel.style.display = marketExplorerScenario === 'custom' ? 'block' : 'none';
 }
-// Turns whichever card is selected into a concrete shocks object + display metadata. "Three year
-// sequence" reuses the exact same shock shape as the Market Risk Scenarios table below, so the two
-// stay in sync rather than drifting into two slightly different definitions of the same stress test.
+// Turns whichever card is selected into a concrete shocks object + display metadata.
 function buildMarketExplorerShocksAndMeta(inputs) {
   if (marketExplorerScenario === 'decade') {
     const startAge = Math.max(inputs.currentAge, inputs.retirementAge);
     return { shocks: buildDownturnShocks(inputs, startAge, 10, 0.01), name: 'A decade of poor returns' };
   }
   if (marketExplorerScenario === 'threeyear') {
-    return { shocks: MARKET_RISK_SCENARIOS[0].shocks, name: 'A three year sequence of bad returns' };
+    return { shocks: SEQUENCE_OF_RETURNS_SHOCKS, name: 'A three year sequence of bad returns' };
   }
   const startAgeEl = els('mktExplorerStartAge');
   const durationEl = els('mktExplorerDuration');
@@ -1026,8 +953,7 @@ function renderMarketExplorerChart(inputs, ctx, shocks) {
   if (!canvas) return;
   const baseRows = projectRun(inputs, ctx, false).rows;
   const scenarioRows = projectRun(inputs, ctx, false, shocks).rows;
-  // Same defensive length-padding as the "What If I..." chart above — none of these scenarios change
-  // the horizon length today, but there's no reason to assume that stays true forever.
+  // Pad to the longer run in case a scenario ever changes the horizon length.
   const longerRows = scenarioRows.length > baseRows.length ? scenarioRows : baseRows;
   const ages = longerRows.map(r => r.age);
   const savingsByYear = rows => ages.map((age, i) => rows[i] ? dv(rows[i].investable + rows[i].cash, rows[i].age, inputs) : null);

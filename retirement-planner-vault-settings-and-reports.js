@@ -855,7 +855,7 @@ function renderFinancialWellness(inputs, ctx, result, confidenceScore) {
     moneySigned(nextYearCashFlow),
     cashFlowStatus,
     `Projected gross income minus income/payroll taxes, current living costs, and planned employee savings. ${nextYearCashFlow >= 0 ? 'A positive amount is unallocated breathing room.' : 'A negative amount indicates the current plan requires cash or account support.'}`,
-    'incomeexpenses', 'Review income and expenses'
+    'gap', 'Review income and expenses'
   ));
 
   const withdrawalStatus = averageWithdrawalRate == null ? 'info' : averageWithdrawalRate <= 0.04 ? 'strong' : averageWithdrawalRate <= 0.055 ? 'watch' : 'attention';
@@ -1108,7 +1108,7 @@ function render() {
   const gapToday = Math.max(0, firstYearSpending - firstYearGuaranteed);
 
   // Small reference notes on the Income and Expenses pages, pointing back at the full
-  // Surplus/(Gap) and withdrawal detail that lives on the Income Gap & Withdrawals page.
+  // Surplus/(Gap) and withdrawal detail that lives on the Income, Expenses & Withdrawals page.
   const surplusSigned = firstYearGuaranteed - firstYearSpending;
   const surplusText = fmtMoney(dv(Math.abs(surplusSigned), retirementAge, inputs)) + (surplusSigned >= 0 ? ' surplus' : ' gap');
   const withdrawalText = fmtMoney(dv(rowAtRetirement ? rowAtRetirement.grossWithdrawal : 0, retirementAge, inputs));
@@ -1121,7 +1121,7 @@ function render() {
   let survivorshipValue = 'Not set';
   let survivorshipClass = '';
   let survivorshipLabel = 'Survivorship confidence score';
-  if (inputs.survivorshipDeathAge > 0 && (activePageId === 'dashboard' || activePageId === 'survivorship' || (activePageId === 'explorers' && selectedExplorerAnalysis === 'whatifresults'))) {
+  if (inputs.survivorshipDeathAge > 0 && (activePageId === 'dashboard' || activePageId === 'survivorship')) {
     const survivorshipScore = runMonteCarlo({ ...inputs, survivorshipEnabled: true }, ctx, 300);
     survivorshipValue = Math.round(survivorshipScore) + '%';
     survivorshipClass = survivorshipScore >= 80 ? 'ok' : (survivorshipScore < 60 ? 'warn' : '');
@@ -1297,7 +1297,7 @@ function render() {
   // Refresh chart for whichever page is currently visible (and any already-built ones)
   const activePage = document.querySelector('.page.active');
   Object.keys(charts).forEach(pid => {
-    if (pid === 'dashboard' || pid === 'explorers_whatif' || pid === 'explorers_marketrisk') return;
+    if (pid === 'dashboard') return;
     if (pid.endsWith('_yearly')) ensureOrUpdateYearlyChart(pid.slice(0, -'_yearly'.length), lastSnapshot);
     else if (pid.endsWith('_pies')) ensureOrUpdatePieChart(pid.slice(0, -'_pies'.length), lastSnapshot);
     else ensureOrUpdateChart(pid, lastSnapshot);
@@ -1356,7 +1356,7 @@ collapsePlannerCards();
 if (initialPageAtBoot) {
   activatePageShell(initialPageAtBoot);
   // Set the Explorer subsection before render() builds and saves the first snapshot. Otherwise the
-  // default "whatif" selection can be written back during startup before the saved route is restored.
+  // default selection can be written back during startup before the saved route is restored.
   if (initialPageAtBoot === 'explorers') activateExplorerAnalysis(initialExplorerAnalysisAtBoot, false, false);
 }
 
@@ -1453,7 +1453,7 @@ if (initialPageAtBoot === 'explorers') activateExplorerAnalysis(initialExplorerA
 window.addEventListener('hashchange', () => {
   let parts = [];
   try { parts = decodeURIComponent(location.hash.slice(1)).split('/'); } catch (e) { return; }
-  const pageId = parts[0];
+  const pageId = MERGED_PAGES[parts[0]] || parts[0];
   if (!isKnownPage(pageId)) return;
   showPage(pageId, false);
   try { localStorage.setItem(ACTIVE_PAGE_KEY, pageId); } catch (e) { /* storage unavailable, ignore */ }

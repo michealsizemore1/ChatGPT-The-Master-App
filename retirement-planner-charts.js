@@ -338,16 +338,14 @@ function ensureOrUpdateChart(pageId, snap) {
 // ---------- Per-section "by year" charts, for sections with inflation-adjusted dollar items ----------
 // Each series pulls straight from the deterministic projection rows, so bars reflect that item's own
 // growth assumption (General/Medical Inflation, SS COLA, or its own yearly-increase %) compounding over time.
-const YEARLY_CHART_PAGES = ['income', 'moneyflows', 'housing', 'expenses', 'medical', 'gap', 'taxes', 'incomeexpenses'];
+const YEARLY_CHART_PAGES = ['income', 'moneyflows', 'housing', 'expenses', 'medical', 'gap', 'taxes', 'incomeexpenses']; // 'incomeexpenses' renders on the Gap page
 
 function yearlyBarConfig(ages, series, opts) {
   opts = opts || {};
   const datasets = series.map((s, i) => ({
     label: s.label,
     data: s.data,
-    // A series can supply its own color (e.g. the "What If I..." Savings Projection chart, whose
-    // baseline bar is meant to look like a specific dark navy rather than the usual rotating palette);
-    // everything else keeps the plain rotating CHART_COLORS assignment it always had.
+    // A series can supply its own color; otherwise it gets the rotating CHART_COLORS palette.
     backgroundColor: s.backgroundColor || CHART_COLORS[i % CHART_COLORS.length],
     borderRadius: 3,
     // Optional stack group id: datasets with the same id stack into one column. The Gap chart uses two ids
@@ -613,6 +611,8 @@ function ensureOrUpdatePieChart(pageId, snap) {
 function refreshSectionCharts(pageId, snap) {
   ensureOrUpdateChart(pageId, snap);
   ensureOrUpdateYearlyChart(pageId, snap);
+  // The Gap page also hosts the Income vs Expenses chart (chart key 'incomeexpenses_yearly').
+  if (pageId === 'gap') ensureOrUpdateYearlyChart('incomeexpenses', snap);
   ensureOrUpdatePieChart(pageId, snap);
 }
 
@@ -925,55 +925,10 @@ function renderRetirementTimingAnalysis() {
 function renderExplorers() {
   const inputs = readInputs();
   const ctx = buildContext(inputs);
-  renderWhatIfCards();
-  renderWhatIfSavingsChart(inputs, ctx);
   renderMarketExplorer(inputs, ctx);
   renderAllocationExplorer(inputs, ctx);
   renderHistoricalBacktest(inputs, ctx);
   renderSustainableSpendingResults();
-  const whatIf = WHAT_IF_SCENARIOS.map(s => runExplorerScenario(s, inputs, ctx));
-  // Survivorship (SBP/DIC) what-if, shown only once a death age is set. Never part of the baseline plan
-  // or the confidence score.
-  if (inputs.survivorshipDeathAge > 0) {
-    const survivorshipScenario = { name: `You predecease your spouse at age ${inputs.survivorshipDeathAge} (SBP + DIC)`, apply: inp => ({ ...inp, survivorshipEnabled: true }) };
-    whatIf.push(runExplorerScenario(survivorshipScenario, inputs, ctx));
-  }
-  const marketRisk = MARKET_RISK_SCENARIOS.map(s => runExplorerScenario(s, inputs, ctx));
-
-  const rowsHtml = list => list.map(r => `
-    <tr>
-      <td>${r.name}</td>
-      <td>${fmtMoney(dv(r.investableAtRetirement, r.retirementAge, inputs))}</td>
-      <td>${fmtMoney(dv(r.endingBalance, r.endAge, inputs))}</td>
-      <td>${fmtMoney(dv(r.endingNetWorth, r.endAge, inputs))}</td>
-      <td>${r.depletionAge ? 'Age ' + r.depletionAge : 'Never'}</td>
-      <td>${Math.round(r.score)}%</td>
-    </tr>`).join('');
-  if (els('whatIfRows')) els('whatIfRows').innerHTML = rowsHtml(whatIf);
-  if (els('marketRiskRows')) els('marketRiskRows').innerHTML = rowsHtml(marketRisk);
-
-  const whatIfConfig = barConfig(whatIf.map(r => r.name), whatIf.map(r => r.score), { percent:true, horizontal:true, showValues:true });
-  const marketRiskConfig = barConfig(marketRisk.map(r => r.name), marketRisk.map(r => r.score), { percent:true, horizontal:true, showValues:true });
-
-  // These two charts have the longest labels in the whole tool (full scenario sentences like
-  // "You predecease your spouse at age 70 (SBP + DIC)"), which is exactly where cut-off text
-  // was worst — barConfig now wraps them onto multiple lines, so size the card to match.
-  const whatIfCanvas = els('chart_whatif');
-  if (whatIfCanvas) { sizeHorizontalChartCard(whatIfCanvas, whatIfConfig.data.labels); ensureChartHorizontalScroll(whatIfCanvas, 460); }
-  if (charts.explorers_whatif) {
-    charts.explorers_whatif.data = whatIfConfig.data; charts.explorers_whatif.options = whatIfConfig.options; charts.explorers_whatif.update();
-  } else {
-    if (whatIfCanvas) charts.explorers_whatif = new Chart(whatIfCanvas.getContext('2d'), whatIfConfig);
-  }
-
-  const marketRiskCanvas = els('chart_marketrisk');
-  if (marketRiskCanvas) { sizeHorizontalChartCard(marketRiskCanvas, marketRiskConfig.data.labels); ensureChartHorizontalScroll(marketRiskCanvas, 460); }
-  if (charts.explorers_marketrisk) {
-    charts.explorers_marketrisk.data = marketRiskConfig.data; charts.explorers_marketrisk.options = marketRiskConfig.options; charts.explorers_marketrisk.update();
-  } else {
-    if (marketRiskCanvas) charts.explorers_marketrisk = new Chart(marketRiskCanvas.getContext('2d'), marketRiskConfig);
-  }
-
   renderCompareCardGrid();
   // Cheap redraw only — never recomputes. If sensitivityResults/ssComparisonResults/compareResults are
   // still null (never run yet, or Reset Everything cleared them), these just keep their card's
