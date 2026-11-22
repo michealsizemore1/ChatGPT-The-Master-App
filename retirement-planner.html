@@ -1251,7 +1251,6 @@
         <textarea class="shared-notes-textarea" oninput="updateSharedNotes(this.value)" placeholder="Jot down anything — questions for your financial advisor, things to double-check, reminders…" rows="3"></textarea>
       </div>
       <div class="page-header"><h2>Personal &amp; Family</h2><p>Ages and household details that drive every other section.</p></div>
-      <div class="mini-chart-card"><canvas id="chart_personal"></canvas></div>
 
       <div class="card">
         <h3 onclick="toggleCard(this)">Personal</h3>
@@ -1316,7 +1315,6 @@
       <div class="mini-chart-card chart-horizontal"><canvas id="chart_income"></canvas></div>
       <div class="mini-chart-card"><div class="mini-label" style="margin-bottom:8px;">Income by year</div><canvas id="chart_income_yearly"></canvas><div class="chart-range-nav" data-chart="income_yearly"><button class="range-nav-btn range-prev" onclick="chartRangeNav('income_yearly','prev')">« <span class="range-nav-label">Age</span></button><button class="range-nav-btn lifetime active" onclick="chartRangeNav('income_yearly','lifetime')">Lifetime</button><button class="range-nav-btn range-next" onclick="chartRangeNav('income_yearly','next')"><span class="range-nav-label">Age</span> »</button></div><div class="range-readout" data-chart="income_yearly"></div></div>
 
-      <div class="note" style="margin-top:0;">At retirement, guaranteed income vs. spending nets to a <b><span id="incomePageSurplusNote">—</span></b> surplus/(gap), with <b><span id="incomePageWithdrawalNote">—</span></b> drawn from your accounts that year. Full year-by-year surplus/gap and withdrawal detail (with its own charts) is on the <b>Income, Expenses &amp; Withdrawals</b> page.</div>
 
       <div class="card">
         <h3 onclick="toggleCard(this)">Income</h3>
@@ -1432,9 +1430,8 @@
       <div class="card">
         <h3 onclick="toggleCard(this)">Survivorship: SBP &amp; DIC<span class="sub-label">Separate scenario — does not change your main plan or primary confidence score</span></h3>
         <p style="font-size:16.5px;color:var(--muted);margin:0 0 10px;line-height:1.6;">Set an assumed age below to test survivorship separately. In that scenario, pensions and VA disability stop, Social Security becomes the single survivor benefit, and enabled SBP/DIC benefits take over. The main household projection remains unchanged.</p>
-        <div class="three-col">
+        <div class="two-col">
           <div class="field"><label>Assumed age you predecease your spouse</label><input type="number" id="survivorshipDeathAge" value="85" min="0" max="100"></div>
-          <div class="field"><label>Overall survivor spending estimate (%) — reference only</label><input type="number" id="survivorSpendingPct" value="55" min="10" max="150" step="5"></div>
           <div class="field"><label>Life insurance payout to spouse (VGLI, lump sum)</label><input type="number" id="survivorLifeInsuranceAmount" value="0" min="0" step="1000"></div>
         </div>
         <p style="font-size:16px;color:var(--muted);margin:2px 0 0;">Paid out as a one-time lump sum when the separate survivorship scenario begins and added to the brokerage pies. Set to $0 if not applicable.</p>
@@ -1443,14 +1440,12 @@
         <div class="checkbox-row"><input type="checkbox" id="sbp1Enabled" onchange="render()"><label for="sbp1Enabled">SBP elected on Military Pension</label></div>
         <div class="two-col">
           <div class="field"><label>SBP coverage (% of pension)</label><input type="number" id="sbp1Pct" value="55" min="0" max="55" step="1"></div>
-          <div class="field"><label>SBP premium reference ($/mo)</label><input type="number" id="sbp1PremiumMonthly" value="0" step="1"></div>
         </div>
         <p style="font-size:16px;color:var(--muted);margin:2px 0 0;">= <span id="sbp1Computed">$0</span>/mo to spouse, taxable, based on your current Military Pension amount</p>
         <div class="mini-label">Survivor Annuity on Government Civil Service Pension</div>
         <div class="checkbox-row"><input type="checkbox" id="sbp2Enabled" onchange="render()"><label for="sbp2Enabled">Survivor annuity elected on Government Civil Service pension</label></div>
         <div class="two-col">
           <div class="field"><label>Survivor annuity coverage (% of pension)</label><input type="number" id="sbp2Pct" value="50" min="0" max="50" step="1"></div>
-          <div class="field"><label>Premium you pay now ($/mo)</label><input type="number" id="sbp2PremiumMonthly" value="0" step="5"></div>
         </div>
         <p style="font-size:16px;color:var(--muted);margin:2px 0 0;">= <span id="sbp2Computed">$0</span>/mo to spouse, taxable, based on your current Government Civil Service pension amount</p>
         <div class="mini-label">VA Dependency &amp; Indemnity Compensation (DIC)</div>
@@ -1728,7 +1723,6 @@
 
       <div class="note" style="margin-top:0;">Don't add rent/mortgage here — that's on the <b>Housing</b> page. Don't add TSP/brokerage contributions here either — those are on <b>Money Flows</b>. This page is for everything else that isn't already covered elsewhere, so nothing gets double-counted.</div>
 
-      <div class="note">At retirement, total spending vs. guaranteed income nets to a <b><span id="expensesPageSurplusNote">—</span></b> surplus/(gap), with <b><span id="expensesPageWithdrawalNote">—</span></b> drawn from your accounts that year. Full year-by-year surplus/gap and withdrawal detail (with its own charts) is on the <b>Income, Expenses &amp; Withdrawals</b> page.</div>
 
       <div class="card">
         <h3 onclick="toggleCard(this)">All Household Expenses<span class="sub-label">Combined view only — each item is still entered and edited on its own page; this just lets you see them side by side</span></h3>
@@ -1802,7 +1796,6 @@
       <div class="page-header"><h2>Income, Expenses &amp; Withdrawals</h2><p>How much of each year's spending your income covers, and what has to come out of your accounts when it doesn't. The first chart compares income (job + guaranteed sources, before tax) with total expenses; the rest show the after-tax surplus or gap and the withdrawals that cover it, year by year.</p></div>
       <div class="mini-chart-card"><div class="mini-label" style="margin-bottom:8px;">Income vs Expenses by year</div><canvas id="chart_incomeexpenses_yearly"></canvas><div class="chart-range-nav" data-chart="incomeexpenses_yearly"><button class="range-nav-btn range-prev" onclick="chartRangeNav('incomeexpenses_yearly','prev')">« <span class="range-nav-label">Age</span></button><button class="range-nav-btn lifetime active" onclick="chartRangeNav('incomeexpenses_yearly','lifetime')">Lifetime</button><button class="range-nav-btn range-next" onclick="chartRangeNav('incomeexpenses_yearly','next')"><span class="range-nav-label">Age</span> »</button></div><div class="range-readout" data-chart="incomeexpenses_yearly"></div></div>
       <div class="note" style="margin-top:0;">Income (green) is job income plus every guaranteed income source, before it's reduced by taxes. Expenses (red) is every recurring bill, housing cost, debt payment, and insurance/medical premium in the plan, plus any Future/One-Time Expenses (Vehicle Purchase, Vacations, etc.) active that year. Hover a bar in a year with an active Future/One-Time Expense or Debt payment (including a future-dated loan started via Start age on the Debt page) to see it itemized by name and amount, so you can confirm it's actually being counted. Where the red bar is taller than the green bar for a given year, that year's gap is covered by a portfolio withdrawal — the table below shows exactly which account(s) it came from.</div>
-      <div class="mini-chart-card"><canvas id="chart_gap"></canvas></div>
       <div class="mini-chart-card"><div class="mini-label" style="margin-bottom:8px;">Surplus / (gap) &amp; withdrawals by year</div><canvas id="chart_gap_yearly"></canvas><div class="chart-range-nav" data-chart="gap_yearly"><button class="range-nav-btn range-prev" onclick="chartRangeNav('gap_yearly','prev')">« <span class="range-nav-label">Age</span></button><button class="range-nav-btn lifetime active" onclick="chartRangeNav('gap_yearly','lifetime')">Lifetime</button><button class="range-nav-btn range-next" onclick="chartRangeNav('gap_yearly','next')"><span class="range-nav-label">Age</span> »</button></div><div class="range-readout" data-chart="gap_yearly"></div></div>
 
       <div class="card">
@@ -1914,7 +1907,6 @@
         <textarea class="shared-notes-textarea" oninput="updateSharedNotes(this.value)" placeholder="Jot down anything — questions for your financial advisor, things to double-check, reminders…" rows="3"></textarea>
       </div>
       <div class="page-header"><h2>Estate Planning</h2><p>A checklist — informational, doesn't feed the projection math.</p></div>
-      <div class="mini-chart-card chart-horizontal"><canvas id="chart_estate"></canvas></div>
 
       <div class="card">
         <h3 onclick="toggleCard(this)">Estate Planning Checklist</h3>
@@ -2099,7 +2091,6 @@
         <textarea class="shared-notes-textarea" oninput="updateSharedNotes(this.value)" placeholder="Jot down anything — questions for your financial advisor, things to double-check, reminders…" rows="3"></textarea>
       </div>
       <div class="page-header"><h2>Assumptions &amp; Guardrails</h2><p>Growth, volatility, and how spending adapts to market performance.</p></div>
-      <div class="mini-chart-card chart-horizontal"><canvas id="chart_assumptions"></canvas></div>
 
       <div class="card">
         <h3 onclick="toggleCard(this)">Growth Assumptions<span class="sub-label">Applies to TSP and brokerage</span></h3>
@@ -2678,17 +2669,17 @@
   </div>
 </div>
 
-<script src="retirement-planner-core.js?v=2026-11-21-dedupe"></script>
-<script src="retirement-planner-tax-and-social-security.js?v=2026-11-21-dedupe"></script>
-<script src="retirement-planner-navigation-and-charts.js?v=2026-11-21-dedupe"></script>
-<script src="retirement-planner-storage-and-notes.js?v=2026-11-21-dedupe"></script>
-<script src="retirement-planner-money-inputs.js?v=2026-11-21-dedupe"></script>
-<script src="retirement-planner-debt-and-inputs.js?v=2026-11-21-dedupe"></script>
-<script src="retirement-planner-projection-engine.js?v=2026-11-21-dedupe"></script>
-<script src="retirement-planner-explorers-and-analysis.js?v=2026-11-21-dedupe"></script>
-<script src="retirement-planner-charts.js?v=2026-11-21-dedupe"></script>
-<script src="retirement-planner-savings-and-coach.js?v=2026-11-21-dedupe"></script>
-<script src="retirement-planner-vault-settings-and-reports.js?v=2026-11-21-dedupe"></script>
+<script src="retirement-planner-core.js?v=2026-11-21-dedupe2"></script>
+<script src="retirement-planner-tax-and-social-security.js?v=2026-11-21-dedupe2"></script>
+<script src="retirement-planner-navigation-and-charts.js?v=2026-11-21-dedupe2"></script>
+<script src="retirement-planner-storage-and-notes.js?v=2026-11-21-dedupe2"></script>
+<script src="retirement-planner-money-inputs.js?v=2026-11-21-dedupe2"></script>
+<script src="retirement-planner-debt-and-inputs.js?v=2026-11-21-dedupe2"></script>
+<script src="retirement-planner-projection-engine.js?v=2026-11-21-dedupe2"></script>
+<script src="retirement-planner-explorers-and-analysis.js?v=2026-11-21-dedupe2"></script>
+<script src="retirement-planner-charts.js?v=2026-11-21-dedupe2"></script>
+<script src="retirement-planner-savings-and-coach.js?v=2026-11-21-dedupe2"></script>
+<script src="retirement-planner-vault-settings-and-reports.js?v=2026-11-21-dedupe2"></script>
 <script src="master-backup-shared.js"></script>
 </body>
 </html>

@@ -1107,14 +1107,6 @@ function render() {
   const firstYearSpending = rowAtRetirement ? rowAtRetirement.spending : (ctx.expensesTotal + inputs.rentMonthly*12);
   const gapToday = Math.max(0, firstYearSpending - firstYearGuaranteed);
 
-  // Small reference notes on the Income and Expenses pages, pointing back at the full
-  // Surplus/(Gap) and withdrawal detail that lives on the Income, Expenses & Withdrawals page.
-  const surplusSigned = firstYearGuaranteed - firstYearSpending;
-  const surplusText = fmtMoney(dv(Math.abs(surplusSigned), retirementAge, inputs)) + (surplusSigned >= 0 ? ' surplus' : ' gap');
-  const withdrawalText = fmtMoney(dv(rowAtRetirement ? rowAtRetirement.grossWithdrawal : 0, retirementAge, inputs));
-  ['incomePageSurplusNote','expensesPageSurplusNote'].forEach(id => { if (els(id)) els(id).textContent = surplusText; });
-  ['incomePageWithdrawalNote','expensesPageWithdrawalNote'].forEach(id => { if (els(id)) els(id).textContent = withdrawalText; });
-
   // Survivorship tile: reuses the same what-if the Explorers page runs (never the baseline
   // plan/main score) — a smaller 300-run Monte Carlo, only computed when an assumed age is
   // actually set, so this doesn't add cost to every render for people not using the feature.
@@ -1261,8 +1253,6 @@ function render() {
 
   // Build snapshot for per-section charts
   lastSnapshot = {
-    yearsToRetirement: Math.max(0, inputs.retirementAge - inputs.currentAge),
-    yearsInRetirement: Math.max(0, ctx.effectiveLifeExpectancy - inputs.retirementAge),
     tradContribFirstYear: rows[0] ? rows[0].tradContribOut : 0,
     rothContribFirstYear: rows[0] ? rows[0].rothContribOut : 0,
     matchContribFirstYear: rows[0] ? rows[0].matchContribOut : 0,
@@ -1281,16 +1271,6 @@ function render() {
     annuityAtRetirement: rowAtRetirement ? rowAtRetirement.annuityAmount : 0,
     grossWithdrawalFirstYear: rowAtRetirement ? rowAtRetirement.grossWithdrawal : 0,
     netSpendingFirstYear: rowAtRetirement ? rowAtRetirement.withdrawal : 0,
-    guaranteedIncomeAtRetirement: firstYearGuaranteed,
-    spendingAtRetirement: firstYearSpending,
-    surplusAtRetirement: firstYearGuaranteed - firstYearSpending,
-    preReturnPct: +els('preReturn').value,
-    postReturnPct: +els('postReturn').value,
-    inflationPct: +els('inflation').value,
-    medicalInflationPct: +els('medicalInflation').value,
-    ssColaPct: +els('ssCola').value,
-    buyHome: inputs.buyHome,
-    homeAppreciationPct: +els('homeAppreciation').value,
     rows, inputs
   };
 

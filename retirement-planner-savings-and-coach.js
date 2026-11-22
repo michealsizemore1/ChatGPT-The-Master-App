@@ -131,8 +131,6 @@ function generateCoachSuggestions(inputs, ctx, result, score) {
   if (highInterestDebt.length) add('high', '⚠', `You're carrying ${highInterestDebt.length} debt${highInterestDebt.length>1?'s':''} above 15% APR (${highInterestDebt.map(d=>d.name).join(', ')}). Paying these down first usually beats any investment return.`);
 
   const totalMonthlyExpenses = expenses.reduce((s,e)=>s+expenseValForBasis(e),0) + inputs.rentMonthly;
-  const cashOnHand = inputs.checkingBalance + inputs.savingsBalance;
-  if (cashOnHand < totalMonthlyExpenses*3) add('medium', '!', `Checking + savings (${fmtMoney(cashOnHand)}) covers less than 3 months of your recurring monthly bills (${fmtMoney(totalMonthlyExpenses)}/mo). Consider building a bigger cash cushion before retirement, separate from the HYSA.`);
 
   const contribPct = inputs.tradPct + inputs.rothPct;
   if (contribPct < inputs.matchCapPct) add('high', '⚠', `You're contributing ${(contribPct*100).toFixed(1)}% of income to TSP but the agency matches up to ${(inputs.matchCapPct*100).toFixed(1)}%. You're leaving free match money on the table.`);
@@ -142,8 +140,6 @@ function generateCoachSuggestions(inputs, ctx, result, score) {
     if (inputs.rothTSPBalance < ltcTotalCost * 0.5) add('medium', '!', `Long-term care is modeled at ~${fmtMoney(ltcTotalCost)} total, funded from Roth TSP first. Your current Roth balance (${fmtMoney(inputs.rothTSPBalance)}) may not fully cover it by itself — the model then uses Brokerage, eligible Traditional TSP, and available cash reserves.`);
   }
 
-  const rothShare = inputs.rothTSPBalance / Math.max(1, inputs.tradTSPBalance + inputs.rothTSPBalance);
-  if (rothShare < 0.2) add('low', 'i', `Only ${(rothShare*100).toFixed(0)}% of your TSP is Roth. More Roth gives you tax-free withdrawal flexibility later — worth a look given your Traditional TSP withdrawals are taxed at your marginal rate.`);
 
   if (!inputs.ruleOf55Applies) add('medium', '!', "Rule of 55 is turned off on the Taxes page, so Traditional TSP withdrawals before 59½ are modeled with a 10% penalty. If you're separating from federal service at 55+ and leaving the money in TSP, turn it back on.");
 
@@ -160,7 +156,6 @@ function generateCoachSuggestions(inputs, ctx, result, score) {
 function renderCoachTips() {
   const container = els('coachTips');
   if (!container) return;
-  const wellnessSummary = els('wellnessSummaryDetail') ? els('wellnessSummaryDetail').textContent : '';
   let tipsHtml = '';
   try {
     if (lastCoachContext) {
@@ -170,11 +165,10 @@ function renderCoachTips() {
         tips.map(t => `<div class="coach-tip coach-tip-${t.severity}" style="display:flex;gap:8px;align-items:flex-start;padding:10px 12px;border-radius:8px;background:var(--card-bg,rgba(120,120,120,0.08));"><span aria-hidden="true">${t.icon}</span><span style="font-size:15px;line-height:1.5;">${escapeHtml(t.text)}</span></div>`).join('') +
         `</div>`;
     }
-  } catch (e) { /* Coach tips are a bonus layer over the Wellness summary below -- never let a
-    scoring hiccup blank out the whole Coach page. */ }
+  } catch (e) { /* never let a scoring hiccup blank out the whole Coach page */ }
   container.innerHTML = `
     ${tipsHtml}
-    <p style="font-size:16px;color:var(--muted);line-height:1.55;margin:0 0 14px;">${wellnessSummary || 'Financial Wellness identifies the plan areas that deserve attention without blending them into one score.'}</p>
+    <p style="font-size:16px;color:var(--muted);line-height:1.55;margin:0 0 14px;">Emergency reserve, tax diversification and other plan measures are on Financial Wellness.</p>
     <div style="display:flex;flex-wrap:wrap;gap:10px;">
       <button type="button" class="add-btn" onclick="showPage('wellness')">Review Financial Wellness</button>
       <button type="button" class="add-btn" onclick="showExplorerAnalysis('retirementtiming')">Test Retirement Timing</button>

@@ -225,16 +225,13 @@ function readInputs() {
     survivorshipDeathAge: +els('survivorshipDeathAge').value || 0,
     // survivorshipEnabled is intentionally omitted from the main inputs. It is enabled only by the
     // standalone Survivorship and Explorers scenario runs.
-    survivorSpendingPct: +els('survivorSpendingPct').value/100 || 1,
     survivorLifeInsuranceAmount: +els('survivorLifeInsuranceAmount').value || 0,
     sbp1Enabled: els('sbp1Enabled').checked,
     sbp1Pct: +els('sbp1Pct').value/100,
     sbp1Annual: (+els('pensionAnnual').value) * (+els('sbp1Pct').value/100),
-    sbp1PremiumMonthly: +els('sbp1PremiumMonthly').value,
     sbp2Enabled: els('sbp2Enabled').checked,
     sbp2Pct: +els('sbp2Pct').value/100,
     sbp2Annual: (+els('pension2Annual').value) * (+els('sbp2Pct').value/100),
-    sbp2PremiumMonthly: +els('sbp2PremiumMonthly').value,
     dicEligible: els('dicEligible').checked,
     dicMonthlyAmount: +els('dicMonthlyAmount').value,
     dicAidAttendanceEnabled: els('dicAidAttendanceEnabled') ? els('dicAidAttendanceEnabled').checked : false,

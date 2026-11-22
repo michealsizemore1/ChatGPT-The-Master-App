@@ -640,9 +640,7 @@ function projectRun(inputs, ctx, randomize, shocks) {
       // housing, debt payments, insurance premiums, SBP premiums, and Tricare/Medicare/FEDVIP premiums
       // (medicalCostAnnual, already folded into expensesInflated above) don't have a Must Spend split.
       essentialFloor = mustSpendCategoriesAnnual + medicalCostAnnual + housingCost + debtPaymentThisYear + insurancePremiumAnnual + sbpPremiumAnnual;
-      // Do not apply survivorSpendingPct again here: the detailed survivor continue/override fields
-      // already build the surviving spouse's expenses item by item. Multiplying the result again would
-      // reduce the same costs twice. The percentage remains visible as a planning reference only.
+      // Survivor expenses come from the item-by-item continue/override fields; no overall % is applied.
 
       // ssAmount/spousalBenefit/pensionAmount/pension2Amount/vaDisabilityAmount/annuityAmount/sbpAmount/
       // dicAmount/guaranteedIncome are all computed once, above, before the retirement-age branch split —

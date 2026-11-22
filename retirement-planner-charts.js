@@ -74,8 +74,6 @@ function barConfig(labels, values, opts) {
 
 function buildChartConfig(pageId, snap) {
   switch (pageId) {
-    case 'personal':
-      return barConfig(['Years to retirement','Years in retirement'], [snap.yearsToRetirement, snap.yearsInRetirement], { plain:true, suffix:' yrs', showValues:true });
     case 'moneyflows':
       return barConfig(['Traditional TSP','Roth TSP','Agency Match','Brokerage (all pies)'],
         [snap.tradContribFirstYear, snap.rothContribFirstYear, snap.matchContribFirstYear, snap.brokerageContribution], { showValues:true });
@@ -98,30 +96,14 @@ function buildChartConfig(pageId, snap) {
         [snap.inputs.currentIncome, snap.ssAtRetirement, snap.spousalAtRetirement, snap.pensionAtRetirement, snap.pension2AtRetirement, snap.vaDisabilityAtRetirement, snap.annuityAtRetirement], { horizontal:true, showValues:true });
     case 'taxes':
       return barConfig(['Gross withdrawn from accounts','Net spending covered'], [snap.grossWithdrawalFirstYear, snap.netSpendingFirstYear], { showValues:true });
-    case 'gap':
-      return barConfig(['Guaranteed income','Total spending','Surplus / (Gap)','Portfolio withdrawal (gross)'],
-        [snap.guaranteedIncomeAtRetirement, snap.spendingAtRetirement, snap.surplusAtRetirement, snap.grossWithdrawalFirstYear], { showValues:true });
     case 'medical':
       return barConfig(['Tricare (annual)','Tricare HVD (annual)','Your Part B (annual)',"Spouse's Part B (annual)",'Medicare HVD (annual)'],
         [(+els('tricareMonthly').value||0)*12,
          ((+els('tricareHearingMonthly').value||0)+(+els('tricareVisionMonthly').value||0)+(+els('tricareDentalMonthly').value||0))*12,
          (+els('partBUserMonthly').value||0)*12, (+els('partBSpouseMonthly').value||0)*12,
          ((+els('hearingMonthly').value||0)+(+els('visionMonthly').value||0)+(+els('dentalMonthly').value||0))*12], { showValues:true });
-    case 'estate': {
-      const items = [
-        ['Will', 'estateWill'], ['POA', 'estatePOA'], ['Healthcare Directive', 'estateHealthcareDirective'],
-        ['Trust', 'estateTrust'], ['Beneficiaries reviewed', 'estateBeneficiaries']
-      ];
-      return barConfig(items.map(i=>i[0]), items.map(i => els(i[1]).checked ? 100 : 0), { percent:true, horizontal:true, showValues:true });
-    }
     case 'insurance':
       return barConfig(insurancePolicies.map(p=>p.name||'Policy'), insurancePolicies.map(p=>+p.premium||0), { horizontal:true, showValues:true });
-    case 'assumptions': {
-      const labels = ['Pre-retirement return','Post-retirement return','General Inflation','Medical Inflation','SS COLA'];
-      const values = [snap.preReturnPct, snap.postReturnPct, snap.inflationPct, snap.medicalInflationPct, snap.ssColaPct];
-      if (snap.buyHome) { labels.push('Housing Appreciation'); values.push(snap.homeAppreciationPct); }
-      return barConfig(labels, values, { percent:true, horizontal:true, showValues:true });
-    }
     default:
       return null;
   }
