@@ -162,11 +162,7 @@ const WHAT_IF_SCENARIOS = [
   { name: 'Claim Social Security at 62', apply: inp => ({ ...inp, ssAge: 62, ssMonthly: ssMonthlyAtAge(inp, 62) }) },
   { name: 'Delay Social Security to 70', apply: inp => ({ ...inp, ssAge: 70, ssMonthly: ssMonthlyAtAge(inp, 70) }) },
   { name: 'Contribute 5% more to TSP', apply: inp => ({ ...inp, tradPct: inp.tradPct + 0.05 }) },
-  { name: 'Pay off all debt today', special: 'payoffDebt' },
-  // Job income stops now. TSP contributions and match follow income automatically, but brokerage pie
-  // contributions are flat $/mo, so they're zeroed too. Pension and VA disability continue.
-  { name: 'Lose my job today', apply: inp => ({ ...inp, currentIncome: 0, incomeGrowth: 0,
-    brokeragePieContributionsMonthly: inp.brokeragePieContributionsMonthly.map(() => 0) }) }
+  { name: 'Pay off all debt today', special: 'payoffDebt' }
 ];
 
 const MARKET_RISK_SCENARIOS = [
@@ -407,8 +403,6 @@ const COMPARE_SCENARIO_LIBRARY = [
       const scale = inputs.brokerageBalance > 0 ? reducedTotal / inputs.brokerageBalance : 0;
       return { inputs: { ...inputs, brokerageBalance: reducedTotal, brokeragePieBalances: inputs.brokeragePieBalances.map(b => b * scale) }, ctx: { ...ctx, debtSchedules: [] } };
     } },
-  { name: 'Lose my job today',
-    build: (inputs, ctx) => ({ inputs: { ...inputs, currentIncome: 0, incomeGrowth: 0, brokeragePieContributionsMonthly: inputs.brokeragePieContributionsMonthly.map(() => 0) }, ctx }) },
   { name: 'Live 5 years longer than expected',
     build: (inputs) => { const newInputs = { ...inputs, lifeExpectancy: inputs.lifeExpectancy + 5 }; return { inputs: newInputs, ctx: buildContext(newInputs) }; } },
   { name: 'Achieve 1% higher average return', build: (inputs, ctx) => ({ inputs: { ...inputs, preReturn: inputs.preReturn + 0.01, postReturn: inputs.postReturn + 0.01 }, ctx }) },
@@ -863,10 +857,7 @@ const WHATIF_CARDS = [
       return { inputs: { ...inputs, hysaBalance: inputs.hysaBalance + 50000 }, ctx: { ...ctx, debtSchedules: [...ctx.debtSchedules, loanSchedule] } };
     } },
   { name: 'Have an unexpected $50k expense in 5 years',
-    build: (inputs, ctx) => ({ inputs, ctx: { ...ctx, futureExpensesOverride: [...futureExpenses, { name: 'Unexpected expense', age: inputs.currentAge + 5, amount: 50000, recurring: false }] } }) },
-  { name: 'Lose my job today',
-    build: (inputs, ctx) => ({ inputs: { ...inputs, currentIncome: 0, incomeGrowth: 0,
-      brokeragePieContributionsMonthly: inputs.brokeragePieContributionsMonthly.map(() => 0) }, ctx }) }
+    build: (inputs, ctx) => ({ inputs, ctx: { ...ctx, futureExpensesOverride: [...futureExpenses, { name: 'Unexpected expense', age: inputs.currentAge + 5, amount: 50000, recurring: false }] } }) }
 ];
 let selectedWhatIfCard = null;
 function selectWhatIfCard(idx) {
