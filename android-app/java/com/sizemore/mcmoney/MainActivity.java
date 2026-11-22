@@ -178,6 +178,15 @@ public class MainActivity extends Activity {
         else super.onBackPressed();
     }
 
+    /** Calls window[fn](text) in the page on the UI thread. */
+    private void sendToPage(final String fn, final String text) {
+        runOnUiThread(new Runnable() {
+            @Override public void run() {
+                web.evaluateJavascript("window." + fn + "&&window." + fn + "(" + org.json.JSONObject.quote(text) + ")", null);
+            }
+        });
+    }
+
     private void toast(final String msg) {
         runOnUiThread(new Runnable() {
             @Override public void run() { Toast.makeText(MainActivity.this, msg, Toast.LENGTH_LONG).show(); }
@@ -249,6 +258,36 @@ public class MainActivity extends Activity {
 
     /** Lets the page save backups and CSV exports, and send a backup to Google Drive (or any app). */
     public class Bridge {
+        /** Checks GitHub for a newer M&C Money; answers through window.__mcUpdate(json). */
+        @JavascriptInterface
+        public void checkForUpdate() {
+            new Thread(new Runnable() {
+                @Override public void run() { sendToPage("__mcUpdate", Updater.check(MainActivity.this)); }
+            }).start();
+        }
+
+        /** Downloads and installs an update; progress goes to window.__mcUpdateStatus(text). */
+        @JavascriptInterface
+        public void installUpdate(final String url, final int build) {
+            if (!Updater.canInstall(MainActivity.this)) {
+                sendToPage("__mcUpdateStatus", "Turn on \u201cAllow from this source\u201d, then come back and tap Install again.");
+                runOnUiThread(new Runnable() {
+                    @Override public void run() {
+                        try { startActivity(Updater.permissionIntent(MainActivity.this)); } catch (Exception ignored) { }
+                    }
+                });
+                return;
+            }
+            new Thread(new Runnable() {
+                @Override public void run() {
+                    String err = Updater.install(MainActivity.this, url, build, new Updater.Progress() {
+                        @Override public void update(String message) { sendToPage("__mcUpdateStatus", message); }
+                    });
+                    sendToPage("__mcUpdateStatus", err != null ? err : "Installing\u2026 M&C Money will close and reopen updated.");
+                }
+            }).start();
+        }
+
         @JavascriptInterface
         public String appVersion() {
             try { return getPackageManager().getPackageInfo(getPackageName(), 0).versionName; }
