@@ -1136,7 +1136,7 @@ function render() {
     const swatch = color => `<span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${color};margin-right:7px;vertical-align:middle;"></span>`;
     els('estimatedTaxesLifetimeTable').innerHTML = `
       <div style="border:1px solid var(--border);border-radius:8px;padding:14px 16px;">
-        <div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:10px;">Lifetime</div>
+        <div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:10px;">Lifetime totals</div>
         <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:15.5px;"><span>${swatch(CHART_COLORS[0])}Federal Income Tax</span><span>${fmtMoney(lifetimeFederal)}</span></div>
         <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:15.5px;"><span>${swatch(CHART_COLORS[1])}State Income Tax</span><span>${fmtMoney(lifetimeState)}</span></div>
         <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:15.5px;"><span>${swatch(CHART_COLORS[2])}FICA</span><span>${fmtMoney(lifetimeFica)}</span></div>
@@ -1232,12 +1232,6 @@ function render() {
     cashTotal: inputs.checkingBalance + inputs.savingsBalance + inputs.hysaBalance,
     currentRentAnnual: inputs.rentMonthly*12,
     housingCostAtRetirement: rowAtRetirement ? rowAtRetirement.housingCost : inputs.rentMonthly*12,
-    ssAtRetirement: rowAtRetirement ? rowAtRetirement.ssAmount : 0,
-    spousalAtRetirement: rowAtRetirement ? rowAtRetirement.spousalBenefit : 0,
-    pensionAtRetirement: rowAtRetirement ? rowAtRetirement.pensionAmount : 0,
-    pension2AtRetirement: rowAtRetirement ? rowAtRetirement.pension2Amount : 0,
-    vaDisabilityAtRetirement: rowAtRetirement ? rowAtRetirement.vaDisabilityAmount : 0,
-    annuityAtRetirement: rowAtRetirement ? rowAtRetirement.annuityAmount : 0,
     grossWithdrawalFirstYear: rowAtRetirement ? rowAtRetirement.grossWithdrawal : 0,
     netSpendingFirstYear: rowAtRetirement ? rowAtRetirement.withdrawal : 0,
     rows, inputs
@@ -1263,7 +1257,6 @@ function render() {
 }
 
 loadState();
-applySharedInvestmentsToPlanner();
 // Restore the most recent retirement-age selection before the first calculation, in case it was
 // made while the page was still starting up and loadState() restored an older value.
 applyPendingRetirementAgeSelection();
@@ -1320,13 +1313,6 @@ renderDebtRows();
 renderFutureExpenseRows();
 renderWindfallRows();
 renderInsuranceRows();
-
-window.addEventListener('storage', function(event) {
-  if (event.key !== SHARED_INVESTMENT_KEY) return;
-  let shared = null;
-  try { shared = JSON.parse(event.newValue || 'null'); } catch (e) {}
-  if (applySharedInvestmentsToPlanner(shared)) render();
-});
 
 // One delegated listener on .shell saves and re-renders every plain input/select (most top-level fields
 // have no handler of their own).

@@ -237,19 +237,28 @@
   .mini-chart-card.chart-scroll-outer{overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch;}
   .chart-scroll-inner{flex:1 1 auto; min-height:0;}
 
-  .chart-range-nav{display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:12px; flex-wrap:wrap;}
+  .chart-range-nav{display:flex; align-items:center; justify-content:center; gap:8px; margin:6px 0 4px; flex-wrap:wrap;}
   .range-nav-btn{
     background:#fbfcfc; border:1px solid var(--border); border-radius:20px;
     padding:6px 14px; font-size:15px; font-weight:600; color:var(--muted); cursor:pointer;
   }
-  .range-nav-btn.lifetime.active{background:var(--navy); color:#fff; border-color:var(--navy); font-weight:700;}
+  .range-nav-btn.range-arrow{width:42px; height:42px; padding:0; border-radius:50%; font-size:26px; line-height:1; color:var(--navy); display:inline-flex; align-items:center; justify-content:center;}
+  .range-current{min-width:112px; text-align:center; font-size:15.5px; font-weight:700; color:var(--navy);}
+  .range-nav-btn.lifetime{padding:6px 12px;}
+  .range-nav-btn.lifetime.active{background:var(--navy); color:#fff; border-color:var(--navy);}
   .range-nav-btn:disabled{opacity:0.35; cursor:not-allowed;}
   .range-nav-btn:not(:disabled):hover{border-color:var(--teal); color:var(--teal);}
+  /* The selected year's values, shown just under the chart card (see updateRangeReadout). */
   .range-readout{
-    display:none; flex:0 0 auto; text-align:center; font-size:14px; font-weight:600; color:var(--navy);
-    background:#f4f7fa; border:1px solid var(--border); border-radius:8px;
-    padding:6px 10px; margin:-4px 0 12px; line-height:1.5;
+    display:none; font-size:15px; color:var(--navy);
+    background:#f4f7fa; border:1px solid var(--border); border-radius:12px;
+    padding:10px 14px; margin:-6px 0 16px; line-height:1.4;
   }
+  .range-readout-title{font-weight:800; margin-bottom:6px;}
+  .range-readout-row{display:flex; justify-content:space-between; gap:12px; padding:3px 0; border-top:1px solid rgba(16,42,67,.06);}
+  .range-readout-row span{display:flex; align-items:center; gap:8px; color:var(--muted);}
+  .range-readout-row i{width:10px; height:10px; border-radius:3px; flex:0 0 auto; display:inline-block;}
+  .range-readout-row b{white-space:nowrap;}
 
   .card{
     background:var(--card);
@@ -404,21 +413,6 @@
   .stat .value{font-size:28px; font-weight:700; color:var(--navy);}
   .stat.warn .value{color:var(--danger);}
   .stat.ok .value{color:var(--good);}
-  .msiz-snapshot{border-top:4px solid var(--teal);}
-  .msiz-snapshot-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:14px;}
-  .msiz-snapshot-head h3{cursor:default;margin:0 0 4px;}
-  .msiz-snapshot-head h3::after{display:none;}
-  .msiz-snapshot-head p{margin:0;color:var(--muted);font-size:14.5px;line-height:1.45;}
-  .msiz-snapshot-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;}
-  .msiz-snapshot-item{background:var(--teal-light);border:1px solid #c7e2df;border-radius:8px;padding:10px;text-align:center;}
-  .msiz-snapshot-item span{display:block;color:var(--muted);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
-  .msiz-snapshot-item strong{display:block;margin-top:4px;color:var(--navy);font-size:18px;}
-  .msiz-snapshot-updated{margin-top:10px;color:var(--muted);font-size:12.5px;text-align:right;}
-  @media(max-width:760px){
-    .msiz-snapshot-head{display:block;}
-    .msiz-snapshot-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
-    .msiz-snapshot-item:first-child{grid-column:1 / -1;}
-  }
   /* Uses the standard light card look (the later theme .card rule sets every card's background), so the
      text must be dark too. */
   .wellness-summary h3{cursor:default;}
@@ -1280,7 +1274,7 @@
       </div>
       <div class="page-header"><h2>Income</h2><p>What comes in — job income, pensions, VA disability, Social Security, and annuity. How it's invested and withdrawn lives on the <b>Money Flows</b> page.</p></div>
 
-      <div class="mini-chart-card chart-horizontal"><canvas id="chart_income"></canvas></div>
+      <div class="mini-chart-card chart-horizontal"><div class="mini-label" style="margin-bottom:8px;">Yearly amounts as entered (today's $)</div><canvas id="chart_income"></canvas></div>
       <div class="mini-chart-card"><div class="mini-label" style="margin-bottom:8px;">Income by year</div><canvas id="chart_income_yearly"></canvas><div class="chart-range-nav" data-chart="income_yearly"><button class="range-nav-btn range-prev" onclick="chartRangeNav('income_yearly','prev')">« <span class="range-nav-label">Age</span></button><button class="range-nav-btn lifetime active" onclick="chartRangeNav('income_yearly','lifetime')">Lifetime</button><button class="range-nav-btn range-next" onclick="chartRangeNav('income_yearly','next')"><span class="range-nav-label">Age</span> »</button></div><div class="range-readout" data-chart="income_yearly"></div></div>
 
 
@@ -1560,23 +1554,6 @@
       <div class="mini-chart-card chart-horizontal"><div class="mini-label" style="margin-bottom:8px;">Brokerage balance by portfolio</div><canvas id="chart_investments_pies"></canvas></div>
 
       <div class="stat" style="margin-bottom:16px;"><div class="label">Total current assets (TSP + brokerage + cash)</div><div class="value" id="totalAssetsTile">$0</div></div>
-
-      <div class="card msiz-snapshot" id="msizInvestmentSnapshot">
-        <div class="msiz-snapshot-head">
-          <div>
-            <h3>MSIZ Investment Snapshot</h3>
-            <p>A concise view of the balances synchronized from MSIZ Terminal.</p>
-          </div>
-        </div>
-        <div class="msiz-snapshot-grid">
-          <div class="msiz-snapshot-item"><span>Total Portfolio</span><strong id="msizSnapTotal">&mdash;</strong></div>
-          <div class="msiz-snapshot-item"><span>TSP</span><strong id="msizSnapTsp">&mdash;</strong></div>
-          <div class="msiz-snapshot-item"><span>All Things</span><strong id="msizSnapAllThings">&mdash;</strong></div>
-          <div class="msiz-snapshot-item"><span>SGOV</span><strong id="msizSnapSgov">&mdash;</strong></div>
-          <div class="msiz-snapshot-item"><span>HYSA</span><strong id="msizSnapHysa">&mdash;</strong></div>
-        </div>
-        <div class="msiz-snapshot-updated" id="msizSnapUpdated">Waiting for synchronized MSIZ data</div>
-      </div>
 
       <div class="card">
         <h3 onclick="toggleCard(this)">TSP — Thrift Savings Plan<span class="sub-label">Agency match always deposits into Traditional TSP</span></h3>

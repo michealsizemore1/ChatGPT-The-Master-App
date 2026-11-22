@@ -146,66 +146,6 @@ function loadState() {
   return applyState(state);
 }
 
-function readSharedInvestmentsForPlanner() {
-  try { return JSON.parse(localStorage.getItem(SHARED_INVESTMENT_KEY) || 'null'); } catch (e) { return null; }
-}
-
-function renderMsizInvestmentSnapshot(shared) {
-  if (!shared) return;
-  const balances = shared.balances || {};
-  const holdings = shared.holdings || {};
-  const tsp = (Number(balances.traditionalTsp) || 0) + (Number(balances.rothTsp) || 0);
-  const allThings = ['SCHD','QQQM','IBIT'].reduce((sum, symbol) => sum + (Number(holdings[symbol]) || 0), 0);
-  const sgov = Number(holdings.SGOV) || 0;
-  const hysa = Number(balances.hysa) || 0;
-  const total = tsp + allThings + sgov + hysa;
-  const put = (id, value) => { const el = els(id); if (el) el.textContent = fmtMoney(value); };
-  put('msizSnapTotal', total);
-  put('msizSnapTsp', tsp);
-  put('msizSnapAllThings', allThings);
-  put('msizSnapSgov', sgov);
-  put('msizSnapHysa', hysa);
-  const updated = els('msizSnapUpdated');
-  if (updated) {
-    const stamp = shared.updatedAt ? new Date(shared.updatedAt) : null;
-    updated.textContent = stamp && !Number.isNaN(stamp.getTime())
-      ? 'Last synchronized ' + stamp.toLocaleString()
-      : 'Synchronized from MSIZ Terminal';
-  }
-}
-
-function applySharedInvestmentsToPlanner(shared) {
-  shared = shared || readSharedInvestmentsForPlanner();
-  if (!shared || !shared.balances) return false;
-  const setValue = (id, value) => { const el = els(id); if (el && value != null && Number.isFinite(Number(value))) el.value = Number(value); };
-  setValue('tradTSPBalance', shared.balances.traditionalTsp);
-  setValue('rothTSPBalance', shared.balances.rothTsp);
-  setValue('hysaBalance', shared.balances.hysa);
-  setValue('tradTSPPct', shared.rates && shared.rates.traditionalTspPct);
-  setValue('rothTSPPct', shared.rates && shared.rates.rothTspPct);
-  const holdings = shared.holdings || {};
-  const contributions = shared.contributions || {};
-  const allThingsBalance = ['SCHD','QQQM','IBIT'].reduce((sum, symbol) => sum + (Number(holdings[symbol]) || 0), 0);
-  const allThingsContribution = ['SCHD','QQQM','IBIT'].reduce((sum, symbol) => sum + (Number(contributions[symbol]) || 0), 0);
-  const upsertPie = (matcher, defaults, balance, contribution) => {
-    let index = brokeragePies.findIndex(pie => matcher.test(String(pie.name || '').trim()));
-    const current = index >= 0 ? brokeragePies[index] : defaults;
-    const updated = { ...current, balance, contribution };
-    if (index >= 0) brokeragePies[index] = updated;
-    else brokeragePies.push(updated);
-  };
-  upsertPie(/^all things bucket$/i,
-    { name:'All Things Bucket', accountType:'roth_ira', riskType:'equity', cashRate:4.5, fee:0 },
-    allThingsBalance, allThingsContribution);
-  upsertPie(/^(sgov|sequence of returns risk)(?:\s*\([^)]*\))?$/i,
-    { name:'SGOV', accountType:'taxable', riskType:'cash', cashRate:4.5, fee:0 },
-    Number(holdings.SGOV) || 0, Number(contributions.SGOV) || 0);
-  if (els('brokeragePieRows')) renderBrokeragePieRows();
-  if (els('pieContributionRows')) renderPieContributionRows();
-  renderMsizInvestmentSnapshot(shared);
-  return true;
-}
-
 // ---------- Expenses (dynamic rows, monthly $ amounts) ----------
 const EXPENSE_CATEGORIES = ['Food & Groceries','Transportation','Healthcare','Utilities','Entertainment & Travel','Personal Care','Shopping','Gifts & Donations','Subscriptions','Pet Care','Personal Support','Other'];
 // "amount" is Like to Spend; "mustSpend" is the essential floor (defaults to amount, $0 for the two

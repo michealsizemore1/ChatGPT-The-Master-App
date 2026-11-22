@@ -204,7 +204,6 @@ function renderLtcVaAidReadout() {
 
 // ---------- Persistence (localStorage) so values survive a page refresh ----------
 const STORAGE_KEY = 'retirementPlannerState_v1';
-const SHARED_INVESTMENT_KEY = 'mlma_investment_sync_v1';
 const ANTHROPIC_API_KEY_STORAGE_KEY = 'retirementPlannerAnthropicApiKey_v1';
 
 function saveAnthropicApiKeyLocal() {

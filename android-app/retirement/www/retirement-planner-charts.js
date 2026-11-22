@@ -91,9 +91,18 @@ function buildChartConfig(pageId, snap) {
       );
     case 'debt':
       return barConfig(debts.map(d=>d.name||d.category), debts.map(d=>+d.balance||0), { horizontal:true, showValues:true });
-    case 'income':
-      return barConfig(["Job income (today's $)",'Your Social Security','Spousal Benefit','Military Pension','Govt Civil Service','VA Disability','Annuity'],
-        [snap.inputs.currentIncome, snap.ssAtRetirement, snap.spousalAtRetirement, snap.pensionAtRetirement, snap.pension2AtRetirement, snap.vaDisabilityAtRetirement, snap.annuityAtRetirement], { horizontal:true, showValues:true });
+    case 'income': {
+      // Each income exactly as entered on this page (yearly, today's $), with the age it starts, so the
+      // bars match the fields. Growth over time is in "Income by year" below.
+      const i = snap.inputs;
+      const from = a => (a ? ` (from ${Math.round(a)})` : '');
+      const spousal = i.spouseWorks ? i.spouseSSMonthly * 12 : spousalMonthlyBenefit(i) * 12;
+      return barConfig(
+        ["Job income", 'Your Social Security' + from(i.ssAge), (i.spouseWorks ? "Spouse's Social Security" : 'Spousal Benefit') + from(i.spouseWorks ? i.spouseSSAge : i.spousalStartAge),
+         'Military Pension' + from(i.pensionAge), 'Govt Civil Service' + from(i.pension2Age), 'VA Disability' + from(i.vaDisabilityAge), 'Annuity' + from(i.annuityStartAge)],
+        [i.currentIncome, i.ssMonthly * 12, spousal, i.pensionAnnual, i.pension2Annual, i.vaDisabilityAnnual, i.annuityMonthly * 12],
+        { horizontal:true, showValues:true });
+    }
     case 'taxes':
       return barConfig(['Gross withdrawn from accounts','Net spending covered'], [snap.grossWithdrawalFirstYear, snap.netSpendingFirstYear], { showValues:true });
     case 'medical':
@@ -171,6 +180,9 @@ function ageToCalendarYear(age) {
   return new Date().getFullYear() + (age - currentAge);
 }
 
+// ---------- Year navigator under each by-year chart: ‹ year › and "All years" ----------
+// ‹ and › move one year at a time (from "All years", either arrow starts at the current year). The
+// selected year's bars are highlighted and its values are listed under the chart card.
 function chartRangeNav(chartKey, action) {
   const [minAge, maxAge] = getProjectionAgeBounds();
   if (!chartRangeState[chartKey]) chartRangeState[chartKey] = { selectedAge: null };
@@ -178,7 +190,7 @@ function chartRangeNav(chartKey, action) {
   if (action === 'lifetime') {
     st.selectedAge = null;
   } else if (st.selectedAge == null) {
-    st.selectedAge = action === 'next' ? maxAge : minAge;
+    st.selectedAge = minAge;
   } else {
     const delta = action === 'next' ? 1 : -1;
     st.selectedAge = Math.min(Math.max(st.selectedAge + delta, minAge), maxAge);
@@ -191,103 +203,89 @@ function applyChartRange(chartKey) {
   const [minAge, maxAge] = getProjectionAgeBounds();
   if (!chartRangeState[chartKey]) chartRangeState[chartKey] = { selectedAge: null };
   const st = chartRangeState[chartKey];
-  // Our labels and readout must always update; pinning Chart.js's tooltip is isolated in try/catch.
   if (chart) {
     try {
-      if (st.selectedAge == null) {
-        chart.setActiveElements([]);
-        if (chart.tooltip) chart.tooltip.setActiveElements([], { x: 0, y: 0 });
-      } else {
-        const idx = findAgeIndex(chart, st.selectedAge);
-        if (idx > -1) {
-          const active = chart.data.datasets.map((_, datasetIndex) => ({ datasetIndex, index: idx }));
-          chart.setActiveElements(active);
-          // Anchor the tooltip at the selected bar's real position (not the canvas corner).
-          let pos = { x: 0, y: 0 };
-          for (const el of active) {
-            const meta = chart.getDatasetMeta(el.datasetIndex);
-            const item = meta && meta.data && meta.data[el.index];
-            if (item) { pos = { x: item.x, y: item.y }; break; }
-          }
-          if (chart.tooltip) chart.tooltip.setActiveElements(active, pos);
-        }
-      }
+      const idx = st.selectedAge == null ? -1 : findAgeIndex(chart, st.selectedAge);
+      // Highlight the selected year's bars; no floating tooltip (the values are listed under the card).
+      chart.setActiveElements(idx > -1 ? chart.data.datasets.map((_, datasetIndex) => ({ datasetIndex, index: idx })) : []);
+      if (chart.tooltip) chart.tooltip.setActiveElements([], { x: 0, y: 0 });
       chart.update();
     } catch (err) {
-      console.error('Chart range-nav tooltip pin failed (labels/readout still updated):', err);
+      console.error('Chart year highlight failed (navigator and values still updated):', err);
     }
   }
   updateRangeReadout(chartKey, chart);
   updateChartRangeUi(chartKey, minAge, maxAge);
 }
 
-// Reliable readout of the selected year's values, read straight from the chart data.
+function rangeYearText(age) {
+  const yr = ageToCalendarYear(age);
+  return (yr != null ? yr + ' · ' : '') + 'Age ' + age;
+}
+
+// The selected year's values, one per line (zeros left out), read straight from the chart data.
 function updateRangeReadout(chartKey, chart) {
   const readout = document.querySelector(`.range-readout[data-chart="${chartKey}"]`);
   if (!readout) return;
+  placeRangeReadout(readout);
   const st = chartRangeState[chartKey];
-  if (!st || st.selectedAge == null || !chart) {
-    readout.style.display = 'none';
-    readout.textContent = '';
-    return;
-  }
-  let idx = -1, parts = [];
+  const idx = (st && st.selectedAge != null && chart) ? findAgeIndex(chart, st.selectedAge) : -1;
+  if (idx < 0) { readout.style.display = 'none'; readout.innerHTML = ''; return; }
+  let rows = [];
   try {
-    idx = findAgeIndex(chart, st.selectedAge);
-    if (idx > -1) {
-      parts = (chart.data.datasets || []).map(ds => {
-        const raw = ds.data[idx];
-        const val = raw && typeof raw === 'object' ? raw.y : raw;
-        return (ds.label || 'Value') + ': ' + (typeof val === 'number' ? fmtMoney(val) : '—');
-      });
-    }
+    rows = (chart.data.datasets || []).map(ds => {
+      const raw = ds.data[idx];
+      const val = raw && typeof raw === 'object' ? raw.y : raw;
+      const label = String(ds.label || 'Value').replace(/\s*\((?:[^()]*|\([^()]*\))*\)\s*$/, '');
+      return { label, val: typeof val === 'number' ? val : 0, color: Array.isArray(ds.backgroundColor) ? ds.backgroundColor[idx] : ds.backgroundColor };
+    }).filter(r => Math.abs(r.val) >= 0.5);
   } catch (err) {
-    console.error('Range readout failed to read chart data:', err);
+    console.error('Year values failed to read chart data:', err);
   }
-  if (idx < 0) {
-    readout.style.display = 'none';
-    readout.textContent = '';
-    return;
-  }
-  const yr = ageToCalendarYear(st.selectedAge);
-  const yearText = yr != null ? yr : ('Age ' + st.selectedAge);
-  readout.textContent = yearText + '  —  ' + parts.join('   ·   ');
+  const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+  readout.innerHTML = `<div class="range-readout-title">${esc(rangeYearText(st.selectedAge))}</div>` +
+    (rows.length
+      ? rows.map(r => `<div class="range-readout-row"><span><i style="background:${esc(r.color || 'var(--muted)')}"></i>${esc(r.label)}</span><b>${esc(fmtMoney(r.val))}</b></div>`).join('')
+      : '<div class="range-readout-row"><span>Nothing in this chart for this year.</span></div>');
   readout.style.display = 'block';
+}
+
+// The values list sits just under the chart card (not inside it), so showing it never shrinks the chart.
+function placeRangeReadout(readout) {
+  if (readout.dataset.placed) return;
+  readout.dataset.placed = '1';
+  const card = readout.closest('.mini-chart-card');
+  if (card && card.parentNode) card.parentNode.insertBefore(readout, card.nextSibling);
+}
+
+// Builds the ‹ year › / All years controls once per chart, replacing the old « year Lifetime year » buttons.
+function buildRangeNav(nav) {
+  if (nav.dataset.built) return;
+  nav.dataset.built = '1';
+  const key = nav.dataset.chart;
+  nav.innerHTML =
+    `<button type="button" class="range-nav-btn range-arrow range-prev" aria-label="Previous year">‹</button>` +
+    `<span class="range-current">All years</span>` +
+    `<button type="button" class="range-nav-btn range-arrow range-next" aria-label="Next year">›</button>` +
+    `<button type="button" class="range-nav-btn lifetime">All years</button>`;
+  nav.querySelector('.range-prev').onclick = () => chartRangeNav(key, 'prev');
+  nav.querySelector('.range-next').onclick = () => chartRangeNav(key, 'next');
+  nav.querySelector('.lifetime').onclick = () => chartRangeNav(key, 'lifetime');
 }
 
 function updateChartRangeUi(chartKey, minAge, maxAge) {
   const nav = document.querySelector(`.chart-range-nav[data-chart="${chartKey}"]`);
   if (!nav) return;
+  buildRangeNav(nav);
   const st = chartRangeState[chartKey] || { selectedAge: null };
-  const lifetimeBtn = nav.querySelector('.lifetime');
-  const prevBtn = nav.querySelector('.range-prev');
-  const nextBtn = nav.querySelector('.range-next');
-  const prevLabel = prevBtn ? prevBtn.querySelector('.range-nav-label') : null;
-  const nextLabel = nextBtn ? nextBtn.querySelector('.range-nav-label') : null;
-  // Once a year is selected, all three controls read as one consecutive run of calendar
-  // years (e.g. « 2039   2040   2041 »), so stepping prev/next always lands on the
-  // adjacent year shown right next to the button you clicked.
-  const yearLabel = (age) => {
-    const yr = ageToCalendarYear(age);
-    return yr != null ? String(yr) : 'Age ' + age;
-  };
-  if (lifetimeBtn) lifetimeBtn.textContent = 'Lifetime';
-  if (st.selectedAge == null) {
-    if (lifetimeBtn) lifetimeBtn.classList.add('active');
-    if (prevLabel) prevLabel.textContent = yearLabel(minAge);
-    if (nextLabel) nextLabel.textContent = yearLabel(maxAge);
-    if (prevBtn) prevBtn.disabled = false;
-    if (nextBtn) nextBtn.disabled = false;
-  } else {
-    if (lifetimeBtn) lifetimeBtn.classList.remove('active');
-    const prevAge = Math.max(minAge, st.selectedAge - 1);
-    const nextAge = Math.min(maxAge, st.selectedAge + 1);
-    if (prevLabel) prevLabel.textContent = yearLabel(prevAge);
-    if (nextLabel) nextLabel.textContent = yearLabel(nextAge);
-    if (prevBtn) prevBtn.disabled = st.selectedAge <= minAge;
-    if (nextBtn) nextBtn.disabled = st.selectedAge >= maxAge;
-  }
+  const all = st.selectedAge == null;
+  nav.querySelector('.range-current').textContent = all ? 'All years' : rangeYearText(st.selectedAge);
+  // Always shown (highlighted while viewing all years) so the navigator's height never changes.
+  nav.querySelector('.lifetime').classList.toggle('active', all);
+  nav.querySelector('.range-prev').disabled = !all && st.selectedAge <= minAge;
+  nav.querySelector('.range-next').disabled = !all && st.selectedAge >= maxAge;
 }
+document.querySelectorAll('.chart-range-nav').forEach(buildRangeNav);
 
 function ensureOrUpdateChart(pageId, snap) {
   if (pageId === 'dashboard' || pageId === 'explorers') return; // handled separately

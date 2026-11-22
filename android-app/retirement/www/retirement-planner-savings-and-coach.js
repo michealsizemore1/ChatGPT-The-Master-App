@@ -79,7 +79,7 @@ function renderSavingsPage() {
     const grandTotal = lifetimeRows.reduce((s,r) => s+r.total, 0);
     els('savingsContribTable').innerHTML = `
       <div style="border:1px solid var(--border);border-radius:8px;padding:14px 16px;">
-        <div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:10px;">Lifetime</div>
+        <div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:10px;">Lifetime totals</div>
         ${lifetimeRows.map((r,i) => `<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:15.5px;"><span>${swatch(CHART_COLORS[i%CHART_COLORS.length])}${r.label}</span><span>${fmtMoney(r.total)}</span></div>`).join('')}
         <div class="total-row"><span>Total</span><span>${fmtMoney(grandTotal)}</span></div>
       </div>
@@ -105,7 +105,7 @@ function renderSavingsPage() {
     const grandTotal = lifetimeRows.reduce((s,r) => s+r.total, 0);
     els('savingsDrawdownsTable').innerHTML = `
       <div style="border:1px solid var(--border);border-radius:8px;padding:14px 16px;">
-        <div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:10px;">Lifetime</div>
+        <div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:10px;">Lifetime totals</div>
         ${lifetimeRows.map(r => `<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:15.5px;"><span>${swatch(CHART_COLORS[r.i%CHART_COLORS.length])}${r.label}</span><span>${fmtMoney(r.total)}</span></div>`).join('')}
         <div class="total-row"><span>Total</span><span>${fmtMoney(grandTotal)}</span></div>
       </div>
