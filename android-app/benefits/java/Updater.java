@@ -139,7 +139,7 @@ public final class Updater {
                     if (total > 0) progress.onProgress((int) (done * 100 / total));
                 }
             }
-            if (file.length() < 100_000) return "The download looks incomplete. Try again.";
+            if (file.length() < 20_000) return "The download looks incomplete. Try again."; // this app's APK is small (~60 KB)
             PackageInstaller pi = ctx.getPackageManager().getPackageInstaller();
             PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL);
             params.setAppPackageName(ctx.getPackageName());
