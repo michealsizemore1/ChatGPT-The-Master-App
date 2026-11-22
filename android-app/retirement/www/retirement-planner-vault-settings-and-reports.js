@@ -1354,3 +1354,34 @@ window.addEventListener('hashchange', () => {
   if (pageId === 'explorers') activateExplorerAnalysis(parts[1] || readInitialExplorerAnalysis(), true, true);
 });
 
+
+// ---------- App updates (Settings, Android app only) ----------
+// The Android app checks GitHub for a newer "retirement-app-N" release and reports back through these
+// two callbacks (see Updater.java / MainActivity.java). In a plain browser the card stays hidden.
+function renderAppUpdateStatus(st) {
+  const card = els('appUpdateCard');
+  if (!card || !st) return;
+  card.style.display = '';
+  const current = st.current || 0, latest = st.latest || 0;
+  if (els('appUpdateVersion')) els('appUpdateVersion').textContent = `You have version 1.${current}`;
+  if (els('appVersionLabel')) els('appVersionLabel').innerHTML = ` <b>Version 1.${current}</b>`;
+  const statusEl = els('appUpdateStatus');
+  const installBtn = els('appUpdateInstallBtn');
+  const checked = st.checkedAt ? new Date(st.checkedAt).toLocaleString([], { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }) : '';
+  if (st.available) {
+    statusEl.textContent = `Version 1.${latest} is ready to install.`;
+    installBtn.textContent = `⬆ Install version 1.${latest}`;
+    installBtn.style.display = '';
+  } else {
+    installBtn.style.display = 'none';
+    statusEl.textContent = st.error ? st.error
+      : (st.checkedAt ? `You're up to date (checked ${checked}).` : 'Checking for updates…');
+  }
+}
+window.onAppUpdateStatus = renderAppUpdateStatus;
+window.onAppUpdateMessage = msg => { const el = els('appUpdateStatus'); if (el) el.textContent = msg; };
+try {
+  if (window.AndroidApp && typeof window.AndroidApp.appUpdateStatus === 'function') {
+    renderAppUpdateStatus(JSON.parse(window.AndroidApp.appUpdateStatus()));
+  }
+} catch (e) { /* not in the Android app */ }

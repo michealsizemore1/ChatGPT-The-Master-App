@@ -974,8 +974,11 @@
   .chat-send-btn{
     border-radius:999px;
     background:linear-gradient(135deg,var(--service-blue),#356b9d);
+    color:#fff;
     box-shadow:0 5px 14px rgba(16,42,67,.18);
   }
+  /* Only titles that actually collapse their card get the ▼ marker. */
+  .card > h3:not([onclick])::after{display:none;}
   .dollar-toggle-btn.active{background:var(--flag-red);}
   .note,
   .shared-notes-card{
@@ -2329,7 +2332,17 @@
         <div class="dn-hdr"><span>&#x1F4DD; Notes</span><small>auto-saved, same on every page</small></div>
         <textarea class="shared-notes-textarea" oninput="updateSharedNotes(this.value)" placeholder="Jot down anything — questions for your financial advisor, things to double-check, reminders…" rows="3"></textarea>
       </div>
-      <div class="page-header"><h2>Settings</h2><p>Instructions, backup, restore, and integrations. <b>Build 2026.08.13.1</b></p></div>
+      <div class="page-header"><h2>Settings</h2><p>Instructions, backup, restore, and integrations.<span id="appVersionLabel"></span></p></div>
+
+      <div class="card no-autocollapse" id="appUpdateCard" style="display:none;">
+        <h3>App updates<span class="sub-label" id="appUpdateVersion"></span></h3>
+        <p id="appUpdateStatus" style="font-size:15.5px;color:var(--muted);margin:0 0 10px;line-height:1.5;">Checking…</p>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;">
+          <button type="button" class="add-btn" id="appUpdateInstallBtn" style="display:none;" onclick="window.AndroidApp.installAppUpdate()"></button>
+          <button type="button" class="add-btn" id="appUpdateCheckBtn" onclick="window.AndroidApp.checkForAppUpdate()">Check for updates</button>
+        </div>
+        <p style="font-size:14.5px;color:var(--muted);margin:10px 0 0;line-height:1.5;">Updates come from this planner's GitHub releases and install over the current version, so your plan and documents stay. The first time, Android asks you to allow installs from Retirement Planner.</p>
+      </div>
 
       <div class="card">
         <h3 onclick="toggleCard(this)">Local Storage<span class="sub-label">Automatically saved on this device</span></h3>

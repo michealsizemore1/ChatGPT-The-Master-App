@@ -73,6 +73,11 @@ public class MainActivity extends Activity {
                 }
                 return true;
             }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                startUpdateCheck(false, true);
+            }
         });
 
         web.setWebChromeClient(new WebChromeClient() {
@@ -85,6 +90,41 @@ public class MainActivity extends Activity {
         if (savedInstanceState == null || web.restoreState(savedInstanceState) == null) {
             web.loadUrl(START_URL);
         }
+    }
+
+    // ---------- In-app updates (see Updater) ----------
+    private boolean installing = false;
+
+    /** Checks GitHub in the background, then tells the page; on app start, mentions a new version once. */
+    private void startUpdateCheck(final boolean force, final boolean announce) {
+        new Thread(new Runnable() {
+            @Override public void run() {
+                Updater.check(getApplicationContext(), force);
+                runOnUiThread(new Runnable() {
+                    @Override public void run() {
+                        sendUpdateStatus();
+                        if (announce && Updater.updateAvailable(MainActivity.this)) {
+                            int latest = Updater.latestBuild(MainActivity.this);
+                            android.content.SharedPreferences p = getSharedPreferences("updater", 0);
+                            if (p.getInt("announced", 0) != latest) {
+                                p.edit().putInt("announced", latest).apply();
+                                Toast.makeText(MainActivity.this, "Retirement Planner version 1." + latest + " is ready. Install it from Settings \u2192 App updates.", Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    }
+                });
+            }
+        }).start();
+    }
+
+    private void sendUpdateStatus() {
+        if (web == null) return;
+        web.evaluateJavascript("window.onAppUpdateStatus && window.onAppUpdateStatus(" + Updater.status(this).toString() + ")", null);
+    }
+
+    private void sendUpdateMessage(String msg) {
+        if (web == null) return;
+        web.evaluateJavascript("window.onAppUpdateMessage && window.onAppUpdateMessage(" + org.json.JSONObject.quote(msg) + ")", null);
     }
 
     private boolean openFileChooser(ValueCallback<Uri[]> callback, WebChromeClient.FileChooserParams params) {
@@ -189,8 +229,56 @@ public class MainActivity extends Activity {
         });
     }
 
-    /** Lets the page save backups and exports into the phone's Downloads folder, and open vault documents. */
+    /** Lets the page save backups and exports into the phone's Downloads folder, open vault documents, and update the app. */
     public class Bridge {
+        @JavascriptInterface
+        public String appUpdateStatus() {
+            return Updater.status(MainActivity.this).toString();
+        }
+
+        @JavascriptInterface
+        public void checkForAppUpdate() {
+            runOnUiThread(new Runnable() { @Override public void run() { sendUpdateMessage("Checking for updates\u2026"); } });
+            startUpdateCheck(true, false);
+        }
+
+        @JavascriptInterface
+        public void installAppUpdate() {
+            runOnUiThread(new Runnable() {
+                @Override public void run() {
+                    if (installing) return;
+                    if (!Updater.canInstall(MainActivity.this)) {
+                        sendUpdateMessage("Turn on \"Allow from this source\" for Retirement Planner, then come back and tap Install again.");
+                        try { startActivity(Updater.permissionIntent(MainActivity.this)); } catch (Exception e) {
+                            try { startActivity(new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + getPackageName()))); } catch (Exception ignored) { }
+                        }
+                        return;
+                    }
+                    installing = true;
+                    final int build = Updater.latestBuild(MainActivity.this);
+                    sendUpdateMessage("Downloading version 1." + build + "\u2026");
+                    new Thread(new Runnable() {
+                        int last = -1;
+                        @Override public void run() {
+                            final String err = Updater.install(getApplicationContext(), new Updater.Progress() {
+                                @Override public void onProgress(final int pct) {
+                                    if (pct / 5 == last) return;
+                                    last = pct / 5;
+                                    runOnUiThread(new Runnable() { @Override public void run() { sendUpdateMessage("Downloading version 1." + build + "\u2026 " + pct + "%"); } });
+                                }
+                            });
+                            runOnUiThread(new Runnable() {
+                                @Override public void run() {
+                                    installing = false;
+                                    sendUpdateMessage(err != null ? err : "Installing version 1." + build + "\u2026 Confirm if Android asks. The app closes when it's done; open it again to use the new version.");
+                                }
+                            });
+                        }
+                    }).start();
+                }
+            });
+        }
+
         @JavascriptInterface
         public boolean saveFile(String name, String mime, String base64) {
             return write(name, mime, base64, false);
