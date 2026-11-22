@@ -250,6 +250,12 @@ public class MainActivity extends Activity {
     /** Lets the page save backups and CSV exports, and send a backup to Google Drive (or any app). */
     public class Bridge {
         @JavascriptInterface
+        public String appVersion() {
+            try { return getPackageManager().getPackageInfo(getPackageName(), 0).versionName; }
+            catch (Exception e) { return ""; }
+        }
+
+        @JavascriptInterface
         public boolean saveFile(String name, String mime, String base64) {
             try {
                 String safe = safeName(name);

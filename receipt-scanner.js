@@ -1,10 +1,11 @@
 (function(){
   'use strict';
   var STORAGE='meridian_money_data_v5';
-  var CATEGORIES=['Books','Dining & Coffee','Entertainment','Groceries','Health & Fitness','Housing','Insurance','Other','Personal Care','Personal Support','Pets','Service','Shopping','Subscriptions','Transportation','Travel','Utilities'];
+  var CATEGORIES=['Books','Coffee','Dining','Entertainment','Groceries','Health & Fitness','Housing','Insurance','Other','Personal Care','Personal Support','Pets','Service','Shopping','Subscriptions','Transportation','Travel','Utilities'];
   var rules=[
     ['Groceries',/\b(milk|bread|egg|cheese|fruit|apple|banana|berry|vegetable|lettuce|meat|beef|chicken|pork|rice|pasta|cereal|yogurt|coffee|tea|juice|water|snack|cookie|chips|grocery|produce|frozen|sauce|flour|sugar)\b/i],
-    ['Dining & Coffee',/\b(burger|sandwich|pizza|latte|mocha|espresso|meal|combo|restaurant|cafe|tip)\b/i],
+    ['Coffee',/\b(latte|mocha|espresso|cappuccino|americano|macchiato|frappuccino|cold brew)\b/i],
+    ['Dining',/\b(burger|sandwich|pizza|meal|combo|restaurant|cafe|tip)\b/i],
     ['Transportation',/\b(gas|fuel|oil change|parking|tire|auto|car wash|uber|lyft)\b/i],
     ['Personal Care',/\b(shampoo|conditioner|soap|deodorant|tooth|lotion|cosmetic|makeup|hair|razor)\b/i],
     ['Health & Fitness',/\b(medicine|pharmacy|vitamin|supplement|protein|prescription|medical|fitness|gym)\b/i],
@@ -15,7 +16,7 @@
     ['Housing',/\b(rent|mortgage|home repair|hardware|lumber|paint)\b/i],
     ['Shopping',/\b(clothing|shirt|pants|shoe|jacket|dress|household|decor|electronics)\b/i]
   ];
-  function categoryFor(name){var text=String(name||'');if(/\b(walmart|costco|winco|albertsons|kroger|safeway|trader joe|whole foods)\b/i.test(text))return'Groceries';if(/\b(starbucks|mcdonald|wendy|subway|restaurant|cafe|grill)\b/i.test(text))return'Dining & Coffee';if(/\b(shell|chevron|exxon|sinclair|maverik|gas station)\b/i.test(text))return'Transportation';if(/\b(walgreens|cvs|rite aid|pharmacy)\b/i.test(text))return'Health & Fitness';for(var i=0;i<rules.length;i++)if(rules[i][1].test(text))return rules[i][0];return'Shopping';}
+  function categoryFor(name){var text=String(name||'');if(/\b(walmart|costco|winco|albertsons|kroger|safeway|trader joe|whole foods)\b/i.test(text))return'Groceries';if(/\b(starbucks|dutch bros|coffee|espresso|moxie java|human bean|black rifle|dunkin|peet'?s)\b/i.test(text))return'Coffee';if(/\b(mcdonald|wendy|subway|restaurant|cafe|grill)\b/i.test(text))return'Dining';if(/\b(shell|chevron|exxon|sinclair|maverik|gas station)\b/i.test(text))return'Transportation';if(/\b(walgreens|cvs|rite aid|pharmacy)\b/i.test(text))return'Health & Fitness';for(var i=0;i<rules.length;i++)if(rules[i][1].test(text))return rules[i][0];return'Shopping';}
   function money(v){var n=Number(String(v||'').replace(/[^0-9.-]/g,''));return Number.isFinite(n)?Math.abs(n):0;}
   function parseReceipt(text){
     var rows=[],lines=String(text||'').split(/\r?\n/).map(function(x){return x.replace(/\s+/g,' ').trim();}).filter(Boolean);
