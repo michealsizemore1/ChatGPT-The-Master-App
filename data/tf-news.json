@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-21T19:46:56+00:00",
+  "updatedAt": "2026-11-22T07:26:53+00:00",
   "source": "Google News searches for college track & field",
   "news": [
     {
@@ -15,22 +15,64 @@
       "url": "https://news.google.com/rss/articles/CBMihAFBVV95cUxPOTduNGZXSkV4UF9KUHdPSHBDc2g2SlFzMFV2U2RSMFVEYXRFQjlTMEN3U2Jxa2R6YjNHcE1WNHY0M1dIaERpRGp6ZUQ5amhBWjEtRnpGMndWUUlWelgtYmwwSTFPdGp5MHR3YWE3clFpT3p4MldpR0JFc2MtOUk1VEJTOEw?oc=5"
     },
     {
-      "date": "2026-11-20",
-      "headline": "Track and Field announces indoor schedule",
-      "source": "University of Maine Athletics",
-      "url": "https://news.google.com/rss/articles/CBMipgFBVV95cUxNdHJwTVFRWEF2bXZiT3pSRUpzcG5aMm5HTW16dmM0eEQzMUppaVdYZzB6RmdIQjdYWnc0R3QxM2pnaHJaNHBFMTktMkxIVXY3TUttYjhSeUlITmhWNHVoU0llN0NORGY5TTFtem5tNEQ3Z1M0a3MxU0F3OWU3SUdjQnJuTi0yekdoYnhWSkFrS3dyOXBPT2pydEdIaU1vampXQzRLMm1B?oc=5"
+      "date": "2026-11-16",
+      "headline": "After six years on the road, Mizzou track and field brings outdoor competition back to Columbia",
+      "source": "Yahoo Sports",
+      "url": "https://news.google.com/rss/articles/CBMiggFBVV95cUxQYnVLQjhHUVRvLWNJMExINVZvN1ktX0J3RFExWHVZX2MyWGxIbXpGdkFHdDBGeTFxY0oxckU4T3VSQzZoNHdQdXhoWWQxS3ZQcGprVmZSaE56cVpRZGhnVGV0VENCb21VNWY1R0FSdHU1aEE0aHBoczZ3dXg5TWZ0enFn?oc=5"
     },
     {
-      "date": "2026-11-19",
-      "headline": "AAMU Announces 2026-27 Track & Field Schedule",
-      "source": "Alabama A&M Athletics",
-      "url": "https://news.google.com/rss/articles/CBMipgFBVV95cUxPLXRMWXdzeUdjS1VkTUJYZk12ZjNNdDhOaWQ5WnIwX1BPcjYwWV9VWWQ2a2l6N3FXQkhCZF9VZy02ZmhCQm5oS1VnV05Wd1ZpazdSUmgwN1RKWXBzOVk0UWxfTzZ5alVubUN3NEszYUxnQ09DQmpjSG9WTFVzRUxpQ0ljWEtrZ1RiQmEySnNxZHlFVzZfRjhONVVpcE96RWxNb2ZyQ0FB?oc=5"
+      "date": "2026-11-16",
+      "headline": "Halter Announces 2027 Track and Field Schedule",
+      "source": "Mizzou Athletics",
+      "url": "https://news.google.com/rss/articles/CBMiiwFBVV95cUxPV1JITG1QRmcyQUdPdUxodXVnajdfQXdsMFRYVlRUdTNjSzlGUFVndXB2OGQ3ZDBYNDdfZXJTZ3lwSHpjZnp2VHJuZjgxVjZUTWgxQ3FLTkNhR18tSFpVRmxJR2pUaFhQUl84Yk1CTWxSUlMzVU1QNUFiZXlRaWJtY0Y3UWNVRVFOYkxV?oc=5"
+    },
+    {
+      "date": "2026-11-16",
+      "headline": "Track and Field Announces 2027 Schedule",
+      "source": "UCF Athletics",
+      "url": "https://news.google.com/rss/articles/CBMihAFBVV95cUxOTE9pVFVnXzdYMDY3TFNFOTg5aGg4dlF5ZFNLTEpDS2tFb3VKRy1wMGFHT0ctaGw2MEpiMGo2cE1nUGptUTNrOEo3Wm5nejhMSlBJYklwdGxZRFI3STVZN1JUNUFNekdRZTVuV2d4QzlJblBsM3JtSWFyR1U5RURsVW9lWno?oc=5"
+    },
+    {
+      "date": "2026-11-15",
+      "headline": "Daniel Sianez - 2027 - Men's Track & Field",
+      "source": "Lubbock Christian University Athletics",
+      "url": "https://news.google.com/rss/articles/CBMiekFVX3lxTE5vN0IxMU45bllpWG9Cb0kyRl93LVJGbzFFN05ybkRXeDFQU3p0eHVZeVFMUkhwVHZudTNxSWpzYW9wZEZ0cWNEODVyYkRZWVZzQ3o5RWdleS1KeG84N0duT19NUVkwNF9uaEZ2RnpQQVNkVzZfZDlOTVpB?oc=5"
+    },
+    {
+      "date": "2026-11-10",
+      "headline": "Track and Field Announces 2026-27 Indoor Schedule",
+      "source": "Dartmouth College Athletics",
+      "url": "https://news.google.com/rss/articles/CBMisgFBVV95cUxNZXJrbVl1SFFMTkxiY2N4aGZMS0FJc1prUkdVZDNvMVNiUkM2WkU1Yk1xTFJCeFVxVG0tTFJBalItODA0UF9UX3Vmd2ZUb3RDQnM5VzRSWUk2amd0RkFjSmVoSzZ3Q3A5LUdvUVlncldtSS02QXkxc2FMTGJqb0tXbVQ3NEhiVXBvMi1iTjJlSVJCQ2ItTmdMOGttZTdmeDN2bER6cmhpZ3NDdV9wa3h5eWln?oc=5"
+    },
+    {
+      "date": "2026-11-10",
+      "headline": "CSUN Releases Track & Field Schedule",
+      "source": "CSUN Athletics",
+      "url": "https://news.google.com/rss/articles/CBMilAFBVV95cUxOYmt2aEdHN256aGJacHVIOERFZWZydWthdEgteUFzRTRxZGJJVXp1TVhtc2dldWNReHJZSnhUcWl6dmJ4Z2JLbFF4LXowaHpkd1lKV3E4ekhlc2phQWdpbWxVa1JRbklZYXFTWEpNSVpEWE0tRDNKUHBka3V3SnI5bndLMUFTeUYxNjU1WXI5QjBBODJQ?oc=5"
+    },
+    {
+      "date": "2026-11-05",
+      "headline": "Track & Field Releases 2027 Schedule - Texas A&M Aggies - Official Athletics Website",
+      "source": "Texas A&M Athletics",
+      "url": "https://news.google.com/rss/articles/CBMif0FVX3lxTFBkU0J0QWlWWWFBb2lPTmNTS2o1VTNKV3VBVTYydVF2RWR1bmN3bXVjYm9XanlHNFRQUEtqR2RTTVdTMVJ4QkEyUWgzRzU5QnJnd3l1MFZFRHdrUWszU0hGSWktS05Bc01Wc2Fyb2k4cWJOTUg0VkJ0b3lLd0VYTW8?oc=5"
+    },
+    {
+      "date": "2026-11-03",
+      "headline": "Head Coach Carson Blackwelder Announces 2027 Indoor Track and Field Schedule",
+      "source": "USC Upstate Athletics",
+      "url": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxQVkxpdkxkTENsMEUyUWNpVjVENWFZRUwtdE1VME4tbzBkczFmV0NJcDdreHR3YzJ1V1J6WTc2SHV5U2drSHFzNENueGpUcnB4T25YSFNxMU1HTC1GWmFmZmtBS01WWDVYdnZhZ24tSmw1MTkyZWlQNWdHTVoxdUJaWUFLdUtBOENlWkVabkxSNzlXUkY5cEFFd01BdHpmeGduYlZSQTBLVzFpbG5MWTNVUlM2Zm1xMWpLbFZZ?oc=5"
     },
     {
       "date": "2026-11-03",
       "headline": "When does the 2027 NCAA indoor track and field season start?",
       "source": "NCAA.com",
       "url": "https://news.google.com/rss/articles/CBMixgFBVV95cUxNTERYWWRaVjlPWVBsWEtsSEhJMVAzTmdVSjUzVXI4VzdBSzJrSjY2UVY4ZEU4emZQZlJPTmVWOW44dlZjSWptMEszQXdtZU5IQjBoVnVZOThWT2QxeE5lVGRqcUZMb20zZE82SkotTjlPS0FpSzUwNFk4Y0RJLVg0eURqZ29Kb1FUUHNuc2EtSVZOWERHVjlHZTNrRk9BaWFqV21Tdnd6eFVTTnpNLU01bWpoY3NwTVJZcHVmcmlaaW1SbUx3dWfSAcsBQVVfeXFMT0hudXB1ZS1zVkc1cGlVa3FfTUdHU181N1hNTHN6MHJqM3VydmZheGxCVjFQX0VSZFlPbkZJYzByUWVhV1RJcWpHcGktTGwtenA1R0oyYXM2cHdiRUZfTUcxMXRZaEpsV0dDTFd6emFpZl9reHRwMk1POU9RamNKdGgwYnhSYW5OUEtVd1dKZklESWIxTnNJdEFzTl9maDMzYy1sM2xJUm56VTVveHVwMm15NmdSZVJJUHd2NVFRV0E5MUVYcnc5TVExSkU?oc=5"
+    },
+    {
+      "date": "2026-11-03",
+      "headline": "LSU Announces 2027 Indoor and Outdoor Track & Field Schedule",
+      "source": "LSUsports.net",
+      "url": "https://news.google.com/rss/articles/CBMiogFBVV95cUxPZjRWS19FWUNrdmRxY3FFTlVoYVBwX0thR01NYkRzS3BBb0R0VnptcmU2NmNsTDRScnYtZnNTcFJLSFp6cW1iMEVFdFFJQm5UUGx4c0RxQm44bGV2RW5sZHNxMURnUHBlWGo0cS1GWEN3cFhjZF9VR2lqNGhNeU1xS2pBVUw3QU0yRldWMnpyWUlWaUYwMF9SNkRCcEJBYjJPRnc?oc=5"
     }
   ]
 }
