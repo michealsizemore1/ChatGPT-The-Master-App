@@ -1,6 +1,10 @@
-"""Packs retirement-planner.html and everything it loads into the APK's www folder.
+"""Packs the app's own copy of the planner (android-app/retirement/www/) into the APK's www folder.
 
 Usage (from the repo root): python3 android-app/retirement/bundle.py <dest-www-folder>
+
+The app has its own copy of the planner so app changes never touch the website's
+retirement-planner files (and website changes never reach the app). Edit the files in
+android-app/retirement/www/ to change the app.
 
 - Local scripts are copied as-is (cache-busting ?v= stripped).
 - CDN libraries (Chart.js, pdf.js, ...) are downloaded so the app works offline.
@@ -16,8 +20,9 @@ import urllib.request
 
 dst = sys.argv[1]
 os.makedirs(dst, exist_ok=True)
+SRC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "www")
 
-html = open("retirement-planner.html", encoding="utf-8").read()
+html = open(os.path.join(SRC, "retirement-planner.html"), encoding="utf-8").read()
 html = re.sub(r'<link[^>]*rel="manifest"[^>]*>\s*', "", html)
 html = re.sub(r'<script[^>]*home-button\.js[^>]*>\s*</script>\s*', "", html)
 html = re.sub(r'(src="[^"?]+\.js)\?[^"]*"', r'\1"', html)
@@ -55,7 +60,7 @@ for src in re.findall(r'<script[^>]*src="([^"]+)"', html):
         continue
     rel = os.path.normpath(src)
     os.makedirs(os.path.join(dst, os.path.dirname(rel)), exist_ok=True)
-    shutil.copy(rel, os.path.join(dst, rel))
+    shutil.copy(os.path.join(SRC, rel), os.path.join(dst, rel))
     print("bundled", rel)
 
 open(os.path.join(dst, "index.html"), "w", encoding="utf-8").write(html)

@@ -1,11 +1,12 @@
-# Builds the Retirement Planner as a real Android app (APK) from retirement-planner.html.
-# The whole planner (and the chart/PDF libraries it uses) is packed inside the APK, so it
-# opens offline and doesn't load the page from the website. Only "Ask AI" needs internet.
+# Builds the Retirement Planner as a real Android app (APK) from the app's own copy of the
+# planner in android-app/retirement/www/ (separate from the website's retirement-planner
+# files, so changing one never changes the other). The whole planner and the chart/PDF
+# libraries it uses are packed inside the APK, so it opens offline. Only "Ask AI" needs internet.
 #
 # Uses the same APP_SIGNING_PASSWORD secret and saved signing key as the M&C Money app
 # (android-app.yml). That workflow is not changed by this one.
 #
-# Every time the planner files change (or you press "Run workflow" on the Actions tab),
+# Every time the app's planner files change (or you press "Run workflow" on the Actions tab),
 # a new APK appears under Releases as "Retirement Planner app v1.N". Install it over the
 # old one; your data stays.
 name: Build Retirement Planner app
@@ -14,9 +15,6 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - retirement-planner.html
-      - retirement-planner-*.js
-      - master-backup-shared.js
       - android-app/retirement/**
       - .github/workflows/retirement-app.yml
 
