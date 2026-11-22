@@ -206,9 +206,18 @@ function applyChartRange(chartKey) {
   if (chart) {
     try {
       const idx = st.selectedAge == null ? -1 : findAgeIndex(chart, st.selectedAge);
-      // Highlight the selected year's bars; no floating tooltip (the values are listed under the card).
-      chart.setActiveElements(idx > -1 ? chart.data.datasets.map((_, datasetIndex) => ({ datasetIndex, index: idx })) : []);
-      if (chart.tooltip) chart.tooltip.setActiveElements([], { x: 0, y: 0 });
+      // Highlight the selected year's bars and pin the pop-up on them, so it moves with ‹ / ›.
+      const active = idx > -1 ? chart.data.datasets.map((_, datasetIndex) => ({ datasetIndex, index: idx })) : [];
+      chart.setActiveElements(active);
+      if (chart.tooltip) {
+        let pos = { x: 0, y: 0 };
+        for (const el of active) {
+          const meta = chart.getDatasetMeta(el.datasetIndex);
+          const item = meta && !meta.hidden && meta.data && meta.data[el.index];
+          if (item && (!pos.x || item.y < pos.y)) pos = { x: item.x, y: item.y };
+        }
+        chart.tooltip.setActiveElements(active, pos);
+      }
       chart.update();
     } catch (err) {
       console.error('Chart year highlight failed (navigator and values still updated):', err);
@@ -236,7 +245,7 @@ function updateRangeReadout(chartKey, chart) {
     rows = (chart.data.datasets || []).map(ds => {
       const raw = ds.data[idx];
       const val = raw && typeof raw === 'object' ? raw.y : raw;
-      const label = String(ds.label || 'Value').replace(/\s*\((?:[^()]*|\([^()]*\))*\)\s*$/, '');
+      const label = shortSeriesLabel(ds.label);
       return { label, val: typeof val === 'number' ? val : 0, color: Array.isArray(ds.backgroundColor) ? ds.backgroundColor[idx] : ds.backgroundColor };
     }).filter(r => Math.abs(r.val) >= 0.5);
   } catch (err) {
@@ -320,6 +329,17 @@ function ensureOrUpdateChart(pageId, snap) {
 // growth assumption (General/Medical Inflation, SS COLA, or its own yearly-increase %) compounding over time.
 const YEARLY_CHART_PAGES = ['income', 'moneyflows', 'housing', 'expenses', 'medical', 'gap', 'taxes', 'incomeexpenses'];
 
+function shortSeriesLabel(label) {
+  return String(label || 'Value').replace(/\s*\((?:[^()]*|\([^()]*\))*\)\s*$/, '');
+}
+// Pop-ups on every chart leave out lines that are $0 for that year (if the whole year is $0, one line
+// stays so the pop-up still shows which year is selected).
+if (window.Chart && Chart.defaults && Chart.defaults.plugins && Chart.defaults.plugins.tooltip) {
+  const tooltipValue = item => item.parsed && (item.chart && item.chart.options.indexAxis === 'y' ? item.parsed.x : item.parsed.y);
+  const isZero = item => { const v = tooltipValue(item); return typeof v === 'number' && Math.abs(v) < 0.5; };
+  Chart.defaults.plugins.tooltip.filter = (item, index, items) => !isZero(item) || (index === 0 && items.every(isZero));
+}
+
 function yearlyBarConfig(ages, series, opts) {
   opts = opts || {};
   const datasets = series.map((s, i) => ({
@@ -346,7 +366,8 @@ function yearlyBarConfig(ages, series, opts) {
         tooltip: {
           enabled: true,
           callbacks: {
-            label: item => item.dataset.label + ': ' + fmtMoney(item.parsed.y),
+            // Short names (the "(own yearly increase %)" notes are in the legend) so the pop-up fits on a phone.
+            label: item => shortSeriesLabel(item.dataset.label) + ': ' + fmtMoney(item.parsed.y),
             // Opt-in per chart via opts.bracketLabels (one string per age/bar, e.g. the Taxes page's
             // Estimated Taxes chart showing "22% federal bracket") — printed once per hovered bar,
             // below the per-series $ lines above, instead of repeating on every dataset row.
