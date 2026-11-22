@@ -17,7 +17,10 @@ on:
       - receipt-scanner.js
       - master-backup-shared.js
       - vendor/**
-      - android-app/**
+      - android-app/java/**
+      - android-app/www/**
+      - android-app/icon/**
+      - android-app/bundle-offline.sh
       - .github/workflows/android-app.yml
 
 permissions:
