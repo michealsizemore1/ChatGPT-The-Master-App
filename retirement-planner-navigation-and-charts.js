@@ -153,9 +153,9 @@ let charts = {};
 let lastSnapshot = null;
 let dollarView = 'nominal'; // 'nominal' (future $) | 'real' (today's $)
 const DOLLAR_VIEW_KEY = 'retirementPlannerDollarView_v1';
-// Which Expenses column ('liketo' / 'mustspend' / 'jobloss') sets baseline spending for every
+// Which Expenses column ('liketo' / 'mustspend') sets baseline spending for every
 // projection. The Must Spend floor for guardrails is always the essentials total regardless.
-let spendingBasis = 'liketo'; // 'liketo' | 'mustspend' | 'jobloss' (test)
+let spendingBasis = 'liketo'; // 'liketo' | 'mustspend'
 const SPENDING_BASIS_KEY = 'retirementPlannerSpendingBasis_v1';
 
 // Deflates a value anchored at a given future age back to today's purchasing power, using General Inflation.
@@ -183,56 +183,13 @@ function setSpendingBasis(mode) {
   const activePage = document.querySelector('.page.active');
   if (activePage && activePage.dataset.page === 'explorers') renderExplorers();
 }
-// An expense row's value for the selected basis, with the same fallbacks as buildContext (Must Spend ->
-// Like to Spend; Job Loss -> Must Spend -> Like to Spend).
+// An expense row's value for the selected basis (Must Spend falls back to Like to Spend, as in buildContext).
 function expenseValForBasis(e) {
   const mustSpend = e.mustSpend != null ? +e.mustSpend : (+e.amount || 0);
   if (spendingBasis === 'mustspend') return mustSpend;
-  if (spendingBasis === 'jobloss') return e.jobLoss != null ? +e.jobLoss : mustSpend;
   return +e.amount || 0;
 }
 
-// Job Loss test: the specific calendar date the header toggle's Job Loss basis actually kicks in on —
-// lives outside .page like dollarView/spendingBasis above, so it gets its own dedicated localStorage key
-// rather than the generic per-page saveState() mechanism.
-let jobLossDate = '2026-12-31';
-const JOB_LOSS_DATE_KEY = 'retirementPlannerJobLossDate_v1';
-// Calendar date -> the whole-number age it falls in (the engine works in whole years).
-function dateToAge(dateStr, currentAge) {
-  if (!dateStr) return null;
-  // Anchor on the actual birth date (day precision, same logic as computeAgeFromBirthDate) rather
-  // than approximating via elapsed time from today — see monthToAge for why the old approach was
-  // off by one for anyone whose birthday hasn't occurred yet this calendar year.
-  const birthDateStr = els('birthDate') ? els('birthDate').value : '';
-  const [by, bm, bd] = (birthDateStr || '').split('-').map(Number);
-  if (by && bm) {
-    const [ty, tm, td] = dateStr.split('-').map(Number);
-    let age = ty - by;
-    const hadBirthday = (tm > bm) || (tm === bm && (bd ? td >= bd : true));
-    if (!hadBirthday) age--;
-    return Math.max(0, age);
-  }
-  const target = new Date(dateStr + 'T00:00:00');
-  const today = new Date();
-  const yearsAway = (target - today) / (365.25*24*60*60*1000);
-  return Math.max(0, Math.round(currentAge + yearsAway));
-}
-function setJobLossDate(value) {
-  jobLossDate = value;
-  try { localStorage.setItem(JOB_LOSS_DATE_KEY, value); } catch (e) { /* storage unavailable, ignore */ }
-  const hintEl = els('jobLossDateHint');
-  if (hintEl) {
-    if (!value) { hintEl.textContent = ''; }
-    else {
-      const currentAge = +els('currentAge').value;
-      const age = dateToAge(value, currentAge);
-      const today = new Date(), target = new Date(value + 'T00:00:00');
-      const monthsAway = Math.round((target - today) / (30.437*24*60*60*1000));
-      hintEl.textContent = monthsAway <= 0 ? `≈ age ${age}` : `≈ ${monthsAway} mo away — age ${age}`;
-    }
-  }
-  render();
-}
 const PAGE_LABELS = {
   dashboard:'Overview', personal:'Personal & Family', income:'Income', survivorship:'Survivorship', moneyflows:'Money Flows',
   investments:'Investments', housing:'Housing', expenses:'Expenses', incomeexpenses:'Income vs Expenses', debt:'Debt',

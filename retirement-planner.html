@@ -124,23 +124,14 @@
   .dollar-toggle{display:flex; border:1px solid rgba(255,255,255,0.3); border-radius:20px; overflow:hidden; flex-shrink:0; margin-top:2px;}
   .dollar-toggle-btn{padding:8px 14px; font-size:16.5px; color:#cfe6e0; cursor:pointer; white-space:nowrap;}
   .dollar-toggle-btn.active{background:var(--teal); color:#fff; font-weight:600;}
-  /* The score sits above the label (not inline beside it) so each button reads as one compact stacked
-     unit instead of a long "Label NN%" strip — three of those side by side is what was crowding the row.
-     A shared min-width keeps all 3 pills the same size instead of "Job Loss" (shortest label) rendering
-     noticeably narrower than "Must Spend"/"Like to Spend" — that width mismatch, combined with
-     align-items:center centering a narrow pill's content, was reading as lopsided empty space on one side. */
+  /* Score stacked above the label; a shared min-width keeps both pills the same size. */
   .spending-basis-toggle-btn{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; min-width:96px;}
   .mc-mini-score{display:inline-flex; align-items:center; justify-content:center; min-width:48px; height:28px; padding:0 9px; border-radius:14px; font-size:15px; font-weight:800; color:#fff; line-height:1;}
   /* Ending net worth at your spouse's own life expectancy, under that tile's specific spending basis —
      a third, smaller line under the label so it reads as "extra detail" rather than competing with the
      confidence-score badge above it for attention. */
   .mc-mini-longevity{font-size:11px; color:#cfe6e0; line-height:1.2; white-space:nowrap;}
-  /* Left-aligned (not flex-end) so the date picker below the toggle lines up under "Job Loss" (the
-     first/leftmost button), not under whichever button happens to be widest/last. */
   .header-toggle-group{display:flex; flex-direction:column; gap:6px; align-items:flex-start; max-width:100%;}
-  .job-loss-date-wrap{display:flex; flex-direction:column; gap:2px; align-items:flex-start;}
-  .job-loss-date-wrap input[type="date"]{font-size:12px; padding:3px 6px; border-radius:6px; border:1px solid var(--border,#ccc);}
-  .job-loss-date-wrap span{font-size:11px; color:#cfe6e0;}
   .hamburger-btn{
     background:rgba(255,255,255,0.12);
     border:1px solid rgba(255,255,255,0.25);
@@ -323,7 +314,7 @@
   .row-list{margin-top:8px;}
   .row-item{display:grid; grid-template-columns:1.3fr 0.9fr 26px; gap:8px; align-items:center; margin-bottom:8px;}
   .row-item.debt-row{grid-template-columns:1.1fr 0.8fr 0.55fr 0.4fr 0.45fr 0.45fr 0.55fr 0.6fr 0.5fr 26px;}
-  .row-item.expense-row{grid-template-columns:1.1fr 1fr 0.7fr 0.7fr 0.7fr 26px;}
+  .row-item.expense-row{grid-template-columns:1.2fr 1fr 0.8fr 0.8fr 26px;}
   /* Starts/Ends date pickers for a recurring expense — a separate full-width row directly under each
      .row-item.expense-row rather than 2 more columns squeezed into that already-tight 6-column grid.
      Deliberately its own simple flex row (not a .row-item variant) so it doesn't have to satisfy the
@@ -389,7 +380,7 @@
   .row-header.cols-contrib{grid-template-columns:1.6fr 0.9fr;}
   .row-header.cols-future{grid-template-columns:1.4fr 0.6fr 0.7fr 0.8fr 26px;}
   .row-header.cols-windfall{grid-template-columns:1.3fr 0.5fr 0.7fr 0.8fr 26px;}
-  .row-header.cols-expense{grid-template-columns:1.1fr 1fr 0.7fr 0.7fr 0.7fr 26px;}
+  .row-header.cols-expense{grid-template-columns:1.2fr 1fr 0.8fr 0.8fr 26px;}
   .row-header.cols-insurance{grid-template-columns:1.2fr 0.8fr 0.7fr 0.7fr 26px;}
   .row-header.cols-vault{grid-template-columns:1.3fr 0.5fr 0.7fr 0.6fr 56px 26px;}
   .vault-search-hit{background:#fbfcfc; border:1px solid var(--border); border-radius:8px; padding:10px 13px; margin-bottom:8px;}
@@ -668,9 +659,7 @@
     .dollar-toggle{flex-wrap:wrap; flex-shrink:1; max-width:100%; border:none; border-radius:0; overflow:visible; gap:5px;}
     .dollar-toggle-btn{font-size:12.5px; padding:5px 8px; border:1px solid rgba(255,255,255,0.35); border-radius:14px;}
     .dollar-toggle-btn.active{border-color:var(--teal);}
-    /* Smaller shared min-width than the desktop 96px — still keeps all 3 pills the same size as each
-       other, just narrow enough that "Job Loss" + "Must Spend" + "Like to Spend" actually fit on one
-       line at phone widths instead of the 3rd one wrapping to its own row. */
+    /* Smaller shared min-width than the desktop 96px so both pills fit on one line on phones. */
     .spending-basis-toggle-btn{min-width:82px;}
     .mc-mini-score{font-size:13px; min-width:38px; height:24px; padding:0 7px; border-radius:12px;}
     /* Stretch the row and let each button grow to fill it, instead of the row only being as wide as its
@@ -733,27 +722,18 @@
     .row-header > *{
       font-size:13px;
     }
-    /* Recurring Monthly Expenses (expense-row: name, category, Job Loss, Must Spend, Like to Spend,
-       remove) — the generic rule above pairs fields 2-and-3 together (category + Job Loss), which
-       visually separates the three $ columns from each other even though they're meant to be compared
-       side by side. Give category its own full-width line instead, and let the three $ columns share
-       one row at a third each — matches the desktop column order. !important is required here: the
-       generic ".row-item > *:not(:first-child):not(.remove-btn):not(.open-btn)" rule above has higher
-       CSS specificity (4 class/pseudo-class selectors, via its two chained :not() clauses) than this more
-       specific-looking ".row-item.expense-row > *:nth-child(n)" selector (only 3), so without !important
-       the generic 50/50 pairing silently wins regardless of source order, and every field here collapses
-       back into 2-per-line pairs instead of "category alone, then the 3 $ fields together." */
+    /* Recurring Monthly Expenses (name, category, Must Spend, Like to Spend, remove): category gets its
+       own line and the two $ columns share the next one. !important is needed because the generic
+       .row-item > *:not(...):not(...) pairing rule has higher specificity. */
     .row-item.expense-row > *:nth-child(2),
     .row-header.cols-expense > *:nth-child(2){
       flex:1 1 100% !important;
     }
     .row-item.expense-row > *:nth-child(3),
     .row-item.expense-row > *:nth-child(4),
-    .row-item.expense-row > *:nth-child(5),
     .row-header.cols-expense > *:nth-child(3),
-    .row-header.cols-expense > *:nth-child(4),
-    .row-header.cols-expense > *:nth-child(5){
-      flex:1 1 calc(33.333% - 6px) !important;
+    .row-header.cols-expense > *:nth-child(4){
+      flex:1 1 calc(50% - 4px) !important;
     }
   }
 
@@ -1125,14 +1105,9 @@
         <span class="dollar-toggle-btn" data-mode="real" onclick="setDollarView('real')">Today's $</span>
         <span class="dollar-toggle-btn active" data-mode="nominal" onclick="setDollarView('nominal')">Future $</span>
       </div>
-      <div class="dollar-toggle" id="spendingBasisToggle" title="Which expense column (Expenses page) drives the whole projection, guardrails, and Monte Carlo — the % next to each option is that option's own Monte Carlo confidence score, computed the same way as the Overview's, so you can compare all three without switching">
-        <span class="dollar-toggle-btn spending-basis-toggle-btn" data-mode="jobloss" onclick="setSpendingBasis('jobloss')"><span class="mc-mini-score" id="mcMiniJobloss"></span><span>Job Loss</span><span class="mc-mini-longevity" id="mcMiniLongevityJobloss" title="Ending net worth if your spouse lives to their life expectancy, projected under this basis"></span></span>
+      <div class="dollar-toggle" id="spendingBasisToggle" title="Which expense column (Expenses page) drives the whole projection, guardrails, and Monte Carlo — the % next to each option is that option's own Monte Carlo confidence score, computed the same way as the Overview's, so you can compare both without switching">
         <span class="dollar-toggle-btn spending-basis-toggle-btn" data-mode="mustspend" onclick="setSpendingBasis('mustspend')"><span class="mc-mini-score" id="mcMiniMustspend"></span><span>Must Spend</span><span class="mc-mini-longevity" id="mcMiniLongevityMustspend" title="Ending net worth if your spouse lives to their life expectancy, projected under this basis"></span></span>
         <span class="dollar-toggle-btn spending-basis-toggle-btn active" data-mode="liketo" onclick="setSpendingBasis('liketo')"><span class="mc-mini-score" id="mcMiniLiketo"></span><span>Like to Spend</span><span class="mc-mini-longevity" id="mcMiniLongevityLiketo" title="Ending net worth if your spouse lives to their life expectancy, projected under this basis"></span></span>
-      </div>
-      <div class="job-loss-date-wrap" title="If Job Loss is selected above, the projection stays on normal income/Like to Spend until this date, then switches to zero income, zero TSP/brokerage contributions, and the Job Loss expense column">
-        <input type="date" id="jobLossDate" onchange="setJobLossDate(this.value)">
-        <span id="jobLossDateHint"></span>
       </div>
     </div>
   </div>
@@ -1772,13 +1747,12 @@
 
       <div class="card">
         <h3 onclick="toggleCard(this)">Recurring Monthly Expenses</h3>
-        <div class="row-header cols-expense"><span>Name</span><span>Category</span><span>Job Loss</span><span>Must Spend</span><span>Like to Spend</span><span></span></div>
+        <div class="row-header cols-expense"><span>Name</span><span>Category</span><span>Must Spend</span><span>Like to Spend</span><span></span></div>
         <div class="row-list" id="expenseRows"></div>
         <button class="add-btn" onclick="addExpense()">+ Add expense</button>
-        <div class="total-row"><span>Job Loss total (excl. housing)</span><span id="expenseJobLossTotal">$0</span></div>
         <div class="total-row"><span>Must Spend total (excl. housing)</span><span id="expenseMustSpendTotal">$0</span></div>
         <div class="total-row"><span>Like to Spend total (excl. housing)</span><span id="expenseTotal">$0</span></div>
-        <p style="font-size:15.5px;color:var(--muted);margin:8px 0 0;line-height:1.5;">The <b>Like to Spend / Job Loss / Must Spend</b> toggle in the header picks which of these three columns actually drives the whole projection — the dashboard, guardrails, the Gap page, Explorers, and every Monte Carlo run all switch together. Whichever ones AREN'T selected still matter: when dynamic spending guardrails (Assumptions page) cut spending in a down market, the cut never pushes recurring expenses below the Must Spend total — housing, debt, insurance, and medical premiums are already treated as 100% essential and are never cut. Job Loss is a test column — leave a row's Job Loss blank and it falls back to that row's Must Spend amount. Each row also has its own <b>Starts / Ends</b> date pickers below it — leave both blank for an expense that applies the whole plan (the default), or set one or both for something that begins or ends partway through retirement (childcare ending, a car payment finishing, a hobby starting once you have more free time).</p>
+        <p style="font-size:15.5px;color:var(--muted);margin:8px 0 0;line-height:1.5;">The <b>Must Spend / Like to Spend</b> toggle in the header picks which of these two columns actually drives the whole projection — the dashboard, guardrails, the Gap page, Explorers, and every Monte Carlo run all switch together. The Must Spend column still matters even when it isn't selected: when dynamic spending guardrails (Assumptions page) cut spending in a down market, the cut never pushes recurring expenses below the Must Spend total — housing, debt, insurance, and medical premiums are already treated as 100% essential and are never cut. Each row also has its own <b>Starts / Ends</b> date pickers below it — leave both blank for an expense that applies the whole plan (the default), or set one or both for something that begins or ends partway through retirement (childcare ending, a car payment finishing, a hobby starting once you have more free time).</p>
       </div>
 
       <div class="card">
@@ -2516,7 +2490,7 @@
       <div class="card" id="oldDataCleanupCard" style="display:none;">
         <h3 onclick="toggleCard(this)">Clear Old Data<span class="sub-label">Leftovers from features this planner no longer has</span></h3>
         <p id="oldDataCleanupNote" style="font-size:14.5px;color:var(--muted);margin:0 0 10px;"></p>
-        <button class="add-btn" style="background:#fdf3f1; color:var(--danger);" onclick="clearOldPlannerData()">Clear old Accounts &amp; Cards data</button>
+        <button class="add-btn" style="background:#fdf3f1; color:var(--danger);" onclick="clearOldPlannerData()">Clear old data</button>
         <p style="font-size:14.5px;color:var(--muted);margin:8px 0 0;">Your retirement plan, Document Vault, and the M&amp;C Money app are not affected. This card disappears once there's nothing left to clear.</p>
       </div>
 
@@ -2550,8 +2524,7 @@
               <p>On larger screens, planner sections use nearly the full available width so cards, tables, charts, and forms have room to breathe. On phones and narrow windows, the same sections remain responsive and stack as needed.</p>
               <ul>
                 <li><b>Today's $</b> removes modeled inflation; <b>Future $</b> shows nominal future dollars.</li>
-                <li>Like to Spend, Must Spend, and Job Loss are alternatives. Only the selected basis is counted.</li>
-                <li>The Job Loss date controls when salary and paycheck contributions stop. The current strategy keeps Job Loss spending through age 59½.</li>
+                <li>Like to Spend and Must Spend are alternatives. Only the selected basis is counted.</li>
                 <li>Shared Notes appear on every page and save as you type.</li>
                 <li>Most cards start collapsed. Select a card title to expand or collapse it.</li>
               </ul>
@@ -2575,9 +2548,9 @@
           <details class="manual-topic">
             <summary>4. My Plan: Personal, Income &amp; Expenses</summary>
             <div class="manual-body">
-              <p><b>Personal &amp; Family:</b> Enter both birthdates, ages, retirement timing, life expectancies, and spouse Social Security status. Dates support partial years and Rule-of-55 testing. The plan runs through the later household endpoint.</p>
+              <p><b>Personal &amp; Family:</b> Enter both birthdates, ages, retirement timing, life expectancies, and spouse Social Security status. Dates support partial years. The plan runs through the later household endpoint.</p>
               <p><b>Income:</b> Enter salary and each guaranteed source separately. Military/government pensions are taxable; VA disability is tax-free; Social Security uses provisional-income taxation. Windfalls must not duplicate existing balances.</p>
-              <p><b>Expenses:</b> Recurring rows are monthly today's-dollar values. Only the selected Like to Spend, Must Spend, or Job Loss column applies. Healthcare grows with Medical Inflation. Do not duplicate rent, premiums, debt payments, medical costs, or one-time purchases modeled elsewhere.</p>
+              <p><b>Expenses:</b> Recurring rows are monthly today's-dollar values. Only the selected Like to Spend or Must Spend column applies. Healthcare grows with Medical Inflation. Do not duplicate rent, premiums, debt payments, medical costs, or one-time purchases modeled elsewhere.</p>
             </div>
           </details>
 
@@ -2699,7 +2672,7 @@
                 <li>Compare Enhanced, Standard, first failure reason/age, and the deterministic ending balance.</li>
                 <li>Refresh, confirm the section and values persist, then download the final JSON backup.</li>
               </ol>
-              <p><b>Blank data:</b> restore your latest JSON backup. <b>Device mismatch:</b> compare the build and restore the newest JSON copy before editing. Also verify spending basis, job-loss date, and withdrawal exclusions.</p>
+              <p><b>Blank data:</b> restore your latest JSON backup. <b>Device mismatch:</b> compare the build and restore the newest JSON copy before editing. Also verify spending basis and withdrawal exclusions.</p>
             </div>
           </details>
         </div>
@@ -2751,17 +2724,17 @@
   </div>
 </div>
 
-<script src="retirement-planner-core.js?v=2026-11-21-cleanup"></script>
-<script src="retirement-planner-tax-and-social-security.js?v=2026-11-21-cleanup"></script>
-<script src="retirement-planner-navigation-and-charts.js?v=2026-11-21-cleanup"></script>
-<script src="retirement-planner-storage-and-notes.js?v=2026-11-21-cleanup"></script>
-<script src="retirement-planner-money-inputs.js?v=2026-11-21-cleanup"></script>
-<script src="retirement-planner-debt-and-inputs.js?v=2026-11-21-cleanup"></script>
-<script src="retirement-planner-projection-engine.js?v=2026-11-21-cleanup"></script>
-<script src="retirement-planner-explorers-and-analysis.js?v=2026-11-21-cleanup"></script>
-<script src="retirement-planner-charts.js?v=2026-11-21-cleanup"></script>
-<script src="retirement-planner-savings-and-coach.js?v=2026-11-21-cleanup"></script>
-<script src="retirement-planner-vault-settings-and-reports.js?v=2026-11-21-cleanup"></script>
+<script src="retirement-planner-core.js?v=2026-11-21-nojobloss"></script>
+<script src="retirement-planner-tax-and-social-security.js?v=2026-11-21-nojobloss"></script>
+<script src="retirement-planner-navigation-and-charts.js?v=2026-11-21-nojobloss"></script>
+<script src="retirement-planner-storage-and-notes.js?v=2026-11-21-nojobloss"></script>
+<script src="retirement-planner-money-inputs.js?v=2026-11-21-nojobloss"></script>
+<script src="retirement-planner-debt-and-inputs.js?v=2026-11-21-nojobloss"></script>
+<script src="retirement-planner-projection-engine.js?v=2026-11-21-nojobloss"></script>
+<script src="retirement-planner-explorers-and-analysis.js?v=2026-11-21-nojobloss"></script>
+<script src="retirement-planner-charts.js?v=2026-11-21-nojobloss"></script>
+<script src="retirement-planner-savings-and-coach.js?v=2026-11-21-nojobloss"></script>
+<script src="retirement-planner-vault-settings-and-reports.js?v=2026-11-21-nojobloss"></script>
 <script src="master-backup-shared.js"></script>
 </body>
 </html>

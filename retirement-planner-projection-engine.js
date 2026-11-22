@@ -182,17 +182,9 @@ function projectRun(inputs, ctx, randomize, shocks) {
     // Start-of-year balances for the Savings page, before anything this year touches them.
     const acctBegin = { trad: balTrad, roth: balRoth, hysa: balHYSA };
     balBrokeragePies.forEach((b, i) => { acctBegin['pie_'+i] = b; });
-    // Job Loss test applies only when the header basis is 'jobloss' and this year is at/after jobLossAge.
-    const jobLossActive = spendingBasis === 'jobloss' && inputs.jobLossAge != null && age >= inputs.jobLossAge;
-    // Job loss before the calendar year you turn 55 disqualifies Rule of 55: Traditional TSP is unavailable
-    // until 59.5 (regardless of the Taxes-page toggle). Roth stays available as a bridge (contributions
-    // come out penalty-free); brokerage and HYSA are always available.
-    const tradAvailableForJobLoss = !(jobLossActive && !ctx.jobLossQualifiesForRuleOf55 && age < 59.5);
+    // Personal strategy: Roth TSP stays out of the withdrawal order until age 59.5.
     const rothAvailableByAge = age >= 59.5;
-    // Personal strategy: after a pre-55 separation, remove both TSP accounts from the withdrawal
-    // waterfall until age 59.5. Cash and brokerage accounts provide the bridge instead.
-    const effectiveWithdrawalOrder = inputs.withdrawalOrder.filter(k =>
-      (k !== 'trad' || tradAvailableForJobLoss) && (k !== 'roth' || rothAvailableByAge));
+    const effectiveWithdrawalOrder = inputs.withdrawalOrder.filter(k => k !== 'roth' || rothAvailableByAge);
 
     // Declared here so mortgage/LTC/Future Expense draws (any year) also record which accounts they came
     // from, in the per-account breakdowns and lifetime totals. Checking/savings aren't tracked here.
@@ -300,7 +292,7 @@ function projectRun(inputs, ctx, randomize, shocks) {
         const fromRoth = Math.min(ltcCostThisYear, balRoth); balRoth -= fromRoth; addDirectWithdrawal('roth', fromRoth);
         const ltcFallbackOrder = [
           ...balBrokeragePies.map((_, i) => 'pie_'+i),
-          ...(tradAvailableForJobLoss ? ['trad'] : []),
+          'trad',
           'hysa', 'savings', 'checking'
         ];
         const ltcUnfunded = withdrawInOrder(ltcCostThisYear - fromRoth, ltcFallbackOrder);
@@ -379,8 +371,8 @@ function projectRun(inputs, ctx, randomize, shocks) {
     const insurancePremiumMonthlyForYear = survivorshipActive ? inputs.insurancePremiumMonthlySurvivor : inputs.insurancePremiumMonthly;
     const insurancePremiumAnnual = (insurancePremiumMonthlyForYear || 0) * 12 * inflator;
 
-    // grossWithdrawal and withdrawalByAccount are declared earlier in this loop iteration (right after
-    // jobLossActive, above the mortgage/LTC/Future Expenses pulls) so those pre-retirement-capable draws
+    // grossWithdrawal and withdrawalByAccount are declared earlier in this loop iteration (above the
+    // mortgage/LTC/Future Expenses pulls) so those pre-retirement-capable draws
     // can also feed into them — not redeclared here, just continuing to accumulate onto the same objects.
     let contributions=0, withdrawal=0, guaranteedIncome=0, guaranteedIncomeAfterTax=0, spending=0, spousalBenefit=0, ssAmount=0, pensionAmount=0, pension2Amount=0, vaDisabilityAmount=0, annuityAmount=0, sbpAmount=0, dicAmount=0, dicAidAttendanceAmount=0, essentialFloor=0, transitionJobIncome=0, transitionTradContrib=0;
     let fedMarginal=null, ltcgMarginal=null;
@@ -435,9 +427,9 @@ function projectRun(inputs, ctx, randomize, shocks) {
       const preR = (shocks.pre && shocks.pre[y] !== undefined) ? shocks.pre[y]
         : (randomize ? randMarketReturn(preMean, preVolatility, inputs.enhancedMonteCarlo) : preMean);
       if (y > 0) income *= (1+inputs.incomeGrowth);
-      // Once employment ends (job loss or the primary's death in a survivorship run), income is zeroed for
-      // good, which zeroes FICA, TSP contributions and taxable wages too.
-      const employmentEnded = jobLossActive || survivorshipActive;
+      // In a survivorship run, the primary's salary stops at death (even before the planned retirement
+      // age), which zeroes FICA, TSP contributions and taxable wages too.
+      const employmentEnded = survivorshipActive;
       if (employmentEnded) income = 0;
       // FICA on job income only: 6.2% SS up to the wage base (grown with General Inflation), 1.45% Medicare
       // uncapped, plus 0.9% above $250k MFJ (a fixed statutory threshold).
@@ -461,18 +453,14 @@ function projectRun(inputs, ctx, randomize, shocks) {
       stateTaxAnnual += idahoTaxOwed(idahoTaxableWorkingYears, inputs.idahoRate, inflator, taxFilingStatusThisYear);
       fedMarginal = marginalRateFromBrackets(taxableWorkingYears, federalBracketsThisYear);
       // Brokerage pie contributions come from the same paycheck as the TSP %-based ones, so they grow with the
-      // same raise assumption — and stop along with it once Job Loss is active, same reasoning as income above.
+      // same raise assumption — and stop along with it once employment ends, same reasoning as income above.
       const pieContribsMonthly = employmentEnded ? (inputs.brokeragePieContributionsMonthly || []).map(() => 0) : (inputs.brokeragePieContributionsMonthly || []);
       const brokerageContribThisYear = pieContribsMonthly.reduce((s,c) => s + (+c||0), 0) * 12 * Math.pow(1+inputs.incomeGrowth, y);
       // Excess income savings: what's left of pay plus guaranteed income after contributions, living costs
-      // and taxes, times the chosen %, goes to Brokerage. Job Loss switches living costs to the Job Loss
-      // column; survivorship before retirement switches to survivor-only expense columns.
-      const preRetireNonMedical = survivorshipActive
-        ? (jobLossActive ? expTotalsThisYear.jobLossNonMedicalSurvivor : expTotalsThisYear.nonMedicalSurvivor)
-        : (jobLossActive ? expTotalsThisYear.jobLossNonMedical : expTotalsThisYear.nonMedical);
-      const preRetireMedical = survivorshipActive
-        ? (jobLossActive ? expTotalsThisYear.jobLossMedicalSurvivor : expTotalsThisYear.medicalSurvivor)
-        : (jobLossActive ? expTotalsThisYear.jobLossMedical : expTotalsThisYear.medical);
+      // and taxes, times the chosen %, goes to Brokerage. Survivorship before retirement switches to the
+      // survivor-only expense columns.
+      const preRetireNonMedical = survivorshipActive ? expTotalsThisYear.nonMedicalSurvivor : expTotalsThisYear.nonMedical;
+      const preRetireMedical = survivorshipActive ? expTotalsThisYear.medicalSurvivor : expTotalsThisYear.medical;
       // Kept on the row so Income vs Expenses has a pre-retirement total-expenses figure.
       recurringLivingCostThisYear = (preRetireNonMedical * inflator + preRetireMedical * medicalInflator) + housingCost + debtPaymentThisYear + insurancePremiumAnnual;
       // Taxes (federal/state/FICA) come out before anything counts as excess.
@@ -488,10 +476,10 @@ function projectRun(inputs, ctx, randomize, shocks) {
         return sum + Math.max(0, (+d.payment || 0) * 12 - (sched.paymentDuringYear[y] || 0));
       }, 0) : 0;
       const paidOffDebtRedirect = Math.min(paidOffDebtRedirectRaw, excessIncomeAvailable);
-      // Job Loss: any surplus (guaranteed income above job-loss spending) goes to HYSA.
-      const jobLossSurplusToHYSA = employmentEnded ? excessIncomeAvailable : 0;
+      // After employment ends, any surplus (guaranteed income above spending) goes to HYSA.
+      const noPaycheckSurplusToHYSA = employmentEnded ? excessIncomeAvailable : 0;
       excessIncomeSaved = employmentEnded ? 0 : (Math.max(0, excessIncomeAvailable - paidOffDebtRedirect) * (inputs.excessIncomeSavingsPct || 0) + paidOffDebtRedirect);
-      // Job Loss: with no paycheck, cover the pre-retirement shortfall from cash first, then other accounts.
+      // With no paycheck, cover the pre-retirement shortfall from cash first, then other accounts.
       if (employmentEnded) {
         const preRetireNeed = Math.max(0, recurringLivingCostThisYear + federalTaxAnnual + stateTaxAnnual + ficaTaxAnnual - (income + guaranteedIncome));
         if (preRetireNeed > 0.01) {
@@ -505,11 +493,10 @@ function projectRun(inputs, ctx, randomize, shocks) {
             const fromPreBrokerage = Math.min(preRemaining, preBrokerageAvailable);
             addPooledWithdrawal(applyPooledDelta(balBrokeragePies, -fromPreBrokerage)); preRemaining -= fromPreBrokerage;
             if (preRemaining > 0) {
-              // Personal strategy: do not withdraw from either TSP account before 59.5 after
-              // a pre-55 separation, even though Roth contribution access can differ legally.
+              // Personal strategy: no Roth TSP withdrawals before 59.5.
               const fromPreRoth = rothAvailableByAge ? Math.min(preRemaining, balRoth) : 0; balRoth -= fromPreRoth; preRemaining -= fromPreRoth;
               addDirectWithdrawal('roth', fromPreRoth);
-              if (preRemaining > 0 && tradAvailableForJobLoss) {
+              if (preRemaining > 0) {
                 const fromPreTrad = Math.min(preRemaining, balTrad); balTrad -= fromPreTrad; preRemaining -= fromPreTrad;
                 addDirectWithdrawal('trad', fromPreTrad);
               }
@@ -549,7 +536,7 @@ function projectRun(inputs, ctx, randomize, shocks) {
         excessIncomeFallbackToHYSA = excessIncomeSaved;
         contribByAccount.hysa = (contribByAccount.hysa || 0) + excessIncomeSaved;
       }
-      balChecking *= (1+inputs.cashRate); balSavings *= (1+inputs.cashRate); balHYSA = balHYSA*(1+inputs.hysaRate) + jobLossSurplusToHYSA + excessIncomeFallbackToHYSA;
+      balChecking *= (1+inputs.cashRate); balSavings *= (1+inputs.cashRate); balHYSA = balHYSA*(1+inputs.hysaRate) + noPaycheckSurplusToHYSA + excessIncomeFallbackToHYSA;
       // IRMAA lookback proxy: this year's approximate MAGI, stored for the two-year lag used later.
       magiHistory[y] = Math.max(0, otherTaxableWorkingYears + taxableSocialSecurity(ssAmount+spousalBenefit, otherTaxableWorkingYears, taxFilingStatusThisYear));
       magiFilingStatusHistory[y] = taxFilingStatusThisYear;
@@ -621,16 +608,14 @@ function projectRun(inputs, ctx, randomize, shocks) {
           : (userOnMedicare ? (inputs.hearingMonthly + inputs.visionMonthly + inputs.dentalMonthly) : 0))
       ) * 12;
       medicalCostAnnual = medicarePremiumBase * medicalInflator;
-      // Baseline spending comes from the header basis (Like to Spend / Must Spend / Job Loss) before any
-      // guardrail cut; survivorship uses only continuing items. Job Loss spending applies until age 59.5,
-      // then Like to Spend resumes. The Must Spend floor is always the essentials total.
-      const jobLossBridgeSpendingActive = jobLossActive && age < 59.5;
+      // Baseline spending comes from the header basis (Like to Spend / Must Spend) before any guardrail
+      // cut; survivorship uses only continuing items. The Must Spend floor is always the essentials total.
       const expensesNonMedicalForYear = survivorshipActive
-        ? (spendingBasis === 'mustspend' ? expTotalsThisYear.mustSpendNonMedicalSurvivor : jobLossBridgeSpendingActive ? expTotalsThisYear.jobLossNonMedicalSurvivor : expTotalsThisYear.nonMedicalSurvivor)
-        : (spendingBasis === 'mustspend' ? expTotalsThisYear.mustSpendNonMedical : jobLossBridgeSpendingActive ? expTotalsThisYear.jobLossNonMedical : expTotalsThisYear.nonMedical);
+        ? (spendingBasis === 'mustspend' ? expTotalsThisYear.mustSpendNonMedicalSurvivor : expTotalsThisYear.nonMedicalSurvivor)
+        : (spendingBasis === 'mustspend' ? expTotalsThisYear.mustSpendNonMedical : expTotalsThisYear.nonMedical);
       const expensesMedicalForYear = survivorshipActive
-        ? (spendingBasis === 'mustspend' ? expTotalsThisYear.mustSpendMedicalSurvivor : jobLossBridgeSpendingActive ? expTotalsThisYear.jobLossMedicalSurvivor : expTotalsThisYear.medicalSurvivor)
-        : (spendingBasis === 'mustspend' ? expTotalsThisYear.mustSpendMedical : jobLossBridgeSpendingActive ? expTotalsThisYear.jobLossMedical : expTotalsThisYear.medical);
+        ? (spendingBasis === 'mustspend' ? expTotalsThisYear.mustSpendMedicalSurvivor : expTotalsThisYear.medicalSurvivor)
+        : (spendingBasis === 'mustspend' ? expTotalsThisYear.mustSpendMedical : expTotalsThisYear.medical);
       // Must Spend floor for this year's recurring expenses only (housing/debt/insurance/Tricare-Medicare
       // premiums/SBP premiums don't have a discretionary counterpart modeled, so they're treated as 100%
       // essential below rather than needing their own Must Spend split).
@@ -871,7 +856,7 @@ function projectRun(inputs, ctx, randomize, shocks) {
 
       if (inputs.withdrawalSimultaneous) {
         // Split the need across checked accounts, water-filling so dry accounts hand off their share.
-        // effectiveWithdrawalOrder already excludes 'trad' when job loss blocks it.
+        // effectiveWithdrawalOrder already excludes 'roth' before 59.5.
         let selected = effectiveWithdrawalOrder.filter(k => bal[k] !== undefined);
         if (inputs.withdrawalProportionMode === 'percent') {
           // Fixed user weights (relative, renormalized each round) instead of balance weights.
@@ -1003,10 +988,6 @@ function computeExpenseTotals(list) {
   const mustSpendTotal = list.reduce((s,e) => s + mustSpendVal(e), 0) * 12;
   const mustSpendMedical = list.filter(e => e.category === 'Healthcare').reduce((s,e) => s + mustSpendVal(e), 0) * 12;
   const mustSpendNonMedical = mustSpendTotal - mustSpendMedical;
-  const jobLossVal = e => (e.jobLoss != null ? +e.jobLoss : mustSpendVal(e));
-  const jobLossTotal = list.reduce((s,e) => s + jobLossVal(e), 0) * 12;
-  const jobLossMedical = list.filter(e => e.category === 'Healthcare').reduce((s,e) => s + jobLossVal(e), 0) * 12;
-  const jobLossNonMedical = jobLossTotal - jobLossMedical;
   const survivorVal = item => (item.survivorAmount != null && item.survivorAmount !== '') ? (+item.survivorAmount || 0) : (+item.amount || 0);
   const survivorList = list.filter(e => e.survivorContinues !== false);
   const totalSurvivor = survivorList.reduce((s,e) => s + survivorVal(e), 0) * 12;
@@ -1015,16 +996,11 @@ function computeExpenseTotals(list) {
   const mustSpendTotalSurvivor = survivorList.reduce((s,e) => s + mustSpendVal(e), 0) * 12;
   const mustSpendMedicalSurvivor = survivorList.filter(e => e.category === 'Healthcare').reduce((s,e) => s + mustSpendVal(e), 0) * 12;
   const mustSpendNonMedicalSurvivor = mustSpendTotalSurvivor - mustSpendMedicalSurvivor;
-  const jobLossTotalSurvivor = survivorList.reduce((s,e) => s + jobLossVal(e), 0) * 12;
-  const jobLossMedicalSurvivor = survivorList.filter(e => e.category === 'Healthcare').reduce((s,e) => s + jobLossVal(e), 0) * 12;
-  const jobLossNonMedicalSurvivor = jobLossTotalSurvivor - jobLossMedicalSurvivor;
   return {
     nonMedical, medical,
     mustSpendNonMedical, mustSpendMedical,
-    jobLossNonMedical, jobLossMedical,
     nonMedicalSurvivor, medicalSurvivor,
-    mustSpendNonMedicalSurvivor, mustSpendMedicalSurvivor,
-    jobLossNonMedicalSurvivor, jobLossMedicalSurvivor
+    mustSpendNonMedicalSurvivor, mustSpendMedicalSurvivor
   };
 }
 function buildContext(inputs) {
@@ -1034,12 +1010,6 @@ function buildContext(inputs) {
   const maxYears = effectiveLifeExpectancy - inputs.currentAge;
   const effectiveSpousalStartAge = Math.max(inputs.ssAge, ageGap + inputs.spousalStartAge);
   const effectiveSpouseOwnSSStartAge = ageGap + inputs.spouseSSAge;
-  // Job Loss test: Rule of 55 needs separation in the calendar year you turn 55 or later. Earlier, Traditional
-  // TSP is off-limits until 59.5 regardless of the global toggle. True (no restriction) when no Job Loss
-  // date is set.
-  const jobLossYear = inputs.jobLossDateRaw ? +String(inputs.jobLossDateRaw).slice(0, 4) : null;
-  const turns55Year = inputs.birthDateRaw ? +String(inputs.birthDateRaw).slice(0, 4) + 55 : null;
-  const jobLossQualifiesForRuleOf55 = !jobLossYear || !turns55Year || jobLossYear >= turns55Year;
   const debtStartMonthOffset = d => (d.startAge != null && d.startAge !== '') ? Math.max(0, Math.round((d.startAge - inputs.currentAge) * 12)) : 0;
   const debtSchedules = debts.map(d => buildDebtSchedule(d, maxYears, debtStartMonthOffset(d)));
   const mortgageSchedule = inputs.buyHome ? buildMortgageSchedule(inputs, maxYears) : null;
@@ -1054,13 +1024,6 @@ function buildContext(inputs) {
   const expensesMustSpendTotal = expenses.reduce((s,e) => s + mustSpendVal(e), 0) * 12;
   const expensesMustSpendMedical = expenses.filter(e => e.category === 'Healthcare').reduce((s,e) => s + mustSpendVal(e), 0) * 12;
   const expensesMustSpendNonMedical = expensesMustSpendTotal - expensesMustSpendMedical;
-  // "Job Loss" totals — a test third spending basis (Expenses page), same shape as Must Spend, falling
-  // back to Must Spend (which itself falls back to Like to Spend) for any row that hasn't had a Job
-  // Loss amount set yet.
-  const jobLossVal = e => (e.jobLoss != null ? +e.jobLoss : mustSpendVal(e));
-  const expensesJobLossTotal = expenses.reduce((s,e) => s + jobLossVal(e), 0) * 12;
-  const expensesJobLossMedical = expenses.filter(e => e.category === 'Healthcare').reduce((s,e) => s + jobLossVal(e), 0) * 12;
-  const expensesJobLossNonMedical = expensesJobLossTotal - expensesJobLossMedical;
   // Survivorship totals: only items marked as continuing, at any override amount. Used once
   // survivorshipActive is true.
   const survivorVal = item => (item.survivorAmount != null && item.survivorAmount !== '') ? (+item.survivorAmount || 0) : (+item.amount || 0);
@@ -1076,19 +1039,12 @@ function buildContext(inputs) {
   const expensesMustSpendTotalSurvivor = expenses.filter(e => e.survivorContinues !== false).reduce((s,e) => s + mustSpendVal(e), 0) * 12;
   const expensesMustSpendMedicalSurvivor = expenses.filter(e => e.category === 'Healthcare' && e.survivorContinues !== false).reduce((s,e) => s + mustSpendVal(e), 0) * 12;
   const expensesMustSpendNonMedicalSurvivor = expensesMustSpendTotalSurvivor - expensesMustSpendMedicalSurvivor;
-  // Job Loss, survivorship-filtered (same "continuing" filter as everything else above).
-  const expensesJobLossTotalSurvivor = expenses.filter(e => e.survivorContinues !== false).reduce((s,e) => s + jobLossVal(e), 0) * 12;
-  const expensesJobLossMedicalSurvivor = expenses.filter(e => e.category === 'Healthcare' && e.survivorContinues !== false).reduce((s,e) => s + jobLossVal(e), 0) * 12;
-  const expensesJobLossNonMedicalSurvivor = expensesJobLossTotalSurvivor - expensesJobLossMedicalSurvivor;
   return {
     maxYears, ageGap, effectiveLifeExpectancy, effectiveSpousalStartAge, effectiveSpouseOwnSSStartAge, debtSchedules, mortgageSchedule,
-    jobLossQualifiesForRuleOf55,
     expensesTotal, expensesMedical, expensesNonMedical,
     expensesMustSpendTotal, expensesMustSpendMedical, expensesMustSpendNonMedical,
-    expensesJobLossTotal, expensesJobLossMedical, expensesJobLossNonMedical,
     debtSchedulesSurvivor, expensesTotalSurvivor, expensesMedicalSurvivor, expensesNonMedicalSurvivor,
     expensesMustSpendTotalSurvivor, expensesMustSpendMedicalSurvivor, expensesMustSpendNonMedicalSurvivor,
-    expensesJobLossTotalSurvivor, expensesJobLossMedicalSurvivor, expensesJobLossNonMedicalSurvivor,
     // Per-year totals honoring each row's Starts/Ends range; projectRun() calls this every year.
     expensesForYear: (age) => computeExpenseTotals(expenses.filter(e => expenseActiveAtAge(e, age)))
   };
@@ -1128,13 +1084,10 @@ function renderDataQualityChecklist(inputs) {
   const host=els('dataQualityChecklist'); if(!host)return;
   const issues=[];
   const add=(level,text)=>issues.push({level,text});
-  if(!inputs.birthDateRaw)add('high','Primary birthdate is blank; calendar-year Rule of 55 and age/date syncing are less reliable.');
+  if(!inputs.birthDateRaw)add('high','Primary birthdate is blank; age/date syncing is less reliable.');
   if(!inputs.retirementDateRaw)add('medium','Planned last working day is blank; the final working year cannot be prorated precisely.');
-  if(spendingBasis==='jobloss'&&!inputs.jobLossDateRaw)add('high','Job Loss is selected but no Job Loss date is set.');
   const missingMust=expenses.filter(e=>e.mustSpend==null||e.mustSpend==='').length;
-  const missingJob=expenses.filter(e=>e.jobLoss==null||e.jobLoss==='').length;
   if(missingMust)add('medium',`${missingMust} expense row(s) have no explicit Must Spend amount and use a fallback.`);
-  if(missingJob)add('medium',`${missingJob} expense row(s) have no explicit Job Loss amount and use Must Spend as a fallback.`);
   if(inputs.sbp1Enabled && !insurancePolicies.some(p => /(sbp|spb)/i.test(p.name || '') && (+p.premium || 0) > 0)) add('high','SBP is enabled, but no SBP premium appears in Insurance. Add the monthly deduction there so gross pension income is not overstated.');
   if(expenses.some(e => /^to cindy$/i.test((e.name || '').trim())) && inputs.rentMonthly > 0) add('medium','Confirm that “To Cindy” does not already include rent, utilities, insurance, or other separately listed costs.');
   if(inputs.partBUserMonthly < 202.9 || inputs.partBSpouseMonthly < 202.9) add('low','A Medicare Part B amount is below the 2026 standard premium of $202.90/month; confirm that the lower amount is intentional.');

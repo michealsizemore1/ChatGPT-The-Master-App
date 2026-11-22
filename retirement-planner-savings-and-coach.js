@@ -248,7 +248,7 @@ function buildPlanSummaryForAI() {
   const ctx = buildContext(inputs);
   const result = projectRun(inputs, ctx, false);
   const score = runMonteCarlo(inputs, ctx, 300);
-  const basisLabel = spendingBasis === 'jobloss' ? 'Job Loss' : spendingBasis === 'mustspend' ? 'Must Spend' : 'Like to Spend';
+  const basisLabel = spendingBasis === 'mustspend' ? 'Must Spend' : 'Like to Spend';
   const firstRetireRow = result.rows.find(r => r.age >= inputs.retirementAge) || result.rows[result.rows.length - 1];
   const pct = v => (v * 100).toFixed(1).replace(/\.0$/, '') + '%';
 
@@ -271,7 +271,7 @@ function buildPlanSummaryForAI() {
   lines.push(`\n=== RECURRING EXPENSES (monthly $, header toggle currently on "${basisLabel}") ===`);
   lines.push(expenses.length ? expenses.map(e => {
     const dateNote = (e.startAge != null || e.endAge != null) ? ` [only active age ${e.startAge != null ? e.startAge : 'plan start'}–${e.endAge != null ? e.endAge : 'plan end'}]` : '';
-    return `${e.name || 'Unnamed'} (${e.category}): Like to Spend $${e.amount}, Must Spend $${e.mustSpend != null ? e.mustSpend : e.amount}, Job Loss $${e.jobLoss != null ? e.jobLoss : (e.mustSpend != null ? e.mustSpend : e.amount)}${dateNote}`;
+    return `${e.name || 'Unnamed'} (${e.category}): Like to Spend $${e.amount}, Must Spend $${e.mustSpend != null ? e.mustSpend : e.amount}${dateNote}`;
   }).join('; ') : 'none entered');
   lines.push(`Housing: $${inputs.rentMonthly || 0}/mo rent${inputs.buyHome ? ', planning to buy a home during the plan' : ''}.`);
   lines.push(`Debt: ${debts.length ? debts.map(d => `${d.name || d.category} ${fmtMoney(d.balance)} balance at ${d.apr}% APR, $${d.payment}/mo payment`).join('; ') : 'none'}.`);

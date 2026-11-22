@@ -161,11 +161,6 @@ function readInputs() {
   return {
     currentAge: +els('currentAge').value,
     retirementAge: +els('retirementAge').value,
-    jobLossAge: dateToAge(jobLossDate, +els('currentAge').value),
-    // Raw calendar strings (not just ages) so the Rule of 55 qualification check below can compare actual
-    // years rather than fractional ages — Rule of 55 is a calendar-year test (separate from federal service
-    // in the year you turn 55, or later), not a birthday-precise one.
-    jobLossDateRaw: jobLossDate,
     birthDateRaw: els('birthDate') ? els('birthDate').value : '',
     // Raw retirement date string (not just retirementAge) so the final working year's job income can be
     // pro-rated against the actual calendar date you stop working, rather than assuming a clean 12-month

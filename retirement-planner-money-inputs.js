@@ -63,7 +63,7 @@ function saveState(includePortableData = false, suppressCloudSync = false) {
     withdrawalOrderState, withdrawalModeCustom, withdrawalExcludedKeys, withdrawalProportionMode,
     withdrawalProportions, excessIncomeDestinationPieName, rothConversionSourceName,
     allocationExplorerStrategy, selectedExplorerAnalysis, sharedNotesText, checkpointBaseline,
-    checkpointHistory, spendingBasis, jobLossDate, dollarView, activePage
+    checkpointHistory, spendingBasis, dollarView, activePage
   };
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { /* storage unavailable, ignore */ }
   if (!suppressCloudSync) markPlannerLocalSaved();
@@ -73,7 +73,10 @@ function saveState(includePortableData = false, suppressCloudSync = false) {
 
 function applyState(state) {
   if (!state) return false;
-  if (Array.isArray(state.expenses)) expenses = state.expenses;
+  if (Array.isArray(state.expenses)) {
+    expenses = state.expenses;
+    expenses.forEach(e => { delete e.jobLoss; }); // column no longer exists; dropped on the next save
+  }
   if (Array.isArray(state.brokeragePies)) {
     brokeragePies = state.brokeragePies;
     // Backward-compatible migration for backups that predate account types. The user's
@@ -101,17 +104,11 @@ function applyState(state) {
   if (isKnownExplorerAnalysis(state.selectedExplorerAnalysis)) selectedExplorerAnalysis = state.selectedExplorerAnalysis;
   // Portable scenario/display/navigation settings used to live only in separate localStorage keys.
   // Keeping them in the state object is essential for identical calculations after a JSON restore or
-  // cloud load on another device—especially Job Loss date and spending basis.
-  if (state.spendingBasis === 'liketo' || state.spendingBasis === 'mustspend' || state.spendingBasis === 'jobloss') {
+  // cloud load on another device—especially spending basis.
+  if (state.spendingBasis === 'liketo' || state.spendingBasis === 'mustspend') {
     spendingBasis = state.spendingBasis;
     try { localStorage.setItem(SPENDING_BASIS_KEY, spendingBasis); } catch (e) {}
     document.querySelectorAll('#spendingBasisToggle .dollar-toggle-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === spendingBasis));
-  }
-  if (typeof state.jobLossDate === 'string' && state.jobLossDate) {
-    jobLossDate = state.jobLossDate;
-    try { localStorage.setItem(JOB_LOSS_DATE_KEY, jobLossDate); } catch (e) {}
-    const jobLossEl = els('jobLossDate');
-    if (jobLossEl) jobLossEl.value = jobLossDate;
   }
   if (state.dollarView === 'real' || state.dollarView === 'nominal') {
     dollarView = state.dollarView;
@@ -221,7 +218,6 @@ function renderExpenseRows() {
       <select onchange="updateExpense(${i},'category',this.value)">
         ${EXPENSE_CATEGORIES.map(c => `<option value="${c}" ${c===e.category?'selected':''}>${c}</option>`).join('')}
       </select>
-      <input type="number" value="${e.jobLoss != null ? e.jobLoss : (e.mustSpend != null ? e.mustSpend : e.amount)}" step="10" min="0" title="Test column: what you'd spend on this if you lost your job" oninput="updateExpense(${i},'jobLoss',this.value)">
       <input type="number" value="${e.mustSpend != null ? e.mustSpend : e.amount}" step="10" min="0" oninput="updateExpense(${i},'mustSpend',this.value)">
       <input type="number" value="${e.amount}" step="10" min="0" oninput="updateExpense(${i},'amount',this.value)">
       <button class="remove-btn" onclick="removeExpense(${i})" title="Remove">×</button>
@@ -256,16 +252,13 @@ function updateExpenseDate(i, which, monthVal) {
 function updateExpenseTotals() {
   els('expenseTotal').textContent = fmtMoney(expenses.reduce((s,e) => s + (+e.amount||0), 0)) + '/mo';
   els('expenseMustSpendTotal').textContent = fmtMoney(expenses.reduce((s,e) => s + (e.mustSpend != null ? +e.mustSpend : (+e.amount || 0)), 0)) + '/mo';
-  if (els('expenseJobLossTotal')) {
-    els('expenseJobLossTotal').textContent = fmtMoney(expenses.reduce((s,e) => s + (e.jobLoss != null ? +e.jobLoss : (e.mustSpend != null ? +e.mustSpend : (+e.amount || 0))), 0)) + '/mo';
-  }
 }
 function updateExpense(i, field, value) {
-  expenses[i][field] = (field==='amount' || field==='mustSpend' || field==='jobLoss') ? +value : value;
+  expenses[i][field] = (field==='amount' || field==='mustSpend') ? +value : value;
   updateExpenseTotals();
   render();
 }
-function addExpense() { expenses.push({ name:'New expense', category:'Other', amount:50, mustSpend:50, jobLoss:0, startAge:null, endAge:null, startDateValue:'', endDateValue:'' }); renderExpenseRows(); render(); }
+function addExpense() { expenses.push({ name:'New expense', category:'Other', amount:50, mustSpend:50, startAge:null, endAge:null, startDateValue:'', endDateValue:'' }); renderExpenseRows(); render(); }
 function removeExpense(i) { expenses.splice(i,1); renderExpenseRows(); render(); }
 
 // Read-only combined view: Housing/Debt/Insurance alongside Recurring Expenses. Never writes back.

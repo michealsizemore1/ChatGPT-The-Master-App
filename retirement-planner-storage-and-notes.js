@@ -271,7 +271,8 @@ function applyPendingRetirementAgeSelection() {
 
 // ---------- Old data cleanup (Settings) ----------
 // Leftovers nothing reads any more: the retired Accounts & Cards tracker (its exact keys plus "rcpt-"
-// receipt photos) and removed cloud sign-in records. M&C Money uses different keys and isn't affected.
+// receipt photos), removed cloud sign-in records, and the retired Job Loss date. M&C Money uses
+// different keys and isn't affected.
 const OLD_PLANNER_DATA_KEYS = [
   'cc-register', 'cc-categories', 'cc-trips', 'cc-notes', 'active-trip',
   'chk-register', 'chk-open-bal', 'chk-notes',
@@ -280,7 +281,8 @@ const OLD_PLANNER_DATA_KEYS = [
   'hysa-register', 'hysa-open-bal', 'hysa-notes',
   'retirementPlannerCloudLastSync_v1', 'retirementPlannerCloudDirty_v1', 'retirementPlannerCloudResetPending_v1',
   'retirementPlannerCloudEmail_v1', 'retirementPlannerLegacyRemoteAuth_v2', 'retirementPlannerRefreshToken_v2',
-  'retirementPlannerAccessToken_v2', 'retirementPlannerTokenExpiry_v2', 'retirementPlannerCloudUser_v2'
+  'retirementPlannerAccessToken_v2', 'retirementPlannerTokenExpiry_v2', 'retirementPlannerCloudUser_v2',
+  'retirementPlannerJobLossDate_v1'
 ];
 const OLD_PLANNER_DATA_PREFIX = 'rcpt-';
 const OLD_PLANNER_SESSION_DB = 'retirementPlannerSecureSession_v2';
@@ -307,13 +309,13 @@ function renderOldDataCleanup() {
   const note = els('oldDataCleanupNote');
   if (note) {
     const kb = Math.max(1, Math.round(found.bytes / 1024));
-    note.textContent = `${found.keys.length} leftover item${found.keys.length === 1 ? '' : 's'} (about ${kb >= 1024 ? (kb / 1024).toFixed(1) + ' MB' : kb + ' KB'}) from the old Accounts & Cards page and the removed cloud sign-in.`;
+    note.textContent = `${found.keys.length} leftover item${found.keys.length === 1 ? '' : 's'} (about ${kb >= 1024 ? (kb / 1024).toFixed(1) + ' MB' : kb + ' KB'}) from features this planner no longer has (Accounts & Cards, cloud sign-in, Job Loss).`;
   }
 }
 function clearOldPlannerData() {
   const found = findOldPlannerData();
   if (!found.keys.length) { renderOldDataCleanup(); return; }
-  if (!confirm('Delete the old Accounts & Cards data (registers, notes, receipt photos) and old cloud sign-in records from this browser?\n\nYour retirement plan, Document Vault and the M&C Money app are not affected. This cannot be undone.')) return;
+  if (!confirm('Delete leftover data from removed features (old Accounts & Cards registers, notes and receipt photos, old cloud sign-in records, and the Job Loss date) from this browser?\n\nYour retirement plan, Document Vault and the M&C Money app are not affected. This cannot be undone.')) return;
   try {
     found.keys.forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
     if (window.indexedDB) indexedDB.deleteDatabase(OLD_PLANNER_SESSION_DB);

@@ -86,7 +86,7 @@ function buildChartConfig(pageId, snap) {
       return barConfig(['Current annual rent','Housing cost at retirement'], [snap.currentRentAnnual, snap.housingCostAtRetirement], { showValues:true });
     case 'expenses':
       // Utilities/Subscriptions bars show the item name (e.g. Verizon) rather than repeating the category.
-      // Values follow the header's Job Loss / Must Spend / Like to Spend toggle.
+      // Values follow the header's Must Spend / Like to Spend toggle.
       return barConfig(
         expenses.map(e => (e.category==='Utilities' || e.category==='Subscriptions') ? (e.name||'Unnamed') : e.category),
         expenses.map(expenseValForBasis), { horizontal:true, showValues:true }

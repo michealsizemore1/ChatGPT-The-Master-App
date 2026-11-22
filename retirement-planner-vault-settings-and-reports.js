@@ -427,7 +427,7 @@ function resetAllData() {
   if (!confirm('This resets the retirement plan, notes, checkpoints, and Coach conversation on this device. Document Vault files remain separate. Continue?')) return;
   try {
     [STORAGE_KEY, ACTIVE_PAGE_KEY, EXPLORER_ANALYSIS_KEY, DOLLAR_VIEW_KEY, SPENDING_BASIS_KEY,
-      JOB_LOSS_DATE_KEY, LAST_BACKUP_KEY, BACKUP_REMINDER_DISMISSED_KEY, SHARED_NOTES_KEY,
+      LAST_BACKUP_KEY, BACKUP_REMINDER_DISMISSED_KEY, SHARED_NOTES_KEY,
       CHECKPOINT_BASELINE_KEY, CHECKPOINT_HISTORY_KEY, COACH_CHAT_HISTORY_KEY,
       RETIREMENT_AGE_PENDING_KEY]
       .forEach(key => localStorage.removeItem(key));
@@ -940,7 +940,7 @@ function renderFinancialWellness(inputs, ctx, result, confidenceScore) {
     'Earliest deterministic retirement age',
     earliestDeterministicRetirementAge == null ? 'Beyond ' + retirementSearchEnd : 'Age ' + earliestDeterministicRetirementAge,
     earliestStatus,
-    `First tested age whose deterministic projection avoids a shortfall through household longevity under the active ${spendingBasis === 'jobloss' ? 'Job Loss' : spendingBasis === 'mustspend' ? 'Must Spend' : 'Like to Spend'} basis. Monte Carlo confidence may still be lower.`,
+    `First tested age whose deterministic projection avoids a shortfall through household longevity under the active ${spendingBasis === 'mustspend' ? 'Must Spend' : 'Like to Spend'} basis. Monte Carlo confidence may still be lower.`,
     'explorers', 'Stress-test retirement timing'
   ));
 
@@ -1060,14 +1060,14 @@ function render() {
   // Cached for renderCoachTips(), which is called with no arguments.
   lastCoachContext = { inputs, ctx, result, score };
 
-  // Mini scores for all three spending bases in the header toggle. Same market paths (the seed doesn't
+  // Mini scores for both spending bases in the header toggle. Same market paths (the seed doesn't
   // depend on basis) and the same 1000 sims for each, so a basis's score doesn't change when you switch
   // tabs.
   const savedSpendingBasisForMini = spendingBasis;
-  ['jobloss', 'mustspend', 'liketo'].forEach(basis => {
+  ['mustspend', 'liketo'].forEach(basis => {
     spendingBasis = basis;
     const miniScore = basis === savedSpendingBasisForMini ? score : runMonteCarlo(inputs, ctx, 1000);
-    const el = els('mcMini' + (basis === 'jobloss' ? 'Jobloss' : basis === 'mustspend' ? 'Mustspend' : 'Liketo'));
+    const el = els('mcMini' + (basis === 'mustspend' ? 'Mustspend' : 'Liketo'));
     if (el) {
       el.textContent = Math.round(miniScore) + '%';
       // Three-band traffic light; black text on orange for contrast, white on red and green.
@@ -1080,7 +1080,7 @@ function render() {
     const basisRows = basis === savedSpendingBasisForMini ? rows : projectRun(inputs, ctx, false).rows;
     const basisSpouseRow = basisRows.find(r => r.spouseAge === inputs.spouseLifeExpectancy) || basisRows[basisRows.length - 1];
     const basisSpouseEndingBalance = basisSpouseRow ? basisSpouseRow.netWorth : 0;
-    const longevityEl = els('mcMiniLongevity' + (basis === 'jobloss' ? 'Jobloss' : basis === 'mustspend' ? 'Mustspend' : 'Liketo'));
+    const longevityEl = els('mcMiniLongevity' + (basis === 'mustspend' ? 'Mustspend' : 'Liketo'));
     if (longevityEl) {
       longevityEl.textContent = fmtMoneyK(dv(basisSpouseEndingBalance, basisSpouseRow ? basisSpouseRow.age : retirementAge, inputs));
     }
@@ -1149,7 +1149,7 @@ function render() {
     <div class="stat"><div class="label">Net worth today (excluding Checking)</div><div class="value">${fmtMoneyK(netWorthToday)}</div></div>
     <div class="stat"><div class="label">Net worth at retirement</div><div class="value">${fmtMoneyK(dv(netWorthAtRetirement, retirementAge, inputs))}</div></div>
     <div class="stat"><div class="label">Ending balance at spouse's longevity (age ${inputs.spouseLifeExpectancy})</div><div class="value">${fmtMoneyK(dv(spouseEndingBalance, spouseLongevityRow ? spouseLongevityRow.age : retirementAge, inputs))}</div></div>
-    <div class="stat"><div class="label">Average retirement withdrawal rate<span class="sub-label" style="display:block; text-transform:none; font-weight:400; font-size:13.5px; margin-top:2px;">${spendingBasis === 'jobloss' ? 'Job Loss' : spendingBasis === 'mustspend' ? 'Must Spend' : 'Like to Spend'} basis</span></div><div class="value">${initialWithdrawalRate != null ? (initialWithdrawalRate*100).toFixed(1)+'%' : '—'}</div></div>
+    <div class="stat"><div class="label">Average retirement withdrawal rate<span class="sub-label" style="display:block; text-transform:none; font-weight:400; font-size:13.5px; margin-top:2px;">${spendingBasis === 'mustspend' ? 'Must Spend' : 'Like to Spend'} basis</span></div><div class="value">${initialWithdrawalRate != null ? (initialWithdrawalRate*100).toFixed(1)+'%' : '—'}</div></div>
   `;
 
   if (els('taxStats')) {
@@ -1339,18 +1339,9 @@ try {
 
 try {
   const savedSpendingBasis = localStorage.getItem(SPENDING_BASIS_KEY);
-  if (savedSpendingBasis === 'liketo' || savedSpendingBasis === 'mustspend' || savedSpendingBasis === 'jobloss') {
+  if (savedSpendingBasis === 'liketo' || savedSpendingBasis === 'mustspend') {
     spendingBasis = savedSpendingBasis;
     document.querySelectorAll('#spendingBasisToggle .dollar-toggle-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === savedSpendingBasis));
-  }
-} catch (e) { /* storage unavailable, ignore */ }
-
-try {
-  const savedJobLossDate = localStorage.getItem(JOB_LOSS_DATE_KEY);
-  if (savedJobLossDate) {
-    jobLossDate = savedJobLossDate;
-    const jlEl = els('jobLossDate');
-    if (jlEl) jlEl.value = savedJobLossDate;
   }
 } catch (e) { /* storage unavailable, ignore */ }
 
