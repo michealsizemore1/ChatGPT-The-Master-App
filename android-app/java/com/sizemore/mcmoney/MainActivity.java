@@ -33,6 +33,9 @@ public class MainActivity extends Activity {
     private static final int FILE_REQUEST = 1001;
     private static final String START_URL = "file:///android_asset/www/index.html";
     private WebView web;
+    private android.view.View lockView;
+    private boolean locked = false, prompting = false;
+    private long backgroundAt = 0;
     private ValueCallback<Uri[]> pendingFiles;
     private Uri cameraUri;
 
@@ -40,7 +43,12 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         web = new WebView(this);
-        setContentView(web);
+        android.widget.FrameLayout root = new android.widget.FrameLayout(this);
+        root.addView(web);
+        lockView = buildLockView();
+        root.addView(lockView);
+        setContentView(root);
+        if (AppLock.enabled(this) && AppLock.available(this)) lock(); else lockView.setVisibility(android.view.View.GONE);
 
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);
@@ -137,6 +145,11 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == AppLock.CONFIRM_REQUEST) {
+            prompting = false;
+            if (resultCode == RESULT_OK) unlock();
+            return;
+        }
         if (requestCode != FILE_REQUEST) {
             super.onActivityResult(requestCode, resultCode, data);
             return;
@@ -174,6 +187,7 @@ public class MainActivity extends Activity {
 
     @Override
     public void onBackPressed() {
+        if (locked) { super.onBackPressed(); return; }
         if (web.canGoBack()) web.goBack();
         else super.onBackPressed();
     }
@@ -185,6 +199,76 @@ public class MainActivity extends Activity {
                 web.evaluateJavascript("window." + fn + "&&window." + fn + "(" + org.json.JSONObject.quote(text) + ")", null);
             }
         });
+    }
+
+    // ---------- App lock (see AppLock) ----------
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (!locked && backgroundAt > 0 && System.currentTimeMillis() - backgroundAt > AppLock.RELOCK_AFTER_MS
+                && AppLock.enabled(this) && AppLock.available(this)) lock();
+        backgroundAt = 0;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (!prompting && !locked) backgroundAt = System.currentTimeMillis();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (locked && !prompting) askToUnlock();
+    }
+
+    private void lock() {
+        locked = true;
+        lockView.setVisibility(android.view.View.VISIBLE);
+        web.setVisibility(android.view.View.INVISIBLE);
+    }
+
+    private void unlock() {
+        locked = false;
+        lockView.setVisibility(android.view.View.GONE);
+        web.setVisibility(android.view.View.VISIBLE);
+    }
+
+    private void askToUnlock() {
+        if (!AppLock.available(this)) { unlock(); return; } // the phone's screen lock was removed
+        prompting = true;
+        AppLock.prompt(this, ok -> runOnUiThread(() -> {
+            prompting = false;
+            if (ok) unlock();
+        }));
+    }
+
+    private android.view.View buildLockView() {
+        android.widget.LinearLayout box = new android.widget.LinearLayout(this);
+        box.setOrientation(android.widget.LinearLayout.VERTICAL);
+        box.setGravity(android.view.Gravity.CENTER);
+        box.setBackgroundColor(0xFF0F172A);
+        int pad = (int) (32 * getResources().getDisplayMetrics().density);
+        box.setPadding(pad, pad, pad, pad);
+        android.widget.TextView title = new android.widget.TextView(this);
+        title.setText("M&C Money is locked");
+        title.setTextColor(0xFFFFFFFF);
+        title.setTextSize(22);
+        title.setGravity(android.view.Gravity.CENTER);
+        android.widget.TextView sub = new android.widget.TextView(this);
+        sub.setText("Use your fingerprint or screen lock to open your budget.");
+        sub.setTextColor(0xFFA7F3D0);
+        sub.setTextSize(16);
+        sub.setGravity(android.view.Gravity.CENTER);
+        sub.setPadding(0, pad / 3, 0, pad / 2);
+        android.widget.Button b = new android.widget.Button(this);
+        b.setText("Unlock");
+        b.setOnClickListener(v -> { if (!prompting) askToUnlock(); });
+        box.addView(title);
+        box.addView(sub);
+        box.addView(b);
+        box.setClickable(true); // nothing behind the lock screen can be tapped
+        return box;
     }
 
     private void toast(final String msg) {
@@ -258,6 +342,19 @@ public class MainActivity extends Activity {
 
     /** Lets the page save backups and CSV exports, and send a backup to Google Drive (or any app). */
     public class Bridge {
+        @JavascriptInterface
+        public String appLockStatus() {
+            try {
+                return new org.json.JSONObject().put("enabled", AppLock.enabled(MainActivity.this))
+                        .put("available", AppLock.available(MainActivity.this)).toString();
+            } catch (Exception e) { return "{}"; }
+        }
+
+        @JavascriptInterface
+        public void setAppLock(boolean on) {
+            AppLock.setEnabled(MainActivity.this, on);
+        }
+
         /** Checks GitHub for a newer M&C Money; answers through window.__mcUpdate(json). */
         @JavascriptInterface
         public void checkForUpdate() {
