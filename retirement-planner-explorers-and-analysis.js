@@ -15,11 +15,8 @@ const HISTORICAL_SP500_RETURNS = {
 };
 const HISTORICAL_YEARS = Object.keys(HISTORICAL_SP500_RETURNS).map(Number).sort((a,b) => a-b);
 const HISTORICAL_FIRST_YEAR = HISTORICAL_YEARS[0], HISTORICAL_LAST_YEAR = HISTORICAL_YEARS[HISTORICAL_YEARS.length-1];
-// Builds the same {pre:{...}, post:{...}} shocks shape buildDownturnShocks/Market Explorer already use,
-// pinning the ACTUAL historical return for each simulated year starting from `startYear`, rather than a
-// hand-picked downturn. Returns null if there isn't enough historical data left after `startYear` to
-// cover the full plan horizon — that starting year simply can't be tested, same as cFIREsim excluding
-// any cycle that would run past the end of its dataset.
+// Builds a {pre, post} shocks object pinning the actual historical return for each year from `startYear`.
+// Returns null if the data runs out before the plan ends (that start year can't be tested).
 function buildHistoricalShocks(inputs, ctx, startYear) {
   const totalYears = ctx.maxYears; // currentAge .. effectiveLifeExpectancy, inclusive span
   if (startYear + totalYears > HISTORICAL_LAST_YEAR) return null;
@@ -32,11 +29,8 @@ function buildHistoricalShocks(inputs, ctx, startYear) {
   }
   return shocks;
 }
-// Runs your real plan once (deterministic, no random draws — the historical sequence IS the draw) for
-// every historical starting year with enough runway, and reports how many of those real historical
-// stretches your plan would have survived. Cheap relative to the Monte Carlo scenarios elsewhere on this
-// page (a plain projectRun per starting year, not 1000 of them), so this runs automatically like the
-// What If/Market Risk cards rather than needing a manual trigger.
+// Runs the plan once per historical start year (the history is the draw) and counts how many it
+// survives. Cheap enough to run automatically.
 function runHistoricalBacktest(inputs, ctx) {
   const results = [];
   for (let startYear = HISTORICAL_FIRST_YEAR; startYear <= HISTORICAL_LAST_YEAR; startYear++) {
@@ -136,11 +130,7 @@ function renderHistoricalBacktest(inputs, ctx) {
             title: items => items.length ? 'Retiring starting ' + labels[items[0].dataIndex] : '',
             label: item => {
               const r = backtest.results[item.dataIndex];
-              // depletionAge is only set when the portfolio itself hits zero during retirement
-              // withdrawals — a shortfall can also come from a pre-retirement Future Expense draw that
-              // couldn't be covered (see the "shortfallEver" comment in projectRun), which has no single
-              // depletion age of its own, so this falls back to a generic label rather than showing
-              // "age null".
+              // No depletion age when the shortfall came from an uncovered pre-retirement Future Expense.
               return r.success ? 'Survived — ending balance ' + fmtMoney(item.parsed.y)
                 : r.depletionAge ? 'Ran out of money at age ' + r.depletionAge
                 : 'Hit a shortfall along the way';
@@ -154,10 +144,7 @@ function renderHistoricalBacktest(inputs, ctx) {
       }
     }
   };
-  // 53+ bars (one per testable historical starting year) is far more than the ~10-15 categories every
-  // other mini-chart-card on this page shows — same horizontal-scroll treatment the many-year yearly
-  // charts elsewhere in the app already use (ensureOrUpdateYearlyChart), sized so each bar stays legible
-  // instead of getting squeezed into illegibility to fit the card's default width.
+  // 53+ bars: give each room and let the card scroll sideways.
   ensureChartHorizontalScroll(canvas, backtest.results.length * 13);
   if (charts.explorers_historical) {
     charts.explorers_historical.data = config.data; charts.explorers_historical.options = config.options; charts.explorers_historical.update();
@@ -176,12 +163,8 @@ const WHAT_IF_SCENARIOS = [
   { name: 'Delay Social Security to 70', apply: inp => ({ ...inp, ssAge: 70, ssMonthly: ssMonthlyAtAge(inp, 70) }) },
   { name: 'Contribute 5% more to TSP', apply: inp => ({ ...inp, tradPct: inp.tradPct + 0.05 }) },
   { name: 'Pay off all debt today', special: 'payoffDebt' },
-  // Job income stops for good starting right now — TSP employee contributions and the agency match
-  // are both computed as a % of income (see projectRun), so zeroing currentIncome already zeroes those
-  // automatically. Fixed-dollar brokerage pie contributions aren't tied to income the same way, though
-  // (they're a flat $/mo per pie), so those need to be zeroed explicitly too, or the scenario would
-  // wrongly assume the same paycheck-funded contributions keep happening with no paycheck. Guaranteed
-  // income already flowing (military pension, VA disability) is untouched — neither depends on this job.
+  // Job income stops now. TSP contributions and match follow income automatically, but brokerage pie
+  // contributions are flat $/mo, so they're zeroed too. Pension and VA disability continue.
   { name: 'Lose my job today', apply: inp => ({ ...inp, currentIncome: 0, incomeGrowth: 0,
     brokeragePieContributionsMonthly: inp.brokeragePieContributionsMonthly.map(() => 0) }) }
 ];
@@ -225,12 +208,8 @@ function runExplorerScenario(scenario, baseInputs, baseCtx) {
 }
 
 // ---------- Explorers: Sensitivity / Tornado analysis ----------
-// Nudges five key single levers up and down (one at a time, everything else held at the current
-// plan) so you can see which input actually moves the confidence score the most. Deliberately NOT
-// run automatically inside renderExplorers() — 5 levers x 2 sides x 300 sims, plus a 300-sim
-// baseline, is ~3,300 Monte Carlo runs, too expensive to re-run on every keystroke-driven render()
-// the way the rest of this page does. Triggered manually via the "Run Analysis" button instead, and
-// cached in sensitivityResults (module-level, below) until re-run.
+// Moves five levers up and down one at a time to show which one moves the score most. About 3,300
+// simulations, so it runs only from the "Run Analysis" button and is cached in sensitivityResults.
 const SENSITIVITY_LEVERS = [
   { name: 'Retirement age',
     low: inp => ({ ...inp, retirementAge: inp.retirementAge - 2 }), lowLabel: '2 yrs earlier',
@@ -250,11 +229,8 @@ const SENSITIVITY_LEVERS = [
 ];
 
 function runSensitivityAnalysis(inputs, ctx) {
-  // Same sim count on every side (300) so every bar is directly comparable to every other bar and
-  // to the baseline — matching the spirit of the 1000-sim convention used elsewhere on this page,
-  // just cheaper since there are 11 separate runs here instead of 1. ctx is reused unchanged for
-  // every variant (none of these five levers change anything buildContext() derives), same
-  // established convention as WHAT_IF_SCENARIOS/runExplorerScenario above.
+  // 300 sims on every side so all bars compare directly. ctx is reused (these levers don't affect
+  // buildContext()).
   const baselineScore = runMonteCarlo(inputs, ctx, 300);
   const results = SENSITIVITY_LEVERS.map(lever => {
     const scoreLow = runMonteCarlo(lever.low(inputs), ctx, 300);
@@ -345,18 +321,11 @@ function renderSensitivityAnalysis() {
 }
 
 // ---------- Social Security Claiming-Age Optimizer ----------
-// Standard SSA early/delayed-retirement adjustment factors relative to a Full Retirement Age of 67
-// (applies to anyone born 1960 or later — covers this plan), derived directly from SSA's published
-// formula: 5/9 of 1% reduction per month for the first 36 months before FRA, 5/12 of 1% per additional
-// month earlier than that, and 2/3 of 1% delayed-credit increase per month after FRA up to age 70.
+// SSA adjustment factors vs. FRA 67 (born 1960+): -5/9 of 1% per month for the first 36 months early,
+// -5/12 of 1% per month beyond that, +2/3 of 1% per month delayed to 70.
 const SS_CLAIMING_FACTORS = { 62:0.700, 63:0.750, 64:0.800, 65:0.8667, 66:0.9333, 67:1.000, 68:1.080, 69:1.160, 70:1.240 };
-// Whatever age/monthly-amount is actually entered on the Income page is treated as the known data point
-// and backed out to an equivalent Full Retirement Age amount (PIA) via the factor table above, so every
-// candidate claiming age below is derived from that SAME underlying benefit rather than re-guessing it.
-// SS_CLAIMING_FACTORS only tabulates ages 62-70 (Social Security's actual claiming window); clamp
-// any out-of-range age to that window's nearest edge instead of silently falling back to a 1.0
-// ("no adjustment") factor, which understated the true benefit for anyone whose saved claiming age
-// was, e.g., 71 (a plausible "delay further" input) or below 62.
+// The entered age/amount is backed out to a PIA so every candidate age uses the same benefit. Ages
+// outside 62-70 clamp to the nearest edge rather than getting a 1.0 factor.
 function ssClaimingFactorForAge(age) {
   const clamped = Math.max(62, Math.min(70, Math.round(age)));
   return SS_CLAIMING_FACTORS[clamped] || 1;
@@ -421,13 +390,8 @@ function renderSSComparison(inputs) {
 }
 
 // ---------- Scenario Comparison (multi-select, side-by-side) ----------
-// One consistent shape — build(inputs, ctx) => {inputs, ctx, shocks} — covering the same ground as
-// WHAT_IF_SCENARIOS/WHATIF_CARDS/MARKET_RISK_SCENARIOS below, so any combination of them can be
-// multi-selected and compared together in one table/chart instead of only one at a time against baseline
-// (What If Scenarios) or a single exclusive radio pick (What-If Cards). Deliberately a separate list
-// rather than reusing those three directly — they have three different shapes (apply/special, build,
-// shocks-only) that would need unwrapping into this one anyway, and keeping them independent means a
-// change to one page's cards can't silently break this one.
+// One shape for every scenario: build(inputs, ctx) => {inputs, ctx, shocks}, so any mix can be compared
+// in one table/chart. Kept separate from the What-If lists so changes there can't break this.
 const COMPARE_SCENARIO_LIBRARY = [
   { name: 'Retire 2 years earlier', build: (inputs, ctx) => ({ inputs: { ...inputs, retirementAge: inputs.retirementAge - 2 }, ctx }) },
   { name: 'Retire 2 years later', build: (inputs, ctx) => ({ inputs: { ...inputs, retirementAge: inputs.retirementAge + 2 }, ctx }) },
@@ -477,10 +441,8 @@ function renderCompareCardGrid() {
     </div>
   `).join('');
 }
-// Runs one named entry (baseline or a built scenario) through a plain deterministic projection plus a
-// full 1000-sim Monte Carlo, same convention as runExplorerScenario above — kept as its own function
-// rather than reusing that one because this also needs the full `rows` array back (for the savings-
-// over-time overlay chart), which runExplorerScenario's return value doesn't include.
+// One entry through a deterministic run plus a 1000-sim Monte Carlo; also returns `rows` for the
+// savings-over-time chart.
 function runComparisonEntry(name, inputs, ctx, shocks) {
   shocks = shocks || {};
   const det = projectRun(inputs, ctx, false, shocks);
@@ -580,13 +542,8 @@ function renderScenarioCompare(inputs) {
 }
 
 // ---------- Withdrawal Order Optimizer (Money Flows page) ----------
-// Tests a handful of realistic account withdrawal sequences against your REAL accounts (not a generic
-// example) and Monte Carlo-scores each, so you can see which actual ordering serves your plan best
-// instead of guessing. Curated strategies rather than an exhaustive permutation search — 5+ accounts
-// would be 120+ orderings, most of them not meaningfully different from each other — covering the
-// handful of genuinely different approaches advisors actually discuss (taxable-first, tax-deferred-
-// first, cash-first, tax-free-first). Reuses runComparisonEntry from Scenario Comparison above, since
-// this is really the same "build a variant, score it, compare" pattern applied to one specific lever.
+// Scores a handful of realistic withdrawal orders (taxable-first, tax-deferred-first, cash-first,
+// tax-free-first) against your real accounts with Monte Carlo, using runComparisonEntry.
 const WITHDRAWAL_ORDER_STRATEGIES = [
   { name: 'Your current order', buildOrder: (keys, current) => current },
   { name: 'Taxable-first (brokerage → Traditional → cash → Roth last)',
@@ -658,14 +615,8 @@ function renderWithdrawalOrderOptimizer(inputs) {
 }
 
 // ---------- Plan vs. Actual Checkpoint Tracker (Investments page) ----------
-// Lets you pin the plan's own deterministic projection at a point in time as a "baseline," then
-// periodically save a "checkpoint" of your real account balances as they stand today. Each checkpoint
-// is compared against what that ORIGINAL baseline projected for that same age, so you can see whether
-// you're tracking ahead of, on, or behind the plan you made — instead of the projection silently
-// re-basing itself to whatever your balances happen to be right now every time you open the tool.
-// Baseline and history persist in their own localStorage keys (like Shared Notes / Ask AI history)
-// rather than inside the main autosaved state blob, so they survive independently of routine edits
-// and don't get quietly overwritten by the ordinary save/restore cycle.
+// Pin the plan's projection as a baseline, then save checkpoints of real balances and compare each to
+// what the baseline projected for that age. Stored in their own keys, separate from the main state.
 const CHECKPOINT_BASELINE_KEY = 'retirementPlannerCheckpointBaseline_v1';
 const CHECKPOINT_HISTORY_KEY = 'retirementPlannerCheckpointHistory_v1';
 let checkpointBaseline = null;
@@ -807,16 +758,10 @@ function renderCheckpointTracker(inputs, rows) {
 }
 
 // ---------- Inherited-Account Tax Breakdown (Estate Planning page) ----------
-// Takes the plan's final modeled row (age = lifeExpectancy, or the survivor's if longer) and shows,
-// account type by account type, roughly what heirs would net after tax if everything were inherited
-// and liquidated at that point. Roth TSP passes tax-free; Traditional TSP is taxed as ordinary income
-// to heirs, spread over 10 years under the SECURE Act's post-2019 rules (no more "stretch IRA") —
-// approximated here with a single assumed flat rate, since the real rate depends entirely on the
-// heirs' own income the decade they inherit. Taxable brokerage and home equity get a step-up in cost
-// basis at death, so no capital gains tax is owed on an immediate sale. Cash accounts are already
-// after-tax. Remaining debt is subtracted before heirs receive anything. Purely illustrative — actual
-// treatment depends on beneficiary designations, state law, trusts, and probate, none of which this
-// (or the rest of the planner) models.
+// Roughly what heirs would net at the plan's final row: Roth TSP tax-free; Traditional TSP taxed as
+// ordinary income over 10 years (SECURE Act) at one assumed flat rate; taxable brokerage and home get a
+// stepped-up basis; cash is after-tax; remaining debt is subtracted. Illustrative only; beneficiary
+// designations, state law, trusts and probate aren't modeled.
 function renderInheritedAccountBreakdown(inputs, rows) {
   const wrap = els('heirBreakdownWrap');
   if (!wrap || !rows.length) return;
@@ -900,10 +845,7 @@ function renderInheritedAccountBreakdown(inputs, rows) {
 }
 
 // ---------- "What If I..." card selector (Explorers page, mimics Boldin's own What-If screen) ----------
-// Each entry gets a build(inputs, ctx) hook returning a fresh {inputs, ctx} pair for that one scenario,
-// rather than mutating anything shared — same non-destructive spirit as WHAT_IF_SCENARIOS above, just
-// covering a different (and differently-shaped) set of quick stress tests, including two that need a
-// synthetic debt/expense injected rather than a simple input tweak.
+// Each card's build(inputs, ctx) returns a fresh {inputs, ctx} without changing anything shared.
 const WHATIF_CARDS = [
   { name: 'Live 5 years longer than expected',
     build: (inputs) => { const newInputs = { ...inputs, lifeExpectancy: inputs.lifeExpectancy + 5 }; return { inputs: newInputs, ctx: buildContext(newInputs) }; } },
@@ -981,10 +923,8 @@ function renderWhatIfSavingsChart(inputs, ctx) {
 }
 
 // ---------- Market Explorer (Explorers page, mimics Boldin's own Market Downturn tab) ----------
-// Builds a shocks object (same {pre:{...}, post:{...}} shape projectRun/runMonteCarlo already accept)
-// spanning `durationYears` starting at `startAge`, pinning the literal return for each of those years —
-// splitting across the pre-retirement/post-retirement buckets automatically depending on where each
-// year of the downturn actually falls relative to retirementAge.
+// Shocks object pinning `returnDuringDownturn` for `durationYears` from `startAge`, split into pre/post
+// retirement buckets automatically.
 function buildDownturnShocks(inputs, startAge, durationYears, returnDuringDownturn) {
   const shocks = { pre: {}, post: {} };
   for (let i = 0; i < durationYears; i++) {
@@ -1115,7 +1055,4 @@ function renderMarketExplorer(inputs, ctx) {
 }
 
 // ---------- Per-section chart configs ----------
-// Wraps a long label into multiple lines (Chart.js renders an array label as stacked lines),
-// so scenario names and item names never get cut off in a horizontal bar chart's label gutter
-// — this is what actually caused the cutoff, since a single long line has nowhere to go but
-// off the edge of the canvas, no matter how tall the chart is.
+// Wraps a long label into stacked lines so names aren't cut off in a horizontal bar chart.

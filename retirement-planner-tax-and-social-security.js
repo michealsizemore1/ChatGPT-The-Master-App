@@ -32,19 +32,9 @@ function inflationIndexedBrackets(brackets, factor) {
   return brackets.map(b => ({ upTo: Number.isFinite(b.upTo) ? b.upTo * factor : Infinity, rate: b.rate }));
 }
 // ---------- Social Security taxation: IRS provisional-income method ----------
-// Replaces a flat "85% of benefits is taxable" assumption with the IRS's actual tiered formula (the
-// simplified/"quick calculation" version of the Social Security Benefits Worksheet, which matches the
-// full worksheet's result in the vast majority of real situations). Provisional income = other taxable
-// income + tax-exempt interest + half of Social Security benefits; the taxable share of SS then steps up
-// through three tiers (0% / up to 50% / up to 85%) instead of jumping straight to 85% for everyone.
-// The $32,000/$44,000 MFJ thresholds are intentionally left un-inflated — unlike most tax figures in this
-// engine, these have been fixed in the tax code since 1993 and are not indexed for inflation (the
-// so-called Social Security "stealth tax": as incomes rise with inflation, more of each benefit becomes
-// taxable over time, exactly as real law works). "Other income" here is every other already-known
-// taxable guaranteed income source (pension/annuity/SBP) — like the rest of this pre-withdrawal tax
-// estimate, it doesn't attempt to fold in this year's Trad TSP/brokerage withdrawal amount, since that
-// isn't known until after the withdrawal waterfall runs later on; this mirrors the same scope limitation
-// the surrounding federal tax estimate already has, rather than introducing a new one.
+// Tiered 0% / 50% / 85% taxable share (IRS quick worksheet). The $32k/$44k MFJ thresholds are fixed in
+// law since 1993 and deliberately not inflated. "Other income" is known guaranteed income only; this
+// year's TSP/brokerage withdrawals aren't known yet at this point, same as the rest of this estimate.
 function taxableSocialSecurity(ssBenefits, otherTaxableIncome, filingStatus = 'mfj') {
   const ss = Math.max(0, ssBenefits);
   if (ss <= 0) return 0;
@@ -80,11 +70,8 @@ function idahoTaxOwed(taxableIncome, rate, inflationFactor = 1, filingStatus = '
   return Math.max(0, Math.max(0, taxableIncome) - zeroBand * inflationFactor) * Math.max(0, rate);
 }
 
-// A spouse's retirement benefit is based on the worker's Primary Insurance Amount (the age-67
-// benefit for this plan), not on the worker's reduced age-62 or delayed age-70 payment. For a spouse
-// born in 1960 or later, claiming before FRA 67 reduces the base spousal amount by 25/36 of 1% per
-// month for the first 36 months and 5/12 of 1% for each additional month. Waiting past FRA does not
-// increase a regular spousal benefit.
+// Spousal benefit is based on the worker's PIA (age-67 benefit). Claiming before FRA 67 cuts it by
+// 25/36 of 1% per month for 36 months, then 5/12 of 1% per month. Waiting past FRA adds nothing.
 function spousalEarlyClaimMultiplier(startAge, fraAge = 67) {
   const clampedStartAge = Math.max(62, Math.min(fraAge, +startAge || fraAge));
   const monthsEarly = Math.max(0, Math.round((fraAge - clampedStartAge) * 12));
@@ -116,23 +103,15 @@ function solveGrossForNetTaxablePortion(baseTaxableIncome, netTarget, brackets, 
   }
   return high;
 }
-// Tax owed on an INCREMENTAL amount stacked on top of baseTaxableIncome — e.g. the real tax bill
-// triggered by a withdrawal when other taxable income already fills the lower brackets — computed
-// bracket-by-bracket (not a single flat rate applied to the whole increment, which is what you get by
-// naively using marginalRateFromBrackets on the total and multiplying it by the whole withdrawal: that
-// overstates the tax, and therefore the gross withdrawal needed, any time the withdrawal itself spans
-// more than one bracket). flatAddOnRate is a rate that applies uniformly regardless of which federal
-// bracket a dollar falls in (Idaho's flat state rate, and/or the Rule-of-55 10% early-withdrawal
-// penalty for Traditional TSP) — added on top of the bracket-blended federal amount.
+// Tax on an amount stacked on top of baseTaxableIncome, computed bracket by bracket (a single marginal
+// rate would overstate it when the amount spans brackets). flatAddOnRate applies to every dollar:
+// Idaho's flat rate and/or the 10% early-withdrawal penalty.
 function taxOwedOnIncrement(baseTaxableIncome, grossAmount, brackets, flatAddOnRate) {
   if (grossAmount <= 0) return 0;
   const base = Math.max(0, baseTaxableIncome);
   return (taxOwedFromBrackets(base + grossAmount, brackets) - taxOwedFromBrackets(base, brackets)) + flatAddOnRate * grossAmount;
 }
-// Inverse of taxOwedOnIncrement: solves for the GROSS amount that must be withdrawn so that, after tax
-// on just that increment (bracket-by-bracket, stacked on top of baseTaxableIncome), the account nets
-// exactly netTarget. Walks the brackets from baseTaxableIncome upward, using each bracket's own rate
-// only for the slice of the withdrawal that actually falls in it.
+// Inverse of taxOwedOnIncrement: the gross withdrawal that nets exactly netTarget after that tax.
 function solveGrossForNet(baseTaxableIncome, netTarget, brackets, flatAddOnRate) {
   if (netTarget <= 0) return 0;
   let cursor = Math.max(0, baseTaxableIncome);

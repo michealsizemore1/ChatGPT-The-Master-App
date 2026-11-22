@@ -6,20 +6,13 @@ function setRetirementAge(age) {
   const ageInput = els('retirementAge');
   if (!ageInput) return;
   ageInput.value = age;
-  // Use precisely the same event path as entering the age manually. The field's own oninput handler
-  // updates the retirement date, while the delegated input/change handlers protect the local
-  // value, save it, and render the selected pill. Maintaining a
-  // separate button-only save path allowed the control to say "Saved" while later restoring the
-  // previous field value.
+  // Use the same event path as typing the age, so the date updates and the value is saved the normal way.
   ageInput.dispatchEvent(new Event('input', { bubbles:true }));
   ageInput.dispatchEvent(new Event('change', { bubbles:true }));
 }
 
-// Reverse of syncRetirementDate below: fires when the Retirement age field itself (or one of the
-// 55/56/57 quick pills) is edited, so "Planned last working day" and its hint stay in step instead
-// of sitting frozen at whatever date was last set (or the page default) while the age moves on.
-// Defaults to the last calendar day of the target month, matching the field's own "last working day"
-// framing and its original Dec 31 default.
+// Reverse of syncRetirementDate: when the Retirement age (or a quick pill) changes, move "Planned last
+// working day" to match.
 function syncRetirementDateFromAge(shouldRender = true) {
   const ageEl = els('retirementAge');
   const dateEl = els('retirementDate');
@@ -28,16 +21,8 @@ function syncRetirementDateFromAge(shouldRender = true) {
   if (isNaN(targetAge)) return;
   const currentAge = +els('currentAge').value;
   const birthDateStr = els('birthDate') ? els('birthDate').value : '';
-  // Unlike every other age-based milestone field (LTC start age, Medicare age, pension age, etc.), which
-  // are genuinely tied to your actual birthday and correctly use ageToMonthValue's birth-month math,
-  // "Planned last working day" isn't a birthday-triggered event at all — it's just whichever calendar
-  // date you choose to stop working. It used to reuse ageToMonthValue (birth month) here too, which meant
-  // every time the Retirement age field changed — typing a new number, or clicking one of the 55-59 quick
-  // pills — this unconditionally overwrote the date back to the LAST DAY OF YOUR BIRTH MONTH (November 30
-  // for a November birthday), silently discarding a deliberately-chosen date like December 31 every time.
-  // Defaults to December 31 of the year you turn the target age instead, matching this field's own
-  // original "planned last working day of the year" framing (see the two-col label above) — so changing
-  // ages no longer fights a manually-set December 31 (or any other custom month/day already sitting here).
+  // Retirement isn't a birthday event, so default to Dec 31 of the year you reach the target age (not
+  // the end of your birth month), and don't overwrite a custom date.
   const [by] = (birthDateStr || '').split('-').map(Number);
   const y = by ? (by + Math.round(targetAge)) : (new Date().getFullYear() + Math.round(targetAge - currentAge));
   dateEl.value = y + '-12-31';
@@ -60,10 +45,7 @@ function syncRetirementDate(force) {
   const msPerYear = 365.25*24*60*60*1000;
   const yearsAway = (target - today) / msPerYear;
   const currentAge = +els('currentAge').value;
-  // Anchor the implied age on the real birth date (day precision), not elapsed-time-from-today —
-  // same fix as monthToAge/dateToAge/syncAgeDate. The date itself is still a freely-chosen calendar
-  // date (not birthday-locked, see comment above syncAgeFromRetirementAge), but whatever date you
-  // land on still corresponds to one specific real age, which this now computes exactly.
+  // Compute the implied age from the real birth date (day precision).
   const birthDateStr = els('birthDate') ? els('birthDate').value : '';
   const [by, bm, bd] = (birthDateStr || '').split('-').map(Number);
   const [ty, tm, td] = dateVal.split('-').map(Number);
@@ -109,12 +91,8 @@ function syncAgeDate(dateFieldId, ageFieldId, hintFieldId, basisAgeFieldId) {
   render();
 }
 
-// Inverse of the monthsAway math inside syncAgeDate above: given a target age and the actual
-// birthdate ("YYYY-MM-DD") it's measured from, returns a "YYYY-MM" string suitable for an
-// <input type="month">'s .value. Anchored on the real birth year/month, not "today" — a birthday
-// always lands in the same calendar month every year, so this is exact, not an approximation, and
-// it no longer defaults to whatever month it happens to be right now (e.g. July) instead of the
-// person's actual birth month (e.g. November).
+// Target age + birth date ("YYYY-MM-DD") -> "YYYY-MM" for an <input type="month">, anchored on the
+// birth month.
 function ageToMonthValue(birthDateStr, targetAge) {
   if (targetAge === null || targetAge === undefined || isNaN(targetAge) || !birthDateStr) return '';
   const [by, bm] = birthDateStr.split('-').map(Number);
@@ -122,10 +100,7 @@ function ageToMonthValue(birthDateStr, targetAge) {
   const y = by + Math.round(targetAge);
   return y + '-' + String(bm).padStart(2, '0');
 }
-// Authoritative direction: your actual birthdate never needs "correcting" the way a plain age
-// number does, so a real birthdate (not just a birth month, and not a manually-bumped "current age")
-// drives currentAge/spouseAge automatically — including re-computing them fresh on every page load,
-// so the age never goes stale between birthdays the way a hand-typed number would.
+// Birth date drives currentAge/spouseAge, recomputed on every load so ages never go stale.
 function computeAgeFromBirthDate(dateStr) {
   if (!dateStr) return null;
   const [y, m, d] = dateStr.split('-').map(Number);
@@ -153,12 +128,7 @@ function syncAgeFromBirthDate(dateFieldId, ageFieldId, monthFieldId, hintFieldId
   render();
 }
 
-// The reverse direction of syncAgeDate: fires when the AGE number field itself is edited directly
-// (which is how most people actually use these fields — the month/year picker is the secondary,
-// optional way in). Without this, editing the age left the date picker and its hint exactly where
-// they started (usually blank), so there was no way to tell what calendar year a given age actually
-// falls in without doing the math yourself. Keeps both fields — and the hint — in sync no matter
-// which one you actually typed into.
+// Reverse of syncAgeDate: when the age number is edited, update the date picker and its hint.
 function syncDateFromAge(ageFieldId, dateFieldId, hintFieldId, basisAgeFieldId) {
   const ageEl = els(ageFieldId);
   const dateEl = els(dateFieldId);
@@ -187,9 +157,8 @@ function syncDateFromAge(ageFieldId, dateFieldId, hintFieldId, basisAgeFieldId) 
 }
 
 // ---------- Long-term care: type-of-care presets (Boise, ID area estimates, today's $) ----------
-// Sources: Genworth/CareScout Cost of Care Survey (state + Boise-area figures) and current local
-// caregiver rate listings. These are starting points, not locked numbers — the Annual cost field
-// stays freely editable after picking a type.
+// Sources: Genworth/CareScout Cost of Care Survey and local caregiver rates. Starting points only; the
+// Annual cost field stays editable.
 const VA_SPOUSE_AA_MONTHLY_2026 = 201.41;
 const LTC_CARE_TYPE_COSTS = {
   inhome_parttime: 31200,   // ~20 hrs/wk at ~$30/hr
@@ -259,54 +228,28 @@ function clearAnthropicApiKeyLocal() {
 }
 const ACTIVE_PAGE_KEY = 'retirementPlannerActivePage_v1';
 let allocationExplorerStrategy = 'moderate';
-// Backup reminder: since this tool is a single offline HTML file with no server, everything you enter
-// only ever lives in this one browser's localStorage unless you explicitly download a JSON backup — a
-// browser data wipe, a new device, or even just clearing site data loses it all silently. LAST_BACKUP_KEY
-// tracks when you last actually clicked "Download backup," separate from STORAGE_KEY (which just tracks
-// your plan data itself and says nothing about whether it's ever been exported anywhere else).
+// Backup reminder: the plan only lives in this browser unless you download a backup. LAST_BACKUP_KEY
+// records when you last did.
 const LAST_BACKUP_KEY = 'retirementPlannerLastBackup_v1';
 const BACKUP_REMINDER_DISMISSED_KEY = 'retirementPlannerBackupReminderDismissed_v1';
 const BACKUP_REMINDER_STALE_DAYS = 30;
 const BACKUP_REMINDER_SNOOZE_DAYS = 7;
 
-// ---------- Local-only planner state (formerly network cloud sync) ----------
-// This file used to include a full account sign-in / network-sync system (legacy online service). That
-// system's UI never actually shipped -- its sign-in overlay and account fields (cloudAuthOverlay,
-// cloudSignInSettingsBtn, cloudAccountEmail, etc.) don't exist anywhere in this page's HTML -- and its
-// sync functions had no live callers left, so in practice the planner has always run entirely from
-// local browser storage already. The dead sync code has been removed. What remains below is the small
-// set of *_KEY constants still used to purge any leftover session data an older build may have left in
-// this browser, plus the genuinely-used "remember the last retirement-age selection across a reload"
-// mechanism, which reuses a couple of the same storage helpers.
-const CLOUD_LAST_SYNC_KEY = 'retirementPlannerCloudLastSync_v1';
-const CLOUD_DIRTY_KEY = 'retirementPlannerCloudDirty_v1';
-const CLOUD_RESET_PENDING_KEY = 'retirementPlannerCloudResetPending_v1';
-const CLOUD_EMAIL_KEY = 'retirementPlannerCloudEmail_v1';
+// ---------- Retirement-age selection ----------
 const RETIREMENT_AGE_PENDING_KEY = 'retirementPlannerRetirementAgePending_v1';
-const PLANNER_AUTH_STORAGE_KEY = 'retirementPlannerLegacyRemoteAuth_v2';
-const PLANNER_REFRESH_STORAGE_KEY = 'retirementPlannerRefreshToken_v2';
-const PLANNER_ACCESS_STORAGE_KEY = 'retirementPlannerAccessToken_v2';
-const PLANNER_EXPIRY_STORAGE_KEY = 'retirementPlannerTokenExpiry_v2';
-const PLANNER_USER_STORAGE_KEY = 'retirementPlannerCloudUser_v2';
-const PLANNER_SESSION_DB_NAME = 'retirementPlannerSecureSession_v2';
 
-function cloudStorageGet(key) {
-  try { return localStorage.getItem(key); } catch (e) { return null; }
-}
-function cloudStorageSet(key, value) {
-  try { localStorage.setItem(key, value); } catch (e) { /* storage unavailable */ }
-}
 function rememberRetirementAgeSelection(age) {
   const selectedAge = Number(age);
   if (!Number.isFinite(selectedAge)) return;
-  const selectedAt = new Date().toISOString();
   // A retirement-age button can be selected while the page is still starting up, and that deliberate
   // selection must win over whatever loadState() is about to restore.
-  cloudStorageSet(RETIREMENT_AGE_PENDING_KEY, JSON.stringify({ age:selectedAge, selectedAt }));
+  try {
+    localStorage.setItem(RETIREMENT_AGE_PENDING_KEY, JSON.stringify({ age:selectedAge, selectedAt:new Date().toISOString() }));
+  } catch (e) { /* storage unavailable */ }
 }
 function readPendingRetirementAgeSelection() {
   try {
-    const pending = JSON.parse(cloudStorageGet(RETIREMENT_AGE_PENDING_KEY) || 'null');
+    const pending = JSON.parse(localStorage.getItem(RETIREMENT_AGE_PENDING_KEY) || 'null');
     return pending && Number.isFinite(Number(pending.age)) && pending.selectedAt ? {
       age:Number(pending.age),
       selectedAt:String(pending.selectedAt)
@@ -321,32 +264,64 @@ function applyPendingRetirementAgeSelection() {
   const ageEl = els('retirementAge');
   if (!ageEl) return false;
   ageEl.value = pending.age;
-  // Restoring this one field on its own, without a full render() here, avoids running the planner
-  // halfway through startup before the rest of loadState()'s fields have been restored.
+  // Restore just this field (no full render()) so the planner doesn't run before loadState() finishes.
   syncRetirementDateFromAge(false);
   return true;
 }
-async function initPlannerCloudSync() {
-  // One-time cleanup: earlier builds stored network cloud-sync session data under these keys. The
-  // planner now runs entirely from local storage, so purge any leftover legacy records on load.
+
+// ---------- Old data cleanup (Settings) ----------
+// Leftovers nothing reads any more: the retired Accounts & Cards tracker (its exact keys plus "rcpt-"
+// receipt photos) and removed cloud sign-in records. M&C Money uses different keys and isn't affected.
+const OLD_PLANNER_DATA_KEYS = [
+  'cc-register', 'cc-categories', 'cc-trips', 'cc-notes', 'active-trip',
+  'chk-register', 'chk-open-bal', 'chk-notes',
+  'mike-register', 'mike-open-bal', 'mike-notes',
+  'savings-register', 'savings-open-bal', 'savings-notes',
+  'hysa-register', 'hysa-open-bal', 'hysa-notes',
+  'retirementPlannerCloudLastSync_v1', 'retirementPlannerCloudDirty_v1', 'retirementPlannerCloudResetPending_v1',
+  'retirementPlannerCloudEmail_v1', 'retirementPlannerLegacyRemoteAuth_v2', 'retirementPlannerRefreshToken_v2',
+  'retirementPlannerAccessToken_v2', 'retirementPlannerTokenExpiry_v2', 'retirementPlannerCloudUser_v2'
+];
+const OLD_PLANNER_DATA_PREFIX = 'rcpt-';
+const OLD_PLANNER_SESSION_DB = 'retirementPlannerSecureSession_v2';
+
+function findOldPlannerData() {
+  const keys = [];
+  let chars = 0;
   try {
-    [CLOUD_DIRTY_KEY, CLOUD_LAST_SYNC_KEY, CLOUD_RESET_PENDING_KEY, CLOUD_EMAIL_KEY,
-      PLANNER_AUTH_STORAGE_KEY, PLANNER_REFRESH_STORAGE_KEY, PLANNER_ACCESS_STORAGE_KEY,
-      PLANNER_EXPIRY_STORAGE_KEY, PLANNER_USER_STORAGE_KEY].forEach(key => {
-        localStorage.removeItem(key);
-        sessionStorage.removeItem(key);
-      });
-    if (window.indexedDB) indexedDB.deleteDatabase(PLANNER_SESSION_DB_NAME);
-  } catch (e) {}
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (OLD_PLANNER_DATA_KEYS.includes(k) || k.startsWith(OLD_PLANNER_DATA_PREFIX)) {
+        keys.push(k);
+        chars += k.length + (localStorage.getItem(k) || '').length;
+      }
+    }
+  } catch (e) { /* storage unavailable */ }
+  return { keys, bytes: chars * 2 }; // browsers store localStorage as UTF-16
+}
+function renderOldDataCleanup() {
+  const card = els('oldDataCleanupCard');
+  if (!card) return;
+  const found = findOldPlannerData();
+  card.style.display = found.keys.length ? '' : 'none';
+  const note = els('oldDataCleanupNote');
+  if (note) {
+    const kb = Math.max(1, Math.round(found.bytes / 1024));
+    note.textContent = `${found.keys.length} leftover item${found.keys.length === 1 ? '' : 's'} (about ${kb >= 1024 ? (kb / 1024).toFixed(1) + ' MB' : kb + ' KB'}) from the old Accounts & Cards page and the removed cloud sign-in.`;
+  }
+}
+function clearOldPlannerData() {
+  const found = findOldPlannerData();
+  if (!found.keys.length) { renderOldDataCleanup(); return; }
+  if (!confirm('Delete the old Accounts & Cards data (registers, notes, receipt photos) and old cloud sign-in records from this browser?\n\nYour retirement plan, Document Vault and the M&C Money app are not affected. This cannot be undone.')) return;
+  try {
+    found.keys.forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
+    if (window.indexedDB) indexedDB.deleteDatabase(OLD_PLANNER_SESSION_DB);
+  } catch (e) { /* storage unavailable */ }
+  renderOldDataCleanup();
+  alert('Old data cleared.');
 }
 
 // ---------- Shared Notes (one card per page, all editing the SAME text) ----------
-// A single note that follows you across every page — type on Taxes, switch to Income, it's already
-// there. Every page has its own <textarea class="shared-notes-textarea" ...> in the DOM at once (only
-// the active page's is visible, via the normal .page/.page.active CSS), so "sync" just means keeping
-// all of those textareas' .value in lockstep with one shared in-memory string. Persists via its own
-// direct localStorage key (SHARED_NOTES_KEY) on every keystroke — deliberately NOT routed through the
-// full render()/saveState() pipeline (see the .shell change-listener above), since that reruns a
-// 1000-simulation Monte Carlo and would make typing feel laggy. It's also folded into saveState()'s
-// returned state object (see `sharedNotesText` there) purely so it round-trips through the JSON
-// backup/restore file, not because typing itself relies on that path.
+// One note shown on every page; all textareas are kept in step. Saved to SHARED_NOTES_KEY on every
+// keystroke without a full render() (which would rerun Monte Carlo), and included in backups.

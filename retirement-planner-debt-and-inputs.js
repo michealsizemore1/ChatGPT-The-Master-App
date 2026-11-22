@@ -47,11 +47,8 @@ function addDebt() { debts.push({ name:'New debt', category:'Other', balance:500
 function removeDebt(i) { debts.splice(i,1); renderDebtRows(); render(); }
 
 // ---------- Debt amortization schedule (return-independent, computed once per render) ----------
-// startMonthOffset lets a debt originate in the future instead of already existing today — e.g. a
-// planned Vehicle Purchase financed at age 62 rather than a loan you're already carrying. Before that
-// many months elapse, the debt simply doesn't exist yet (balance $0, no payment); amortization begins
-// exactly at that month using the debt's real balance/APR/payment. Defaults to 0 (starts now), which
-// reproduces the exact original behavior for every pre-existing debt.
+// startMonthOffset lets a debt start in the future (e.g. a car loan at 62); until then balance and
+// payment are $0. Defaults to 0 (exists today).
 function buildDebtSchedule(debt, maxYears, startMonthOffset) {
   startMonthOffset = Math.max(0, Math.round(startMonthOffset || 0));
   const r = debt.apr/100/12;
@@ -73,12 +70,7 @@ function buildDebtSchedule(debt, maxYears, startMonthOffset) {
     return { balanceAtYearEnd, paymentDuringYear, neverPaysOff, payoffMonthIndex: null };
   }
   let bal = 0, y = 0, paidThisYear = 0, month = 0, originated = false;
-  // Exact number of months from today until the balance actually hits zero, tracked at the same
-  // monthly resolution the amortization math itself already runs at — independent of anyone's age or
-  // birthday, since a payoff date is purely a function of balance/APR/payment (and, now, origination
-  // timing), not a milestone tied to a person's calendar. Only balanceAtYearEnd/paymentDuringYear (the
-  // arrays the rest of the engine needs) get rolled up to yearly resolution; this stays at the true
-  // monthly precision.
+  // Months from today until payoff, kept at monthly precision; only the yearly arrays get rolled up.
   let payoffMonthIndex = null;
   while (month < maxYears*12) {
     if (!originated && month >= startMonthOffset) { bal = debt.balance; originated = true; }
@@ -134,9 +126,7 @@ function buildMortgageSchedule(inputs, maxYears) {
 }
 
 // ---------- Random normal (Box-Muller) ----------
-// Seeded RNG so the Monte Carlo confidence score is reproducible for a given set of inputs — a plain page
-// refresh (same data, nothing changed) reproduces the exact same score instead of jittering randomly.
-// Only actually changing an input reseeds (and thus can change) the result.
+// Seeded RNG so the same inputs always give the same Monte Carlo score; only changing an input reseeds.
 function hashStringToSeed(str) {
   let h = 0x811c9dc5;
   for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193); }
@@ -209,11 +199,8 @@ function readInputs() {
     brokeragePieRiskTypes: brokeragePies.map(p => p.riskType || 'equity'),
     brokeragePieCashRates: brokeragePies.map(p => (+p.cashRate || 4.5)/100),
     brokeragePieFees: brokeragePies.map(p => Math.max(0, (+p.fee || 0)/100)),
-    // Excluded accounts are dropped here rather than in the engine itself — effectiveWithdrawalOrder
-    // (projectRun()) is built directly from this array, so an excluded account is simply never a
-    // candidate to draw from, in both the sequential and simultaneous paths, with no further engine
-    // changes needed. withdrawalOrderState itself (the full list, used for the on-screen order/UI)
-    // stays untouched so an excluded account keeps its position if it's ever re-included.
+    // Excluded accounts are dropped here so the engine never draws from them. withdrawalOrderState keeps
+    // the full list so an excluded account keeps its place if re-included.
     withdrawalOrder: withdrawalOrderState.filter(k => !withdrawalExcludedKeys.includes(k)),
     withdrawalSimultaneous: els('withdrawSimultaneous').checked,
     withdrawalProportionMode,
@@ -318,12 +305,8 @@ function readInputs() {
     ssWageBase: +els('ssWageBase').value,
     ruleOf55Applies: els('ruleOf55Applies').checked,
     guardrailsEnabled: els('guardrailsEnabled').checked,
-    // A blank field (e.g. from a saved state captured while the field happened to be empty — the
-    // guardBand field itself is now hidden, only ever written by the slider, but guardAdj is still a
-    // plain visible number input someone could clear) silently coerces to 0 via +'' otherwise, which
-    // isn't "no adjustment configured," it's actively wrong: a 0% band or 0% adjustment makes the upper/
-    // current/lower guardrail figures collapse to the exact same number, which looks like a bug rather
-    // than a deliberately-chosen setting. Falls back to each field's own HTML default (20%/10%) instead.
+    // A blank field would coerce to 0 and collapse the guardrail figures into one number, so blanks fall
+    // back to the HTML defaults (20% band / 10% adjustment).
     guardBand: (els('guardBand').value === '' ? 20 : +els('guardBand').value)/100,
     guardAdj: (els('guardAdj').value === '' ? 10 : +els('guardAdj').value)/100,
     spendingPhasesEnabled: els('spendingPhasesEnabled') ? els('spendingPhasesEnabled').checked : false,
@@ -332,11 +315,8 @@ function readInputs() {
     goGoSpendingPct: els('goGoSpendingPct') ? (+els('goGoSpendingPct').value || 0)/100 : 1,
     slowGoSpendingPct: els('slowGoSpendingPct') ? (+els('slowGoSpendingPct').value || 0)/100 : 0.9,
     noGoSpendingPct: els('noGoSpendingPct') ? (+els('noGoSpendingPct').value || 0)/100 : 0.8,
-    // Roth Conversion planner (Taxes page): converts Traditional TSP to Roth TSP each year during a
-    // configured post-retirement window, paying the resulting tax bill from a separate account (never
-    // from the TSP itself, which would shrink the value of the conversion). rothConversionTaxSource is
-    // a dynamically-populated select (HYSA or a specific brokerage pie) tracked the same way
-    // excessIncomeDestinationPieName is — see rothConversionSourceName below.
+    // Roth Conversion planner (Taxes page): converts Traditional TSP to Roth TSP during a set window,
+    // paying the tax from a separate account (HYSA or a brokerage pie), never from the TSP itself.
     rothConversionEnabled: els('rothConversionEnabled') ? els('rothConversionEnabled').checked : false,
     rothConversionStartAge: els('rothConversionStartAge') ? +els('rothConversionStartAge').value || 55 : 55,
     rothConversionEndAge: els('rothConversionEndAge') ? +els('rothConversionEndAge').value || 75 : 75,
@@ -346,11 +326,6 @@ function readInputs() {
 }
 
 // ---------- Core projection engine (shared by deterministic run, Monte Carlo, and Explorer scenarios) ----------
-// Prorates the first calendar year a birthday-triggered income (pension, VA disability, SS, annuity, spousal
-// benefit) is received: the "age" loop advances one full year per row, but someone whose birthday falls partway
-// through the year (e.g. November) only actually collects that income from their birthday through Dec 31 in the
-// year they first become eligible — a fraction of the 12 months this engine would otherwise credit. A January
-// birthday (the default) computes to a full 12/12, so this is a no-op for anyone who doesn't set it.
-// Only applies to a milestone strictly in the future (eligibilityAge > currentAge) — anything whose eligibility
-// age is already at or before today's age (e.g. a pension already being drawn) is treated as already fully
-// active for the whole current year, not freshly starting, so it isn't clipped down to a couple months.
+// Prorates the first year of a birthday-triggered income (pension, VA, SS, annuity, spousal) to the
+// months from the birthday through Dec 31. A January birthday gives 12/12. Income whose eligibility age
+// is already reached counts as fully active for the current year.

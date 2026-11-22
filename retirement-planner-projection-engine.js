@@ -22,18 +22,9 @@ function setSocialSecurityAge(age) {
   ageInput.dispatchEvent(new Event('input', { bubbles:true }));
   ageInput.dispatchEvent(new Event('change', { bubbles:true }));
 }
-// Job income is either fully counted (every age below retirementAge) or fully zeroed (every age at or
-// above it) — accurate for every full year on either side, but the ONE year you actually retire is
-// usually only partially worked. E.g. turning 55 in November and retiring at the very end of December is
-// about 7 weeks of that age-year still on the job, not the full 12 months the "< retirementAge" branch
-// assumes for every other working year, and not the 0 months the post-retirement branch assumes for
-// every later year either. Computes what fraction of that one transition year (from the birthday that
-// starts the age-retirementAge year, through the actual retirement date) was still spent working.
-// r.income (the display figure) is pro-rated by this fraction, AND so are that same transition year's
-// Traditional/Roth/match contributions further down in projectRun — those get added directly to
-// balTrad/balRoth/balBrokeragePies, so this value does reach real account balances for the transition
-// year specifically, not merely the chart/report display figure. Every other year (fully before or
-// fully after retirement) is unaffected either way.
+// Fraction of the retirement year actually worked (from the birthday starting that age-year to the
+// retirement date). Pro-rates that one year's income and its TSP/match/brokerage contributions; every
+// other year is fully working or fully retired.
 function workingFractionOfFinalYear(inputs) {
   const [by, bm, bd] = (inputs.birthDateRaw || '').split('-').map(Number);
   const [ry, rm, rd] = (inputs.retirementDateRaw || '').split('-').map(Number);
@@ -65,12 +56,8 @@ function taxableCashInterestForYear(inputs, pieBalances, hysaBalance, savingsBal
     + Math.max(0, savingsBalance) * Math.max(0, inputs.cashRate || 0)
     + Math.max(0, checkingBalance) * Math.max(0, inputs.cashRate || 0);
 }
-// Applies a pooled inflow/outflow across all pies proportionally to their current balance (a positive delta
-// deposits, a negative delta withdraws). Withdrawals "water-fill" over a few rounds so a pie that runs dry
-// hands its unmet share to the others, and every pie is floored at 0. Returns an array (same length/order as
-// pieBalances) of how much each individual pie's balance actually changed — positive for a deposit, negative
-// for a withdrawal — so callers that need to know (e.g. attributing a Long-Term Care or Future Expense pull
-// to the Income Gap & Withdrawals per-account breakdown) can do so; most callers just ignore the return value.
+// Spreads a deposit (+) or withdrawal (-) across pies by balance. Withdrawals water-fill so a dry pie
+// passes its share on; pies floor at 0. Returns each pie's change, for callers that attribute draws.
 function applyPooledDelta(pieBalances, delta) {
   const before = pieBalances.slice();
   if (!pieBalances.length || Math.abs(delta) < 1e-9) return pieBalances.map(() => 0);
@@ -98,9 +85,8 @@ function applyPooledDelta(pieBalances, delta) {
 }
 
 // ---------- RMD (Required Minimum Distribution) ----------
-// IRS Uniform Lifetime Table (effective 2022+, Pub 590-B) — divides a Traditional-account balance by the
-// factor for your current age to get the minimum amount that must come out that year. Only applies to
-// Traditional TSP; Roth TSP is exempt. Floors at the age-120 factor for any age beyond the published table.
+// IRS Uniform Lifetime Table (2022+, Pub 590-B): balance / factor for your age. Traditional TSP only
+// (Roth is exempt). Ages past the table use the age-120 factor.
 const RMD_UNIFORM_LIFETIME_TABLE = {
   72:27.4, 73:26.5, 74:25.5, 75:24.6, 76:23.7, 77:22.9, 78:22.0, 79:21.1, 80:20.2,
   81:19.4, 82:18.5, 83:17.7, 84:16.8, 85:16.0, 86:15.2, 87:14.4, 88:13.7, 89:12.9, 90:12.2,
@@ -114,12 +100,8 @@ function rmdDivisor(age) {
 }
 
 // ---------- IRMAA (Income-Related Monthly Adjustment Amount) ----------
-// CMS-published 2026 Part B surcharge tiers for Married Filing Jointly (confirmed via the November 2025
-// CMS announcement) — the MAGI thresholds and surcharge dollar amounts here are current as of this
-// update, but should still be checked against current IRS/CMS guidance as RMD/IRMAA-relevant ages
-// actually approach, since these are republished annually. Returns the today's-$ monthly surcharge for a
-// given (already inflation-adjusted-for-comparison) MAGI; the caller applies medicalInflator on top, same
-// as the Part B premium fields it's added to.
+// 2026 CMS Part B surcharge tiers, Married Filing Jointly. Republished yearly, so re-check as Medicare
+// age approaches. Returns the today's-$ monthly surcharge; the caller applies medicalInflator.
 const IRMAA_BRACKETS_MFJ_BASE = [
   { magi: 218000, surcharge: 81.20 },
   { magi: 274000, surcharge: 202.90 },
@@ -197,30 +179,14 @@ function projectRun(inputs, ctx, randomize, shocks) {
       if (firstShortfallAge === null) { firstShortfallAge = age; firstShortfallReason = reason; }
     };
     const startInvestable = balTrad + balRoth + sumPies(balBrokeragePies);
-    // Savings page (per-account year-by-year chart): snapshot every tracked account's balance right
-    // here, before ANYTHING this year touches it (contributions, growth, mortgage/LTC/Future Expense
-    // draws, RMD, Roth conversion, or the main spending withdrawal all happen after this line) — the
-    // true start-of-year balance each account's own begin→contrib→return→withdrawal→end waterfall is
-    // built from, at the row push near the bottom of this loop.
+    // Start-of-year balances for the Savings page, before anything this year touches them.
     const acctBegin = { trad: balTrad, roth: balRoth, hysa: balHYSA };
     balBrokeragePies.forEach((b, i) => { acctBegin['pie_'+i] = b; });
-    // Job Loss test toggle (header): only actually changes anything once BOTH the header basis is set to
-    // 'jobloss' AND this year is at/after the specific age the job loss is assumed to happen (inputs.jobLossAge,
-    // set from the date field under the toggle) — years before that still run on the normal Like to Spend
-    // baseline, same as if the toggle weren't on at all.
+    // Job Loss test applies only when the header basis is 'jobloss' and this year is at/after jobLossAge.
     const jobLossActive = spendingBasis === 'jobloss' && inputs.jobLossAge != null && age >= inputs.jobLossAge;
-    // Job Loss test: if this involuntary separation happens before the calendar year you turn 55
-    // (ctx.jobLossQualifiesForRuleOf55 — see buildContext), Traditional TSP isn't just penalized before
-    // 59.5, it's genuinely unavailable as a withdrawal source at all until then — a real TSP/401(k) rule,
-    // independent of the blanket "Rule of 55 applies" toggle (Taxes page), which only reflects the
-    // baseline plan's assumption of separating at 55+. Every place below that could otherwise pull from
-    // Traditional TSP during a Job Loss year checks this first.
-    // Job loss before the calendar year of turning 55 disqualifies Rule of 55, meaning BOTH
-    // Traditional TSP is off-limits until 59.5 when job loss disqualifies Rule of 55 — no
-    // penalty-free separation withdrawal is available, so any Trad draw before 59.5 would trigger
-    // the 10% early-withdrawal penalty. Roth TSP *contributions* are always penalty-free (only
-    // earnings face the penalty before 59.5), so Roth stays in the withdrawal order as a bridge
-    // source for the ages-55-to-59.5 gap. Brokerage pies and HYSA remain accessible throughout.
+    // Job loss before the calendar year you turn 55 disqualifies Rule of 55: Traditional TSP is unavailable
+    // until 59.5 (regardless of the Taxes-page toggle). Roth stays available as a bridge (contributions
+    // come out penalty-free); brokerage and HYSA are always available.
     const tradAvailableForJobLoss = !(jobLossActive && !ctx.jobLossQualifiesForRuleOf55 && age < 59.5);
     const rothAvailableByAge = age >= 59.5;
     // Personal strategy: after a pre-55 separation, remove both TSP accounts from the withdrawal
@@ -228,15 +194,8 @@ function projectRun(inputs, ctx, randomize, shocks) {
     const effectiveWithdrawalOrder = inputs.withdrawalOrder.filter(k =>
       (k !== 'trad' || tradAvailableForJobLoss) && (k !== 'roth' || rothAvailableByAge));
 
-    // Hoisted up here (rather than declared down near the rest of this year's stats, below) so the
-    // mortgage down payment / Long-Term Care / Future Expenses pulls just below — which can all happen
-    // in ANY year, not just retirement years — can also record which specific account(s) they actually
-    // came out of. Previously only the main retirement withdrawal waterfall (further down) populated
-    // these, so a LTC bill or a planned future expense that dipped into Traditional TSP, Roth TSP, HYSA,
-    // or a brokerage pie would silently vanish from the Income Gap & Withdrawals / Income-by-Year
-    // per-account breakdowns and from the lifetime gross-withdrawal total, even though the account
-    // balance itself was correctly reduced. Checking/savings pulls still aren't tracked here, matching
-    // how the main waterfall itself only ever draws from trad/roth/hysa/pies, never checking/savings.
+    // Declared here so mortgage/LTC/Future Expense draws (any year) also record which accounts they came
+    // from, in the per-account breakdowns and lifetime totals. Checking/savings aren't tracked here.
     let grossWithdrawal = 0;
     const withdrawalByAccount = {};
     // Savings page: mirrors withdrawalByAccount but for money moving IN — Trad/Roth/match payroll
@@ -258,25 +217,10 @@ function projectRun(inputs, ctx, randomize, shocks) {
       withdrawalByAccount[key] = (withdrawalByAccount[key] || 0) + amt;
       grossWithdrawal += amt;
     };
-    // Shared sequential waterfall for "special" draws (Long-Term Care, Future/planned expenses) that can
-    // happen in ANY year, pre- or post-retirement — strictly one account at a time, in the exact order
-    // configured on the Money Flows page (inputs.withdrawalOrder — Trad TSP, then each brokerage pie
-    // individually, then HYSA, then Roth, by default), fully draining each before moving to the next.
-    // Previously LTC and Future Expenses each had their own hardcoded fallback order (LTC: Roth first,
-    // tax-free; Future Expenses: HYSA/savings/checking first) that ignored the user's configured order and
-    // could raid a brokerage pie reserved for a specific purpose (e.g. "Sequence of Returns Risk" T-bills)
-    // well before Traditional TSP was touched.
-    // When supplied, amountNeeded is treated as a NET dollar figure (mirroring takeFrom() below) and the
-    // actual balance drawn from a taxable account is grossed up so the account still nets the full amount
-    // needed after tax, with the tax split into federalTaxAnnual/stateTaxAnnual the same way takeFrom()
-    // does. Only usable post-retirement, since that's the only point in the loop where ordinaryIncomeStack
-    // exists — pre-retirement calls (and the mortgage down payment draw, which runs before that for the
-    // year) omit this argument and keep pulling plain, ungrossed-up dollar amounts, same as before.
-    // taxCtx (optional 3rd arg) is { earlyPenalty, stackBox: { v: <running ordinary-taxable-income
-    // total for this year, boxed in an object so this closure — declared outside the post-retirement
-    // block where that running total actually lives — can read/update it across the call> } }. Gross-up
-    // is bracket-blended (solveGrossForNet/taxOwedOnIncrement) rather than one flat rate applied to the
-    // whole amount — see those functions for why that matters.
+    // Sequential waterfall for LTC and Future Expense draws, in any year: one account at a time in the
+    // Money Flows order, draining each before the next. With taxCtx ({ earlyPenalty, stackBox: { v } },
+    // post-retirement only), amountNeeded is net and taxable accounts are grossed up bracket by bracket,
+    // with the tax recorded as federal/state. Without it, plain dollar amounts are pulled.
     const withdrawInOrder = (amountNeeded, order, taxCtx) => {
       let remain = amountNeeded;
       for (const key of order) {
@@ -325,12 +269,8 @@ function projectRun(inputs, ctx, randomize, shocks) {
       return remain; // whatever's left unmet, if the whole order runs dry
     };
 
-    // Mortgage down payment: checking/savings/HYSA are already after-tax cash, so no gross-up applies to
-    // those (correct as-is). The brokerage-pie fallback below still pulls a plain dollar amount rather than
-    // grossing up for LTCG tax the way Future Expenses now does above — this runs earlier in the year's
-    // iteration than guaranteedIncome/taxableBeforeWithdrawal/this year's marginal rates are computed, so
-    // there isn't yet a tax rate available to gross up against without a larger reordering of the loop.
-    // Currently inactive for this plan (buyHome is off), so left as the pre-existing simplified behavior.
+    // Mortgage down payment: cash accounts need no gross-up. The brokerage fallback isn't grossed up for
+    // LTCG because this runs before the year's tax rates exist. Inactive while buyHome is off.
     if (ctx.mortgageSchedule && y === ctx.mortgageSchedule.purchaseYearIdx) {
       let remaining = ctx.mortgageSchedule.downPayment;
       const t1 = Math.min(remaining, balChecking); balChecking -= t1; remaining -= t1;
@@ -343,15 +283,10 @@ function projectRun(inputs, ctx, randomize, shocks) {
       }
     }
 
-    // Long-term care for spouse: Roth TSP is the preferred first source. If Roth cannot cover the bill,
-    // essential care falls back to every other accessible household resource: brokerage pies, eligible
-    // Traditional TSP, HYSA, savings, and checking. A simulation fails only when the complete household
-    // waterfall is exhausted, rather than merely because one preferred account ran short.
-    // The cost itself is computed here every year, pre- or post-retirement (it's stored on the row below
-    // regardless), but the actual draw only happens right here for pre-retirement years, since there's no
-    // "totalSpending"/"guaranteedIncomeAfterTax" concept yet before retirementAge. Post-retirement years
-    // instead first offset this cost against that year's guaranteed-income surplus (if any) inside the
-    // post-retirement branch, right after `need` is computed further down, and only then fall back to Roth.
+    // Long-term care for spouse: Roth first, then every other accessible resource (brokerage, eligible
+    // Traditional TSP, HYSA, savings, checking); a run fails only when all are exhausted. Pre-retirement
+    // the draw happens here; post-retirement the cost is first offset by any guaranteed-income surplus
+    // further down.
     let ltcCostThisYear = 0;
     let ltcVaAidIncomeThisYear = 0;
     const ltcActiveThisYear = inputs.ltcEnabled && spouseAgeThisYear >= inputs.ltcStartAge && spouseAgeThisYear < inputs.ltcStartAge + inputs.ltcDuration;
@@ -373,21 +308,10 @@ function projectRun(inputs, ctx, randomize, shocks) {
       }
     }
 
-    // Future / one-time planned expenses: hit at a specific age (or a recurring range), drawn in your
-    // configured withdrawal order (Money Flows page) — Traditional TSP first by default, same as everyday
-    // spending and Long-Term Care above — instead of the old cash-first fallback (HYSA/savings/checking),
-    // which used to raid the emergency HYSA reserve for a planned vehicle purchase or vacation before ever
-    // touching Traditional TSP.
-    // Survivorship what-if: only items still checked "continues" on the Survivorship page's checklist count,
-    // at each item's edited override amount if one was set — same per-item pattern as expenses/debts/insurance.
-    // Explorers "What If I..." cards (e.g. "an unexpected $50k expense in 5 years") inject a synthetic entry
-    // via ctx.futureExpensesOverride instead of touching the real futureExpenses list, so trying a scenario
-    // never risks mutating what's actually entered on the Housing/Money Flows page.
-    // The cost itself is computed here every year, pre- or post-retirement (it's stored on the row below
-    // regardless), but the actual draw via withdrawInOrder only happens right here for pre-retirement years,
-    // same reasoning as LTC above. Post-retirement years instead first offset this cost against that year's
-    // guaranteed-income surplus (if any) inside the post-retirement branch, right after `need` is computed
-    // further down, and only pull the remainder (if any) via withdrawInOrder there.
+    // Future / one-time expenses at an age or age range, drawn in the Money Flows order. Survivorship counts
+    // only items marked as continuing (at any override amount). What-If cards inject entries via
+    // ctx.futureExpensesOverride, never the real list. Pre-retirement the draw happens here;
+    // post-retirement it's first offset by any guaranteed-income surplus.
     let futureExpenseCostThisYear = 0;
     (ctx.futureExpensesOverride || futureExpenses).forEach(f => {
       const hits = f.recurring ? (age >= f.age && age <= (f.endAge || f.age)) : (age === f.age);
@@ -409,11 +333,8 @@ function projectRun(inputs, ctx, randomize, shocks) {
       }
     });
 
-    // Survivorship what-if: the life insurance lump sum (e.g. VGLI, entered on the Survivorship page)
-    // pays out the year this scenario starts, landing in the brokerage pies as another resource that
-    // helps fund the surviving spouse's expenses — same one-time-inflow treatment as a windfall above.
-    // Gated on survivorshipEnabled, which the main plan/Monte Carlo run never sets, so this never affects
-    // the baseline plan.
+    // Survivorship what-if: the life insurance lump sum (e.g. VGLI) lands in the brokerage pies the year
+    // the scenario starts. Never affects the baseline plan.
     if (inputs.survivorshipEnabled && inputs.survivorshipDeathAge && age === inputs.survivorshipDeathAge) {
       applyPooledDelta(balBrokeragePies, +inputs.survivorLifeInsuranceAmount || 0);
     }
@@ -463,10 +384,7 @@ function projectRun(inputs, ctx, randomize, shocks) {
     // can also feed into them — not redeclared here, just continuing to accumulate onto the same objects.
     let contributions=0, withdrawal=0, guaranteedIncome=0, guaranteedIncomeAfterTax=0, spending=0, spousalBenefit=0, ssAmount=0, pensionAmount=0, pension2Amount=0, vaDisabilityAmount=0, annuityAmount=0, sbpAmount=0, dicAmount=0, dicAidAttendanceAmount=0, essentialFloor=0, transitionJobIncome=0, transitionTradContrib=0;
     let fedMarginal=null, ltcgMarginal=null;
-    // Hoisted so the row-push below (shared by both branches) can expose the already-computed IRMAA
-    // surcharge for display/charting purposes — irmaaSurchargeMonthly itself stays a local const right
-    // where it's used (Medicare premium calc, post-retirement only) so this doesn't touch that existing
-    // math at all, just mirrors the value out for the row.
+    // Mirror of the IRMAA surcharge for the row (display only).
     let irmaaSurchargeMonthlyForRow = 0;
     let tradContribOut=0, rothContribOut=0, matchContribOut=0;
     let medicalCostAnnual=0, expensesCategoriesAnnual=0, excessIncomeSaved=0, recurringLivingCostThisYear=0, taxableInterestIncome=0, investmentFeesAnnual=0, spendingPhaseMultiplier=1;
@@ -475,36 +393,24 @@ function projectRun(inputs, ctx, randomize, shocks) {
     let federalTaxAnnual=0, stateTaxAnnual=0, ficaTaxAnnual=0;
     let rothConversionAmount=0, rothConversionTax=0;
 
-    // Guaranteed income streams each start on their own eligibility age (Pension/VA Disability/SS/etc.
-    // pages), independent of the "retirement age" used for the contribution-vs-withdrawal split below.
-    // A military pension and VA disability, in particular, routinely start well before someone actually
-    // stops working a second career — hoisted up here (computed every year, not just once age reaches
-    // retirementAge) so they show up on the Income chart and get put to use as soon as they're eligible,
-    // instead of being silently held at $0 until retirementAge is reached.
-    // Each stream is prorated for the single calendar year it first kicks in (see prorateFirstYear above),
-    // using whichever spouse's birthday actually governs that milestone — the spousal SS benefit follows the
-    // spouse's own birth month, everything else follows the primary's.
+    // Guaranteed income starts at each stream's own eligibility age, independent of retirement age (a
+    // military pension or VA disability often starts mid-career). The first year is prorated by the birth
+    // month that governs it (spouse's for spousal SS, otherwise the primary's).
     ssAmount = prorateFirstYear(age, inputs.ssAge, inputs.ssMonthly*12*ssInflator, inputs.birthMonth, inputs.currentAge, inputs.ssStartDateRaw);
     spousalBenefit = inputs.spouseWorks
       ? prorateFirstYear(age, ctx.effectiveSpouseOwnSSStartAge, inputs.spouseSSMonthly*12*ssInflator, inputs.spouseBirthMonth, inputs.currentAge, inputs.spouseSSStartDateRaw)
       : prorateFirstYear(age, ctx.effectiveSpousalStartAge, spousalMonthlyBenefit(inputs)*12*ssInflator, inputs.spouseBirthMonth, inputs.currentAge, inputs.spousalStartDateRaw);
-    // Real-world Social Security survivor rule: once you're past your own life expectancy, your spouse steps up
-    // from the ~50% spousal benefit to your full benefit as a 100% survivor benefit. ssAmount itself doesn't
-    // need to change to reflect that (it already computes your full benefit — the dollars just keep flowing,
-    // now to your spouse as the survivor instead of to you), but the spousal supplement goes away since the
-    // survivor benefit replaces it rather than stacking on top of it. The separate survivorship scenario
-    // additionally stops primary-only income and applies configured SBP/DIC and survivor expenses.
-    // Death timing is intentionally modeled only when a separate survivorship scenario enables it.
+    // Past your life expectancy, your spouse gets your full benefit as a 100% survivor benefit (ssAmount
+    // already is your full benefit) and the spousal supplement stops. The survivorship scenario also stops
+    // primary-only income and applies SBP/DIC and survivor expenses.
     const primaryDeceased = survivorshipActive;
     pensionAmount = prorateFirstYear(age, inputs.pensionAge, inputs.pensionAnnual*pensionInflator, inputs.birthMonth, inputs.currentAge, inputs.pensionStartDateRaw);
     pension2Amount = prorateFirstYear(age, inputs.pension2Age, inputs.pension2Annual*pension2Inflator, inputs.birthMonth, inputs.currentAge, inputs.pension2StartDateRaw);
     vaDisabilityAmount = prorateFirstYear(age, inputs.vaDisabilityAge, inputs.vaDisabilityAnnual*vaInflator, inputs.birthMonth, inputs.currentAge, inputs.vaDisabilityStartDateRaw);
     annuityAmount = prorateFirstYear(age, inputs.annuityStartAge, inputs.annuityMonthly*12*annuityInflator, inputs.birthMonth, inputs.currentAge, inputs.annuityStartDateRaw);
     if (survivorshipActive) {
-      // Pension(s) and VA disability stopped with the primary member's death; the ~50% spousal SS rate is
-      // replaced by the full 100% survivor benefit (already what ssAmount computes, so it's left as-is and
-      // spousalBenefit is zeroed instead of double-counting both).
-      // The survivor receives the larger of the two Social Security records, not both benefits.
+      // Pension and VA disability stop at the primary's death. The survivor gets the larger of the two SS
+      // records, not both.
       ssAmount = Math.max(ssAmount, spousalBenefit);
       pensionAmount = 0; pension2Amount = 0; vaDisabilityAmount = 0; ltcVaAidIncomeThisYear = 0; spousalBenefit = 0;
       sbpAmount = (inputs.sbp1Enabled ? inputs.sbp1Annual*pensionInflator : 0) + (inputs.sbp2Enabled ? inputs.sbp2Annual*pension2Inflator : 0);
@@ -520,11 +426,7 @@ function projectRun(inputs, ctx, randomize, shocks) {
       ? Math.min(Math.max(0, pensionAmount), Math.max(0, inputs.idahoMilitaryDeductionAnnual || 0) * inflator)
       : 0;
 
-    // Start/end-dated expenses: which recurring expense rows actually count this year, filtered by age
-    // against each row's optional startAge/endAge (see expenseActiveAtAge/computeExpenseTotals above) —
-    // recomputed every year of the loop (both branches below read from it) so a row with a Starts/Ends
-    // date actually turns on or off at the right point in the projection instead of counting for every
-    // year of the plan the way it did before this feature existed.
+    // Recurring expenses active this year (by each row's optional start/end age).
     const expTotalsThisYear = ctx.expensesForYear(age);
 
     if (age < inputs.retirementAge) {
@@ -533,19 +435,12 @@ function projectRun(inputs, ctx, randomize, shocks) {
       const preR = (shocks.pre && shocks.pre[y] !== undefined) ? shocks.pre[y]
         : (randomize ? randMarketReturn(preMean, preVolatility, inputs.enhancedMonteCarlo) : preMean);
       if (y > 0) income *= (1+inputs.incomeGrowth);
-      // Job Loss test: once active, the paycheck is gone for good — zeroing it here (rather than just
-      // skipping this year's raise) means every dollar figure derived from income below (FICA, TSP/match
-      // contributions, taxable wages) correctly falls to zero too, and it stays zero in every later year
-      // since income only ever grows off its own prior value.
-      // In a survivorship run Michael's salary and payroll contributions stop at death,
-      // even when the assumed death occurs before the planned retirement age.
+      // Once employment ends (job loss or the primary's death in a survivorship run), income is zeroed for
+      // good, which zeroes FICA, TSP contributions and taxable wages too.
       const employmentEnded = jobLossActive || survivorshipActive;
       if (employmentEnded) income = 0;
-      // FICA payroll tax on job income (working years only — pension/SS/withdrawals aren't FICA-taxable).
-      // Social Security's 6.2% share is capped at the wage base (grown here with General Inflation as a
-      // stand-in for real wage-base growth, since it isn't itself an input); Medicare's 1.45% has no cap,
-      // plus the additional 0.9% Medicare surtax above $250k (MFJ) — a fixed statutory threshold that
-      // doesn't get inflated, unlike the wage base.
+      // FICA on job income only: 6.2% SS up to the wage base (grown with General Inflation), 1.45% Medicare
+      // uncapped, plus 0.9% above $250k MFJ (a fixed statutory threshold).
       const ssWageBaseThisYear = inputs.ssWageBase * Math.pow(1+inputs.inflation, y);
       const ssTaxThisYear = Math.min(income, ssWageBaseThisYear) * 0.062;
       const medicareTaxThisYear = income * 0.0145 + Math.max(0, income - 250000) * 0.009;
@@ -553,14 +448,9 @@ function projectRun(inputs, ctx, randomize, shocks) {
       const tradContrib = income*inputs.tradPct;
       const rothContrib = income*inputs.rothPct;
       const matchContrib = income*Math.min(inputs.tradPct+inputs.rothPct, inputs.matchCapPct);
-      // Federal + Idaho income tax on working-years income, for the Taxes page's Estimated Taxes chart —
-      // wages minus the pre-tax Traditional TSP contribution (Roth isn't pre-tax, so it stays in the taxable
-      // base), plus any guaranteed income already flowing before retirementAge (a military pension or VA
-      // disability routinely starts mid-career), same provisional-income SS treatment as the post-retirement
-      // calc below. Purely informational for the chart — doesn't feed back into contributions or spending,
-      // matching how FICA above is handled, so it can't disturb the rest of the projection.
-      // T-bill/cash-account interest is taxable as ordinary income in the year earned. It remains
-      // invested in the account, but the associated income tax reduces this year's spendable cash.
+      // Working-years federal + Idaho tax for the Taxes chart: wages minus pre-tax Traditional TSP, plus any
+      // guaranteed income already flowing (SS via provisional income). Informational only. Cash/T-bill
+      // interest is taxed as ordinary income in the year earned and reduces spendable cash.
       taxableInterestIncome = taxableCashInterestForYear(inputs, balBrokeragePies, balHYSA, balSavings, balChecking);
       const otherTaxableWorkingYears = (income - tradContrib) + pensionAmount + pension2Amount + annuityAmount + taxableInterestIncome;
       const taxableSSWorkingYears = taxableSocialSecurity(ssAmount+spousalBenefit, otherTaxableWorkingYears, taxFilingStatusThisYear);
@@ -574,72 +464,34 @@ function projectRun(inputs, ctx, randomize, shocks) {
       // same raise assumption — and stop along with it once Job Loss is active, same reasoning as income above.
       const pieContribsMonthly = employmentEnded ? (inputs.brokeragePieContributionsMonthly || []).map(() => 0) : (inputs.brokeragePieContributionsMonthly || []);
       const brokerageContribThisYear = pieContribsMonthly.reduce((s,c) => s + (+c||0), 0) * 12 * Math.pow(1+inputs.incomeGrowth, y);
-      // Excess income savings: whatever's left of your paycheck (plus any guaranteed income already
-      // flowing in, e.g. a military pension or VA disability that started before you actually retired)
-      // after contributions and recurring living costs, times the chosen %, gets swept into Brokerage
-      // on top of the fixed contributions above. Guaranteed income doesn't get a TSP-style elective
-      // contribution % applied to it — that only applies to actual paycheck income — so it's added
-      // here rather than into tradContrib/rothContrib/matchContrib above.
-      // Job Loss test: recurring living costs switch to the Job Loss expense column once active — same
-      // basis the post-retirement branch below uses, just gated by age here too instead of unconditionally.
-      // Survivorship what-if: if the assumed predecease age falls before retirementAge, switch to the
-      // survivor-only expense columns here too — mirrors the post-retirement branch's expensesNonMedicalForYear/
-      // expensesMedicalForYear logic (housingCost/debtPaymentThisYear/insurancePremiumAnnual above are already
-      // survivorship-aware regardless of pre/post retirement since they're computed once, hoisted above this split).
+      // Excess income savings: what's left of pay plus guaranteed income after contributions, living costs
+      // and taxes, times the chosen %, goes to Brokerage. Job Loss switches living costs to the Job Loss
+      // column; survivorship before retirement switches to survivor-only expense columns.
       const preRetireNonMedical = survivorshipActive
         ? (jobLossActive ? expTotalsThisYear.jobLossNonMedicalSurvivor : expTotalsThisYear.nonMedicalSurvivor)
         : (jobLossActive ? expTotalsThisYear.jobLossNonMedical : expTotalsThisYear.nonMedical);
       const preRetireMedical = survivorshipActive
         ? (jobLossActive ? expTotalsThisYear.jobLossMedicalSurvivor : expTotalsThisYear.medicalSurvivor)
         : (jobLossActive ? expTotalsThisYear.jobLossMedical : expTotalsThisYear.medical);
-      // Hoisted to the per-year let-block above (rather than declared with const, right here, the way
-      // this line originally read) so it survives past this if-block and can be pushed onto the row
-      // below — the "Income vs Expenses" page's combined chart needs a real total-expenses figure for
-      // pre-retirement years too, not just post-retirement ones (where `spending` already serves that
-      // role). Every other pre-retirement local this depends on (preRetireNonMedical/Medical, housingCost,
-      // debtPaymentThisYear, insurancePremiumAnnual) is unchanged — this is purely a scope change, not a
-      // formula change.
+      // Kept on the row so Income vs Expenses has a pre-retirement total-expenses figure.
       recurringLivingCostThisYear = (preRetireNonMedical * inflator + preRetireMedical * medicalInflator) + housingCost + debtPaymentThisYear + insurancePremiumAnnual;
-      // Working-year federal/state/FICA tax (federalTaxAnnual/stateTaxAnnual/ficaTaxAnnual, all already
-      // computed above for this year) now comes out before what's left counts as "excess" — previously
-      // this used gross pay, silently assuming the whole paycheck was available to contribute/spend/save
-      // with no tax bite taken out of it first, which overstated how much slack there actually was to
-      // sweep into Brokerage below.
+      // Taxes (federal/state/FICA) come out before anything counts as excess.
       const excessIncomeAvailable = Math.max(0, income + guaranteedIncome - tradContrib - rothContrib - brokerageContribThisYear - recurringLivingCostThisYear - federalTaxAnnual - stateTaxAnnual - ficaTaxAnnual);
-      // Paid-off debt redirect: recurringLivingCostThisYear above already reflects a lower debtPaymentThisYear
-      // once a debt (e.g. a car loan) is fully paid off, which is what makes excessIncomeAvailable bigger —
-      // but by default that freed amount just blends into the general slack and only gets swept at whatever
-      // % Excess Income Savings is set to (or not at all, if that's 0%), so it can silently look like it just
-      // evaporates instead of visibly going somewhere. With this toggle on, the exact former payment of any
-      // debt that's paid off by this year (100% of it, not just the % above) gets carved out and swept into
-      // the same destination pie unconditionally, on top of the %-based sweep on whatever's left — same
-      // 1:1 index correspondence between ctx.debtSchedules and the debts array used everywhere else that
-      // reads a debt's schedule. Excluded: debts that never pay off, and any that started already at $0
-      // balance (nothing to free). Capped at excessIncomeAvailable so this can never claim more than the
-      // year's actual slack contains.
+      // Paid-off debt redirect: with the toggle on, 100% of a paid-off debt's former payment goes to the
+      // excess-income destination pie, on top of the %-based sweep. Excludes debts that never pay off or
+      // started at $0, and is capped at the year's available slack.
       const paidOffDebtRedirectRaw = (inputs.redirectPaidOffDebtPayments && !employmentEnded) ? debts.reduce((sum, d, i) => {
         const sched = ctx.debtSchedules[i];
         if (!sched || sched.neverPaysOff || (+d.balance || 0) <= 0) return sum;
         if ((sched.balanceAtYearEnd[y] ?? 0) > 0.01) return sum;
-        // Prorate the transition year: a debt that pays off mid-year still made some real payments
-        // that year (sched.paymentDuringYear[y]), so only the amount actually freed up (the nominal
-        // annual payment minus what was actually still paid) counts as newly "freed" this year — every
-        // full year after payoff, paymentDuringYear[y] is 0, so the whole payment counts as freed.
+        // Payoff year: only the part of the annual payment not actually paid counts as freed.
         return sum + Math.max(0, (+d.payment || 0) * 12 - (sched.paymentDuringYear[y] || 0));
       }, 0) : 0;
       const paidOffDebtRedirect = Math.min(paidOffDebtRedirectRaw, excessIncomeAvailable);
-      // Job Loss test: any surplus left over (guaranteed income exceeds job-loss spending) gets swept
-      // into HYSA rather than a brokerage pie — you're no longer making paycheck-style contributions,
-      // but the pension/VA cash still needs somewhere to land. Pre-retirement surplus goes to HYSA;
-      // post-retirement this is irrelevant (jobLossActive = false at and after retirementAge).
+      // Job Loss: any surplus (guaranteed income above job-loss spending) goes to HYSA.
       const jobLossSurplusToHYSA = employmentEnded ? excessIncomeAvailable : 0;
       excessIncomeSaved = employmentEnded ? 0 : (Math.max(0, excessIncomeAvailable - paidOffDebtRedirect) * (inputs.excessIncomeSavingsPct || 0) + paidOffDebtRedirect);
-      // Job Loss test: pre-retirement years never had a withdrawal mechanism before this feature, because a
-      // shortfall wasn't possible — your paycheck was always assumed to at least cover living costs, so any
-      // gap just silently zeroed out excessIncomeSaved above instead of drawing anything down. With income
-      // gone, that assumption breaks, so cover a real gap the same cash-first, then-brokerage, then-Roth,
-      // then-Traditional order used everywhere else in this engine for an unplanned shortfall (LTC, future
-      // expenses) — rather than pretending the bills simply don't get paid.
+      // Job Loss: with no paycheck, cover the pre-retirement shortfall from cash first, then other accounts.
       if (employmentEnded) {
         const preRetireNeed = Math.max(0, recurringLivingCostThisYear + federalTaxAnnual + stateTaxAnnual + ficaTaxAnnual - (income + guaranteedIncome));
         if (preRetireNeed > 0.01) {
@@ -698,10 +550,7 @@ function projectRun(inputs, ctx, randomize, shocks) {
         contribByAccount.hysa = (contribByAccount.hysa || 0) + excessIncomeSaved;
       }
       balChecking *= (1+inputs.cashRate); balSavings *= (1+inputs.cashRate); balHYSA = balHYSA*(1+inputs.hysaRate) + jobLossSurplusToHYSA + excessIncomeFallbackToHYSA;
-      // IRMAA lookback proxy: this year's approximate MAGI (taxable wages after the pre-tax Traditional TSP
-      // contribution, plus the taxable share of any guaranteed income already flowing), carried forward as
-      // next year's IRMAA basis — see the post-retirement branch below for why a 1-year lookback is used
-      // instead of computing IRMAA off the same year's own income.
+      // IRMAA lookback proxy: this year's approximate MAGI, stored for the two-year lag used later.
       magiHistory[y] = Math.max(0, otherTaxableWorkingYears + taxableSocialSecurity(ssAmount+spousalBenefit, otherTaxableWorkingYears, taxFilingStatusThisYear));
       magiFilingStatusHistory[y] = taxFilingStatusThisYear;
     } else {
@@ -745,20 +594,9 @@ function projectRun(inputs, ctx, randomize, shocks) {
         : (randomize ? randMarketReturn(postMean, postVolatility, inputs.enhancedMonteCarlo) : postMean);
       const spendMult = inputs.spendingMultiplier == null ? 1 : inputs.spendingMultiplier;
       const explorerDiscretionaryMult = inputs.discretionarySpendingMultiplier == null ? 1 : inputs.discretionarySpendingMultiplier;
-      // Survivorship what-if (Explorers page only, gated on inputs.survivorshipEnabled which the main plan never sets):
-      // once past the assumed age the primary member predeceases the spouse, pension(s)/VA disability/spousal SS stop
-      // and SBP/DIC (if configured) take over instead. (survivorshipActive itself is computed further up, before
-      // this branch, so the debt/housing/insurance totals above it can respect it too.)
-      // Healthcare coverage: Tricare covers whichever of you hasn't yet reached Medicare age; each of you separately
-      // picks up a Part B premium once you individually reach Medicare age (no Part D for either of you). Tricare
-      // itself stops costing anything once someone reaches Medicare age — Tricare For Life continues as coverage
-      // behind the scenes, but it has no separate premium beyond Part B, so there's nothing left to count once
-      // both of you are on Medicare (or, in the survivorship what-if, once your spouse individually is).
-      // Survivorship what-if: once you've predeceased your spouse, your own Part B premium stops outright, and
-      // her Tricare premium stops the moment she reaches Medicare age herself (same no-added-cost rule as above).
-      // Your FEDVIP plan (hearing/vision/dental) was your enrollment covering both of you, so it doesn't just
-      // disappear — she needs her own once she reaches Medicare age herself, using whatever's entered on the
-      // Survivorship page for that cost.
+      // Healthcare: Tricare covers whoever isn't on Medicare yet; each person adds Part B at Medicare age (no
+      // Part D). Tricare For Life has no premium beyond Part B. Survivorship: your Part B stops, her Tricare
+      // stops at her Medicare age, and she needs her own FEDVIP (cost from the Survivorship page).
       const userOnMedicare = age >= inputs.medicareAge;
       const spouseOnMedicare = spouseAgeThisYear >= inputs.medicareAge;
       const onTricare = survivorshipActive ? !spouseOnMedicare : (!userOnMedicare || !spouseOnMedicare);
@@ -766,16 +604,9 @@ function projectRun(inputs, ctx, randomize, shocks) {
       // "Her Tricare/Part B/FEDVIP continues" checkbox on the Survivorship page (an escape hatch for an
       // edge case like being fully covered another way) — checked by default, so this normally has no effect.
       const medicalContinuesForSurvivor = !survivorshipActive || inputs.survivorMedicalContinues !== false;
-      // IRMAA (Income-Related Monthly Adjustment Amount): a Medicare Part B surcharge above certain household
-      // MAGI thresholds. Real IRMAA uses a 2-year-old MAGI figure, so the modeled MAGI history uses the
-      // same two-year lag. Before two modeled years exist, no surcharge is assumed because the planner
-      // does not have the earlier tax returns. Thresholds and surcharges use the published 2026 CMS figures;
-      // verify against current IRS/CMS guidance as
-      // RMD/IRMAA-relevant ages actually approach. Thresholds grow with General Inflation (same simplification
-      // used for the Social Security wage base elsewhere); the surcharge itself is left in today's $ and rides
-      // along with medicalInflator below, same as the Part B premium fields it's added to. Applied per spouse
-      // who is actually on Medicare that year, since IRMAA is assessed per Medicare enrollee off the shared
-      // household MAGI.
+      // IRMAA uses MAGI from two years earlier (none assumed until two modeled years exist). 2026 CMS figures;
+      // thresholds grow with General Inflation, the surcharge rides medicalInflator. Applied per spouse on
+      // Medicare, off the shared household MAGI.
       const irmaaThresholdInflator = Math.pow(1+inputs.inflation, y);
       const irmaaLookbackMagi = y >= 2 ? (magiHistory[y - 2] || 0) : 0;
       const irmaaLookbackFilingStatus = y >= 2 ? (magiFilingStatusHistory[y - 2] || 'mfj') : taxFilingStatusThisYear;
@@ -790,20 +621,9 @@ function projectRun(inputs, ctx, randomize, shocks) {
           : (userOnMedicare ? (inputs.hearingMonthly + inputs.visionMonthly + inputs.dentalMonthly) : 0))
       ) * 12;
       medicalCostAnnual = medicarePremiumBase * medicalInflator;
-      // Survivorship what-if: use only the expenses marked as continuing (toggled on the Survivorship page),
-      // at each item's edited override amount if one was set, instead of the full household expense list.
-      // spendingBasis ('liketo' default, 'mustspend', or the test 'jobloss' basis, all via the header
-      // toggle) picks which Expenses-page column this year's baseline spending starts from, BEFORE any
-      // guardrail cut runs. The Must Spend *floor* two lines below is intentionally left alone either
-      // way — it's always the true essential-only total regardless of which basis is currently selected.
-      // Job Loss spending only applies during the pre-retirement unemployment window (ages 53-54 in this plan).
-      // In retirement, spending always uses Like to Spend amounts — only the TSP access restriction persists.
-      // Job Loss spending only applies pre-retirement (unemployment period). Once retired, spending
-      // reverts to Like to Spend — the reduced job-loss column only models the involuntary gap before
-      // age 55, not a permanent retirement lifestyle cut. TSP access restrictions (tradAvailableForJobLoss)
-      // still apply through 59.5 regardless, since that's a legal Rule of 55 constraint, not a spending choice.
-      // Current plan choice overrides the older explanatory notes above: Job Loss spending continues
-      // after retirement until age 59.5, then the plan returns to Like to Spend.
+      // Baseline spending comes from the header basis (Like to Spend / Must Spend / Job Loss) before any
+      // guardrail cut; survivorship uses only continuing items. Job Loss spending applies until age 59.5,
+      // then Like to Spend resumes. The Must Spend floor is always the essentials total.
       const jobLossBridgeSpendingActive = jobLossActive && age < 59.5;
       const expensesNonMedicalForYear = survivorshipActive
         ? (spendingBasis === 'mustspend' ? expTotalsThisYear.mustSpendNonMedicalSurvivor : jobLossBridgeSpendingActive ? expTotalsThisYear.jobLossNonMedicalSurvivor : expTotalsThisYear.nonMedicalSurvivor)
@@ -875,41 +695,19 @@ function projectRun(inputs, ctx, randomize, shocks) {
       spending = totalSpending;
       const need = Math.max(0, totalSpending - guaranteedIncomeAfterTax);
 
-      // Marginal rates for this year's withdrawal-driven tax (moved up from just below the LTC/Future
-      // Expenses block, so LTC/Future Expenses draws — right below — can use the same rates to gross up
-      // and record tax the same way takeFrom() does further down). Traditional TSP withdrawals before 59.5
-      // avoid the 10% early-withdrawal penalty under the Rule of 55 (separating from federal service in the
-      // year you turn 55+); if that assumption is turned off, the penalty applies to any Traditional TSP
-      // withdrawal taken before 59.5. Marginal bracket for the withdrawal itself stacks on top of the same
-      // guaranteed-income taxable base above.
+      // Before 59.5, Traditional TSP withdrawals carry the 10% penalty unless Rule of 55 applies (separating
+      // in the year you turn 55+). fedMarginal/ltcgMarginal stack on the guaranteed-income base.
       const earlyPenalty = (!inputs.ruleOf55Applies && age < 59.5) ? 0.10 : 0;
       fedMarginal = marginalRateFromBrackets(taxableBeforeWithdrawal + need, federalBracketsThisYear);
       ltcgMarginal = marginalRateFromBrackets(taxableBeforeWithdrawal + need, ltcgBracketsThisYear);
-      // fedMarginal/ltcgMarginal above are kept purely for display (the "22% federal bracket" style
-      // labels on the Taxes page) — actual withdrawal tax below is no longer a flat rate derived from
-      // these; it's computed bracket-by-bracket per withdrawal via solveGrossForNet/taxOwedOnIncrement,
-      // using the running ordinaryIncomeStack so multiple withdrawals in the same year (LTC/Future
-      // Expenses, RMD, a Roth conversion, and the main spending gap) each see accurate brackets instead
-      // of every one of them independently assuming it's the only draw competing for the lower brackets.
+      // fedMarginal/ltcgMarginal are for display only. Actual withdrawal tax is bracket by bracket against the
+      // running ordinaryIncomeStack, so multiple draws in one year (LTC, Future Expenses, RMD, conversion,
+      // spending gap) each see the right brackets.
       let ordinaryIncomeStack = taxableBeforeWithdrawal;
 
-      // Long-Term Care and Future Expenses (both computed unconditionally, earlier in this loop iteration,
-      // before this retirement-age branch split) get first claim on this year's guaranteed-income surplus —
-      // whatever's left of guaranteedIncomeAfterTax after totalSpending is covered — before either one
-      // touches an investment account, matching the same "guaranteed income first" principle everyday
-      // spending already follows via `need` just above. LTC claims the shared surplus pool first (essential
-      // care cost), Future Expenses gets whatever's left after that (more discretionary/planned); any amount
-      // beyond the surplus falls back to each draw's normal account order (LTC: Roth first, then all other
-      // accessible household resources; Future Expenses: withdrawInOrder, same as
-      // the pre-retirement branch above). Pre-retirement years never reach this code — they already drew
-      // immediately, with no surplus check, back at LTC's/Future Expenses' original position earlier in the
-      // loop, since totalSpending/guaranteedIncomeAfterTax have no pre-retirement equivalent.
-      // Future Expenses' account draw here (beyond what the guaranteed-income surplus covers) is grossed up
-      // for tax the same way the main spending waterfall's takeFrom() below is — a Trad TSP or brokerage-pie
-      // pull to cover, say, a $12,000 vehicle purchase actually needs to remove more than $12,000 from the
-      // account so the taxable event it triggers doesn't quietly shrink the $12,000 itself, and the resulting
-      // tax bill is now recorded into federalTaxAnnual/stateTaxAnnual like any other withdrawal. The Roth
-      // portion of LTC is tax-free; taxable fallback accounts are grossed up and taxed normally.
+      // LTC, then Future Expenses, get first claim on any guaranteed-income surplus before touching accounts.
+      // The rest uses each draw's normal order (LTC: Roth first, then everything else; Future Expenses:
+      // withdrawInOrder). Future Expense draws from taxable accounts are grossed up and their tax recorded.
       let guaranteedIncomeSurplus = Math.max(0, guaranteedIncomeAfterTax - totalSpending);
       if (ltcCostThisYear > 0) {
         const ltcFromSurplus = Math.min(ltcCostThisYear, guaranteedIncomeSurplus);
@@ -952,10 +750,7 @@ function projectRun(inputs, ctx, randomize, shocks) {
       let hysaGrown = balHYSA*(1+inputs.hysaRate);
       let remaining = need;
 
-      // Withdrawal accounts: each has a current (post-growth) balance. Traditional TSP and each brokerage
-      // pie get grossed up bracket-by-bracket (solveGrossForNet, using the running ordinaryIncomeStack)
-      // so a NET dollar taken out correctly reflects only the tax bracket(s) it actually falls in,
-      // instead of one flat rate applied to the whole withdrawal. Roth and HYSA are already after-tax.
+      // Traditional TSP and brokerage pies are grossed up bracket by bracket; Roth and HYSA are after-tax.
       const acctTaxInfo = { trad: { brackets: federalBracketsThisYear, flatAdd: inputs.idahoRate + earlyPenalty } };
       const bal = { trad: tradGrown, roth: rothGrown, hysa: hysaGrown };
       brokPiesGrown.forEach((b, i) => {
@@ -993,24 +788,15 @@ function projectRun(inputs, ctx, randomize, shocks) {
         // Traditional TSP draws stack onto ordinary income for bracket purposes; LTCG-taxed pie draws
         // read the same stack to find their bracket but don't add to it (different income type).
         if (key === 'trad') ordinaryIncomeStack += grossTaken;
-        // Split this withdrawal's tax back into Federal vs Idaho-state shares for the Taxes page's
-        // Estimated Taxes chart — Idaho's flat rate on the gross is always the state slice; whatever's
-        // left (bracket-blended federal + early-withdrawal penalty for Traditional TSP, or the federal
-        // LTCG amount for brokerage pie sales) is the federal slice.
+        // Split the tax into Idaho (flat rate on the gross) and federal (the rest, including any penalty or LTCG).
         const stateTaxAmt = inputs.idahoRate * grossTaken * (info.taxablePct == null ? 1 : info.taxablePct);
         stateTaxAnnual += stateTaxAmt;
         federalTaxAnnual += taxAmt - stateTaxAmt;
       };
 
-      // Required Minimum Distributions (RMD): once you reach rmdAge, the IRS forces a withdrawal from
-      // Traditional TSP every year — whether you actually need the money for spending or not — computed off
-      // balTrad as it stood at the start of this year (before this year's growth, i.e. the prior year-end
-      // balance), divided by the IRS Uniform Lifetime Table factor for your current age (rmdDivisor above).
-      // Roth TSP is never subject to RMDs. Taxed at the same ordinary rate as any other Traditional withdrawal
-      // and tracked in withdrawalByAccount the same way a normal takeFrom() call would, but — unlike a normal
-      // need-driven withdrawal — it isn't capped by how much you actually need this year: any leftover after
-      // covering spending is swept into Brokerage (the same destination pie excess income savings uses)
-      // instead of just sitting there or vanishing from the projection.
+      // RMDs from rmdAge: prior year-end Traditional TSP balance / Uniform Lifetime factor, taxed as ordinary
+      // income whether needed or not. Anything beyond this year's need is swept to the excess-income pie.
+      // Roth is exempt.
       const rmdOwnerAge = survivorshipActive && inputs.survivorSpousalRollover ? spouseAgeThisYear : age;
       if (inputs.rmdAge && rmdOwnerAge >= inputs.rmdAge && balTrad > 0.01) {
         const rmdRequiredGross = Math.min(bal.trad, balTrad / rmdDivisor(rmdOwnerAge));
@@ -1042,27 +828,15 @@ function projectRun(inputs, ctx, randomize, shocks) {
         }
       }
 
-      // Roth Conversion planner (Taxes page): during the configured post-retirement window, move
-      // Traditional TSP dollars into Roth TSP each year, taxed as ordinary income the same way any
-      // other Trad withdrawal is (progressive federal brackets + Idaho flat rate), but the resulting
-      // tax bill is paid from a SEPARATE account (HYSA or a specific brokerage pie) rather than out of
-      // the TSP itself — pulling the tax from inside the conversion would shrink the amount that
-      // actually lands in Roth, defeating the point of converting in the first place. Runs after RMD
-      // above (real IRS rule: this year's RMD isn't itself convertible — it has to come out as a normal
-      // distribution first, then whatever's left in Trad can be converted), and is NOT gated by
-      // tradAvailableForJobLoss/Rule of 55 the way an actual distribution is — a Roth conversion is an
-      // in-plan rollover, not a "separation withdrawal," so it isn't subject to the 10%-early-withdrawal/
-      // Rule-of-55 restriction that only applies to money actually leaving the TSP as spendable cash.
+      // Roth Conversion planner: in the set window, move Traditional TSP to Roth, taxed as ordinary income
+      // (federal brackets + Idaho), with the tax paid from a separate account so the full amount lands in
+      // Roth. Runs after the RMD (an RMD can't be converted). Not limited by Rule of 55, since a conversion is
+      // an in-plan rollover, not a distribution.
       if (inputs.rothConversionEnabled && age >= inputs.rothConversionStartAge && age <= inputs.rothConversionEndAge && bal.trad > 0.01) {
         const desiredConversion = Math.min(inputs.rothConversionAnnualAmount, bal.trad);
         if (desiredConversion > 0.01) {
-          // Stacked on top of ordinaryIncomeStack (this year's guaranteed income plus any LTC/Future-
-          // Expense/RMD draws already recorded above) PLUS this year's still-to-come gap-driven
-          // withdrawal (`need`) — the same conservative "assume the main withdrawal happens too"
-          // assumption the original version used, so the conversion doesn't claim brackets the main
-          // withdrawal will actually need, just computed bracket-by-bracket now (taxOwedOnIncrement)
-          // instead of applying one flat top-marginal rate to the whole conversion amount. No
-          // early-withdrawal penalty — conversions aren't distributions.
+          // Taxed on top of ordinaryIncomeStack plus this year's coming spending withdrawal (`need`), bracket by
+          // bracket. No early-withdrawal penalty.
           const convBase = ordinaryIncomeStack + need;
           const desiredTax = taxOwedOnIncrement(convBase, desiredConversion, federalBracketsThisYear, inputs.idahoRate);
           // Cap the conversion so its tax bill never exceeds what the configured source account can
@@ -1077,11 +851,8 @@ function projectRun(inputs, ctx, randomize, shocks) {
             bal.trad -= actualConversion;
             bal.roth += actualConversion;
             if (bal[sourceKey] !== undefined) bal[sourceKey] -= actualTax;
-            // Savings page: a conversion isn't spending or investment growth for either account — it's
-            // an internal transfer. Recorded as a Roth "contribution" here; the matching Trad side is
-            // folded into savingsWithdrawByAccount (built at the row push below) rather than the real
-            // withdrawalByAccount, so it doesn't also change the IRMAA MAGI lookback proxy or the
-            // Income Gap & Withdrawals page, which read the real withdrawalByAccount for other reasons.
+            // A conversion is an internal transfer: recorded as a Roth contribution, and the Trad side goes into
+            // savingsWithdrawByAccount (not withdrawalByAccount, which feeds IRMAA and the Gap page).
             contribByAccount.roth = (contribByAccount.roth||0) + actualConversion;
             rothConversionAmount = actualConversion;
             rothConversionTax = actualTax;
@@ -1099,16 +870,11 @@ function projectRun(inputs, ctx, randomize, shocks) {
       }
 
       if (inputs.withdrawalSimultaneous) {
-        // Split the need across the checked accounts, "water-filling" over a few rounds so accounts
-        // that run dry hand off their unmet share to the others still selected. effectiveWithdrawalOrder
-        // already excludes 'trad' during a Job Loss year that doesn't qualify for Rule of 55 and hasn't
-        // reached 59.5 yet, so bal.trad simply never gets touched in that case.
+        // Split the need across checked accounts, water-filling so dry accounts hand off their share.
+        // effectiveWithdrawalOrder already excludes 'trad' when job loss blocks it.
         let selected = effectiveWithdrawalOrder.filter(k => bal[k] !== undefined);
         if (inputs.withdrawalProportionMode === 'percent') {
-          // Fixed weights the user set on the Money Flows page, instead of that year's balance — an
-          // account's share of each year's withdrawal stays constant even as balances drift apart over
-          // time, unlike the balance-weighted path below. Weights are relative (renormalized against
-          // whichever accounts are still active each round), so they don't need to add up to exactly 100.
+          // Fixed user weights (relative, renormalized each round) instead of balance weights.
           for (let round = 0; round < selected.length && remaining > 0.01; round++) {
             const active = selected.filter(k => bal[k] > 0.01);
             if (!active.length) break;
@@ -1133,10 +899,8 @@ function projectRun(inputs, ctx, randomize, shocks) {
         effectiveWithdrawalOrder.forEach(key => { if (remaining > 0.01) takeFrom(key, remaining); });
       }
 
-      // Taxable Traditional withdrawals and Roth conversions can cause a larger share of Social
-      // Security to become federally taxable. Recompute that share after the year's ordinary-income
-      // draws, then fund the incremental federal tax from after-tax accounts so it reduces the plan's
-      // real balances rather than appearing only as an informational tax number.
+      // Traditional withdrawals and conversions can make more Social Security taxable. Recompute after the
+      // year's ordinary draws and pay the extra federal tax from after-tax accounts.
       const ordinaryDrawsThisYear = (withdrawalByAccount.trad || 0) + rothConversionAmount;
       const ssTaxableAfterWithdrawals = taxableSocialSecurity(
         ssAmount + spousalBenefit,
@@ -1174,13 +938,9 @@ function projectRun(inputs, ctx, randomize, shocks) {
       balBrokeragePies = balBrokeragePies.map((_, i) => Math.max(0, bal['pie_'+i]));
       balChecking *= (1+inputs.cashRate); balSavings *= (1+inputs.cashRate);
 
-      // IRMAA lookback proxy (see the comment above medicarePremiumBase): carry this year's approximate MAGI
-      // — taxable guaranteed income, this year's actual gross Traditional TSP withdrawal (which now
-      // includes any RMD forced out above), any Roth conversion amount (ordinary income in the year it
-      // happens, same as a Trad withdrawal — MAGI doesn't distinguish why money left Traditional TSP),
-      // and the user-entered gain portion of market-linked taxable-account sales. Cash-like taxable
-      // interest is already included in taxableGuaranteed above in the year earned, so withdrawing its
-      // principal is deliberately excluded here; Roth IRA withdrawals are excluded as tax-free.
+      // IRMAA lookback proxy: MAGI = taxable guaranteed income + gross Traditional TSP withdrawals (incl.
+      // RMD) + Roth conversions + the gain portion of market-linked taxable sales. Cash interest is already
+      // counted when earned; Roth withdrawals are tax-free.
       const brokerageWithdrawalTotal = balBrokeragePies.reduce((s, _, i) =>
         s + ((!isRothIraPie(inputs, i) && !isTaxableCashPie(inputs, i)) ? (withdrawalByAccount['pie_'+i] || 0) : 0), 0);
       magiHistory[y] = Math.max(0, taxableGuaranteed + (withdrawalByAccount.trad || 0) + rothConversionAmount + brokerageWithdrawalTotal * inputs.brokerageTaxablePct);
@@ -1195,10 +955,7 @@ function projectRun(inputs, ctx, randomize, shocks) {
     const netWorth = investable + cash + homeEquityThisYear + vehicleAssetsThisYear - debtBalanceThisYear;
 
     if (!randomize) {
-      // Savings page: the Trad side of a Roth conversion is folded into a COPY of withdrawalByAccount
-      // (not the real one — see the comment at the conversion block above) so Trad's own
-      // begin→contrib→return→withdrawal→end waterfall balances correctly without disturbing anything
-      // else downstream that reads the real withdrawalByAccount (IRMAA lookback, Income Gap page, etc.).
+      // Copy of withdrawalByAccount with the conversion's Trad side added, for the Savings page only.
       const savingsWithdrawByAccount = { ...withdrawalByAccount };
       if (rothConversionAmount > 0) savingsWithdrawByAccount.trad = (savingsWithdrawByAccount.trad||0) + rothConversionAmount;
       const acctEnd = { trad: balTrad, roth: balRoth, hysa: balHYSA };
@@ -1231,20 +988,13 @@ function projectRun(inputs, ctx, randomize, shocks) {
   return { rows, investableAtRetirement, cashAtRetirement, depletionAge, firstShortfallAge, firstShortfallReason, success: !shortfallEver, initialWithdrawalRate, totalRothConverted, totalRothConversionTax };
 }
 
-// Whether a single recurring expense row counts as "active" in a given projection year (age) — both
-// startAge and endAge are optional (null/undefined = unbounded on that side), so a row with neither set
-// (every row that existed before this feature, and every new row by default) behaves exactly as before:
-// active for the whole plan. Set via the Starts/Ends date pickers on the Expenses page (updateExpenseDate),
-// which convert the picked calendar month into an age anchored on today's currentAge — the same convention
-// Future Expenses/Windfalls/Job Loss already use (see monthToAge).
+// Is an expense row active at this age? startAge/endAge are optional (missing = open-ended), set from
+// the Starts/Ends pickers on the Expenses page.
 function expenseActiveAtAge(e, age) {
   return (e.startAge == null || age >= e.startAge) && (e.endAge == null || age <= e.endAge);
 }
-// Same math as buildContext's expensesXxx totals below, factored out so it can be rerun against any subset
-// of the expenses array — the full list (what buildContext itself still uses for its own static fields,
-// kept for backward compatibility with their one remaining non-projectRun consumer) or, per projection year,
-// only the rows expenseActiveAtAge() says are active that year (see expensesForYear, in buildContext's
-// return value below, which projectRun() actually calls every year instead of reading the static fields).
+// Expense totals for any subset of rows: the full list (buildContext's static fields) or the rows active
+// in a given year (expensesForYear).
 function computeExpenseTotals(list) {
   const total = list.reduce((s,e) => s + (+e.amount || 0), 0) * 12;
   const medical = list.filter(e => e.category === 'Healthcare').reduce((s,e) => s + (+e.amount || 0), 0) * 12;
@@ -1284,14 +1034,9 @@ function buildContext(inputs) {
   const maxYears = effectiveLifeExpectancy - inputs.currentAge;
   const effectiveSpousalStartAge = Math.max(inputs.ssAge, ageGap + inputs.spousalStartAge);
   const effectiveSpouseOwnSSStartAge = ageGap + inputs.spouseSSAge;
-  // Job Loss test: Rule of 55 only waives the 10% early-withdrawal penalty (and, more fundamentally, only
-  // makes a TSP "separation withdrawal" available at all before 59.5) if you separate from federal service
-  // in the calendar year you turn 55 or later — a year-based test, not a birthday-precise one. The global
-  // "Rule of 55 applies" toggle (Taxes page) is a blanket assumption for the whole plan, but Job Loss is
-  // specifically testing an involuntary EARLY separation, which could easily land before that threshold —
-  // in which case Traditional TSP isn't just penalized, it's genuinely off-limits as a withdrawal source
-  // until age 59.5, no matter how the global toggle is set. Only meaningful when a Job Loss date is actually
-  // set; defaults to true (no restriction) if it isn't, since there's nothing to disqualify.
+  // Job Loss test: Rule of 55 needs separation in the calendar year you turn 55 or later. Earlier, Traditional
+  // TSP is off-limits until 59.5 regardless of the global toggle. True (no restriction) when no Job Loss
+  // date is set.
   const jobLossYear = inputs.jobLossDateRaw ? +String(inputs.jobLossDateRaw).slice(0, 4) : null;
   const turns55Year = inputs.birthDateRaw ? +String(inputs.birthDateRaw).slice(0, 4) + 55 : null;
   const jobLossQualifiesForRuleOf55 = !jobLossYear || !turns55Year || jobLossYear >= turns55Year;
@@ -1316,11 +1061,8 @@ function buildContext(inputs) {
   const expensesJobLossTotal = expenses.reduce((s,e) => s + jobLossVal(e), 0) * 12;
   const expensesJobLossMedical = expenses.filter(e => e.category === 'Healthcare').reduce((s,e) => s + jobLossVal(e), 0) * 12;
   const expensesJobLossNonMedical = expensesJobLossTotal - expensesJobLossMedical;
-  // Survivorship what-if: a parallel set of totals that only include expenses/debts marked as continuing
-  // after you're gone (item.survivorContinues, toggled on the Survivorship page — defaults to continuing
-  // when unset), using each item's edited override amount (item.survivorAmount) if the user set one,
-  // otherwise its normal amount. Used instead of the totals above only once survivorshipActive is true
-  // in projectRun().
+  // Survivorship totals: only items marked as continuing, at any override amount. Used once
+  // survivorshipActive is true.
   const survivorVal = item => (item.survivorAmount != null && item.survivorAmount !== '') ? (+item.survivorAmount || 0) : (+item.amount || 0);
   const debtSchedulesSurvivor = debts.filter(d => d.survivorContinues !== false).map(d => {
     const survivorPayment = (d.survivorAmount != null && d.survivorAmount !== '') ? (+d.survivorAmount || 0) : d.payment;
@@ -1347,10 +1089,7 @@ function buildContext(inputs) {
     debtSchedulesSurvivor, expensesTotalSurvivor, expensesMedicalSurvivor, expensesNonMedicalSurvivor,
     expensesMustSpendTotalSurvivor, expensesMustSpendMedicalSurvivor, expensesMustSpendNonMedicalSurvivor,
     expensesJobLossTotalSurvivor, expensesJobLossMedicalSurvivor, expensesJobLossNonMedicalSurvivor,
-    // Per-year expense totals, filtered by each row's optional Starts/Ends date range (expenseActiveAtAge)
-    // — projectRun() calls this once every year of the loop instead of reading the static fields above,
-    // so a childcare cost that ends in 5 years or a hobby that starts in retirement actually turns off/on
-    // at the right point instead of counting for the whole plan like the static fields above always do.
+    // Per-year totals honoring each row's Starts/Ends range; projectRun() calls this every year.
     expensesForYear: (age) => computeExpenseTotals(expenses.filter(e => expenseActiveAtAge(e, age)))
   };
 }
@@ -1415,15 +1154,6 @@ function runHighPrecisionMonteCarlo() {
 }
 
 // ---------- Historical Sequence-of-Returns Backtest ----------
-// Real S&P 500 total-return-by-year (price return + reinvested dividends), 1928-2025, sourced from
-// Slickcharts (which compiles from the index provider) — used to replay your ACTUAL plan against every
-// real historical stretch of market history long enough to cover it, instead of only the randomly-drawn
-// Monte Carlo years. This is the same idea cFIREsim/FIRECalc are built on: "how would my plan have
-// actually done starting retirement in 1966, or 2000, or 1929?" rather than a statistical approximation.
-// Deliberately returns-only, not a full historical-everything simulation — inflation stays at your
-// assumed rate rather than that specific historical year's real inflation, since the engine compounds
-// inflation as a single scalar rate throughout (Math.pow(1+inputs.inflation, y)) in dozens of places, and
-// swapping that for a properly-varying year-by-year rate would be a much larger, riskier change for a
-// secondary/supplementary check like this one. Applied to BOTH pre- and post-retirement years uniformly
-// (one blended equity series for the whole plan) — a reasonable fit given your own portfolio is nearly
-// all stocks/cash in both phases, not a mix that would need separate historical series per phase.
+// S&P 500 total return by year (price + dividends), 1928-2025, from Slickcharts. Replays the plan
+// against every long-enough historical stretch (like cFIREsim/FIRECalc). Returns only; inflation stays
+// at your assumed rate. One series for both pre- and post-retirement years.

@@ -3,10 +3,7 @@ let sharedNotesText = '';
 function loadSharedNotes() {
   try { return localStorage.getItem(SHARED_NOTES_KEY) || ''; } catch (e) { return ''; }
 }
-// Skips the textarea the user is actively typing in (document.activeElement) so syncing the OTHER
-// (currently hidden) pages' copies never yanks the caret position out from under whichever one is
-// focused — every other instance still gets the latest text immediately, so switching pages mid-edit
-// always shows what was just typed.
+// Skip the textarea being typed in so the caret doesn't jump; every other copy updates immediately.
 function renderSharedNotesTextareas() {
   document.querySelectorAll('.shared-notes-textarea').forEach(el => {
     if (el !== document.activeElement && el.value !== sharedNotesText) el.value = sharedNotesText;
@@ -127,17 +124,9 @@ function applyState(state) {
   if (isKnownExplorerAnalysis(state.selectedExplorerAnalysis)) {
     try { localStorage.setItem(EXPLORER_ANALYSIS_KEY, state.selectedExplorerAnalysis); } catch (e) {}
   }
-  // Deliberately NOT syncing state.sharedNotesText here. This function runs on every normal boot (via
-  // loadState()), and the copy of sharedNotesText baked into this state blob is only as fresh as the
-  // last time saveState() happened to run for some unrelated field — notes themselves persist through
-  // their own dedicated key (SHARED_NOTES_KEY) on every keystroke and deliberately skip the full
-  // saveState() pipeline (see the Shared Notes section) to avoid a laggy Monte Carlo re-run on every
-  // character typed. If this function overwrote SHARED_NOTES_KEY with whatever stale copy is sitting in
-  // this blob, a note typed since the last unrelated field edit would get silently discarded the very
-  // next time the page loads — that was exactly the bug (notes not sticking, or seeming to have a size
-  // limit as they got reverted to an older, shorter version). The one legitimate case where a backup's
-  // notes SHOULD win — an explicit Restore from Backup — handles this itself, right after calling this
-  // function, instead of it happening implicitly on every single boot.
+  // Deliberately NOT restoring state.sharedNotesText on a normal boot: notes save to their own key on
+  // every keystroke, so this copy may be stale and would wipe newer notes. Restore from Backup handles
+  // notes itself.
   if (state.fields) {
     Object.keys(state.fields).forEach(id => {
       if (id === 'anthropicApiKey') return;
@@ -221,10 +210,8 @@ function applySharedInvestmentsToPlanner(shared) {
 
 // ---------- Expenses (dynamic rows, monthly $ amounts) ----------
 const EXPENSE_CATEGORIES = ['Food & Groceries','Transportation','Healthcare','Utilities','Entertainment & Travel','Personal Care','Shopping','Gifts & Donations','Subscriptions','Pet Care','Personal Support','Other'];
-// "amount" is the "Like to Spend" figure — the only one the engine actually uses. "mustSpend" is the
-// essential-floor figure Boldin shows alongside it; it's captured for reference/future stress-testing
-// but doesn't itself change the projection. Existing rows default mustSpend = amount (essential utility
-// bills), except the two clearly-discretionary ones, which default to $0.
+// "amount" is Like to Spend; "mustSpend" is the essential floor (defaults to amount, $0 for the two
+// clearly discretionary rows).
 let expenses = [];
 function renderExpenseRows() {
   const container = els('expenseRows');
@@ -256,12 +243,8 @@ function expenseDateHint(e) {
   if (e.startAge != null) return `Starts at age ${e.startAge}`;
   return `Ends at age ${e.endAge}`;
 }
-// Starts/Ends date pickers store BOTH the raw month string (startDateValue/endDateValue, purely so the
-// picker redisplays what was chosen after a reload) and the age it converts to (startAge/endAge — null on
-// either side means unbounded on that side), the same age-anchored-on-currentAge convention Future Expenses/
-// Windfalls/Job Loss already use (see monthToAge). The engine (projectRun, via ctx.expensesForYear) only
-// ever reads startAge/endAge, never the date strings, so this matches the loop's own age-based year steps
-// exactly instead of needing a separate calendar-date comparison every iteration.
+// Start/end pickers store the month string (for redisplay) and the age it converts to (null = open-
+// ended). The engine only reads startAge/endAge.
 function updateExpenseDate(i, which, monthVal) {
   const ageField = which === 'start' ? 'startAge' : 'endAge';
   const dateField = which === 'start' ? 'startDateValue' : 'endDateValue';
@@ -285,11 +268,8 @@ function updateExpense(i, field, value) {
 function addExpense() { expenses.push({ name:'New expense', category:'Other', amount:50, mustSpend:50, jobLoss:0, startAge:null, endAge:null, startDateValue:'', endDateValue:'' }); renderExpenseRows(); render(); }
 function removeExpense(i) { expenses.splice(i,1); renderExpenseRows(); render(); }
 
-// Read-only combined view on the Expenses page: shows Housing/Debt/Insurance alongside the
-// Recurring Expenses list purely for visibility. It sums numbers already entered on their own
-// pages/arrays — it never writes back to them, so nothing here changes what the Monte Carlo
-// engine counts. Housing uses rows[0] (today) from the deterministic run, which already reflects
-// rent or an already-purchased mortgage + property tax/insurance, whichever applies right now.
+// Read-only combined view: Housing/Debt/Insurance alongside Recurring Expenses. Never writes back.
+// Housing uses rows[0] (today) from the deterministic run.
 function renderCombinedExpensesCard(rows, inputs) {
   if (!els('combinedGrandTotal')) return;
   const expensesMonthly = expenses.reduce((s,e) => s + expenseValForBasis(e), 0);
@@ -303,10 +283,8 @@ function renderCombinedExpensesCard(rows, inputs) {
   els('combinedGrandTotal').textContent = fmtMoney(expensesMonthly + housingMonthly + debtMonthly + insuranceMonthly) + '/mo';
 }
 
-// Live "if this happens" readout on the Survivorship page itself. The engine only applies this
-// what-if on the Explorers page (never the main plan/Monte Carlo score), so without this readout
-// checking the boxes here produces no visible change anywhere until you navigate to Explorers —
-// this gives instant feedback right where you're setting the age/elections/eligibility.
+// Live "if this happens" readout on the Survivorship page (the engine only applies survivorship on
+// Explorers), so changes here show up immediately.
 function renderSurvivorshipSummary(inputs, rows) {
   const body = els('survivorshipSummaryBody');
   if (!body) return;
@@ -314,11 +292,8 @@ function renderSurvivorshipSummary(inputs, rows) {
     body.innerHTML = `<p style="font-size:16.5px;color:var(--muted);margin:0;">Enter an assumed age above to see what this scenario would pay your spouse. Right now this is off — no age is set.</p>`;
     return;
   }
-  // Every figure in this card is grown from today's $ out to the assumed death age, so it reflects
-  // "what it would look like at that point" rather than a flat today's-$ estimate. Guaranteed income
-  // streams grow at their own rate (same as the engine): SBP with the underlying pension's growth
-  // rate, DIC and the SS survivor benefit with SS COLA. Expenses/insurance/medical use General
-  // Inflation / Medical Inflation (Assumptions page), same as the real yearly engine.
+  // Figures are grown from today's $ to the assumed death age: SBP at the pension's growth rate, DIC and
+  // SS survivor at SS COLA, expenses at General/Medical Inflation.
   const yearsToDeath = Math.max(0, inputs.survivorshipDeathAge - inputs.currentAge);
   const ageGap = inputs.currentAge - inputs.spouseCurrentAge;
   const spouseAgeAtDeath = inputs.survivorshipDeathAge - ageGap;
@@ -335,10 +310,8 @@ function renderSurvivorshipSummary(inputs, rows) {
   const guaranteedMonthly = sbp1Monthly + sbp2Monthly + dicMonthly + dicAidAttendanceMonthly + ssSurvivorMonthly;
   const ltcMonthly = ltcActiveAtDeath ? inputs.ltcAnnualCost * medInflatorToDeath / 12 : 0;
 
-  // Same Tricare/Part B/FEDVIP logic the engine uses once survivorship is active, evaluated at the
-  // assumed death age. Tricare's premium drops to $0 once she reaches Medicare age herself — Tricare
-  // For Life continues as coverage behind the scenes (wrapping around Medicare), but it has no added
-  // premium beyond Part B, so there's no Tricare cost left to count once she's on Medicare.
+  // Same Tricare/Part B/FEDVIP logic as the engine at the death age. Tricare's premium is $0 once she's on
+  // Medicare (Tricare For Life has no premium beyond Part B).
   const spouseOnMedicareAtDeath = spouseAgeAtDeath >= inputs.medicareAge;
   const medicalContinues = inputs.survivorMedicalContinues !== false;
   const medicalMonthlyToday = !medicalContinues ? 0 : (
@@ -348,13 +321,9 @@ function renderSurvivorshipSummary(inputs, rows) {
   );
   const medicalMonthly = medicalMonthlyToday * medInflatorToDeath;
 
-  // Only items still checked "continues" on the checklist above count here, at each item's edited
-  // override amount if one was set — matches the engine's survivor-filtered totals instead of the
-  // full household lists. Healthcare-category expenses grow with Medical Inflation, like the engine;
-  // everything else (and insurance) grows with General Inflation. Debt payments are fixed loan
-  // payments and don't inflate, matching the engine. Housing uses the actual projected cost at that
-  // age (already grown at its own rent/appreciation rate) unless overridden, in which case the
-  // override grows with General Inflation.
+  // Only items still checked "continues", at any override amount. Healthcare grows with Medical
+  // Inflation, everything else (and insurance) with General Inflation; debt payments don't inflate.
+  // Housing uses the projected cost at that age unless overridden (an override grows with inflation).
   const survivorVal = (item, key) => (item.survivorAmount != null && item.survivorAmount !== '') ? (+item.survivorAmount || 0) : (+item[key] || 0);
   const expensesMonthlyNonMedToday = expenses.reduce((s,e) => s + ((e.survivorContinues !== false && e.category !== 'Healthcare') ? survivorVal(e,'amount') : 0), 0);
   const expensesMonthlyMedToday = expenses.reduce((s,e) => s + ((e.survivorContinues !== false && e.category === 'Healthcare') ? survivorVal(e,'amount') : 0), 0);
@@ -420,12 +389,8 @@ function renderSurvivorTaxSummary(inputs) {
   `;
 }
 
-// Two snapshot bar charts, styled the same way as the Income/Expenses page charts, showing
-// what the spouse would receive and spend under this what-if — in today's dollars, matching
-// the "If This Happens" text above (same numbers, just visualized like every other section).
-// Plus a "by year" chart (same style as the Income/Expenses/Gap pages) tracking both totals
-// across the whole projection, run through this scenario (survivorship kicks in at the
-// assumed age; before that, the numbers are identical to the baseline plan).
+// Two snapshot bar charts (what the spouse receives and spends, today's $) plus a by-year chart across
+// the projection with survivorship starting at the assumed age.
 function renderSurvivorshipCharts(inputs, rows, ctx) {
   const incomeCanvas = els('chart_survivorship_income');
   const expenseCanvas = els('chart_survivorship_expenses');
@@ -462,10 +427,7 @@ function renderSurvivorshipCharts(inputs, rows, ctx) {
   );
   const medicalMonthly = medicalMonthlyToday * medInflatorToDeath;
 
-  // Only items still checked "continues" on the checklist count here, at each item's edited override
-  // amount if one was set. Healthcare-category expenses grow with Medical Inflation; everything else
-  // (and insurance) grows with General Inflation. Debt payments don't inflate (fixed loan payments).
-  // Housing uses the actual projected cost at that age unless overridden.
+  // Same rules as the summary card above: checked items at any override, inflation by category, debt flat.
   const survivorVal = (item, key) => (item.survivorAmount != null && item.survivorAmount !== '') ? (+item.survivorAmount || 0) : (+item[key] || 0);
   const expensesMonthlyNonMedToday = expenses.reduce((s,e) => s + ((e.survivorContinues !== false && e.category !== 'Healthcare') ? survivorVal(e,'amount') : 0), 0);
   const expensesMonthlyMedToday = expenses.reduce((s,e) => s + ((e.survivorContinues !== false && e.category === 'Healthcare') ? survivorVal(e,'amount') : 0), 0);
@@ -477,10 +439,7 @@ function renderSurvivorshipCharts(inputs, rows, ctx) {
     : (inputs.survivorHousingAmountOverride != null ? inputs.survivorHousingAmountOverride * genInflatorToDeath : (deathAgeRow ? deathAgeRow.housingCost / 12 : 0));
   const expenseTotalAnnual = (expensesMonthly + housingMonthly + debtMonthly + insuranceMonthly + medicalMonthly) * 12 + ltcAnnual;
 
-  // Guaranteed income (SS/SBP/DIC) rarely covers 100% of expenses on its own — whatever's left
-  // has to come from withdrawing the portfolio (TSP/brokerage/cash), same as it does for the
-  // baseline plan's own Surplus/(Gap) & Withdrawals math. Without this bar, the income chart
-  // understated what actually funds the spouse's spending.
+  // Whatever guaranteed income doesn't cover comes from the portfolio; this bar shows that drawdown.
   const investmentDrawdownAnnual = Math.max(0, expenseTotalAnnual - guaranteedAnnual);
 
   const incomeConfig = barConfig(
@@ -499,11 +458,7 @@ function renderSurvivorshipCharts(inputs, rows, ctx) {
       // chart here looks the same as a 4-bar chart anywhere else in the tool.
       sizeHorizontalChartCard(canvas, config.data.labels);
       ensureChartHorizontalScroll(canvas, 460);
-      // Destroy + recreate rather than mutating .data/.options in place: Chart.js only reliably
-      // picks up a changed plugin config (like barValueLabels here) on construction, so an
-      // in-place update on an existing instance can leave it stuck on the options object from
-      // whenever the chart was first built — silently dropping both the value labels and, if the
-      // interaction/tooltip config also came along for the ride, hover as well.
+      // Destroy and recreate: Chart.js only picks up plugin config changes (value labels, hover) on construction.
       if (charts[key]) charts[key].destroy();
       charts[key] = new Chart(canvas.getContext('2d'), config);
     });
@@ -531,10 +486,8 @@ function renderSurvivorshipCharts(inputs, rows, ctx) {
     }
 
     if (drawdownCanvas) {
-      // Investment drawdown = grossWithdrawal, the actual amount pulled from TSP/brokerage/HYSA that
-      // year to cover whatever total expenses aren't already covered by guaranteed income (SS survivor
-      // benefit, SBP, DIC). The VGLI lump sum entered above lands in the brokerage pies the year this
-      // scenario starts, so its effect shows up here as smaller (or zero) drawdown for as long as it lasts.
+      // Drawdown = grossWithdrawal, what's pulled from TSP/brokerage/HYSA after guaranteed income. The VGLI
+      // lump sum lands in the brokerage pies when the scenario starts.
       const key = 'survivorship_drawdown';
       const config = yearlyBarConfig(ages, [
         { label: 'Investment drawdown', data: scenarioRows.map(r => dv(r.grossWithdrawal || 0, r.age, inputs)) }
@@ -547,10 +500,8 @@ function renderSurvivorshipCharts(inputs, rows, ctx) {
   }
 }
 
-// Toggles whether a single expense/debt/insurance item continues after survivorship starts, and lets its
-// amount be overridden for that scenario. Both stored right on the item itself (item.survivorContinues,
-// item.survivorAmount — default continuing at the normal amount when unset) so they ride along with that
-// item's own array in saveState/loadState — no separate persistence plumbing needed.
+// Per-item survivorship toggle and override, stored on the item itself (survivorContinues /
+// survivorAmount) so it saves with that item's array.
 function survivorArrByName(arrName) {
   if (arrName === 'expenses') return expenses;
   if (arrName === 'debts') return debts;
@@ -568,10 +519,8 @@ function setSurvivorAmount(arrName, i, value) {
   render();
 }
 
-// Itemized "which expenses continue" checklist on the Survivorship page — every recurring cost from the
-// Expenses, Debt, and Insurance pages, each with its own on/off toggle and an editable amount (defaulting
-// to its normal amount, in case it would change rather than disappear). Read directly from the same arrays
-// those pages edit, so it always matches what's there.
+// "Which expenses continue" checklist: every recurring cost from Expenses, Debt and Insurance, each with
+// a toggle and editable amount, read from those pages' arrays.
 function renderSurvivorExpenseChecklist() {
   const body = els('survivorExpenseChecklistBody');
   if (!body) return;
@@ -627,10 +576,7 @@ function updateFutureExpense(i, field, value) {
   if (field === 'recurring') futureExpenses[i][field] = value === 'true';
   else if (field === 'name') futureExpenses[i][field] = value;
   else futureExpenses[i][field] = +value;
-  // Editing the age number directly should push the pinned date picker to match it, not blank it out
-  // and leave the user guessing what calendar date that age actually falls on. Update the sibling
-  // month input in place (not a full renderFutureExpenseRows()) so the age field being typed into
-  // doesn't lose keyboard focus mid-keystroke.
+  // Editing the age moves the paired month picker in place (no full re-render, so focus isn't lost).
   if (field === 'age') {
     futureExpenses[i].dateValue = ageToMonthValue(els('birthDate') ? els('birthDate').value : '', futureExpenses[i].age);
     const rows = els('futureExpenseRows');
@@ -647,11 +593,7 @@ function removeFutureExpense(i) { futureExpenses.splice(i,1); renderFutureExpens
 function monthToAge(monthVal, basisAge) {
   if (!monthVal) return basisAge;
   const [ty, tm] = monthVal.split('-').map(Number);
-  // Anchor on the person's actual birth year/month (same precise calendar-age logic as
-  // computeAgeFromBirthDate) rather than approximating from "today" + elapsed months from
-  // basisAge — the old approximation assumed basisAge was exact as of today, which is only
-  // true if today happens to fall on the birthday, and silently produced off-by-one ages
-  // for anyone whose birthday hasn't occurred yet this calendar year.
+  // Anchor on the real birth year/month so ages aren't off by one before this year's birthday.
   const birthDateStr = els('birthDate') ? els('birthDate').value : '';
   const [by, bm] = (birthDateStr || '').split('-').map(Number);
   if (by && bm) {
@@ -663,15 +605,8 @@ function monthToAge(monthVal, basisAge) {
   const monthsAway = (ty - today.getFullYear()) * 12 + (tm - 1 - today.getMonth());
   return Math.max(1, Math.round(basisAge + monthsAway / 12));
 }
-// One-time self-heal, run once at boot (see bottom of script, after birthDate/spouseBirthDate are
-// synced) for plans saved before monthToAge/dateToAge/syncAgeDate/syncRetirementDate were corrected
-// to anchor on the actual birth date. A date picker's *stored* age (expenses[].startAge/endAge,
-// futureExpenses[].age, windfalls[].age, or a milestone's own Age field) was computed once at the
-// moment it was picked and then persisted as a plain number — simply fixing the conversion functions
-// doesn't retroactively correct a number that's already sitting in someone's saved plan. This
-// re-derives every stored age from its paired date field using the corrected math, so an existing
-// plan self-corrects on load instead of requiring every date to be manually re-picked. Harmless
-// no-op for anyone whose stored ages already happen to be exact.
+// Boot-time self-heal: re-derive every stored age (expense start/end, future expenses, windfalls,
+// milestones) from its paired date, for plans saved before the age math was fixed. No-op otherwise.
 function recomputeAgesFromDates() {
   const currentAge = +els('currentAge').value;
   expenses.forEach(e => {
@@ -842,9 +777,7 @@ function updateExcessIncomeDestination(name) {
 }
 
 // ---------- Roth Conversion: tax-payment source account (HYSA or a specific brokerage pie) ----------
-// Same pattern as excessIncomeDestinationPieName above — a dynamically-populated <select> whose
-// options get rebuilt via innerHTML whenever brokeragePies changes, so the selected value has to be
-// tracked in its own module-level variable rather than relying on the DOM to remember it.
+// The <select> is rebuilt whenever brokeragePies changes, so the choice is tracked in this variable.
 let rothConversionSourceName = 'hysa';
 function renderRothConversionSourceOptions() {
   const sel = els('rothConversionTaxSource');
@@ -882,16 +815,11 @@ function updatePieContribution(i, value) {
 // Order is a flat array of account keys: 'trad', 'roth', 'hysa', and 'pie_0'..'pie_N-1' (index into brokeragePies).
 let withdrawalOrderState = ["trad","hysa","roth"];
 let withdrawalModeCustom = true;
-// Accounts checked OFF in the Withdrawal Strategy list — kept as a separate array (rather than removing
-// them from withdrawalOrderState) so an excluded account still shows in the list at its usual position,
-// with its usual balance, and un-excluding it later doesn't lose whatever order position it had. Only
-// affects the voluntary spending-gap waterfall below; Required Minimum Distributions are still forced
-// out of Trad TSP regardless (see rmdAge below), since those aren't optional.
+// Accounts unchecked in Withdrawal Strategy. Kept separate from withdrawalOrderState so they keep their
+// place. Only affects voluntary withdrawals; RMDs still come out of Trad TSP.
 let withdrawalExcludedKeys = [];
-// How a simultaneous ("multiple accounts at once") withdrawal splits across the accounts that ARE
-// included: 'balance' (default — proportional to that year's actual balance, exactly the original
-// behavior) or 'percent' (fixed weights you set yourself in withdrawalProportions, independent of how
-// each account's balance drifts over time).
+// How a simultaneous withdrawal splits across included accounts: 'balance' (by each year's balance) or
+// 'percent' (your fixed weights in withdrawalProportions).
 let withdrawalProportionMode = 'percent';
 let withdrawalProportions = {}; // { [accountKey]: percent } — only read when withdrawalProportionMode === 'percent'
 
@@ -919,10 +847,8 @@ function normalizeWithdrawalExclusions() {
   withdrawalExcludedKeys = withdrawalExcludedKeys.filter(k => validKeys.includes(k));
 }
 
-// Drops stale keys and gives any newly-relevant included account an even starting share of 100%, so a
-// just-added account (or one just un-excluded) doesn't silently sit at 0% — used as relative weights at
-// withdrawal time (see projectRun()), so this doesn't need to add up to exactly 100, but starting even
-// keeps the numbers meaning what they look like they mean until the user adjusts them.
+// Drop stale keys and give newly included accounts an even share. Used as relative weights, so they
+// needn't total exactly 100.
 function normalizeWithdrawalProportions() {
   const validKeys = getWithdrawalAccountKeys();
   Object.keys(withdrawalProportions).forEach(k => { if (!validKeys.includes(k)) delete withdrawalProportions[k]; });

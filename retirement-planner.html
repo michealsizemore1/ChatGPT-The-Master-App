@@ -418,7 +418,6 @@
   .msiz-snapshot-head h3{cursor:default;margin:0 0 4px;}
   .msiz-snapshot-head h3::after{display:none;}
   .msiz-snapshot-head p{margin:0;color:var(--muted);font-size:14.5px;line-height:1.45;}
-  .msiz-open-btn{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:9px 14px;border-radius:8px;background:var(--teal);color:#fff;text-decoration:none;font-size:14px;font-weight:800;}
   .msiz-snapshot-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;}
   .msiz-snapshot-item{background:var(--teal-light);border:1px solid #c7e2df;border-radius:8px;padding:10px;text-align:center;}
   .msiz-snapshot-item span{display:block;color:var(--muted);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
@@ -426,7 +425,6 @@
   .msiz-snapshot-updated{margin-top:10px;color:var(--muted);font-size:12.5px;text-align:right;}
   @media(max-width:760px){
     .msiz-snapshot-head{display:block;}
-    .msiz-open-btn{width:100%;margin-top:11px;}
     .msiz-snapshot-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
     .msiz-snapshot-item:first-child{grid-column:1 / -1;}
   }
@@ -584,10 +582,6 @@
      notes use the same 24px horizontal spacing as the rest of the page. */
   @media (max-width:1700px){ .shared-notes-card{padding-left:24px; padding-right:24px;} }
 
-  .tip{display:flex; gap:12px; padding:14px 16px; border-radius:8px; margin-bottom:10px; border:1px solid var(--border); background:#fbfcfc; align-items:flex-start;}
-  .tip.high{border-color:#f0c3bb; background:#fdf3f1;}
-  .tip.medium{border-color:#f0ddb5; background:#fffaf0;}
-  .tip.good{border-color:#c9e4de; background:var(--teal-light);}
   .chat-box{border:1px solid var(--border); border-radius:8px; padding:12px; background:#fbfcfc; margin-top:10px;}
   .chat-log{max-height:320px; overflow-y:auto; margin-bottom:10px;}
   .chat-msg{padding:10px 12px; border-radius:8px; margin-bottom:8px; font-size:16.5px; line-height:1.55;}
@@ -1640,7 +1634,6 @@
             <h3>MSIZ Investment Snapshot</h3>
             <p>A concise view of the balances synchronized from MSIZ Terminal.</p>
           </div>
-          <a class="msiz-open-btn" href="msiz-terminal.html">Open MSIZ Terminal &rarr;</a>
         </div>
         <div class="msiz-snapshot-grid">
           <div class="msiz-snapshot-item"><span>Total Portfolio</span><strong id="msizSnapTotal">&mdash;</strong></div>
@@ -2520,6 +2513,13 @@
         <p style="font-size:14.5px;color:var(--muted);margin:8px 0 0;">This resets the retirement plan, notes, checkpoints, and Coach conversation. Document Vault files remain separate and are not erased.</p>
       </div>
 
+      <div class="card" id="oldDataCleanupCard" style="display:none;">
+        <h3 onclick="toggleCard(this)">Clear Old Data<span class="sub-label">Leftovers from features this planner no longer has</span></h3>
+        <p id="oldDataCleanupNote" style="font-size:14.5px;color:var(--muted);margin:0 0 10px;"></p>
+        <button class="add-btn" style="background:#fdf3f1; color:var(--danger);" onclick="clearOldPlannerData()">Clear old Accounts &amp; Cards data</button>
+        <p style="font-size:14.5px;color:var(--muted);margin:8px 0 0;">Your retirement plan, Document Vault, and the M&amp;C Money app are not affected. This card disappears once there's nothing left to clear.</p>
+      </div>
+
       <div class="card">
         <h3 onclick="toggleCard(this)">Data Quality Checklist<span class="sub-label">Potential blanks, conflicts, and items worth reviewing</span></h3>
         <div id="dataQualityChecklist"></div>
@@ -2751,17 +2751,17 @@
   </div>
 </div>
 
-<script src="retirement-planner-core.js?v=2026-09-04-fixes1"></script>
-<script src="retirement-planner-tax-and-social-security.js?v=2026-09-04-fixes1"></script>
-<script src="retirement-planner-navigation-and-charts.js?v=2026-09-04-fixes1"></script>
-<script src="retirement-planner-accounts-and-legacy-cloud.js?v=2026-09-04-fixes1"></script>
-<script src="retirement-planner-money-inputs.js?v=2026-09-04-fixes1"></script>
-<script src="retirement-planner-debt-and-inputs.js?v=2026-09-04-fixes1"></script>
-<script src="retirement-planner-projection-engine.js?v=2026-09-04-fixes1"></script>
-<script src="retirement-planner-explorers-and-analysis.js?v=2026-09-04-fixes1"></script>
-<script src="retirement-planner-charts.js?v=2026-09-04-fixes1"></script>
-<script src="retirement-planner-savings-and-coach.js?v=2026-09-04-fixes1"></script>
-<script src="retirement-planner-vault-settings-and-reports.js?v=2026-09-04-fixes1"></script>
+<script src="retirement-planner-core.js?v=2026-11-21-cleanup"></script>
+<script src="retirement-planner-tax-and-social-security.js?v=2026-11-21-cleanup"></script>
+<script src="retirement-planner-navigation-and-charts.js?v=2026-11-21-cleanup"></script>
+<script src="retirement-planner-storage-and-notes.js?v=2026-11-21-cleanup"></script>
+<script src="retirement-planner-money-inputs.js?v=2026-11-21-cleanup"></script>
+<script src="retirement-planner-debt-and-inputs.js?v=2026-11-21-cleanup"></script>
+<script src="retirement-planner-projection-engine.js?v=2026-11-21-cleanup"></script>
+<script src="retirement-planner-explorers-and-analysis.js?v=2026-11-21-cleanup"></script>
+<script src="retirement-planner-charts.js?v=2026-11-21-cleanup"></script>
+<script src="retirement-planner-savings-and-coach.js?v=2026-11-21-cleanup"></script>
+<script src="retirement-planner-vault-settings-and-reports.js?v=2026-11-21-cleanup"></script>
 <script src="master-backup-shared.js"></script>
 </body>
 </html>

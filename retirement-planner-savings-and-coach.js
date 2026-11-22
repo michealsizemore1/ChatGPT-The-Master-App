@@ -192,11 +192,7 @@ function toggleFloatingAi(forceOpen) {
   panel.style.display = shouldOpen ? 'flex' : 'none';
   if (shouldOpen) {
     renderCoachAiGate();
-    // Re-render from the persisted history every time the panel opens, rather than trusting whatever the
-    // DOM happened to be left showing — coachChatLog's innerHTML isn't kept in sync while the panel is
-    // closed (nothing re-renders a hidden panel), so this is what makes a conversation started earlier in
-    // the session (or in a previous session, since history now persists to localStorage) actually show up
-    // again instead of opening to an empty log.
+    // Re-render from saved history each time the panel opens (the hidden log isn't kept in sync).
     renderCoachChatLog();
     const input = els('coachChatInput');
     if (input) input.focus();
@@ -245,15 +241,8 @@ function renderCoachAiGate() {
   if (clearBtn) clearBtn.style.display = (key && coachChatHistory.length) ? 'inline-block' : 'none';
 }
 
-// Full plan snapshot sent as the system prompt's context on every question — deliberately comprehensive
-// (every major lever in the app, plus the full year-by-year projection) rather than the handful of
-// headline numbers this used to send, so the AI can actually analyze the plan in the kind of depth a
-// normal Claude conversation would, instead of only being able to comment on 5-6 numbers. Built entirely
-// from readInputs()'s return value and the typed arrays (expenses/debts/insurancePolicies/brokeragePies/
-// withdrawal-order state) — NEVER from saveState()'s `fields` blob or any generic dump of every DOM input,
-// since `fields` is the one place the Anthropic API key itself (anthropicApiKey) lives; keeping this
-// function's inputs restricted to named, individually-read values makes it structurally impossible for
-// the key to end up inside a request sent to Anthropic's own servers.
+// Full plan snapshot sent as context with every question. Built only from readInputs() and the named
+// arrays, never from saveState()'s `fields`, so the Anthropic API key can never end up in a request.
 function buildPlanSummaryForAI() {
   const inputs = readInputs();
   const ctx = buildContext(inputs);
@@ -323,10 +312,8 @@ function escapeHtml(str) {
   d.textContent = str == null ? '' : String(str);
   return d.innerHTML;
 }
-// Renders an AI reply's markdown (headers, bold, lists, code blocks, etc.) as real HTML via marked.js —
-// matching how a normal Claude chat actually displays formatted answers, instead of the old plain-text
-// wall with manual <br> substitution. Falls back to the old escaped-plain-text behavior if the CDN script
-// hasn't loaded yet (slow connection, blocked domain, etc.) so a reply is still readable either way.
+// Renders an AI reply's markdown as HTML via marked.js; falls back to escaped plain text if marked
+// hasn't loaded.
 function renderMarkdown(text) {
   if (window.marked && typeof window.marked.parse === 'function') {
     try {
@@ -340,10 +327,7 @@ function renderMarkdown(text) {
   return escapeHtml(text).replace(/\n/g, '<br>');
 }
 
-// Chat history persists in this browser (same trust boundary as the Anthropic API key itself, which
-// already lives in localStorage) so the conversation is still there next time the panel is opened —
-// previously an in-memory-only array, wiped by any page refresh. "New chat" (clearCoachChat, below) is
-// the explicit way to reset it.
+// Chat history persists in this browser until "New chat" (clearCoachChat) resets it.
 const COACH_CHAT_HISTORY_KEY = 'retirementPlannerAskAiHistory_v1';
 let coachChatHistory = [];
 try {
@@ -421,12 +405,8 @@ async function sendCoachChatMessage() {
       return;
     }
 
-    // Streamed response (stream:true above): Anthropic sends Server-Sent Events, one JSON object per
-    // "data: " line. The only event type that carries actual reply text is content_block_delta with a
-    // text_delta — each one is appended and the pending bubble is re-rendered through renderMarkdown()
-    // so formatting (a list that's still being written, etc.) updates live instead of only appearing once
-    // the whole response finishes, which is what gives this the real-time "normal Claude chat" feel
-    // instead of a single "Thinking…" then a static dump of the whole answer at once.
+    // Streamed reply (Server-Sent Events): append each content_block_delta text_delta and re-render so the
+    // answer appears live.
     const reader = resp.body.getReader();
     const decoder = new TextDecoder();
     let buffer = '', assistantText = '', streamError = null;
@@ -474,17 +454,6 @@ async function sendCoachChatMessage() {
 }
 
 // ---------- Document Vault: client-side document upload, keyword search, and AI Q&A ----------
-// Storage: IndexedDB, not localStorage. Two problems came out of the original localStorage-only design:
-// (1) localStorage's small, synchronous, per-origin quota (often just a few MB — sometimes tighter still
-// on a file:// page, which is how this tool is normally opened) is shared with the main plan's own
-// STORAGE_KEY. A handful of large documents could push total usage over that limit, and depending on the
-// browser a quota failure can end up costing more than just the one write that failed. (2) Only extracted
-// text was ever kept, never the original file, so there was never anything to actually open or download —
-// "Your Documents" only ever showed searchable text, never the document itself.
-// IndexedDB fixes both: it's a completely separate storage mechanism from localStorage, so a large vault
-// can never contend with or endanger the main plan's saved data; it stores the original file as a real
-// Blob with no size penalty; and its real-world quota is dramatically larger than localStorage's (typically
-// a meaningful share of free disk space, easily hundreds of MB or more, vs. localStorage's usual 5-10 MB).
-// Nothing here ever leaves the browser except the specific document text sent to Anthropic if you use
-// Ask AI below (and only after you've added your own API key on Settings).
-// vaultEsc() below is this section's own HTML-escaping helper.
+// Original files are stored as Blobs in IndexedDB, separate from localStorage, so a large vault can't
+// use up the plan's storage quota. Nothing leaves the browser except document text sent to Anthropic
+// when you use Ask AI. vaultEsc() below is this section's HTML-escaping helper.

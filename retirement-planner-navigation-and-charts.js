@@ -1,18 +1,11 @@
 if (typeof Chart !== 'undefined') {
   Chart.defaults.font.size = 13; Chart.defaults.font.family = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
-  // Draws the actual value on/next to each bar — opt-in per chart via a flag set directly on the
-  // dataset itself (dataset.showValues / dataset.valueFormatter, set from barConfig()'s opts.showValues)
-  // rather than through chart.options.plugins.barValueLabels. Reading it off the dataset sidesteps any
-  // question of whether Chart.js's options-merge machinery actually exposes a custom plugin's config
-  // object the way core options (scales, tooltip callbacks, etc.) are exposed — dataset properties are
-  // plain data, always intact, and pieContribution/pieBalance access already proves that works reliably.
+  // Draws the value on each bar. Opt-in via dataset.showValues / dataset.valueFormatter (set by
+  // barConfig's opts.showValues); dataset properties always survive Chart.js's option merging.
   Chart.register({
     id: 'barValueLabels',
     afterDatasetsDraw(chart) {
-      // Defensive: a draw-time error here must never be allowed to break the chart's own
-      // rendering/hover for the rest of Chart.js's render pipeline (afterDatasetsDraw runs
-      // for every registered plugin on every chart, so one bad plugin can otherwise poison
-      // the whole draw call).
+      // A draw error here must never break the chart (this hook runs for every chart).
       try {
         const { ctx } = chart;
         const horizontal = chart.options && chart.options.indexAxis === 'y';
@@ -29,10 +22,7 @@ if (typeof Chart !== 'undefined') {
             const pos = bar.tooltipPosition ? bar.tooltipPosition() : bar;
             if (pos.x == null || pos.y == null || isNaN(pos.x) || isNaN(pos.y)) return;
             ctx.save();
-            // Smaller font + tighter padding on mobile — the pill is drawn at a fixed pixel size
-            // regardless of canvas width, so on a narrow phone viewport (where bars are already
-            // thinner and closer together) the full-size desktop pill is disproportionately large
-            // and collides with its neighbors.
+            // Smaller pill on phones so neighboring labels don't collide.
             const mobile = isMobile();
             const fontPx = mobile ? 11 : 13;
             ctx.font = "600 " + fontPx + "px -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
@@ -72,21 +62,12 @@ if (typeof Chart !== 'undefined') {
       }
     }
   });
-  // Draws the $ amount + % directly on each pie slice — same opt-in pattern as barValueLabels
-  // above (dataset.showValues / dataset.valueFormatter), just reading arc centers instead of bar
-  // positions. Tiny slices (<6% of the total) skip their label since there's no room to fit text
-  // without it spilling outside the arc.
+  // Draws $ amount + % on each pie slice (same opt-in as barValueLabels). Slices under 6% are skipped.
   Chart.register({
     id: 'pieValueLabels',
     afterDatasetsDraw(chart) {
       try {
-        // This plugin computes "value (percent of the whole)" — only meaningful for a pie/doughnut,
-        // where every slice really is a share of one total. It used to be gated on dataset.showValues
-        // alone, which every bar chart ALSO sets (via barConfig's opts.showValues) to get its own
-        // barValueLabels pill — so this plugin was firing on every bar chart too, drawing a second,
-        // unboxed white "value (N%)" label directly on top of barValueLabels' solid black pill at the
-        // same position. Against a light chart background that second label was nearly invisible and
-        // just muddied the real one. Restricting to actual pie charts fixes both problems at once.
+        // Pie/doughnut only: bar charts also set showValues and would get a duplicate label.
         if (chart.config.type !== 'pie' && chart.config.type !== 'doughnut') return;
         chart.data.datasets.forEach((dataset, di) => {
           if (!dataset.showValues) return;
@@ -120,11 +101,8 @@ if (typeof Chart !== 'undefined') {
       }
     }
   });
-  // Draws a dashed vertical baseline marker on the Sensitivity/Tornado chart (Explorers page) at the
-  // plan's current confidence score, so each lever's low→high span reads visually against where you
-  // actually stand today. Opt-in via chart.tornadoBaselineValue (a plain number set directly on the
-  // chart instance after creation) rather than chart.options.plugins, same reasoning as barValueLabels
-  // above — a plain instance property is guaranteed to survive Chart.js's internal option merging.
+  // Dashed baseline at the current confidence score on the Sensitivity/Tornado chart. Opt-in via
+  // chart.tornadoBaselineValue.
   Chart.register({
     id: 'tornadoBaseline',
     afterDatasetsDraw(chart) {
@@ -151,13 +129,8 @@ if (typeof Chart !== 'undefined') {
   });
 }
 // ---------- Mobile-aware chart sizing ----------
-// The chart CSS/canvas system below was tuned on a wide desktop screen: fixed pixel font sizes for
-// axis ticks and the value-label pills, and container heights (not widths) that adapt to item count.
-// On a narrow phone viewport none of that adapts — the canvas width shrinks to the screen, but bar
-// count, label text, and font sizes stay exactly the same, so bars/labels that had comfortable room
-// on desktop visually collide on mobile. isMobile() drives smaller fonts/labels below; the
-// ensureChartHorizontalScroll() helper gives bar-heavy or label-heavy charts a guaranteed minimum
-// pixel width and lets the card scroll horizontally instead of squeezing bars to unreadable thinness.
+// isMobile() drives smaller fonts/labels; ensureChartHorizontalScroll() gives crowded charts a minimum
+// width and lets the card scroll sideways instead of squeezing bars.
 function isMobile() {
   return window.innerWidth <= 700;
 }
@@ -180,11 +153,8 @@ let charts = {};
 let lastSnapshot = null;
 let dollarView = 'nominal'; // 'nominal' (future $) | 'real' (today's $)
 const DOLLAR_VIEW_KEY = 'retirementPlannerDollarView_v1';
-// Which Expenses-page column ('liketo' or 'mustspend') drives the actual baseline spending used
-// every year by projectRun() — and therefore the guardrails, the dashboard, the Gap page, Explorers,
-// and every Monte Carlo run, since they all flow through buildContext()/projectRun(). The Must Spend
-// *floor* (guardrails never cutting below it) is unaffected by this toggle either way — it's always
-// the true essential-only total; this only changes what spending STARTS at before any guardrail cut.
+// Which Expenses column ('liketo' / 'mustspend' / 'jobloss') sets baseline spending for every
+// projection. The Must Spend floor for guardrails is always the essentials total regardless.
 let spendingBasis = 'liketo'; // 'liketo' | 'mustspend' | 'jobloss' (test)
 const SPENDING_BASIS_KEY = 'retirementPlannerSpendingBasis_v1';
 
@@ -213,12 +183,8 @@ function setSpendingBasis(mode) {
   const activePage = document.querySelector('.page.active');
   if (activePage && activePage.dataset.page === 'explorers') renderExplorers();
 }
-// Which per-item dollar value a single expense row contributes, given whichever basis is currently
-// selected in the header toggle — same fallback chain the engine itself uses in buildContext (Must
-// Spend falls back to Like to Spend if left blank; Job Loss falls back to Must Spend, then Like to
-// Spend). Used by every UI element on the Expenses page (chart, combined-total card) so they all switch
-// together with the toggle instead of the chart/totals staying frozen on Like to Spend regardless of
-// which basis is actually selected.
+// An expense row's value for the selected basis, with the same fallbacks as buildContext (Must Spend ->
+// Like to Spend; Job Loss -> Must Spend -> Like to Spend).
 function expenseValForBasis(e) {
   const mustSpend = e.mustSpend != null ? +e.mustSpend : (+e.amount || 0);
   if (spendingBasis === 'mustspend') return mustSpend;
@@ -231,10 +197,7 @@ function expenseValForBasis(e) {
 // rather than the generic per-page saveState() mechanism.
 let jobLossDate = '2026-12-31';
 const JOB_LOSS_DATE_KEY = 'retirementPlannerJobLossDate_v1';
-// Converts an arbitrary future (or past) calendar date into the whole-number age it falls in, the same
-// year-resolution every other age in this engine works at — a job loss "3 months from now" and one
-// "11 months from now" both land in the same projection year, which is the right precision for an
-// annual simulation even though the date picker itself is precise to the day.
+// Calendar date -> the whole-number age it falls in (the engine works in whole years).
 function dateToAge(dateStr, currentAge) {
   if (!dateStr) return null;
   // Anchor on the actual birth date (day precision, same logic as computeAgeFromBirthDate) rather
@@ -412,11 +375,7 @@ function readInitialPage() {
 // doesn't touch any field values, so nothing here affects the plan or Monte Carlo score.
 function toggleCard(h3) {
   h3.parentElement.classList.toggle('collapsed');
-  // A chart inside a card that was just un-collapsed (display:none -> visible) has been sitting at
-  // zero size the whole time, so Chart.js's own responsive layout never had a real size to work
-  // with — dispatching a resize event is what Chart.js's responsive plugin listens for, and forces
-  // every chart on the page (cheap, since there are never more than a handful) to recompute its
-  // canvas size against whatever's actually visible right now.
+  // A just-expanded card's charts were sized at zero; a resize event makes Chart.js re-measure them.
   window.dispatchEvent(new Event('resize'));
 }
 
@@ -448,12 +407,8 @@ function showPage(pageId, persistPage = true) {
     }
     saveState();
   }
-  // Every collapsible card collapses each time its section is visited, so you always land on a clean,
-  // scannable list of titles. Only cards with an actual <h3 onclick="toggleCard(this)"> header are
-  // collapsible — a few cards (What If I..., Market Explorer) use a plain <h2> instead because they're
-  // meant to always stay open, and must NOT get the .collapsed class: the CSS rule that hides a
-  // collapsed card's body (.card.collapsed > *:not(h3){display:none}) would hide literally everything
-  // in them, since they have no h3 to spare.
+  // Collapse every collapsible card (those with <h3 onclick="toggleCard(this)">) on each visit. Always-open
+  // cards use <h2> and must not get .collapsed, which would hide everything in them.
   const activePage = document.querySelector(`.page[data-page="${pageId}"]`);
   if (activePage) collapsePlannerCards(activePage);
   if (lastSnapshot) refreshSectionCharts(pageId, lastSnapshot);

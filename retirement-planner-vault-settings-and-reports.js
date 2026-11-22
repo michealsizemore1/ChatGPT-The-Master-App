@@ -62,10 +62,8 @@ async function vaultDBGetAll() {
   });
 }
 
-// One-time migration: documents uploaded before this feature existed were saved as extracted text only,
-// in a single localStorage key. Moves any of those into IndexedDB (fileBlob stays null on these records
-// — the original file was never kept for them, so Open/Download will ask you to re-upload) and clears
-// the old key so this only ever runs once.
+// One-time migration of old text-only vault documents from localStorage into IndexedDB (no original
+// file, so Open asks for a re-upload). Clears the old key afterward.
 async function migrateVaultFromLocalStorage() {
   let old = null;
   try { const raw = localStorage.getItem(VAULT_STORAGE_KEY); if (raw) old = JSON.parse(raw); } catch (e) { /* ignore corrupt old data */ }
@@ -75,10 +73,7 @@ async function migrateVaultFromLocalStorage() {
     try { await vaultDBPut({ ...d, fileBlob: null, sizeOriginal: d.sizeOriginal || (d.extractedText ? d.extractedText.length : 0) }); }
     catch (e) { failures++; /* best-effort — skip any record that fails to migrate rather than blocking the rest */ }
   }
-  // Only clear the old copy once every record actually made it into IndexedDB — if IndexedDB is
-  // unavailable or blocked (private browsing, a storage-blocking extension, a full quota), every
-  // migration attempt fails and the old data must survive so it can migrate on a later visit
-  // instead of being silently deleted with nothing to show for it.
+  // Only clear the old copy if every record migrated, so nothing is lost if IndexedDB is blocked.
   if (failures === 0) {
     try { localStorage.removeItem(VAULT_STORAGE_KEY); } catch (e) { /* ignore */ }
   }
@@ -103,11 +98,8 @@ function fmtBytes(n) {
   return (n/(1024*1024)).toFixed(2) + ' MB';
 }
 
-// Pulls the plain text out of one uploaded File, using whichever library matches its type. Returns a
-// Promise<string>. PDF/DOCX extraction depends on pdf.js/mammoth.js (loaded via CDN with `defer`) having
-// actually finished loading by the time you upload — if a library didn't load (offline, CDN blocked),
-// this throws a clear, specific error instead of silently producing empty/garbled text. A failure here
-// only costs search/Ask AI text — the original file still gets saved and can still be opened.
+// Extracts plain text from an uploaded file with pdf.js / mammoth.js. Throws a clear error if the
+// library didn't load; the original file is still saved either way.
 async function extractTextFromFile(file) {
   const name = file.name || '';
   const ext = name.toLowerCase().split('.').pop();
@@ -377,10 +369,8 @@ function restoreFromFile(file) {
     try {
       const state = JSON.parse(e.target.result);
       applyState(state);
-      // Notes and the Checkpoint Tracker are the fields applyState() deliberately
-      // doesn't touch on a normal boot (see the comment there) — an explicit restore is the one
-      // legitimate case where the backup's copy SHOULD overwrite whatever is currently in this browser,
-      // so they're synced here instead.
+      // Notes and the Checkpoint Tracker aren't restored on a normal boot (see applyState), so an explicit
+      // restore syncs them here.
       if (typeof state.sharedNotesText === 'string') updateSharedNotes(state.sharedNotesText);
       if (state.checkpointBaseline !== undefined) { checkpointBaseline = state.checkpointBaseline; persistCheckpointBaseline(); }
       if (Array.isArray(state.checkpointHistory)) { checkpointHistory = state.checkpointHistory; persistCheckpointHistory(); }
@@ -397,13 +387,8 @@ function restoreFromFile(file) {
 }
 
 // ---------- Print Full Plan ----------
-// Charts are normally only ever created for whichever page happens to be active on screen — printing
-// needs every page's canvas populated at once, so this briefly visits every page (building any chart
-// that hasn't been created yet, exactly like a normal page visit already does) before handing off to
-// the browser's own print dialog. The @media print stylesheet does the actual "show every page instead
-// of just the active one" work; this function's job is just to make sure there's real content in the
-// DOM for it to show. Whichever page was open before Print Full Plan was clicked is restored once the
-// print dialog closes (or is cancelled), via the afterprint event.
+// Briefly visits every page so all charts exist, then opens the print dialog (the @media print styles
+// show every page). The original page is restored on afterprint.
 let apiKeyBeforePrint = null;
 function removeApiKeyFromPrint() {
   const keyInput = els('anthropicApiKey');
@@ -431,11 +416,7 @@ function printFullPlan() {
   window.print();
 }
 
-// A chart built while some OTHER page was the visible one is still sized for that page's own on-screen
-// layout, not for print's "every page visible at once, stacked" layout — beforeprint fires once the
-// browser has actually applied the @media print rules, so this is the right moment to tell every
-// existing chart to recompute its size against whatever it's really sitting inside now. Registered
-// globally (not just from the Print Full Plan button) so it also covers a plain Ctrl/Cmd+P.
+// Resize every chart for the print layout. Registered globally so plain Ctrl/Cmd+P works too.
 window.addEventListener('beforeprint', () => {
   removeApiKeyFromPrint();
   Object.values(charts).forEach(c => { try { c.resize(); } catch (e) { /* a stale/destroyed chart instance can safely be skipped */ } });
@@ -465,10 +446,7 @@ function payoffStatsFromSchedule(sched, currentAge, originalBalance) {
   const totalPaid = sched.paymentDuringYear.slice(0, payoffYearIdx >= 0 ? payoffYearIdx + 1 : sched.paymentDuringYear.length)
     .reduce((s, p) => s + p, 0);
   const totalInterest = sched.neverPaysOff ? null : Math.max(0, totalPaid - originalBalance);
-  // A debt that amortizes fine but just doesn't finish within the projection horizon (maxYears) is
-  // NOT the same as one that never pays off at current payments -- neverPaysOff stays false, but
-  // payoffMonthIndex is also null since the loop never reached zero balance. Callers need to tell
-  // these two null-payoffAge cases apart instead of treating both as "no data."
+  // Distinguish "pays off after the projection ends" from "never pays off at current payments".
   const payoffBeyondHorizon = !sched.neverPaysOff && sched.payoffMonthIndex == null;
   return { payoffAge, totalInterest, neverPaysOff: sched.neverPaysOff, payoffYearIdx, payoffMonthIndex: sched.payoffMonthIndex, payoffBeyondHorizon };
 }
@@ -560,12 +538,9 @@ function renderDebtPayoffPlan(inputs, ctx) {
   }
 }
 
-// ---------- Guardrails visual (Assumptions & Guardrails page) — Income Lab-style dashboard: current
-// balance/spending tiles, upper/current/lower guardrail "gauges", and a band-width settings slider.
-// Everything here is read-only math derived from the same guardBand/guardAdj-driven logic already in
-// projectRun()'s post-retirement branch (need0/currentRate/initialWithdrawalRate) — this just solves that
-// same inequality for the BALANCE that would trigger it, instead of the other way around, so it can be
-// shown before the fact rather than only observed after a guardrail cut/raise already happened in a row.
+// ---------- Guardrails visual (Assumptions & Guardrails page) ----------
+// Income Lab-style tiles and gauges. Solves projectRun()'s guardrail test for the balance that would
+// trigger a raise or cut, so thresholds are visible ahead of time.
 function renderGuardrailsVisual(inputs, rows, retirementAge, result) {
   const enabledContent = els('grEnabledContent'), disabledContent = els('grDisabledContent');
   if (!enabledContent || !disabledContent) return;
@@ -593,15 +568,10 @@ function renderGuardrailsVisual(inputs, rows, retirementAge, result) {
   const monthlySpending = annualSpending / 12;
   const band = inputs.guardBand, adj = inputs.guardAdj;
 
-  // Solving currentRate = need0/balance against the same two inequalities projectRun() checks every year:
-  // currentRate < rate*(1-band) triggers a raise, currentRate > rate*(1+band) triggers a cut. IMPORTANT:
-  // rate (initialWithdrawalRate) is need0/balance — need0 being the PORTFOLIO's share of spending only
-  // (totalSpending minus guaranteed income already covered by pension/SS/VA/etc.), not total spending
-  // itself. At this reference row rate*balance reconstructs that same need0 exactly (by definition, since
-  // this is the very row initialWithdrawalRate was captured from), so balance/(1-band) and balance/(1+band)
-  // are what solving the inequality for balance actually reduces to — need0 cancels out of both sides. Using
-  // annualSpending (total spending, including guaranteed income) here instead would inflate both thresholds
-  // by the same wrong factor and shift the whole band off to one side instead of straddling the balance.
+  // projectRun() raises when currentRate < rate*(1-band) and cuts when currentRate > rate*(1+band), where
+  // rate = need0/balance and need0 is the portfolio's share of spending (after guaranteed income). Solving
+  // for balance gives balance/(1-band) and balance/(1+band); need0 cancels. Using total spending instead
+  // would shift the band off-center.
   const upperBalance = band < 1 ? balance / (1 - band) : Infinity;
   const lowerBalance = balance / (1 + band);
   const upperMonthlyPaycheck = annualSpending * (1 + adj) / 12;
@@ -663,12 +633,8 @@ function renderGapTable(rows, inputs, retirementAge) {
 }
 
 // ---------- Tax Bracket & IRMAA Cliffs (Taxes page) ----------
-// The Estimated Taxes chart above already surfaces the federal/LTCG bracket in its tooltip footer
-// (hover-only, one year at a time) — this instead plots the whole plan's federal marginal bracket as a
-// stepped line, plus the IRMAA Medicare surcharge as bars, on one shared age axis, so a bracket jump or
-// an IRMAA tier crossing is visible at a glance instead of needing to hover through 40+ years to find it.
-// Reuses `rows`/`inputs` already computed by the caller (render()) — no extra projectRun/Monte Carlo
-// call, since fedMarginalRate and irmaaSurchargeMonthly are already on every row.
+// Whole-plan federal marginal bracket (stepped line) and IRMAA surcharge (bars) on one age axis. Uses
+// the rows render() already computed.
 function renderTaxCliffChart(inputs, rows) {
   const canvas = els('chart_tax_cliff');
   if (!canvas || !rows || !rows.length) return;
@@ -730,9 +696,7 @@ function renderTaxCliffChart(inputs, rows) {
 }
 
 // ---------- Roth Conversion planner: before/after comparison (Taxes page) ----------
-// Two extra deterministic (non-randomized) projectRun() calls, not Monte Carlo — cheap enough to run
-// on every render() alongside the age-comparison table just below it, which already does five. Only
-// actually runs when the toggle is on; otherwise the card just hides itself.
+// Two deterministic projectRun() calls, only when the toggle is on; otherwise the card hides.
 function renderRothConversionComparison(inputs, ctx) {
   const wrap = els('rothConversionComparisonWrap');
   const statsEl = els('rothConversionStats');
@@ -1032,10 +996,7 @@ function render() {
     const ssPill = els('ssPill' + ssClaimAge);
     if (ssPill) ssPill.classList.toggle('active', +els('ssAge').value === ssClaimAge);
   }
-  // Self-healing: if a saved state (e.g. restored on a different device) left these fields genuinely
-  // blank, re-populate the visible box with its real default now — readInputs() below already treats a
-  // blank field as this same default for the math, but without this the input itself keeps looking empty
-  // (and the next save would just persist "" again) even though the plan is actually using 10%/20%.
+  // Refill blank guardrail fields with their defaults so the box matches what the math uses.
   if (els('guardAdj') && els('guardAdj').value === '') els('guardAdj').value = '10';
   if (els('guardBand') && els('guardBand').value === '') els('guardBand').value = '20';
 
@@ -1092,29 +1053,16 @@ function render() {
 
   // Monte Carlo score
   const score = runMonteCarlo(inputs, ctx, 1000);
-  // Apples-to-apples reference using the same plan, success definition, simulation count, and average
-  // returns, but a conventional normal return distribution instead of the optional fat-tailed mixture.
-  // The enhanced score remains the primary conservative score; this reference makes comparisons with
-  // mainstream planners easier without weakening the underlying household test.
+  // Reference score with the same plan and sims but a normal return distribution (no fat tails), for
+  // comparison with mainstream planners. The enhanced score stays primary.
   const standardComparableScore = runMonteCarlo({ ...inputs, enhancedMonteCarlo:false }, ctx, 1000);
   renderFinancialWellness(inputs, ctx, result, score);
-  // Cached for renderCoachTips() (savings-and-coach.js), which is invoked with no arguments from two
-  // different call sites (this render() pass, and showPage() when navigating straight to Coach) --
-  // neither has inputs/ctx/result/score naturally in scope, so this is the same "compute once during
-  // render(), read later from a global" pattern lastSnapshot below already uses.
+  // Cached for renderCoachTips(), which is called with no arguments.
   lastCoachContext = { inputs, ctx, result, score };
 
-  // Mini Monte Carlo scores for all three spending bases (Job Loss / Must Spend / Like to Spend), shown
-  // right in the header toggle so you can compare all three at a glance without switching the active one.
-  // These reuse the same inputs/ctx already built above and share the exact same simulated market-return
-  // paths across all three runs (runMonteCarlo's seed doesn't depend on spendingBasis), so the comparison
-  // is apples-to-apples. All three now run the SAME 1000-simulation count as the Dashboard ring — an
-  // earlier version used a cheaper 300-run approximation for whichever basis was NOT currently active
-  // (to save render time), but that meant a given basis's own number would jump around every time you
-  // switched away from it and back: 1000-run precision while it was active, then a slightly different
-  // 300-run approximation the moment it became inactive. Same basis, same inputs, genuinely different
-  // numbers depending on which tab happened to be selected — that inconsistency mattered more than the
-  // extra compute, so every basis is now always evaluated at full precision regardless of which is active.
+  // Mini scores for all three spending bases in the header toggle. Same market paths (the seed doesn't
+  // depend on basis) and the same 1000 sims for each, so a basis's score doesn't change when you switch
+  // tabs.
   const savedSpendingBasisForMini = spendingBasis;
   ['jobloss', 'mustspend', 'liketo'].forEach(basis => {
     spendingBasis = basis;
@@ -1122,21 +1070,13 @@ function render() {
     const el = els('mcMini' + (basis === 'jobloss' ? 'Jobloss' : basis === 'mustspend' ? 'Mustspend' : 'Liketo'));
     if (el) {
       el.textContent = Math.round(miniScore) + '%';
-      // Same red/orange/green traffic-light read as the rest of the app (tip severities, stat.warn/ok),
-      // just collapsed to 3 bands instead of the Dashboard ring's 4, since a small dot has less room to
-      // read a finer gradient at a glance. Orange (--orange:#e08c2b) is light enough that white text on
-      // it loses too much contrast to read at this size — black text stays legible there, while red and
-      // green are both dark enough for white to still read cleanly.
+      // Three-band traffic light; black text on orange for contrast, white on red and green.
       const isOrange = miniScore >= 40 && miniScore < 70;
       el.style.background = miniScore < 40 ? 'var(--danger)' : isOrange ? 'var(--orange)' : 'var(--good)';
       el.style.color = isOrange ? '#000' : '#fff';
     }
-    // Ending net worth at your spouse's own life expectancy age, run under THIS specific basis — same
-    // calculation as the Dashboard's "Ending balance at spouse's longevity" stat card further down, just
-    // repeated per basis instead of only for whichever one happens to be active. Reuses the deterministic
-    // `rows` already computed at the top of render() for the active basis (no need to run it twice);
-    // the two inactive bases each get one cheap deterministic projectRun() call (not a 1000-run Monte
-    // Carlo like the score above — this is a single pass, so it's not worth reusing/caching further).
+    // Ending net worth at the spouse's life expectancy under this basis: reuse `rows` for the active basis,
+    // one deterministic run for each of the others.
     const basisRows = basis === savedSpendingBasisForMini ? rows : projectRun(inputs, ctx, false).rows;
     const basisSpouseRow = basisRows.find(r => r.spouseAge === inputs.spouseLifeExpectancy) || basisRows[basisRows.length - 1];
     const basisSpouseEndingBalance = basisSpouseRow ? basisSpouseRow.netWorth : 0;
@@ -1431,13 +1371,7 @@ if (initialPageAtBoot) {
 
 restoreAnthropicApiKeyLocal();
 
-// Start session restoration before any account rows, calculations, Monte Carlo runs, or charts are
-// built. A data-specific rendering exception must never prevent authentication from starting and
-// leave the badge permanently at its original "Checking" label.
-// Let the locally saved plan finish its first render before starting authentication and network work.
-// On slower phones this prevents the initial legacy online service request from competing with the planner's
-// calculation-heavy startup; a manual Sync succeeding immediately afterward was the telltale symptom.
-initPlannerCloudSync();
+renderOldDataCleanup();
 
 renderExpenseRows();
 renderBrokeragePieRows();
@@ -1454,14 +1388,8 @@ window.addEventListener('storage', function(event) {
   if (applySharedInvestmentsToPlanner(shared)) render();
 });
 
-// Plain top-level fields (currentAge, preReturn, ltcStartAge, stdDeduction, etc.) were never wired to
-// an individual oninput/onchange handler the way checkboxes, row-item fields, and date pickers are —
-// editing one directly updated the DOM but never called render()/saveState(), so the edit silently
-// vanished on the next reload (reverting to whatever was last actually saved, e.g. a stale default).
-// It only looked like it "worked" when some other action nearby (a checkbox, a row edit, a pill
-// click) happened to trigger render() shortly after and incidentally picked up the live DOM value.
-// One delegated listener on .shell, covering every plain input/select inside the main planner
-// fixes every field at once instead of just the one that got reported.
+// One delegated listener on .shell saves and re-renders every plain input/select (most top-level fields
+// have no handler of their own).
 const shellEl = document.querySelector('.shell');
 if (shellEl) {
   let pendingFieldSave = null;
@@ -1478,10 +1406,7 @@ if (shellEl) {
     pendingFieldSave = setTimeout(() => saveState(), 150);
   });
   shellEl.addEventListener('change', function(e) {
-    // Shared Notes textareas (class="shared-notes-textarea", one per page) are deliberately excluded
-    // here — they persist directly via updateSharedNotes()'s own oninput handler instead of the full
-    // render() pipeline, so typing/blurring in a notes box never triggers a 1000-simulation Monte
-    // Carlo re-run just to save a few words of text.
+    // Shared Notes textareas are excluded; they save themselves without a full render().
     if (e.target && e.target.matches && e.target.matches('input, select')) {
       render();
     }

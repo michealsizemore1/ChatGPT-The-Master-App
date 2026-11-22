@@ -10,9 +10,7 @@ const fmtMoneyK = n => {
 const CHART_COLORS = ['#1f7a6c','#e08c2b','#5a4fcf','#c0392b','#3f9c7c','#8892a0','#c07a1f','#2b6ea3','#a15fc9','#5c8a3f'];
 
 // ---------- Local save-status badge ----------
-// Small purely-local "Saving... / Saved locally" indicator for the Settings page's badge. This
-// replaces an older network cloud-sync status system (removed -- the planner runs entirely from
-// local browser storage; see retirement-planner-accounts-and-legacy-cloud.js).
+// "Saving... / Saved locally" indicator on the Settings badge.
 function markPlannerLocalDirty() {
   const badge = els('cloudSyncBadge');
   if (badge) badge.dataset.state = 'unsaved';

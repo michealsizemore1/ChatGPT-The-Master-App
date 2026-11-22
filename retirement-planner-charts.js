@@ -43,10 +43,7 @@ function barConfig(labels, values, opts) {
     type: 'bar',
     data: { labels: chartLabels, datasets: [{
       data: values, backgroundColor: labels.map((_,i)=>CHART_COLORS[i%CHART_COLORS.length]), borderRadius: 4,
-      // Read directly by the barValueLabels plugin (see Chart.register above) — opt-in per chart so
-      // charts with lots of bars (Expenses, Explorers, etc.) don't get cluttered. Set on the dataset
-      // itself rather than in options.plugins so the plugin doesn't depend on Chart.js's options-merge
-      // exposing a custom key.
+      // Read by the barValueLabels plugin; opt-in per chart so crowded charts stay clean.
       showValues: !!opts.showValues, valueFormatter: fmtFull
     }] },
     options: {
@@ -88,11 +85,8 @@ function buildChartConfig(pageId, snap) {
     case 'housing':
       return barConfig(['Current annual rent','Housing cost at retirement'], [snap.currentRentAnnual, snap.housingCostAtRetirement], { showValues:true });
     case 'expenses':
-      // Utilities/Subscriptions have several named items each (Verizon, Idaho Power, YouTube
-      // Premium, etc.) — show the item name alone (shorter, fits the chart) rather than
-      // repeating the category, which is what made every "Utilities" bar look the same before.
-      // Values follow the header's Job Loss / Must Spend / Like to Spend toggle, same as everything
-      // else the toggle drives, instead of always plotting the Like to Spend column.
+      // Utilities/Subscriptions bars show the item name (e.g. Verizon) rather than repeating the category.
+      // Values follow the header's Job Loss / Must Spend / Like to Spend toggle.
       return barConfig(
         expenses.map(e => (e.category==='Utilities' || e.category==='Subscriptions') ? (e.name||'Unnamed') : e.category),
         expenses.map(expenseValForBasis), { horizontal:true, showValues:true }
@@ -134,10 +128,7 @@ function buildChartConfig(pageId, snap) {
 }
 
 // ---------- Chart range navigator (« Age X · Lifetime · Age X »), Boldin-style ----------
-// The chart always shows the full lifetime timeline — this never zooms or hides any years.
-// Stepping with «/» just pins that single year's tooltip (all series' values), like a hover
-// that stays put; Lifetime un-pins it. Purely a display control — never touches inputs, the
-// plan, or the Monte Carlo score.
+// Always shows the full timeline; «/» pins one year's tooltip and Lifetime un-pins it. Display only.
 const chartRangeState = {}; // keyed by chart key: { selectedAge } — null selectedAge = Lifetime (nothing pinned)
 
 function getProjectionAgeBounds() {
@@ -150,10 +141,7 @@ function getProjectionAgeBounds() {
 // (yearly bar charts: labels like 'Age 62') or {x,y} points (the Dashboard line chart).
 function findAgeIndex(chart, age) {
   if (chart.data.labels && chart.data.labels.length) {
-    // Exact match first (covers every chart whose labels are plain "Age N"); fall back to matching
-    // just the leading "Age N" prefix for charts like Income that append "(you)"/"(spouse)" once a
-    // death event is in play (survivorship what-if, or either person's real life expectancy ending
-    // before the other's).
+    // Exact "Age N" match first, then prefix match for labels like "Age N (spouse)".
     const exact = chart.data.labels.indexOf('Age ' + age);
     if (exact !== -1) return exact;
     return chart.data.labels.findIndex(label => typeof label === 'string' && label.match(/^Age\s+(\d+)/i) && +label.match(/^Age\s+(\d+)/i)[1] === age);
@@ -221,10 +209,7 @@ function applyChartRange(chartKey) {
   const [minAge, maxAge] = getProjectionAgeBounds();
   if (!chartRangeState[chartKey]) chartRangeState[chartKey] = { selectedAge: null };
   const st = chartRangeState[chartKey];
-  // The «/»/Lifetime button labels and the readout text are our own state and DOM — they must
-  // always update no matter what. Pinning Chart.js's own tooltip is a nice-to-have on top, so
-  // it's isolated in a try/catch: if the Chart.js call throws or behaves oddly for a given
-  // chart/browser, that can no longer silently block the labels and readout from updating.
+  // Our labels and readout must always update; pinning Chart.js's tooltip is isolated in try/catch.
   if (chart) {
     try {
       if (st.selectedAge == null) {
@@ -235,10 +220,7 @@ function applyChartRange(chartKey) {
         if (idx > -1) {
           const active = chart.data.datasets.map((_, datasetIndex) => ({ datasetIndex, index: idx }));
           chart.setActiveElements(active);
-          // Anchor the tooltip at the real pixel position of the selected bar/point instead of
-          // the canvas corner (0,0) — pinning it at (0,0) worked out fine on a narrow phone
-          // screen but rendered the tooltip off in the corner, away from the data, on a wide
-          // desktop chart, which is why the selection looked like it "did nothing" on a PC.
+          // Anchor the tooltip at the selected bar's real position (not the canvas corner).
           let pos = { x: 0, y: 0 };
           for (const el of active) {
             const meta = chart.getDatasetMeta(el.datasetIndex);
@@ -257,10 +239,7 @@ function applyChartRange(chartKey) {
   updateChartRangeUi(chartKey, minAge, maxAge);
 }
 
-// Chart.js's programmatic tooltip pin (above) is a nice-to-have, but its rendering can be
-// finicky across browsers/screen sizes. This readout is the reliable source of truth for
-// "what did I select": it reads straight from the chart's own data and always shows correct
-// values for the selected year, independent of whether the Chart.js tooltip itself renders.
+// Reliable readout of the selected year's values, read straight from the chart data.
 function updateRangeReadout(chartKey, chart) {
   const readout = document.querySelector(`.range-readout[data-chart="${chartKey}"]`);
   if (!readout) return;
@@ -333,10 +312,7 @@ function ensureOrUpdateChart(pageId, snap) {
   const config = buildChartConfig(pageId, snap);
   if (!config) return;
   const canvas = els('chart_' + pageId);
-  // Horizontal bar charts (Expenses, Debt, Transactions, etc.) can have anywhere from a
-  // couple of bars to a dozen named items, each with a label that may or may not have needed
-  // wrapping onto multiple lines above — size the card to fit both the bar count and however
-  // tall the (possibly multi-line) labels ended up being.
+  // Size horizontal bar charts to fit the bar count and any multi-line labels.
   if (config.options.indexAxis === 'y' && canvas) {
     sizeHorizontalChartCard(canvas, config.data.labels);
     // On a narrow phone viewport the category-label column and the plot area both get squeezed
@@ -374,21 +350,13 @@ function yearlyBarConfig(ages, series, opts) {
     // everything else keeps the plain rotating CHART_COLORS assignment it always had.
     backgroundColor: s.backgroundColor || CHART_COLORS[i % CHART_COLORS.length],
     borderRadius: 3,
-    // Optional per-series stack group id (Chart.js): datasets sharing the same id stack together into
-    // one column; datasets that don't set this all fall into Chart.js's own default single group, so
-    // every existing caller that doesn't pass `stack` keeps behaving exactly as before. The Income Gap
-    // & Withdrawals chart uses two distinct ids (see buildYearlyChartConfig's 'gap' case) so the
-    // Surplus/(Gap) bar and the per-account withdrawal breakdown render as two separate stacked columns
-    // side by side per age, instead of getting summed together into one meaningless combined bar.
+    // Optional stack group id: datasets with the same id stack into one column. The Gap chart uses two ids
+    // so Surplus/(Gap) and the withdrawal breakdown sit side by side.
     stack: s.stack
   }));
   return {
     type: 'bar',
-    // opts.labels lets a caller override the default "Age 68" x-axis labels — used by the Income chart
-    // once Survivorship is enabled, so a year that's actually tracking the surviving spouse alone (after
-    // the primary's modeled death age) reads as "Age 71 (spouse)" instead of silently continuing to look
-    // like the primary's own age, which is what made it look like SS was still being paid to someone
-    // who'd already passed.
+    // opts.labels overrides the "Age N" labels (e.g. "Age 71 (spouse)" once the survivor is alone).
     data: { labels: opts.labels || ages.map(a => 'Age ' + a), datasets },
     options: {
       responsive: true,
@@ -438,25 +406,13 @@ function buildYearlyChartConfig(pageId, snap) {
         { label: 'Future / one-time expenses (General Inflation)', data: rows.map(r => d(r.futureExpenseCost, r.age)) }
       ], { stacked: true });
     case 'income': {
-      // Once retired, whatever's pulled out of Traditional TSP / Roth TSP / HYSA / brokerage pies to
-      // cover that year's spending gap is just as much "income" for the year as a paycheck or Social
-      // Security check — so it's added here as one bar series per account actually drawn from anywhere
-      // in the projection (same account keys/labels/filtering as the Income Gap & Withdrawals page),
-      // stacked right alongside the guaranteed-income sources (no separate stack group, unlike the
-      // Income Gap & Withdrawals chart — there the withdrawal total is compared against a Surplus/(Gap)
-      // figure so keeping them visually separate matters; here everything is simply "money that came in
-      // this year," so it all belongs in one combined stack).
+      // In retirement, withdrawals from each account count as that year's income, one series per account
+      // drawn from, stacked with guaranteed income in one column.
       const accountKeys = getWithdrawalAccountKeys();
       const usedKeys = accountKeys.filter(k => rows.some(r => (r.withdrawalByAccount && r.withdrawalByAccount[k]) > 0.5));
-      // Whose SS is this? Two separate things can end the "it's still your own SS" story for a row: (1) the
-      // always-on, real-world rule (independent of the opt-in Survivorship what-if) — past your own life
-      // expectancy, r.primaryDeceased is true and your spousal benefit already dropped to $0 in the engine,
-      // with ssAmount's dollar figure now flowing to your spouse as their 100% survivor benefit instead of
-      // to you; or (2) the separate Survivorship what-if page's assumed EARLIER predecease age, which also
-      // zeros pension/VA/spousal and adds SBP/DIC on top — but only when that what-if is actually active
-      // (inputs.survivorshipEnabled), never for your real plan/Dashboard/Monte Carlo score. Either way, the
-      // "Social Security" bar just continuing unchanged with the same label looked exactly like still being
-      // paid your own SS after death, so it's split into two series (one that stops, one that only starts).
+      // Social Security is split into two series (yours, then the survivor's) once you're deceased, either
+      // past your life expectancy (always on) or at the Survivorship what-if's earlier age (only when that
+      // what-if is enabled).
       const deceasedFor = r => !!r.primaryDeceased || !!(inputs.survivorshipEnabled && inputs.survivorshipDeathAge && r.age >= inputs.survivorshipDeathAge);
       const hasAnyDeath = rows.some(deceasedFor);
       const ssSeries = hasAnyDeath ? [
@@ -492,10 +448,7 @@ function buildYearlyChartConfig(pageId, snap) {
         }))
       ], {
         stacked: true,
-        // Whose age is this bar? Pre-death, it's always yours; once either the always-on primaryDeceased
-        // rule or the opt-in Survivorship what-if has kicked in, the row is really tracking your spouse
-        // living on alone, so the label switches to their age instead of silently continuing to show your
-        // own age climbing past your modeled life expectancy.
+        // After a death, the row tracks the surviving spouse, so label it with their age.
         labels: hasAnyDeath ? rows.map(r => deceasedFor(r) ? ('Age ' + r.spouseAge + ' (spouse)') : ('Age ' + r.age + ' (you)')) : undefined
       });
     }
@@ -520,13 +473,8 @@ function buildYearlyChartConfig(pageId, snap) {
       ], { stacked: true, bracketLabels });
     }
     case 'gap': {
-      // Same account keys/labels as the Income Gap & Withdrawals table below it, filtered to only the
-      // accounts actually drawn from anywhere in the projection — so the chart's legend (and each bar
-      // segment's color, in the tooltip) tells you exactly which account that year's withdrawal came
-      // from, instead of one unlabeled lump "Portfolio withdrawal" bar. The Surplus/(Gap) bar gets its
-      // own stack group ('surplus') so it renders as its own column rather than getting summed into
-      // the withdrawal total; the per-account bars share the 'withdrawal' stack group so they stack
-      // into one column whose total height still equals the old lump gross-withdrawal figure.
+      // One bar series per account actually drawn from (stack 'withdrawal'), with Surplus/(Gap) in its own
+      // stack ('surplus') so it sits beside rather than on top.
       const accountKeys = getWithdrawalAccountKeys();
       const usedKeys = accountKeys.filter(k => rows.some(r => (r.withdrawalByAccount && r.withdrawalByAccount[k]) > 0.5));
       return yearlyBarConfig(ages, [
@@ -539,37 +487,15 @@ function buildYearlyChartConfig(pageId, snap) {
       ], { stacked: true });
     }
     case 'incomeexpenses': {
-      // Deliberately a simpler, 2-series view than the 'income'/'gap' cases above: job income + every
-      // guaranteed income source (SS/spousal/both pensions/VA disability/annuity — all already computed
-      // every year regardless of pre/post retirement, hoisted above the retirement-age branch split in
-      // projectRun) side by side with total expenses (housing/debt/insurance/recurring bills/medical
-      // premiums, whichever basis the header toggle currently selects for the recurring-expenses slice),
-      // both plotted as ordinary positive bars from a shared $0 baseline (an earlier diverging version —
-      // income up, expenses down as negative bars — kept visually reading as one merged column at the
-      // zero line no matter how the two bars were positioned; two same-direction bars side by side reads
-      // unambiguously and you can still see the comparison directly: taller red than green = that year
-      // leans on savings). Portfolio withdrawals are intentionally excluded from the income side — they're
-      // sized specifically to cover whatever gap exists, so folding them in here would make income ≈
-      // expenses almost every year by construction and hide the exact comparison this chart exists to
-      // show. r.spending only exists for retirement-age-and-later rows (0 before then, like the Gap/
-      // Medical/Taxes yearly charts above already work); r.recurringLivingCostThisYear is its
-      // pre-retirement-years counterpart (same underlying formula, computed before the withdrawal engine
-      // exists to track against).
-      // r.spending / r.recurringLivingCostThisYear cover recurring bills, housing, debt, and insurance —
-      // but NOT Future/One-Time Expenses (Vehicle Purchase, Vacations, etc.), which the engine computes
-      // and withdraws entirely separately (r.futureExpenseCost, set every row regardless of pre/post
-      // retirement). Left out here, "Total Expenses" would silently under-count any year a future
-      // expense lands. Folded in explicitly so the red bar reflects everything actually being spent.
+      // Two series from a $0 baseline: income (job + every guaranteed source) vs total expenses (housing,
+      // debt, insurance, recurring bills, medical premiums, plus Future/One-Time Expenses). Portfolio
+      // withdrawals are left out of income on purpose, since they exist to fill the gap. r.spending applies
+      // from retirement age; r.recurringLivingCostThisYear covers earlier years.
       const totalExpensesForYear = r => (r.age < inputs.retirementAge ? (r.recurringLivingCostThisYear || 0) : (r.spending || 0)) + (r.futureExpenseCost || 0);
       const incomeVals = rows.map(r => d((r.income || 0) + (r.guaranteedIncome || 0), r.age));
       const expenseVals = rows.map(r => d(totalExpensesForYear(r), r.age));
-      // Itemized audit trail: for any year where a named Future/One-Time Expense (Vehicle Purchase,
-      // Vacations, etc.) is active, list its name and inflated dollar amount as extra tooltip lines —
-      // lets you hover any age and directly confirm a specific expense is actually being counted, rather
-      // than just trusting the total. Mirrors the exact same hit-test + inflation formula projectRun uses
-      // (age >= f.age && age <= (f.endAge||f.age) for recurring, age === f.age for one-time; amount grown
-      // by (1+inflation)^y where y = years elapsed since today), so this always matches what was actually
-      // withdrawn, not just what CURRENTLY shows in the Future Expenses list years from now.
+      // Tooltip lines listing each Future/One-Time Expense active that year, using projectRun's same
+      // hit-test and inflation formula so they match what was actually withdrawn.
       const futureExpenseFooterLines = rows.map(r => {
         const y = r.age - inputs.currentAge;
         const survivorCutoff = inputs.survivorshipEnabled && inputs.survivorshipDeathAge && r.age >= inputs.survivorshipDeathAge;
@@ -583,21 +509,12 @@ function buildYearlyChartConfig(pageId, snap) {
         return hits.map(f => {
           const baseAmt = (survivorCutoff && f.survivorAmount != null && f.survivorAmount !== '') ? (+f.survivorAmount || 0) : (+f.amount || 0);
           const amtNominal = baseAmt * Math.pow(1 + inputs.inflation, y);
-          // Run through the same d()/dv() today's-dollars deflation the bar values themselves use, so
-          // this line always matches whatever $ convention (nominal vs. today's dollars) the chart is
-          // currently displaying — otherwise the itemized amount could silently disagree with the bar
-          // it's supposed to be explaining whenever the Real/Nominal dollar-view toggle is set to Real.
+          // Same today's-dollars conversion as the bars, so the line matches the Real/Nominal toggle.
           return '  • ' + (f.name || 'Future expense') + ': ' + fmtMoney(d(amtNominal, r.age)) + ' (included in Total Expenses)';
         });
       });
-      // Same itemized-audit treatment for Debt payments (Car Payment, and any future-dated loan added
-      // via Start age/Term on the Debt page — e.g. a vehicle financed at a later age instead of paid as
-      // a lump-sum Future Expense). Debt payments were already folded into Total Expenses via
-      // recurringLivingCostThisYear/spending (both include debtPaymentThisYear), so the dollar total was
-      // always correct — this only adds the same per-item visibility Future Expenses just got, so a
-      // financed car payment shows up by name exactly like Vacations & Trips does. Recomputed here with
-      // buildDebtSchedule directly (same function/formula buildContext uses to build ctx.debtSchedules)
-      // rather than threading ctx through, since buildYearlyChartConfig only receives rows/inputs.
+      // Same itemized tooltip lines for debt payments (already in Total Expenses), rebuilt with
+      // buildDebtSchedule since this function only receives rows/inputs.
       const maxYearsForDebt = ages.length ? ages[ages.length - 1] - inputs.currentAge : 0;
       const debtSchedulesForChart = debts.map(dbt => {
         const offset = (dbt.startAge != null && dbt.startAge !== '') ? Math.max(0, Math.round((dbt.startAge - inputs.currentAge) * 12)) : 0;
@@ -616,18 +533,8 @@ function buildYearlyChartConfig(pageId, snap) {
         const lines = [...(futureExpenseFooterLines[idx] || []), ...(debtFooterLines[idx] || [])];
         return lines.length ? lines : undefined;
       });
-      // One ordinary category per age, two real-valued (non-null) datasets — Chart.js's plain default
-      // grouped-bar behavior. An earlier version tried to force separation by giving each age its own
-      // PAIR of category slots (income in one, null; expense in the other, null) instead of trusting
-      // Chart.js's built-in multi-dataset grouping. That backfired: Chart.js still reserves a left/right
-      // sub-slot per dataset within EVERY category regardless of whether that dataset's value is null
-      // there, so the real income bar always sat pinned to the left edge of its own (income-only)
-      // category and the real expense bar always sat pinned to the right edge of ITS (expense-only)
-      // category — pushing a same-age income/expense pair apart (empty half + category gap + empty
-      // half) while making an expense bar and the NEXT age's income bar look closer together (nothing
-      // but the plain category gap between them). That's the reversed-pairing bug reported. With no
-      // nulls at all, every category has real values for both datasets, so Chart.js's default grouping
-      // places them snugly side by side with no asymmetric empty half-slots to cause this.
+      // One category per age with two non-null datasets so Chart.js groups each income/expense pair side
+      // by side (null placeholders caused the pairs to look mismatched).
       const cfg = yearlyBarConfig(ages, [
         { label: 'Total Income (job + guaranteed, before tax)', data: incomeVals, backgroundColor: '#1f7a6c' },
         { label: 'Total Expenses', data: expenseVals, backgroundColor: '#c0392b' }
@@ -644,22 +551,13 @@ function ensureOrUpdateYearlyChart(pageId, snap) {
   const config = buildYearlyChartConfig(pageId, snap);
   if (!config) return;
   const key = pageId + '_yearly';
-  // Persist the year tapped on every standard yearly chart, not only the three custom Savings
-  // charts. Without this hook, Income vs Expenses displayed the tapped year's temporary tooltip,
-  // but the Back/Next controls still believed the chart was in Lifetime mode and jumped to an
-  // endpoint instead of moving to the adjacent year.
+  // Remember the tapped year on every yearly chart so Back/Next step from it.
   enableChartRangeClickSelection(config, key);
   // One bar per projected year (often 40-50 years, "Lifetime" view shows them all at once) — on a
   // narrow phone viewport that's not enough pixels for every bar to stay legible, so give the chart
   // a guaranteed minimum width and let the card scroll horizontally instead of squeezing bars thin.
   const numBars = (config.data.labels || []).length;
-  // A page with 2+ distinct stack groups (e.g. Income vs Expenses' 'income'/'expenses' columns, or
-  // Gap's 'surplus'/'withdrawal' columns) renders that many side-by-side bars per age instead of 1 —
-  // at the base 13px/age budget, Chart.js's categoryPercentage/barPercentage math (0.8 * 0.9, split
-  // across N columns) leaves each bar only a couple px wide with a sub-pixel gap between them, which
-  // visually reads as one merged/stacked bar even though the two are technically separate elements.
-  // Scaling the per-age pixel budget by the number of stack groups keeps each bar (and the gap
-  // between them) wide enough to actually look side by side instead of touching.
+  // Widen the per-age pixel budget by the number of stack groups so side-by-side bars don't look merged.
   const stackGroupCount = new Set((config.data.datasets || []).map(ds => ds.stack || '_default')).size;
   const pxPerBar = 13 + Math.max(0, stackGroupCount - 1) * 10;
   if (charts[key]) {
@@ -1034,10 +932,8 @@ function renderExplorers() {
   renderHistoricalBacktest(inputs, ctx);
   renderSustainableSpendingResults();
   const whatIf = WHAT_IF_SCENARIOS.map(s => runExplorerScenario(s, inputs, ctx));
-  // Survivorship (SBP/DIC) is a dynamically-named what-if, shown only once an assumed death age is set on the
-  // Survivorship page. It's never enabled in the baseline plan or the Monte Carlo confidence score — Survivorship
-  // is deliberately kept separate from your main plan, so this is the only place (along with the Dashboard
-  // tile and the Survivorship page's own preview) where you actually see its effect.
+  // Survivorship (SBP/DIC) what-if, shown only once a death age is set. Never part of the baseline plan
+  // or the confidence score.
   if (inputs.survivorshipDeathAge > 0) {
     const survivorshipScenario = { name: `You predecease your spouse at age ${inputs.survivorshipDeathAge} (SBP + DIC)`, apply: inp => ({ ...inp, survivorshipEnabled: true }) };
     whatIf.push(runExplorerScenario(survivorshipScenario, inputs, ctx));
@@ -1088,7 +984,5 @@ function renderExplorers() {
 }
 
 // ---------- Savings page: per-account balances, contributions/returns, and drawdowns by year ----------
-// Every number here comes straight from projectRun()'s row-level per-account tracking (acctBegin/
-// acctEnd/contribByAccount/savingsWithdrawByAccount — see projectRun() itself for how those are built).
-// "Returns" for a given account/year is a plug, the same way a real statement reconciles a balance:
-// end = begin + contributions + returns - withdrawals, so returns = end - begin - contributions + withdrawals.
+// From projectRun()'s per-account tracking. Returns are the reconciling plug:
+// returns = end - begin - contributions + withdrawals.
