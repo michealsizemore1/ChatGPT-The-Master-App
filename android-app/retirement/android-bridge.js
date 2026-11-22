@@ -47,6 +47,12 @@
     reader.readAsDataURL(blob);
     return null;
   };
+  // Printing (Print Full Plan): Android apps can't use window.print, so open Android's print screen.
+  // The app fires 'afterprint' when that screen closes, which restores the page as in a browser.
+  window.print = function () {
+    window.dispatchEvent(new Event("beforeprint"));
+    window.AndroidApp.printPage();
+  };
   var realClick = HTMLAnchorElement.prototype.click;
   HTMLAnchorElement.prototype.click = function () {
     if (handle(this)) return;

@@ -1050,9 +1050,7 @@
   }
 </style>
 </head>
-<body><script src="home-button.js"></script>
-
-<div class="sticky-app-bar">
+<body><div class="sticky-app-bar">
   <button class="hamburger-btn" onclick="toggleMenu()" aria-label="Open menu">☰</button>
   <div class="sticky-section-info">
     <span class="sticky-section-caption">Current section</span>
@@ -1901,7 +1899,7 @@
 
       <div class="page-header"><h2>Document Vault</h2><p>Upload important documents (PDF, Word, or plain text) to keep them searchable — informational only, doesn't feed the projection math.</p></div>
 
-      <div class="note" style="margin-top:0;"><b>Not password-protected or encrypted:</b> anyone who can use this browser profile can open these files, the same as any other page in this app — treat it as a filing folder, not a safe. The original file is saved (up to ~25 MB each) so you can open or download it again later, alongside its extracted <b>text</b> for search and Ask AI (up to ~1 MB of text per document — very long documents just won't be fully searchable past that point, but the original file itself is never truncated). Stored in this browser's own document storage, separate from the rest of your plan data. Everything stays in this browser only, unless you use Ask AI below with your own Anthropic API key, in which case the relevant document text is sent to Anthropic to answer your question.</div>
+      <div class="note" style="margin-top:0;"><b>Not password-protected or encrypted:</b> anyone who can open this app can open these files (turn on App lock in Settings to require your fingerprint or screen lock) — treat it as a filing folder, not a safe. The original file is saved (up to ~25 MB each) so you can open or download it again later, alongside its extracted <b>text</b> for search and Ask AI (up to ~1 MB of text per document — very long documents just won't be fully searchable past that point, but the original file itself is never truncated). Stored in the app's own document storage on this phone, separate from the rest of your plan data. Everything stays on this phone unless you use Ask AI with your own Anthropic API key, in which case the parts of your documents that match your question are sent to Anthropic to answer it.</div>
 
       <div class="card">
         <h3 onclick="toggleCard(this)">Upload</h3>
@@ -2334,6 +2332,12 @@
       </div>
       <div class="page-header"><h2>Settings</h2><p>Instructions, backup, restore, and integrations.<span id="appVersionLabel"></span></p></div>
 
+      <div class="card no-autocollapse" id="appLockCard" style="display:none;">
+        <h3>App lock<span class="sub-label">Fingerprint or screen lock to open the app</span></h3>
+        <div class="checkbox-row"><input type="checkbox" id="appLockEnabled" data-no-save onchange="setAppLockEnabled(this.checked)"><label for="appLockEnabled">Require fingerprint or screen lock</label></div>
+        <p id="appLockStatus" style="font-size:15px;color:var(--muted);margin:4px 0 0;line-height:1.5;"></p>
+      </div>
+
       <div class="card no-autocollapse" id="appUpdateCard" style="display:none;">
         <h3>App updates<span class="sub-label" id="appUpdateVersion"></span></h3>
         <p id="appUpdateStatus" style="font-size:15.5px;color:var(--muted);margin:0 0 10px;line-height:1.5;">Checking…</p>
@@ -2346,13 +2350,17 @@
 
       <div class="card">
         <h3 onclick="toggleCard(this)">Local Storage<span class="sub-label">Automatically saved on this device</span></h3>
-        <p style="font-size:15px;color:var(--muted);margin:0;line-height:1.55;">The retirement plan and shared Notes are stored only in this browser. Download a JSON backup after meaningful changes and keep it somewhere safe.</p>
+        <p style="font-size:15px;color:var(--muted);margin:0;line-height:1.55;">The retirement plan and shared Notes are stored only in this app on this phone. Automatic backups (below) save a copy to your Downloads folder; you can also download a backup any time.</p>
       </div>
 
       <div class="card">
         <h3 onclick="toggleCard(this)">Backup &amp; Restore</h3>
         <p style="font-size:16px;color:var(--muted);margin:0 0 12px;line-height:1.55;">Your planner data is saved automatically on this device. The JSON backup is your portable recovery copy and never includes your Anthropic API key. Document Vault files remain separate; keep copies of the original files.</p>
         <button class="add-btn" onclick="downloadBackup()">Download planner backup (.json)</button>
+        <div id="autoBackupBox" style="display:none;margin-top:12px;">
+          <div class="checkbox-row"><input type="checkbox" id="autoBackupEnabled" data-no-save onchange="setAutoBackupEnabled(this.checked)"><label for="autoBackupEnabled">Automatic backups</label></div>
+          <p id="autoBackupStatus" style="font-size:15px;color:var(--muted);margin:4px 0 0;line-height:1.5;"></p>
+        </div>
         <div class="field" style="margin-top:14px;">
           <label>Restore from backup</label>
           <input type="file" id="restoreFileInput" accept="application/json" onchange="restoreFromFile(this.files[0])">
@@ -2463,7 +2471,7 @@
           <details class="manual-topic">
             <summary>8. Plan Health &amp; Coach, Document Vault</summary>
             <div class="manual-body">
-              <p><b>Document Vault:</b> Files and keyword search remain in the current browser and do not affect calculations. When you use Ask AI, only the parts of your documents that match your question are sent to Anthropic, along with the list of document names. Keep originals separately.</p>
+              <p><b>Document Vault:</b> Files and keyword search stay in the app on this phone and do not affect calculations. When you use Ask AI, only the parts of your documents that match your question are sent to Anthropic, along with the list of document names. Keep originals separately.</p>
               <p><b>Coach &amp; Ask AI:</b> Coach shows automated suggestions; the ✦ Ask AI button is the one AI chat, covering your plan and your Document Vault. Enter the Anthropic key in Settings on each device. The key, conversation, and Vault files are excluded from JSON backups, GitHub source, and printing. AI answers never change plan inputs automatically.</p>
               <p><b>Plan Health:</b> Separates strengths and pressure points without creating a blended score. Resolve coverage, account-access, tax, medical, and data-quality issues first.</p>
             </div>
@@ -2512,11 +2520,11 @@
             <summary>12. Settings, Local Storage, Backup &amp; Privacy</summary>
             <div class="manual-body">
               <ul>
-                <li>The retirement plan and shared Notes save automatically in this browser.</li>
+                <li>The retirement plan and shared Notes save automatically in the app, and a backup copy is saved to Downloads/Retirement Planner/Auto backups at most once a day.</li>
                 <li>Use Download planner backup to create a portable recovery copy.</li>
                 <li>JSON backup includes planner state, notes, and checkpoints; it excludes the API key and Vault files.</li>
                 <li>Data Quality flags patterns needing review but cannot verify real-world accuracy.</li>
-                <li>Print Full Plan opens the browser print dialog with planner sections; the API key and sensitive controls are omitted.</li>
+                <li>Print Full Plan opens Android's print screen (print or Save as PDF) with planner sections; the API key and sensitive controls are omitted.</li>
                 <li>Reset clears planner state after confirmation but leaves Vault files separate.</li>
               </ul>
               <p class="manual-note">Upload only index.html to GitHub Pages. Keep JSON backups and API keys off GitHub.</p>
@@ -2554,16 +2562,16 @@
 
       <div class="card">
         <h3 onclick="toggleCard(this)">Print Full Plan<span class="sub-label">Every section, one document — good for handing off to a financial advisor or CPA</span></h3>
-        <p style="font-size:16px;color:var(--muted);margin:0 0 12px;line-height:1.55;">Generates a printable version of the entire plan — every page, chart, and table, fully expanded — using your browser's own print dialog. From there you can print to paper or choose "Save as PDF" to get a file you can send or upload elsewhere. This can take a few seconds to prepare since it briefly visits every section first.</p>
+        <p style="font-size:16px;color:var(--muted);margin:0 0 12px;line-height:1.55;">Generates a printable version of the entire plan — every page, chart, and table, fully expanded — using Android's print screen. From there you can print to paper or choose "Save as PDF" to get a file you can send or upload elsewhere. This can take a few seconds to prepare since it briefly visits every section first.</p>
         <button class="add-btn" onclick="printFullPlan()">Print Full Plan</button>
       </div>
 
       <div class="card print-sensitive no-autocollapse">
         <h3>Ask AI<span class="sub-label">Your Anthropic API key for the ✦ Ask AI button</span></h3>
         <div class="field"><label>Anthropic API key</label><input type="password" id="anthropicApiKey" placeholder="sk-ant-..." autocomplete="off" oninput="saveAnthropicApiKeyLocal()"></div>
-        <div class="sub-label" style="margin:-4px 0 8px;">Stored only in this browser&#39;s local storage &mdash; avoid entering it on a shared or public device.</div>
+        <div class="sub-label" style="margin:-4px 0 8px;">Stored only in this app on this phone &mdash; it never leaves the phone except to talk to Anthropic.</div>
         <button type="button" class="add-btn" style="margin:0 0 10px;background:#fdf3f1;color:var(--danger);" onclick="clearAnthropicApiKeyLocal()">Remove saved API key from this device</button>
-        <p style="font-size:16.5px;color:var(--muted);margin:0;line-height:1.55;">This file has no backend — adding a key here lets the Ask AI button call the Anthropic API directly from your browser. The key is saved only in this device's browser so it survives a refresh. It is excluded from JSON backups, GitHub source, and printing; enter it separately on each device. Each question sends a full snapshot of your plan to Anthropic's servers. The conversation itself is saved locally; use "New chat" to clear it. Leave the key blank to keep the AI fully offline.</p>
+        <p style="font-size:16.5px;color:var(--muted);margin:0;line-height:1.55;">The app has no server of its own — adding a key here lets the Ask AI button call the Anthropic API directly from your phone. The key is saved only in this app. It is excluded from JSON backups, GitHub source, and printing; enter it separately on each device. Each question sends a full snapshot of your plan to Anthropic's servers. The conversation itself is saved locally; use "New chat" to clear it. Leave the key blank to keep the AI fully offline.</p>
       </div>
     </div>
 

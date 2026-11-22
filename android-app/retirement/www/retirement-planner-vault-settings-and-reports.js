@@ -19,7 +19,7 @@ function vaultTotalBytes() {
 function openVaultDB() {
   if (vaultDBPromise) return vaultDBPromise;
   vaultDBPromise = new Promise((resolve, reject) => {
-    if (!window.indexedDB) { reject(new Error('This browser does not support IndexedDB — Document Vault storage is unavailable.')); return; }
+    if (!window.indexedDB) { reject(new Error('Document Vault storage is unavailable on this phone.')); return; }
     const req = indexedDB.open(VAULT_DB_NAME, 1);
     req.onupgradeneeded = () => {
       const db = req.result;
@@ -274,6 +274,61 @@ function downloadBackup() {
   URL.revokeObjectURL(url);
   try { localStorage.setItem(LAST_BACKUP_KEY, new Date().toISOString()); } catch (e) { /* storage unavailable, ignore */ }
   renderBackupReminder();
+}
+
+// ---------- Automatic backups (Android app only) ----------
+// At most once a day, and only when the plan changed, the app saves the same JSON as "Download planner
+// backup" to Downloads/Retirement Planner/Auto backups (the app keeps the newest 7). Runs when the app
+// opens and whenever it goes to the background. In a plain browser this does nothing.
+const AUTO_BACKUP_KEY = 'retirementPlannerAutoBackup_v1';
+const AUTO_BACKUP_GAP_MS = 24 * 3600 * 1000;
+function autoBackupSupported() { return !!(window.AndroidApp && typeof window.AndroidApp.saveAutoBackup === 'function'); }
+function readAutoBackupState() {
+  try { return Object.assign({ enabled: true, lastAt: 0, lastHash: '', where: '' }, JSON.parse(localStorage.getItem(AUTO_BACKUP_KEY) || '{}')); }
+  catch (e) { return { enabled: true, lastAt: 0, lastHash: '', where: '' }; }
+}
+function writeAutoBackupState(st) { try { localStorage.setItem(AUTO_BACKUP_KEY, JSON.stringify(st)); } catch (e) { /* storage unavailable */ } }
+function hashText(text) { let h = 0; for (let i = 0; i < text.length; i++) h = (h * 31 + text.charCodeAt(i)) | 0; return String(h); }
+function maybeAutoBackup(force) {
+  if (!autoBackupSupported()) return;
+  const st = readAutoBackupState();
+  if (!st.enabled) return;
+  if (!force && Date.now() - st.lastAt < AUTO_BACKUP_GAP_MS) return;
+  const state = saveState(true);
+  // Leave out where you were in the app, so just moving around doesn't count as a change.
+  const { activePage, selectedExplorerAnalysis, ...plan } = state;
+  const json = JSON.stringify(state, null, 2);
+  const hash = hashText(JSON.stringify(plan));
+  if (!force && hash === st.lastHash) return;
+  const d = new Date(), pad = n => String(n).padStart(2, '0');
+  const stamp = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}`;
+  const where = window.AndroidApp.saveAutoBackup(`retirement-planner-auto-${stamp}.json`, json);
+  if (!where) return;
+  writeAutoBackupState({ ...st, lastAt: Date.now(), lastHash: hash, where });
+  try { localStorage.setItem(LAST_BACKUP_KEY, new Date().toISOString()); } catch (e) { /* storage unavailable */ }
+  renderBackupReminder();
+  renderAutoBackupStatus();
+}
+function setAutoBackupEnabled(on) {
+  writeAutoBackupState({ ...readAutoBackupState(), enabled: !!on });
+  if (on) maybeAutoBackup(true);
+  renderAutoBackupStatus();
+}
+function renderAutoBackupStatus() {
+  const box = els('autoBackupBox');
+  if (!box || !autoBackupSupported()) return;
+  box.style.display = '';
+  const st = readAutoBackupState();
+  els('autoBackupEnabled').checked = st.enabled;
+  const when = st.lastAt ? new Date(st.lastAt).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
+  els('autoBackupStatus').textContent = !st.enabled
+    ? 'Off. Turn this on to save a copy to your Downloads folder automatically.'
+    : (st.lastAt ? `On. Last saved ${when} to ${st.where}. A new copy is saved at most once a day, when the plan has changed; the newest 7 are kept.`
+                 : 'On. The first copy is saved to Downloads/Retirement Planner/Auto backups shortly.');
+}
+if (autoBackupSupported()) {
+  setTimeout(() => { renderAutoBackupStatus(); maybeAutoBackup(false); }, 4000);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') maybeAutoBackup(false); });
 }
 
 function restoreFromFile(file) {
@@ -1354,6 +1409,24 @@ window.addEventListener('hashchange', () => {
   if (pageId === 'explorers') activateExplorerAnalysis(parts[1] || readInitialExplorerAnalysis(), true, true);
 });
 
+
+// ---------- App lock (Settings, Android app only; see AppLock.java) ----------
+function renderAppLockStatus() {
+  const card = els('appLockCard');
+  if (!card || !(window.AndroidApp && typeof window.AndroidApp.appLockStatus === 'function')) return;
+  let st = {};
+  try { st = JSON.parse(window.AndroidApp.appLockStatus()); } catch (e) { return; }
+  card.style.display = '';
+  els('appLockEnabled').checked = !!st.enabled;
+  els('appLockStatus').textContent = !st.available
+    ? 'Your phone has no screen lock, so the app can\'t be locked. Set one up in your phone\'s Settings to use this.'
+    : (st.enabled ? 'On. The app asks when it opens and after it has been away for 5 minutes.' : 'Off. Anyone holding your phone can open the app.');
+}
+function setAppLockEnabled(on) {
+  if (window.AndroidApp && typeof window.AndroidApp.setAppLock === 'function') window.AndroidApp.setAppLock(!!on);
+  renderAppLockStatus();
+}
+renderAppLockStatus();
 
 // ---------- App updates (Settings, Android app only) ----------
 // The Android app checks GitHub for a newer "retirement-app-N" release and reports back through these

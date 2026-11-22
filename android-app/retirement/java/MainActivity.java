@@ -33,6 +33,9 @@ public class MainActivity extends Activity {
     private static final String SITE = "https://michealsizemore1.github.io/ChatGPT-The-Master-App/";
     private static final String FOLDER = "Retirement Planner";
     private WebView web;
+    private android.view.View lockView;
+    private boolean locked = false, prompting = false;
+    private long backgroundAt = 0;
     private ValueCallback<Uri[]> pendingFiles;
     private Uri cameraUri;
 
@@ -40,7 +43,12 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         web = new WebView(this);
-        setContentView(web);
+        android.widget.FrameLayout root = new android.widget.FrameLayout(this);
+        root.addView(web);
+        lockView = buildLockView();
+        root.addView(lockView);
+        setContentView(root);
+        if (AppLock.enabled(this) && AppLock.available(this)) lock(); else lockView.setVisibility(android.view.View.GONE);
 
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);
@@ -182,6 +190,11 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == AppLock.CONFIRM_REQUEST) {
+            prompting = false;
+            if (resultCode == RESULT_OK) unlock();
+            return;
+        }
         if (requestCode != FILE_REQUEST) {
             super.onActivityResult(requestCode, resultCode, data);
             return;
@@ -217,10 +230,84 @@ public class MainActivity extends Activity {
         CookieManager.getInstance().flush();
     }
 
+    // Back closes the menu or Ask AI panel, then steps back through the sections you visited, then goes
+    // to the Overview, and only then leaves the app (see handleAndroidBack in the page).
     @Override
     public void onBackPressed() {
-        if (web.canGoBack()) web.goBack();
-        else super.onBackPressed();
+        if (locked) { super.onBackPressed(); return; }
+        web.evaluateJavascript("(window.handleAndroidBack && window.handleAndroidBack()) ? 'handled' : 'exit'", value -> {
+            if (value == null || !value.contains("handled")) finish();
+        });
+    }
+
+    // ---------- App lock (see AppLock) ----------
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (!locked && backgroundAt > 0 && System.currentTimeMillis() - backgroundAt > AppLock.RELOCK_AFTER_MS
+                && AppLock.enabled(this) && AppLock.available(this)) lock();
+        backgroundAt = 0;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (!prompting && !locked) backgroundAt = System.currentTimeMillis();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (locked && !prompting) askToUnlock();
+    }
+
+    private void lock() {
+        locked = true;
+        lockView.setVisibility(android.view.View.VISIBLE);
+        web.setVisibility(android.view.View.INVISIBLE);
+    }
+
+    private void unlock() {
+        locked = false;
+        lockView.setVisibility(android.view.View.GONE);
+        web.setVisibility(android.view.View.VISIBLE);
+    }
+
+    private void askToUnlock() {
+        if (!AppLock.available(this)) { unlock(); return; } // the phone's screen lock was removed
+        prompting = true;
+        AppLock.prompt(this, ok -> runOnUiThread(() -> {
+            prompting = false;
+            if (ok) unlock();
+        }));
+    }
+
+    private android.view.View buildLockView() {
+        android.widget.LinearLayout box = new android.widget.LinearLayout(this);
+        box.setOrientation(android.widget.LinearLayout.VERTICAL);
+        box.setGravity(android.view.Gravity.CENTER);
+        box.setBackgroundColor(0xFF0B1F3A);
+        int pad = (int) (32 * getResources().getDisplayMetrics().density);
+        box.setPadding(pad, pad, pad, pad);
+        android.widget.TextView title = new android.widget.TextView(this);
+        title.setText("Retirement Planner is locked");
+        title.setTextColor(0xFFFFFFFF);
+        title.setTextSize(22);
+        title.setGravity(android.view.Gravity.CENTER);
+        android.widget.TextView sub = new android.widget.TextView(this);
+        sub.setText("Use your fingerprint or screen lock to open your plan.");
+        sub.setTextColor(0xFFCFE6E0);
+        sub.setTextSize(16);
+        sub.setGravity(android.view.Gravity.CENTER);
+        sub.setPadding(0, pad / 3, 0, pad / 2);
+        android.widget.Button b = new android.widget.Button(this);
+        b.setText("Unlock");
+        b.setOnClickListener(v -> { if (!prompting) askToUnlock(); });
+        box.addView(title);
+        box.addView(sub);
+        box.addView(b);
+        box.setClickable(true); // nothing behind the lock screen can be tapped
+        return box;
     }
 
     private void toast(final String msg) {
@@ -231,6 +318,53 @@ public class MainActivity extends Activity {
 
     /** Lets the page save backups and exports into the phone's Downloads folder, open vault documents, and update the app. */
     public class Bridge {
+        @JavascriptInterface
+        public String saveAutoBackup(String name, String json) {
+            return Backups.save(getApplicationContext(), name, json);
+        }
+
+        @JavascriptInterface
+        public String appLockStatus() {
+            try {
+                return new org.json.JSONObject().put("enabled", AppLock.enabled(MainActivity.this))
+                        .put("available", AppLock.available(MainActivity.this)).toString();
+            } catch (Exception e) { return "{}"; }
+        }
+
+        @JavascriptInterface
+        public void setAppLock(boolean on) {
+            AppLock.setEnabled(MainActivity.this, on);
+        }
+
+        /** Print Full Plan: Android's print screen (print or Save as PDF). Tells the page when it closes. */
+        @JavascriptInterface
+        public void printPage() {
+            runOnUiThread(() -> {
+                final android.print.PrintDocumentAdapter inner = web.createPrintDocumentAdapter("Retirement Plan");
+                android.print.PrintDocumentAdapter wrapped = new android.print.PrintDocumentAdapter() {
+                    @Override public void onStart() { inner.onStart(); }
+                    @Override public void onLayout(android.print.PrintAttributes oldA, android.print.PrintAttributes newA,
+                            android.os.CancellationSignal cancel, LayoutResultCallback cb, Bundle extras) {
+                        inner.onLayout(oldA, newA, cancel, cb, extras);
+                    }
+                    @Override public void onWrite(android.print.PageRange[] pages, android.os.ParcelFileDescriptor dest,
+                            android.os.CancellationSignal cancel, WriteResultCallback cb) {
+                        inner.onWrite(pages, dest, cancel, cb);
+                    }
+                    @Override public void onFinish() {
+                        inner.onFinish();
+                        web.evaluateJavascript("window.dispatchEvent(new Event('afterprint'))", null);
+                    }
+                };
+                android.print.PrintManager pm = (android.print.PrintManager) getSystemService(PRINT_SERVICE);
+                try { pm.print("Retirement Plan", wrapped, new android.print.PrintAttributes.Builder().build()); }
+                catch (Exception e) {
+                    toast("Couldn't open printing: " + e.getMessage());
+                    web.evaluateJavascript("window.dispatchEvent(new Event('afterprint'))", null);
+                }
+            });
+        }
+
         @JavascriptInterface
         public String appUpdateStatus() {
             return Updater.status(MainActivity.this).toString();

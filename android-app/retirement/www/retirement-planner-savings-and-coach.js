@@ -317,7 +317,7 @@ function renderCoachChatLog() {
   if (clearBtn) clearBtn.style.display = coachChatHistory.length ? 'inline-block' : 'none';
 }
 function clearCoachChat() {
-  if (coachChatHistory.length && !confirm('Start a new conversation? This clears the current chat history in this browser.')) return;
+  if (coachChatHistory.length && !confirm('Start a new conversation? This clears the current chat history in this app.')) return;
   coachChatHistory = [];
   saveCoachChatHistory();
   renderCoachChatLog();
@@ -462,7 +462,7 @@ async function sendCoachChatMessage() {
     }
   } catch (e) {
     const pending = els('coachChatPending');
-    if (pending) pending.outerHTML = `<div class="chat-msg ai">Couldn't reach the API from this browser (${escapeHtml(e.message)}). This may be blocked by CORS depending on your browser/extensions.</div>`;
+    if (pending) pending.outerHTML = `<div class="chat-msg ai">Couldn't reach the API (${escapeHtml(e.message)}). Check that your phone is online and try again.</div>`;
     coachChatHistory.pop();
     saveCoachChatHistory();
   } finally {

@@ -352,8 +352,33 @@ function collapsePlannerCards(root = document) {
   });
 }
 
+// Android Back button (app only): sections visited this session, so Back can step back through them.
+const sectionHistory = [];
+let navigatingBack = false;
+function handleAndroidBack() {
+  const ai = els('floatingAiPanel');
+  if (ai && ai.style.display !== 'none') { toggleFloatingAi(false); return true; }
+  const nav = els('sidenav');
+  if (nav && nav.classList.contains('open')) { closeMenu(); return true; }
+  const current = (document.querySelector('.page.active') || {}).dataset?.page;
+  while (sectionHistory.length && sectionHistory[sectionHistory.length - 1] === current) sectionHistory.pop();
+  if (sectionHistory.length) {
+    navigatingBack = true;
+    try { showPage(sectionHistory.pop()); } finally { navigatingBack = false; }
+    return true;
+  }
+  if (current && current !== 'dashboard') { showPage('dashboard'); return true; }
+  return false;
+}
+
 function showPage(pageId, persistPage = true) {
+  const previousPage = (document.querySelector('.page.active') || {}).dataset?.page;
   pageId = activatePageShell(pageId);
+  // Only real navigation counts (not Print Full Plan's behind-the-scenes visits or a Back step).
+  if (persistPage && !navigatingBack && previousPage && previousPage !== pageId) {
+    sectionHistory.push(previousPage);
+    if (sectionHistory.length > 30) sectionHistory.shift();
+  }
   // Save immediately after the visible section changes. Page-specific charts and tools initialize
   // below; none of them should be able to prevent the navigation choice from being remembered.
   if (persistPage) {

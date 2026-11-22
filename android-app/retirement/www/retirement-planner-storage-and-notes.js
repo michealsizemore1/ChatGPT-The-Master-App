@@ -315,7 +315,7 @@ function renderOldDataCleanup() {
 function clearOldPlannerData() {
   const found = findOldPlannerData();
   if (!found.keys.length) { renderOldDataCleanup(); return; }
-  if (!confirm('Delete leftover data from removed features (old Accounts & Cards registers, notes and receipt photos, old cloud sign-in records, and the Job Loss date) from this browser?\n\nYour retirement plan, Document Vault and the M&C Money app are not affected. This cannot be undone.')) return;
+  if (!confirm('Delete leftover data from removed features (old Accounts & Cards registers, notes and receipt photos, old cloud sign-in records, and the Job Loss date) from this app?\n\nYour retirement plan, Document Vault and the M&C Money app are not affected. This cannot be undone.')) return;
   try {
     found.keys.forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
     if (window.indexedDB) indexedDB.deleteDatabase(OLD_PLANNER_SESSION_DB);

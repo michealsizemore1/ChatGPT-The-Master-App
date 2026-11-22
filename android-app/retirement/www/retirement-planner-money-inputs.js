@@ -50,7 +50,8 @@ function dismissBackupReminder() {
 function saveState(includePortableData = false, suppressCloudSync = false) {
   const fields = {};
   document.querySelectorAll('.page input, .page select').forEach(el => {
-    if (!el.id || el.id === 'anthropicApiKey') return;
+    // data-no-save: app settings (App lock, Automatic backups) that live in the app, not in the plan.
+    if (!el.id || el.id === 'anthropicApiKey' || el.hasAttribute('data-no-save')) return;
     fields[el.id] = el.type === 'checkbox' ? el.checked : el.value;
   });
   // Checkpoint history is part of the retirement plan backup. Accounts & Cards and Document Vault use
@@ -128,7 +129,7 @@ function applyState(state) {
     Object.keys(state.fields).forEach(id => {
       if (id === 'anthropicApiKey') return;
       const el = els(id);
-      if (!el) return;
+      if (!el || el.hasAttribute('data-no-save')) return;
       if (el.type === 'checkbox') el.checked = !!state.fields[id];
       else el.value = state.fields[id];
     });
