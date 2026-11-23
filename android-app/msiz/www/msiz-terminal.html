@@ -3029,18 +3029,68 @@ function applyLiveData(data){
   var months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
   var asOfEl = document.getElementById('holdingsDate');
   if(asOfEl) asOfEl.textContent = 'AS OF ' + months[now.getMonth()] + ' ' + String(now.getDate()).padStart(2,'0') + ' ' + now.getFullYear();
-  renderHoldings();
-  renderCenterHoldings();
-  renderPerfTable();
-  // Refresh every visible area that reads QUOTES. Previously these retained
-  // the embedded fallback values even after the current snapshot arrived.
-  renderSelectedStats();
-  renderSelectedInfoStrip();
-  renderChartLegend();
-  renderDivCal();
+  // Refresh every visible area that reads QUOTES. Each runs on its own so one
+  // failing view can't stop the others from updating.
+  [renderHoldings, renderCenterHoldings, renderPerfTable, renderSelectedStats,
+   renderSelectedInfoStrip, renderChartLegend, renderDivCal].forEach(function(fn){
+    try { fn(); } catch(e) { console.error('MSIZ render', e); }
+  });
+}
+// Live quotes for the holdings and the indexes, straight from Yahoo Finance (about 15 min
+// delayed for the indexes, like Yahoo's own app). These don't depend on the snapshot file,
+// whose scheduled refreshes GitHub often runs late or skips.
+var LIVE_QUOTE_SYMS = ['SCHD','QQQM','SGOV','IBIT','^GSPC','^DJI','^IXIC'];
+function fetchYahooQuote(sym){
+  var path = 'v8/finance/chart/' + encodeURIComponent(sym) + '?range=1d&interval=5m';
+  var urls = ['https://query1.finance.yahoo.com/' + path, 'https://query2.finance.yahoo.com/' + path];
+  function attempt(i){
+    if(i >= urls.length) return Promise.resolve(null);
+    return fetch(urls[i], {cache:'no-store'}).then(function(r){ if(!r.ok) throw 0; return r.json(); })
+      .then(function(j){
+        var m = j && j.chart && j.chart.result && j.chart.result[0] && j.chart.result[0].meta;
+        var price = m && Number(m.regularMarketPrice);
+        var prev = m && Number(m.previousClose || m.chartPreviousClose);
+        if(!price || !prev) throw 0;
+        var old = QUOTES[sym] || {};
+        return {
+          price: price, prev: prev, change: price - prev,
+          changesPercentage: (price - prev) / prev * 100,
+          volume: Number(m.regularMarketVolume) || old.volume || 0,
+          avgVolume: old.avgVolume || 0,
+          yearHigh: Number(m.fiftyTwoWeekHigh) || old.yearHigh,
+          yearLow: Number(m.fiftyTwoWeekLow) || old.yearLow,
+          marketTime: m.regularMarketTime
+        };
+      })
+      .catch(function(){ return attempt(i+1); });
+  }
+  return attempt(0);
+}
+function fetchYahooQuotes(){
+  return Promise.all(LIVE_QUOTE_SYMS.map(fetchYahooQuote)).then(function(list){
+    var data = {}, newest = 0;
+    LIVE_QUOTE_SYMS.forEach(function(sym, i){
+      if(list[i]){ data[sym] = list[i]; newest = Math.max(newest, list[i].marketTime || 0); }
+    });
+    if(!Object.keys(data).length) return false;
+    applyLiveData(data);
+    var label = 'LIVE \u00b7 ' + new Date((newest || Date.now()/1000) * 1000).toLocaleString([], {
+      month:'short', day:'numeric', hour:'numeric', minute:'2-digit', timeZoneName:'short'
+    }).toUpperCase();
+    ['holdingsDate','centerHoldingsDate'].forEach(function(id){
+      var el = document.getElementById(id);
+      if(el){ el.textContent = label; el.title = 'Live quotes from Yahoo Finance'; }
+    });
+    return true;
+  });
 }
 function fetchLiveQuotes(){
-  fetch(MARKET_DATA_URL + '?v=' + Date.now(), {cache:'no-store'})
+  var snapshotDone = fetchSnapshotQuotes();
+  // Apply live quotes after the snapshot so the newer numbers win.
+  Promise.resolve(snapshotDone).then(fetchYahooQuotes, fetchYahooQuotes).catch(function(){});
+}
+function fetchSnapshotQuotes(){
+  return fetch(MARKET_DATA_URL + '?v=' + Date.now(), {cache:'no-store'})
     .then(function(r){ return r.json(); })
     .then(function(snapshot){
       applyLiveData(snapshot.quotes || {});
