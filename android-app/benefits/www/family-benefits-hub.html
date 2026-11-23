@@ -446,6 +446,7 @@
     <a href="#incomeloss" class="nav-link" data-target="incomeloss"><span class="ico">&#128200;</span> Income After Loss</a>
     <a href="#statebenefits" class="nav-link" data-target="statebenefits"><span class="ico">&#128506;&#65039;</span> Idaho Survivor Benefits</a>
     </div>
+    <a href="#appsettings" class="nav-link" data-target="appsettings" style="border-top:1px solid rgba(255,255,255,.08);margin-top:6px;"><span class="ico">&#9881;&#65039;</span> App Settings</a>
   </nav>
   <div id="menuBackdrop" aria-hidden="true"></div>
 
@@ -907,7 +908,7 @@
       <h2>Backup &amp; Restore</h2>
       <div class="quick-notes"><label class="qn-label">Notes</label><textarea class="notes-box qn-box" id="qn-backup" placeholder="Quick notes for this section..."></textarea></div>
       <div class="card">
-        <p>Everything in this app — passwords, contacts, dates, documents, and notes — lives only inside this app on this phone. There is no cloud sync, and it is separate from the website. Uninstalling the app, clearing its storage, or getting a new phone will erase it all unless you have a backup. The app saves one automatically each day (see App settings below), and you can export one any time.</p>
+        <p>Everything in this app — passwords, contacts, dates, documents, and notes — lives only inside this app on this phone. There is no cloud sync, and it is separate from the website. Uninstalling the app, clearing its storage, or getting a new phone will erase it all unless you have a backup. The app saves one automatically each day (see App Settings in the menu), and you can export one any time.</p>
         <div class="warning">
           The exported file is a plain, unencrypted JSON file containing everything you've entered, including passwords. Store it somewhere as secure as this page itself (encrypted drive, password-protected archive, or a safe/safe deposit box if printed) — not in a random cloud folder.
         </div>
@@ -920,12 +921,17 @@
           <span class="save-note" id="backup-status"></span>
         </div>
         <p class="save-note">Export saves a dated <code>.json</code> file to your phone's <b>Downloads/Family Benefits Hub</b> folder. Import reads a previously exported file (from the app, its automatic backups, or the website) and restores everything (this will overwrite any current entries with the same name/date), then reloads the page.</p>
+        <p class="save-note">Automatic daily backups and app lock are in <a class="link" href="#appsettings" onclick="event.preventDefault();activatePage('appsettings');window.scrollTo(0,0);">&#9881;&#65039; App Settings</a>.</p>
       </div>
 
-      <div class="card no-print" id="appSettingsCard" style="display:none;">
-        <h3 style="margin-top:0;">App settings<span class="save-note" id="appVersionLabel" style="margin-left:8px;"></span></h3>
+    </section>
 
-        <h4 style="margin:14px 0 6px;color:var(--navy);">App lock</h4>
+    <!-- APP SETTINGS (Android app only) -->
+    <section id="appsettings" class="page no-print">
+      <h2>App Settings <span class="save-note" id="appVersionLabel" style="font-size:14px;margin-left:6px;"></span></h2>
+      <p class="save-note" id="appSettingsWebNote">These settings are only available in the Family Benefits Hub Android app.</p>
+      <div class="card no-print" id="appSettingsCard" style="display:none;">
+        <h4 style="margin:0 0 6px;color:var(--navy);">App lock</h4>
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
           <input type="checkbox" id="appLockEnabled" onchange="setAppLockEnabled(this.checked)" style="width:20px;height:20px;accent-color:var(--navy);">
           Require fingerprint or screen lock to open the app
@@ -1518,6 +1524,7 @@ window.onAppUpdateMessage = function(msg){ const el = document.getElementById('a
 
 if(window.AndroidApp){
   document.getElementById('appSettingsCard').style.display = '';
+  document.getElementById('appSettingsWebNote').style.display = 'none';
   renderAppLockStatus();
   renderAutoBackupStatus();
   try { renderAppUpdateStatus(JSON.parse(window.AndroidApp.appUpdateStatus())); } catch(e){}
