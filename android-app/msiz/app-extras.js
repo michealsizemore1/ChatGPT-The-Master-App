@@ -7,6 +7,25 @@
   if (!window.AndroidApp) return;
   var LIVE = 'https://michealsizemore1.github.io/ChatGPT-The-Master-App/data/market-quotes.json';
 
+  // ---------- Error log (shown under Diagnostics in the App menu) ----------
+  var appErrors = [];
+  function logError(msg){
+    var t = new Date().toLocaleTimeString([], {hour:'numeric', minute:'2-digit', second:'2-digit'});
+    appErrors.push(t + '  ' + String(msg).slice(0, 220));
+    if(appErrors.length > 8) appErrors.shift();
+    var el = document.getElementById('appDiagLog');
+    if(el) el.textContent = appErrors.join('\n');
+  }
+  window.addEventListener('error', function(e){
+    logError((e.message || 'Error') + (e.filename ? ' (line ' + e.lineno + ')' : ''));
+  });
+  window.addEventListener('unhandledrejection', function(e){ logError('Promise: ' + (e.reason && e.reason.message || e.reason)); });
+  var realConsoleError = console.error.bind(console);
+  console.error = function(){
+    try { logError(Array.prototype.map.call(arguments, function(a){ return a && a.stack ? a.stack.split('\n').slice(0,2).join(' ') : String(a); }).join(' ')); } catch(_) {}
+    realConsoleError.apply(null, arguments);
+  };
+
   // ---------- Market data: live from the website, packed copy when offline ----------
   var realFetch = window.fetch.bind(window);
   function readPacked() {
@@ -24,8 +43,13 @@
     var url = typeof input === 'string' ? input : (input && input.url) || '';
     if (url.indexOf(LIVE) !== 0) return realFetch(input, init);
     return realFetch(input, init).then(function (r) {
-      return r.ok ? r : readPacked();
-    }, readPacked);
+      if (r.ok) return r;
+      logError('Market data file: HTTP ' + r.status + ', using the copy in the app');
+      return readPacked();
+    }, function (e) {
+      logError('Market data file unreachable (' + (e && e.message || e) + '), using the copy in the app');
+      return readPacked();
+    });
   };
 
   // ---------- App menu ----------
@@ -77,10 +101,18 @@
       '<button class="b" id="appRestore" type="button">Restore a backup</button></div>' +
       '<input type="file" id="appRestoreFile" accept=".json,application/json" style="display:none">' +
       '<div class="muted" id="masterBackupStatus" style="margin-top:6px"></div>' +
+      '<h3>Diagnostics</h3>' +
+      '<div class="muted">Quotes: <span id="appDiagQuotes">\u2014</span></div>' +
+      '<pre id="appDiagLog" class="muted" style="white-space:pre-wrap;margin:6px 0 0;font:11px \'IBM Plex Mono\',monospace">No errors.</pre>' +
       '</div></div>');
     document.body.appendChild(wrap);
 
-    function open() { wrap.classList.add('open'); renderLock(); renderUpdate(); }
+    function open() {
+      wrap.classList.add('open'); renderLock(); renderUpdate();
+      var hd = document.getElementById('holdingsDate');
+      document.getElementById('appDiagQuotes').textContent = hd && hd.textContent ? hd.textContent : 'not loaded yet';
+      if (appErrors.length) document.getElementById('appDiagLog').textContent = appErrors.join('\n');
+    }
     function close() { wrap.classList.remove('open'); }
     btn.addEventListener('click', open);
     wrap.querySelector('.close').addEventListener('click', close);
