@@ -1916,39 +1916,105 @@ function loadBal(){
   return result;
 }
 // DIVIDEND CALENDAR
+// Confirmed payouts as of Nov 22, 2026, plus the next scheduled ex-dates. Future amounts not yet
+// declared repeat the latest confirmed payout and are marked EST. Paid / soon / upcoming is worked
+// out from today's date, and refreshDivCalendar() below pulls new payouts from Yahoo Finance when
+// the phone is online and rolls the schedule forward, so the calendar keeps itself current.
 var DIV_DATA = [
-  // Future dates without a declared amount use the latest confirmed payout as an estimate.
-  {
-    sym:'SGOV', name:'iShares 0-3M Treasury', freq:'Monthly',
-    exDate:'2026-09-01', payDate:'2026-09-08', amount:0.306812,
-    status:'upcoming', estimated:true
-  },
-  {
-    sym:'SCHD', name:'Schwab Dividend Equity', freq:'Quarterly',
-    exDate:'2026-09-23', payDate:'2026-09-28', amount:0.2525,
-    status:'upcoming', estimated:true
-  },
-  {
-    sym:'QQQM', name:'Invesco Nasdaq 100', freq:'Quarterly',
-    exDate:'2026-09-21', payDate:'2026-09-25', amount:0.35215,
-    status:'upcoming', estimated:true
-  },
-  {
-    sym:'SGOV', name:'iShares 0-3M Treasury', freq:'Monthly',
-    exDate:'2026-08-03', payDate:'2026-08-06', amount:0.306812,
-    status:'paid'
-  },
-  {
-    sym:'SCHD', name:'Schwab Dividend Equity', freq:'Quarterly',
-    exDate:'2026-06-24', payDate:'2026-06-29', amount:0.2525,
-    status:'paid'
-  },
-  {
-    sym:'QQQM', name:'Invesco Nasdaq 100', freq:'Quarterly',
-    exDate:'2026-06-22', payDate:'2026-06-26', amount:0.35215,
-    status:'paid'
-  },
+  { sym:'SGOV', name:'iShares 0-3M Treasury', freq:'Monthly',   exDate:'2026-12-01', payDate:'2026-12-04', amount:0.32858, estimated:true },
+  { sym:'SCHD', name:'Schwab Dividend Equity', freq:'Quarterly', exDate:'2026-12-09', payDate:'2026-12-14', amount:0.2665,  estimated:true },
+  { sym:'QQQM', name:'Invesco Nasdaq 100',     freq:'Quarterly', exDate:'2026-12-21', payDate:'2026-12-28', amount:0.31266, estimated:true },
+  { sym:'SGOV', name:'iShares 0-3M Treasury', freq:'Monthly',   exDate:'2026-11-02', payDate:'2026-11-05', amount:0.32858 },
+  { sym:'SGOV', name:'iShares 0-3M Treasury', freq:'Monthly',   exDate:'2026-10-01', payDate:'2026-10-06', amount:0.301 },
+  { sym:'SCHD', name:'Schwab Dividend Equity', freq:'Quarterly', exDate:'2026-09-23', payDate:'2026-09-28', amount:0.2665 },
+  { sym:'QQQM', name:'Invesco Nasdaq 100',     freq:'Quarterly', exDate:'2026-09-21', payDate:'2026-09-25', amount:0.31266 },
+  { sym:'SGOV', name:'iShares 0-3M Treasury', freq:'Monthly',   exDate:'2026-09-01', payDate:'2026-09-04', amount:0.3071 }
 ];
+var DIV_INFO = {
+  SGOV:{ name:'iShares 0-3M Treasury',  freq:'Monthly',   payLag:3 },
+  SCHD:{ name:'Schwab Dividend Equity', freq:'Quarterly', payLag:5 },
+  QQQM:{ name:'Invesco Nasdaq 100',     freq:'Quarterly', payLag:4 }
+};
+var DIV_PAID_ROWS_PER_SYM = 2; // most recent paid rows shown for each fund
+function divIso(dt){ return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0'); }
+function divParse(iso){ var p=iso.split('-'); return new Date(+p[0], +p[1]-1, +p[2]); }
+function divAddDays(iso, n){ var d=divParse(iso); d.setDate(d.getDate()+n); return divIso(d); }
+function divMarketClosed(dt){
+  var md = (dt.getMonth()+1)*100 + dt.getDate();
+  return dt.getDay()===0 || dt.getDay()===6 || md===101 || md===619 || md===704 || md===1225;
+}
+function divWeekday(dt){ while(divMarketClosed(dt)) dt.setDate(dt.getDate()+1); return dt; }
+function divAddBizDays(iso, n){ var d=divParse(iso); while(n>0){ d.setDate(d.getDate()+1); if(!divMarketClosed(d)) n--; } return divIso(d); }
+function divStatus(d){
+  var today = divIso(new Date());
+  if(d.payDate < today) return 'paid';
+  if(d.exDate <= divAddDays(today, 14)) return 'soon';
+  return 'upcoming';
+}
+// Next ex-date after `lastEx`: SGOV goes ex on the first business day of each month; the
+// quarterly funds about 13 weeks after the previous one.
+function divProjectNext(sym, lastEx){
+  var d = divParse(lastEx);
+  if(DIV_INFO[sym].freq === 'Monthly') d = new Date(d.getFullYear(), d.getMonth()+1, 1);
+  else d.setDate(d.getDate()+91);
+  return divIso(divWeekday(d));
+}
+// Rolls each fund forward so there is always one upcoming payout to show.
+function divEnsureUpcoming(){
+  var today = divIso(new Date());
+  Object.keys(DIV_INFO).forEach(function(sym){
+    var rows = DIV_DATA.filter(function(d){ return d.sym===sym; }).sort(function(a,b){ return a.exDate.localeCompare(b.exDate); });
+    if(!rows.length) return;
+    var guard = 0;
+    while(rows[rows.length-1].payDate < today && guard++ < 24){
+      var last = rows[rows.length-1];
+      var ex = divProjectNext(sym, last.exDate);
+      var row = { sym:sym, name:DIV_INFO[sym].name, freq:DIV_INFO[sym].freq, exDate:ex,
+                  payDate:divAddBizDays(ex, DIV_INFO[sym].payLag), amount:last.amount, estimated:true };
+      DIV_DATA.push(row); rows.push(row);
+    }
+  });
+}
+// Pulls each fund's last year of payouts from Yahoo Finance (ex-date + amount) and merges them in.
+var divRefreshing = false;
+function refreshDivCalendar(){
+  if(divRefreshing) return;
+  divRefreshing = true;
+  var syms = Object.keys(DIV_INFO);
+  Promise.all(syms.map(function(sym){
+    var path = 'v8/finance/chart/'+sym+'?range=1y&interval=1d&events=div';
+    var urls = ['https://query1.finance.yahoo.com/'+path, 'https://query2.finance.yahoo.com/'+path];
+    function attempt(i){
+      if(i >= urls.length) return Promise.resolve(null);
+      return fetch(urls[i], {cache:'no-store'}).then(function(r){ if(!r.ok) throw 0; return r.json(); })
+        .catch(function(){ return attempt(i+1); });
+    }
+    return attempt(0).then(function(j){
+      var res = j && j.chart && j.chart.result && j.chart.result[0];
+      var ev = res && res.events && res.events.dividends;
+      if(!ev) return;
+      Object.keys(ev).forEach(function(k){
+        var e = ev[k]; if(!e || !e.amount || !e.date) return;
+        var ex = new Date(e.date*1000).toISOString().slice(0,10);
+        var match = DIV_DATA.filter(function(d){
+          return d.sym===sym && Math.abs(divParse(d.exDate)-divParse(ex)) <= 4*86400000;
+        })[0];
+        if(match){ match.exDate = ex; match.amount = e.amount; match.estimated = false; }
+        else DIV_DATA.push({ sym:sym, name:DIV_INFO[sym].name, freq:DIV_INFO[sym].freq, exDate:ex,
+                             payDate:divAddBizDays(ex, DIV_INFO[sym].payLag), amount:e.amount });
+      });
+      // An estimated row whose ex-date is past but that Yahoo never reported keeps its estimate.
+      // Future estimates follow the newest confirmed amount.
+      var confirmed = DIV_DATA.filter(function(d){ return d.sym===sym && !d.estimated; })
+        .sort(function(a,b){ return b.exDate.localeCompare(a.exDate); })[0];
+      if(confirmed) DIV_DATA.forEach(function(d){ if(d.sym===sym && d.estimated && d.exDate > confirmed.exDate) d.amount = confirmed.amount; });
+    });
+  })).then(function(){
+    divRefreshing = false;
+    divEnsureUpcoming();
+    renderDivCal();
+  }, function(){ divRefreshing = false; });
+}
 function fmtDivDate(d){
   var parts = d.split('-');
   var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -1960,10 +2026,15 @@ function renderDivCal(){
   var bal = loadBal();
   var html = '';
   // Sort: upcoming/soon first (by ex-date asc), then paid (by ex-date desc)
+  divEnsureUpcoming();
+  DIV_DATA.forEach(function(d){ d.status = divStatus(d); });
+  // Upcoming first (soonest ex-date first), then the most recent payouts for each fund.
   var upcoming = DIV_DATA.filter(function(d){ return d.status !== 'paid'; })
     .sort(function(a,b){ return a.exDate.localeCompare(b.exDate); });
+  var shown = {};
   var paid = DIV_DATA.filter(function(d){ return d.status === 'paid'; })
-    .sort(function(a,b){ return b.exDate.localeCompare(a.exDate); });
+    .sort(function(a,b){ return b.exDate.localeCompare(a.exDate); })
+    .filter(function(d){ shown[d.sym] = (shown[d.sym]||0) + 1; return shown[d.sym] <= DIV_PAID_ROWS_PER_SYM; });
   var rows = upcoming.concat(paid);
   rows.forEach(function(d){
     var sharesApprox = 0;
@@ -2803,6 +2874,8 @@ document.addEventListener('DOMContentLoaded', function(){
   setInterval(function(){ updateMarketBadges(); updateTopBarStatus(); }, 60000);
   fetchLiveQuotes();
   setInterval(fetchLiveQuotes, 60000);
+  refreshDivCalendar();
+  setInterval(refreshDivCalendar, 6*3600000);
   fetchFutures();
   setInterval(fetchFutures, 60000);
   fetchBitcoinSpot();
