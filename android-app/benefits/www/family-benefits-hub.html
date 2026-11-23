@@ -238,6 +238,22 @@
     font-size:14px;
   }
   .quick-notes{margin:2px 0 20px;}
+  .set-intro{color:#475569;font-size:17px;margin:4px 0 2px;}
+  .set-version{color:#94a3b8;font-size:14px;margin:0 0 16px;}
+  .set-card{margin-bottom:18px;}
+  .set-h{margin:0 0 4px;font-size:20px;color:var(--navy);}
+  .set-sub{color:#64748b;margin:0 0 12px;}
+  .set-check{display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;}
+  .set-check input{width:22px;height:22px;accent-color:var(--navy);}
+  button.small.set-btn2{background:#eef2f7;color:var(--navy);border:1px solid #d6dde8;}
+  button.small.set-btn2:disabled{opacity:.45;cursor:default;}
+  button.small.set-link{background:none;border:0;color:#b42318;padding:2px 0;text-decoration:underline;}
+  .set-link{background:none;border:0;color:#b42318;padding:2px 0;text-decoration:underline;}
+  .set-label{font-weight:600;font-size:14px;color:#334155;margin:14px 0 6px;}
+  .set-list{border:1px solid #e2e8f0;border-radius:10px;max-height:300px;overflow-y:auto;}
+  .set-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-top:1px solid #f1f5f9;font-size:14px;}
+  .set-row:first-child{border-top:0;}
+  .set-row small{display:block;color:#94a3b8;}
   .qn-label{
     display:block;
     font-size:11.5px;
@@ -928,37 +944,68 @@
 
     <!-- APP SETTINGS (Android app only) -->
     <section id="appsettings" class="page no-print">
-      <h2>App Settings <span class="save-note" id="appVersionLabel" style="font-size:14px;margin-left:6px;"></span></h2>
+      <h2>App Settings</h2>
+      <p class="set-intro">Lock the app, back up your data, restore a previous backup, or undo a recent change.</p>
+      <p class="set-version" id="appVersionLabel"></p>
       <p class="save-note" id="appSettingsWebNote">These settings are only available in the Family Benefits Hub Android app.</p>
-      <div class="card no-print" id="appSettingsCard" style="display:none;">
-        <h4 style="margin:0 0 6px;color:var(--navy);">App lock</h4>
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-          <input type="checkbox" id="appLockEnabled" onchange="setAppLockEnabled(this.checked)" style="width:20px;height:20px;accent-color:var(--navy);">
-          Require fingerprint or screen lock to open the app
+
+      <div id="appSettingsCard" style="display:none;">
+      <div class="card set-card">
+        <h3 class="set-h">&#128272; App Lock</h3>
+        <p class="set-sub">Fingerprint or screen lock to open the app.</p>
+        <label class="set-check">
+          <input type="checkbox" id="appLockEnabled" onchange="setAppLockEnabled(this.checked)">
+          Require fingerprint or screen lock
         </label>
         <p class="save-note" id="appLockStatus"></p>
+      </div>
 
-        <h4 style="margin:18px 0 6px;color:var(--navy);">Automatic backups</h4>
-        <p class="save-note" id="autoBackupStatus">Once a day, the app saves a backup to <b>Downloads/Family Benefits Hub/Auto backups</b> and keeps the newest 7.</p>
-        <div class="toolbar"><button class="small add" type="button" onclick="runAppAutoBackup(true)">Back up now</button></div>
-        <p class="save-note" id="backupNowMsg" role="status" style="font-weight:600;"></p>
-
-        <h4 style="margin:18px 0 6px;color:var(--navy);">Google Drive</h4>
-        <p class="save-note" id="driveStatus"></p>
-        <div class="toolbar">
-          <button class="small add" type="button" id="driveLinkBtn" onclick="window.AndroidApp.linkDriveBackup()">Choose Google Drive file</button>
-          <button class="small" type="button" id="driveUnlinkBtn" style="display:none;background:#fff;color:var(--navy);border:1px solid var(--navy);" onclick="unlinkDrive()">Stop saving to Drive</button>
-          <button class="small" type="button" style="background:var(--navy);color:#fff;" onclick="shareBackupCopy()">Send a copy&hellip;</button>
-        </div>
-        <p class="save-note" id="driveHowTo">Tap <b>Choose Google Drive file</b>, tap the &#9776; menu in the picker, choose <b>Drive</b>, pick a folder, then tap <b>Save</b>. After that, every backup (daily and Back up now) also updates that one file in your Drive, and Drive keeps its older versions. <b>Send a copy</b> opens the share sheet for a one-time copy (Save to Drive, email, and so on).</p>
-
-        <h4 style="margin:18px 0 6px;color:var(--navy);">App updates</h4>
-        <p class="save-note" id="appUpdateStatus">Checking…</p>
+      <div class="card set-card">
+        <h3 class="set-h">&#11014;&#65039; App Updates</h3>
+        <p class="set-sub" id="appUpdateStatus">Checking&hellip;</p>
         <div class="toolbar">
           <button class="small add" type="button" id="appUpdateInstallBtn" style="display:none;" onclick="window.AndroidApp.installAppUpdate()"></button>
-          <button class="small" type="button" id="appUpdateCheckBtn" style="background:var(--navy);color:#fff;" onclick="window.AndroidApp.checkForAppUpdate()">Check for updates</button>
+          <button class="small set-btn2" type="button" id="appUpdateCheckBtn" onclick="window.AndroidApp.checkForAppUpdate()">Check for updates</button>
         </div>
-        <p class="save-note">Updates come from GitHub releases and install over the current version, so everything you've entered stays. The first time, Android asks you to allow installs from Family Benefits Hub.</p>
+        <p class="save-note">Updates come from GitHub releases and install over the current version, so everything you've entered stays.</p>
+      </div>
+
+      <div class="quick-notes"><label class="qn-label">Notes</label><textarea class="notes-box qn-box" id="qn-appsettings" placeholder="Quick notes for this section..."></textarea></div>
+
+      <div class="card set-card">
+        <h3 class="set-h">&#128190; Backup</h3>
+        <p class="set-sub">Save everything in this app &mdash; contacts, documents, accounts &amp; passwords, wishes, dates, and notes &mdash; as a file you can keep somewhere safe. The app also does this automatically once a day.</p>
+        <div class="toolbar">
+          <button class="small add" type="button" onclick="runAppAutoBackup(true)">&#11015; Back up now</button>
+          <button class="small set-btn2" type="button" id="driveLinkBtn" onclick="window.AndroidApp.linkDriveBackup()">&#9729;&#65039; Save to Google Drive</button>
+          <button class="small set-btn2" type="button" onclick="shareBackupCopy()">Send a copy&hellip;</button>
+        </div>
+        <p class="save-note" id="backupNowMsg" role="status" style="font-weight:600;"></p>
+        <p class="save-note" id="autoBackupStatus"></p>
+        <p class="save-note" id="driveStatus"></p>
+        <button class="small set-link" type="button" id="driveUnlinkBtn" style="display:none;" onclick="unlinkDrive()">Stop saving to Google Drive</button>
+        <p class="save-note" id="driveHowTo"><b>Save to Google Drive:</b> tap it, tap the &#9776; menu in the picker, choose <b>Drive</b>, pick a folder, then tap <b>Save</b>. After that every backup also updates that one file in your Drive, and Drive keeps its older versions. <b>Send a copy</b> opens the share sheet for a one-time copy.</p>
+      </div>
+
+      <div class="card set-card">
+        <h3 class="set-h">&#128228; Restore</h3>
+        <p class="set-sub">Choose a backup file you've saved before (from this app, its automatic backups, Google Drive, or the website) to restore it. Entries in the file replace the ones in the app, so back up first if you want to keep what's here. You can undo a restore below.</p>
+        <div class="toolbar">
+          <button class="small set-btn2" type="button" onclick="document.getElementById('importFile').click()">&#128228; Choose Backup File&hellip;</button>
+        </div>
+      </div>
+
+      <div class="card set-card">
+        <h3 class="set-h">&#8630; Undo &amp; Redo</h3>
+        <p class="set-sub">Undo the latest change, redo it if you change your mind, or select a recent restore point from this session.</p>
+        <div class="toolbar">
+          <button class="small set-btn2" type="button" id="undoBtn" onclick="hubUndo()">Undo Last Change</button>
+          <button class="small set-btn2" type="button" id="redoBtn" onclick="hubRedo()">Redo</button>
+        </div>
+        <p class="save-note" id="undoMsg" role="status" style="font-weight:600;color:#1a7f37;"></p>
+        <div class="set-label">Select a restore point</div>
+        <div id="restorePoints" class="set-list"></div>
+      </div>
       </div>
     </section>
 
@@ -970,6 +1017,102 @@
 </div>
 
 <script>
+// ---------- Undo & Redo (app) ----------
+// Every saved change goes through localStorage.setItem. Just before the first change of a burst
+// (a pause of 4s or a different section starts a new one), a copy of everything is kept as a
+// restore point. Restore points last for this session (sessionStorage), newest first, up to 25.
+const UNDO_IGNORE = /^(lastSection|navGroup_|autoHideMenu|appAutoBackup|hubUndo|hubRedo)/;
+let undoSuspended = false, undoBurstAt = 0, undoBurstLabel = '', undoLabelOverride = '';
+function hubSnapshot(){
+  const d = {};
+  for(let i = 0; i < localStorage.length; i++){
+    const k = localStorage.key(i);
+    if(!UNDO_IGNORE.test(k)) d[k] = localStorage.getItem(k);
+  }
+  return d;
+}
+function readStack(name){ try { return JSON.parse(sessionStorage.getItem(name) || '[]'); } catch(e){ return []; } }
+function writeStack(name, arr){
+  arr = arr.slice(0, 25);
+  while(arr.length){
+    try { sessionStorage.setItem(name, JSON.stringify(arr)); return; } catch(e){ arr.pop(); } // too big: drop the oldest
+  }
+  sessionStorage.removeItem(name);
+}
+function undoSectionLabel(){
+  const page = document.querySelector('.page.active');
+  const h = page && page.querySelector('h2');
+  return (h ? h.textContent.trim() : 'Hub') + ' updated';
+}
+function noteHubChange(key, value){
+  if(undoSuspended || UNDO_IGNORE.test(key)) return;
+  if(localStorage.getItem(key) === value) return;
+  const label = undoLabelOverride || undoSectionLabel();
+  const now = Date.now();
+  if(undoLabelOverride || now - undoBurstAt > 4000 || label !== undoBurstLabel){
+    const stack = readStack('hubUndo');
+    stack.unshift({ label: label, at: new Date().toISOString(), data: hubSnapshot() });
+    writeStack('hubUndo', stack);
+    sessionStorage.removeItem('hubRedo');
+    setTimeout(renderUndoPanel, 0);
+    if(undoLabelOverride){ undoLabelOverride = ''; undoSuspended = true; return; } // one restore point for a whole restore (the page reloads next)
+  }
+  undoBurstAt = now;
+  undoBurstLabel = label;
+}
+(function(){
+  const realSet = Storage.prototype.setItem, realRemove = Storage.prototype.removeItem;
+  Storage.prototype.setItem = function(k, v){ if(this === localStorage) noteHubChange(String(k), String(v)); return realSet.call(this, k, v); };
+  Storage.prototype.removeItem = function(k){ if(this === localStorage && localStorage.getItem(k) !== null) noteHubChange(String(k), null); return realRemove.call(this, k); };
+})();
+function applyHubSnapshot(data){
+  undoSuspended = true;
+  Object.keys(hubSnapshot()).forEach(k => localStorage.removeItem(k));
+  Object.keys(data).forEach(k => localStorage.setItem(k, data[k]));
+  undoSuspended = false;
+  location.reload();
+}
+function hubUndo(){
+  const undo = readStack('hubUndo'); if(!undo.length) return;
+  const item = undo.shift();
+  const redo = readStack('hubRedo');
+  redo.unshift({ label: item.label, at: new Date().toISOString(), data: hubSnapshot() });
+  writeStack('hubUndo', undo); writeStack('hubRedo', redo);
+  sessionStorage.setItem('hubUndoDone', 'Undid: ' + item.label);
+  applyHubSnapshot(item.data);
+}
+function hubRedo(){
+  const redo = readStack('hubRedo'); if(!redo.length) return;
+  const item = redo.shift();
+  const undo = readStack('hubUndo');
+  undo.unshift({ label: item.label, at: new Date().toISOString(), data: hubSnapshot() });
+  writeStack('hubUndo', undo); writeStack('hubRedo', redo);
+  sessionStorage.setItem('hubUndoDone', 'Redid: ' + item.label);
+  applyHubSnapshot(item.data);
+}
+function hubRestorePoint(index){
+  const undo = readStack('hubUndo'); const item = undo[index]; if(!item) return;
+  const when = new Date(item.at).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+  if(!confirm('Go back to how everything was before "' + item.label + '" (' + when + ')?')) return;
+  const rest = undo.slice(index + 1);
+  rest.unshift({ label: 'Going back to ' + when, at: new Date().toISOString(), data: hubSnapshot() });
+  writeStack('hubUndo', rest); sessionStorage.removeItem('hubRedo');
+  sessionStorage.setItem('hubUndoDone', 'Went back to before "' + item.label + '"');
+  applyHubSnapshot(item.data);
+}
+function renderUndoPanel(){
+  const list = document.getElementById('restorePoints'); if(!list) return;
+  const undo = readStack('hubUndo'), redo = readStack('hubRedo');
+  document.getElementById('undoBtn').disabled = !undo.length;
+  document.getElementById('redoBtn').disabled = !redo.length;
+  const esc = v => String(v).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  list.innerHTML = undo.length ? undo.map((it, i) =>
+    '<div class="set-row"><div>Before: ' + esc(it.label) + '<small>' +
+    new Date(it.at).toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}) +
+    '</small></div><button class="small set-btn2" type="button" onclick="hubRestorePoint(' + i + ')">Restore this point</button></div>').join('')
+    : '<div class="set-row" style="color:#94a3b8;">No changes recorded yet.</div>';
+}
+
 // ---------- Navigation ----------
 const sidebar = document.getElementById('sidebar');
 const hamburger = document.getElementById('hamburger');
@@ -1410,6 +1553,9 @@ document.getElementById('importFile').addEventListener('change', (e) => {
   reader.onload = (ev) => {
     try{
       const data = JSON.parse(ev.target.result);
+      if(!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('not a backup');
+      if(!confirm('Restore this backup? Entries in it replace the ones in the app. You can undo this in App Settings > Undo & Redo.')){ e.target.value = ''; return; }
+      undoLabelOverride = 'Restored a backup file';
       Object.keys(data).forEach(k => localStorage.setItem(k, data[k]));
       alert('Backup restored. The page will now reload.');
       location.reload();
@@ -1536,15 +1682,15 @@ function renderDriveStatus(){
   const esc = v => String(v).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   if(!st.linked){
     el.innerHTML = 'Not set up. Backups are only saved on this phone.';
-    linkBtn.textContent = 'Choose Google Drive file';
+    linkBtn.innerHTML = '&#9729;&#65039; Save to Google Drive';
     unlinkBtn.style.display = 'none';
     return;
   }
   const when = st.lastAt ? new Date(st.lastAt).toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}) : 'not yet';
   el.innerHTML = (st.error ? '<b style="color:#b42318">' + esc(st.error) + '</b><br>' : '') +
     'On. Each backup also updates <b>' + esc(st.name) + '</b>' + (st.where ? ' in ' + esc(st.where) : '') + '. Last saved: <b>' + when + '</b>.' +
-    (st.where ? '' : '<br>This file isn\'t in Google Drive. To use Drive, tap Change file and choose Drive in the picker.');
-  linkBtn.textContent = 'Change file';
+    (st.where ? '' : '<br>This file isn\'t in Google Drive. To use Drive, tap Change Drive file and choose Drive in the picker.');
+  linkBtn.innerHTML = '&#9729;&#65039; Change Drive file';
   unlinkBtn.style.display = '';
 }
 function renderAutoBackupStatus(err){
@@ -1574,7 +1720,7 @@ function setAppLockEnabled(on){
 function renderAppUpdateStatus(st){
   if(!st) return;
   const current = st.current || 0, latest = st.latest || 0;
-  document.getElementById('appVersionLabel').textContent = 'Version 1.' + current;
+  document.getElementById('appVersionLabel').textContent = 'Family Benefits Hub app version 1.' + current;
   const statusEl = document.getElementById('appUpdateStatus');
   const installBtn = document.getElementById('appUpdateInstallBtn');
   const checked = st.checkedAt ? new Date(st.checkedAt).toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}) : '';
@@ -1596,6 +1742,9 @@ if(window.AndroidApp){
   renderAppLockStatus();
   renderAutoBackupStatus();
   renderDriveStatus();
+  renderUndoPanel();
+  const undoDone = sessionStorage.getItem('hubUndoDone');
+  if(undoDone){ sessionStorage.removeItem('hubUndoDone'); document.getElementById('undoMsg').textContent = '\u2705 ' + undoDone + '.'; }
   try { renderAppUpdateStatus(JSON.parse(window.AndroidApp.appUpdateStatus())); } catch(e){}
   setTimeout(function(){ runAppAutoBackup(false); }, 3000);
 }
