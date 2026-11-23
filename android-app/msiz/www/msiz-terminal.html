@@ -1312,59 +1312,6 @@
         </div>
       </div>
     </div>
-    <!-- INVESTMENT CONTRIBUTION MATRIX -->
-    <section class="contrib-matrix-wrap" aria-labelledby="contributionMatrixTitle">
-      <div class="div-cal-header">
-        <span class="div-cal-title" id="contributionMatrixTitle">&#9670; INVESTMENT CONTRIBUTION MATRIX</span>
-        <span style="margin-left:auto;">CURRENT + MONTHLY</span>
-      </div>
-      <div class="div-cal-header">
-        <span class="div-cal-title">CURRENT PORTFOLIO WEIGHTS</span>
-        <button type="button" id="matrixReset" class="matrix-reset" title="Put every balance back to the built-in figures">RESET</button>
-        <span style="margin-left:auto;" id="matrixTotalHeader">$210,834 TOTAL</span>
-      </div>
-      <div class="hscroll-wrap" aria-label="Current portfolio balances and weights; swipe left or right">
-        <div class="contrib-matrix-summary" id="matrixSummary"></div>
-        <table class="contrib-matrix-table">
-          <thead><tr><th>PORTFOLIO</th><th>ACCOUNT / INVESTMENT</th><th>CURRENT BALANCE</th><th>WEIGHT OF TOTAL</th></tr></thead>
-          <tbody id="matrixBody"></tbody>
-        </table>
-      </div>
-      <div class="div-cal-header">
-        <span class="div-cal-title">MONTHLY CONTRIBUTION WEIGHTS — SEPARATE</span>
-        <span style="margin-left:auto;">$2,500.40 / MONTH</span>
-      </div>
-      <div class="hscroll-wrap" aria-label="Portfolio contribution weights; swipe left or right">
-        <div class="contrib-matrix-summary">
-          <div class="contrib-matrix-card"><strong>TSP PIE</strong><span>$2,375.40 · 95.00%</span></div>
-          <div class="contrib-matrix-card"><strong>ETF PIE</strong><span>$100.00 · 4.00%</span></div>
-          <div class="contrib-matrix-card"><strong>SGOV PIE</strong><span>$25.00 · 1.00%</span></div>
-        </div>
-        <table class="contrib-matrix-table">
-          <thead><tr><th>PORTFOLIO</th><th>INVESTMENT</th><th>MONTHLY</th><th>WEIGHT IN PIE</th><th>WEIGHT OF TOTAL</th></tr></thead>
-          <tbody>
-            <tr><td>TSP Pie</td><td style="color:#ff5252">TSP C</td><td>$783.88</td><td>33%</td><td>31.35%</td></tr>
-            <tr><td>TSP Pie</td><td style="color:#ff80ab">TSP S</td><td>$783.88</td><td>33%</td><td>31.35%</td></tr>
-            <tr><td>TSP Pie</td><td style="color:#40c4ff">TSP I</td><td>$807.64</td><td>34%</td><td>32.30%</td></tr>
-            <tr><td>ETF Pie</td><td style="color:#00e676">SCHD</td><td>$50.00</td><td>50%</td><td>2.00%</td></tr>
-            <tr><td>ETF Pie</td><td style="color:#00b8ff">QQQM</td><td>$45.00</td><td>45%</td><td>1.80%</td></tr>
-            <tr><td>ETF Pie</td><td style="color:#ff6d00">IBIT</td><td>$5.00</td><td>5%</td><td>0.20%</td></tr>
-            <tr><td>SGOV Pie</td><td style="color:#ffd740">SGOV</td><td>$25.00</td><td>100%</td><td>1.00%</td></tr>
-            <tr class="total-row"><td>TOTAL</td><td>ALL MONTHLY CONTRIBUTIONS</td><td>$2,500.40</td><td>—</td><td>100.00%</td></tr>
-          </tbody>
-        </table>
-        <table class="contrib-matrix-table" style="margin-top:8px;min-width:620px;">
-          <thead><tr><th>TSP SOURCE</th><th>CONTRIBUTION RATE</th><th>YOUR CONTRIBUTION</th><th>EMPLOYER MATCH</th><th>TOTAL</th></tr></thead>
-          <tbody>
-            <tr><td>Traditional TSP</td><td>16%</td><td>$1,027.20</td><td>$321.00</td><td>$1,348.20</td></tr>
-            <tr><td>Roth TSP</td><td>16%</td><td>$1,027.20</td><td>$0.00</td><td>$1,027.20</td></tr>
-            <tr class="total-row"><td>Total TSP</td><td>32% employee</td><td>$2,054.40</td><td>$321.00</td><td>$2,375.40</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="contrib-matrix-note" id="matrixReconcile" style="display:none"></div>
-      <div class="contrib-matrix-note">Balances in the table above are yours to edit — tap a figure, type the new one and press enter. They are stored on this device and feed the weights, the dividend estimates and the projections. The current portfolio weights include the HYSA. The separate monthly contribution table includes only accounts receiving monthly deposits. HYSA is omitted from that table because no new money is contributed to it each month.</div>
-    </section>
   </div>
   <!-- RIGHT PANEL -->
   <div class="panel" id="panel-right" style="border-right:none;overflow:hidden;">
@@ -1969,39 +1916,105 @@ function loadBal(){
   return result;
 }
 // DIVIDEND CALENDAR
+// Confirmed payouts as of Nov 22, 2026, plus the next scheduled ex-dates. Future amounts not yet
+// declared repeat the latest confirmed payout and are marked EST. Paid / soon / upcoming is worked
+// out from today's date, and refreshDivCalendar() below pulls new payouts from Yahoo Finance when
+// the phone is online and rolls the schedule forward, so the calendar keeps itself current.
 var DIV_DATA = [
-  // Future dates without a declared amount use the latest confirmed payout as an estimate.
-  {
-    sym:'SGOV', name:'iShares 0-3M Treasury', freq:'Monthly',
-    exDate:'2026-09-01', payDate:'2026-09-08', amount:0.306812,
-    status:'upcoming', estimated:true
-  },
-  {
-    sym:'SCHD', name:'Schwab Dividend Equity', freq:'Quarterly',
-    exDate:'2026-09-23', payDate:'2026-09-28', amount:0.2525,
-    status:'upcoming', estimated:true
-  },
-  {
-    sym:'QQQM', name:'Invesco Nasdaq 100', freq:'Quarterly',
-    exDate:'2026-09-21', payDate:'2026-09-25', amount:0.35215,
-    status:'upcoming', estimated:true
-  },
-  {
-    sym:'SGOV', name:'iShares 0-3M Treasury', freq:'Monthly',
-    exDate:'2026-08-03', payDate:'2026-08-06', amount:0.306812,
-    status:'paid'
-  },
-  {
-    sym:'SCHD', name:'Schwab Dividend Equity', freq:'Quarterly',
-    exDate:'2026-06-24', payDate:'2026-06-29', amount:0.2525,
-    status:'paid'
-  },
-  {
-    sym:'QQQM', name:'Invesco Nasdaq 100', freq:'Quarterly',
-    exDate:'2026-06-22', payDate:'2026-06-26', amount:0.35215,
-    status:'paid'
-  },
+  { sym:'SGOV', name:'iShares 0-3M Treasury', freq:'Monthly',   exDate:'2026-12-01', payDate:'2026-12-04', amount:0.32858, estimated:true },
+  { sym:'SCHD', name:'Schwab Dividend Equity', freq:'Quarterly', exDate:'2026-12-09', payDate:'2026-12-14', amount:0.2665,  estimated:true },
+  { sym:'QQQM', name:'Invesco Nasdaq 100',     freq:'Quarterly', exDate:'2026-12-21', payDate:'2026-12-28', amount:0.31266, estimated:true },
+  { sym:'SGOV', name:'iShares 0-3M Treasury', freq:'Monthly',   exDate:'2026-11-02', payDate:'2026-11-05', amount:0.32858 },
+  { sym:'SGOV', name:'iShares 0-3M Treasury', freq:'Monthly',   exDate:'2026-10-01', payDate:'2026-10-06', amount:0.301 },
+  { sym:'SCHD', name:'Schwab Dividend Equity', freq:'Quarterly', exDate:'2026-09-23', payDate:'2026-09-28', amount:0.2665 },
+  { sym:'QQQM', name:'Invesco Nasdaq 100',     freq:'Quarterly', exDate:'2026-09-21', payDate:'2026-09-25', amount:0.31266 },
+  { sym:'SGOV', name:'iShares 0-3M Treasury', freq:'Monthly',   exDate:'2026-09-01', payDate:'2026-09-04', amount:0.3071 }
 ];
+var DIV_INFO = {
+  SGOV:{ name:'iShares 0-3M Treasury',  freq:'Monthly',   payLag:3 },
+  SCHD:{ name:'Schwab Dividend Equity', freq:'Quarterly', payLag:5 },
+  QQQM:{ name:'Invesco Nasdaq 100',     freq:'Quarterly', payLag:4 }
+};
+var DIV_PAID_ROWS_PER_SYM = 2; // most recent paid rows shown for each fund
+function divIso(dt){ return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0'); }
+function divParse(iso){ var p=iso.split('-'); return new Date(+p[0], +p[1]-1, +p[2]); }
+function divAddDays(iso, n){ var d=divParse(iso); d.setDate(d.getDate()+n); return divIso(d); }
+function divMarketClosed(dt){
+  var md = (dt.getMonth()+1)*100 + dt.getDate();
+  return dt.getDay()===0 || dt.getDay()===6 || md===101 || md===619 || md===704 || md===1225;
+}
+function divWeekday(dt){ while(divMarketClosed(dt)) dt.setDate(dt.getDate()+1); return dt; }
+function divAddBizDays(iso, n){ var d=divParse(iso); while(n>0){ d.setDate(d.getDate()+1); if(!divMarketClosed(d)) n--; } return divIso(d); }
+function divStatus(d){
+  var today = divIso(new Date());
+  if(d.payDate < today) return 'paid';
+  if(d.exDate <= divAddDays(today, 14)) return 'soon';
+  return 'upcoming';
+}
+// Next ex-date after `lastEx`: SGOV goes ex on the first business day of each month; the
+// quarterly funds about 13 weeks after the previous one.
+function divProjectNext(sym, lastEx){
+  var d = divParse(lastEx);
+  if(DIV_INFO[sym].freq === 'Monthly') d = new Date(d.getFullYear(), d.getMonth()+1, 1);
+  else d.setDate(d.getDate()+91);
+  return divIso(divWeekday(d));
+}
+// Rolls each fund forward so there is always one upcoming payout to show.
+function divEnsureUpcoming(){
+  var today = divIso(new Date());
+  Object.keys(DIV_INFO).forEach(function(sym){
+    var rows = DIV_DATA.filter(function(d){ return d.sym===sym; }).sort(function(a,b){ return a.exDate.localeCompare(b.exDate); });
+    if(!rows.length) return;
+    var guard = 0;
+    while(rows[rows.length-1].payDate < today && guard++ < 24){
+      var last = rows[rows.length-1];
+      var ex = divProjectNext(sym, last.exDate);
+      var row = { sym:sym, name:DIV_INFO[sym].name, freq:DIV_INFO[sym].freq, exDate:ex,
+                  payDate:divAddBizDays(ex, DIV_INFO[sym].payLag), amount:last.amount, estimated:true };
+      DIV_DATA.push(row); rows.push(row);
+    }
+  });
+}
+// Pulls each fund's last year of payouts from Yahoo Finance (ex-date + amount) and merges them in.
+var divRefreshing = false;
+function refreshDivCalendar(){
+  if(divRefreshing) return;
+  divRefreshing = true;
+  var syms = Object.keys(DIV_INFO);
+  Promise.all(syms.map(function(sym){
+    var path = 'v8/finance/chart/'+sym+'?range=1y&interval=1d&events=div';
+    var urls = ['https://query1.finance.yahoo.com/'+path, 'https://query2.finance.yahoo.com/'+path];
+    function attempt(i){
+      if(i >= urls.length) return Promise.resolve(null);
+      return fetch(urls[i], {cache:'no-store'}).then(function(r){ if(!r.ok) throw 0; return r.json(); })
+        .catch(function(){ return attempt(i+1); });
+    }
+    return attempt(0).then(function(j){
+      var res = j && j.chart && j.chart.result && j.chart.result[0];
+      var ev = res && res.events && res.events.dividends;
+      if(!ev) return;
+      Object.keys(ev).forEach(function(k){
+        var e = ev[k]; if(!e || !e.amount || !e.date) return;
+        var ex = new Date(e.date*1000).toISOString().slice(0,10);
+        var match = DIV_DATA.filter(function(d){
+          return d.sym===sym && Math.abs(divParse(d.exDate)-divParse(ex)) <= 4*86400000;
+        })[0];
+        if(match){ match.exDate = ex; match.amount = e.amount; match.estimated = false; }
+        else DIV_DATA.push({ sym:sym, name:DIV_INFO[sym].name, freq:DIV_INFO[sym].freq, exDate:ex,
+                             payDate:divAddBizDays(ex, DIV_INFO[sym].payLag), amount:e.amount });
+      });
+      // An estimated row whose ex-date is past but that Yahoo never reported keeps its estimate.
+      // Future estimates follow the newest confirmed amount.
+      var confirmed = DIV_DATA.filter(function(d){ return d.sym===sym && !d.estimated; })
+        .sort(function(a,b){ return b.exDate.localeCompare(a.exDate); })[0];
+      if(confirmed) DIV_DATA.forEach(function(d){ if(d.sym===sym && d.estimated && d.exDate > confirmed.exDate) d.amount = confirmed.amount; });
+    });
+  })).then(function(){
+    divRefreshing = false;
+    divEnsureUpcoming();
+    renderDivCal();
+  }, function(){ divRefreshing = false; });
+}
 function fmtDivDate(d){
   var parts = d.split('-');
   var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -2013,10 +2026,15 @@ function renderDivCal(){
   var bal = loadBal();
   var html = '';
   // Sort: upcoming/soon first (by ex-date asc), then paid (by ex-date desc)
+  divEnsureUpcoming();
+  DIV_DATA.forEach(function(d){ d.status = divStatus(d); });
+  // Upcoming first (soonest ex-date first), then the most recent payouts for each fund.
   var upcoming = DIV_DATA.filter(function(d){ return d.status !== 'paid'; })
     .sort(function(a,b){ return a.exDate.localeCompare(b.exDate); });
+  var shown = {};
   var paid = DIV_DATA.filter(function(d){ return d.status === 'paid'; })
-    .sort(function(a,b){ return b.exDate.localeCompare(a.exDate); });
+    .sort(function(a,b){ return b.exDate.localeCompare(a.exDate); })
+    .filter(function(d){ shown[d.sym] = (shown[d.sym]||0) + 1; return shown[d.sym] <= DIV_PAID_ROWS_PER_SYM; });
   var rows = upcoming.concat(paid);
   rows.forEach(function(d){
     var sharesApprox = 0;
@@ -2846,7 +2864,6 @@ function setupCollapsibleSections(){
     document.getElementById('chartLegend'), document.getElementById('miniChartsRow')
   ]);
   addGroup('dividends', 'Dividend Calendar', [panel && panel.querySelector(':scope > .div-cal-wrap')]);
-  addGroup('contributions', 'Investment Contribution Matrix', [panel && panel.querySelector(':scope > .contrib-matrix-wrap')]);
 }
 
 document.addEventListener('DOMContentLoaded', function(){
@@ -2857,6 +2874,8 @@ document.addEventListener('DOMContentLoaded', function(){
   setInterval(function(){ updateMarketBadges(); updateTopBarStatus(); }, 60000);
   fetchLiveQuotes();
   setInterval(fetchLiveQuotes, 60000);
+  refreshDivCalendar();
+  setInterval(refreshDivCalendar, 6*3600000);
   fetchFutures();
   setInterval(fetchFutures, 60000);
   fetchBitcoinSpot();
@@ -2894,14 +2913,35 @@ function fetchFutures(){
       chgEl.style.color   = up ? 'var(--green)' : 'var(--red)';
     });
   }
+  // Live quotes from Yahoo Finance win over the snapshot: futures trade nearly around the clock
+  // (Sun 4 PM - Fri 3 PM MT), and the snapshot file isn't refreshed every minute overnight.
+  var live = {};
+  function fetchLive(sym){
+    var path = 'v8/finance/chart/' + encodeURIComponent(sym) + '?range=1d&interval=5m';
+    var urls = ['https://query1.finance.yahoo.com/' + path, 'https://query2.finance.yahoo.com/' + path];
+    function attempt(i){
+      if(i >= urls.length) return Promise.resolve();
+      return fetch(urls[i], {cache:'no-store'}).then(function(r){ if(!r.ok) throw 0; return r.json(); })
+        .then(function(j){
+          var m = j && j.chart && j.chart.result && j.chart.result[0] && j.chart.result[0].meta;
+          var price = m && Number(m.regularMarketPrice);
+          var prev = m && Number(m.previousClose || m.chartPreviousClose);
+          if(price && prev) live[sym] = {price:price, prev:prev};
+        })
+        .catch(function(){ return attempt(i+1); });
+    }
+    return attempt(0);
+  }
   render(lastKnown);
-  fetch(MARKET_DATA_URL + '?v=' + Date.now(), {cache:'no-store'})
+  var snapshotDone = fetch(MARKET_DATA_URL + '?v=' + Date.now(), {cache:'no-store'})
     .then(function(r){ return r.json(); })
     .then(function(snapshot){
       var data = snapshot.futures || {};
-      render(Object.keys(data).length ? data : lastKnown);
+      if(Object.keys(data).length) render(data);
     })
     .catch(function(){});
+  var liveDone = Promise.all(Object.keys(map).map(fetchLive));
+  Promise.all([snapshotDone, liveDone]).then(function(){ render(live); });
 }
 fetchFutures();
 setInterval(fetchFutures, 60000);
