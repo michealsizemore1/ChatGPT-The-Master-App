@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-22T19:50:33+00:00",
+  "updatedAt": "2026-11-23T01:50:08+00:00",
   "source": "Google News searches for cross country meet results",
   "page": "https://michealsizemore1.github.io/ChatGPT-The-Master-App/cross-country.html",
   "meets": [
@@ -58,10 +58,22 @@
   ],
   "results": [
     {
+      "date": "2026-11-23",
+      "headline": "Alabama Beats BYU for First NCAA Women's XC Title",
+      "source": "Marathon Handbook",
+      "url": "https://news.google.com/rss/articles/CBMieEFVX3lxTFBvOTRZY2Q2TzY2SGRSaGtCQ01BSFRlb2NOTkFVVWZVN3JTRVV6MlNuYnljdFk4X05wam54Z0RDY0RLNlB2c0txaGRUblA3cmxHUmxaVGpyQllDalBwUFkzYkozZm5VbElsN2E5bW5wb0tWUmNXQ2pnTw?oc=5"
+    },
+    {
+      "date": "2026-11-23",
+      "headline": "Which Conferences Performed The Best At The 2026 NCAA DI XC Championships? Results Breakdown",
+      "source": "FloTrack",
+      "url": "https://news.google.com/rss/articles/CBMipwFBVV95cUxOelp5VzBXRVNMeGlKUnRfMXVmbG5jUXhRMFNUSVZucUUxanJIRVlydlVPTmFfMHMzMGhpZzFDTmlpbENxLUtOMUxULS1GM210alR5Q0NtOXp0MWY2XzdYSGtqeFNBb3FYXzlvQnh4YTRuTmhCaVZtYUZtM1VFUVZYQlpLc09aNzlVbHZvNjl1TmNUdEtKNWlLYk45bENvQ3RUVGJ3WU45cw?oc=5"
+    },
+    {
       "date": "2026-11-22",
-      "headline": "FAY AND EVERARD RETAIN NATIONAL CROSS COUNTRY TITLES IN THRILLING FASHION",
-      "source": "Athletics Ireland",
-      "url": "https://news.google.com/rss/articles/CBMiqgFBVV95cUxPOHotNVZoMWZ1MV80cHFPWlAwUTViOUdlLVVUT3pxWkRMU2ttci1pWFhoYm8tYl9xS1hGbVBjYVJmX0FtYld6dHo3TWZTSE5VZjZQdTZLbTdYTjJucGNkR0JWZnNvOFk3ZGxrQzVzZ1o5MWVzRXZrd1JnelRLOTR2X25ael9hV0NPaW4yNEV4M1RnVTNnbjc4YV9qc2R0LXNTd0VEeDdmNkh2Zw?oc=5"
+      "headline": "Hannah Gapes wins NCAA cross country individual national title",
+      "source": "Yahoo Sports",
+      "url": "https://news.google.com/rss/articles/CBMigwFBVV95cUxOOUNoZjZOVndDWDg0THNBQ0h3aHkzSnhnanVoelZGZDU4X2pTXzBodXJrbjFJUjVkR0FaTG0zeHdZUEZycG1WZ0N5T09JSnJ2bllwTjY0QkdpRHNaTV85ZHVrbDQ1eFBTeTRWY2xZcDc1dkxhSkRRZmNVSUZtUXplempFbw?oc=5"
     },
     {
       "date": "2026-11-22",
@@ -134,18 +146,6 @@
       "headline": "Boston University's Buettner-Cable Concludes Cross Country Season at NCAA Championship",
       "source": "Patriot League",
       "url": "https://news.google.com/rss/articles/CBMizAFBVV95cUxNLW00NUNGclpYWmR2dVU5SGdiRFo2VnhCY09sRk54dW1TVEYzQWpjZktaSm5HOFUxSnVXLW9WVDF0OG9VcVBPMFRLWHlFSjk4UWxkdThBcHNoSjFGWE9wRVdIZ3JaRE90UlNaSzg1Rk03MG9YTDIwMFBwSktuUGFPb2JJbTlkdDM3aEc3WG91MjFORk03THhjY1IwaGNVUDZDYzVjTmxxZGJOamZFWXZRMjhqNXFDbzJoZkpwMm9VQk8tYWFCcFlqVEMzZDM?oc=5"
-    },
-    {
-      "date": "2026-11-21",
-      "headline": "Jane Hedengren Battles Calf Injury at NCAA Cross Country Championships as BYU Finishes Third",
-      "source": "World-Track",
-      "url": "https://news.google.com/rss/articles/CBMiwwFBVV95cUxNX2h3ck5hUlFYc0VfQXdGQ3VfWWxFWXZpWU5yMXpUOGpnam01SkRmZHIwaFNoa0NDelVGWjFSa28wYmJhdTNGSThGTFgtLTNrUzVXT1FKQXRQbGRIZnlLWWZ4YVJvaC1DdnlRVG5Qb3lCaWp1cTh0NC0yYV9RWFdXV01yVHoxU1ZpTnFaWWxOZmpmb2NMQ0llQVRacGV5bDRMWVRFVXo0ZDY5S2RMUk5zdXlQVEdvS3hqMzRQZVlYQmtRLWM?oc=5"
-    },
-    {
-      "date": "2026-11-21",
-      "headline": "Women’s Cross Country Earns First National Title, Men Take 3rd at NCAA Meet",
-      "source": "Alabama Athletics",
-      "url": "https://news.google.com/rss/articles/CBMi0gFBVV95cUxQcUJLbjBnbFhCRVcyX0V2ek5oYXl4dUlWVklUdmsxNEotaTdRTHdELWg1ckQ1OTVEYTlFc0t0Z0hCdTA4MGZzZ3FQTGdDcU8tQ0h1cU9vMWdDdFFyMUNvUFdKbmlDdW9hMDhRLWh3ak5VdjcxaUpwZWt4d2ctZGpSNkJfVGRSV0FHZ0kwZk5YMHYzSVBYcW9ucEN2SGVZY2E4THlMT3gxR3BuMDVNZGtXNFNFYTRQOWR5U0hnX0pPZll0WjlGM2NyeDZqaHpwUlZSYVE?oc=5"
     }
   ]
 }
