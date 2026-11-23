@@ -161,6 +161,14 @@ public class MainActivity extends Activity {
             if (resultCode == RESULT_OK) unlock();
             return;
         }
+        if (requestCode == DriveBackup.LINK_REQUEST) {
+            if (resultCode == RESULT_OK && data != null && data.getData() != null) {
+                String name = DriveBackup.onLinked(this, data.getData());
+                toast("Linked " + name + ". Saving a backup to it now\u2026");
+                web.evaluateJavascript("window.onDriveLinked && window.onDriveLinked()", null);
+            }
+            return;
+        }
         if (requestCode != FILE_REQUEST) {
             super.onActivityResult(requestCode, resultCode, data);
             return;
@@ -286,6 +294,57 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public String saveAutoBackup(String name, String json) {
             return Backups.save(getApplicationContext(), name, json);
+        }
+
+        /** Google Drive backup: pick a file in Drive once; each backup then overwrites it. */
+        @JavascriptInterface
+        public void linkDriveBackup() {
+            runOnUiThread(() -> {
+                try { startActivityForResult(DriveBackup.linkIntent(), DriveBackup.LINK_REQUEST); }
+                catch (Exception e) { toast("Couldn't open the file picker"); }
+            });
+        }
+
+        @JavascriptInterface
+        public void unlinkDriveBackup() {
+            DriveBackup.unlink(getApplicationContext());
+        }
+
+        @JavascriptInterface
+        public String driveBackupStatus() {
+            return DriveBackup.status(getApplicationContext());
+        }
+
+        /** Writes in the background (Drive can be slow), then calls window.onDriveBackupResult(error or ""). */
+        @JavascriptInterface
+        public boolean writeDriveBackup(final String json) {
+            if (!DriveBackup.linked(getApplicationContext())) return false;
+            new Thread(() -> {
+                final String err = DriveBackup.write(getApplicationContext(), json);
+                runOnUiThread(() -> web.evaluateJavascript("window.onDriveBackupResult && window.onDriveBackupResult("
+                        + org.json.JSONObject.quote(err == null ? "" : err) + ")", null));
+            }).start();
+            return true;
+        }
+
+        /** "Send a copy": saves the backup to Downloads, then opens the share sheet (Save to Drive, email, ...). */
+        @JavascriptInterface
+        public boolean shareBackup(String name, String json) {
+            final String where = Backups.save(getApplicationContext(), name, json);
+            final Uri uri = Backups.lastUri();
+            if (uri == null) { toast(where.isEmpty() ? "Couldn't save the backup" : "Saved to " + where + ". Sharing needs Android 10 or newer."); return !where.isEmpty(); }
+            final String title = name;
+            runOnUiThread(() -> {
+                Intent send = new Intent(Intent.ACTION_SEND);
+                send.setType("application/json");
+                send.putExtra(Intent.EXTRA_STREAM, uri);
+                send.putExtra(Intent.EXTRA_SUBJECT, title);
+                send.setClipData(ClipData.newRawUri(title, uri));
+                send.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                try { startActivity(Intent.createChooser(send, "Send backup to\u2026")); }
+                catch (Exception e) { toast("No app available to share with"); }
+            });
+            return true;
         }
 
         @JavascriptInterface

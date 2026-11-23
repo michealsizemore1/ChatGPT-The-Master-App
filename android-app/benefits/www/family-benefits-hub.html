@@ -941,6 +941,16 @@
         <h4 style="margin:18px 0 6px;color:var(--navy);">Automatic backups</h4>
         <p class="save-note" id="autoBackupStatus">Once a day, the app saves a backup to <b>Downloads/Family Benefits Hub/Auto backups</b> and keeps the newest 7.</p>
         <div class="toolbar"><button class="small add" type="button" onclick="runAppAutoBackup(true)">Back up now</button></div>
+        <p class="save-note" id="backupNowMsg" role="status" style="font-weight:600;"></p>
+
+        <h4 style="margin:18px 0 6px;color:var(--navy);">Google Drive</h4>
+        <p class="save-note" id="driveStatus"></p>
+        <div class="toolbar">
+          <button class="small add" type="button" id="driveLinkBtn" onclick="window.AndroidApp.linkDriveBackup()">Choose Google Drive file</button>
+          <button class="small" type="button" id="driveUnlinkBtn" style="display:none;background:#fff;color:var(--navy);border:1px solid var(--navy);" onclick="unlinkDrive()">Stop saving to Drive</button>
+          <button class="small" type="button" style="background:var(--navy);color:#fff;" onclick="shareBackupCopy()">Send a copy&hellip;</button>
+        </div>
+        <p class="save-note" id="driveHowTo">Tap <b>Choose Google Drive file</b>, tap the &#9776; menu in the picker, choose <b>Drive</b>, pick a folder, then tap <b>Save</b>. After that, every backup (daily and Back up now) also updates that one file in your Drive, and Drive keeps its older versions. <b>Send a copy</b> opens the share sheet for a one-time copy (Save to Drive, email, and so on).</p>
 
         <h4 style="margin:18px 0 6px;color:var(--navy);">App updates</h4>
         <p class="save-note" id="appUpdateStatus">Checking…</p>
@@ -1472,12 +1482,70 @@ function runAppAutoBackup(manual){
   const today = new Date().toISOString().slice(0,10);
   if(!manual && localStorage.getItem('appAutoBackupLastDate') === today) return;
   const stamp = new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');
-  const where = window.AndroidApp.saveAutoBackup('family-benefits-hub-auto-' + stamp + '.json', appBackupJSON());
+  const json = appBackupJSON();
+  const where = window.AndroidApp.saveAutoBackup('family-benefits-hub-auto-' + stamp + '.json', json);
   if(where){
     localStorage.setItem('appAutoBackupLastDate', today);
     localStorage.setItem('appAutoBackupLastAt', new Date().toISOString());
   }
   renderAutoBackupStatus(where ? '' : 'The backup could not be saved. Try "Back up now" again.');
+  const toDrive = typeof window.AndroidApp.writeDriveBackup === 'function' && window.AndroidApp.writeDriveBackup(json);
+  if(manual){
+    const t = new Date().toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+    pendingManual = toDrive ? {t: t, phoneOk: !!where} : null;
+    showBackupNowMsg(where
+      ? '✅ Backed up at ' + t + ' to your phone' + (toDrive ? '. Saving to Google Drive…' : '.')
+      : '❌ The backup could not be saved to your phone.' + (toDrive ? ' Trying Google Drive…' : ''), !where);
+  }
+}
+let pendingManual = null;
+function showBackupNowMsg(text, isError){
+  const el = document.getElementById('backupNowMsg');
+  if(!el) return;
+  el.textContent = text;
+  el.style.color = isError ? '#b42318' : '#1a7f37';
+}
+// Called by the app after it writes the Google Drive file ('' = it worked).
+window.onDriveBackupResult = function(err){
+  renderDriveStatus();
+  if(!pendingManual) return;
+  const m = pendingManual; pendingManual = null;
+  if(m.phoneOk && !err) showBackupNowMsg('✅ Backed up at ' + m.t + ' to your phone and Google Drive.', false);
+  else if(m.phoneOk) showBackupNowMsg('⚠️ Backed up at ' + m.t + ' to your phone, but not Google Drive. ' + err, true);
+  else if(!err) showBackupNowMsg('⚠️ Saved to Google Drive at ' + m.t + ', but not to your phone.', true);
+  else showBackupNowMsg('❌ The backup could not be saved. ' + err, true);
+};
+// Called by the app right after a Drive file is chosen: fill it now.
+window.onDriveLinked = function(){ renderDriveStatus(); runAppAutoBackup(true); };
+function unlinkDrive(){
+  if(!confirm('Stop saving backups to Google Drive? The file already in your Drive stays there.')) return;
+  window.AndroidApp.unlinkDriveBackup();
+  renderDriveStatus();
+}
+function shareBackupCopy(){
+  const stamp = new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');
+  window.AndroidApp.shareBackup('family-benefits-hub-auto-' + stamp + '.json', appBackupJSON());
+}
+function renderDriveStatus(){
+  const el = document.getElementById('driveStatus');
+  if(!el || !(window.AndroidApp && typeof window.AndroidApp.driveBackupStatus === 'function')) return;
+  let st = {};
+  try { st = JSON.parse(window.AndroidApp.driveBackupStatus()); } catch(e){}
+  const linkBtn = document.getElementById('driveLinkBtn');
+  const unlinkBtn = document.getElementById('driveUnlinkBtn');
+  const esc = v => String(v).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  if(!st.linked){
+    el.innerHTML = 'Not set up. Backups are only saved on this phone.';
+    linkBtn.textContent = 'Choose Google Drive file';
+    unlinkBtn.style.display = 'none';
+    return;
+  }
+  const when = st.lastAt ? new Date(st.lastAt).toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}) : 'not yet';
+  el.innerHTML = (st.error ? '<b style="color:#b42318">' + esc(st.error) + '</b><br>' : '') +
+    'On. Each backup also updates <b>' + esc(st.name) + '</b>' + (st.where ? ' in ' + esc(st.where) : '') + '. Last saved: <b>' + when + '</b>.' +
+    (st.where ? '' : '<br>This file isn\'t in Google Drive. To use Drive, tap Change file and choose Drive in the picker.');
+  linkBtn.textContent = 'Change file';
+  unlinkBtn.style.display = '';
 }
 function renderAutoBackupStatus(err){
   const el = document.getElementById('autoBackupStatus');
@@ -1527,6 +1595,7 @@ if(window.AndroidApp){
   document.getElementById('appSettingsWebNote').style.display = 'none';
   renderAppLockStatus();
   renderAutoBackupStatus();
+  renderDriveStatus();
   try { renderAppUpdateStatus(JSON.parse(window.AndroidApp.appUpdateStatus())); } catch(e){}
   setTimeout(function(){ runAppAutoBackup(false); }, 3000);
 }

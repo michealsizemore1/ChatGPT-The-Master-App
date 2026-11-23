@@ -22,8 +22,14 @@ final class Backups {
 
     private Backups() { }
 
+    private static Uri last;
+
+    /** The file the last save() wrote on Android 10+ (for sharing it), or null. */
+    static Uri lastUri() { return last; }
+
     /** Saves one backup. Returns where it went (for the Settings text), or "" if it failed. */
     static String save(Context ctx, String name, String json) {
+        last = null;
         try {
             byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
             if (Build.VERSION.SDK_INT >= 29) {
@@ -35,6 +41,7 @@ final class Backups {
                 Uri uri = ctx.getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, cv);
                 if (uri == null) return "";
                 try (OutputStream os = ctx.getContentResolver().openOutputStream(uri)) { os.write(bytes); }
+                last = uri;
                 prune29(ctx, rel + "/");
                 return "Downloads/" + SUBFOLDER;
             } else {
