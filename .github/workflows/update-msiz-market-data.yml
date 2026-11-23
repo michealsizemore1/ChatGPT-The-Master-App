@@ -4,6 +4,9 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "*/15 13-22 * * 1-5"
+    # Futures trade overnight (Sun 23:00 UTC - Fri 22:00 UTC), so refresh every 30 min then too.
+    - cron: "*/30 23 * * 0-4"
+    - cron: "*/30 0-12 * * 1-5"
     - cron: "15 1 * * *"
 
 permissions:

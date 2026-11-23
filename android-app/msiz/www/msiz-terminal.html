@@ -2913,14 +2913,35 @@ function fetchFutures(){
       chgEl.style.color   = up ? 'var(--green)' : 'var(--red)';
     });
   }
+  // Live quotes from Yahoo Finance win over the snapshot: futures trade nearly around the clock
+  // (Sun 4 PM - Fri 3 PM MT), and the snapshot file isn't refreshed every minute overnight.
+  var live = {};
+  function fetchLive(sym){
+    var path = 'v8/finance/chart/' + encodeURIComponent(sym) + '?range=1d&interval=5m';
+    var urls = ['https://query1.finance.yahoo.com/' + path, 'https://query2.finance.yahoo.com/' + path];
+    function attempt(i){
+      if(i >= urls.length) return Promise.resolve();
+      return fetch(urls[i], {cache:'no-store'}).then(function(r){ if(!r.ok) throw 0; return r.json(); })
+        .then(function(j){
+          var m = j && j.chart && j.chart.result && j.chart.result[0] && j.chart.result[0].meta;
+          var price = m && Number(m.regularMarketPrice);
+          var prev = m && Number(m.previousClose || m.chartPreviousClose);
+          if(price && prev) live[sym] = {price:price, prev:prev};
+        })
+        .catch(function(){ return attempt(i+1); });
+    }
+    return attempt(0);
+  }
   render(lastKnown);
-  fetch(MARKET_DATA_URL + '?v=' + Date.now(), {cache:'no-store'})
+  var snapshotDone = fetch(MARKET_DATA_URL + '?v=' + Date.now(), {cache:'no-store'})
     .then(function(r){ return r.json(); })
     .then(function(snapshot){
       var data = snapshot.futures || {};
-      render(Object.keys(data).length ? data : lastKnown);
+      if(Object.keys(data).length) render(data);
     })
     .catch(function(){});
+  var liveDone = Promise.all(Object.keys(map).map(fetchLive));
+  Promise.all([snapshotDone, liveDone]).then(function(){ render(live); });
 }
 fetchFutures();
 setInterval(fetchFutures, 60000);
