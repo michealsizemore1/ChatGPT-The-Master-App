@@ -1312,59 +1312,6 @@
         </div>
       </div>
     </div>
-    <!-- INVESTMENT CONTRIBUTION MATRIX -->
-    <section class="contrib-matrix-wrap" aria-labelledby="contributionMatrixTitle">
-      <div class="div-cal-header">
-        <span class="div-cal-title" id="contributionMatrixTitle">&#9670; INVESTMENT CONTRIBUTION MATRIX</span>
-        <span style="margin-left:auto;">CURRENT + MONTHLY</span>
-      </div>
-      <div class="div-cal-header">
-        <span class="div-cal-title">CURRENT PORTFOLIO WEIGHTS</span>
-        <button type="button" id="matrixReset" class="matrix-reset" title="Put every balance back to the built-in figures">RESET</button>
-        <span style="margin-left:auto;" id="matrixTotalHeader">$210,834 TOTAL</span>
-      </div>
-      <div class="hscroll-wrap" aria-label="Current portfolio balances and weights; swipe left or right">
-        <div class="contrib-matrix-summary" id="matrixSummary"></div>
-        <table class="contrib-matrix-table">
-          <thead><tr><th>PORTFOLIO</th><th>ACCOUNT / INVESTMENT</th><th>CURRENT BALANCE</th><th>WEIGHT OF TOTAL</th></tr></thead>
-          <tbody id="matrixBody"></tbody>
-        </table>
-      </div>
-      <div class="div-cal-header">
-        <span class="div-cal-title">MONTHLY CONTRIBUTION WEIGHTS — SEPARATE</span>
-        <span style="margin-left:auto;">$2,500.40 / MONTH</span>
-      </div>
-      <div class="hscroll-wrap" aria-label="Portfolio contribution weights; swipe left or right">
-        <div class="contrib-matrix-summary">
-          <div class="contrib-matrix-card"><strong>TSP PIE</strong><span>$2,375.40 · 95.00%</span></div>
-          <div class="contrib-matrix-card"><strong>ETF PIE</strong><span>$100.00 · 4.00%</span></div>
-          <div class="contrib-matrix-card"><strong>SGOV PIE</strong><span>$25.00 · 1.00%</span></div>
-        </div>
-        <table class="contrib-matrix-table">
-          <thead><tr><th>PORTFOLIO</th><th>INVESTMENT</th><th>MONTHLY</th><th>WEIGHT IN PIE</th><th>WEIGHT OF TOTAL</th></tr></thead>
-          <tbody>
-            <tr><td>TSP Pie</td><td style="color:#ff5252">TSP C</td><td>$783.88</td><td>33%</td><td>31.35%</td></tr>
-            <tr><td>TSP Pie</td><td style="color:#ff80ab">TSP S</td><td>$783.88</td><td>33%</td><td>31.35%</td></tr>
-            <tr><td>TSP Pie</td><td style="color:#40c4ff">TSP I</td><td>$807.64</td><td>34%</td><td>32.30%</td></tr>
-            <tr><td>ETF Pie</td><td style="color:#00e676">SCHD</td><td>$50.00</td><td>50%</td><td>2.00%</td></tr>
-            <tr><td>ETF Pie</td><td style="color:#00b8ff">QQQM</td><td>$45.00</td><td>45%</td><td>1.80%</td></tr>
-            <tr><td>ETF Pie</td><td style="color:#ff6d00">IBIT</td><td>$5.00</td><td>5%</td><td>0.20%</td></tr>
-            <tr><td>SGOV Pie</td><td style="color:#ffd740">SGOV</td><td>$25.00</td><td>100%</td><td>1.00%</td></tr>
-            <tr class="total-row"><td>TOTAL</td><td>ALL MONTHLY CONTRIBUTIONS</td><td>$2,500.40</td><td>—</td><td>100.00%</td></tr>
-          </tbody>
-        </table>
-        <table class="contrib-matrix-table" style="margin-top:8px;min-width:620px;">
-          <thead><tr><th>TSP SOURCE</th><th>CONTRIBUTION RATE</th><th>YOUR CONTRIBUTION</th><th>EMPLOYER MATCH</th><th>TOTAL</th></tr></thead>
-          <tbody>
-            <tr><td>Traditional TSP</td><td>16%</td><td>$1,027.20</td><td>$321.00</td><td>$1,348.20</td></tr>
-            <tr><td>Roth TSP</td><td>16%</td><td>$1,027.20</td><td>$0.00</td><td>$1,027.20</td></tr>
-            <tr class="total-row"><td>Total TSP</td><td>32% employee</td><td>$2,054.40</td><td>$321.00</td><td>$2,375.40</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="contrib-matrix-note" id="matrixReconcile" style="display:none"></div>
-      <div class="contrib-matrix-note">Balances in the table above are yours to edit — tap a figure, type the new one and press enter. They are stored on this device and feed the weights, the dividend estimates and the projections. The current portfolio weights include the HYSA. The separate monthly contribution table includes only accounts receiving monthly deposits. HYSA is omitted from that table because no new money is contributed to it each month.</div>
-    </section>
   </div>
   <!-- RIGHT PANEL -->
   <div class="panel" id="panel-right" style="border-right:none;overflow:hidden;">
@@ -2846,7 +2793,6 @@ function setupCollapsibleSections(){
     document.getElementById('chartLegend'), document.getElementById('miniChartsRow')
   ]);
   addGroup('dividends', 'Dividend Calendar', [panel && panel.querySelector(':scope > .div-cal-wrap')]);
-  addGroup('contributions', 'Investment Contribution Matrix', [panel && panel.querySelector(':scope > .contrib-matrix-wrap')]);
 }
 
 document.addEventListener('DOMContentLoaded', function(){
