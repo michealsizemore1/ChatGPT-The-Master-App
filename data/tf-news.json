@@ -1,7 +1,43 @@
 {
-  "updatedAt": "2026-11-22T19:57:55+00:00",
+  "updatedAt": "2026-11-24T00:21:26+00:00",
   "source": "Google News searches for college track & field",
   "news": [
+    {
+      "date": "2026-11-24",
+      "headline": "Colorado Unveils 2026-27 Track And Field Schedule",
+      "source": "University of Colorado Athletics",
+      "url": "https://news.google.com/rss/articles/CBMiowFBVV95cUxQOUl1RzBYQWU2S2dMaU5pdFVtWXlhdGY4N2hMbjJmZUlYUmdYd0dreW9Oa3N5c2FiOXBKQ09tLVRVTnpjUDFNQk9CMlJHYmQ3dGpmMmI1QXlycm5hYjBYOFlLek9NNzNqSUtrUERxenZHSXhIMGlVeW11R0F1VllXMlJacUwzYld6TmYzbmQ4bG5NNE1xZnZtblBwU0MwVFdDZ0RJ?oc=5"
+    },
+    {
+      "date": "2026-11-23",
+      "headline": "Men's Track and Field Announces 2027 Indoor and Outdoor Schedules",
+      "source": "Princeton University Athletics",
+      "url": "https://news.google.com/rss/articles/CBMirwFBVV95cUxNU0J5UXVxUG1zdy1NUk8zNTJxTUNKMDNCLXMxaDRQRjlFNkp1WmtoOTBzaGNGczUzVnd4bzgwV0MtQ1k2SXJSSHRERlRBcm56MkhJZExwN05GRTU0cXYxNl9GVVE3ODVqVHRKakFza2lPU1BEbTJMemhZTk4xd1hwOG1NcC1MNkdfNlJ2RVJGRzJBZ2Z6dEwySW9hSmlZSkRyVUJfeTdFRFB6WGdMSmZB?oc=5"
+    },
+    {
+      "date": "2026-11-23",
+      "headline": "Minnesota Track & Field Announces 2026-27 Schedule",
+      "source": "University of Minnesota Athletics",
+      "url": "https://news.google.com/rss/articles/CBMiqgFBVV95cUxQWTVxNkhQdGotNS00V0ZySkh3VzF1WnBVUy1WeGtCcUpicDRTV0FwMFA0c2xZTDhQcXBjQ3hQUW5pWE9lRk9aQzJlQndKbG02NHAta3RCTXB5dlpOeFQxLVVYb1RLRGFqS3Q2eVQxNXJBdncyR3dGaDN6V29KcVlldF92MUIzVGpZSHloZC1KbzJZaEhybU4tUUwtSEkyLTAyOE1xZEp0akpYdw?oc=5"
+    },
+    {
+      "date": "2026-11-23",
+      "headline": "Track & Field Announces 2026-27 Indoor, Outdoor Schedules",
+      "source": "Georgetown University Athletics",
+      "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxONVRWSUxYenhiTF8xOGVjX1pnMWt5YjRreEpwRmxBNzNMRWt6NkVhdlVLS1Ayb25mY1VrMHh4VUdVU0NZM1dMWlNsVTg2N2NpOHNJSDhaNUgzblJiZEZJV0NUdmF0LU1aUl9hdS1MRjdVSlIzMG9lQzJ5VkNQbUg2aFFTRG16MkppV2JEQTZYdTRMREpMcHhBZlBIUXVPSEdMN0Y2czFCblNHMFdDTm5WYQ?oc=5"
+    },
+    {
+      "date": "2026-11-23",
+      "headline": "Georgia Track and Field Announces 2027 Indoor and Outdoor Schedules - University of Georgia Athletics",
+      "source": "University of Georgia Athletics",
+      "url": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxNNDAyTjVpSEZSU2ZJS2lodGVPX1Rkb052TmgwR0lCdW50T2RHVFNrNlBmaWRybFl4U1JDVnViNDlXOWFlRmxScE9IN2hTVHdsUnV2ZE9vVUVJdlFDbmUwR2NiUUd1dkJneEZhOVR4NzRfMGNwNVZPbUFSZHpTakE4Y3l2WlVUQ29Ia3gtN0JwWVNWTG01Yk9xemNhNWtmQXQwbFUydkZDamhZbjY2Y2Y1VGFCNVktV1VpbnhF?oc=5"
+    },
+    {
+      "date": "2026-11-23",
+      "headline": "Track & Field Unveils 2026-27 Schedule",
+      "source": "Georgia Tech Yellow Jackets",
+      "url": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxPdFNXUi11NVN5Mmc5X01xdFBZVHJkTF9GcWN4QkV6NkZKNG12ZU0yTnJvU3hodGdEclhDaVdLMFlyQi1JWnA0Qll5dUFBZHFLam1ZVDMxOHZOaGFyS0Q5WFFBdkNXUEJkTFNEeEpxWWthT2pNRmJ4Ykw5ZnQtaHAtOG9qZEdQM2VW?oc=5"
+    },
     {
       "date": "2026-11-21",
       "headline": "College Track and Field Live Stream: How to Watch College Track and Field (Nov. 21, 2026)",
@@ -21,10 +57,22 @@
       "url": "https://news.google.com/rss/articles/CBMipgFBVV95cUxNdHJwTVFRWEF2bXZiT3pSRUpzcG5aMm5HTW16dmM0eEQzMUppaVdYZzB6RmdIQjdYWnc0R3QxM2pnaHJaNHBFMTktMkxIVXY3TUttYjhSeUlITmhWNHVoU0llN0NORGY5TTFtem5tNEQ3Z1M0a3MxU0F3OWU3SUdjQnJuTi0yekdoYnhWSkFrS3dyOXBPT2pydEdIaU1vampXQzRLMm1B?oc=5"
     },
     {
-      "date": "2026-11-03",
-      "headline": "When does the 2027 NCAA indoor track and field season start?",
-      "source": "NCAA.com",
-      "url": "https://news.google.com/rss/articles/CBMixgFBVV95cUxNTERYWWRaVjlPWVBsWEtsSEhJMVAzTmdVSjUzVXI4VzdBSzJrSjY2UVY4ZEU4emZQZlJPTmVWOW44dlZjSWptMEszQXdtZU5IQjBoVnVZOThWT2QxeE5lVGRqcUZMb20zZE82SkotTjlPS0FpSzUwNFk4Y0RJLVg0eURqZ29Kb1FUUHNuc2EtSVZOWERHVjlHZTNrRk9BaWFqV21Tdnd6eFVTTnpNLU01bWpoY3NwTVJZcHVmcmlaaW1SbUx3dWfSAcsBQVVfeXFMT0hudXB1ZS1zVkc1cGlVa3FfTUdHU181N1hNTHN6MHJqM3VydmZheGxCVjFQX0VSZFlPbkZJYzByUWVhV1RJcWpHcGktTGwtenA1R0oyYXM2cHdiRUZfTUcxMXRZaEpsV0dDTFd6emFpZl9reHRwMk1POU9RamNKdGgwYnhSYW5OUEtVd1dKZklESWIxTnNJdEFzTl9maDMzYy1sM2xJUm56VTVveHVwMm15NmdSZVJJUHd2NVFRV0E5MUVYcnc5TVExSkU?oc=5"
+      "date": "2026-11-17",
+      "headline": "Track & Field to Host Alumni Gathering on January 16",
+      "source": "Ithaca College Athletics",
+      "url": "https://news.google.com/rss/articles/CBMiogFBVV95cUxPZURGNFo2UXMxT0VzZWEweGVqOENPWm1yYWFSWTZHRWhCT2RUVG81bm5UU0JpaXBpaWl1VmFDMFNFbFZmc0dRVDhuVWVmbW9qcGJoSUI4V2pTM2w4TGIxOU5tM2FpWUlqZnBaa0QtNGVTLXdRUVJEeU9oczJ4bVRvVGloU2RNdHNhSW1nREpyeE94RWpKanZkWXZ2U3BNd2t6eXc?oc=5"
+    },
+    {
+      "date": "2026-11-16",
+      "headline": "Halter Announces 2027 Track and Field Schedule",
+      "source": "Mizzou Athletics",
+      "url": "https://news.google.com/rss/articles/CBMiiwFBVV95cUxPV1JITG1QRmcyQUdPdUxodXVnajdfQXdsMFRYVlRUdTNjSzlGUFVndXB2OGQ3ZDBYNDdfZXJTZ3lwSHpjZnp2VHJuZjgxVjZUTWgxQ3FLTkNhR18tSFpVRmxJR2pUaFhQUl84Yk1CTWxSUlMzVU1QNUFiZXlRaWJtY0Y3UWNVRVFOYkxV?oc=5"
+    },
+    {
+      "date": "2026-11-12",
+      "headline": "Illinois Track and Field Adds Four in 2027 Signing Class",
+      "source": "University of Illinois Athletics",
+      "url": "https://news.google.com/rss/articles/CBMiugFBVV95cUxOYWkwU1R0Z3V3MXpFVWphRXRFM3hjS3RQcVhkX1ZUQVFOcEtoNDdMZXRPS0U2MGN1Vm1LSjdsR0FNV3BWbzk4ZUJxcTYzdmtWRVRiU3pQeGdBNkg2T09tY3AzTnlnaFRYbVpiZ0RsOW92bjZIdjk3OEU1SzRzZ212WGd1bV91OFo2UkRrT2JTcnUzWWUzMFhfV3ZxTXItd1R3dm9Ta3JMaFlKaHdFTWI5dVYyZzJwWTZiUFE?oc=5"
     }
   ]
 }
