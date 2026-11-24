@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-24T02:20:35+00:00",
+  "updatedAt": "2026-11-24T13:58:03+00:00",
   "source": "Google News searches for cross country meet results",
   "page": "https://michealsizemore1.github.io/ChatGPT-The-Master-App/cross-country.html",
   "meets": [
@@ -58,10 +58,28 @@
   ],
   "results": [
     {
-      "date": "2026-11-23",
+      "date": "2026-11-24",
+      "headline": "Stevens competes at Divison 3 cross country championships",
+      "source": "Yahoo Sports",
+      "url": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxPSVFHem1Qa2xZbDZkRkJySkljYjJacHI0S3FRMHFUdlB6SUc1eGZaRHdvaXlfeFFCQzByMUtmYWdhY0pHYlczbGpBZnJoNzJEcDdtVFB1LUFxcHJmUkdSa3VaY3NRR0s4OXdZd1lEY2s5REM1eFhrMTdiaEVtTWg0UFJUY3hPZHpS?oc=5"
+    },
+    {
+      "date": "2026-11-24",
       "headline": "2026 NCAA cross country national championships: Date, time, TV channel, history, results",
       "source": "NCAA.com",
       "url": "https://news.google.com/rss/articles/CBMi1wFBVV95cUxQMDlIbFg3dVlmY0dmS0NDRzhlS0padTFKczIwVXBuTGJDdXg3RHBCSmxiSDUtak1hTFlJUTNGdXZFWF9sQ2NXOTZXZWJvLWNfMHNycVdMMzAxdTJfNmhHNFEzdzdPN0p4VVU3WFlrclVMRTlfVXM0UzNiV1JUeXRtNHZrZE54TTdXalh2d0RRMVVZQVhZWlBLSWhVY1dscW9fSFFHMDMxcU11TV9saTJxTVZNdko4RS1lVkJMSmljd0FwZmJBWkdYNHBLMGlpdENpTFE0MWZob9IB3AFBVV95cUxPYmxEamVxeG5NZE9hUFlQZzJ6T2prN0RqRUo4MHBrLWVSZHdNdklwWkpMVmxUd0FrY1NKSzFUNnB2STlvcHpSTWUwdEEzV2NUVXkwaHNudkh5RVkzb19TTVJqUVFVQzlfTGFlZ2U0NHdRd21RczRnSjc5dGN2UVBTZWZYdTNKN19SSGI5MENOSmVNX3FOQ1NWMzQ3T1JrTUJCeXZ6aHp0TDN4QTZrNG0yV3pDbEJqSFBvZHlLempXZXBuSVBRUXdOVnVlQW1oZFpJT1VuSzNncG05VUpZ?oc=5"
+    },
+    {
+      "date": "2026-11-24",
+      "headline": "2026 NCAA Cross Country Championships Results: Alabama and New Mexico Win First Team Titles",
+      "source": "RallyFuel",
+      "url": "https://news.google.com/rss/articles/CBMifkFVX3lxTFB4aU9zRGJUdE9CakM2aFh1TjljLXZJU0FwcXcybm5YRTlEX091WDdHVGtkMlVtXzFkRlAwcUctVzFPenc3c211VnBua1ZFUlFOXzJmV3JJS2hPZS14ZkJPNnd4N3dSQ0RqbG1UQTVZaEdvQm1janVSeTVsY01NQQ?oc=5"
+    },
+    {
+      "date": "2026-11-23",
+      "headline": "The Weekend Recovery: NCAA Championships, Brooks XC Northeast Regional, NXR Extravaganza",
+      "source": "Yahoo Sports",
+      "url": "https://news.google.com/rss/articles/CBMilgFBVV95cUxPNTV5MnYyMmJkSUJVMlU4dG1PWWRWcjhPTHNFdjdvQnYtakhxRUU4MjhUTHBDY0dUTE5CSkVWTVJzdHN5WVI1a2lHMjhTWjJJQ1F6TnJNX3ZSekx2R0o5T3NhSld1LWJXeFJHay0xWnBtampkMlMwQ1pzby1MbFVTNGF3MGxoOTZ1SGRjOHdvcFpKdjhmbWc?oc=5"
     },
     {
       "date": "2026-11-23",
@@ -86,12 +104,6 @@
       "headline": "The Best Photos From the NCAA XC Championships That Capture the Grit and Emotion of the Meet",
       "source": "Runner's World",
       "url": "https://news.google.com/rss/articles/CBMikwFBVV95cUxONThIY2NhTnFkZG9ucTh1RjJHblVRemZPX0RwbkJGNUluSFNNQlZWb1JTRENZUjAwV1MxZVZnTENydDNsVUlJX29SN1ViVTZCTmFiX1hRSnE0LVhiQUZjZUJVcUY5LWUwb29TX2JDaWVLUDBDOVk2bnFGVDQxTVY5Y1Jwc2l1ZWNHS3ZOb05WQWxTWHc?oc=5"
-    },
-    {
-      "date": "2026-11-23",
-      "headline": "NCAA Division III Cross Country Championships 2026 Results: Johns Hopkins, Williams Win Titles",
-      "source": "World-Track",
-      "url": "https://news.google.com/rss/articles/CBMilgFBVV95cUxOYW9mV2tyMVV3Tl9qMlRSbXFrRmczQ3pEU1NZTlYwdFBydWtaMlBRMkU0QTh6TXNONzdBc0piU0FsdTZVM2tIcjZQbGNmUG8yY0FUUWh0RkNVWUxWc01UOGt2VFZjbmdmX19NbkFRRU5pTjV1TXBKWHo5Q1JiZXhCdEpZbkdwLVd4a25IVU9May05bEU1emc?oc=5"
     },
     {
       "date": "2026-11-23",
@@ -131,21 +143,9 @@
     },
     {
       "date": "2026-11-22",
-      "headline": "UMD Cross Country Teams Finish Season with Strong Showing in NCAA Central Region Meet",
-      "source": "UMD Bulldogs",
-      "url": "https://news.google.com/rss/articles/CBMi4wFBVV95cUxPeFRiRGxibDkxalQwOEtJYWlqby13QTc5V2w2WHNVUk9oSTlnc0FZNXBDX21TdjljZ3RMTmdmQ3hvVm8xN2xKZ2RHZUVYSTQxNXhTQ2tiVl9lbWNBSFZHcDFiQUs1UHY3ZVNjSjREOGpYT0xRUmN3R3VvNkJKSXo4OTRCMGlIQXUxcHVFS3pid1lLOEFXdlJlNW5OQ1hfT1B1V1pNbG5PREltWUpWSk52SzZ4cVp3UjRBRzdIazdCd1JURllXenFRbTF0VTZ0Y0NEUkJ4OFZLQk5NVnBMdG02WW1GRQ?oc=5"
-    },
-    {
-      "date": "2026-11-22",
       "headline": "HISTORY MADE! Generals Finish Sixth at NCAA Men's Cross Country Championships",
       "source": "generalssports.com",
       "url": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxPWUYzenI1WHlKOXc3X05vSnhEVF9NZ19aOERUNFo0SU1YNDJnQzdSeUh1MGRuc0Z3NkZ3M0ZNUlgtcEs4ZHBYRGtsVUtwM0xFR3VNOFdBMWtwNlFOcVU4T0lsZnFQMXRqNXR1TjlIMmZ6ZDNmWTd5b1pSd1FEdTdBdmRMbm1WZDZYeG9NYTAtRVE5NWYyVERVNkNDOC1ZYVh4U0VMd0U4OFpfV2RpMkwtLXQyRG81b3VQQlJaZFdEX24?oc=5"
-    },
-    {
-      "date": "2026-11-22",
-      "headline": "UW-Stevens Point’s Murphy Wins NCAA Men’s Cross Country Individual Title",
-      "source": "Wisconsin Intercollegiate Athletic Conference",
-      "url": "https://news.google.com/rss/articles/CBMitAFBVV95cUxNRlotQ2RKRkljWk9fRFp4ZlpfLTh4eS1JcE9uREJZYTFwY2xnZjlxRmtGMXVxXzQtT0huRk9BTThIMFVsYWxaWHlLVF9fcHBGUUo0SnlLekU3a1V3OEplZTFIU01oYUlFTG9WdDdlTjgxUW1hbjlabjJrOVprYjNuNDJwNUczLUpkQ2p2eTNMVURjNTRTLVFIdXdDWlFPZlRTb056ZFZ6R0pBQ0dGN3ZIUC1aRTk?oc=5"
     }
   ]
 }
