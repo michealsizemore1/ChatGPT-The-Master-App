@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-24T22:45:31+00:00",
+  "updatedAt": "2026-11-25T09:08:47+00:00",
   "source": "Google News searches for college track & field",
   "news": [
     {
@@ -7,6 +7,12 @@
       "headline": "West Virginia Announces 2026-27 Indoor Track and Field Schedule",
       "source": "West Virginia University Athletics",
       "url": "https://news.google.com/rss/articles/CBMiswFBVV95cUxOckRIWjNfOExFWXJTbnNRbV9ESFVxaVBjX1JOZ2RzNmVodThsTklIQUpVMGphMXFLTzdCdzg3Y3RuZmZRMnZiQzJoU05TZzBITGUyWVRQZVlibnVhcVhBZlVUcDJDM3plT2hMb2VYanJRV29YeXJ6S0hyYTVxUDRramdVUGxLMVgtQUZnczQyaG80NHhpdXhJLUhBZ3pYcDVubnd2MFZKb3Jia0djQm5LSXpnbw?oc=5"
+    },
+    {
+      "date": "2026-11-24",
+      "headline": "Track & Field Announces 2027 Indoor Schedule",
+      "source": "Campbell University",
+      "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxOaFZCak9hWXZhZTJ3MVVhSGdSbGVfV0FNblpNR21QQ2NLU0VyZkljMjh5ZV9SdUljdHRCX19lWTNqWFNkWE1pbmZUZmFzWWU1dVM3ak9pdkFkSDlqRm9SSnNCTGNGMllTY0RyWHViSG13RUxzRUxjR1hnaFkxLWJXOHcxQTg4ZHNPd1dLSQ?oc=5"
     },
     {
       "date": "2026-11-24",
@@ -19,6 +25,12 @@
       "headline": "Utah State Announces 2026-2027 Indoor Track & Field Schedule",
       "source": "Utah State University Athletics",
       "url": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxOdGo0T2VNZmUyak5aUnNsdFFyVWptZ1J2TlREb1dlRE1VMC1YZmptZ0RKWFNyMkRubWNvRUFaaUNBekF0VUpvVU1HdVRoWnRpblZ5ZVpGODI2R0hrd2l1SjNwTXo4VzQ3QkVwTDRid3BubVEtdUZlZHd4Wm11M1BLZGJwQXcwTkdKdldNckN3ZDY4NzlrcVBpS25DcEF1UFR3cEFEalA4b29hSnVyeTRUcVBUMi1mRzV1ZkI4Z1FhM3U?oc=5"
+    },
+    {
+      "date": "2026-11-24",
+      "headline": "Miami Releases 2027 Indoor Track and Field Schedule",
+      "source": "Miami University RedHawks",
+      "url": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxQYUItVEdQWWd1ajZBMzJ1MWdJTTdlbjFYQndXVjNXTnc0b0NKSUtrcEtmSTV6djFoUFoxUGJkamNkTU5PeHFjVUZQVDREVi1Cajh2djBNc0Rja3I2VDZqNTBWdzk3YTZNbzc1RTRBdkU4U1ItRWZYMFFERTZNM1loenRNYkZLekdqYjFEN0w3UFJTM2p2RERkcDY4UEdkZktMV1MzZDE5bjRPd1hKajVZRHRqQWEyLXN3VHd3?oc=5"
     },
     {
       "date": "2026-11-24",
@@ -57,10 +69,10 @@
       "url": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxNNDAyTjVpSEZSU2ZJS2lodGVPX1Rkb052TmgwR0lCdW50T2RHVFNrNlBmaWRybFl4U1JDVnViNDlXOWFlRmxScE9IN2hTVHdsUnV2ZE9vVUVJdlFDbmUwR2NiUUd1dkJneEZhOVR4NzRfMGNwNVZPbUFSZHpTakE4Y3l2WlVUQ29Ia3gtN0JwWVNWTG01Yk9xemNhNWtmQXQwbFUydkZDamhZbjY2Y2Y1VGFCNVktV1VpbnhF?oc=5"
     },
     {
-      "date": "2026-11-20",
-      "headline": "Track & Field Announces 2027 Indoor Schedule",
-      "source": "University of Maryland Athletics",
-      "url": "https://news.google.com/rss/articles/CBMihAFBVV95cUxPOTduNGZXSkV4UF9KUHdPSHBDc2g2SlFzMFV2U2RSMFVEYXRFQjlTMEN3U2Jxa2R6YjNHcE1WNHY0M1dIaERpRGp6ZUQ5amhBWjEtRnpGMndWUUlWelgtYmwwSTFPdGp5MHR3YWE3clFpT3p4MldpR0JFc2MtOUk1VEJTOEw?oc=5"
+      "date": "2026-11-23",
+      "headline": "Track & Field Unveils 2026-27 Schedule",
+      "source": "Georgia Tech Yellow Jackets",
+      "url": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxPdFNXUi11NVN5Mmc5X01xdFBZVHJkTF9GcWN4QkV6NkZKNG12ZU0yTnJvU3hodGdEclhDaVdLMFlyQi1JWnA0Qll5dUFBZHFLam1ZVDMxOHZOaGFyS0Q5WFFBdkNXUEJkTFNEeEpxWWthT2pNRmJ4Ykw5ZnQtaHAtOG9qZEdQM2VW?oc=5"
     }
   ]
 }
