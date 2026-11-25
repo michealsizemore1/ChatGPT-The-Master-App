@@ -2879,7 +2879,7 @@ document.addEventListener('DOMContentLoaded', function(){
   fetchFutures();
   setInterval(fetchFutures, 60000);
   fetchBitcoinSpot();
-  setInterval(fetchBitcoinSpot, 60 * 60 * 1000);
+  setInterval(fetchBitcoinSpot, 60 * 1000);   // every minute (BeyondStride's Markets card uses the same source)
   seedSharedInvestmentData();
 });
 // FUTURES FETCH — calls our own backend proxy /api/futures
@@ -2967,13 +2967,13 @@ function showBitcoinSpot(q){
   var up=q.changesPercentage>=0;
   var previous=q.price/(1+q.changesPercentage/100);
   var pointChange=q.price-previous;
-  if(priceEl){priceEl.textContent=Math.round(q.price).toLocaleString();priceEl.title='Bitcoin spot price · hourly 24/7 update';}
+  if(priceEl){priceEl.textContent=Math.round(q.price).toLocaleString();priceEl.title='Bitcoin spot price · updated every minute, 24/7';}
   if(chgEl){chgEl.textContent=(up?'▲':'▼')+Math.abs(q.changesPercentage).toFixed(2)+'%';chgEl.className=up?'up':'dn';}
   if(ptEl){ptEl.textContent=(up?'+':'-')+Math.abs(pointChange).toFixed(0);ptEl.className=up?'up':'dn';}
   if(updatedEl){
     var updatedDate=new Date((q.lastUpdated||Math.floor(Date.now()/1000))*1000);
     updatedEl.textContent='UPDATED '+updatedDate.toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZone:'America/Denver',timeZoneName:'short'}).toUpperCase()+' · '+String(q.source||'LIVE').toUpperCase();
-    updatedEl.title='Bitcoin refreshes immediately when opened and every hour while the terminal remains open.';
+    updatedEl.title='Bitcoin refreshes immediately when opened and every minute while the terminal remains open.';
   }
   applyBitcoinToMacroStrip();
   renderAllStrips();
@@ -3039,10 +3039,47 @@ function applyLiveData(data){
   renderChartLegend();
   renderDivCal();
 }
+// Live quotes straight from Yahoo Finance, every minute. GitHub runs the scheduled snapshot update only a few times a
+// day, so the snapshot file alone can be hours old during trading hours. Same request and math as the snapshot script
+// (and BeyondStride's Markets card): regularMarketPrice vs previousClose from a 1-day chart.
+var LIVE_QUOTE_SYMS = ['^GSPC','^DJI','^IXIC','SCHD','QQQM','SGOV','IBIT'];
+var lastSnapshotQuotes = {};
+function fetchYahooQuote(sym){
+  var path = 'v8/finance/chart/' + encodeURIComponent(sym) + '?interval=1h&range=1d';
+  var urls = ['https://query1.finance.yahoo.com/' + path, 'https://query2.finance.yahoo.com/' + path];
+  function attempt(i){
+    if(i >= urls.length) return Promise.resolve(null);
+    return fetch(urls[i], {cache:'no-store'}).then(function(r){ if(!r.ok) throw 0; return r.json(); })
+      .then(function(j){
+        var m = j && j.chart && j.chart.result && j.chart.result[0] && j.chart.result[0].meta;
+        var price = m && Number(m.regularMarketPrice);
+        var prev = m && Number(m.previousClose || m.chartPreviousClose);
+        if(!price || !prev) throw 0;
+        var change = price - prev;
+        return {sym:sym, price:Math.round(price*1e4)/1e4, prev:Math.round(prev*1e4)/1e4, change:Math.round(change*1e4)/1e4,
+                changesPercentage:Math.round(change/prev*100*1e4)/1e4, yearHigh:m.fiftyTwoWeekHigh, yearLow:m.fiftyTwoWeekLow,
+                marketState:m.marketState||'', currency:m.currency||'USD', time:Number(m.regularMarketTime)||0};
+      })
+      .catch(function(){ return attempt(i+1); });
+  }
+  return attempt(0);
+}
+function fetchYahooQuotes(){
+  return Promise.all(LIVE_QUOTE_SYMS.map(fetchYahooQuote)).then(function(rows){
+    var merged = {}, newest = 0;
+    Object.keys(lastSnapshotQuotes).forEach(function(k){ merged[k] = lastSnapshotQuotes[k]; });
+    rows.forEach(function(q){ if(!q) return; merged[q.sym] = Object.assign({}, merged[q.sym] || {}, q); if(q.time > newest) newest = q.time; });
+    if(!newest) return;
+    applyLiveData(merged);
+    var label = 'LIVE · ' + new Date(newest*1000).toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit', timeZoneName:'short'}).toUpperCase();
+    ['holdingsDate','centerHoldingsDate'].forEach(function(id){ var el = document.getElementById(id); if(el){ el.textContent = label; el.title = 'Live from Yahoo Finance, refreshed every minute'; } });
+  });
+}
 function fetchLiveQuotes(){
   fetch(MARKET_DATA_URL + '?v=' + Date.now(), {cache:'no-store'})
     .then(function(r){ return r.json(); })
     .then(function(snapshot){
+      lastSnapshotQuotes = snapshot.quotes || {};
       applyLiveData(snapshot.quotes || {});
       var liveStrips = {news:snapshot.news, econ:snapshot.economy, macro:snapshot.macro};
       Object.keys(liveStrips).forEach(function(id){
@@ -3066,6 +3103,8 @@ function fetchLiveQuotes(){
         asOfEl.title = 'Automatic market update from ' + (snapshot.source || 'the scheduled market feed');
       }
     })
+    .catch(function(){})
+    .then(fetchYahooQuotes)
     .catch(function(){});
 }
 // ── STOCK SEARCH MODAL + MONTHLY CONTRIBUTIONS ─────────────────────────────
