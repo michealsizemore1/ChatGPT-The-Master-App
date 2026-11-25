@@ -342,6 +342,12 @@ public class MainActivity extends Activity {
 
     /** Lets the page save backups and CSV exports, and send a backup to Google Drive (or any app). */
     public class Bridge {
+        /** Daily spending totals for BeyondStride's Today screen (see SpendingProvider). */
+        @JavascriptInterface
+        public void setSpending(String json) {
+            SpendingProvider.save(MainActivity.this, json);
+        }
+
         @JavascriptInterface
         public String appLockStatus() {
             try {

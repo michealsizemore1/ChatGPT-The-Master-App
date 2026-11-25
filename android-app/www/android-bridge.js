@@ -74,3 +74,42 @@
   document.addEventListener("DOMContentLoaded", patch);
   window.addEventListener("load", patch);
 })();
+
+// 💳 Daily spending for BeyondStride's Today screen (app only). Adds up each of the last 14 days' spending from all
+// accounts with the same rules as the budget (transfers, card payments, income and "excluded from budget" don't
+// count; splits and refunds do) and hands the totals to the app, which shares only these daily totals.
+(function () {
+  if (!window.AndroidApp || !window.AndroidApp.setSpending) return;
+  var last = "";
+  function dk(d) { return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2); }
+  function send() {
+    try {
+      if (typeof spendingAllocations !== "function") return;
+      var data = JSON.parse(localStorage.getItem("meridian_money_data_v5") || "null");
+      if (!data || !data.transactions) return;
+      try { if (typeof cardPaymentIdSet === "function") CARD_PAYMENT_IDS = cardPaymentIdSet(data); } catch (e) {}
+      var days = {}, now = new Date();
+      for (var i = 13; i >= 0; i--) days[dk(new Date(now.getFullYear(), now.getMonth(), now.getDate() - i))] = 0;
+      data.transactions.forEach(function (t) {
+        var day = String(t && t.date || "").slice(0, 10);
+        if (!(day in days) || t.excludeFromBudget) return;
+        spendingAllocations(t).forEach(function (part) { days[day] += Number(part.amount) || 0; });
+      });
+      Object.keys(days).forEach(function (k) { days[k] = Math.max(0, Math.round(days[k] * 100) / 100); });
+      var json = JSON.stringify({ days: days });
+      if (json === last) return;
+      last = json;
+      window.AndroidApp.setSpending(json);
+    } catch (e) {}
+  }
+  window.addEventListener("load", function () { setTimeout(send, 1500); });
+  var realSet = Storage.prototype.setItem;
+  var timer = 0;
+  Storage.prototype.setItem = function (k) {
+    var r = realSet.apply(this, arguments);
+    if (k === "meridian_money_data_v5") { clearTimeout(timer); timer = setTimeout(send, 800); }
+    return r;
+  };
+  setInterval(function () { last = ""; send(); }, 10 * 60 * 1000);   // new day, fresh timestamp
+  document.addEventListener("visibilitychange", function () { if (document.hidden) { last = ""; send(); } });
+})();
