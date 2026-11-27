@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-27T12:45:18+00:00",
+  "updatedAt": "2026-11-27T23:33:03+00:00",
   "source": "Google News searches for cross country meet results",
   "page": "https://michealsizemore1.github.io/ChatGPT-The-Master-App/cross-country.html",
   "meets": [
@@ -59,6 +59,12 @@
   "results": [
     {
       "date": "2026-11-25",
+      "headline": "Indiana and Oregon Claim 2026 Big Ten Women’s Cross Country Postseason Awards",
+      "source": "Big Ten Conference",
+      "url": "https://news.google.com/rss/articles/CBMitwFBVV95cUxOZDEyNDlIdllUcTVUSkFWV0hwblUyOGROa250Z0x5dXg3Qnl0RUZOZTd2TTcwVGt5TGU0ZWhQYlJqcDJJQkZuRWN3M21xb3AxcF8xOUNlMWJsOGRFZ3N6TzZMOXdyblVOY1ZvMVZ2Vm05cjlLVVdBS2JHTW5sUGxqTWNQWmpqU3lLRjEtcTVqODA4ZlB0cFVSQU9VRzJPTjBaZGlUMWdoSDYyTXdjOE10VTNQVHdqdFE?oc=5"
+    },
+    {
+      "date": "2026-11-25",
       "headline": "Video Recap: New Mexico Wins the NCAA Men's Cross Country Championship",
       "source": "New Mexico Lobos",
       "url": "https://news.google.com/rss/articles/CBMipwFBVV95cUxQV2YwcW9zNm5BOE01N3ppTnpkZDNqVy1oN0dyYzh5cFdReDVDUExtdExab0x0dWdYaHhPeEhSQmRuc2xWYTI5WXlzdmtIUzF4QW14UURKcm5yR0tsOXRXT2VfT2dNUmg3S00yZzlNN3prLWNDSWRXN2tFOUlzNzB2M0pqVUZTVzY4NmN2YzNZOUtDUVcwaUExeE43dWlvY1BTdTlwTlV1WQ?oc=5"
@@ -101,12 +107,6 @@
     },
     {
       "date": "2026-11-23",
-      "headline": "NCAA Division III Cross Country Championships 2026 Results: Johns Hopkins, Williams Win Titles",
-      "source": "World-Track",
-      "url": "https://news.google.com/rss/articles/CBMilgFBVV95cUxOYW9mV2tyMVV3Tl9qMlRSbXFrRmczQ3pEU1NZTlYwdFBydWtaMlBRMkU0QTh6TXNONzdBc0piU0FsdTZVM2tIcjZQbGNmUG8yY0FUUWh0RkNVWUxWc01UOGt2VFZjbmdmX19NbkFRRU5pTjV1TXBKWHo5Q1JiZXhCdEpZbkdwLVd4a25IVU9May05bEU1emc?oc=5"
-    },
-    {
-      "date": "2026-11-23",
       "headline": "2026 NCAA cross country national championships: Date, time, TV channel, history, results",
       "source": "NCAA.com",
       "url": "https://news.google.com/rss/articles/CBMi1wFBVV95cUxQMDlIbFg3dVlmY0dmS0NDRzhlS0padTFKczIwVXBuTGJDdXg3RHBCSmxiSDUtak1hTFlJUTNGdXZFWF9sQ2NXOTZXZWJvLWNfMHNycVdMMzAxdTJfNmhHNFEzdzdPN0p4VVU3WFlrclVMRTlfVXM0UzNiV1JUeXRtNHZrZE54TTdXalh2d0RRMVVZQVhZWlBLSWhVY1dscW9fSFFHMDMxcU11TV9saTJxTVZNdko4RS1lVkJMSmljd0FwZmJBWkdYNHBLMGlpdENpTFE0MWZob9IB3AFBVV95cUxPYmxEamVxeG5NZE9hUFlQZzJ6T2prN0RqRUo4MHBrLWVSZHdNdklwWkpMVmxUd0FrY1NKSzFUNnB2STlvcHpSTWUwdEEzV2NUVXkwaHNudkh5RVkzb19TTVJqUVFVQzlfTGFlZ2U0NHdRd21RczRnSjc5dGN2UVBTZWZYdTNKN19SSGI5MENOSmVNX3FOQ1NWMzQ3T1JrTUJCeXZ6aHp0TDN4QTZrNG0yV3pDbEJqSFBvZHlLempXZXBuSVBRUXdOVnVlQW1oZFpJT1VuSzNncG05VUpZ?oc=5"
@@ -116,6 +116,12 @@
       "headline": "Which Conferences Performed The Best At The 2026 NCAA DI XC Championships? Results Breakdown",
       "source": "FloTrack",
       "url": "https://news.google.com/rss/articles/CBMipwFBVV95cUxOelp5VzBXRVNMeGlKUnRfMXVmbG5jUXhRMFNUSVZucUUxanJIRVlydlVPTmFfMHMzMGhpZzFDTmlpbENxLUtOMUxULS1GM210alR5Q0NtOXp0MWY2XzdYSGtqeFNBb3FYXzlvQnh4YTRuTmhCaVZtYUZtM1VFUVZYQlpLc09aNzlVbHZvNjl1TmNUdEtKNWlLYk45bENvQ3RUVGJ3WU45cw?oc=5"
+    },
+    {
+      "date": "2026-11-22",
+      "headline": "Hannah Gapes and Alabama Win NCAA Women's XC Titles",
+      "source": "Marathon Handbook",
+      "url": "https://news.google.com/rss/articles/CBMigwFBVV95cUxNdGt3RG9vdm9JZlktZnpYQkY1TERiVDU2TC1aOEJHdGUzZ2V2Q0oydFViX0Roc2ZKTDFIZFpBUEFrQVhCbG95eWpqdmNCUU5xV0EwWEhRNjlrQTUzRzg2YzlLeExCQ0ZlNUFOdHBaUE94TVZsbXZnLW5wcGJTZE1uYUZINA?oc=5"
     },
     {
       "date": "2026-11-22",
@@ -140,12 +146,6 @@
       "headline": "New Mexico Men, Alabama Women Win First NCAA Cross Country Titles",
       "source": "Trackalerts.com",
       "url": "https://news.google.com/rss/articles/CBMimgFBVV95cUxPVGVKNEVPVHBwMkZ1dWtnLTRKNHpOZGVGZWcwS2FsNDFheEpxSnYtY2MwRFFSRGdZN0JNOU9Gc2lNem9xX3BudnZ0ZkQwU2xYWkI3UVFPSEF3OFdvSlpHamM1VllBN0ctMzJ1Rk93T0N6dnZlX19XRk1uRkRrUlRlOGlsejE0RUVuT3IwRVh1aU4tM2pJSTRFVkVB?oc=5"
-    },
-    {
-      "date": "2026-11-21",
-      "headline": "ALABAMA WOMEN & NEW MEXICO MEN TAKE FIRST-EVER NCAA CROSS COUNTRY TITLES",
-      "source": "RunBlogRun",
-      "url": "https://news.google.com/rss/articles/CBMirwFBVV95cUxOX05xR0V4MWJtRUtCSTNPX1Y2cmNKV2R4eU0tRHFYbE1tc0ZkUWZGS1hLcmVMZFFyTDBNUFl6N1NmTktxZUk0NEswNHJDYW1hNnhrUXBHd19zWVhaTFVKQ3V3UFhQb0hGeWRtbFVVMFl3enYwcUk1dGFtSmtFa2tTQTdJRDBZRGszcDRkUkpoR0VEd2JRbWRTMlVGZ3N4NS1rMHczcTlRLTZaRlAzWDFn?oc=5"
     }
   ]
 }
