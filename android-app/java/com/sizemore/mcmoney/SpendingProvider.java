@@ -8,7 +8,7 @@ import android.database.MatrixCursor;
 import android.net.Uri;
 
 /**
- * Shares the last 14 days' spending totals (one number per day, nothing else) with BeyondStride's Today screen.
+ * Shares the last 14 days' spending totals and the transactions behind them with BeyondStride's Today screen.
  * Only apps the owner has allowed ("Read M&C Money daily spending" permission) can read it.
  */
 public class SpendingProvider extends ContentProvider {

@@ -77,7 +77,8 @@
 
 // 💳 Daily spending for BeyondStride's Today screen (app only). Adds up each of the last 14 days' spending from all
 // accounts with the same rules as the budget (transfers, card payments, income and "excluded from budget" don't
-// count; splits and refunds do) and hands the totals to the app, which shares only these daily totals.
+// count; splits and refunds do) and hands the totals, plus each day's transactions (merchant, amount, category,
+// account), to the app, which shares them only with apps the owner allows (BeyondStride).
 (function () {
   if (!window.AndroidApp || !window.AndroidApp.setSpending) return;
   var last = "";
@@ -88,15 +89,23 @@
       var data = JSON.parse(localStorage.getItem("meridian_money_data_v5") || "null");
       if (!data || !data.transactions) return;
       try { if (typeof cardPaymentIdSet === "function") CARD_PAYMENT_IDS = cardPaymentIdSet(data); } catch (e) {}
-      var days = {}, now = new Date();
-      for (var i = 13; i >= 0; i--) days[dk(new Date(now.getFullYear(), now.getMonth(), now.getDate() - i))] = 0;
+      var days = {}, tx = {}, now = new Date(), accts = {};
+      (data.accounts || []).forEach(function (a) { if (a && a.id) accts[a.id] = a.name || ""; });
+      for (var i = 13; i >= 0; i--) { var k0 = dk(new Date(now.getFullYear(), now.getMonth(), now.getDate() - i)); days[k0] = 0; tx[k0] = []; }
       data.transactions.forEach(function (t) {
         var day = String(t && t.date || "").slice(0, 10);
         if (!(day in days) || t.excludeFromBudget) return;
-        spendingAllocations(t).forEach(function (part) { days[day] += Number(part.amount) || 0; });
+        var amt = 0, parts = spendingAllocations(t);
+        parts.forEach(function (part) { amt += Number(part.amount) || 0; });
+        if (!parts.length) return;
+        days[day] += amt;
+        // The transactions behind each day's total, for BeyondStride's day popup.
+        var cat = ""; try { cat = typeof transactionCategoryLabel === "function" ? transactionCategoryLabel(t) : (t.category || ""); } catch (e) { cat = t.category || ""; }
+        tx[day].push({ m: String(t.merchant || t.description || t.payee || t.name || "Transaction"), a: Math.round(amt * 100) / 100,
+          c: String(cat || ""), acct: String(accts[t.accountId] || ""), p: String(t.person || "") });
       });
-      Object.keys(days).forEach(function (k) { days[k] = Math.max(0, Math.round(days[k] * 100) / 100); });
-      var json = JSON.stringify({ days: days });
+      Object.keys(days).forEach(function (k) { days[k] = Math.max(0, Math.round(days[k] * 100) / 100); tx[k].sort(function (a, b) { return b.a - a.a; }); });
+      var json = JSON.stringify({ days: days, tx: tx });
       if (json === last) return;
       last = json;
       window.AndroidApp.setSpending(json);

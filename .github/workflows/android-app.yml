@@ -174,7 +174,7 @@ jobs:
           <?xml version="1.0" encoding="utf-8"?>
           <resources>
               <color name="app_bg">#F5F7FB</color>
-              <string name="read_spending_desc">See how much was spent each day (totals only) in M&amp;C Money.</string>
+              <string name="read_spending_desc">See how much was spent each day in M&amp;C Money, and on what.</string>
               <style name="AppTheme" parent="android:Theme.Material.Light.NoActionBar">
                   <item name="android:statusBarColor">#0F172A</item>
                   <item name="android:navigationBarColor">#0F172A</item>
