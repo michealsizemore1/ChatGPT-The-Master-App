@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-26T17:05:31+00:00",
+  "updatedAt": "2026-11-27T01:48:20+00:00",
   "source": "Google News searches for cross country meet results",
   "page": "https://michealsizemore1.github.io/ChatGPT-The-Master-App/cross-country.html",
   "meets": [
@@ -59,12 +59,6 @@
   "results": [
     {
       "date": "2026-11-25",
-      "headline": "NCAA Division II men's and women's cross country championships qualifiers announced",
-      "source": "NCAA.com",
-      "url": "https://news.google.com/rss/articles/CBMizwFBVV95cUxNTXpjanhVaHhOdVlFNjB0ck9HcWpRUHI5bHpiSC1ZOWRTR3FKb3FkMkVIU1RWOVU5ZXExQ1NZaVRwdHU3WXczdGM1WUVucDVBWWR2alJVNnBiSG53TnpWTGM4SVpPakVYSnVreXRlWlZXN3UyY09PNjBtUFlzbEVvN3U4WU0wd2lMOFNQTWFuZ1hydHVSRm1STVdDd1UwdTJBeGMxRzN2Q3pndDBaaGJzUjExNTVTWURPd2hWUDRwa21BNUx0b0JQODQwQThkMFXSAdQBQVVfeXFMTkFPeEdEOUJnNjEtbzNaM0lDREYzTmxMdExmb0hUVEgwNHQ0NE1yck1lMUs2ZmJQcUY2U0EycTh3MHlBZTA5cHpXZ2NDVmxjdm41LUpvaEtnOUo4UkdQb0hISW1qU1hhWEE5a1Nsckt6MjJTWjJVeUpCZmpWelAtQk5MMkJYVWxobmhoV21SUUtiTzdfRWVvUWZfeW16bWJjRGlUTDVuNU1vWDdScjJmbTFPZjR3emkxNGg4WExDVFZzRVA4Rk8xanN2a2lKMTZ3Y2ZTbWQ?oc=5"
-    },
-    {
-      "date": "2026-11-25",
       "headline": "Video Recap: New Mexico Wins the NCAA Men's Cross Country Championship",
       "source": "New Mexico Lobos",
       "url": "https://news.google.com/rss/articles/CBMipwFBVV95cUxQV2YwcW9zNm5BOE01N3ppTnpkZDNqVy1oN0dyYzh5cFdReDVDUExtdExab0x0dWdYaHhPeEhSQmRuc2xWYTI5WXlzdmtIUzF4QW14UURKcm5yR0tsOXRXT2VfT2dNUmg3S00yZzlNN3prLWNDSWRXN2tFOUlzNzB2M0pqVUZTVzY4NmN2YzNZOUtDUVcwaUExeE43dWlvY1BTdTlwTlV1WQ?oc=5"
@@ -74,6 +68,18 @@
       "headline": "2026 NCAA Cross Country Championships Results: Alabama and New Mexico Win First Team Titles",
       "source": "RallyFuel",
       "url": "https://news.google.com/rss/articles/CBMifkFVX3lxTFB4aU9zRGJUdE9CakM2aFh1TjljLXZJU0FwcXcybm5YRTlEX091WDdHVGtkMlVtXzFkRlAwcUctVzFPenc3c211VnBua1ZFUlFOXzJmV3JJS2hPZS14ZkJPNnd4N3dSQ0RqbG1UQTVZaEdvQm1janVSeTVsY01NQQ?oc=5"
+    },
+    {
+      "date": "2026-11-24",
+      "headline": "Brooks XC Northeast 2026 results: Ethan Fischer (15:37), Kathryn Froelich (17:19) win at Holmdel",
+      "source": "World-Track",
+      "url": "https://news.google.com/rss/articles/CBMiigFBVV95cUxQSDN6TWtpRjd4aVJvZlh6bkFYX3AzOU5Dd1I0M01VQ08yN25HOWZhdXJHRnpqek91cHM5aWJyeWVjVHFBMlA0Y3VwOXNCZ0hieGVGYkZ3X0JfM051WHpNMUtZSEFid3F3bVdpZ2M1cUQzTVNXRVd4d29HQUFuSW1oZ0pyVk1TNDhfZ0E?oc=5"
+    },
+    {
+      "date": "2026-11-23",
+      "headline": "The Weekend Recovery: NCAA Championships, Brooks XC Northeast Regional, NXR Extravaganza",
+      "source": "Yahoo Sports",
+      "url": "https://news.google.com/rss/articles/CBMilgFBVV95cUxPNTV5MnYyMmJkSUJVMlU4dG1PWWRWcjhPTHNFdjdvQnYtakhxRUU4MjhUTHBDY0dUTE5CSkVWTVJzdHN5WVI1a2lHMjhTWjJJQ1F6TnJNX3ZSekx2R0o5T3NhSld1LWJXeFJHay0xWnBtampkMlMwQ1pzby1MbFVTNGF3MGxoOTZ1SGRjOHdvcFpKdjhmbWc?oc=5"
     },
     {
       "date": "2026-11-23",
@@ -89,21 +95,27 @@
     },
     {
       "date": "2026-11-23",
+      "headline": "Both Carroll Teams Claim NXR South Cross Country Titles",
+      "source": "Southlake Style",
+      "url": "https://news.google.com/rss/articles/CBMimgFBVV95cUxNYW5MeDBPRFdGREN4elFtWXNjZzYwZm12Z2luUDlvdjVLYTdoOU5xOGNCcEJYcDRCNXFQRjU5ZGFfZEdFbDAydnFIdlI0OE9DS003d1dwX1ZVYmJXb0g4U3d5dW9ZRmxOa2NleDlndGo2dEtabmxBVk1aWXl6ZVFJaVJfOGlhQm5xWTRGQkVrcHlhamh4Qm9wOG5B?oc=5"
+    },
+    {
+      "date": "2026-11-23",
       "headline": "The Best Photos From the NCAA XC Championships That Capture the Grit and Emotion of the Meet",
       "source": "Runner's World",
       "url": "https://news.google.com/rss/articles/CBMikwFBVV95cUxONThIY2NhTnFkZG9ucTh1RjJHblVRemZPX0RwbkJGNUluSFNNQlZWb1JTRENZUjAwV1MxZVZnTENydDNsVUlJX29SN1ViVTZCTmFiX1hRSnE0LVhiQUZjZUJVcUY5LWUwb29TX2JDaWVLUDBDOVk2bnFGVDQxTVY5Y1Jwc2l1ZWNHS3ZOb05WQWxTWHc?oc=5"
     },
     {
       "date": "2026-11-23",
-      "headline": "2026 NCAA cross country national championships: Date, time, TV channel, history, results",
-      "source": "NCAA.com",
-      "url": "https://news.google.com/rss/articles/CBMi1wFBVV95cUxQMDlIbFg3dVlmY0dmS0NDRzhlS0padTFKczIwVXBuTGJDdXg3RHBCSmxiSDUtak1hTFlJUTNGdXZFWF9sQ2NXOTZXZWJvLWNfMHNycVdMMzAxdTJfNmhHNFEzdzdPN0p4VVU3WFlrclVMRTlfVXM0UzNiV1JUeXRtNHZrZE54TTdXalh2d0RRMVVZQVhZWlBLSWhVY1dscW9fSFFHMDMxcU11TV9saTJxTVZNdko4RS1lVkJMSmljd0FwZmJBWkdYNHBLMGlpdENpTFE0MWZob9IB3AFBVV95cUxPYmxEamVxeG5NZE9hUFlQZzJ6T2prN0RqRUo4MHBrLWVSZHdNdklwWkpMVmxUd0FrY1NKSzFUNnB2STlvcHpSTWUwdEEzV2NUVXkwaHNudkh5RVkzb19TTVJqUVFVQzlfTGFlZ2U0NHdRd21RczRnSjc5dGN2UVBTZWZYdTNKN19SSGI5MENOSmVNX3FOQ1NWMzQ3T1JrTUJCeXZ6aHp0TDN4QTZrNG0yV3pDbEJqSFBvZHlLempXZXBuSVBRUXdOVnVlQW1oZFpJT1VuSzNncG05VUpZ?oc=5"
+      "headline": "NCAA Division III Cross Country Championships 2026 Results: Johns Hopkins, Williams Win Titles",
+      "source": "World-Track",
+      "url": "https://news.google.com/rss/articles/CBMilgFBVV95cUxOYW9mV2tyMVV3Tl9qMlRSbXFrRmczQ3pEU1NZTlYwdFBydWtaMlBRMkU0QTh6TXNONzdBc0piU0FsdTZVM2tIcjZQbGNmUG8yY0FUUWh0RkNVWUxWc01UOGt2VFZjbmdmX19NbkFRRU5pTjV1TXBKWHo5Q1JiZXhCdEpZbkdwLVd4a25IVU9May05bEU1emc?oc=5"
     },
     {
       "date": "2026-11-23",
-      "headline": "Alabama Beats BYU for First NCAA Women's XC Title",
-      "source": "Marathon Handbook",
-      "url": "https://news.google.com/rss/articles/CBMieEFVX3lxTFBvOTRZY2Q2TzY2SGRSaGtCQ01BSFRlb2NOTkFVVWZVN3JTRVV6MlNuYnljdFk4X05wam54Z0RDY0RLNlB2c0txaGRUblA3cmxHUmxaVGpyQllDalBwUFkzYkozZm5VbElsN2E5bW5wb0tWUmNXQ2pnTw?oc=5"
+      "headline": "2026 NCAA cross country national championships: Date, time, TV channel, history, results",
+      "source": "NCAA.com",
+      "url": "https://news.google.com/rss/articles/CBMi1wFBVV95cUxQMDlIbFg3dVlmY0dmS0NDRzhlS0padTFKczIwVXBuTGJDdXg3RHBCSmxiSDUtak1hTFlJUTNGdXZFWF9sQ2NXOTZXZWJvLWNfMHNycVdMMzAxdTJfNmhHNFEzdzdPN0p4VVU3WFlrclVMRTlfVXM0UzNiV1JUeXRtNHZrZE54TTdXalh2d0RRMVVZQVhZWlBLSWhVY1dscW9fSFFHMDMxcU11TV9saTJxTVZNdko4RS1lVkJMSmljd0FwZmJBWkdYNHBLMGlpdENpTFE0MWZob9IB3AFBVV95cUxPYmxEamVxeG5NZE9hUFlQZzJ6T2prN0RqRUo4MHBrLWVSZHdNdklwWkpMVmxUd0FrY1NKSzFUNnB2STlvcHpSTWUwdEEzV2NUVXkwaHNudkh5RVkzb19TTVJqUVFVQzlfTGFlZ2U0NHdRd21RczRnSjc5dGN2UVBTZWZYdTNKN19SSGI5MENOSmVNX3FOQ1NWMzQ3T1JrTUJCeXZ6aHp0TDN4QTZrNG0yV3pDbEJqSFBvZHlLempXZXBuSVBRUXdOVnVlQW1oZFpJT1VuSzNncG05VUpZ?oc=5"
     },
     {
       "date": "2026-11-23",
@@ -130,22 +142,10 @@
       "url": "https://news.google.com/rss/articles/CBMigwFBVV95cUxNdGt3RG9vdm9JZlktZnpYQkY1TERiVDU2TC1aOEJHdGUzZ2V2Q0oydFViX0Roc2ZKTDFIZFpBUEFrQVhCbG95eWpqdmNCUU5xV0EwWEhRNjlrQTUzRzg2YzlLeExCQ0ZlNUFOdHBaUE94TVZsbXZnLW5wcGJTZE1uYUZINA?oc=5"
     },
     {
-      "date": "2026-11-22",
-      "headline": "Elsingi Kipruto and New Mexico Win NCAA Men's XC Titles",
-      "source": "Marathon Handbook",
-      "url": "https://news.google.com/rss/articles/CBMigAFBVV95cUxNTFMxNW1lMG5UZjE4d01KSk16aHc2ZTdIUzROMEZMY2E1U0trU0pWMTk4TlhwTnZvM0ZncFlhT2ZzeHRCUkF6ZmxQcjh3WjVDS2xCMTVCd1kxX3lfYk1Fc0lja0I0Y19IcVB4c1NwOWRFbUtWdEJmZHU2NnpEQjlPOA?oc=5"
-    },
-    {
-      "date": "2026-11-22",
-      "headline": "WSU Cross Country Wraps Up NCAA Championships in Terre Haute",
-      "source": "Washington State University Athletics",
-      "url": "https://news.google.com/rss/articles/CBMioAFBVV95cUxQRHpzNWtpZkNYZmIxbTk3eU1vQnE3V1hPLWxVRWhReThla2lQM0FqRWFHamlXUUduaU1KakphLTZaUVJRcXIwdmNjN1N0YlZnb2VoNXFMbU9FSzFvQmprSUhFN3lLa0kzb3Q1NnVOdVJMdFhqM0tRQnRwb2VwR0FxME1Gamw1R2tHMy0zOTVtbjNjZmM1czJxSUNZM1pIQ2JB?oc=5"
-    },
-    {
-      "date": "2026-11-22",
-      "headline": "Comer Places Fifth, SUNY Geneseo Cross Country Finishes 10th At 2026 NCAA Championship; Nine E8 Runners Excel",
-      "source": "Empire 8 Athletic Conference",
-      "url": "https://news.google.com/rss/articles/CBMiugFBVV95cUxQSFdfOF9HNU1ZTGRLYkI2bWlSUXAxZWVqZmE1eGhzbTh2b1BrVUExME1XbXJJc0lNVWxUSjVweHJsOFQyZmNnamhOTE4wU3MtbGVoZ3VRVHM1Wl9lNi0zU3hwd1pxS0VNaTR6d2pHVWtoTXlqcXlLWHhpbHdqTlhGaGZURTdhLW8zRGQ2UW44aXZMZUNRemZ0Q2VBT04xU3BQMTFGUU9QajJpSzZCeUtGaWlSUW1kdU1XSkE?oc=5"
+      "date": "2026-11-21",
+      "headline": "Women’s Cross Country Earns First National Title, Men Take 3rd at NCAA Meet",
+      "source": "Alabama Athletics",
+      "url": "https://news.google.com/rss/articles/CBMi0gFBVV95cUxQcUJLbjBnbFhCRVcyX0V2ek5oYXl4dUlWVklUdmsxNEotaTdRTHdELWg1ckQ1OTVEYTlFc0t0Z0hCdTA4MGZzZ3FQTGdDcU8tQ0h1cU9vMWdDdFFyMUNvUFdKbmlDdW9hMDhRLWh3ak5VdjcxaUpwZWt4d2ctZGpSNkJfVGRSV0FHZ0kwZk5YMHYzSVBYcW9ucEN2SGVZY2E4THlMT3gxR3BuMDVNZGtXNFNFYTRQOWR5U0hnX0pPZll0WjlGM2NyeDZqaHpwUlZSYVE?oc=5"
     }
   ]
 }
