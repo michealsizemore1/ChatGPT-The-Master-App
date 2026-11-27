@@ -165,7 +165,7 @@ jobs:
           <?xml version="1.0" encoding="utf-8"?>
           <resources>
               <color name="app_bg">#F4F6FA</color>
-              <string name="read_summary_desc">See your retirement plan's headline numbers (date, confidence, assets, net worth).</string>
+              <string name="read_summary_desc">See the headline numbers of your retirement plan (date, confidence, assets, net worth).</string>
               <style name="AppTheme" parent="android:Theme.Material.Light.NoActionBar">
                   <item name="android:statusBarColor">#0B1F3A</item>
                   <item name="android:navigationBarColor">#0B1F3A</item>
