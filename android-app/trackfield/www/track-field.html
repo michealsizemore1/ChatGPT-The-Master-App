@@ -1,0 +1,799 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#241f1c">
+<title>Track &amp; Field — World Rankings</title>
+<style>
+:root{--ink:#221f1d;--dark:#241f1c;--track:#c0472b;--gold:#e8b64c;--paper:#f5f1ea;--card:#fffdf9;--line:#e2dbd0;--muted:#7b736a}
+*{box-sizing:border-box}html{font-size:15px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:Georgia,'Times New Roman',serif}
+.sans,.nav,.eyebrow,.chip,button,input,.tag{font-family:Arial,Helvetica,sans-serif}
+.top{position:sticky;top:0;z-index:20;background:var(--dark);color:#fff;border-bottom:1px solid #3d3531}
+.nav{height:100px;max-width:980px;margin:auto;display:flex;align-items:center;gap:22px;padding:0 24px}
+.home{width:43px;height:52px;border:1px solid #574c46;border-radius:6px;color:#fff;display:grid;place-items:center;text-decoration:none;font-size:20px}
+.brand{margin-right:auto}
+.brand strong{display:block;font-size:23px;letter-spacing:.08em}
+.brand span{display:block;color:var(--gold);font-size:9px;letter-spacing:.22em;text-transform:uppercase;margin-top:4px}
+.tabs{display:flex;align-self:stretch}
+.tabs button{position:relative;border:0;background:transparent;color:#b2a79f;font-weight:800;font-size:14px;padding:0 15px;cursor:pointer}
+.tabs button.active{color:#fff}
+.tabs button.active:after{content:"";height:4px;background:var(--track);position:absolute;left:13px;right:13px;bottom:0}
+.page{max-width:920px;margin:0 auto;padding:30px 24px 70px}
+.hero{background:var(--card);border:1px solid var(--line);padding:27px 29px 22px}
+.eyebrow{font-size:10px;letter-spacing:.22em;font-weight:800;color:#6d655d;text-transform:uppercase}
+.hero h1{font-size:39px;font-weight:500;margin:12px 0 4px}
+.hero-row{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.stamp{font:700 11px Arial,Helvetica,sans-serif;color:#5f574f}
+.stamp b{color:var(--track)}
+.source{font:11px/1.6 Arial,Helvetica,sans-serif;color:var(--muted);margin:10px 0 0}
+.source a{color:var(--track)}
+.panel{background:var(--card);border:1px solid var(--line);border-top:0}
+.controls{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:13px}
+.ctl-row{display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap}.seg{display:flex;gap:6px}.sortseg{margin-left:auto}.sortseg button.active{background:var(--track);border-color:var(--track);color:#fff}.sortseg button[disabled]{opacity:.4;cursor:not-allowed}.sortlabel{font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#a29a91;align-self:center;margin-right:-4px}
+.seg button{border:1px solid var(--line);background:#fff;color:var(--muted);font:800 11px Arial,Helvetica,sans-serif;letter-spacing:.09em;text-transform:uppercase;padding:9px 18px;cursor:pointer}
+.seg button.active{background:var(--dark);color:#fff;border-color:var(--dark)}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.chips button{flex:0 0 auto;border:1px solid var(--line);background:#fff;color:#4d463f;font:800 12px Arial,Helvetica,sans-serif;padding:9px 15px;cursor:pointer;border-radius:2px}
+.chips button.active{background:var(--track);color:#fff;border-color:var(--track)}
+.list-head{display:grid;grid-template-columns:44px minmax(0,1fr) 96px;gap:10px;padding:12px 18px;background:#ebe5db;color:#77706a;font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.16em;text-transform:uppercase}
+.list-head span:last-child{text-align:right}
+.athlete{display:grid;grid-template-columns:44px minmax(0,1fr) 96px;gap:10px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line)}
+.athlete:nth-child(odd){background:#fbf8f3}
+.rank{font-size:23px;color:#b9b1a7}
+.athlete.podium .rank{color:var(--track)}
+.name{font-size:19px;line-height:1.15}
+.country{font:10px Arial,Helvetica,sans-serif;letter-spacing:.16em;color:#8b847c;margin-top:5px}
+.figure{text-align:right}
+.figure b{display:block;font:800 17px Arial,Helvetica,sans-serif;font-variant-numeric:tabular-nums}
+.figure b.none{color:#b9b1a7;font-weight:400}
+.figure small{display:block;font:10px Arial,Helvetica,sans-serif;color:#8b847c;margin-top:4px;letter-spacing:.04em}
+.event-note{padding:14px 18px;font:12px/1.6 Arial,Helvetica,sans-serif;color:var(--muted);border-bottom:1px solid var(--line);background:#fbf8f3}
+.section-card{background:var(--card);border:1px solid var(--line);padding:22px;margin-bottom:18px}
+.section-card h2{font-size:28px;font-weight:500;margin:0 0 6px}
+.section-card p.note{font:13px/1.6 Arial,Helvetica,sans-serif;color:var(--muted);margin:0 0 16px}
+.meet,.story{display:grid;grid-template-columns:74px minmax(0,1fr);gap:14px;padding:15px 0;border-top:1px solid var(--line)}
+.meet:first-of-type,.story:first-of-type{border-top:0}
+.meet-date{font:800 11px Arial,Helvetica,sans-serif;letter-spacing:.06em;color:var(--track);line-height:1.45;text-transform:uppercase}
+.meet-date small{display:block;color:#a29a91;font-weight:700}
+.meet h3,.story h3{margin:0 0 4px;font-size:19px;font-weight:500;line-height:1.2}
+.meet .where,.story .where{font:12px Arial,Helvetica,sans-serif;color:#5f574f}
+.meet .detail,.story .detail{font:12px/1.55 Arial,Helvetica,sans-serif;color:var(--muted);margin-top:6px}.meet .watch{font:12px/1.5 Arial,Helvetica,sans-serif;color:#3f3933;margin-top:8px;padding:8px 10px;background:#fbf5f2;border-left:3px solid var(--track)}.meet .watch b{font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--track);display:block;margin-bottom:3px}
+.tag{display:inline-block;margin-top:8px;font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.12em;text-transform:uppercase;padding:4px 8px;border:1px solid var(--line);color:#6d655d;background:#fbf8f3}
+.tag.major{border-color:var(--track);color:var(--track)}
+.tag.champs{border-color:#2f6d4f;color:#2f6d4f}
+.done{display:grid;grid-template-columns:74px minmax(0,1fr) auto;gap:12px;align-items:baseline;padding:11px 0;border-top:1px solid var(--line);font-family:Arial,Helvetica,sans-serif}
+.done:first-of-type{border-top:0}
+.done .d{font:800 11px Arial,Helvetica,sans-serif;color:#a29a91;letter-spacing:.06em;text-transform:uppercase}
+.done .m{font-size:14px;color:#3f3933}
+.done .f{font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--track)}
+.tt-row{display:grid;grid-template-columns:104px minmax(0,1fr) auto;gap:12px;align-items:baseline;padding:10px 0;border-top:1px solid var(--line)}
+.tt-row:first-of-type{border-top:0}
+.tt-row .t{font:800 13px Arial,Helvetica,sans-serif;color:var(--track);font-variant-numeric:tabular-nums}
+.tt-row .t .tz{font:700 9px Arial,Helvetica,sans-serif;letter-spacing:.1em;color:#b9b1a7;margin-left:5px}
+.tt-row .t small{display:block;font:700 10px Arial,Helvetica,sans-serif;color:#a29a91;margin-top:3px;letter-spacing:.02em}
+.tt-row .e{font:14px Arial,Helvetica,sans-serif;color:#3f3933}
+.tt-row.support .t{color:#b9b1a7}.tt-row.support .e{color:#8b847c}
+.tt-link{border:1px solid var(--line);background:#fbf5f2;color:var(--track);font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.12em;text-transform:uppercase;padding:5px 9px;cursor:pointer}
+.tt-link:hover{background:var(--track);color:#fff;border-color:var(--track)}
+.tt-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.tt-result-link{border:1px solid var(--track);background:#fff;color:var(--track);font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.12em;text-transform:uppercase;padding:5px 9px;cursor:pointer;text-decoration:none;display:inline-block}
+.tt-result-link:hover{background:var(--track);color:#fff}
+.tt-badge{display:inline-block;margin-left:7px;font:800 8px Arial,Helvetica,sans-serif;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;vertical-align:middle;border-radius:2px}
+.tt-badge.live{background:var(--track);color:#fff}
+.tt-badge.final{background:#efe8de;color:#8b847c}
+.tt-row.is-live{background:#fff6f2}
+.tt-row.is-live .e{color:var(--track);font-weight:700}
+.tt-row.is-live .t{color:var(--track)}
+.tt-live-banner{display:flex;align-items:center;gap:9px;padding:11px 13px;margin-bottom:15px;background:#fff6f2;border:1px solid var(--track);font:13px Arial,Helvetica,sans-serif;color:var(--ink)}
+.tt-live-banner.off{background:#fbf8f3;border-color:var(--line);color:var(--muted)}
+.tt-live-banner .dot{width:8px;height:8px;border-radius:50%;background:var(--track);flex-shrink:0;animation:tt-pulse 1.6s ease-in-out infinite}
+.tt-live-banner b{font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.13em;text-transform:uppercase;color:var(--track);margin-right:7px}
+.tt-live-banner.off b{color:var(--muted)}
+.tt-live-banner a{color:var(--track);font-weight:700}
+.tt-live-time{color:#8b847c;margin-left:6px;font-size:12px}
+@keyframes tt-pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.rec-flag{display:block;font:700 9px Arial,Helvetica,sans-serif;letter-spacing:.09em;text-transform:uppercase;color:#a2812c;margin-top:4px}
+.rec-new .rec-ev{color:var(--track)}
+.rec{display:grid;grid-template-columns:110px minmax(0,1fr) auto;gap:12px;align-items:baseline;padding:12px 0;border-top:1px solid var(--line)}
+.rec:first-of-type{border-top:0}
+.rec-ev{font:800 12px Arial,Helvetica,sans-serif;letter-spacing:.05em;text-transform:uppercase;color:var(--ink)}
+.rec-ev small{display:block;font:700 9px Arial,Helvetica,sans-serif;letter-spacing:.08em;color:#a29a91;text-transform:uppercase;margin-top:4px}
+.rec-who b{font:500 17px Georgia,'Times New Roman',serif;display:block}
+.rec-who small{display:block;font:10px Arial,Helvetica,sans-serif;letter-spacing:.05em;color:#8b847c;margin-top:4px}
+.rec-mark{font:800 17px Arial,Helvetica,sans-serif;font-variant-numeric:tabular-nums;color:var(--track);text-align:right}
+.meet-links{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.meet-links a{font:800 9px Arial,Helvetica,sans-serif;letter-spacing:.11em;text-transform:uppercase;color:var(--track);border:1px solid var(--line);background:#fbf8f3;padding:5px 9px;text-decoration:none}
+.meet-links a:hover{background:var(--track);border-color:var(--track);color:#fff}
+.tt-head{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:15px}
+.story h3 a{color:inherit;text-decoration:none;box-shadow:inset 0 -1px 0 rgba(192,71,43,.35)}
+.story h3 a:hover{color:var(--track)}
+.newsdate{font:800 11px Arial,Helvetica,sans-serif;letter-spacing:.06em;color:var(--track);line-height:1.45;text-transform:uppercase}
+.newsdate small{display:block;color:#a29a91;font-weight:700}
+.hide{display:none!important}
+@media(max-width:680px){
+.story{grid-template-columns:64px minmax(0,1fr);gap:11px}
+.rec{grid-template-columns:minmax(0,1fr) auto;gap:10px}
+.rec-ev{grid-column:1/-1}
+.rec-who b{font-size:16px}
+html{font-size:14px}
+.ctl-row{gap:8px}.sortseg{margin-left:0}.seg button{padding:9px 13px}
+.nav{height:106px;display:grid;grid-template-columns:42px 1fr;padding:10px 14px 0;gap:7px 11px}
+.home{height:46px}.brand strong{font-size:19px}
+.tabs{grid-column:1/-1;height:44px;justify-content:flex-start;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tabs button{padding:0 10px;font-size:13px;flex:0 0 auto}
+.tabs button.active:after{left:7px;right:7px}
+.page{padding:12px 14px 60px}
+.hero{padding:19px 16px}.hero h1{font-size:32px}
+.list-head,.athlete{grid-template-columns:32px minmax(0,1fr) 84px;padding-left:12px;padding-right:12px;gap:8px}
+.rank{font-size:20px}.name{font-size:17px}
+.figure b{font-size:16px}
+.meet{grid-template-columns:64px minmax(0,1fr);gap:11px}
+.done{grid-template-columns:60px minmax(0,1fr)}
+.done .f{grid-column:2}
+.tt-row{grid-template-columns:84px minmax(0,1fr);gap:9px}
+.tt-actions{grid-column:2;justify-self:start;margin-top:2px;justify-content:flex-start}
+}
+</style>
+</head>
+<body>
+<header class="top"><div class="nav">
+  <a class="home" href="index.html" aria-label="Home">&#8962;</a>
+  <div class="brand"><strong>TRACK &amp; FIELD</strong><span>World Athletics command center</span></div>
+  <nav class="tabs" aria-label="Sections">
+    <button class="active" data-tab="track">Track</button>
+    <button data-tab="road">Road</button>
+    <button data-tab="ultra">Ultra</button>
+    <button data-tab="entries">Entries</button>
+    <button data-tab="calendar">Calendar</button>
+  </nav>
+</div></header>
+
+<main class="page">
+  <section id="trackView">
+    <div class="hero">
+      <div class="eyebrow">World rankings &middot; 100m to 10,000m</div>
+      <div class="hero-row"><h1>Track</h1><div class="stamp">AS OF <b>22 OCT 2026</b></div></div>
+      <p class="source">Top 10 per event from the official World Athletics world rankings, with each athlete&rsquo;s 2026 season best alongside. The ranking score reflects results and the quality of the fields raced, so it does not simply follow the times. <a href="https://worldathletics.org/world-rankings" target="_blank" rel="noopener">worldathletics.org</a></p>
+    </div>
+    <div class="panel">
+      <div class="controls">
+        <div class="ctl-row"><div class="seg" role="tablist" aria-label="Category"><button class="active" data-gender="men" role="tab" aria-selected="true">Men</button><button data-gender="women" role="tab" aria-selected="false">Women</button></div><span class="sortlabel">Sort</span><div class="seg sortseg" role="group" aria-label="Sort by"><button class="active" data-sort="points">Points</button><button data-sort="time">Time</button></div></div>
+        <div class="chips" id="trackChips" role="tablist" aria-label="Event"></div>
+      </div>
+      <div class="event-note" id="trackNote"></div>
+      <div class="list-head"><span>Rank</span><span>Athlete</span><span>Best / score</span></div>
+      <div id="trackList"></div>
+    </div>
+    <div class="section-card" style="margin-top:18px">
+      <div class="eyebrow">100m to 10,000m, standard and rarely-run</div>
+      <h2>World records</h2>
+      <p class="note" id="trackRecordsNote"></p>
+      <div id="trackRecords"></div>
+    </div>
+    <div class="section-card" style="margin-top:18px">
+      <div class="eyebrow">Track &amp; field</div>
+      <h2>Latest news</h2>
+      <p class="note" id="trackNewsNote"></p>
+      <div id="trackNews"></div>
+    </div>
+  </section>
+
+  <section id="roadView" class="hide">
+    <div class="hero">
+      <div class="eyebrow">World rankings &middot; road running</div>
+      <div class="hero-row"><h1>Road</h1><div class="stamp">AS OF <b>22 OCT 2026</b></div></div>
+      <p class="source">World Athletics ranks the roads in two groups only. The 5km and 10km are not ranked separately &mdash; they feed the 5000m and 10,000m rankings on the Track tab. Times shown are 2026 season bests at the group&rsquo;s headline distance. <a href="https://worldathletics.org/world-rankings" target="_blank" rel="noopener">worldathletics.org</a></p>
+    </div>
+    <div class="panel">
+      <div class="controls">
+        <div class="ctl-row"><div class="seg" role="tablist" aria-label="Category"><button class="active" data-gender="men" role="tab" aria-selected="true">Men</button><button data-gender="women" role="tab" aria-selected="false">Women</button></div><span class="sortlabel">Sort</span><div class="seg sortseg" role="group" aria-label="Sort by"><button class="active" data-sort="points">Points</button><button data-sort="time">Time</button></div></div>
+        <div class="chips" id="roadChips" role="tablist" aria-label="Group"></div>
+      </div>
+      <div class="event-note" id="roadNote"></div>
+      <div class="list-head"><span>Rank</span><span>Athlete</span><span>Best / score</span></div>
+      <div id="roadList"></div>
+    </div>
+    <div class="section-card" style="margin-top:18px">
+      <div class="eyebrow">5km to the marathon</div>
+      <h2>World records</h2>
+      <p class="note" id="roadRecordsNote"></p>
+      <div id="roadRecords"></div>
+    </div>
+    <div class="section-card" style="margin-top:18px">
+      <div class="eyebrow">Road racing</div>
+      <h2>Latest news</h2>
+      <p class="note" id="roadNewsNote"></p>
+      <div id="roadNews"></div>
+    </div>
+  </section>
+
+  <section id="ultraView" class="hide">
+    <div class="hero">
+      <div class="eyebrow">ITRA world rankings</div>
+      <div class="hero-row"><h1>Ultra</h1><div class="stamp">ITRA INDEX <b>CURRENT</b></div></div>
+      <p class="source">World Athletics publishes no ultra rankings &mdash; its road groups stop at the marathon. These are the ITRA Performance Index world rankings, the sport&rsquo;s established global rating for ultra and trail running: a 0&ndash;1000 index built from each runner&rsquo;s best five results over the previous 36 months. <a href="https://itra.run/Runners/Ranking" target="_blank" rel="noopener">itra.run</a></p>
+    </div>
+    <div class="panel">
+      <div class="controls">
+        <div class="ctl-row"><div class="seg" role="tablist" aria-label="Category"><button class="active" data-gender="men" role="tab" aria-selected="true">Men</button><button data-gender="women" role="tab" aria-selected="false">Women</button></div><span class="sortlabel">Sort</span><div class="seg sortseg" role="group" aria-label="Sort by"><button class="active" data-sort="points">Points</button><button data-sort="time" disabled title="ITRA publishes a performance index, not times">Time</button></div></div>
+        <div class="chips" id="ultraChips" role="tablist" aria-label="Distance"></div>
+      </div>
+      <div class="event-note" id="ultraNote"></div>
+      <div class="list-head"><span>Rank</span><span>Athlete</span><span>Index / age</span></div>
+      <div id="ultraList"></div>
+    </div>
+    <div class="section-card" style="margin-top:18px">
+      <div class="eyebrow">50km to 48 hours</div>
+      <h2>World records</h2>
+      <p class="note" id="ultraRecordsNote"></p>
+      <div id="ultraRecords"></div>
+    </div>
+    <div class="section-card" style="margin-top:18px">
+      <div class="eyebrow">Ultra &amp; trail</div>
+      <h2>Latest news</h2>
+      <p class="note" id="ultraNewsNote"></p>
+      <div id="ultraNews"></div>
+    </div>
+  </section>
+
+  <section id="entriesView" class="hide">
+    <div class="hero">
+      <div class="eyebrow">TCS New York City Marathon &middot; Nov 1 &middot; Final results</div>
+      <div class="hero-row"><h1>Entries</h1><div class="stamp">RESULTS <b>1 NOV 2026</b></div></div>
+      <p class="source">Andreas Almgren capped a stunning marathon debut, out-kicking Yemaneberhan Crippa and Kamohelo Mofolo in 2:06:01 as defending champion Benson Kipruto faded to fourth. Sheila Chepkirui denied Hellen Obiri a third straight New York title, winning in 2:24:36 as American Jessica McClain&rsquo;s 2:24:42 ended an eight-year US podium drought. Switzerland&rsquo;s Marcel Hug (1:28:14) and Catherine Debrunner (1:40:02) swept the wheelchair races. Full results at <a href="https://results.nyrr.org/" target="_blank" rel="noopener">results.nyrr.org</a>.</p>
+    </div>
+    <div class="panel">
+      <div class="controls">
+        <div class="ctl-row"><div class="seg" role="tablist" aria-label="Category"><button class="active" data-gender="men" role="tab" aria-selected="true">Men</button><button data-gender="women" role="tab" aria-selected="false">Women</button></div><span class="sortlabel">Sort</span><div class="seg sortseg" role="group" aria-label="Sort by"><button class="active" data-sort="points">Points</button><button data-sort="time">Time</button></div></div>
+        <div class="chips" id="entriesChips" role="tablist" aria-label="Event"></div>
+      </div>
+      <div class="event-note" id="entriesNote"></div>
+      <div class="list-head"><span>&nbsp;</span><span>Athlete</span><span>Result / PB</span></div>
+      <div id="entriesList"></div>
+    </div>
+    <div class="section-card" style="margin-top:18px">
+      <div class="eyebrow">Staten Island to Central Park &middot; Nov 1</div>
+      <h2>Meet timetable</h2>
+      <p class="note">The professional start, women then men, plus the wheelchair, handcycle and mass-participation waves, as run on race day. Mountain Time first, New York local time underneath. Replays aired on ESPN2 and WABC-TV, with ABC&rsquo;s finish-line special.</p>
+      <div class="tt-head">
+        <div class="seg" id="ttDays" role="tablist" aria-label="Day"></div>
+        <span class="sortlabel">Show</span>
+        <div class="seg sortseg" id="ttScope" role="group" aria-label="Which events">
+          <button class="active" data-scope="finals">Diamond finals</button>
+          <button data-scope="all">Full programme</button>
+        </div>
+      </div>
+      <div id="ttLiveBanner"></div>
+      <div id="ttList"></div>
+    </div>
+    <div class="section-card">
+      <div class="eyebrow">Not yet published</div>
+      <h2>Still to come</h2>
+      <p class="note">Start lists for the rest of the calendar, and when each is normally released.</p>
+      <div id="pendingList"></div>
+    </div>
+    <div class="section-card" style="margin-top:18px">
+      <div class="eyebrow">Meet news</div>
+      <h2>Latest news</h2>
+      <p class="note" id="entriesNewsNote"></p>
+      <div id="entriesNews"></div>
+    </div>
+  </section>
+
+  <section id="calendarView" class="hide">
+    <div class="section-card">
+      <div class="eyebrow">What&rsquo;s next</div>
+      <h2>Upcoming meets</h2>
+      <p class="note">Diamond League final, global championships and the remaining World Marathon Majors, with broadcast details in Mountain Time.</p>
+      <div id="upcomingList"></div>
+    </div>
+    <div class="section-card">
+      <div class="eyebrow">2026 season</div>
+      <h2>Diamond League season</h2>
+      <p class="note">All 15 meetings of the 2026 Wanda Diamond League, finishing with the two-day final in Brussels.</p>
+      <div id="dlList"></div>
+    </div>
+    <div class="section-card">
+      <div class="eyebrow">Also worth knowing</div>
+      <h2>Season notes</h2>
+      <p class="note" style="margin:0">The World Athletics Continental Tour Gold series ran from March to July 2026 and has finished for the year, so the autumn calendar is championship and marathon territory. The Ultimate Championship in Budapest is new for 2026: sixteen athletes per track event, eight per field event, and a US$10 million purse.</p>
+    </div>
+    <div class="section-card" style="margin-top:18px">
+      <div class="eyebrow">Championships &amp; majors</div>
+      <h2>Latest news</h2>
+      <p class="note" id="calendarNewsNote"></p>
+      <div id="calendarNews"></div>
+    </div>
+  </section>
+</main>
+
+<script src="version-check.js"></script>
+<script>
+const APP_VERSION='2026-11-12-1';
+checkForNewerAppVersion(APP_VERSION, 'tf');
+
+// [name, country, ranking score, 2026 season best]  "rd" marks a road time used where there is no track mark.
+const TRACK_EVENTS=['100m','200m','400m','800m','1500m','5000m','10,000m'];
+const TRACK_NOTES={
+ '100m':'Ranked together with the indoor 50m, 55m and 60m. Times are 2026 outdoor season bests.',
+ '200m':'A standalone ranking group. Times are 2026 outdoor season bests.',
+ '400m':'Ranked together with the 300m and 500m.',
+ '800m':'Ranked together with the 600m and 1000m.',
+ '1500m':'Ranked together with the mile, 2000m and road mile.',
+ '5000m':'Ranked together with the 3000m, two miles and road 5km.',
+ '10,000m':'Ranked together with the road 10km, so several of these athletes score from the roads. Times marked "rd" are road 10km bests.'
+};
+const TRACK={
+ men:{
+  '100m':[['Oblique Seville','JAM',1445,'9.82'],['Kenneth Bednarek','USA',1413,'9.87'],['Kayinsola Ajayi','NGR',1384,'9.84'],['Noah Lyles','USA',1376,'9.79'],['Gift Leotlela','RSA',1355,'9.91'],['Emmanuel Eseme','CMR',1346,'9.83'],['Kishane Thompson','JAM',1345,''],['Christian Coleman','USA',1340,''],['Jordan Anthony','USA',1339,'9.91'],['Trayvon Bromell','USA',1337,'9.91']],
+  '200m':[['Kenneth Bednarek','USA',1471,'19.62'],['Letsile Tebogo','BOT',1415,'19.84'],['Sinesipho Dambile','RSA',1387,'19.74'],['Bryan Levell','JAM',1366,'19.93'],['Andre De Grasse','CAN',1344,'19.84'],['Courtney Lindsey','USA',1340,''],['Makanakaishe Charamba','ZIM',1335,'19.88'],['Noah Lyles','USA',1330,'19.91'],['Zharnel Hughes','GBR',1318,'20.04'],['Alexander Ogando','DOM',1307,'19.96']],
+  '400m':[['Busang Collen Kebinatshipi','BOT',1483,'43.40'],['Jereem Richards','TTO',1407,'43.68'],['Rai Benjamin','USA',1390,'43.83'],['Jacory Patterson','USA',1374,'43.96'],['Matthew Hudson-Smith','GBR',1363,'44.09'],['Chris Bailey','USA',1360,'44.06'],['Zakithi Nene','RSA',1358,'43.89'],['Lee Eppie','BOT',1328,''],['Muzala Samukonga','ZAM',1326,'44.02'],['Khaleb McRae','USA',1326,'44.40']],
+  '800m':[['Emmanuel Wanyonyi','KEN',1460,'1:41.76'],['Djamel Sedjati','ALG',1438,'1:41.83'],['Marco Arop','CAN',1414,'1:41.84'],['Brandon Miller','USA',1370,'1:42.19'],['Cooper Lutkenhaus','USA',1366,'1:42.08'],['Mark English','IRL',1350,'1:42.97'],['Mohamed Attaoui','ESP',1348,'1:43.82'],['Max Burgin','GBR',1343,'1:42.98'],['Eliott Crestan','BEL',1340,'1:43.83'],['Yanis Meziane','FRA',1323,'']],
+  '1500m':[['Cameron Myers','AUS',1410,'3:28.00'],['Yared Nuguse','USA',1383,'3:29.36'],['Cole Hocker','USA',1367,''],['Hobbs Kessler','USA',1365,'3:31.76'],['Azeddine Habz','FRA',1356,'3:29.80'],['Timothy Cheruiyot','KEN',1353,'3:30.67'],['Ethan Strand','USA',1352,'3:30.77'],['Isaac Nader','POR',1342,'3:30.43'],['Phanuel Kipkosgei Koech','KEN',1342,''],['Jake Wightman','GBR',1332,'3:29.95']],
+  '5000m':[['Cole Hocker','USA',1389,''],['Birhanu Balew','BRN',1359,'12:47.73'],['Parker Wolfe','USA',1358,'12:49.45'],['Biniam Mehary','ETH',1352,'12:54.35'],['Egide Ntakarutimana','BDI',1338,''],['Addisu Yihune','ETH',1338,'12:47.62'],['Nico Young','USA',1338,''],['Graham Blanks','USA',1337,'12:49.99'],['Jakob Ingebrigtsen','NOR',1335,'12:59.24'],['Grant Fisher','USA',1333,'12:49.61']],
+  '10,000m':[['Biniam Mehary','ETH',1271,'26:55 rd'],['Andreas Almgren','SWE',1259,'27:23.44'],['Ky Robinson','AUS',1235,'26:57.07'],['Selemon Barega','ETH',1234,'27:37 rd'],['Ishmael Rokitto Kipkurui','KEN',1234,''],['Nicholas Kipkorir','KEN',1233,''],['Edwin Kurgat','KEN',1232,'27:50.98'],['Mohamed Abdilaahi','GER',1232,'26:56.58'],['Stanley Waithaka Mburu','KEN',1226,''],['Mebuki Suzuki','JPN',1219,'']]
+ },
+ women:{
+  '100m':[['Melissa Jefferson-Wooden','USA',1451,'10.70'],['Julien Alfred','LCA',1415,'10.70'],['Tina Clayton','JAM',1390,'10.85'],['Sha\'Carri Richardson','USA',1378,'10.77'],['Jonielle Smith','JAM',1332,'10.89'],['Amy Hunt','GBR',1321,'10.97'],['Shericka Jackson','JAM',1311,'10.81'],['Patrizia Van der Weken','LUX',1306,''],['Lavanya Williams','JAM',1302,''],['Brianna Lyston','JAM',1297,'10.94']],
+  '200m':[['Melissa Jefferson-Wooden','USA',1421,'21.69'],['Gabrielle Thomas','USA',1392,'21.70'],['Julien Alfred','LCA',1384,''],['Amy Hunt','GBR',1378,'22.19'],['Kayla White','USA',1373,'21.92'],['Shericka Jackson','JAM',1346,'21.87'],['Anavia Battle','USA',1339,'22.21'],['Cambrea Sturgis','USA',1325,''],['Shaunae Miller-Uibo','BAH',1323,'22.04'],['Adaejah Hodge','IVB',1321,'21.68']],
+  '400m':[['Marileidy Paulino','DOM',1451,'48.48'],['Henriette Jaeger','NOR',1389,'49.04'],['Nickisha Pryce','JAM',1368,'49.27'],['Salwa Eid Naser','BRN',1364,'49.27'],['Natalia Bukowiecka','POL',1342,'49.57'],['Aaliyah Butler','USA',1341,'48.84'],['Lurdes Gloria Manuel','CZE',1338,'49.37'],['Roxana Gomez','CUB',1331,'49.99'],['Lieke Klaver','NED',1330,''],['Amber Anning','GBR',1317,'49.96']],
+  '800m':[['Audrey Werro','SUI',1434,'1:53.80'],['Keely Hodgkinson','GBR',1427,'1:54.33'],['Femke Broeders-Bol','NED',1389,'1:55.60'],['Lilian Odira','KEN',1358,'1:56.19'],['Georgia Hunter Bell','GBR',1342,'1:55.93'],['Addison Wiley','USA',1333,'1:57.70'],['Tsige Duguma','ETH',1311,'1:56.92'],['Sage Hurta-Klecker','USA',1304,'1:58.18'],['Sarah Billings','AUS',1299,''],['Anais Bourgoin','FRA',1295,'1:55.65']],
+  '1500m':[['Klaudia Kazimierska','POL',1390,'3:55.59'],['Dorcus Ewoi','KEN',1389,'3:55.58'],['Georgia Hunter Bell','GBR',1385,'3:55.63'],['Jessica Hull','AUS',1378,'3:55.20'],['Nikki Hiltz','USA',1373,'3:59.26'],['Freweyni Hailu','ETH',1356,'3:55.92'],['Abbey Caldwell','AUS',1345,'3:56.12'],['Agathe Guillemot','FRA',1345,'3:56.24'],['Birke Haylom','ETH',1340,'3:55.56'],['Emily Mackay','USA',1328,'']],
+  '5000m':[['Likina Amebaw','ETH',1325,'14:18.41'],['Faith Kipyegon','KEN',1324,'14:24.14'],['Freweyni Hailu','ETH',1313,'14:18.94'],['Nadia Battocletti','ITA',1311,'14:40.05'],['Senayet Getachew','ETH',1305,'14:22.37'],['Aleshign Baweke','ETH',1302,'14:18.54'],['Medina Eisa','ETH',1292,'14:22.51'],['Rose Davies','AUS',1280,'14:44.53'],['Fantaye Belayneh','ETH',1274,'14:23.44'],['Shelby Houlihan','USA',1272,'14:57.88']],
+  '10,000m':[['Agnes Jebet Ngetich','KEN',1339,'28:58 rd'],['Beatrice Chebet','KEN',1318,''],['Nadia Battocletti','ITA',1313,'31:41.17'],['Ririka Hironaka','JPN',1282,''],['Joy Cheptoyek','UGA',1258,'32:01.92'],['Chaltu Dida','ETH',1257,'29:50 rd'],['Miriam Chebet','KEN',1253,'32:09.42'],['Asayech Ayichew','ETH',1243,'30:01 rd'],['Jana Van Lent','BEL',1240,'30:51.18'],['Senayet Getachew','ETH',1237,'']]
+ }
+};
+
+const ROAD_GROUPS=['10km – Half marathon','Marathon'];
+const ROAD_NOTES={
+ '10km – Half marathon':'World Athletics ranks this group as 10km through the half marathon, including 15km, 10 miles and 20km. Times are 2026 half marathon season bests, or a road 10km best where marked "10k".',
+ 'Marathon':'Ranked together with the half marathon, 25km and 30km. Times are 2026 marathon season bests.'
+};
+const ROAD={
+ men:{
+  '10km – Half marathon':[['Yomif Kejelcha','ETH',1307,'56:51'],['Nicholas Kipkorir','KEN',1299,'58:08'],['Andreas Almgren','SWE',1292,''],['Rodrigue Kwizera','BDI',1265,'58:16'],['Alex Nzioka Matata','KEN',1260,'59:11'],['Isaia Kipkoech Lasoi','KEN',1257,'58:26'],['Joshua Cheptegei','UGA',1252,''],['Tadese Worku','ETH',1251,''],['Khairi Bejiga','ETH',1249,''],['Jemal Mekonen','ETH',1243,'58:55']],
+  'Marathon':[['Sabastian Kimaru Sawe','KEN',1441,'1:59:30'],['Jacob Kiplimo','UGA',1400,'2:00:28'],['John Korir','KEN',1387,''],['Amos Kipruto','KEN',1386,'2:01:09'],['Yomif Kejelcha','ETH',1375,'1:59:41'],['Tadese Takele Bikila','ETH',1360,'2:02:56'],['Geofry Toroitich Kipchumba','KEN',1355,'2:03:37'],['Guye Adola','ETH',1338,'2:02:50'],['Alphonce Felix Simbu','TAN',1334,''],['Milkesa Mengesha','ETH',1321,'2:03:46']]
+ },
+ women:{
+  '10km – Half marathon':[['Agnes Jebet Ngetich','KEN',1355,'28:58 10k'],['Likina Amebaw','ETH',1284,'1:05:07'],['Fotyen Tesfay','ETH',1268,'1:03:57'],['Brenda Jepchirchir','KEN',1257,''],['Caroline Makandi Gitonga','KEN',1256,'1:06:16'],['Veronica Loleo','KEN',1254,''],['Chaltu Dida','ETH',1253,'29:50 10k'],['Miriam Chebet','KEN',1250,'1:06:27'],['Loice Chemnung','KEN',1249,'1:04:01'],['Daisilah Jerono','KEN',1241,'']],
+  'Marathon':[['Tigst Assefa','ETH',1437,'2:11:04'],['Hawi Feysa','ETH',1389,'2:13:33'],['Brigid Kosgei','KEN',1375,'2:14:29'],['Joyciline Jepkosgei','KEN',1361,'2:15:55'],['Peres Jepchirchir','KEN',1360,''],['Sharon Lokedi','KEN',1349,'2:14:07'],['Aynalem Desta','ETH',1343,''],['Hellen Obiri','KEN',1338,'2:15:53'],['Bertukan Welde','ETH',1328,'2:16:36'],['Sifan Hassan','NED',1319,'']]
+ }
+};
+
+const ULTRA_DISTANCES=['50K','100K','100M'];
+const ULTRA_NOTES={
+ '50K':'ITRA Performance Index for the 50km category. The index is a rolling rating built from a runner\u2019s best five results over the previous 36 months, so it is a standing rather than a single-season list.',
+ '100K':'ITRA Performance Index for the 100km category, weighted towards recent results.',
+ '100M':'ITRA Performance Index for the 100 mile category \u2014 the closest thing the sport has to a world ranking at the classic ultra distance.'
+};
+// [name, country, ITRA index, age group]
+const ULTRA={
+ men:{
+  '50K':[['Frederic Tranchand','FRA',944,'35-39'],['Cristian Minoggio','ITA',940,'40-44'],['Daniel Pattis','ITA',940,'23-34'],['Andrzej Witek','POL',932,'23-34'],['Francesco Puppi','ITA',930,'23-34'],['Andreas Reiterer','ITA',928,'23-34'],['Chunlong Yang','CHN',928,'23-34'],['Nashon Kiplimo','KEN',925,'23-34'],['Luca Del Pero','ITA',923,'23-34'],['William Boffelli','ITA',923,'23-34']],
+  '100K':[['Cristian Minoggio','ITA',945,'40-44'],['Ben Dhiman','USA',941,'35-39'],['Louison Coiffet','FRA',937,'23-34'],['Jim Walmsley','USA',930,'35-39'],['Francesco Puppi','ITA',928,'23-34'],['Andreas Reiterer','ITA',927,'23-34'],['Rongchao Gu','CHN',927,'35-39'],['Hannes Namberger','GER',926,'35-39'],['Jonathan Albon','GBR',924,'35-39'],['Jianjian Yang','CHN',923,'23-34']],
+  '100M':[['Ben Dhiman','USA',962,'35-39'],['Caleb Olson','USA',944,'23-34'],['Hugo Deck','FRA',937,'23-34'],['Chris Myers','USA',937,'23-34'],['Baptiste Chassagne','FRA',936,'23-34'],['Vincent Bouillard','FRA',933,'23-34'],['Thomas Evans','GBR',932,'23-34'],['Francesco Puppi','ITA',927,'23-34'],['Karol Siola','POL',925,'23-34'],['Virgile Moriset','FRA',925,'23-34']]
+ },
+ women:{
+  '50K':[['Tove Alexandersson','SWE',864,'23-34'],['Miao Yao','CHN',823,'23-34'],['Judith Wyder','SUI',817,'35-39'],['Ikram Rharsalla Laktab','ESP',811,'23-34'],['Maude Mathys','SUI',804,'35-39'],['Nuria Gil Clapera','ESP',796,'23-34'],['Ida Amelie Robsahm','NOR',796,'23-34'],['María Teresa La Chica Lhoëst','ESP',790,'23-34'],['Sara Alonso','ESP',788,'23-34'],['Agnieszka Dygacz','POL',786,'40-44']],
+  '100K':[['Jennifer Lichter','USA',823,'23-34'],['Anne Flower','USA',821,'35-39'],['Katie Schide','USA',813,'23-34'],['Miao Yao','CHN',812,'23-34'],['Sunmaya Budha','NEP',809,'23-34'],['Yngvild Kaspersen','NOR',803,'23-34'],['Lucy Bartholomew','AUS',801,'23-34'],['Antonina Iushina','RUS',801,'23-34'],['Eszter Csillag','HUN',800,'40-44'],['Toni McCann','RSA',799,'23-34']],
+  '100M':[['Katie Schide','USA',830,'23-34'],['Jennifer Lichter','USA',830,'23-34'],['Courtney Dauwalter','USA',828,'40-44'],['Antonina Iushina','RUS',818,'23-34'],['Riley Brady','USA',817,'23-34'],['Tara Dower','USA',812,'23-34'],['Marianne Hogan','CAN',809,'35-39'],['Ruth Croft','NZL',806,'35-39'],['Fuzhao Xiang','CHN',806,'35-39'],['Caitlin Fielder','NZL',805,'23-34']]
+ }
+};
+// TCS New York City Marathon final results (men and women); race run 1 Nov 2026.
+// [name, country, finish time, personal best entering the race, world rank (blank; not meaningful for results)]
+const ENTRY_EVENTS=['Marathon'];
+// Elite start only; women go off 30 minutes before men. New York sits on EST (UTC-5), two hours ahead of Denver's MST (UTC-7) for these dates.
+const TIMETABLE=[
+ {label:'Sunday 1 November',short:'Sun 1 Nov',rows:[
+  ['08:00','Wheelchair (men)'],['08:02','Wheelchair (women)'],['08:22','Handcycle & para divisions'],
+  ['08:35','Women’s Marathon','women/Marathon'],['09:05','Men’s Marathon','men/Marathon'],
+  ['09:10','Wave 1'],['09:45','Wave 2'],['10:20','Wave 3'],['10:55','Wave 4'],['11:30','Wave 5']
+ ]}
+];
+const ENTRY_MEET_CITY='New York';
+const ENTRY_RESULTS_URL='https://results.nyrr.org/';
+const ENTRY_RESULTS_LABEL='results.nyrr.org';
+// Elite marathon finishers arrive roughly two to two-and-a-half hours after the gun, so the
+// live window needs a much longer buffer than a track meet's last race; Brussels used 40 minutes.
+const ENTRY_LIVE_BUFFER_MIN=180;
+// Daylight saving time ends at 2am local on race morning, so both New York (EST, UTC-5) and
+// Denver (MST, UTC-7) are already on standard time by the 8:35am ET gun -- a flat two-hour gap.
+const ENTRY_UTC_OFFSET_HOURS=-5, MOUNTAIN_UTC_OFFSET_HOURS=-7, ENTRY_MEET_MONTH_INDEX=10; // New York EST, Denver MST, November (0-based)
+function toMountain(hhmm){const diff=ENTRY_UTC_OFFSET_HOURS-MOUNTAIN_UTC_OFFSET_HOURS,p=hhmm.split(':'),H=(+p[0]+24-diff)%24;return `${H%12||12}:${p[1]} ${H>=12?'PM':'AM'}`}
+// Men's and women's championship or major races count as finals; support races render dimmed.
+function isFinalEvent(n){return /^(Men|Women)/.test(n)&&!/Invitational|T63|T54/.test(n)}
+// ---- Live status for the timetable ----------------------------------------
+// No public results feed exists for this meet, so "live" here means an honest, purely time-driven
+// read of the schedule: which event is on right now, and which have already finished, computed
+// straight from each device's own clock against the published start times, never a guessed result.
+// The meet runs EST (UTC-5), so a row's real UTC instant is its local time plus five hours, dated
+// against the day the TIMETABLE entry belongs to.
+function ttRowDateUTC(dayIndex,hhmm){
+ const day=TIMETABLE[dayIndex],dom=+(day.label.match(/(\d+)/)||[])[1]||(4+dayIndex);
+ const p=hhmm.split(':').map(Number);
+ return new Date(Date.UTC(2026,ENTRY_MEET_MONTH_INDEX,dom,p[0]-ENTRY_UTC_OFFSET_HOURS,p[1]));
+}
+// The last row at-or-before `now`, scoped to that day's OWN window (its first row's start through
+// its last row plus a results buffer) — never keyed off the next day's start, so a long overnight
+// gap between sessions can't make a day look like it's still "live".
+function ttDayWindow(dayIndex){
+ const rows=TIMETABLE[dayIndex].rows;
+ return {start:ttRowDateUTC(dayIndex,rows[0][0]).getTime(), end:ttRowDateUTC(dayIndex,rows[rows.length-1][0]).getTime()+ENTRY_LIVE_BUFFER_MIN*60000};
+}
+function ttRowStatuses(dayIndex){
+ const rows=TIMETABLE[dayIndex].rows,now=Date.now(),win=ttDayWindow(dayIndex);
+ let liveIdx=-1;
+ if(now>=win.end)liveIdx=rows.length;
+ else if(now>=win.start){for(let i=0;i<rows.length;i++){if(ttRowDateUTC(dayIndex,rows[i][0]).getTime()<=now)liveIdx=i;else break}}
+ return rows.map((r,i)=>i<liveIdx?'final':i===liveIdx?'live':'upcoming');
+}
+function ttLiveIndexInDay(rows,dayIndex,now){let idx=-1;for(let i=0;i<rows.length;i++){if(ttRowDateUTC(dayIndex,rows[i][0]).getTime()<=now)idx=i;else break}return idx}
+// One phase for the whole meet, used by the banner and to pick which day opens by default.
+function ttMeetPhase(){
+ const now=Date.now();
+ const wins=TIMETABLE.map((_,i)=>ttDayWindow(i));
+ const first=wins[0],last=wins[wins.length-1];
+ if(now<first.start)return{kind:'before',ms:first.start-now};
+ if(now>=last.end)return{kind:'after'};
+ for(let i=0;i<TIMETABLE.length;i++){
+  const w=wins[i];
+  if(now>=w.start&&now<w.end){
+   const idx=ttLiveIndexInDay(TIMETABLE[i].rows,i,now);
+   if(idx>-1)return{kind:'live',day:i,idx};
+  }
+  if(now<w.start)return{kind:'gap',ms:w.start-now,label:i===1?'Day two starts in':`Day ${i+1} starts in`};
+ }
+ return{kind:'gap',ms:0,label:'Between sessions'};
+}
+function ttDefaultDay(){for(let i=0;i<TIMETABLE.length;i++){if(Date.now()<ttDayWindow(i).end)return i}return TIMETABLE.length-1}
+function ttFmtCountdown(ms){if(ms<=0)return'any moment';const mins=Math.round(ms/60000),h=Math.floor(mins/60),m=mins%60;return h>0?`${h}h ${m}m`:`${m}m`}
+function ttBadge(status){return status==='live'?'<span class="tt-badge live">Live</span>':status==='final'?'<span class="tt-badge final">Final</span>':''}
+function renderTtBanner(){
+ const el=$('#ttLiveBanner');if(!el)return;
+ const phase=ttMeetPhase();
+ if(phase.kind==='before'){el.innerHTML=`<div class="tt-live-banner off"><b>Starts soon</b> Day one begins in ${esc(ttFmtCountdown(phase.ms))}</div>`;return}
+ if(phase.kind==='after'){el.innerHTML=`<div class="tt-live-banner off"><b>Final complete</b> Full results at <a href="${ENTRY_RESULTS_URL}" target="_blank" rel="noopener">${esc(ENTRY_RESULTS_LABEL)}</a></div>`;return}
+ if(phase.kind==='gap'){el.innerHTML=`<div class="tt-live-banner off"><b>Between sessions</b> ${esc(phase.label)}${phase.ms?' &middot; '+esc(ttFmtCountdown(phase.ms)):''}</div>`;return}
+ const row=TIMETABLE[phase.day].rows[phase.idx];
+ el.innerHTML=`<div class="tt-live-banner"><span class="dot"></span><b>Live now</b> ${esc(row[1])}<span class="tt-live-time">${esc(toMountain(row[0]))} MST</span></div>`;
+}
+// Each start list takes its time straight from the timetable, so the two can never disagree.
+const ENTRY_WHEN=(()=>{const out={men:{},women:{}};
+ TIMETABLE.forEach(d=>d.rows.forEach(([t,n,key])=>{if(!key)return;const g=key.split('/')[0],ev=key.split('/')[1];
+  out[g][ev]=`${d.short} · ${toMountain(t)} MST`}));
+ return out})();
+const ENTRIES={
+ men:{
+  'Marathon':[['Andreas Almgren','SWE','2:06:01','Debut',''],['Yemaneberhan Crippa','ITA','2:06:14','2:05:18',''],['Kamohelo Mofolo','LES','2:06:26','2:08:50',''],['Benson Kipruto','KEN','2:06:27','2:02:16',''],['Haftu Strintzos','AUS','2:06:34','2:06:20',''],['Zouhair Talbi','USA','2:06:43','2:03:45',''],['Ahmed Muhumed','USA','2:07:08','Debut',''],['Geoffrey Kamworor','KEN','2:07:09','2:04:23',''],['Ryota Kondo','JPN','2:07:09','2:05:39',''],['Ryan Ford','USA','2:07:17','2:05:46','']]
+ },
+ women:{
+  'Marathon':[['Sheila Chepkirui','KEN','2:24:36','2:17:29',''],['Jessica McClain','USA','2:24:42','2:20:49',''],['Hellen Obiri','KEN','2:24:43','2:15:53',''],['Edna Kiplagat','KEN','2:25:42','2:19:50',''],['Mercy Chelangat','KEN','2:25:46','2:20:30',''],['Carrie Ellwood','USA','2:26:28','2:22:53',''],['Weini Kelati','USA','2:26:51','Debut',''],['Paige Wood','USA','2:27:29','2:26:02',''],['Viola Cheptoo','KEN','2:28:34','2:19:05',''],['Fabienne Königstein','GER','2:28:49','2:22:17','']]
+ }
+};
+const ENTRIES_PENDING=[
+ ['Shanghai Marathon','Dec 6','Elite field announced closer to race day.'],
+ ['Valencia Marathon','Dec 6','Preliminary field published 6 Nov — Kejelcha, Korir, Jepkosgei and Tesfay among those confirmed; organizers say an updated roster is coming soon.']
+];
+const UPCOMING=[
+ {d:'Dec 6',y:'2026',name:'Shanghai Marathon',where:'Shanghai, China',detail:'A candidate race under assessment to join the majors in 2027.',watch:'Broadcast details not yet announced',tag:'Candidate major',cls:'',links:[['Race details & schedule','https://www.watchathletics.com/schedule/watchlive/11238'],['Bid to join the World Marathon Majors','https://marathonhandbook.com/shanghai-marathon-is-one-race-away-from-joining-the-worlds-most-exclusive-running-club/']]},
+ {d:'Dec 6',y:'2026',name:'Valencia Marathon',where:'Valencia, Spain',detail:'One of the fastest courses in the world — Agnes Ngetich’s half marathon and 10km world bests have both come on these roads.',watch:'Broadcast details not yet announced',tag:'Elite race',cls:'',links:[['Official site','https://www.valenciaciudaddelrunning.com/en/marathon/'],['Kejelcha and Tesfay lead elite lineup','https://www.valenciaciudaddelrunning.com/en/kejelcha-tesfay-lead-elite-lineup-big-ambitions-valencia-marathon-2026/']]},
+ {d:'Mar 7',y:'2027',name:'Tokyo Marathon',where:'Tokyo, Japan',detail:'The newest of the six World Marathon Majors and the first big race of the 2027 season.',watch:'Broadcast details not yet announced',tag:'Marathon major',cls:'major',links:[['Official site','https://www.marathon.tokyo/en/'],['Prize money raised, field expanded for 2027','https://marathonhandbook.com/tokyo-marathon-pushes-champion-prize-to-170000-and-expands-field-to-40000-for-2027/']]},
+ {d:'Apr 19',y:'2027',name:'Boston Marathon',where:'Boston, USA',detail:'The 131st running of the oldest annual marathon, on Patriots’ Day weekend.',watch:'Broadcast details not yet announced',tag:'Marathon major',cls:'major',links:[['Official site','https://www.baa.org/races/boston-marathon']]}
+];
+const DL_SEASON=[
+ ['May 16','Keqiao / Shanghai','China'],['May 23','Xiamen','China'],['May 31','Rabat','Morocco'],
+ ['Jun 4','Rome','Italy'],['Jun 7','Stockholm','Sweden'],['Jun 10','Oslo','Norway'],
+ ['Jun 19','Doha','Qatar'],['Jun 28','Paris','France'],['Jul 4','Eugene','USA'],
+ ['Jul 10','Monaco','Monaco'],['Jul 18','London','Great Britain'],['Aug 21','Lausanne','Switzerland'],
+ ['Aug 23','Silesia','Poland'],['Aug 27','Zurich','Switzerland'],['Sep 4-5','Brussels','Belgium']
+];
+
+// Section news. [ISO date, headline, publisher, url, one-line summary]
+// Checked 12 November 2026; the twice-weekly refresh replaces these.
+const NEWS_CHECKED='2026-11-12';
+const NEWS={
+ track:[
+  ['2026-11-09','Ratified world records: Dos Santos, Kejelcha, Kerr, Russell','World Athletics','https://worldathletics.org/news/press-releases/ratified-world-records-dos-santos-kejelcha-kerr-russell','World Athletics formally ratified four 2026 marks: Josh Kerr’s mile world record (3:42.66), Yomif Kejelcha’s half marathon world record (56:51), Alison dos Santos’s 400m hurdles world record (45.80), and Masai Russell’s 100m hurdles world record (12.09).'],
+  ['2026-11-03','Patience pays off for new king of the hurdles Dos Santos','Diamond League','https://www.diamondleague.com/patience-pays-off-for-new-king-of-the-hurdles-dos-santos/','Alison dos Santos broke the 400m hurdles world record with 45.80 in Zurich, beat rival Karsten Warholm in all five of their Diamond League meetings this season, and claimed his third Diamond League title.'],
+  ['2026-10-29','2026 Season Review Part VI: drama, records and new champions in Brussels','Diamond League','https://www.diamondleague.com/part-vi-drama-records-and-new-champions-in-brussels/','The season-ending retrospective recaps the Brussels Diamond League Final, where Chase Jackson and Collen Kebinatshipi set meeting records and 21 athletes won their first Diamond League titles.']
+ ],
+ road:[
+  ['2026-11-06','A preliminary view of Valencia Marathon’s international elite field','Athletics Illustrated','https://athleticsillustrated.com/a-preliminary-view-of-valencia-marathons-international-elite-field/','Yomif Kejelcha and Fotyen Tesfay headline the first names revealed for the Dec 6 Valencia field, joined by defending champions John Korir and Joyciline Jepkosgei, with organizers planning to add more contenders soon.'],
+  ['2026-11-01','Almgren stuns in NYC debut as Chepkirui denies Obiri a third title','Marathon Journal','https://marathonjournal.com/2026-new-york-city-marathon-results/','The Swede out-kicked Yemaneberhan Crippa and Kamohelo Mofolo to win New York in 2:06:01 as defending champion Benson Kipruto faded to fourth, while Sheila Chepkirui (2:24:36) held off a fast-closing Jessica McClain and Hellen Obiri.'],
+  ['2026-10-28','Claudio Berardelli Unfiltered: Jepchirchir’s doping, Sawe’s sub-2, and Wanyonyi’s future','LetsRun.com','https://www.letsrun.com/news/2026/10/claudio-berardelli-unfiltered-jepchirchirs-doping-sawes-sub-2-and-wanyonyis-800-1500-future/','Coach Claudio Berardelli says “justice has been done” on training-mate Peres Jepchirchir’s EPO case and reveals that world record holder Sabastian Sawe was drug-tested every three days during his sub-2-hour marathon build.']
+ ],
+ ultra:[
+  ['2026-11-09','This Week In Running: November 9, 2026','iRunFar','https://www.irunfar.com/this-week-in-running-november-9-2026','Manuel Merillas and Sara Alonso won the Marató dels Dements Skymasters to clinch the 2026 Skyrunner World Series overall titles, Chris Myers set the first sub-20-hour Grampians Peak Trail 100 Mile mark, and Antonina Iushina won that race’s women’s division.'],
+  ['2026-11-02','Javelina and Tsaigu headline a loaded ultra weekend','iRunFar','https://www.irunfar.com/this-week-in-running-november-2-2026','Rob Molke (12:11) and Heather Jackson won a wind-down Javelina 100 Mile in Arizona, while Jim Walmsley returned to form to win China’s Tsaigu Trail 105k in 10:53 and Tove Alexandersson took its women’s 50k.'],
+  ['2026-10-26','Golden Trail World Series finale in Muju: Elazzaoui’s third straight title, Kolbeinsdóttir’s surprise win','iRunFar','https://www.irunfar.com/this-week-in-running-october-26-2026','Elhousine Elazzaoui topped a rainy, technical Muju Trail Grand Finale to claim his third consecutive series title, while Iceland’s Andrea Kolbeinsdóttir won the women’s race by almost six minutes; Frédéric Tranchand also set a course record at Spain’s Sobrescobio Skyrace.']
+ ],
+ entries:[
+  ['2026-11-03','24-year-old charity runner Rachel Apa dies after collapsing near the NYC Marathon finish','WSB-TV','https://www.wsbtv.com/sports/woman-running-nyc/3TZ4OJ2N6MZJVIFVIWLZKPIYKY/','The Pennsylvania runner, racing her first New York City Marathon to raise money for Parkinson’s research, collapsed about two miles from the finish and died later at a hospital.'],
+  ['2026-11-01','Almgren stuns in NYC debut as Chepkirui denies Obiri a third title','Marathon Journal','https://marathonjournal.com/2026-new-york-city-marathon-results/','The Swede out-kicked Yemaneberhan Crippa and Kamohelo Mofolo to win in 2:06:01 as defending champion Benson Kipruto faded to fourth, while Sheila Chepkirui (2:24:36) held off Jessica McClain and Hellen Obiri.'],
+  ['2026-11-01','McClain’s runner-up finish ends an eight-year US podium drought','Yahoo Sports','https://sports.yahoo.com/articles/york-city-marathon-2026-results-162826825.html','Jessica McClain’s 2:24:42 — six seconds back — is the first American women’s podium finish in New York since Shalane Flanagan’s 2018 bronze.'],
+  ['2026-11-01','Hug and Debrunner sweep the wheelchair races','FloTrack','https://www.flotrack.org/articles/16339972-2026-nyc-marathon-live-updates-results-winners','Marcel Hug won an eighth men’s wheelchair title in 1:28:14, edging Daniel Romanchuk by just over a second, while Catherine Debrunner’s 1:40:02 fell about 30 seconds shy of her own course record.']
+ ],
+ calendar:[
+  ['2026-11-01','New York closes the 2026 majors season as Almgren and Chepkirui win','FloTrack','https://www.flotrack.org/articles/16339972-2026-nyc-marathon-live-updates-results-winners','The year’s sixth and final World Marathon Major wrapped with upset wins for Andreas Almgren (2:06:01) and Sheila Chepkirui (2:24:36), leaving Shanghai and Valencia, both Dec 6, as the last notable marathons of 2026.'],
+  ['2026-10-15','Coe and President Ruto reaffirm plans for Nairobi 2029','World Athletics','https://worldathletics.org/news/press-releases/coe-president-ruto-kenya-2029-world-championships','World Athletics president Sebastian Coe and Kenyan president William Ruto reaffirmed their commitment to the 2029 World Championships in Nairobi — the first held in Africa — during a visit to Eldoret, with Kasarani stadium upgrades already underway.'],
+  ['2026-10-12','Wanda Diamond League publishes 2027 calendar','Diamond League','https://www.diamondleague.com/wanda-diamond-league-publishes-2027-calendar/','The 2027 season opens in Doha on 7 May and closes with a two-day final in Zurich on 25–26 August, with Shanghai/Keqiao, Xiamen, Rome, Rabat, Oslo, Stockholm, Paris, Eugene, Monaco, Lausanne, London, Silesia and Brussels filling out the 15-meeting calendar.']
+ ]
+};
+
+// World records. [event, mark, athlete, country, venue, date, note]
+// Track and road from the World Athletics world-record tables; ultra from the IAU record lists.
+// Both read 12 November 2026 (full men's and women's tables on both sites cross-checked
+// against the entries below; Kerr's mile and Kejelcha's half marathon marks are now ratified).
+const RECORDS_CHECKED='2026-11-12';
+const RECORDS={
+ track:{
+  men:[
+   ['100m','9.58','Usain Bolt','JAM','Berlin','16 Aug 2009',''],
+   ['200m','19.19','Usain Bolt','JAM','Berlin','20 Aug 2009',''],
+   ['400m','43.03','Wayde van Niekerk','RSA','Rio de Janeiro','14 Aug 2016',''],
+   ['800m','1:40.91','David Rudisha','KEN','London','9 Aug 2012',''],
+   ['1000m','2:11.83','Emmanuel Wanyonyi','KEN','Monaco','10 Jul 2026','previous record Noah Ngeny 2:11.96, Rieti, 5 Sep 1999'],
+   ['1500m','3:26.00','Hicham El Guerrouj','MAR','Rome','14 Jul 1998',''],
+   ['Mile','3:42.66','Josh Kerr','GBR','London','18 Jul 2026','previous record Hicham El Guerrouj 3:43.13, Rome, 7 Jul 1999'],
+   ['2000m','4:43.13','Jakob Ingebrigtsen','NOR','Brussels','8 Sep 2023',''],
+   ['3000m','7:17.55','Jakob Ingebrigtsen','NOR','Chorzow','25 Aug 2024',''],
+   ['2 miles','7:54.10','Jakob Ingebrigtsen','NOR','Paris','9 Jun 2023','world best, not a ratified record'],
+   ['5000m','12:35.36','Joshua Cheptegei','UGA','Monaco','14 Aug 2020',''],
+   ['10,000m','26:11.00','Joshua Cheptegei','UGA','Valencia','7 Oct 2020','']
+  ],
+  women:[
+   ['100m','10.49','Florence Griffith Joyner','USA','Indianapolis','16 Jul 1988',''],
+   ['200m','21.34','Florence Griffith Joyner','USA','Seoul','29 Sep 1988',''],
+   ['400m','47.60','Marita Koch','GDR','Canberra','6 Oct 1985',''],
+   ['800m','1:53.28','Jarmila Kratochvilova','TCH','Munich','26 Jul 1983',''],
+   ['1000m','2:28.98','Svetlana Masterkova','RUS','Brussels','23 Aug 1996',''],
+   ['1500m','3:48.68','Faith Kipyegon','KEN','Eugene','5 Jul 2025',''],
+   ['Mile','4:07.64','Faith Kipyegon','KEN','Monaco','21 Jul 2023',''],
+   ['2000m','5:19.70','Jessica Hull','AUS','Monaco','12 Jul 2024',''],
+   ['3000m','8:06.11','Wang Junxia','CHN','Beijing','13 Sep 1993',''],
+   ['2 miles','8:58.58','Meseret Defar','ETH','Brussels','14 Sep 2007','world best, not a ratified record'],
+   ['5000m','13:58.06','Beatrice Chebet','KEN','Eugene','5 Jul 2025',''],
+   ['10,000m','28:54.14','Beatrice Chebet','KEN','Eugene','25 May 2024','']
+  ]
+ },
+ road:{
+  men:[
+   ['5km','12:49','Berihu Aregawi','ETH','Barcelona','31 Dec 2021',''],
+   ['10km','26:31','Yomif Kejelcha','ETH','Castellon','16 Feb 2025',''],
+   ['Half marathon','56:51','Yomif Kejelcha','ETH','Buenos Aires','23 Aug 2026','previous record Jacob Kiplimo 57:20, Lisbon, 8 Mar 2026'],
+   ['Marathon','1:59:30','Sabastian Sawe','KEN','London','26 Apr 2026','']
+  ],
+  women:[
+   ['5km','13:54','Beatrice Chebet','KEN','Barcelona','31 Dec 2024','mixed race'],
+   ['5km','14:13','Beatrice Chebet','KEN','Barcelona','31 Dec 2023','women-only race'],
+   ['10km','28:46','Agnes Ngetich','KEN','Valencia','14 Jan 2024','mixed race'],
+   ['10km','29:27','Agnes Ngetich','KEN','Herzogenaurach','26 Apr 2025','women-only race'],
+   ['Half marathon','1:02:52','Letesenbet Gidey','ETH','Valencia','24 Oct 2021','mixed race'],
+   ['Half marathon','1:05:15','Agnes Ngetich','KEN','Copenhagen','20 Sep 2026','women-only race — previous record Peres Jepchirchir 1:05:16, Gdynia, 17 Oct 2020','pending'],
+   ['Marathon','2:09:56','Ruth Chepngetich','KEN','Chicago','13 Oct 2024','mixed race'],
+   ['Marathon','2:15:41','Tigst Assefa','ETH','London','26 Apr 2026','women-only race']
+  ]
+ },
+ ultra:{
+  men:[
+   ['50km','2:38:43','CJ Albertson','USA','San Francisco','8 Oct 2022','road'],
+   ['50 miles','4:48:21','Charlie Lawrence','USA','Vienna, IL','11 Nov 2023',''],
+   ['100km','6:05:35','Aleksandr Sorokin','LTU','Vilnius','14 May 2023','road'],
+   ['100 miles','10:51:39','Aleksandr Sorokin','LTU','Tel Aviv','7 Jan 2022',''],
+   ['6 hours','98.496 km','Aleksandr Sorokin','LTU','Bedford','23 Apr 2022',''],
+   ['12 hours','177.410 km','Aleksandr Sorokin','LTU','Tel Aviv','7 Jan 2022',''],
+   ['24 hours','319.614 km','Aleksandr Sorokin','LTU','Verona','17 Sep 2022',''],
+   ['48 hours','485.099 km','Matthieu Bonne','BEL','Pabianice','30 May 2025','']
+  ],
+  women:[
+   ['50km','2:59:54','Des Linden','USA','Dorena','13 Apr 2021','road'],
+   ['50 miles','5:18:57','Anne Flower','USA','Vienna, IL','9 Nov 2025',''],
+   ['100km','6:33:11','Tomoe Abe','JPN','Lake Saroma','25 Jun 2000','road'],
+   ['100 miles','12:42:40','Camille Herron','USA','Vienna, IL','11 Nov 2017',''],
+   ['6 hours','85.490 km','Nele Alder-Baerens','GER','Munster','11 Mar 2017',''],
+   ['12 hours','153.600 km','Satu Lipiainen','FIN','Kokkola','20 May 2023',''],
+   ['24 hours','278.621 km','Sarah Webster','GBR','Albi','18 Oct 2025',''],
+   ['48 hours','436.371 km','Patrycja Bereznowska','POL','Pabianice','30 May 2025','']
+  ]
+ }
+};
+const RECORD_SOURCE={
+ track:['World Athletics world records','https://worldathletics.org/records/by-category/world-records'],
+ road:['World Athletics world records','https://worldathletics.org/records/by-category/world-records'],
+ ultra:['IAU world records','https://iau-ultramarathon.org/iau-records.html']
+};
+
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+const state={track:{gender:'men',key:'100m',sort:'points'},road:{gender:'men',key:'10km – Half marathon',sort:'points'},ultra:{gender:'men',key:'50K',sort:'points'},entries:{gender:'men',key:'Marathon',sort:'time'}};
+// Times come in several shapes: 9.82, 1:41.76, 12:47.62, 1:59:30, and road marks like '26:55 rd'.
+function timeSeconds(v){if(!v)return Infinity;const m=String(v).match(/[0-9]+(?::[0-9]+)*(?:\.[0-9]+)?/);if(!m)return Infinity;const parts=m[0].split(':').map(Number);if(parts.some(n=>!Number.isFinite(n)))return Infinity;return parts.reduce((a,b)=>a*60+b,0)}
+
+function athleteRow(i,name,country,figure,sub,subIsScore){
+  const shown=figure?`<b>${esc(figure)}</b>`:'<b class="none">&mdash;</b>';
+  return `<article class="athlete${i<3?' podium':''}"><span class="rank">${i+1}</span><div><div class="name">${esc(name)}</div><div class="country">${esc(country)}</div></div><div class="figure">${shown}<small>${esc(sub)}${subIsScore?' pts':''}</small></div></article>`;
+}
+function renderBoard(section,data,keys,notes){
+  const s=state[section], list=(data[s.gender]||{})[s.key]||[];
+  $('#'+section+'Chips').innerHTML=keys.map(k=>`<button role="tab" aria-selected="${k===s.key}" class="${k===s.key?'active':''}" data-key="${esc(k)}">${esc(k)}</button>`).join('');
+  const baseNote=typeof notes==='string'?notes:(notes[s.key]||'');
+  $('#'+section+'Note').textContent=s.sort==='time'?baseNote+' Sorted by time; the rank column still shows the world ranking position.':baseNote;
+  // Keep each athlete's ranking position so it survives a re-sort.
+  const items=list.map((row,i)=>({row,rank:i+1}));
+  if(s.sort==='time'&&section!=='ultra')items.sort((a,b)=>timeSeconds(a.row[3])-timeSeconds(b.row[3]));
+  $('#'+section+'List').innerHTML=items.map(({row,rank})=>section==='ultra'
+    ? athleteRow(rank-1,row[0],row[1],row[2],row[3],false)
+    : athleteRow(rank-1,row[0],row[1],row[3],row[2],true)
+  ).join('')||'<div class="event-note">No data for this selection.</div>';
+  $$('#'+section+'Chips button').forEach(b=>b.onclick=()=>{s.key=b.dataset.key;renderBoard(section,data,keys,notes)});
+  renderRecords(section);
+  saveView();
+}
+function renderEntries(){
+  const s=state.entries, list=(ENTRIES[s.gender]||{})[s.key]||[];
+  $('#entriesChips').innerHTML=ENTRY_EVENTS.map(k=>`<button role="tab" aria-selected="${k===s.key}" class="${k===s.key?'active':''}" data-key="${esc(k)}">${esc(k)}</button>`).join('');
+  $('#entriesNote').textContent=`${list.length} finished \u00b7 ${(ENTRY_WHEN[s.gender]||{})[s.key]||''} \u00b7 sorted by ${s.sort==='time'?'finish time':'world ranking'}`;
+  const ordered=list.slice().sort((a,b)=>s.sort==='time'
+    ? timeSeconds(a[2])-timeSeconds(b[2])
+    : (Number(a[4]||9999)-Number(b[4]||9999)));
+  $('#entriesList').innerHTML=ordered.map(([name,country,sb,pb,rank])=>
+    `<article class="athlete"><span class="rank">&nbsp;</span><div><div class="name">${esc(name)}</div><div class="country">${esc(country)}</div></div><div class="figure">${sb?`<b>${esc(sb)}</b>`:'<b class="none">&mdash;</b>'}<small>${pb?'PB '+esc(pb):'no PB listed'}${rank?' \u00b7 WR '+esc(rank):''}</small></div></article>`
+  ).join('')||'<div class="event-note">No entry list for this event.</div>';
+  $$('#entriesChips button').forEach(b=>b.onclick=()=>{s.key=b.dataset.key;renderEntries()});
+  saveView();
+  $('#pendingList').innerHTML=ENTRIES_PENDING.map(([name,when,note])=>
+    `<div class="done" style="grid-template-columns:minmax(0,1fr)"><div><div class="m" style="font-size:15px;color:var(--ink)">${esc(name)}</div><div class="d" style="margin-top:4px">${esc(when)}</div><div style="font:12px/1.5 Arial,Helvetica,sans-serif;color:var(--muted);margin-top:5px">${esc(note)}</div></div></div>`
+  ).join('');
+}
+const ttState={day:ttDefaultDay(),scope:'finals'};
+// --- Remembering where you were -------------------------------------------
+// A refresh should land back on the same tab and the same selection, so the view
+// is mirrored into the URL hash (shareable) and localStorage (survives a bare URL).
+const TABS=['track','road','ultra','entries','calendar'];
+const SECTION_KEYS={track:TRACK_EVENTS,road:ROAD_GROUPS,ultra:ULTRA_DISTANCES,entries:ENTRY_EVENTS};
+let activeTab='track';
+function saveView(){
+  try{localStorage.setItem('tf-view',JSON.stringify({tab:activeTab,state:state,tt:ttState}))}catch(e){}
+  const s=state[activeTab];
+  const hash='#'+activeTab+(s?'/'+s.gender+'/'+encodeURIComponent(s.key)+'/'+s.sort:'');
+  if(location.hash!==hash){try{history.replaceState(null,'',location.pathname+location.search+hash)}catch(e){}}
+}
+// Anything stored can be stale — an event that no longer exists, a hand-edited hash —
+// so every piece is checked against the live data before it is used.
+function applyView(tab,sel){
+  if(TABS.indexOf(tab)>-1)activeTab=tab;
+  const s=state[activeTab];
+  if(!s||!sel)return;
+  if(sel.gender==='men'||sel.gender==='women')s.gender=sel.gender;
+  if(SECTION_KEYS[activeTab].indexOf(sel.key)>-1)s.key=sel.key;
+  if(sel.sort==='points'||(sel.sort==='time'&&activeTab!=='ultra'))s.sort=sel.sort;
+}
+function restoreView(){
+  let saved=null;
+  try{saved=JSON.parse(localStorage.getItem('tf-view')||'null')}catch(e){}
+  if(saved){
+    if(saved.tt){if(Number.isInteger(saved.tt.day)&&saved.tt.day>=0&&saved.tt.day<TIMETABLE.length)ttState.day=saved.tt.day;
+      if(saved.tt.scope==='all'||saved.tt.scope==='finals')ttState.scope=saved.tt.scope}
+    TABS.forEach(t=>{if(saved.state&&saved.state[t])applyView(t,saved.state[t])});
+    if(TABS.indexOf(saved.tab)>-1)activeTab=saved.tab;
+  }
+  // The hash wins, so a link to a particular board opens on it.
+  const parts=decodeURIComponent(location.hash.slice(1)).split('/');
+  if(parts[0])applyView(parts[0],{gender:parts[1],key:parts[2],sort:parts[3]});
+  showTab(activeTab);
+  // The gender and sort buttons are static markup, so bring them in line with the restored state.
+  TABS.forEach(t=>{const s=state[t];if(!s)return;
+    $$('#'+t+'View .controls .seg:not(.sortseg) button').forEach(b=>{const on=b.dataset.gender===s.gender;b.classList.toggle('active',on);b.setAttribute('aria-selected',on)});
+    $$('#'+t+'View .controls .sortseg button').forEach(b=>b.classList.toggle('active',b.dataset.sort===s.sort&&!b.disabled));
+  });
+  $$('#ttScope button').forEach(b=>b.classList.toggle('active',b.dataset.scope===ttState.scope));
+}
+function showTab(name){
+  activeTab=name;
+  $$('.tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
+  TABS.forEach(x=>$('#'+x+'View').classList.toggle('hide',x!==name));
+  saveView();
+}
+function renderTimetable(){
+  const day=TIMETABLE[ttState.day];
+  $('#ttDays').innerHTML=TIMETABLE.map((d,i)=>`<button role="tab" aria-selected="${i===ttState.day}" class="${i===ttState.day?'active':''}" data-day="${i}">${esc(d.short)}</button>`).join('');
+  renderTtBanner();
+  const statuses=ttRowStatuses(ttState.day);
+  const rows=day.rows.filter(r=>ttState.scope==='all'||isFinalEvent(r[1]));
+  $('#ttList').innerHTML=rows.map(r=>{
+    const[t,n,key]=r,status=statuses[day.rows.indexOf(r)],badge=ttBadge(status);
+    const actions=[];
+    if(key)actions.push(`<button class="tt-link" data-entry="${esc(key)}">Start list</button>`);
+    if(status==='final')actions.push(`<a class="tt-result-link" href="${ENTRY_RESULTS_URL}" target="_blank" rel="noopener">Result &#8599;</a>`);
+    return`<div class="tt-row${isFinalEvent(n)?'':' support'}${status==='live'?' is-live':''}"><div class="t">${esc(toMountain(t))}<span class="tz">MST</span><small>${esc(t)} ${esc(ENTRY_MEET_CITY)}</small></div><div class="e">${esc(n)}${badge}</div><div class="tt-actions">${actions.join('')}</div></div>`;
+  }).join('');
+  $$('#ttDays button').forEach(b=>b.onclick=()=>{ttState.day=+b.dataset.day;renderTimetable()});
+  $$('#ttScope button').forEach(b=>b.onclick=()=>{ttState.scope=b.dataset.scope;$$('#ttScope button').forEach(x=>x.classList.toggle('active',x===b));renderTimetable()});
+  saveView();
+  // Tapping a race jumps the start list above to that event.
+  $$('#ttList .tt-link').forEach(b=>b.onclick=()=>{
+    const g=b.dataset.entry.split('/')[0],ev=b.dataset.entry.split('/')[1];
+    state.entries.gender=g;state.entries.key=ev;
+    $$('#entriesView .controls .seg:not(.sortseg) button').forEach(x=>{const on=x.dataset.gender===g;x.classList.toggle('active',on);x.setAttribute('aria-selected',on)});
+    renderEntries();
+    $('#entriesView .panel').scrollIntoView({behavior:'smooth',block:'start'});
+  });
+}
+const NEWS_MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function newsDate(iso){const p=String(iso).split('-');return {d:(+p[2])+' '+NEWS_MONTHS[+p[1]-1],y:p[0]}}
+function renderNews(){
+  const checked=newsDate(NEWS_CHECKED);
+  Object.keys(NEWS).forEach(sec=>{
+    const list=NEWS[sec]||[];
+    const note=$('#'+sec+'NewsNote'), box=$('#'+sec+'News');
+    if(!box)return;
+    if(note)note.textContent=list.length
+      ? 'Checked '+checked.d+' '+checked.y+'. Headlines refresh twice a week; tap one to read it at the source.'
+      : 'Nothing new since this section was last checked.';
+    box.innerHTML=list.map(function(row){const dt=newsDate(row[0]);
+      return '<article class="story"><div class="newsdate">'+esc(dt.d)+'<small>'+esc(dt.y)+'</small></div><div>'
+        +'<h3><a href="'+esc(row[3])+'" target="_blank" rel="noopener">'+esc(row[1])+'</a></h3>'
+        +'<div class="where">'+esc(row[2])+'</div>'
+        +'<div class="detail">'+esc(row[4])+'</div></div></article>';
+    }).join('')||'<div class="event-note" style="border:0;background:none;padding-left:0">No stories yet.</div>';
+  });
+}
+function renderRecords(section){
+  const box=$('#'+section+'Records');
+  if(!box)return;
+  const gender=state[section].gender;
+  const list=((RECORDS[section]||{})[gender])||[];
+  const src=RECORD_SOURCE[section]||['',''];
+  const d=newsDate(RECORDS_CHECKED);
+  const note=$('#'+section+'RecordsNote');
+  if(note)note.innerHTML=(gender==='men'?'Men':'Women')+'&rsquo;s world records, from <a href="'+esc(src[1])+'" target="_blank" rel="noopener">'+esc(src[0])+'</a>. Switch to '+(gender==='men'?'women':'men')+' above to see theirs. Read '+esc(d.d)+' '+esc(d.y)+'.';
+  box.innerHTML=list.map(function(r){
+    var pending=r[7]==='pending';
+    return '<div class="rec'+(pending?' rec-new':'')+'"><div class="rec-ev">'+esc(r[0])+(r[6]?'<small>'+esc(r[6])+'</small>':'')+'</div>'
+      +'<div class="rec-who"><b>'+esc(r[2])+'</b><small>'+esc(r[3])+' &middot; '+esc(r[4])+' &middot; '+esc(r[5])+'</small></div>'
+      +'<div class="rec-mark">'+esc(r[1])+(pending?'<span class="rec-flag">Awaiting ratification</span>':'')+'</div></div>';
+  }).join('')||'<div class="event-note" style="border:0;background:none;padding-left:0">No records listed.</div>';
+}
+function renderAll(){
+  renderBoard('track',TRACK,TRACK_EVENTS,TRACK_NOTES);
+  renderBoard('road',ROAD,ROAD_GROUPS,ROAD_NOTES);
+  renderBoard('ultra',ULTRA,ULTRA_DISTANCES,ULTRA_NOTES);
+  renderEntries();
+}
+// Official page and background reading for each meet; nothing renders when there is no link yet.
+function meetLinks(links){
+  if(!links||!links.length)return '';
+  return '<div class="meet-links">'+links.map(function(l){
+    return '<a href="'+esc(l[1])+'" target="_blank" rel="noopener">'+esc(l[0])+'</a>';
+  }).join('')+'</div>';
+}
+function renderCalendar(){
+  $('#upcomingList').innerHTML=UPCOMING.map(m=>
+    `<article class="meet"><div class="meet-date">${esc(m.d)}<small>${esc(m.y)}</small></div><div><h3>${esc(m.name)}</h3><div class="where">${esc(m.where)}</div><div class="detail">${esc(m.detail)}</div><div class="watch"><b>Watch</b> ${m.watch}</div>${meetLinks(m.links)}<span class="tag ${esc(m.cls)}">${esc(m.tag)}</span></div></article>`
+  ).join('');
+  $('#dlList').innerHTML=DL_SEASON.map(([d,city,country],i)=>
+    `<div class="done"><span class="d">${esc(d)}</span><span class="m">${esc(city)}, ${esc(country)}</span><span class="f">${i===DL_SEASON.length-1?'Final':''}</span></div>`
+  ).join('');
+}
+$$('.tabs button').forEach(btn=>btn.onclick=()=>showTab(btn.dataset.tab));
+['track','road','ultra','entries'].forEach(section=>{
+  $$('#'+section+'View .controls .seg:not(.sortseg) button').forEach(btn=>btn.onclick=()=>{
+    state[section].gender=btn.dataset.gender;
+    $$('#'+section+'View .controls .seg:not(.sortseg) button').forEach(b=>{b.classList.toggle('active',b===btn);b.setAttribute('aria-selected',b===btn)});
+    renderAll();
+  });
+  $$('#'+section+'View .controls .sortseg button').forEach(btn=>btn.onclick=()=>{
+    if(btn.disabled)return;
+    state[section].sort=btn.dataset.sort;
+    $$('#'+section+'View .controls .sortseg button').forEach(b=>b.classList.toggle('active',b===btn));
+    renderAll();
+  });
+});
+restoreView();renderAll();renderCalendar();renderTimetable();renderNews();
+// Keeps the timetable's live badges and banner current while the tab sits open.
+setInterval(renderTimetable,30000);
+</script>
+</body>
+</html>
