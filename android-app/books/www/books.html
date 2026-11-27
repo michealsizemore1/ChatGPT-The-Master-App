@@ -1,0 +1,1923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cindy's Book Collection</title>
+<style>
+  :root {
+    --bg: #1a1410;
+    --surface: #251e17;
+    --surface2: #2f2620;
+    --border: #3d3228;
+    --accent: #c8902a;
+    --accent2: #e8b44a;
+    --text: #f0e8d8;
+    --text2: #a89880;
+    --red: #c0392b;
+    --green: #27ae60;
+    --blue: #2980b9;
+    --purple: #8e44ad;
+    --radius: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Georgia', serif; min-height: 100vh; }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, var(--surface) 0%, #1e160e 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 20px 32px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px;
+  }
+  .logo { display: flex; align-items: center; gap: 12px; }
+  .logo-icon { font-size: 2rem; }
+  .logo h1 { font-size: 1.6rem; color: var(--accent2); letter-spacing: 1px; }
+  .logo p { font-size: 0.8rem; color: var(--text2); }
+  .stats-row { display: flex; gap: 20px; flex-wrap: wrap; }
+  .stat { text-align: center; }
+  .stat-num { font-size: 1.4rem; font-weight: bold; color: var(--accent2); }
+  .stat-lbl { font-size: 0.7rem; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; }
+
+  /* TOOLBAR */
+  .toolbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 32px;
+    display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
+  }
+  .search-wrap { position: relative; flex: 1; min-width: 200px; }
+  .search-wrap input {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); border-radius: var(--radius); padding: 8px 12px 8px 36px;
+    font-size: 0.9rem; outline: none; transition: border-color 0.2s;
+  }
+  .search-wrap input:focus { border-color: var(--accent); }
+  .search-wrap .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text2); font-size: 1rem; }
+  select, .btn {
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); border-radius: var(--radius); padding: 8px 12px;
+    font-size: 0.85rem; cursor: pointer; outline: none; transition: all 0.2s;
+  }
+  select:focus, select:hover { border-color: var(--accent); }
+  .btn { font-family: Georgia, serif; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .btn:hover { border-color: var(--accent); background: var(--border); }
+  .btn-primary { background: var(--accent); border-color: var(--accent); color: #1a1410; font-weight: bold; }
+  .btn-primary:hover { background: var(--accent2); border-color: var(--accent2); }
+  .btn-danger { background: transparent; border-color: var(--red); color: var(--red); }
+  .btn-danger:hover { background: var(--red); color: white; }
+  .btn-sm { padding: 4px 10px; font-size: 0.78rem; }
+  .view-btns { display: flex; gap: 4px; }
+  .view-btn { padding: 7px 10px; background: var(--surface2); border: 1px solid var(--border); color: var(--text2); border-radius: var(--radius); cursor: pointer; font-size: 1rem; transition: all 0.2s; }
+  .view-btn.active { background: var(--accent); border-color: var(--accent); color: #1a1410; }
+
+  /* MAIN */
+  main { padding: 24px 32px; }
+
+  /* GRID VIEW */
+  .grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 18px; }
+  .book-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    overflow: hidden; cursor: pointer; transition: all 0.2s; position: relative;
+  }
+  .book-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(200,144,42,0.15); }
+
+  /* Cover image area */
+  .cover-area { height: 200px; position: relative; overflow: hidden; background: var(--surface2); }
+  .cover-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .cover-loading {
+    height: 200px; display: flex; align-items: center; justify-content: center;
+    background: var(--surface2); color: var(--text2); font-size: 0.75rem; font-family: sans-serif;
+  }
+  .cover-spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 6px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .book-spine {
+    height: 200px; display: flex; align-items: center; justify-content: center;
+    font-size: 0.78rem; text-align: center; padding: 12px; font-weight: bold;
+    letter-spacing: 0.5px; position: relative; overflow: hidden;
+  }
+  .book-spine span { position: relative; z-index: 1; }
+  .book-spine::after { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.12); }
+  /* fetch-covers badge on card */
+  .cover-badge {
+    position: absolute; top: 6px; right: 6px; background: rgba(0,0,0,0.6);
+    color: var(--text2); font-size: 0.65rem; padding: 2px 6px; border-radius: 20px;
+    font-family: sans-serif; cursor: pointer; transition: all 0.2s;
+  }
+  .cover-badge:hover { background: var(--accent); color: #1a1410; }
+
+  .book-card-body { padding: 12px; }
+  .book-title { font-size: 0.9rem; font-weight: bold; color: var(--text); margin-bottom: 4px; line-height: 1.3; }
+  .book-author { font-size: 0.78rem; color: var(--text2); margin-bottom: 8px; }
+  .badges { display: flex; flex-wrap: wrap; gap: 4px; }
+  .badge {
+    font-size: 0.65rem; padding: 2px 7px; border-radius: 20px; font-family: sans-serif;
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+  }
+  .badge-hb { background: #3d2b0a; color: #e8b44a; border: 1px solid #6b4d1a; }
+  .badge-pb { background: #0a2b3d; color: #4aabe8; border: 1px solid #1a4d6b; }
+  .badge-eb { background: #1a2b0a; color: #7ae84a; border: 1px solid #3a5d1a; }
+  .badge-ab { background: #2b0a3d; color: #b44ae8; border: 1px solid #5d1a6b; }
+  .badge-read { background: #0a3d1a; color: #4ae87a; border: 1px solid #1a6b3a; }
+  .badge-reading { background: #3d2b0a; color: #e8b44a; border: 1px solid #6b4d1a; }
+  .badge-unread { background: #2a2a2a; color: #888; border: 1px solid #444; }
+  .badge-genre { background: #1a1a3d; color: #8a8ae8; border: 1px solid #3a3a6b; }
+  .star-row { display: flex; gap: 2px; margin-top: 6px; }
+  .star { color: #555; font-size: 0.85rem; cursor: pointer; transition: color 0.1s; }
+  .star.lit { color: var(--accent2); }
+  .card-actions { display: flex; gap: 6px; margin-top: 8px; }
+  .card-btn { flex: 1; padding: 4px; font-size: 0.75rem; text-align: center; border-radius: 4px; cursor: pointer; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); transition: all 0.15s; font-family: Georgia, serif; }
+  .card-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .card-btn.del:hover { border-color: var(--red); color: var(--red); }
+
+  /* LIST VIEW */
+  .list-view table { width: 100%; border-collapse: collapse; }
+  .list-view th {
+    background: var(--surface); color: var(--text2); font-size: 0.75rem;
+    text-transform: uppercase; letter-spacing: 1px; padding: 10px 14px;
+    border-bottom: 2px solid var(--border); text-align: left; cursor: pointer;
+    white-space: nowrap; font-family: sans-serif; user-select: none;
+  }
+  .list-view th:hover { color: var(--accent); }
+  .list-view th .sort-arrow { margin-left: 4px; opacity: 0.5; }
+  .list-view th.sorted { color: var(--accent); }
+  .list-view th.sorted .sort-arrow { opacity: 1; }
+  .list-view tr:hover td { background: var(--surface2); }
+  .list-view td { padding: 8px 14px; border-bottom: 1px solid var(--border); font-size: 0.88rem; vertical-align: middle; }
+  .list-view td.title-cell { font-weight: bold; color: var(--text); }
+  .list-view td.author-cell { color: var(--text2); }
+  .list-thumb { width: 32px; height: 46px; object-fit: cover; border-radius: 3px; display: block; background: var(--surface2); }
+  .list-thumb-spine { width: 32px; height: 46px; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 0.4rem; font-weight: bold; text-align: center; overflow: hidden; }
+  .row-actions { display: flex; gap: 6px; }
+  .row-btn { padding: 3px 8px; font-size: 0.75rem; border-radius: 4px; cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--text2); transition: all 0.15s; font-family: Georgia, serif; }
+  .row-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .row-btn.del:hover { border-color: var(--red); color: var(--red); }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+    z-index: 100; align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  }
+  .modal-header {
+    padding: 20px 24px 16px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-header h2 { font-size: 1.2rem; color: var(--accent2); }
+  .modal-close { background: none; border: none; color: var(--text2); font-size: 1.4rem; cursor: pointer; padding: 4px; border-radius: 4px; transition: color 0.2s; }
+  .modal-close:hover { color: var(--text); }
+  .modal-body { padding: 20px 24px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-grid .full { grid-column: 1 / -1; }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group label { font-size: 0.78rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; font-family: sans-serif; }
+  .form-group input, .form-group select, .form-group textarea {
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); border-radius: var(--radius); padding: 8px 12px;
+    font-size: 0.9rem; outline: none; transition: border-color 0.2s; font-family: Georgia, serif;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--accent); }
+  .form-group textarea { resize: vertical; min-height: 70px; }
+  .form-group select option { background: var(--surface2); }
+  /* Style the datalist dropdown as best we can */
+  input[list] { appearance: none; }
+  .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+  .star-picker { display: flex; gap: 4px; }
+  .star-pick { font-size: 1.3rem; cursor: pointer; color: #555; transition: color 0.1s; }
+  .star-pick.lit { color: var(--accent2); }
+
+  /* GENRE MANAGER */
+  .genre-table { width: 100%; border-collapse: collapse; }
+  .genre-table th { font-size: 0.75rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; font-family: sans-serif; padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: left; }
+  .genre-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); font-size: 0.9rem; vertical-align: middle; }
+  .genre-row-edit { display: none; gap: 6px; align-items: center; }
+  .genre-row-edit input { flex: 1; }
+  .genre-name-display { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .genre-count { font-size: 0.75rem; color: var(--text2); background: var(--surface2); padding: 1px 7px; border-radius: 20px; font-family: sans-serif; }
+
+  /* EMPTY */
+  .empty { text-align: center; padding: 80px 20px; color: var(--text2); }
+  .empty-icon { font-size: 4rem; margin-bottom: 16px; }
+  .empty h3 { font-size: 1.2rem; margin-bottom: 8px; color: var(--text); }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px; background: var(--surface);
+    border: 1px solid var(--accent); color: var(--text); padding: 12px 18px;
+    border-radius: var(--radius); font-size: 0.88rem; z-index: 999;
+    transform: translateY(80px); opacity: 0; transition: all 0.3s;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* DETAIL PANEL */
+  .detail-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+    z-index: 90; align-items: center; justify-content: flex-end;
+  }
+  .detail-overlay.open { display: flex; }
+  .detail-panel {
+    background: var(--surface); border-left: 2px solid var(--border);
+    width: 340px; height: 100vh; overflow-y: auto; padding: 28px 24px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .detail-cover { width: 100%; height: 260px; object-fit: cover; border-radius: 8px; display: block; }
+  .detail-spine-preview {
+    height: 260px; border-radius: 8px; display: flex; align-items: center;
+    justify-content: center; font-weight: bold; font-size: 0.9rem;
+    text-align: center; padding: 16px; position: relative; overflow: hidden;
+  }
+  .detail-spine-preview::after { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.1); }
+  .detail-title { font-size: 1.3rem; font-weight: bold; color: var(--text); line-height: 1.3; }
+  .detail-author { font-size: 1rem; color: var(--accent2); }
+  .detail-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.88rem; }
+  .detail-row .key { color: var(--text2); font-family: sans-serif; font-size: 0.78rem; text-transform: uppercase; }
+  .detail-notes { background: var(--surface2); border-radius: var(--radius); padding: 12px; font-size: 0.88rem; color: var(--text2); line-height: 1.5; font-style: italic; }
+  .detail-close { position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--text2); font-size: 1.4rem; cursor: pointer; }
+
+  /* Cover fetch progress bar */
+  .cover-progress-bar {
+    height: 3px; background: var(--border); position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    display: none;
+  }
+  .cover-progress-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.3s; }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    header, .toolbar, main { padding-left: 16px; padding-right: 16px; }
+    .form-grid { grid-template-columns: 1fr; }
+    .detail-panel { width: 100%; }
+    .grid-view { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--surface); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+  /* AI Scan button */
+  .btn-scan {
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    border-color: #6a11cb; color: #fff; font-weight: bold;
+  }
+  .btn-scan:hover { filter: brightness(1.15); border-color: #2575fc; }
+
+  /* Scan overlay */
+  .scan-overlay {
+    display: none; position: fixed; inset: 0; z-index: 999;
+    background: rgba(0,0,0,0.75); align-items: center; justify-content: center;
+    flex-direction: column; gap: 18px;
+  }
+  .scan-overlay.active { display: flex; }
+  .scan-spinner {
+    width: 52px; height: 52px; border: 4px solid var(--border);
+    border-top-color: var(--accent2); border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .scan-label { color: var(--text); font-size: 1.1rem; letter-spacing: 0.5px; }
+  .scan-sub   { color: var(--text2); font-size: 0.82rem; }
+
+  /* Settings modal */
+  .settings-modal {
+    display: none; position: fixed; inset: 0; z-index: 600;
+    background: rgba(0,0,0,0.6); align-items: center; justify-content: center;
+  }
+  .settings-modal.open { display: flex; }
+  .settings-box {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    width: min(480px, 96vw); padding: 28px; position: relative;
+  }
+  .settings-box h2 { color: var(--accent2); margin-bottom: 6px; }
+  .settings-box p  { color: var(--text2); font-size: 0.85rem; line-height: 1.5; margin-bottom: 16px; }
+  .settings-box label { display: block; font-size: 0.82rem; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; margin-top: 14px; }
+  .settings-box input { width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: var(--radius); padding: 10px 12px; font-size: 0.9rem; outline: none; font-family: monospace; }
+  .settings-box input:focus { border-color: var(--accent); }
+  .settings-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
+  .settings-close { position: absolute; top: 14px; right: 16px; background: none; border: none; color: var(--text2); font-size: 1.4rem; cursor: pointer; }
+  .api-hint { background: var(--surface2); border-radius: 6px; padding: 10px 14px; margin-top: 14px; font-size: 0.8rem; color: var(--text2); line-height: 1.6; }
+  .api-hint a { color: var(--accent2); }
+</style>
+</head>
+<body>
+
+<!-- Cover fetch progress -->
+<div class="cover-progress-bar" id="coverProgressBar">
+  <div class="cover-progress-fill" id="coverProgressFill"></div>
+</div>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">📚</div>
+    <div>
+      <h1>Cindy's Book Collection</h1>
+      <p>Personal library tracker</p>
+    </div>
+  </div>
+  <div class="stats-row" id="statsRow"></div>
+</header>
+
+<div class="toolbar">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="Search by title, author, genre…">
+  </div>
+  <select id="filterFormat">
+    <option value="">All Formats</option>
+    <option>Hardback</option>
+    <option>Paperback</option>
+    <option>eBook</option>
+    <option>Audiobook</option>
+  </select>
+  <select id="filterStatus">
+    <option value="">All Statuses</option>
+    <option>Read</option>
+    <option>Currently Reading</option>
+    <option>Unread</option>
+    <option>Wishlist</option>
+  </select>
+  <select id="filterGenre">
+    <option value="">All Genres</option>
+  </select>
+  <select id="sortBy">
+    <option value="dateAdded">Date Added</option>
+    <option value="title">Title A–Z</option>
+    <option value="author">Author A–Z</option>
+    <option value="rating">Rating</option>
+    <option value="year">Year Published</option>
+  </select>
+  <button class="btn" id="btnNoCover" title="Show only books missing a cover image" style="white-space:nowrap">🖼 No Cover</button>
+  <div class="view-btns">
+    <button class="view-btn active" id="btnGrid" title="Grid view">⊞</button>
+    <button class="view-btn" id="btnList" title="List view">☰</button>
+  </div>
+  <button class="btn" id="btnGenres" title="Manage genres">🏷 Genres</button>
+  <button class="btn" id="btnFetchCovers" title="Fetch missing book covers">🖼 Get Covers</button>
+  <button class="btn btn-primary" id="btnAdd">＋ Add Book</button>
+  <button class="btn" id="btnSettings" title="AI & Settings">⚙️</button>
+</div>
+
+<main>
+  <div id="bookContainer"></div>
+</main>
+
+<!-- Genre datalist (shared) -->
+<datalist id="genreList"></datalist>
+
+<!-- ADD / EDIT MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modalTitle">Add Book</h2>
+      <button class="modal-close" id="modalClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom:16px;padding:12px 14px;background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <span style="color:var(--text2);font-size:0.85rem;flex:1;min-width:160px">📷 Point your camera at a book cover and AI will fill in the details automatically.</span>
+        <label class="btn btn-scan" style="cursor:pointer;margin:0" title="Take or upload a photo of the book cover — AI will identify it">
+          📷 Scan Book Cover
+          <input type="file" id="scanFileInput" accept="image/*" capture="environment" style="display:none" onchange="handleScanUpload(this)">
+        </label>
+      </div>
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Title *</label>
+          <input type="text" id="fTitle" placeholder="Book title">
+        </div>
+        <div class="form-group full">
+          <label>Author *</label>
+          <input type="text" id="fAuthor" placeholder="Author name">
+        </div>
+        <div class="form-group">
+          <label>Format</label>
+          <select id="fFormat">
+            <option>Hardback</option>
+            <option>Paperback</option>
+            <option>eBook</option>
+            <option>Audiobook</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="fStatus">
+            <option>Unread</option>
+            <option>Currently Reading</option>
+            <option>Read</option>
+            <option>Wishlist</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>Genre <span style="color:var(--text2);font-size:0.7rem;text-transform:none">(type your own or pick existing)</span></label>
+          <input type="text" id="fGenre" list="genreList" placeholder="e.g. Classic, Mystery, Sci-Fi…" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>Year Published</label>
+          <input type="number" id="fYear" placeholder="e.g. 1939" min="-3000" max="2099">
+        </div>
+        <div class="form-group">
+          <label>Publisher</label>
+          <input type="text" id="fPublisher" placeholder="Publisher name">
+        </div>
+        <div class="form-group">
+          <label>ISBN</label>
+          <input type="text" id="fISBN" placeholder="ISBN-13">
+        </div>
+        <div class="form-group">
+          <label>Pages</label>
+          <input type="number" id="fPages" placeholder="e.g. 384" min="1">
+        </div>
+        <div class="form-group">
+          <label>Language</label>
+          <input type="text" id="fLang" placeholder="e.g. English">
+        </div>
+        <div class="form-group">
+          <label>Date Read</label>
+          <input type="date" id="fDateRead">
+        </div>
+        <div class="form-group">
+          <label>Spine Color (fallback)</label>
+          <input type="color" id="fColor" value="#2c1810">
+        </div>
+        <div class="form-group full">
+          <label>Cover Image <span style="color:var(--text2);font-size:0.7rem;text-transform:none">(auto-fetched, paste a URL, or upload a file)</span></label>
+          <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap">
+            <div style="flex:1;min-width:180px;display:flex;flex-direction:column;gap:8px">
+              <input type="text" id="fCoverUrl" placeholder="https://…jpg  (leave blank to auto-fetch)" oninput="updateCoverPreview()">
+              <div style="display:flex;gap:8px;align-items:center">
+                <label class="btn btn-sm" style="cursor:pointer;margin:0" title="Upload a cover image from your computer">
+                  📁 Upload Image
+                  <input type="file" id="fCoverFile" accept="image/*" style="display:none" onchange="handleCoverUpload(this)">
+                </label>
+                <button type="button" class="btn btn-sm" onclick="clearCoverImage()" title="Remove cover image">✕ Clear</button>
+              </div>
+            </div>
+            <div id="coverPreviewWrap" style="width:80px;flex-shrink:0;display:none">
+              <img id="coverPreviewImg" src="" alt="Cover preview"
+                style="width:80px;height:110px;object-fit:cover;border-radius:4px;border:1px solid var(--border);display:block"
+                onerror="this.parentNode.style.display='none'">
+            </div>
+          </div>
+        </div>
+        <div class="form-group full">
+          <label>Your Rating</label>
+          <div class="star-picker" id="starPicker">
+            <span class="star-pick" data-v="1">★</span>
+            <span class="star-pick" data-v="2">★</span>
+            <span class="star-pick" data-v="3">★</span>
+            <span class="star-pick" data-v="4">★</span>
+            <span class="star-pick" data-v="5">★</span>
+          </div>
+        </div>
+        <div class="form-group full">
+          <label>Notes / Review</label>
+          <textarea id="fNotes" placeholder="Your thoughts, favourite quotes…"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" id="modalCancel">Cancel</button>
+      <button class="btn btn-primary" id="modalSave">Save Book</button>
+    </div>
+  </div>
+</div>
+
+<!-- AI SCAN OVERLAY -->
+<div class="scan-overlay" id="scanOverlay">
+  <div class="scan-spinner"></div>
+  <div class="scan-label" id="scanLabel">Identifying book…</div>
+  <div class="scan-sub">Claude AI is reading the cover</div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="settings-modal" id="settingsModal">
+  <div class="settings-box">
+    <button class="settings-close" id="settingsClose">✕</button>
+    <h2>⚙️ AI Settings</h2>
+    <p>Enter your Anthropic API key to enable the <strong>📷 Scan Book Cover</strong> feature. The key is stored only in your browser and never sent anywhere except Anthropic's servers.</p>
+    <label for="apiKeyInput">Anthropic API Key</label>
+    <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-…" autocomplete="off" spellcheck="false">
+    <div class="api-hint">
+      Don't have a key? Get one free at
+      <a href="https://console.anthropic.com/settings/keys" target="_blank">console.anthropic.com</a>
+      → Sign in → API Keys → Create Key.<br>
+      The <strong>claude-haiku</strong> model used for scanning costs fractions of a cent per scan.
+    </div>
+    <div class="settings-actions">
+      <button class="btn" id="settingsCancel">Cancel</button>
+      <button class="btn btn-primary" id="settingsSave">Save Key</button>
+    </div>
+  </div>
+</div>
+
+<!-- GENRE MANAGER MODAL -->
+<div class="modal-overlay" id="genreModalOverlay">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header">
+      <h2>🏷 Manage Genres</h2>
+      <button class="modal-close" id="genreModalClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="color:var(--text2);font-size:0.85rem;margin-bottom:14px">
+        Rename a genre to update all books that use it at once. Type any name — genres are fully custom.
+      </p>
+      <table class="genre-table" id="genreTable"></table>
+      <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+        <p style="font-size:0.78rem;color:var(--text2);margin-bottom:8px;font-family:sans-serif;text-transform:uppercase;letter-spacing:0.5px">Add new genre</p>
+        <div style="display:flex;gap:8px">
+          <input type="text" id="newGenreInput" list="genreList" placeholder="New genre name…" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:var(--radius);padding:8px 12px;font-size:0.9rem;outline:none;font-family:Georgia,serif">
+          <button class="btn btn-primary btn-sm" id="newGenreAdd">Add</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" id="genreModalDone">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL PANEL -->
+<div class="detail-overlay" id="detailOverlay">
+  <div class="detail-panel" id="detailPanel">
+    <button class="detail-close" id="detailClose">✕</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── DATA ────────────────────────────────────────────────────────────────────
+const STORE_KEY = 'bookCollection_v2';
+
+const DEFAULT_BOOKS = [
+  { id: uid(), title: "Uncle Tom's Cabin", author: "Harriet Beecher Stowe", format: "Paperback", status: "Unread", genre: "Classic", year: 1852, publisher: "", isbn: "", pages: 529, lang: "English", dateRead: "", color: "#e8e0d0", rating: 0, notes: "Seen on my shelf.", coverUrl: undefined, dateAdded: Date.now() - 8*86400000 },
+  { id: uid(), title: "Gone with the Wind", author: "Margaret Mitchell", format: "Paperback", status: "Unread", genre: "Historical Fiction", year: 1936, publisher: "Scribner", isbn: "", pages: 1037, lang: "English", dateRead: "", color: "#c0392b", rating: 0, notes: "Two copies on shelf — paperback and hardback editions.", coverUrl: undefined, dateAdded: Date.now() - 7*86400000 },
+  { id: uid(), title: "Gone with the Wind", author: "Margaret Mitchell", format: "Hardback", status: "Unread", genre: "Historical Fiction", year: 1936, publisher: "Scribner", isbn: "", pages: 1037, lang: "English", dateRead: "", color: "#2c5f2e", rating: 0, notes: "Hardback Scribner edition.", coverUrl: undefined, dateAdded: Date.now() - 7*86400000 },
+  { id: uid(), title: "The Complete Short Stories of Mark Twain", author: "Mark Twain", format: "Hardback", status: "Unread", genre: "Classic", year: 1957, publisher: "Doubleday", isbn: "", pages: 676, lang: "English", dateRead: "", color: "#f5f0e0", rating: 0, notes: "Edited by Charles Neider. Doubleday edition.", coverUrl: undefined, dateAdded: Date.now() - 6*86400000 },
+  { id: uid(), title: "The Adventures of Tom Sawyer", author: "Mark Twain", format: "Hardback", status: "Unread", genre: "Classic", year: 1876, publisher: "", isbn: "", pages: 274, lang: "English", dateRead: "", color: "#1a3a5c", rating: 0, notes: "Illustrated hardback edition.", coverUrl: undefined, dateAdded: Date.now() - 5*86400000 },
+  { id: uid(), title: "The Art of War", author: "Sun Tzu", format: "Paperback", status: "Unread", genre: "Philosophy", year: -500, publisher: "", isbn: "", pages: 68, lang: "English", dateRead: "", color: "#4b2d8a", rating: 0, notes: "Classic strategy text.", coverUrl: undefined, dateAdded: Date.now() - 4*86400000 },
+  { id: uid(), title: "The Silence of the Lambs", author: "Thomas Harris", format: "Paperback", status: "Unread", genre: "Thriller", year: 1988, publisher: "", isbn: "", pages: 352, lang: "English", dateRead: "", color: "#1a1a1a", rating: 0, notes: "", coverUrl: undefined, dateAdded: Date.now() - 3*86400000 },
+  { id: uid(), title: "Lonesome Dove", author: "Larry McMurtry", format: "Paperback", status: "Unread", genre: "Western", year: 1985, publisher: "", isbn: "", pages: 843, lang: "English", dateRead: "", color: "#8b2c0a", rating: 0, notes: "", coverUrl: undefined, dateAdded: Date.now() - 2*86400000 },
+  { id: uid(), title: "The Jungle", author: "Upton Sinclair", format: "Paperback", status: "Unread", genre: "Classic", year: 1906, publisher: "Barnes & Noble Classics", isbn: "", pages: 412, lang: "English", dateRead: "", color: "#2c2c2c", rating: 0, notes: "Barnes & Noble Classics edition.", coverUrl: undefined, dateAdded: Date.now() - 1*86400000 },
+];
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+
+function load() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(STORE_KEY));
+    if (stored && stored.length) return stored;
+    // migrate from v1 if present
+    const v1 = JSON.parse(localStorage.getItem('bookCollection_v1'));
+    if (v1 && v1.length) return v1.map(b => ({...b, coverUrl: undefined}));
+    return DEFAULT_BOOKS;
+  } catch { return DEFAULT_BOOKS; }
+}
+function save() {
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify(books));
+  } catch(e) {
+    if (e.name === 'QuotaExceededError' || e.code === 22) {
+      showToast('⚠️ Storage full — uploaded images are too large. Try a smaller image or use a URL instead.');
+    }
+  }
+}
+
+let books = load();
+if (!books.length) { books = DEFAULT_BOOKS; save(); }
+
+// ─── MIGRATION: inject new shelf books without destroying existing data ───────
+const MIGRATION_KEY = 'bookMigration_v1';
+
+const BOOKS_TO_ADD = [
+  // === BIBLE SHELF ===
+  { title: "Scenes from the Bible", author: "Gustave Doré", format: "Hardback", genre: "Bible", year: null, publisher: "", color: "#1a3a5c", notes: "Illustrated by Gustave Doré." },
+  { title: "Holy Bible (KJV Family Reference Edition)", author: "", format: "Hardback", genre: "Bible", year: null, publisher: "Thomas Nelson", color: "#6b1a2c", notes: "King James Version. Family Reference Edition. Red Letter Edition. Nelson 158BG." },
+  { title: "Chronological Study Bible", author: "", format: "Hardback", genre: "Bible", year: null, publisher: "Thomas Nelson", color: "#7a1a2c", notes: "NKJV. Nelson 525BG." },
+  { title: "New American Standard Bible", author: "", format: "Hardback", genre: "Bible", year: null, publisher: "Thomas Nelson", color: "#8b2030", notes: "References, Words of Christ in Red, Dictionary/Concordance." },
+  { title: "The New National Baptist Hymnal", author: "", format: "Hardback", genre: "Religion", year: null, publisher: "", color: "#2a1a3a", notes: "" },
+  { title: "NIV Study Bible", author: "", format: "Hardback", genre: "Bible", year: null, publisher: "Zondervan", color: "#7a4a20", notes: "New International Version. Zondervan." },
+
+  // === BANNED BOOKS SHELF ===
+  { title: "The Great Gatsby and Other Classic Works", author: "F. Scott Fitzgerald", format: "Hardback", genre: "Classic", year: 1925, publisher: "", color: "#f0e8d0", notes: "Collector's deluxe edition." },
+  { title: "The Adventures of Huckleberry Finn", author: "Mark Twain", format: "Hardback", genre: "Classic", year: 1884, publisher: "", color: "#8b6030", notes: "Banned Books shelf." },
+  { title: "The Grapes of Wrath", author: "John Steinbeck", format: "Hardback", genre: "Classic", year: 1939, publisher: "Viking", color: "#c8a020", notes: "Viking Penguin Deluxe edition." },
+  { title: "Lord of the Flies", author: "William Golding", format: "Paperback", genre: "Classic", year: 1954, publisher: "Penguin", color: "#1a1a2a", notes: "Penguin Classics Deluxe Edition." },
+  { title: "Catch-22", author: "Joseph Heller", format: "Paperback", genre: "Classic", year: 1961, publisher: "", color: "#1a3a7a", notes: "50th Anniversary Edition." },
+  { title: "A Clockwork Orange", author: "Anthony Burgess", format: "Paperback", genre: "Classic", year: 1962, publisher: "", color: "#c0392b", notes: "50th Anniversary Edition." },
+  { title: "The Catcher in the Rye", author: "J.D. Salinger", format: "Paperback", genre: "Classic", year: 1951, publisher: "Little, Brown", color: "#e8d0b0", notes: "" },
+  { title: "Slaughterhouse-Five", author: "Kurt Vonnegut", format: "Paperback", genre: "Classic", year: 1969, publisher: "", color: "#e8c820", notes: "" },
+  { title: "Brave New World", author: "Aldous Huxley", format: "Paperback", genre: "Classic", year: 1932, publisher: "Harper Perennial", color: "#e8e8e8", notes: "Harper Perennial Modern Classics." },
+  { title: "1984", author: "George Orwell", format: "Paperback", genre: "Classic", year: 1949, publisher: "", color: "#e87820", notes: "" },
+  { title: "Animal Farm", author: "George Orwell", format: "Paperback", genre: "Classic", year: 1945, publisher: "", color: "#f0e8d0", notes: "" },
+  { title: "Of Mice and Men", author: "John Steinbeck", format: "Paperback", genre: "Classic", year: 1937, publisher: "", color: "#a02040", notes: "" },
+  { title: "To Kill a Mockingbird", author: "Harper Lee", format: "Paperback", genre: "Classic", year: 1960, publisher: "", color: "#f0c8e0", notes: "" },
+  { title: "Dubliners", author: "James Joyce", format: "Hardback", genre: "Classic", year: 1914, publisher: "", color: "#1a4a1a", notes: "Leather-bound collector's edition." },
+  { title: "The Legend of Sleepy Hollow and Other Stories", author: "Washington Irving", format: "Hardback", genre: "Classic", year: 1820, publisher: "", color: "#1a2a3a", notes: "Collector's edition." },
+
+  // === KRISTIN HANNAH ===
+  { title: "The Great Alone", author: "Kristin Hannah", format: "Hardback", genre: "Fiction", year: 2018, publisher: "St. Martin's Press", color: "#c05020", notes: "Signed copy. #1 New York Times Bestseller." },
+
+  // === REFERENCE SHELF ===
+  { title: "Webster's New World Thesaurus", author: "Charlton Laird", format: "Paperback", genre: "Reference", year: null, publisher: "Pocket Books", color: "#1a8a7a", notes: "Revised and Updated." },
+  { title: "Webster's New World Dictionary", author: "", format: "Paperback", genre: "Reference", year: null, publisher: "Pocket Books", color: "#c0392b", notes: "Revised and Updated." },
+  { title: "Webster's Dictionary", author: "", format: "Paperback", genre: "Reference", year: null, publisher: "Federal Street Press", color: "#c87820", notes: "" },
+  { title: "Larousse's French-English English-French Dictionary", author: "", format: "Paperback", genre: "Reference", year: null, publisher: "Larousse", color: "#2a60a0", notes: "All-New Edition." },
+  { title: "Webster's New Dictionary of the English Language", author: "", format: "Paperback", genre: "Reference", year: null, publisher: "The Popular Group", color: "#c0392b", notes: "" },
+
+  // === WIZARD OF OZ COLLECTION (L. Frank Baum) ===
+  { title: "The Wonderful Wizard of Oz", author: "L. Frank Baum", format: "Hardback", genre: "Children's Fantasy", year: 1900, publisher: "", color: "#1a4a2a", notes: "The Wizard of Oz Collection box set." },
+  { title: "The Marvelous Land of Oz", author: "L. Frank Baum", format: "Hardback", genre: "Children's Fantasy", year: 1904, publisher: "", color: "#1a4a28", notes: "The Wizard of Oz Collection box set." },
+  { title: "Ozma of Oz", author: "L. Frank Baum", format: "Hardback", genre: "Children's Fantasy", year: 1907, publisher: "", color: "#1a4030", notes: "The Wizard of Oz Collection box set." },
+  { title: "Dorothy and the Wizard in Oz", author: "L. Frank Baum", format: "Hardback", genre: "Children's Fantasy", year: 1908, publisher: "", color: "#1a3a35", notes: "The Wizard of Oz Collection box set." },
+  { title: "The Road to Oz", author: "L. Frank Baum", format: "Hardback", genre: "Children's Fantasy", year: 1909, publisher: "", color: "#1a3040", notes: "The Wizard of Oz Collection box set." },
+  { title: "The Emerald City of Oz", author: "L. Frank Baum", format: "Hardback", genre: "Children's Fantasy", year: 1910, publisher: "", color: "#1a2548", notes: "The Wizard of Oz Collection box set." },
+  { title: "The Patchwork Girl of Oz", author: "L. Frank Baum", format: "Hardback", genre: "Children's Fantasy", year: 1913, publisher: "", color: "#1a2050", notes: "The Wizard of Oz Collection box set." },
+  { title: "Tik-Tok of Oz", author: "L. Frank Baum", format: "Hardback", genre: "Children's Fantasy", year: 1914, publisher: "", color: "#1a1a55", notes: "The Wizard of Oz Collection box set." },
+  { title: "The Scarecrow of Oz", author: "L. Frank Baum", format: "Hardback", genre: "Children's Fantasy", year: 1915, publisher: "", color: "#20185a", notes: "The Wizard of Oz Collection box set." },
+  { title: "Rinkitink in Oz", author: "L. Frank Baum", format: "Hardback", genre: "Children's Fantasy", year: 1916, publisher: "", color: "#251560", notes: "The Wizard of Oz Collection box set." },
+  { title: "The Lost Princess of Oz", author: "L. Frank Baum", format: "Hardback", genre: "Children's Fantasy", year: 1917, publisher: "", color: "#2a1265", notes: "The Wizard of Oz Collection box set." },
+  { title: "The Tin Woodman of Oz", author: "L. Frank Baum", format: "Hardback", genre: "Children's Fantasy", year: 1918, publisher: "", color: "#300f6a", notes: "The Wizard of Oz Collection box set." },
+  { title: "The Magic of Oz", author: "L. Frank Baum", format: "Hardback", genre: "Children's Fantasy", year: 1919, publisher: "", color: "#350d6e", notes: "The Wizard of Oz Collection box set." },
+  { title: "Glinda of Oz", author: "L. Frank Baum", format: "Hardback", genre: "Children's Fantasy", year: 1920, publisher: "", color: "#3a0a72", notes: "The Wizard of Oz Collection box set." },
+  { title: "The Royal Book of Oz", author: "Ruth Plumly Thompson", format: "Hardback", genre: "Children's Fantasy", year: 1921, publisher: "", color: "#3f0775", notes: "The Wizard of Oz Collection box set." },
+
+  // === ROALD DAHL (Puffin hardback series) ===
+  { title: "The BFG", author: "Roald Dahl", format: "Hardback", genre: "Children's Fiction", year: 1982, publisher: "Puffin", color: "#1a3a6a", notes: "" },
+  { title: "Matilda", author: "Roald Dahl", format: "Hardback", genre: "Children's Fiction", year: 1988, publisher: "Puffin", color: "#c0207a", notes: "" },
+  { title: "Esio Trot", author: "Roald Dahl", format: "Hardback", genre: "Children's Fiction", year: 1990, publisher: "Puffin", color: "#c0392b", notes: "" },
+  { title: "George's Marvellous Medicine", author: "Roald Dahl", format: "Hardback", genre: "Children's Fiction", year: 1981, publisher: "Puffin", color: "#c02060", notes: "" },
+  { title: "Fantastic Mr Fox", author: "Roald Dahl", format: "Hardback", genre: "Children's Fiction", year: 1970, publisher: "Puffin", color: "#c04020", notes: "" },
+  { title: "Charlie and the Chocolate Factory", author: "Roald Dahl", format: "Hardback", genre: "Children's Fiction", year: 1964, publisher: "Puffin", color: "#c8a000", notes: "" },
+  { title: "Charlie and the Great Glass Elevator", author: "Roald Dahl", format: "Hardback", genre: "Children's Fiction", year: 1972, publisher: "Puffin", color: "#1a6a3a", notes: "" },
+  { title: "Danny the Champion of the World", author: "Roald Dahl", format: "Hardback", genre: "Children's Fiction", year: 1975, publisher: "Puffin", color: "#c06020", notes: "" },
+  { title: "The Magic Finger", author: "Roald Dahl", format: "Hardback", genre: "Children's Fiction", year: 1966, publisher: "Puffin", color: "#2a7a8a", notes: "" },
+  { title: "The Twits", author: "Roald Dahl", format: "Hardback", genre: "Children's Fiction", year: 1980, publisher: "Puffin", color: "#3a8a4a", notes: "" },
+  { title: "The Witches", author: "Roald Dahl", format: "Hardback", genre: "Children's Fiction", year: 1983, publisher: "Puffin", color: "#7a3a8a", notes: "" },
+  { title: "The Giraffe and the Pelly and Me", author: "Roald Dahl", format: "Hardback", genre: "Children's Fiction", year: 1985, publisher: "Puffin", color: "#3a7a3a", notes: "" },
+  { title: "James and the Giant Peach", author: "Roald Dahl", format: "Hardback", genre: "Children's Fiction", year: 1961, publisher: "Puffin", color: "#3a8a5a", notes: "" },
+  { title: "Boy", author: "Roald Dahl", format: "Hardback", genre: "Children's Fiction", year: 1984, publisher: "Puffin", color: "#4aaa2a", notes: "Autobiography." },
+  { title: "Going Solo", author: "Roald Dahl", format: "Hardback", genre: "Children's Fiction", year: 1986, publisher: "Puffin", color: "#2a8a5a", notes: "Autobiography." },
+  { title: "Billy and the Minpins", author: "Roald Dahl", format: "Hardback", genre: "Children's Fiction", year: 1991, publisher: "Puffin", color: "#2a5a8a", notes: "" },
+
+  // === CHRONICLES OF NARNIA (C.S. Lewis) ===
+  { title: "The Magician's Nephew", author: "C.S. Lewis", format: "Hardback", genre: "Fantasy", year: 1955, publisher: "", color: "#1a4a1a", notes: "Chronicles of Narnia Book 1." },
+  { title: "The Lion, the Witch and the Wardrobe", author: "C.S. Lewis", format: "Hardback", genre: "Fantasy", year: 1950, publisher: "", color: "#1a3a7a", notes: "Chronicles of Narnia Book 2." },
+  { title: "The Horse and His Boy", author: "C.S. Lewis", format: "Hardback", genre: "Fantasy", year: 1954, publisher: "", color: "#2a2a2a", notes: "Chronicles of Narnia Book 3." },
+  { title: "Prince Caspian", author: "C.S. Lewis", format: "Hardback", genre: "Fantasy", year: 1951, publisher: "", color: "#1a1a1a", notes: "Chronicles of Narnia Book 4." },
+  { title: "The Voyage of the Dawn Treader", author: "C.S. Lewis", format: "Hardback", genre: "Fantasy", year: 1952, publisher: "", color: "#8b1a2c", notes: "Chronicles of Narnia Book 5." },
+  { title: "The Silver Chair", author: "C.S. Lewis", format: "Hardback", genre: "Fantasy", year: 1953, publisher: "", color: "#1a4a2a", notes: "Chronicles of Narnia Book 6." },
+  { title: "The Last Battle", author: "C.S. Lewis", format: "Hardback", genre: "Fantasy", year: 1956, publisher: "", color: "#1a2a3a", notes: "Chronicles of Narnia Book 7." },
+  { title: "The Narnia Trivia Book", author: "C.S. Lewis", format: "Paperback", genre: "Fantasy", year: null, publisher: "", color: "#2a8a6a", notes: "" },
+
+  // === TOLKIEN ===
+  { title: "The Silmarillion", author: "J.R.R. Tolkien", format: "Hardback", genre: "Fantasy", year: 1977, publisher: "William Morrow", color: "#1a1a3a", notes: "Deluxe hardback." },
+  { title: "The Hobbit", author: "J.R.R. Tolkien", format: "Hardback", genre: "Fantasy", year: 1937, publisher: "William Morrow", color: "#2a1a0a", notes: "" },
+  { title: "The Lord of the Rings", author: "J.R.R. Tolkien", format: "Hardback", genre: "Fantasy", year: 1954, publisher: "HMH", color: "#f0f0f0", notes: "One-volume edition. HMH." },
+  { title: "The Lord of the Rings (deluxe edition)", author: "J.R.R. Tolkien", format: "Hardback", genre: "Fantasy", year: 1954, publisher: "William Morrow", color: "#7a7a8a", notes: "Deluxe hardback edition." },
+  { title: "Unfinished Tales of Númenor and Middle-Earth", author: "J.R.R. Tolkien", format: "Hardback", genre: "Fantasy", year: 1980, publisher: "William Morrow", color: "#4a5a6a", notes: "" },
+
+  // === HARRY POTTER (J.K. Rowling) ===
+  { title: "Harry Potter and the Sorcerer's Stone", author: "J.K. Rowling", format: "Hardback", genre: "Fantasy", year: 1997, publisher: "Scholastic", color: "#6a3a8a", notes: "Year 1. Special Scholastic edition." },
+  { title: "Harry Potter and the Chamber of Secrets", author: "J.K. Rowling", format: "Hardback", genre: "Fantasy", year: 1998, publisher: "Scholastic", color: "#8a2a4a", notes: "Year 2. Special Scholastic edition." },
+  { title: "Harry Potter and the Prisoner of Azkaban", author: "J.K. Rowling", format: "Hardback", genre: "Fantasy", year: 1999, publisher: "Scholastic", color: "#2a4a6a", notes: "Year 3. Special Scholastic edition." },
+  { title: "Harry Potter and the Goblet of Fire", author: "J.K. Rowling", format: "Hardback", genre: "Fantasy", year: 2000, publisher: "Scholastic", color: "#5a2a3a", notes: "Year 4. Special Scholastic edition." },
+  { title: "Harry Potter and the Order of the Phoenix", author: "J.K. Rowling", format: "Hardback", genre: "Fantasy", year: 2003, publisher: "Scholastic", color: "#2a3a7a", notes: "Year 5. Special Scholastic edition." },
+  { title: "Harry Potter and the Half-Blood Prince", author: "J.K. Rowling", format: "Hardback", genre: "Fantasy", year: 2005, publisher: "Scholastic", color: "#1a4a2a", notes: "Year 6. Special Scholastic edition." },
+
+  // === A COURT OF THORNS AND ROSES (Sarah J. Maas) ===
+  { title: "A Court of Thorns and Roses", author: "Sarah J. Maas", format: "Hardback", genre: "Fantasy Romance", year: 2015, publisher: "", color: "#c0392b", notes: "" },
+  { title: "A Court of Mist and Fury", author: "Sarah J. Maas", format: "Hardback", genre: "Fantasy Romance", year: 2016, publisher: "", color: "#2a2a2a", notes: "" },
+  { title: "A Court of Wings and Ruin", author: "Sarah J. Maas", format: "Hardback", genre: "Fantasy Romance", year: 2017, publisher: "", color: "#c020a0", notes: "" },
+  { title: "A Court of Frost and Starlight", author: "Sarah J. Maas", format: "Hardback", genre: "Fantasy Romance", year: 2018, publisher: "", color: "#2a4a6a", notes: "" },
+  { title: "A Court of Silver Flames", author: "Sarah J. Maas", format: "Hardback", genre: "Fantasy Romance", year: 2021, publisher: "", color: "#2a2a2a", notes: "" },
+
+  // === FANNIE FLAGG ===
+  { title: "Fried Green Tomatoes at the Whistle Stop Cafe", author: "Fannie Flagg", format: "Hardback", genre: "Fiction", year: 1987, publisher: "", color: "#f0e8a0", notes: "" },
+  { title: "The Wonder Boy of Whistle Stop", author: "Fannie Flagg", format: "Hardback", genre: "Fiction", year: 2020, publisher: "Random House", color: "#a0d0e8", notes: "" },
+
+  // === H.E. BATES – THE LARKINS SERIES ===
+  { title: "A Little of What You Fancy", author: "H.E. Bates", format: "Hardback", genre: "Fiction", year: 1970, publisher: "", color: "#e8a0c0", notes: "The Larkins series." },
+  { title: "A Breath of French Air", author: "H.E. Bates", format: "Hardback", genre: "Fiction", year: 1959, publisher: "", color: "#c8d000", notes: "The Larkins series." },
+  { title: "The Darling Buds of May", author: "H.E. Bates", format: "Hardback", genre: "Fiction", year: 1958, publisher: "", color: "#3a8a3a", notes: "The Larkins series." },
+  { title: "Oh! To Be in England", author: "H.E. Bates", format: "Hardback", genre: "Fiction", year: 1963, publisher: "", color: "#c03a3a", notes: "The Larkins series." },
+  { title: "When the Green Woods Laugh", author: "H.E. Bates", format: "Hardback", genre: "Fiction", year: 1960, publisher: "", color: "#7a2a9a", notes: "The Larkins series." },
+
+  // === LEFT BEHIND SERIES (LaHaye & Jenkins / Tyndale) ===
+  { title: "Left Behind", author: "Tim LaHaye & Jerry B. Jenkins", format: "Paperback", genre: "Christian Fiction", year: 1995, publisher: "Tyndale", color: "#c86010", notes: "Left Behind Series #1." },
+  { title: "Tribulation Force", author: "Tim LaHaye & Jerry B. Jenkins", format: "Paperback", genre: "Christian Fiction", year: 1996, publisher: "Tyndale", color: "#c86820", notes: "Left Behind Series #2." },
+  { title: "Nicolae", author: "Tim LaHaye & Jerry B. Jenkins", format: "Paperback", genre: "Christian Fiction", year: 1997, publisher: "Tyndale", color: "#c07020", notes: "Left Behind Series #3." },
+  { title: "Soul Harvest", author: "Tim LaHaye & Jerry B. Jenkins", format: "Paperback", genre: "Christian Fiction", year: 1998, publisher: "Tyndale", color: "#c07828", notes: "Left Behind Series #4." },
+  { title: "Apollyon", author: "Tim LaHaye & Jerry B. Jenkins", format: "Paperback", genre: "Christian Fiction", year: 1999, publisher: "Tyndale", color: "#c08030", notes: "Left Behind Series #5." },
+  { title: "Assassins", author: "Tim LaHaye & Jerry B. Jenkins", format: "Paperback", genre: "Christian Fiction", year: 1999, publisher: "Tyndale", color: "#c08838", notes: "Left Behind Series #6." },
+  { title: "The Indwelling", author: "Tim LaHaye & Jerry B. Jenkins", format: "Paperback", genre: "Christian Fiction", year: 2000, publisher: "Tyndale", color: "#c09040", notes: "Left Behind Series #7." },
+  { title: "The Mark", author: "Tim LaHaye & Jerry B. Jenkins", format: "Paperback", genre: "Christian Fiction", year: 2000, publisher: "Tyndale", color: "#c89848", notes: "Left Behind Series #8." },
+  { title: "Desecration", author: "Tim LaHaye & Jerry B. Jenkins", format: "Paperback", genre: "Christian Fiction", year: 2001, publisher: "Tyndale", color: "#c0a050", notes: "Left Behind Series #9." },
+  { title: "The Remnant", author: "Tim LaHaye & Jerry B. Jenkins", format: "Paperback", genre: "Christian Fiction", year: 2002, publisher: "Tyndale", color: "#c0a858", notes: "Left Behind Series #10." },
+  { title: "Armageddon", author: "Tim LaHaye & Jerry B. Jenkins", format: "Paperback", genre: "Christian Fiction", year: 2003, publisher: "Tyndale", color: "#c0b060", notes: "Left Behind Series #11." },
+  { title: "Glorious Appearing", author: "Tim LaHaye & Jerry B. Jenkins", format: "Paperback", genre: "Christian Fiction", year: 2004, publisher: "Tyndale", color: "#c0b868", notes: "Left Behind Series #12." },
+  { title: "Kingdom Come", author: "Tim LaHaye & Jerry B. Jenkins", format: "Paperback", genre: "Christian Fiction", year: 2007, publisher: "Tyndale", color: "#7a5a30", notes: "Left Behind Sequel — It Is Finished." },
+  { title: "The Rising", author: "Tim LaHaye & Jerry B. Jenkins", format: "Paperback", genre: "Christian Fiction", year: 2005, publisher: "Tyndale", color: "#2a8ab0", notes: "Countdown to the Rapture — Before They Were Left Behind." },
+  { title: "The Rapture", author: "Tim LaHaye & Jerry B. Jenkins", format: "Paperback", genre: "Christian Fiction", year: 2006, publisher: "Tyndale", color: "#8a2a2a", notes: "Countdown to the Rapture Book 3." },
+  { title: "The Regime", author: "Tim LaHaye & Jerry B. Jenkins", format: "Paperback", genre: "Christian Fiction", year: 2005, publisher: "Tyndale", color: "#2a6a2a", notes: "Countdown to the Rapture Book 2." },
+
+  // === ADDITIONAL CLASSICS (misc shelf) ===
+  { title: "Classic Stories", author: "Edgar Allan Poe", format: "Hardback", genre: "Classic", year: null, publisher: "", color: "#1a1a1a", notes: "Collected stories." },
+  { title: "The Wizard of Oz", author: "L. Frank Baum", format: "Hardback", genre: "Children's Fantasy", year: 1900, publisher: "Sandy Creek", color: "#c87820", notes: "Sandy Creek illustrated edition." },
+  { title: "The Hemingway Stories", author: "Ernest Hemingway", format: "Hardback", genre: "Classic", year: null, publisher: "Scribner", color: "#f5f0e0", notes: "Scribner edition." },
+  { title: "The Princess Bride", author: "William Goldman", format: "Hardback", genre: "Fantasy", year: 1973, publisher: "Harper Perennial", color: "#1a4a2a", notes: "Harper Perennial edition." },
+  { title: "Frankenstein", author: "Mary Shelley", format: "Hardback", genre: "Classic", year: 1818, publisher: "Barnes & Noble Classics", color: "#6a2a3a", notes: "Barnes & Noble Classics edition." },
+  { title: "The Picture of Dorian Gray", author: "Oscar Wilde", format: "Hardback", genre: "Classic", year: 1890, publisher: "Barnes & Noble Classics", color: "#7a2a3a", notes: "Barnes & Noble Classics." },
+  { title: "Playback", author: "Raymond Chandler", format: "Paperback", genre: "Mystery", year: 1958, publisher: "Vintage Crime", color: "#2a6a4a", notes: "" },
+  { title: "Dracula", author: "Bram Stoker", format: "Paperback", genre: "Classic", year: 1897, publisher: "", color: "#3a1a1a", notes: "" },
+  { title: "White Fang", author: "Jack London", format: "Paperback", genre: "Classic", year: 1906, publisher: "Modern Publishing", color: "#f0f0e8", notes: "" },
+  { title: "The Raven and Other Poems", author: "Edgar Allan Poe", format: "Hardback", genre: "Classic", year: 1845, publisher: "", color: "#c02a2a", notes: "" },
+  { title: "Frankenstein (paperback)", author: "Mary Shelley", format: "Paperback", genre: "Classic", year: 1818, publisher: "Barnes & Noble Classics", color: "#e8e8e0", notes: "Second copy." },
+
+  // === CLASSICS SHELF 2 ===
+  { title: "A Treasury of Best-Loved Fairy Tales", author: "", format: "Hardback", genre: "Children's Fiction", year: null, publisher: "Fall River Press", color: "#2a8a9a", notes: "" },
+  { title: "Le Morte d'Arthur", author: "Sir Thomas Malory", format: "Hardback", genre: "Classic", year: 1485, publisher: "", color: "#3a1a1a", notes: "King Arthur and the Knights of the Round Table." },
+  { title: "Frankenstein (Penguin)", author: "Mary Shelley", format: "Hardback", genre: "Classic", year: 1818, publisher: "Penguin", color: "#1a1a1a", notes: "Penguin hardback edition." },
+  { title: "A Tale of Two Cities", author: "Charles Dickens", format: "Hardback", genre: "Classic", year: 1859, publisher: "", color: "#2a4a8a", notes: "Deluxe hardback." },
+  { title: "The Odyssey", author: "Homer", format: "Hardback", genre: "Classic", year: -800, publisher: "", color: "#3a5a9a", notes: "Deluxe hardback." },
+  { title: "Alice's Adventures in Wonderland / Through the Looking-Glass", author: "Lewis Carroll", format: "Hardback", genre: "Classic", year: 1865, publisher: "", color: "#c0207a", notes: "Combined volume." },
+  { title: "The Strange Case of Dr. Jekyll and Mr. Hyde and Other Stories", author: "Robert Louis Stevenson", format: "Hardback", genre: "Classic", year: 1886, publisher: "", color: "#8a1a2a", notes: "" },
+
+  // === COLLECTED WORKS ===
+  { title: "The Best of Lewis Carroll", author: "Lewis Carroll", format: "Hardback", genre: "Classic", year: null, publisher: "", color: "#f0f0f0", notes: "" },
+  { title: "The Adventures of Indiana Jones", author: "", format: "Hardback", genre: "Adventure", year: null, publisher: "Castle", color: "#7a3a1a", notes: "Castle edition." },
+  { title: "Jane Austen: Seven Novels", author: "Jane Austen", format: "Hardback", genre: "Classic", year: null, publisher: "", color: "#6ab0d0", notes: "Complete works collector's edition." },
+  { title: "The Complete Sherlock Holmes", author: "Sir Arthur Conan Doyle", format: "Hardback", genre: "Mystery", year: null, publisher: "", color: "#4a1a1a", notes: "Complete collection." },
+  { title: "The Princess Bride (slipcase)", author: "William Goldman", format: "Hardback", genre: "Fantasy", year: 1973, publisher: "", color: "#3a1a1a", notes: "Slipcase/box edition." },
+
+  // === CHRISTIAN NON-FICTION ===
+  { title: "Bible Answers for 1000 Difficult Questions", author: "White", format: "Hardback", genre: "Christian Non-Fiction", year: null, publisher: "World", color: "#d070c0", notes: "" },
+  { title: "The Believer's Guide to Spiritual Warfare", author: "", format: "Paperback", genre: "Christian Non-Fiction", year: null, publisher: "Regal", color: "#2a1a3a", notes: "" },
+  { title: "Angels", author: "Billy Graham", format: "Hardback", genre: "Christian Non-Fiction", year: null, publisher: "", color: "#3a1a2a", notes: "The Essential Billy Graham Library." },
+  { title: "My Utmost for His Highest", author: "Oswald Chambers", format: "Hardback", genre: "Christian Non-Fiction", year: 1935, publisher: "Discovery House", color: "#1a6a7a", notes: "Updated Edition." },
+  { title: "One Question a Day with God", author: "Lester Sumrall", format: "Hardback", genre: "Christian Non-Fiction", year: null, publisher: "Castle Point Books", color: "#f0f0f0", notes: "Daily Reflections on Faith." },
+  { title: "60 Things God Said About Sex", author: "Lester Sumrall", format: "Paperback", genre: "Christian Non-Fiction", year: null, publisher: "", color: "#2a4a8a", notes: "" },
+  { title: "The Book of Bible Promises", author: "Derek Prince", format: "Paperback", genre: "Christian Non-Fiction", year: null, publisher: "", color: "#1a3a6a", notes: "" },
+  { title: "Does Your Tongue Need Healing?", author: "Derek Prince", format: "Paperback", genre: "Christian Non-Fiction", year: null, publisher: "", color: "#1a2a5a", notes: "" },
+  { title: "The Marriage Covenant", author: "Derek Prince", format: "Paperback", genre: "Christian Non-Fiction", year: null, publisher: "", color: "#6a8aa0", notes: "" },
+  { title: "The Prayer of Jabez", author: "Bruce Wilkinson", format: "Hardback", genre: "Christian Non-Fiction", year: 2000, publisher: "Multnomah", color: "#4a6a3a", notes: "" },
+  { title: "Secrets of the Vine", author: "Bruce Wilkinson", format: "Hardback", genre: "Christian Non-Fiction", year: 2001, publisher: "Multnomah", color: "#3a5a4a", notes: "" },
+  { title: "Praying God's Will for My Life", author: "Lee Roberts", format: "Hardback", genre: "Christian Non-Fiction", year: null, publisher: "Thomas Nelson", color: "#c07020", notes: "" },
+  { title: "The Power of Praying for Your Adult Children", author: "Stormie Omartian", format: "Hardback", genre: "Christian Non-Fiction", year: null, publisher: "", color: "#6a2a5a", notes: "" },
+  { title: "Wife After God's Own Heart", author: "Elizabeth George", format: "Hardback", genre: "Christian Non-Fiction", year: null, publisher: "", color: "#e890b0", notes: "" },
+  { title: "Where Angels Walk", author: "Joan Wester Anderson", format: "Hardback", genre: "Christian Non-Fiction", year: 1992, publisher: "", color: "#2a1a0a", notes: "" },
+  { title: "Releasing the Ability of God Through Prayer", author: "Charles Capps", format: "Hardback", genre: "Christian Non-Fiction", year: null, publisher: "", color: "#1a1a2a", notes: "" },
+  { title: "Laugh Your Way to a Better Marriage", author: "Mark Gungor", format: "Hardback", genre: "Christian Non-Fiction", year: null, publisher: "", color: "#3a8a3a", notes: "" },
+  { title: "Bible Trivia", author: "Lang", format: "Paperback", genre: "Christian Non-Fiction", year: null, publisher: "", color: "#e8e090", notes: "" },
+
+  // === MISC ===
+  { title: "The Little Frog's Guide to Life", author: "Maybell Eequay", format: "Hardback", genre: "Humor", year: null, publisher: "", color: "#e0e8f0", notes: "" },
+];
+
+function migrateAddBooks() {
+  if (localStorage.getItem(MIGRATION_KEY)) return;
+  const existingKeys = new Set(books.map(b => (b.title + '|' + b.author).toLowerCase().trim()));
+  const toAdd = BOOKS_TO_ADD.filter(b =>
+    !existingKeys.has((b.title + '|' + b.author).toLowerCase().trim())
+  );
+  const newBooks = toAdd.map((b, i) => ({
+    id: uid(),
+    dateAdded: Date.now() - (toAdd.length - i) * 60000,
+    status: 'Unread',
+    isbn: '',
+    pages: null,
+    lang: 'English',
+    dateRead: '',
+    rating: 0,
+    coverUrl: undefined,
+    ...b
+  }));
+  books = [...newBooks, ...books];
+  save();
+  localStorage.setItem(MIGRATION_KEY, '1');
+}
+
+migrateAddBooks();
+
+// ── MIGRATION v2: Books from new shelf photos ──────────────────────────────
+const MIGRATION_KEY_2 = 'bookMigration_v2';
+const BOOKS_TO_ADD_2 = [
+  // Christian / Religion shelf
+  {title:"What's in the Bible", author:"R.C. Sproul & Robert Wolgemuth", format:"Hardback", genre:"Christian Non-Fiction", publisher:"Word", color:"#c0c0c0"},
+  {title:"The Classic Writings of Billy Graham", author:"Billy Graham", format:"Hardback", genre:"Christian Non-Fiction", publisher:"Family Christian Library", color:"#7a1010", notes:"Contains: Angels, How to Be Born Again, The Holy Spirit"},
+  {title:"Every Good and Evil Angel in the Bible", author:"Larry Richards", format:"Hardback", genre:"Christian Non-Fiction", publisher:"Nelson", color:"#3a1a50"},
+  {title:"Prayers That Avail Much", author:"Word Ministries Inc", format:"Hardback", genre:"Christian Non-Fiction", publisher:"Harrison House", color:"#1a2050", notes:"Special Commemorative Gift Edition"},
+  {title:"Human Sexuality", author:"Ben Sonnenberg", format:"Hardback", genre:"Christian Non-Fiction", publisher:"CPH", color:"#1a3050"},
+  {title:"The King James Bible Word Book", author:"", format:"Hardback", genre:"Reference", publisher:"Nelson", color:"#c8b870"},
+  {title:"Extreme Answers to Extreme Questions", author:"", format:"Hardback", genre:"Christian Non-Fiction", publisher:"Nelson", color:"#1a3080"},
+
+  // Romance shelf
+  {title:"My Dark Prince", author:"Parker S. Huntington & L.J. Shen", format:"Hardback", genre:"Romance", color:"#e8e8e8"},
+  {title:"Warrior's Woman", author:"Johanna Lindsey", format:"Paperback", genre:"Romance", publisher:"Avon", color:"#d0e4f0"},
+  {title:"Keeper of the Heart", author:"Johanna Lindsey", format:"Paperback", genre:"Romance", publisher:"Avon", color:"#302060"},
+  {title:"Heart of a Warrior", author:"Johanna Lindsey", format:"Paperback", genre:"Romance", publisher:"Avon", color:"#801010"},
+  {title:"Angel", author:"Johanna Lindsey", format:"Paperback", genre:"Romance", publisher:"Corgi", color:"#602080"},
+  {title:"Conquer the Night", author:"Heather Graham", format:"Paperback", genre:"Romance", publisher:"Zebra", color:"#501020"},
+
+  // Christmas shelf
+  {title:"Charles Dickens' Christmas Stories", author:"Charles Dickens", format:"Hardback", genre:"Christmas", publisher:"Arctopolis", color:"#8b1a1a"},
+  {title:"The Book of Christmas", author:"", format:"Hardback", genre:"Christmas", publisher:"Reader's Digest", color:"#8b1a1a"},
+  {title:"Norman Rockwell's Christmas", author:"Norman Rockwell", format:"Hardback", genre:"Christmas", publisher:"Abrams", color:"#8b1a1a"},
+  {title:"A Christmas Treasury", author:"", format:"Hardback", genre:"Christmas", color:"#8b1a1a"},
+  {title:"The Christmas Movie Cookbook", author:"Julia Rutland", format:"Hardback", genre:"Christmas", publisher:"Simon & Schuster", color:"#8b1a1a"},
+  {title:"My Angel Named Herman", author:"", format:"Hardback", genre:"Christmas", publisher:"Tommy Nelson", color:"#1a1a40"},
+  {title:"Skipping Christmas", author:"John Grisham", format:"Hardback", genre:"Christmas", publisher:"Doubleday", color:"#1a1a40"},
+  {title:"The Christmas Stranger", author:"Richard Paul Evans", format:"Hardback", genre:"Christmas", publisher:"Gallery Books", color:"#e0e8f0"},
+  {title:"The Nutcracker", author:"Alexandre Dumas", format:"Hardback", genre:"Christmas", publisher:"Nelson", color:"#8b1a1a"},
+  {title:"Classic Christmas Poems", author:"", format:"Hardback", genre:"Christmas", publisher:"Nelson", color:"#8b1a1a"},
+
+  // Fiction shelf (Kristin Hannah + others)
+  {title:"The Nightingale", author:"Kristin Hannah", format:"Hardback", genre:"Fiction", publisher:"St. Martin's Press", color:"#181828"},
+  {title:"The Women", author:"Kristin Hannah", format:"Hardback", genre:"Fiction", publisher:"St. Martin's Press", color:"#281818"},
+  {title:"The Correspondent", author:"Virginia Evans", format:"Hardback", genre:"Fiction", publisher:"Crown", color:"#c04828"},
+  {title:"The Library of Amorlin", author:"Kalyn Josephson", format:"Hardback", genre:"Fantasy", publisher:"Erewhon", color:"#204858"},
+  {title:"Tress of the Emerald Sea", author:"Brandon Sanderson", format:"Hardback", genre:"Fantasy", publisher:"Tor", color:"#204838"},
+  {title:"Shogun", author:"James Clavell", format:"Hardback", genre:"Fiction", color:"#182030", notes:"The Complete Novel"},
+  {title:"Centennial", author:"James A. Michener", format:"Hardback", genre:"Fiction", publisher:"Random House", color:"#181818"},
+
+  // Fiction shelf (mixed)
+  {title:"The Help", author:"Kathryn Stockett", format:"Paperback", genre:"Fiction", publisher:"Berkley", color:"#603880"},
+  {title:"The Four Winds", author:"Kristin Hannah", format:"Hardback", genre:"Fiction", publisher:"St. Martin's Griffin", color:"#181818"},
+  {title:"Theo of Golden", author:"Allen Levi", format:"Hardback", genre:"Fiction", color:"#f0f0f0"},
+  {title:"Pachinko", author:"Min Jin Lee", format:"Hardback", genre:"Fiction", publisher:"Grand Central", color:"#204060"},
+  {title:"Go Set a Watchman", author:"Harper Lee", format:"Hardback", genre:"Fiction", publisher:"HarperCollins", color:"#181830"},
+  {title:"Calico Joe", author:"John Grisham", format:"Paperback", genre:"Fiction", publisher:"Vintage", color:"#182030"},
+  {title:"Before We Were Yours", author:"Lisa Wingate", format:"Hardback", genre:"Fiction", publisher:"Ballantine Books", color:"#f0f0f0"},
+  {title:"Project Hail Mary", author:"Andy Weir", format:"Hardback", genre:"Science Fiction", publisher:"Ballantine Books", color:"#181818"},
+  {title:"The Mirror", author:"Marlys Millhiser", format:"Hardback", genre:"Fiction", publisher:"Omega", color:"#c02020"},
+  {title:"Remarkably Bright Creatures", author:"Shelby Van Pelt", format:"Hardback", genre:"Fiction", color:"#207060"},
+
+  // Evie Woods / Matt Haig shelf
+  {title:"The Story Collector", author:"Evie Woods", format:"Paperback", genre:"Fiction", color:"#302060"},
+  {title:"The Violin Maker's Secret", author:"Evie Woods", format:"Hardback", genre:"Fiction", publisher:"HarperCollins", color:"#183030"},
+  {title:"The Midnight Library", author:"Matt Haig", format:"Hardback", genre:"Fiction", publisher:"Penguin", color:"#181830"},
+
+  // Mystery/Thriller shelf 1
+  {title:"The Whistler", author:"John Grisham", format:"Hardback", genre:"Mystery/Thriller", publisher:"Doubleday", color:"#181818"},
+  {title:"Zoo", author:"James Patterson", format:"Hardback", genre:"Thriller", publisher:"Little, Brown", color:"#181818"},
+  {title:"Along Came a Spider", author:"James Patterson", format:"Hardback", genre:"Mystery", publisher:"Little, Brown", color:"#181818"},
+  {title:"My Husband's Wife", author:"Alice Feeney", format:"Hardback", genre:"Mystery/Thriller", publisher:"Flatiron Books", color:"#c09840"},
+  {title:"The Silent Patient", author:"Alex Michaelides", format:"Hardback", genre:"Mystery/Thriller", publisher:"Celadon Books", color:"#c02040"},
+  {title:"All the Missing Girls", author:"Megan Miranda", format:"Hardback", genre:"Mystery/Thriller", publisher:"Simon & Schuster", color:"#183030"},
+  {title:"The Girl in the Park", author:"Fredericks", format:"Hardback", genre:"Mystery/Thriller", color:"#303030"},
+
+  // Mystery/Thriller shelf 2 (Mysteries/Thrillers label)
+  {title:"Murder at Holly House", author:"Denzil Meyrick", format:"Hardback", genre:"Mystery", color:"#183018"},
+  {title:"Rebecca", author:"Daphne du Maurier", format:"Paperback", genre:"Classic", publisher:"Back Bay Books", color:"#181818"},
+  {title:"The Life We Bury", author:"Allen Eskens", format:"Paperback", genre:"Mystery/Thriller", publisher:"Seventh Street Books", color:"#f0f0f0"},
+  {title:"Girls Like Us", author:"Cristina Alger", format:"Hardback", genre:"Mystery/Thriller", publisher:"Putnam", color:"#206040"},
+  {title:"Kiss the Girls", author:"James Patterson", format:"Hardback", genre:"Mystery", publisher:"Little, Brown", color:"#c02060"},
+  {title:"A Painted House", author:"John Grisham", format:"Paperback", genre:"Fiction", publisher:"Vintage", color:"#204060"},
+  {title:"The Chamber", author:"John Grisham", format:"Paperback", genre:"Mystery/Thriller", publisher:"Vintage", color:"#183018"},
+  {title:"The Husband's Secret", author:"Liane Moriarty", format:"Paperback", genre:"Fiction", publisher:"Berkley", color:"#f0f0f0"},
+  {title:"Big Little Lies", author:"Liane Moriarty", format:"Paperback", genre:"Fiction", publisher:"Berkley", color:"#f0f0f0"},
+
+  // Mary Higgins Clark + others shelf
+  {title:"The Intruder", author:"Freida McFadden", format:"Hardback", genre:"Mystery/Thriller", color:"#181830"},
+  {title:"Daisy Darker", author:"Alice Feeney", format:"Hardback", genre:"Mystery/Thriller", publisher:"Flatiron Books", color:"#183030"},
+  {title:"On the Street Where You Live", author:"Mary Higgins Clark", format:"Paperback", genre:"Mystery", publisher:"Pocket Books", color:"#c02020"},
+  {title:"Two Little Girls in Blue", author:"Mary Higgins Clark", format:"Paperback", genre:"Mystery", publisher:"Pocket Books", color:"#204060"},
+  {title:"Daddy's Little Girl", author:"Mary Higgins Clark", format:"Paperback", genre:"Mystery", publisher:"Pocket Books", color:"#f0f0f0"},
+  {title:"Just Take My Heart", author:"Mary Higgins Clark", format:"Paperback", genre:"Mystery", publisher:"Pocket Books", color:"#181818"},
+  {title:"While My Pretty One Sleeps", author:"Mary Jane Clark", format:"Paperback", genre:"Mystery", publisher:"Pocket Books", color:"#181830"},
+  {title:"Dancing in the Dark", author:"Mary Jane Clark", format:"Paperback", genre:"Mystery", color:"#181830"},
+  {title:"A Good Night to Kill", author:"Lillian O'Donnell", format:"Paperback", genre:"Mystery", publisher:"St. Martin's", color:"#181818"},
+  {title:"Probable Cause", author:"Ridley Pearson", format:"Paperback", genre:"Mystery", publisher:"Fawcett Crest", color:"#181818"},
+  {title:"Bone Cold", author:"Erica Spindler", format:"Paperback", genre:"Mystery/Thriller", publisher:"MIRA", color:"#181818"},
+  {title:"The Midnight Club", author:"James Patterson", format:"Paperback", genre:"Mystery", publisher:"Warner", color:"#181818"},
+
+  // Photography shelf
+  {title:"Understanding Exposure", author:"Bryan Peterson", format:"Hardback", genre:"Photography", publisher:"Amphoto Books", color:"#f0f0f0"},
+  {title:"Black & White Photography", author:"Michael Freeman", format:"Hardback", genre:"Photography", publisher:"Ilex", color:"#f0f0f0"},
+  {title:"The Photographer's Eye: A Graphic Guide", author:"Michael Freeman", format:"Hardback", genre:"Photography", publisher:"Ilex", color:"#f0f0f0"},
+  {title:"Mastering Black and White Digital Photography", author:"Michael Freeman", format:"Hardback", genre:"Photography", publisher:"Lark Books", color:"#607080"},
+  {title:"Michael Freeman's Photo School: Black & White", author:"Michael Freeman", format:"Hardback", genre:"Photography", color:"#c040a0"},
+  {title:"Mastering Digital SLR Photography", author:"David Busch", format:"Hardback", genre:"Photography", publisher:"Course Technology", color:"#181818"},
+  {title:"Nikon D7500 for Dummies", author:"Julie Adair King", format:"Paperback", genre:"Photography", publisher:"Wiley", color:"#f0d020"},
+  {title:"Nikon School Guide to Digital SLR Photography", author:"", format:"Hardback", genre:"Photography", publisher:"Nikon", color:"#181818"},
+
+  // Gothic / Halloween shelf
+  {title:"Coraline", author:"Neil Gaiman", format:"Hardback", genre:"Fantasy", color:"#181818"},
+  {title:"Long Live the Pumpkin Queen", author:"Shea Ernshaw", format:"Hardback", genre:"Fantasy", publisher:"Disney", color:"#181818", notes:"Tim Burton's The Nightmare Before Christmas"},
+  {title:"Sally's Lament: A Twisted Tale", author:"Mancusi", format:"Hardback", genre:"Fantasy", publisher:"Disney Hyperion", color:"#181818"},
+  {title:"Hour of the Pumpkin Queen", author:"Shepherd", format:"Hardback", genre:"Fantasy", publisher:"Disney", color:"#181818", notes:"Tim Burton's The Nightmare Before Christmas"},
+  {title:"The Legend of Sleepy Hollow & Other Stories", author:"Washington Irving", format:"Hardback", genre:"Classic", color:"#1a2848"},
+  {title:"Tim Burton's The Nightmare Before Christmas", author:"Shepherd", format:"Hardback", genre:"Fantasy", publisher:"Disney", color:"#50208a"},
+
+  // WWII / Auschwitz shelf
+  {title:"The Escape Artist", author:"Jonathan Freedland", format:"Hardback", genre:"Historical Non-Fiction", publisher:"Harper", color:"#181818", notes:"The Man Who Broke Out of Auschwitz to Warn the World"},
+  {title:"Schindler's List", author:"Thomas Keneally", format:"Paperback", genre:"Historical Fiction", publisher:"Atria", color:"#181818"},
+  {title:"The Librarian of Auschwitz", author:"Antonio Iturbe", format:"Hardback", genre:"Historical Fiction", publisher:"Penguin", color:"#183040"},
+  {title:"Cilka's Journey", author:"Heather Morris", format:"Hardback", genre:"Historical Fiction", publisher:"Zaffre", color:"#c02020"},
+  {title:"The Tattooist of Auschwitz", author:"Heather Morris", format:"Hardback", genre:"Historical Fiction", publisher:"Zaffre", color:"#204060"},
+  {title:"The Child of Auschwitz", author:"Lily Graham", format:"Hardback", genre:"Historical Fiction", color:"#204060"},
+
+  // Children's / YA shelf
+  {title:"Green Eggs and Ham", author:"Dr. Seuss", format:"Hardback", genre:"Children's", publisher:"Beginner Books", color:"#c02020"},
+  {title:"The Cat's Quizzer", author:"Dr. Seuss", format:"Hardback", genre:"Children's", publisher:"Beginner Books", color:"#f0d020"},
+  {title:"Bridge to Terabithia", author:"Katherine Paterson", format:"Hardback", genre:"Children's", publisher:"Newbery Library", color:"#604020"},
+  {title:"The Maze Runner", author:"James Dashner", format:"Hardback", genre:"YA Fiction", publisher:"Delacorte Press", color:"#181818"},
+  {title:"Never Fall Down", author:"Patricia McCormick", format:"Hardback", genre:"YA Fiction", color:"#f0f0f0"},
+  {title:"Red Kayak", author:"Priscilla Cummings", format:"Paperback", genre:"Children's", publisher:"Puffin", color:"#183030"},
+  {title:"The City of Ember", author:"Jeanne DuPrau", format:"Paperback", genre:"YA Fiction", publisher:"Yearling", color:"#886030"},
+
+  // Children's classic shelf
+  {title:"The Rainbow Fish", author:"Marcus Pfister", format:"Hardback", genre:"Children's", publisher:"Grosset & Dunlap", color:"#206080"},
+  {title:"A Christmas Story", author:"", format:"Hardback", genre:"Children's", publisher:"Grosset & Dunlap", color:"#204060"},
+  {title:"And to Think That I Saw It on Mulberry Street", author:"Dr. Seuss", format:"Hardback", genre:"Children's", publisher:"Vanguard Press", color:"#c02020"},
+  {title:"If I Ran the Zoo", author:"Dr. Seuss", format:"Hardback", genre:"Children's", color:"#c02020"},
+  {title:"Life with Dick and Jane and Friends", author:"Various", format:"Hardback", genre:"Children's", publisher:"Grosset & Dunlap", color:"#206020"},
+  {title:"The World of Dick and Jane and Friends", author:"Various", format:"Hardback", genre:"Children's", publisher:"Grosset & Dunlap", color:"#206020"},
+  {title:"Storybook Treasury of Dick and Jane and Friends", author:"Various", format:"Hardback", genre:"Children's", publisher:"Grosset & Dunlap", color:"#c8c890"},
+
+  // Misc Non-Fiction shelf
+  {title:"Baby's First Six Years", author:"", format:"Hardback", genre:"Parenting", publisher:"Golden Press", color:"#f0f0f0"},
+  {title:"The Illustrated A Brief History of Time / The Universe in a Nutshell", author:"Stephen Hawking", format:"Hardback", genre:"Science", color:"#181818"},
+  {title:"100 Things You Will Never Find", author:"Daniel Smith", format:"Hardback", genre:"Non-Fiction", publisher:"Quercus", color:"#883010"},
+  {title:"The Home Edit Life", author:"Clea Shearer & Joanna Teplin", format:"Hardback", genre:"Non-Fiction", publisher:"Potter", color:"#c8a820"},
+  {title:"Inside the White House", author:"Ronald Kessler", format:"Hardback", genre:"Non-Fiction", publisher:"Pocket Books", color:"#204080"},
+  {title:"The Book of Unsolved Mysteries", author:"", format:"Hardback", genre:"Non-Fiction", color:"#302010"},
+  {title:"Is It Hot in Here? Or Is It Me?", author:"Wingert and Kantrowitz", format:"Paperback", genre:"Health", publisher:"Workman", color:"#f0e8c0", notes:"The Complete Guide to Menopause"},
+
+  // True Crime / History shelf
+  {title:"Murder & Mayhem in Boise", author:"Iverson and Wade", format:"Paperback", genre:"True Crime", publisher:"Farcountry", color:"#806020"},
+  {title:"Idaho Madams", author:"Marsenich", format:"Paperback", genre:"True Crime", publisher:"Farcountry", color:"#806020"},
+  {title:"The Black Dahlia Files", author:"Donald H. Wolfe", format:"Hardback", genre:"True Crime", publisher:"Regan", color:"#181818", notes:"The Mob, the Mogul, and the Murder That Transfixed Los Angeles"},
+  {title:"Haunted Savannah", author:"James Caskey", format:"Paperback", genre:"Non-Fiction", publisher:"Bonaventure", color:"#181818"},
+  {title:"The Hot Zone", author:"Richard Preston", format:"Paperback", genre:"Non-Fiction", color:"#c02020"},
+  {title:"The Glass Castle", author:"Jeannette Walls", format:"Hardback", genre:"Memoir", publisher:"Scribner", color:"#f0f0f0"},
+  {title:"The Other Tudors", author:"Philippa Jones", format:"Hardback", genre:"History", color:"#601880"},
+  {title:"The Republic of Pirates", author:"Colin Woodard", format:"Paperback", genre:"History", publisher:"Mariner Books", color:"#181818"},
+  {title:"Conspiracy", author:"Charlotte Greig", format:"Hardback", genre:"Non-Fiction", publisher:"Arcturus", color:"#c02020"},
+  {title:"Mary, Bloody Mary", author:"Carolyn Meyer", format:"Hardback", genre:"Historical Fiction", publisher:"Harcourt", color:"#f0e8c0"},
+
+  // Cookbooks shelf 1
+  {title:"Eagle Brand Best-Loved Desserts", author:"", format:"Hardback", genre:"Cookbook", publisher:"Meredith Books", color:"#f0d020"},
+  {title:"OREO with a Twist", author:"", format:"Hardback", genre:"Cookbook", publisher:"Meredith Books", color:"#202020"},
+  {title:"All in One", author:"", format:"Hardback", genre:"Cookbook", color:"#f0f0f0"},
+  {title:"The Complete Guide to Intermittent Fasting", author:"", format:"Hardback", genre:"Health", publisher:"Love Food", color:"#c02020"},
+  {title:"Fabulous Food the Costco Way", author:"", format:"Hardback", genre:"Cookbook", publisher:"Costco", color:"#181818"},
+  {title:"Cooking for Kids Bible", author:"", format:"Hardback", genre:"Cookbook", publisher:"Publications International", color:"#f0f0f0"},
+  {title:"Cook It in Your Dutch Oven", author:"America's Test Kitchen", format:"Hardback", genre:"Cookbook", publisher:"America's Test Kitchen", color:"#206080"},
+  {title:"The Pioneer Woman Cooks", author:"Ree Drummond", format:"Hardback", genre:"Cookbook", publisher:"William Morrow", color:"#c85020"},
+  {title:"The Mediterranean Method", author:"Steven Masley", format:"Hardback", genre:"Health", publisher:"Harmony Books", color:"#206080"},
+  {title:"Tasty: Latest & Greatest", author:"", format:"Hardback", genre:"Cookbook", publisher:"Potter", color:"#181830"},
+  {title:"The Mediterranean Diet Weight Loss Solution", author:"Julene Stassou", format:"Paperback", genre:"Health", color:"#206040"},
+
+  // Cookbooks shelf 2
+  {title:"The 30-Minute Mediterranean Diet Cookbook", author:"Deanna Segrave-Daly & Serena Ball", format:"Paperback", genre:"Cookbook", color:"#206040"},
+  {title:"Best Recipes: From the Backs of Boxes, Bottles, Cans and Jars", author:"Ceil Dyer", format:"Hardback", genre:"Cookbook", publisher:"Galahad Books", color:"#f0e8c0"},
+  {title:"The Allergy Self Help Cookbook", author:"Jones", format:"Hardback", genre:"Cookbook", publisher:"Rodale", color:"#f0f0f0"},
+  {title:"Fix-It and Forget-It Cookbook", author:"Dawn Ranck", format:"Hardback", genre:"Cookbook", publisher:"Taste of Home Books", color:"#f0f0f0"},
+  {title:"The Four Ingredient Cookbooks", author:"Coffee & Cale", format:"Hardback", genre:"Cookbook", color:"#c02020"},
+
+  // Cookbooks shelf 3
+  {title:"NutriNinja: Simply Delicious, Simply Nutritious", author:"", format:"Paperback", genre:"Cookbook", color:"#602080"},
+  {title:"The Complete Healthy Smoothie for NutriBullet", author:"Manheim", format:"Hardback", genre:"Cookbook", color:"#f0f0f0"},
+  {title:"The Pillsbury Cookbook", author:"", format:"Hardback", genre:"Cookbook", publisher:"Bantam Books", color:"#f0f0f0"},
+
+  // Travel shelf
+  {title:"Your Guide to the National Parks", author:"", format:"Hardback", genre:"Travel", publisher:"Stone Road Press", year:2017, color:"#182060"},
+  {title:"Moon Road Trip USA", author:"", format:"Paperback", genre:"Travel", publisher:"Moon", color:"#f0f0f0", notes:"Cross-Country Adventures on America's Two-Lane Highways"},
+];
+
+function migrateAddBooks2() {
+  if (localStorage.getItem(MIGRATION_KEY_2)) return;
+  const existingKeys = new Set(books.map(b => (b.title + '|' + b.author).toLowerCase().trim()));
+  const toAdd = BOOKS_TO_ADD_2.filter(b =>
+    !existingKeys.has((b.title + '|' + b.author).toLowerCase().trim())
+  );
+  const newBooks = toAdd.map((b, i) => ({
+    id: uid(),
+    dateAdded: Date.now() - (toAdd.length - i) * 60000,
+    status: 'Unread',
+    isbn: '',
+    pages: null,
+    lang: 'English',
+    dateRead: '',
+    rating: 0,
+    coverUrl: undefined,
+    ...b
+  }));
+  books = [...newBooks, ...books];
+  save();
+  localStorage.setItem(MIGRATION_KEY_2, '1');
+}
+
+migrateAddBooks2();
+
+// ── MIGRATION v3: Final shelf photo ───────────────────────────────────────
+const MIGRATION_KEY_3 = 'bookMigration_v3';
+const BOOKS_TO_ADD_3 = [
+  {title:"Debt-Free Living", author:"Larry Burkett", format:"Hardback", genre:"Finance", publisher:"Moody", color:"#f0f0f0"},
+  {title:"UltraRunning Magazine (October/November 2025)", author:"", format:"Magazine", genre:"Magazine", color:"#1a1a4a", notes:"October/November 2025 issue"},
+  {title:"UltraRunning Magazine (February/March 2026)", author:"", format:"Magazine", genre:"Magazine", color:"#1a1a4a", notes:"February/March 2026 issue"},
+  {title:"Buying Your First Home", author:"Bray, O'Connell & Stewart", format:"Paperback", genre:"Finance", publisher:"NOLO", color:"#f0f0f0"},
+  {title:"The Creature from Jekyll Island", author:"G. Edward Griffin", format:"Hardback", genre:"Non-Fiction", publisher:"American Media", color:"#c8a820"},
+];
+
+function migrateAddBooks3() {
+  if (localStorage.getItem(MIGRATION_KEY_3)) return;
+  const existingKeys = new Set(books.map(b => (b.title + '|' + b.author).toLowerCase().trim()));
+  const toAdd = BOOKS_TO_ADD_3.filter(b =>
+    !existingKeys.has((b.title + '|' + b.author).toLowerCase().trim())
+  );
+  const newBooks = toAdd.map((b, i) => ({
+    id: uid(),
+    dateAdded: Date.now() - (toAdd.length - i) * 60000,
+    status: 'Unread',
+    isbn: '',
+    pages: null,
+    lang: 'English',
+    dateRead: '',
+    rating: 0,
+    coverUrl: undefined,
+    ...b
+  }));
+  books = [...newBooks, ...books];
+  save();
+  localStorage.setItem(MIGRATION_KEY_3, '1');
+}
+
+migrateAddBooks3();
+
+// ── MIGRATION v4: Leather-bound collector's editions ──────────────────────
+const MIGRATION_KEY_4 = 'bookMigration_v4';
+const BOOKS_TO_ADD_4 = [
+  {title:"Short Stories", author:"Mark Twain", format:"Hardback", genre:"Classic", publisher:"Easton Press", color:"#3a1020", notes:"Leather-bound Easton Press collector's edition, gold embossed"},
+  {title:"Dubliners", author:"James Joyce", format:"Hardback", genre:"Classic", publisher:"Easton Press", color:"#1a3a1a", notes:"Leather-bound Easton Press collector's edition, gold embossed"},
+];
+
+function migrateAddBooks4() {
+  if (localStorage.getItem(MIGRATION_KEY_4)) return;
+  const existingKeys = new Set(books.map(b => (b.title + '|' + b.author).toLowerCase().trim()));
+  const toAdd = BOOKS_TO_ADD_4.filter(b =>
+    !existingKeys.has((b.title + '|' + b.author).toLowerCase().trim())
+  );
+  const newBooks = toAdd.map((b, i) => ({
+    id: uid(), dateAdded: Date.now() - (toAdd.length - i) * 60000,
+    status: 'Unread', isbn: '', pages: null, lang: 'English',
+    dateRead: '', rating: 0, coverUrl: undefined, ...b
+  }));
+  books = [...newBooks, ...books];
+  save();
+  localStorage.setItem(MIGRATION_KEY_4, '1');
+}
+
+migrateAddBooks4();
+
+// Genres list (persisted separately for user-defined genres that may not have books yet)
+const GENRE_KEY = 'bookGenres_v1';
+function loadGenres() {
+  try { return JSON.parse(localStorage.getItem(GENRE_KEY)) || []; } catch { return []; }
+}
+function saveGenres() { localStorage.setItem(GENRE_KEY, JSON.stringify(userGenres)); }
+
+let userGenres = loadGenres(); // extra genres beyond those in books
+
+function allGenres() {
+  const fromBooks = books.map(b=>b.genre).filter(Boolean);
+  return [...new Set([...fromBooks, ...userGenres])].sort();
+}
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let view = 'grid';
+let search = '';
+let filterFormat = '';
+let filterStatus = '';
+let filterGenre = '';
+let filterNoCover = false;
+let sortBy = 'dateAdded';
+let sortDir = 1;
+let editId = null;
+let formRating = 0;
+const fetchingSet = new Set(); // ids currently being fetched
+
+// ─── ELEMENTS ────────────────────────────────────────────────────────────────
+const container    = document.getElementById('bookContainer');
+const statsRow     = document.getElementById('statsRow');
+const searchInput  = document.getElementById('searchInput');
+const selFormat    = document.getElementById('filterFormat');
+const selStatus    = document.getElementById('filterStatus');
+const selGenre     = document.getElementById('filterGenre');
+const selSort      = document.getElementById('sortBy');
+const btnGrid      = document.getElementById('btnGrid');
+const btnList      = document.getElementById('btnList');
+const btnAdd       = document.getElementById('btnAdd');
+const btnGenres    = document.getElementById('btnGenres');
+const btnFetchAll  = document.getElementById('btnFetchCovers');
+const modal        = document.getElementById('modalOverlay');
+const genreModal   = document.getElementById('genreModalOverlay');
+const detailOv     = document.getElementById('detailOverlay');
+const toast        = document.getElementById('toast');
+const genreListEl  = document.getElementById('genreList');
+const progressBar  = document.getElementById('coverProgressBar');
+const progressFill = document.getElementById('coverProgressFill');
+
+// ─── COVER FETCHING ──────────────────────────────────────────────────────────
+// Mobile-safe fetch with timeout (AbortSignal.timeout not supported on older iOS/Android)
+function fetchWithTimeout(url, ms) {
+  ms = ms || 12000;
+  const ctrl = new AbortController();
+  const timer = setTimeout(function() { ctrl.abort(); }, ms);
+  return fetch(url, { signal: ctrl.signal }).finally(function() { clearTimeout(timer); });
+}
+
+async function fetchCoverForBook(book) {
+  if (fetchingSet.has(book.id)) return;
+  if (book.coverUrl !== undefined && book.coverUrl !== null) return; // already tried
+  fetchingSet.add(book.id);
+  let url = '';
+  try {
+    const t = encodeURIComponent(book.title);
+    const a = book.author ? encodeURIComponent(book.author) : '';
+
+    // Strategy 1: Open Library — title + author (or title-only if no author)
+    try {
+      const olQuery = a ? 'title=' + t + '&author=' + a : 'title=' + t;
+      const res1 = await fetchWithTimeout('https://openlibrary.org/search.json?' + olQuery + '&limit=1&fields=cover_i,isbn');
+      if (res1.ok) {
+        const d1 = await res1.json();
+        const doc = d1.docs && d1.docs[0];
+        if (doc && doc.cover_i) {
+          url = 'https://covers.openlibrary.org/b/id/' + doc.cover_i + '-M.jpg';
+        } else if (doc && doc.isbn && doc.isbn[0]) {
+          url = 'https://covers.openlibrary.org/b/isbn/' + doc.isbn[0] + '-M.jpg';
+        }
+      }
+    } catch(e1) { /* OL strategy 1 timed out or failed */ }
+
+    // Strategy 2: Google Books fallback
+    if (!url) {
+      try {
+        const gq = a ? 'intitle:' + t + '+inauthor:' + a : 'intitle:' + t;
+        const res2 = await fetchWithTimeout('https://www.googleapis.com/books/v1/volumes?q=' + gq + '&maxResults=1&fields=items(volumeInfo/imageLinks)');
+        if (res2.ok) {
+          const d2 = await res2.json();
+          const thumb = d2.items && d2.items[0] && d2.items[0].volumeInfo && d2.items[0].volumeInfo.imageLinks && d2.items[0].volumeInfo.imageLinks.thumbnail;
+          if (thumb) url = thumb.replace('http://', 'https://').replace('zoom=1', 'zoom=2');
+        }
+      } catch(e2) { /* Google Books timed out or failed */ }
+    }
+
+    // Strategy 3: Open Library title-only (broader, catches wrong/missing author)
+    if (!url && a) {
+      try {
+        const res3 = await fetchWithTimeout('https://openlibrary.org/search.json?title=' + t + '&limit=1&fields=cover_i,isbn');
+        if (res3.ok) {
+          const d3 = await res3.json();
+          const doc3 = d3.docs && d3.docs[0];
+          if (doc3 && doc3.cover_i) url = 'https://covers.openlibrary.org/b/id/' + doc3.cover_i + '-M.jpg';
+          else if (doc3 && doc3.isbn && doc3.isbn[0]) url = 'https://covers.openlibrary.org/b/isbn/' + doc3.isbn[0] + '-M.jpg';
+        }
+      } catch(e3) { /* OL strategy 3 timed out or failed */ }
+    }
+  } catch { /* outer safety net */ }
+
+  book.coverUrl = url || null;
+  fetchingSet.delete(book.id);
+  save();
+  // Update just this card's cover area without full re-render
+  updateCardCover(book);
+}
+
+function updateCardCover(book) {
+  const card = document.querySelector(`.book-card[data-id="${book.id}"] .cover-area`);
+  if (card) card.innerHTML = coverAreaHTML(book);
+  // Also update list thumb
+  const thumb = document.querySelector(`.list-thumb-wrap[data-id="${book.id}"]`);
+  if (thumb) thumb.innerHTML = thumbHTML(book);
+}
+
+async function fetchAllCovers() {
+  const missing = books.filter(b => b.coverUrl === undefined || b.coverUrl === null);
+  if (!missing.length) { showToast('All covers already fetched!'); return; }
+  progressBar.style.display = 'block';
+  btnFetchAll.disabled = true;
+  btnFetchAll.textContent = '⏳ Fetching…';
+  let done = 0;
+  const total = missing.length;
+  // Small delay between requests — helps on slow mobile connections
+  const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+  const delay = isMobile ? 300 : 50;
+  for (const book of missing) {
+    await fetchCoverForBook(book);
+    done++;
+    progressFill.style.width = (done / total * 100) + '%';
+    btnFetchAll.textContent = '⏳ ' + done + ' / ' + total;
+    if (delay) await new Promise(function(r){ setTimeout(r, delay); });
+  }
+  setTimeout(() => {
+    progressBar.style.display = 'none';
+    progressFill.style.width = '0%';
+  }, 800);
+  btnFetchAll.disabled = false;
+  btnFetchAll.textContent = '🖼 Get Covers';
+  showToast(`Covers fetched for ${done} books.`);
+  render();
+}
+
+// ─── FILTERS / RENDER ────────────────────────────────────────────────────────
+function filtered() {
+  let list = [...books];
+  const q = search.toLowerCase();
+  if (q) list = list.filter(b =>
+    b.title.toLowerCase().includes(q) ||
+    b.author.toLowerCase().includes(q) ||
+    (b.genre||'').toLowerCase().includes(q) ||
+    (b.notes||'').toLowerCase().includes(q)
+  );
+  if (filterFormat)  list = list.filter(b => b.format === filterFormat);
+  if (filterStatus)  list = list.filter(b => b.status === filterStatus);
+  if (filterGenre)   list = list.filter(b => b.genre === filterGenre);
+  if (filterNoCover) list = list.filter(b => !b.coverUrl);
+  list.sort((a, b) => {
+    let av = a[sortBy] ?? '', bv = b[sortBy] ?? '';
+    if (sortBy === 'title' || sortBy === 'author') { av = av.toLowerCase(); bv = bv.toLowerCase(); }
+    if (av < bv) return -1 * sortDir;
+    if (av > bv) return  1 * sortDir;
+    return 0;
+  });
+  return list;
+}
+
+function renderStats() {
+  const total   = books.length;
+  const read    = books.filter(b => b.status === 'Read').length;
+  const reading = books.filter(b => b.status === 'Currently Reading').length;
+  const hb      = books.filter(b => b.format === 'Hardback').length;
+  const rated   = books.filter(b => b.rating > 0);
+  const avgRating = rated.length ? (rated.reduce((s,b)=>s+b.rating,0)/rated.length).toFixed(1) : '–';
+  const withCovers = books.filter(b => b.coverUrl).length;
+  statsRow.innerHTML = [
+    ['Total', total], ['Read', read], ['Reading', reading],
+    ['Hardback', hb], ['Avg ★', avgRating], ['Covers', withCovers]
+  ].map(([l,v]) => `<div class="stat"><div class="stat-num">${v}</div><div class="stat-lbl">${l}</div></div>`).join('');
+}
+
+function rebuildGenreDatalist() {
+  genreListEl.innerHTML = allGenres().map(g=>`<option value="${g}">`).join('');
+}
+
+function rebuildGenreFilter() {
+  const genres = allGenres();
+  const prev = selGenre.value;
+  selGenre.innerHTML = '<option value="">All Genres</option>' + genres.map(g=>`<option ${g===prev?'selected':''}>${g}</option>`).join('');
+}
+
+function spineStyle(color) {
+  const hex = (color||'#2c1810').replace('#','');
+  const r = parseInt(hex.slice(0,2),16)||44, g = parseInt(hex.slice(2,4),16)||24, b = parseInt(hex.slice(4,6),16)||16;
+  const lum = (0.299*r + 0.587*g + 0.114*b) / 255;
+  const txt = lum > 0.45 ? '#1a1410' : '#f0e8d8';
+  return `background:${color}; color:${txt};`;
+}
+
+function stars(n, id) {
+  return Array.from({length:5},(_,i) =>
+    `<span class="star ${i<n?'lit':''}" data-id="${id}" data-v="${i+1}">★</span>`
+  ).join('');
+}
+
+function formatBadge(f) {
+  const map = {Hardback:'badge-hb',Paperback:'badge-pb',eBook:'badge-eb',Audiobook:'badge-ab'};
+  return `<span class="badge ${map[f]||'badge-pb'}">${f}</span>`;
+}
+
+function statusBadge(s) {
+  const map = {Read:'badge-read','Currently Reading':'badge-reading',Unread:'badge-unread',Wishlist:'badge-genre'};
+  return `<span class="badge ${map[s]||'badge-unread'}">${s}</span>`;
+}
+
+function coverAreaHTML(b) {
+  if (b.coverUrl === undefined) {
+    // Not fetched yet — show spinner (will be fetched in background)
+    return `<div class="cover-loading"><span class="cover-spinner"></span>Loading…</div>`;
+  }
+  if (b.coverUrl) {
+    return `<img class="cover-img" src="${b.coverUrl}" alt="${b.title}" onerror="this.parentNode.innerHTML=spineHTML_${b.id}()">`;
+  }
+  // No cover found
+  return `<div class="book-spine" style="${spineStyle(b.color)}"><span>${b.title}</span></div>`;
+}
+
+function thumbHTML(b) {
+  if (b.coverUrl) {
+    return `<img class="list-thumb" src="${b.coverUrl}" alt="${b.title}" onerror="this.outerHTML='<div class=\\'list-thumb-spine\\' style=\\'${spineStyle(b.color)}\\'>${b.title.slice(0,6)}</div>'">`;
+  }
+  return `<div class="list-thumb-spine" style="${spineStyle(b.color)}">${b.title.slice(0,6)}</div>`;
+}
+
+function renderGrid(list) {
+  if (!list.length) return emptyState();
+  return `<div class="grid-view">${list.map(b => {
+    const needsFetch = b.coverUrl === undefined;
+    return `
+    <div class="book-card" data-id="${b.id}">
+      <div class="cover-area" data-id="${b.id}">
+        ${coverAreaHTML(b)}
+        ${needsFetch ? '' : (b.coverUrl ? '' : `<span class="cover-badge-wrap" style="display:flex;flex-direction:column;gap:4px;position:absolute;top:8px;right:8px">
+          <span class="cover-badge" onclick="event.stopPropagation();retryFetch('${b.id}')" title="Try fetching cover automatically">🖼 Retry</span>
+          <span class="cover-badge" onclick="event.stopPropagation();openModal('${b.id}')" title="Upload or paste a cover image manually" style="background:var(--surface2);border:1px solid var(--accent);color:var(--accent2)">📁 Upload</span>
+        </span>`)}
+      </div>
+      <div class="book-card-body">
+        <div class="book-title">${b.title}</div>
+        <div class="book-author">${b.author}</div>
+        <div class="badges">
+          ${formatBadge(b.format)}
+          ${statusBadge(b.status)}
+          ${b.genre ? `<span class="badge badge-genre">${b.genre}</span>` : ''}
+        </div>
+        <div class="star-row">${stars(b.rating, b.id)}</div>
+        <div class="card-actions">
+          <button class="card-btn edit-btn" data-id="${b.id}">Edit</button>
+          <button class="card-btn del del-btn" data-id="${b.id}">Delete</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function renderList(list) {
+  if (!list.length) return emptyState();
+  const cols = [
+    {key:'_thumb', label:''},
+    {key:'title', label:'Title'},
+    {key:'author', label:'Author'},
+    {key:'format', label:'Format'},
+    {key:'status', label:'Status'},
+    {key:'genre', label:'Genre'},
+    {key:'year', label:'Year'},
+    {key:'pages', label:'Pages'},
+    {key:'rating', label:'Rating'},
+  ];
+  return `<div class="list-view"><table>
+    <thead><tr>
+      ${cols.map(c=> c.key==='_thumb' ? '<th></th>' : `<th class="${sortBy===c.key?'sorted':''}" data-sort="${c.key}">${c.label}<span class="sort-arrow">${sortBy===c.key?(sortDir===1?'▲':'▼'):'⇅'}</span></th>`).join('')}
+      <th>Actions</th>
+    </tr></thead>
+    <tbody>${list.map(b=>`<tr>
+      <td><div class="list-thumb-wrap" data-id="${b.id}">${thumbHTML(b)}</div></td>
+      <td class="title-cell">${b.title}</td>
+      <td class="author-cell">${b.author}</td>
+      <td>${formatBadge(b.format)}</td>
+      <td>${statusBadge(b.status)}</td>
+      <td>${b.genre||'–'}</td>
+      <td>${b.year != null ? b.year : '–'}</td>
+      <td>${b.pages||'–'}</td>
+      <td><span style="color:var(--accent2)">${'★'.repeat(b.rating)}${'☆'.repeat(5-b.rating)}</span></td>
+      <td><div class="row-actions">
+        <button class="row-btn view-btn-r" data-id="${b.id}">View</button>
+        <button class="row-btn edit-btn" data-id="${b.id}">Edit</button>
+        <button class="row-btn del del-btn" data-id="${b.id}">Del</button>
+      </div></td>
+    </tr>`).join('')}</tbody>
+  </table></div>`;
+}
+
+function emptyState() {
+  return `<div class="empty"><div class="empty-icon">📖</div><h3>No books found</h3><p>Try adjusting your filters or add a new book.</p></div>`;
+}
+
+function render() {
+  rebuildGenreFilter();
+  rebuildGenreDatalist();
+  const list = filtered();
+  container.innerHTML = view === 'grid' ? renderGrid(list) : renderList(list);
+  renderStats();
+  bindCardEvents();
+
+  // Kick off background fetches — limit concurrency to avoid overwhelming mobile connections
+  const toFetch = books.filter(b => b.coverUrl === undefined && !fetchingSet.has(b.id));
+  const concurrency = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? 2 : 6;
+  toFetch.slice(0, concurrency).forEach(b => fetchCoverForBook(b));
+}
+
+function bindCardEvents() {
+  container.querySelectorAll('.edit-btn').forEach(el =>
+    el.addEventListener('click', e => { e.stopPropagation(); openModal(el.dataset.id); }));
+  container.querySelectorAll('.del-btn').forEach(el =>
+    el.addEventListener('click', e => { e.stopPropagation(); deleteBook(el.dataset.id); }));
+  container.querySelectorAll('.view-btn-r').forEach(el =>
+    el.addEventListener('click', e => { e.stopPropagation(); openDetail(el.dataset.id); }));
+  container.querySelectorAll('.star').forEach(el =>
+    el.addEventListener('click', e => { e.stopPropagation(); rateBook(el.dataset.id, +el.dataset.v); }));
+  container.querySelectorAll('.book-card').forEach(el =>
+    el.addEventListener('click', () => openDetail(el.dataset.id)));
+  container.querySelectorAll('[data-sort]').forEach(el =>
+    el.addEventListener('click', () => {
+      if (sortBy === el.dataset.sort) sortDir *= -1;
+      else { sortBy = el.dataset.sort; sortDir = 1; selSort.value = sortBy; }
+      render();
+    }));
+}
+
+// Global helper for onerror fallback
+window.retryFetch = function(id) {
+  const b = books.find(x=>x.id===id);
+  if (!b) return;
+  b.coverUrl = undefined;
+  save();
+  fetchCoverForBook(b);
+};
+
+// ─── COVER IMAGE HELPERS ─────────────────────────────────────────────────────
+// Resize any image data URL to max 300×450 JPEG — keeps localStorage usage small
+function compressImageDataUrl(dataUrl) {
+  return new Promise(function(resolve) {
+    const img = new Image();
+    img.onload = function() {
+      const MAX_W = 300, MAX_H = 450;
+      const ratio = Math.min(MAX_W / img.width, MAX_H / img.height, 1);
+      const w = Math.round(img.width  * ratio);
+      const h = Math.round(img.height * ratio);
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/jpeg', 0.85));
+    };
+    img.onerror = function() { resolve(dataUrl); }; // fallback: keep original
+    img.src = dataUrl;
+  });
+}
+
+function updateCoverPreview() {
+  const url = document.getElementById('fCoverUrl').value.trim();
+  const wrap = document.getElementById('coverPreviewWrap');
+  const img  = document.getElementById('coverPreviewImg');
+  if (url) {
+    img.src = url;
+    wrap.style.display = 'block';
+  } else {
+    wrap.style.display = 'none';
+    img.src = '';
+  }
+}
+
+function handleCoverUpload(input) {
+  if (!input.files || !input.files[0]) return;
+  const file = input.files[0];
+  input.value = '';
+  const reader = new FileReader();
+  reader.onload = async function(e) {
+    try {
+      // Compress to 300×450 JPEG before storing — reduces 3-8MB photos to ~30-60KB
+      const compressed = await compressImageDataUrl(e.target.result);
+      document.getElementById('fCoverUrl').value = compressed;
+      updateCoverPreview();
+    } catch {
+      showToast('Could not read image. Try a different file.');
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearCoverImage() {
+  document.getElementById('fCoverUrl').value = '';
+  updateCoverPreview();
+}
+
+// ─── ADD / EDIT MODAL ────────────────────────────────────────────────────────
+function openModal(id) {
+  editId = id || null;
+  formRating = 0;
+  const b = id ? books.find(x=>x.id===id) : null;
+  document.getElementById('modalTitle').textContent = b ? 'Edit Book' : 'Add Book';
+  document.getElementById('fTitle').value     = b?.title || '';
+  document.getElementById('fAuthor').value    = b?.author || '';
+  document.getElementById('fFormat').value    = b?.format || 'Hardback';
+  document.getElementById('fStatus').value    = b?.status || 'Unread';
+  document.getElementById('fGenre').value     = b?.genre || '';
+  document.getElementById('fYear').value      = b?.year != null ? b.year : '';
+  document.getElementById('fPublisher').value = b?.publisher || '';
+  document.getElementById('fISBN').value      = b?.isbn || '';
+  document.getElementById('fPages').value     = b?.pages || '';
+  document.getElementById('fLang').value      = b?.lang || 'English';
+  document.getElementById('fDateRead').value  = b?.dateRead || '';
+  document.getElementById('fColor').value     = b?.color || '#2c1810';
+  document.getElementById('fCoverUrl').value  = (b?.coverUrl && b.coverUrl !== 'null') ? b.coverUrl : '';
+  document.getElementById('fNotes').value     = b?.notes || '';
+  formRating = b?.rating || 0;
+  updateStarPicker(formRating);
+  rebuildGenreDatalist();
+  updateCoverPreview();
+  modal.classList.add('open');
+  document.getElementById('fTitle').focus();
+}
+
+function closeModal() { modal.classList.remove('open'); }
+
+function saveModal() {
+  const title  = document.getElementById('fTitle').value.trim();
+  const author = document.getElementById('fAuthor').value.trim();
+  if (!title || !author) { showToast('Title and Author are required.'); return; }
+  const coverUrlInput = document.getElementById('fCoverUrl').value.trim();
+  const genre = document.getElementById('fGenre').value.trim();
+  const data = {
+    title, author,
+    format:    document.getElementById('fFormat').value,
+    status:    document.getElementById('fStatus').value,
+    genre,
+    year:      document.getElementById('fYear').value !== '' ? +document.getElementById('fYear').value : null,
+    publisher: document.getElementById('fPublisher').value.trim(),
+    isbn:      document.getElementById('fISBN').value.trim(),
+    pages:     +document.getElementById('fPages').value || null,
+    lang:      document.getElementById('fLang').value.trim(),
+    dateRead:  document.getElementById('fDateRead').value,
+    color:     document.getElementById('fColor').value,
+    notes:     document.getElementById('fNotes').value.trim(),
+    rating:    formRating,
+    // If user pasted a URL use it; otherwise keep existing or set undefined to auto-fetch
+    coverUrl:  coverUrlInput ? coverUrlInput : (editId ? books.find(b=>b.id===editId)?.coverUrl : undefined),
+  };
+  // Add new genre to userGenres list if not already there
+  if (genre && !userGenres.includes(genre)) { userGenres.push(genre); saveGenres(); }
+
+  if (editId) {
+    const idx = books.findIndex(b=>b.id===editId);
+    books[idx] = {...books[idx], ...data};
+    showToast('Book updated ✓');
+  } else {
+    books.unshift({id: uid(), dateAdded: Date.now(), ...data});
+    showToast('Book added ✓');
+  }
+  save(); closeModal(); render();
+}
+
+function updateStarPicker(n) {
+  document.querySelectorAll('.star-pick').forEach(s => {
+    s.classList.toggle('lit', +s.dataset.v <= n);
+  });
+}
+
+document.getElementById('starPicker').addEventListener('click', e => {
+  if (e.target.classList.contains('star-pick')) {
+    formRating = +e.target.dataset.v;
+    updateStarPicker(formRating);
+  }
+});
+
+// ─── GENRE MANAGER ───────────────────────────────────────────────────────────
+function openGenreModal() {
+  renderGenreTable();
+  genreModal.classList.add('open');
+  document.getElementById('newGenreInput').value = '';
+}
+
+function closeGenreModal() { genreModal.classList.remove('open'); render(); }
+
+function renderGenreTable() {
+  const genres = allGenres();
+  const table = document.getElementById('genreTable');
+  if (!genres.length) {
+    table.innerHTML = '<tr><td colspan="3" style="color:var(--text2);padding:16px;text-align:center">No genres yet. Add books or create one below.</td></tr>';
+    return;
+  }
+  table.innerHTML = `<thead><tr><th>Genre</th><th>Books</th><th>Actions</th></tr></thead><tbody>` +
+    genres.map(g => {
+      const count = books.filter(b=>b.genre===g).length;
+      return `<tr id="genre-row-${CSS.escape(g)}">
+        <td>
+          <div class="genre-name-display" id="gnd-${CSS.escape(g)}">
+            <span>${g}</span>
+            <span class="genre-count">${count}</span>
+          </div>
+          <div class="genre-row-edit" id="ged-${CSS.escape(g)}" style="display:none">
+            <input type="text" class="genre-rename-input" value="${g}" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:var(--radius);padding:6px 10px;font-size:0.88rem;outline:none;font-family:Georgia,serif">
+            <button class="btn btn-primary btn-sm" onclick="saveGenreRename('${g}', this.previousElementSibling.value)">Save</button>
+            <button class="btn btn-sm" onclick="cancelGenreEdit('${g}')">Cancel</button>
+          </div>
+        </td>
+        <td style="color:var(--text2);font-family:sans-serif;font-size:0.85rem">${count} book${count!==1?'s':''}</td>
+        <td>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-sm" onclick="startGenreEdit('${g}')">✏ Rename</button>
+            ${count===0 ? `<button class="btn btn-sm btn-danger" onclick="deleteGenre('${g}')">✕</button>` : ''}
+          </div>
+        </td>
+      </tr>`;
+    }).join('') + '</tbody>';
+}
+
+function startGenreEdit(g) {
+  document.getElementById(`gnd-${CSS.escape(g)}`).style.display = 'none';
+  const ged = document.getElementById(`ged-${CSS.escape(g)}`);
+  ged.style.display = 'flex';
+  ged.querySelector('input').focus();
+}
+
+function cancelGenreEdit(g) {
+  document.getElementById(`gnd-${CSS.escape(g)}`).style.display = 'flex';
+  document.getElementById(`ged-${CSS.escape(g)}`).style.display = 'none';
+}
+
+function saveGenreRename(oldName, newName) {
+  newName = newName.trim();
+  if (!newName) { showToast('Genre name cannot be empty.'); return; }
+  if (newName === oldName) { cancelGenreEdit(oldName); return; }
+  // Update all books
+  let count = 0;
+  books.forEach(b => { if (b.genre === oldName) { b.genre = newName; count++; } });
+  // Update userGenres
+  const idx = userGenres.indexOf(oldName);
+  if (idx !== -1) userGenres[idx] = newName;
+  else if (!userGenres.includes(newName)) userGenres.push(newName);
+  save(); saveGenres();
+  showToast(`"${oldName}" → "${newName}" (${count} book${count!==1?'s':''} updated)`);
+  renderGenreTable();
+  rebuildGenreDatalist();
+  rebuildGenreFilter();
+}
+
+function deleteGenre(g) {
+  userGenres = userGenres.filter(x=>x!==g);
+  saveGenres();
+  renderGenreTable();
+  showToast(`Genre "${g}" removed.`);
+}
+
+document.getElementById('newGenreAdd').addEventListener('click', () => {
+  const val = document.getElementById('newGenreInput').value.trim();
+  if (!val) return;
+  if (!userGenres.includes(val) && !books.some(b=>b.genre===val)) {
+    userGenres.push(val); saveGenres();
+  }
+  document.getElementById('newGenreInput').value = '';
+  renderGenreTable();
+  rebuildGenreDatalist();
+  showToast(`Genre "${val}" added.`);
+});
+
+document.getElementById('newGenreInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('newGenreAdd').click();
+});
+
+// ─── DELETE ──────────────────────────────────────────────────────────────────
+function deleteBook(id) {
+  const b = books.find(x=>x.id===id);
+  if (!confirm(`Delete "${b?.title}"?`)) return;
+  books = books.filter(x=>x.id!==id);
+  save(); render(); showToast('Book removed.');
+}
+
+// ─── RATE INLINE ─────────────────────────────────────────────────────────────
+function rateBook(id, v) {
+  const b = books.find(x=>x.id===id);
+  if (!b) return;
+  b.rating = b.rating === v ? 0 : v;
+  save(); render();
+}
+
+// ─── DETAIL PANEL ────────────────────────────────────────────────────────────
+function openDetail(id) {
+  const b = books.find(x=>x.id===id);
+  if (!b) return;
+  const coverHTML = b.coverUrl
+    ? `<img class="detail-cover" src="${b.coverUrl}" alt="${b.title}" onerror="this.outerHTML='<div class=\\'detail-spine-preview\\' style=\\'${spineStyle(b.color)}\\'>${b.title}</div>'">`
+    : `<div class="detail-spine-preview" style="${spineStyle(b.color)}">${b.title}</div>`;
+
+  const panel = document.getElementById('detailPanel');
+  panel.innerHTML = `
+    <button class="detail-close" id="detailClose">✕</button>
+    ${coverHTML}
+    <div class="detail-title">${b.title}</div>
+    <div class="detail-author">by ${b.author}</div>
+    <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">
+      ${formatBadge(b.format)}${statusBadge(b.status)}
+      ${b.genre?`<span class="badge badge-genre">${b.genre}</span>`:''}
+    </div>
+    <div style="display:flex;gap:4px;margin-top:4px;color:var(--accent2);font-size:1.1rem">
+      ${'★'.repeat(b.rating)}${'☆'.repeat(5-b.rating)}
+    </div>
+    ${[
+      ['Year', b.year != null ? b.year : '–'],
+      ['Pages', b.pages||'–'],
+      ['Publisher', b.publisher||'–'],
+      ['Language', b.lang||'–'],
+      ['ISBN', b.isbn||'–'],
+      ['Date Read', b.dateRead||'–'],
+      ['Added', new Date(b.dateAdded).toLocaleDateString()],
+    ].map(([k,v])=>`<div class="detail-row"><span class="key">${k}</span><span>${v}</span></div>`).join('')}
+    ${b.notes?`<div style="font-size:0.78rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;font-family:sans-serif;margin-top:4px">Notes</div><div class="detail-notes">${b.notes}</div>`:''}
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn btn-primary" style="flex:1" onclick="openModal('${id}');closeDetail()">Edit</button>
+      <button class="btn btn-danger" onclick="deleteBook('${id}');closeDetail()">Delete</button>
+    </div>
+  `;
+  detailOv.classList.add('open');
+  document.getElementById('detailClose').addEventListener('click', closeDetail);
+}
+
+function closeDetail() { detailOv.classList.remove('open'); }
+
+// ─── TOAST ───────────────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg) {
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2800);
+}
+
+// ─── EVENTS ──────────────────────────────────────────────────────────────────
+btnAdd.addEventListener('click', () => openModal(null));
+document.getElementById('modalClose').addEventListener('click', closeModal);
+document.getElementById('modalCancel').addEventListener('click', closeModal);
+document.getElementById('modalSave').addEventListener('click', saveModal);
+modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+
+btnGenres.addEventListener('click', openGenreModal);
+document.getElementById('genreModalClose').addEventListener('click', closeGenreModal);
+document.getElementById('genreModalDone').addEventListener('click', closeGenreModal);
+genreModal.addEventListener('click', e => { if (e.target === genreModal) closeGenreModal(); });
+
+btnFetchAll.addEventListener('click', fetchAllCovers);
+
+// ─── AI SETTINGS ─────────────────────────────────────────────────────────────
+const settingsModal  = document.getElementById('settingsModal');
+const apiKeyInput    = document.getElementById('apiKeyInput');
+
+function openSettingsModal() {
+  apiKeyInput.value = localStorage.getItem('anthropicApiKey') || '';
+  settingsModal.classList.add('open');
+  apiKeyInput.focus();
+}
+function closeSettingsModal() { settingsModal.classList.remove('open'); }
+
+document.getElementById('btnSettings').addEventListener('click', openSettingsModal);
+document.getElementById('settingsClose').addEventListener('click', closeSettingsModal);
+document.getElementById('settingsCancel').addEventListener('click', closeSettingsModal);
+settingsModal.addEventListener('click', e => { if (e.target === settingsModal) closeSettingsModal(); });
+document.getElementById('settingsSave').addEventListener('click', () => {
+  const key = apiKeyInput.value.trim();
+  if (!key) { showToast('Please enter a valid API key.'); return; }
+  localStorage.setItem('anthropicApiKey', key);
+  showToast('API key saved ✓');
+  closeSettingsModal();
+});
+
+// ─── AI BOOK SCANNER ─────────────────────────────────────────────────────────
+const scanOverlay = document.getElementById('scanOverlay');
+const scanLabel   = document.getElementById('scanLabel');
+
+async function handleScanUpload(input) {
+  if (!input.files || !input.files[0]) return;
+
+  const apiKey = localStorage.getItem('anthropicApiKey');
+  if (!apiKey) {
+    showToast('Set your Anthropic API key in ⚙️ Settings first.');
+    openSettingsModal();
+    input.value = '';
+    return;
+  }
+
+  const file = input.files[0];
+  input.value = '';
+
+  // Read file as base64
+  const base64 = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
+  const mediaType = file.type || 'image/jpeg';
+
+  // Show overlay
+  scanOverlay.classList.add('active');
+  scanLabel.textContent = 'Identifying book…';
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 600,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
+            { type: 'text', text: `Identify this book cover and return ONLY a valid JSON object — no markdown, no explanation — with these exact fields (use null for anything you are unsure of):
+{
+  "title": "...",
+  "author": "...",
+  "year": 1984,
+  "publisher": "...",
+  "genre": "...",
+  "pages": null,
+  "isbn": "...",
+  "notes": "one-sentence description of the book"
+}
+
+Pick genre from: Fiction, Mystery, Thriller, Romance, Fantasy, Science Fiction, Classic, Historical Fiction, Historical Non-Fiction, Biography, Memoir, Non-Fiction, Self-Help, Christian Fiction, Christian Non-Fiction, Children's, YA Fiction, Cookbook, Photography, Travel, Reference, Bible, Religion, Horror, Humor, Finance, Health, Science, History, True Crime, Poetry, Graphic Novel, or a concise custom genre if none fit.` }
+          ]
+        }]
+      })
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err?.error?.message || `API error ${response.status}`);
+    }
+
+    const data = await response.json();
+    const text = data.content?.[0]?.text || '';
+
+    // Extract JSON (handle any stray markdown)
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('Could not parse AI response.');
+    const info = JSON.parse(jsonMatch[0]);
+
+    scanLabel.textContent = 'Filling in details…';
+
+    // Auto-fill form fields
+    if (info.title)     document.getElementById('fTitle').value     = info.title;
+    if (info.author)    document.getElementById('fAuthor').value    = info.author;
+    if (info.year)      document.getElementById('fYear').value      = info.year;
+    if (info.publisher) document.getElementById('fPublisher').value = info.publisher;
+    if (info.genre)     document.getElementById('fGenre').value     = info.genre;
+    if (info.pages)     document.getElementById('fPages').value     = info.pages;
+    if (info.isbn)      document.getElementById('fISBN').value      = info.isbn;
+    if (info.notes)     document.getElementById('fNotes').value     = info.notes;
+
+    // Add new genre to list if needed
+    const g = info.genre;
+    if (g && !userGenres.includes(g)) { userGenres.push(g); saveGenres(); rebuildGenreDatalist(); }
+
+    showToast(`📚 Identified: "${info.title || 'Unknown'}" — review and save!`);
+
+    // Kick off cover fetch for the identified book; fall back to using the scanned photo itself
+    const tempBook = { id: '__scan__', title: info.title || '', author: info.author || '', coverUrl: undefined };
+    try {
+      await fetchCoverForBook(tempBook);
+      if (tempBook.coverUrl) {
+        document.getElementById('fCoverUrl').value = tempBook.coverUrl;
+        updateCoverPreview();
+      } else {
+        // No cover found online — compress & use the scanned photo directly
+        const scanDataUrl = 'data:' + mediaType + ';base64,' + base64;
+        const compressed = await compressImageDataUrl(scanDataUrl);
+        document.getElementById('fCoverUrl').value = compressed;
+        updateCoverPreview();
+      }
+    } catch { /* cover fetch failed, that's ok */ }
+
+  } catch (err) {
+    showToast('Scan failed: ' + err.message);
+  } finally {
+    scanOverlay.classList.remove('active');
+  }
+}
+
+detailOv.addEventListener('click', e => { if (e.target === detailOv) closeDetail(); });
+
+searchInput.addEventListener('input', () => { search = searchInput.value; render(); });
+selFormat.addEventListener('change', () => { filterFormat = selFormat.value; render(); });
+selStatus.addEventListener('change', () => { filterStatus = selStatus.value; render(); });
+selGenre.addEventListener('change', () => { filterGenre = selGenre.value; render(); });
+document.getElementById('btnNoCover').addEventListener('click', () => {
+  filterNoCover = !filterNoCover;
+  const btn = document.getElementById('btnNoCover');
+  btn.classList.toggle('btn-primary', filterNoCover);
+  btn.textContent = filterNoCover ? '🖼 No Cover ✓' : '🖼 No Cover';
+  render();
+});
+selSort.addEventListener('change', () => { sortBy = selSort.value; sortDir = 1; render(); });
+
+btnGrid.addEventListener('click', () => {
+  view = 'grid'; btnGrid.classList.add('active'); btnList.classList.remove('active'); render();
+});
+btnList.addEventListener('click', () => {
+  view = 'list'; btnList.classList.add('active'); btnGrid.classList.remove('active'); render();
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeModal(); closeGenreModal(); closeDetail(); }
+  if ((e.ctrlKey||e.metaKey) && e.key === 'n') { e.preventDefault(); openModal(null); }
+});
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>
