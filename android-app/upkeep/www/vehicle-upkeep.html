@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vehicle Upkeep</title>
+<style>
+:root{--bg:#0e1517;--card:#162124;--card2:#1d2b2f;--line:#2a3b40;--text:#eef4f3;--muted:#9fb3b1;--dim:#6f8584;
+  --accent:#2dd4bf;--accent2:#14b8a6;--warn:#fbbf24;--bad:#fb7185;--good:#4ade80}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{padding:0 0 calc(76px + env(safe-area-inset-bottom))}
+header{position:sticky;top:0;z-index:20;background:var(--bg);padding:calc(12px + env(safe-area-inset-top)) 16px 10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line)}
+header h1{font-size:20px;margin:0;flex:1;letter-spacing:.01em}
+header h1 small{display:block;font-size:12px;color:var(--muted);font-weight:500}
+main{padding:12px 14px;max-width:720px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin:0 0 12px}
+.card h2{font-size:15px;margin:0 0 8px;display:flex;align-items:center;gap:8px}
+.card h2 .sp{flex:1}
+.muted{color:var(--muted)}.dim{color:var(--dim)}.small{font-size:12.5px}
+.row{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)}
+.row:first-of-type{border-top:none}
+.row .main{flex:1;min-width:0}
+.row .t{font-weight:600}
+.row .s{color:var(--muted);font-size:13px}
+.tag{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--card2);color:var(--muted);white-space:nowrap}
+.tag.bad{background:rgba(251,113,133,.15);color:var(--bad)}.tag.warn{background:rgba(251,191,36,.15);color:var(--warn)}.tag.good{background:rgba(74,222,128,.13);color:var(--good)}
+.tag.acc{background:rgba(45,212,191,.15);color:var(--accent)}
+button{font:inherit;cursor:pointer}
+.btn{background:var(--card2);border:1px solid var(--line);color:var(--text);border-radius:12px;padding:9px 14px;font-weight:600;font-size:14px}
+.btn.acc{background:var(--accent);border-color:var(--accent);color:#06201c}
+.btn.sm{padding:5px 10px;font-size:12.5px;border-radius:10px}
+.btn.bad{color:var(--bad)}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.iconbtn{background:none;border:none;color:var(--muted);font-size:20px;padding:4px 8px}
+.empty{color:var(--muted);font-size:13.5px;padding:6px 0}
+nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:#0b1113;border-top:1px solid var(--line);display:flex;padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+nav button{flex:1;background:none;border:none;color:var(--dim);font-size:11.5px;font-weight:600;padding:4px 0;display:flex;flex-direction:column;align-items:center;gap:2px}
+nav button .i{font-size:20px;line-height:1.1;filter:grayscale(.6);opacity:.75}
+nav button.on{color:var(--accent)}nav button.on .i{filter:none;opacity:1}
+.fab{position:fixed;right:16px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:25;background:var(--accent);color:#06201c;border:none;border-radius:18px;padding:13px 18px;font-weight:800;font-size:15px;box-shadow:0 6px 18px rgba(0,0,0,.4)}
+.seg{display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px}
+.seg button{background:var(--card);border:1px solid var(--line);color:var(--muted);border-radius:99px;padding:6px 12px;font-size:13px;font-weight:600;white-space:nowrap}
+.seg button.on{background:var(--accent);border-color:var(--accent);color:#06201c}
+.big{font-size:22px;font-weight:800}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px}
+.kv div:nth-child(odd){color:var(--muted)}
+a{color:var(--accent)}
+/* sheet */
+#sheetWrap{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;display:none;align-items:flex-end;justify-content:center}
+#sheetWrap.open{display:flex}
+#sheet{width:100%;max-width:620px;max-height:90vh;overflow:auto;background:#111a1c;border:1px solid var(--line);border-bottom:none;border-radius:18px 18px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom))}
+#sheet h3{margin:0 0 10px;font-size:17px;display:flex;align-items:center}
+#sheet h3 span{flex:1}
+label.f{display:block;margin:10px 0 0;font-size:12.5px;color:var(--muted);font-weight:600}
+input,select,textarea{width:100%;background:var(--card);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:10px;font:inherit;margin-top:4px}
+textarea{min-height:70px;resize:vertical}
+input[type=checkbox]{width:20px;height:20px;accent-color:var(--accent);margin:0}
+.chk{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+.labin{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--line)}
+.labin .n{flex:1;font-size:14px}.labin .n small{display:block;color:var(--dim);font-size:11.5px}
+.labin input{width:110px;margin:0}
+svg.trend{width:100%;height:150px;display:block;margin:6px 0}
+.spark{width:90px;height:30px;flex-shrink:0}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(140px + env(safe-area-inset-bottom));background:#e8fffb;color:#06201c;padding:10px 16px;border-radius:12px;font-weight:600;z-index:60;font-size:14px;box-shadow:0 6px 18px rgba(0,0,0,.4)}
+#printView{display:none}
+@media print{
+  body{background:#fff;color:#000;padding:0}
+  header,nav,main,.fab,#sheetWrap,.toast{display:none!important}
+  #printView{display:block;font:12px/1.4 system-ui,sans-serif;color:#000;padding:10px}
+  #printView h1{font-size:18px;margin:0 0 2px}#printView h2{font-size:13px;margin:14px 0 4px;border-bottom:1px solid #999}
+  #printView table{width:100%;border-collapse:collapse}#printView td,#printView th{text-align:left;padding:2px 6px 2px 0;vertical-align:top}
+}
+</style>
+<style>
+:root{--accent:#fb923c;--accent2:#f97316}
+.btn.acc,.fab,.seg button.on{color:#2a1204}
+.miles{font-family:ui-monospace,Menlo,monospace}
+.bar{height:6px;border-radius:99px;background:var(--card2);overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;border-radius:99px}
+</style>
+</head>
+<body>
+<header>
+  <h1>🔧 Vehicle Upkeep<small>Services, mileage and what's coming due</small></h1>
+</header>
+<main id="view"></main>
+<button class="fab" id="fab" type="button">＋ Add</button>
+<nav id="nav">
+  <button data-tab="home" type="button"><span class="i">⏰</span>Due</button>
+  <button data-tab="car" type="button"><span class="i">🚗</span>Vehicles</button>
+  <button data-tab="log" type="button"><span class="i">🧾</span>History</button>
+  <button data-tab="other" type="button"><span class="i">🧰</span>Other</button>
+  <button data-tab="more" type="button"><span class="i">⚙️</span>More</button>
+</nav>
+<div id="sheetWrap"><div id="sheet"></div></div>
+<input type="file" id="importFile" accept="application/json,.json" style="display:none">
+
+<script>
+(function(){
+'use strict';
+// ════════════════════════════════════════════════════════════════════
+// Vehicle Upkeep: your vehicles, their service schedules (by miles and/or months), a history of what was done and
+// what it cost, and other recurring upkeep (filters, batteries, a bike tune-up…). Everything stays on this phone.
+// BeyondStride's Today screen gets only "what's coming due", and only if you allow it.
+// ════════════════════════════════════════════════════════════════════
+var KEY='vehicle_upkeep_v1';
+var EMPTY={vehicles:[],tasks:[],log:[],other:[],settings:{}};
+var db=load(),tab='home',carSel=null;
+
+function load(){var d;try{d=JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){d=null;}d=d&&typeof d==='object'?d:{};
+  Object.keys(EMPTY).forEach(function(k){if(d[k]==null)d[k]=JSON.parse(JSON.stringify(EMPTY[k]));});return d;}
+function save(msg){db.updated=Date.now();try{localStorage.setItem(KEY,JSON.stringify(db));}catch(e){alert('Could not save — phone storage is full.');return;}
+  share();autoBackup();if(msg)toast(msg);render();}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function keyOf(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function todayKey(){return keyOf(new Date());}
+function parseD(k){if(!k)return null;var p=String(k).split('-');if(p.length!==3)return null;return new Date(+p[0],+p[1]-1,+p[2]);}
+function addMonths(k,n){var d=parseD(k);if(!d)return '';var day=d.getDate();d.setDate(1);d.setMonth(d.getMonth()+n);var last=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();d.setDate(Math.min(day,last));return keyOf(d);}
+function addDays(k,n){var d=parseD(k);if(!d)return '';d.setDate(d.getDate()+n);return keyOf(d);}
+function daysUntil(k){var d=parseD(k);if(!d)return null;return Math.round((d-parseD(todayKey()))/864e5);}
+function niceD(k){var d=parseD(k);if(!d)return '';return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
+function mi(n){return n==null||n===''||isNaN(+n)?'':Math.round(+n).toLocaleString('en-US');}
+function money(n){return '$'+(+n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function relDays(n){if(n==null)return '';if(n===0)return 'today';if(n===1)return 'tomorrow';if(n<0)return Math.abs(n)+(n===-1?' day':' days')+' overdue';if(n<60)return 'in '+n+' days';return 'in '+Math.round(n/30.4)+' months';}
+function toast(m){document.querySelectorAll('.toast').forEach(function(x){x.remove();});var t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(function(){t.remove();},2200);}
+function car(id){return db.vehicles.filter(function(v){return v.id===id;})[0];}
+function carName(v){return v?(v.name||[v.year,v.make,v.model].filter(Boolean).join(' ')||'Vehicle'):'';}
+
+// ── Mileage: the current reading and how fast it grows (from your updates) ──
+function odo(v){var r=(v.odo||[]).slice().sort(function(a,b){return a.date<b.date?-1:1;});return r;}
+function curMiles(v){var r=odo(v);return r.length?+r[r.length-1].miles:null;}
+function milesPerDay(v){ // from the readings of the last ~12 months; 30 mi/day if not enough yet
+  var r=odo(v).filter(function(x){return daysUntil(x.date)>=-400;});if(r.length<2)return v.perDay?+v.perDay:30;
+  var a=r[0],b=r[r.length-1],days=-daysUntil(a.date)+daysUntil(b.date);if(days<14)return v.perDay?+v.perDay:30;return Math.max(1,(b.miles-a.miles)/days);}
+function addReading(v,miles,date){miles=+miles;if(!(miles>0))return;v.odo=(v.odo||[]).filter(function(x){return x.date!==date;});v.odo.push({date:date,miles:miles});}
+
+// ── Service schedules ───────────────────────────────────────────────
+// Common intervals as a starting point. Your owner's manual has the right ones for your vehicle: edit any of them.
+var SERVICE_PRESETS=[['Oil & filter change',5000,6],['Tire rotation',6000,6],['Engine air filter',15000,12],['Cabin air filter',15000,12],['Brake inspection',12000,12],
+  ['Wiper blades','',12],['Battery check','',12],['Tire pressure & tread check','',1],['Coolant flush',60000,60],['Transmission fluid',60000,60],['Brake fluid','',24],['Spark plugs',100000,'']];
+// When a task is next due: by miles, by months, whichever comes first.
+function due(t){
+  var v=car(t.vehicleId),cur=v?curMiles(v):null,out={};
+  if(+t.everyMiles>0&&t.lastMiles!==''&&t.lastMiles!=null){out.atMiles=+t.lastMiles+(+t.everyMiles);if(cur!=null){out.milesLeft=out.atMiles-cur;out.dateByMiles=addDays(todayKey(),Math.round(out.milesLeft/milesPerDay(v)));}}
+  if(+t.everyMonths>0&&t.lastDate)out.dateByTime=addMonths(t.lastDate,+t.everyMonths);
+  var ds=[out.dateByMiles,out.dateByTime].filter(Boolean).sort();out.date=ds[0]||'';out.days=out.date?daysUntil(out.date):null;
+  out.never=!t.lastDate&&(t.lastMiles===''||t.lastMiles==null);
+  out.status=out.never?'unknown':(out.milesLeft!=null&&out.milesLeft<0)||(out.days!=null&&out.days<0)?'overdue':(out.milesLeft!=null&&out.milesLeft<=500)||(out.days!=null&&out.days<=30)?'soon':'ok';
+  return out;
+}
+function dueText(t,d){
+  if(d.never)return 'When was it last done? Tap to set.';
+  var parts=[];if(d.atMiles)parts.push(d.milesLeft!=null?(d.milesLeft<0?mi(-d.milesLeft)+' mi over':mi(d.milesLeft)+' mi left')+' (at '+mi(d.atMiles)+')':'at '+mi(d.atMiles)+' mi');
+  if(d.dateByTime)parts.push((daysUntil(d.dateByTime)<0?'was due ':'by ')+niceD(d.dateByTime));
+  else if(d.dateByMiles)parts.push('about '+niceD(d.dateByMiles));
+  return parts.join(' · ');
+}
+function otherDue(o){if(!o.lastDate||!(+o.everyMonths>0))return {date:'',days:null,status:'unknown'};var dt=addMonths(o.lastDate,+o.everyMonths),n=daysUntil(dt);return {date:dt,days:n,status:n<0?'overdue':n<=30?'soon':'ok'};}
+function allDue(){
+  var out=[];db.tasks.forEach(function(t){var v=car(t.vehicleId);if(!v||v.sold)return;var d=due(t);out.push({kind:'task',id:t.id,title:t.name,sub:carName(v),d:d,t:t});});
+  db.other.forEach(function(o){var d=otherDue(o);out.push({kind:'other',id:o.id,title:o.name,sub:o.where||'Other upkeep',d:d,t:o});});
+  var rank={overdue:0,soon:1,ok:2,unknown:3};return out.sort(function(a,b){return rank[a.d.status]-rank[b.d.status]||((a.d.date||'9')<(b.d.date||'9')?-1:1);});
+}
+
+// ── Summary for BeyondStride ─────────────────────────────────────────
+function summary(){
+  var list=allDue().filter(function(x){return x.d.status==='overdue'||x.d.status==='soon';});
+  return {updated:db.updated||Date.now(),app:'upkeep',
+    due:list.slice(0,6).map(function(x){return {title:x.title+(db.vehicles.length>1&&x.kind==='task'?' · '+x.sub:''),date:x.d.date||'',days:x.d.days,milesLeft:x.d.milesLeft!=null?Math.round(x.d.milesLeft):null,kind:x.kind};}),
+    overdue:list.filter(function(x){return x.d.status==='overdue';}).length};
+}
+function share(){try{if(window.AndroidApp&&AndroidApp.setSummary)AndroidApp.setSummary(JSON.stringify(summary()));}catch(e){}}
+function autoBackup(){
+  try{if(!window.AndroidApp||!AndroidApp.saveAutoBackup||db.settings.autoBackup===false)return;
+    var k=todayKey();if(localStorage.getItem('vu_autoBackupDay')===k)return;
+    var where=AndroidApp.saveAutoBackup('vehicle-upkeep-auto-'+k+'.json',JSON.stringify(db));
+    if(where){localStorage.setItem('vu_autoBackupDay',k);localStorage.setItem('vu_autoBackupAt',String(Date.now()));}
+  }catch(e){}
+}
+function exportJson(){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(db,null,1)],{type:'application/json'}));a.download='vehicle-upkeep-backup-'+todayKey()+'.json';
+  document.body.appendChild(a);a.click();a.remove();toast(window.AndroidApp?'Saved to Downloads/Vehicle Upkeep':'Backup downloaded');}
+document.getElementById('importFile').addEventListener('change',function(e){var f=e.target.files&&e.target.files[0];if(!f)return;var rd=new FileReader();
+  rd.onload=function(){try{var d=JSON.parse(rd.result);if(!d||!Array.isArray(d.vehicles))throw 0;if(!confirm('Replace everything in Vehicle Upkeep with this backup?'))return;
+    db=d;Object.keys(EMPTY).forEach(function(k){if(db[k]==null)db[k]=JSON.parse(JSON.stringify(EMPTY[k]));});save('Backup restored');}catch(x){alert('That file isn\'t a Vehicle Upkeep backup.');}};rd.readAsText(f);e.target.value='';});
+
+// ── Rendering ───────────────────────────────────────────────────────
+var V=document.getElementById('view');
+function card(title,body,extra){return '<div class="card"><h2>'+title+'<span class="sp"></span>'+(extra||'')+'</h2>'+body+'</div>';}
+function render(){
+  document.querySelectorAll('#nav button').forEach(function(b){b.classList.toggle('on',b.dataset.tab===tab);});
+  var fab=document.getElementById('fab');fab.style.display=tab==='more'?'none':'';
+  fab.textContent={home:'＋ Log a service',car:'＋ Vehicle',log:'＋ Log a service',other:'＋ Upkeep item'}[tab]||'＋ Add';
+  V.innerHTML=({home:renderHome,car:renderCars,log:renderLog,other:renderOther,more:renderMore}[tab])();
+}
+function tagFor(d){var cls={overdue:'bad',soon:'warn',ok:'good',unknown:''}[d.status];var txt=d.status==='overdue'?'overdue':d.status==='unknown'?'set up':d.milesLeft!=null&&d.milesLeft<=500&&d.status==='soon'?mi(d.milesLeft)+' mi':relDays(d.days);return '<span class="tag '+cls+'">'+txt+'</span>';}
+function dueRow(x){var t=x.t,d=x.d;
+  return '<div class="row" data-act="'+(x.kind==='task'?'editTask':'editOther')+'" data-id="'+x.id+'"><div class="main"><div class="t">'+esc(x.title)+'</div><div class="s">'+esc(x.sub)+' · '+esc(x.kind==='task'?dueText(t,d):d.date?(d.days<0?'was due ':'due ')+niceD(d.date):'When was it last done? Tap to set.')+'</div></div>'+
+    tagFor(d)+'<button class="btn sm" data-act="'+(x.kind==='task'?'doneTask':'doneOther')+'" data-id="'+x.id+'">Done</button></div>';}
+function renderHome(){
+  if(!db.vehicles.length&&!db.other.length)return card('👋 Welcome','<div class="muted">Add your vehicle and its usual services (oil, tires, filters…). Update the mileage now and then and this tells you what\'s coming due — by miles or by months, whichever comes first.</div>'+
+    '<div class="btns"><button class="btn acc" data-act="addCar">＋ Add my vehicle</button><button class="btn" data-act="addOther">＋ Other upkeep</button></div>'+
+    '<div class="small dim" style="margin-top:8px">Everything stays on this phone.</div>');
+  var h='';
+  db.vehicles.filter(function(v){return !v.sold;}).forEach(function(v){var c=curMiles(v),r=odo(v),last=r[r.length-1];
+    h+='<div class="card" style="display:flex;align-items:center;gap:12px"><div style="flex:1"><div class="t" style="font-weight:700">🚗 '+esc(carName(v))+'</div><div class="s muted small">'+(c!=null?'<span class="miles">'+mi(c)+'</span> mi · updated '+esc(niceD(last.date)):'No mileage yet')+'</div></div><button class="btn sm acc" data-act="miles" data-id="'+v.id+'">Update miles</button></div>';});
+  var all=allDue(),now=all.filter(function(x){return x.d.status==='overdue'||x.d.status==='soon';}),unk=all.filter(function(x){return x.d.status==='unknown';}),next=all.filter(function(x){return x.d.status==='ok';});
+  h+=card('⏰ Due now &amp; soon',now.length?now.map(dueRow).join(''):'<div class="empty">✅ Nothing due in the next month or 500 miles.</div>');
+  if(unk.length)h+=card('❓ Needs a starting point',unk.map(dueRow).join('')+'<div class="small dim" style="margin-top:6px">Tap one and enter when it was last done (date and/or miles).</div>');
+  if(next.length)h+=card('📆 Coming later',next.slice(0,8).map(dueRow).join(''));
+  return h;
+}
+function renderCars(){
+  if(!db.vehicles.length)return card('🚗 Vehicles','<div class="empty">No vehicles yet. Tap ＋ Vehicle.</div>');
+  return db.vehicles.map(function(v){
+    var tasks=db.tasks.filter(function(t){return t.vehicleId===v.id;}),c=curMiles(v),yr=String(new Date().getFullYear());
+    var spent=db.log.filter(function(l){return l.vehicleId===v.id&&String(l.date).slice(0,4)===yr;}).reduce(function(s,l){return s+(+l.cost||0);},0);
+    var all=db.log.filter(function(l){return l.vehicleId===v.id;}).reduce(function(s,l){return s+(+l.cost||0);},0);
+    return card('🚗 '+esc(carName(v))+(v.sold?' <span class="tag">sold</span>':''),
+      '<div class="kv">'+[['Mileage',c!=null?'<span class="miles">'+mi(c)+'</span> mi (~'+mi(milesPerDay(v)*30.4)+' a month)':''],['Plate',esc(v.plate||'')],['VIN',v.vin?'<span class="miles">'+esc(v.vin)+'</span>':''],
+        ['Spent '+yr,money(spent)],['Spent in all',money(all)],['Notes',esc(v.notes||'')]].filter(function(x){return x[1];}).map(function(x){return '<div>'+x[0]+'</div><div>'+x[1]+'</div>';}).join('')+'</div>'+
+      '<div style="margin-top:12px;font-weight:700;font-size:13px;color:var(--accent)">Service schedule</div>'+
+      (tasks.length?tasks.map(function(t){var d=due(t);return '<div class="row" data-act="editTask" data-id="'+t.id+'"><div class="main"><div class="t">'+esc(t.name)+'</div><div class="s">Every '+esc([+t.everyMiles>0?mi(t.everyMiles)+' mi':'',+t.everyMonths>0?t.everyMonths+' months':''].filter(Boolean).join(' or '))+' · '+esc(dueText(t,d))+'</div></div>'+tagFor(d)+'</div>';}).join(''):'<div class="empty">No services yet.</div>')+
+      '<div class="btns"><button class="btn sm acc" data-act="miles" data-id="'+v.id+'">Update miles</button><button class="btn sm" data-act="addTask" data-id="'+v.id+'">＋ Service</button>'+
+      (tasks.length<3?'<button class="btn sm" data-act="presets" data-id="'+v.id+'">＋ Usual services</button>':'')+'<button class="btn sm" data-act="editCar" data-id="'+v.id+'">Edit vehicle</button></div>');
+  }).join('');
+}
+function renderLog(){
+  if(!db.log.length)return card('🧾 History','<div class="empty">Every service you log shows here with its cost. Tap ＋ Log a service (or "Done" on a due item).</div>');
+  var byYear={};db.log.forEach(function(l){var y=String(l.date).slice(0,4);(byYear[y]=byYear[y]||[]).push(l);});
+  return Object.keys(byYear).sort().reverse().map(function(y){var list=byYear[y].sort(function(a,b){return a.date<b.date?1:-1;}),tot=list.reduce(function(s,l){return s+(+l.cost||0);},0);
+    return card(esc(y),list.map(function(l){var v=car(l.vehicleId);return '<div class="row" data-act="editLog" data-id="'+l.id+'"><div class="main"><div class="t">'+esc(l.service)+'</div><div class="s">'+esc([niceD(l.date),v?carName(v):l.vehicleId==='other'?'Other upkeep':'',l.miles?mi(l.miles)+' mi':'',l.shop].filter(Boolean).join(' · '))+(l.notes?'<br>'+esc(l.notes):'')+'</div></div>'+(l.cost?'<span class="tag">'+money(l.cost)+'</span>':'')+'</div>';}).join(''),'<span class="tag acc">'+money(tot)+'</span>');}).join('');
+}
+function renderOther(){
+  var h=card('🧰 Other upkeep',db.other.length?db.other.map(function(o){var d=otherDue(o);return dueRow({kind:'other',id:o.id,title:o.name,sub:o.where||'Other upkeep',d:d,t:o});}).join(''):
+    '<div class="empty">Recurring jobs that aren\'t the car — an air filter, smoke detector batteries, a bike tune-up, a water filter.</div>');
+  if(db.other.length<3)h+='<div class="btns" style="padding:0 4px 12px">'+[['Air filter (HVAC)',3],['Smoke detector batteries',12],['Water filter',6],['Bike tune-up',12]].map(function(p){return '<button class="btn sm" data-act="otherPreset" data-n="'+esc(p[0])+'" data-m="'+p[1]+'">＋ '+esc(p[0])+'</button>';}).join('')+'</div>';
+  return h;
+}
+function renderMore(){
+  var at=+localStorage.getItem('vu_autoBackupAt')||0;
+  return card('💾 Backup','<div class="muted small">Everything lives only on this phone. A backup is saved automatically once a day'+(at?' (last: '+esc(new Date(at).toLocaleString())+')':'')+'.</div>'+
+    '<div class="btns"><button class="btn" data-act="exportJson">Back up now</button><button class="btn" data-act="importJson">Restore a backup</button></div>'+
+    '<label class="chk"><input type="checkbox" data-act="toggleAuto" '+(db.settings.autoBackup===false?'':'checked')+'> Daily automatic backup</label>')+
+    card('ℹ️ About the intervals','<div class="muted small">The usual services start with common intervals. Your owner\'s manual (or your mechanic) has the right ones for your vehicle — tap any service to change it.</div>');
+}
+
+// ── Sheets ─────────────────────────────────────────────────────────
+var SH=document.getElementById('sheet'),SW=document.getElementById('sheetWrap');
+function openSheet(html){SH.innerHTML=html;SW.classList.add('open');}
+function closeSheet(){SW.classList.remove('open');SH.innerHTML='';}
+SW.addEventListener('click',function(e){if(e.target===SW)closeSheet();});
+function inp(name,label,val,type,ph){type=type||'text';return '<label class="f">'+label+'<input name="'+name+'" type="'+type+'" value="'+esc(val==null?'':val)+'" placeholder="'+esc(ph||'')+'"'+(type==='number'?' inputmode="decimal" step="any"':'')+'></label>';}
+function head(t){return '<h3><span>'+t+'</span><button class="iconbtn" data-act="close">✕</button></h3>';}
+function carOptions(sel,withOther){return db.vehicles.map(function(v){return '<option value="'+v.id+'"'+(v.id===sel?' selected':'')+'>'+esc(carName(v))+'</option>';}).join('')+(withOther?'<option value="other"'+(sel==='other'?' selected':'')+'>Other upkeep</option>':'');}
+
+function editCar(id){var v=id?car(id):null,x=v||{};
+  openSheet(head(v?'Edit vehicle':'New vehicle')+'<form id="vf"><div class="grid2">'+inp('year','Year',x.year,'number')+inp('make','Make',x.make,'text','e.g. Toyota')+'</div>'+inp('model','Model',x.model,'text','e.g. RAV4')+
+    inp('name','Nickname (optional)',x.name)+(v?'':inp('miles','Current mileage',curMiles(x),'number'))+inp('plate','Plate',x.plate)+inp('vin','VIN',x.vin)+
+    '<label class="f">Notes<textarea name="notes" placeholder="Tire size, oil type…">'+esc(x.notes||'')+'</textarea></label>'+(v?'<label class="chk"><input type="checkbox" name="sold" '+(v.sold?'checked':'')+'> Sold / no longer have it</label>':'')+
+    '<div class="btns"><button class="btn acc" type="submit">Save</button>'+(v?'<button class="btn bad" type="button" data-act="delCar" data-id="'+v.id+'">Delete</button>':'')+'</div></form>');
+  var f=document.getElementById('vf');f.addEventListener('submit',function(e){e.preventDefault();var o=v||{id:uid(),odo:[]};
+    ['year','make','model','name','plate','vin','notes'].forEach(function(k){o[k]=f.elements[k].value.trim();});if(f.elements.sold)o.sold=f.elements.sold.checked;
+    if(!o.make&&!o.model&&!o.name){alert('Please enter the make and model (or a nickname).');return;}
+    if(!v){if(f.elements.miles.value)addReading(o,f.elements.miles.value,todayKey());db.vehicles.push(o);}
+    closeSheet();save('Saved');if(!v){tab='car';render();askPresets(o.id);}});}
+function askPresets(vid){var v=car(vid);
+  openSheet(head('Usual services for '+esc(carName(v)))+'<div class="small dim">Pick the ones that apply (common intervals; change any later). Then tap each one on the Vehicles tab to say when it was last done.</div><form id="pf">'+
+    SERVICE_PRESETS.map(function(p,i){return '<label class="chk"><input type="checkbox" name="p'+i+'" '+(i<6?'checked':'')+'> '+esc(p[0])+' <span class="dim small">every '+esc([p[1]?mi(p[1])+' mi':'',p[2]?p[2]+' mo':''].filter(Boolean).join(' / '))+'</span></label>';}).join('')+
+    '<div class="btns"><button class="btn acc" type="submit">Add these</button></div></form>');
+  document.getElementById('pf').addEventListener('submit',function(e){e.preventDefault();var n=0;SERVICE_PRESETS.forEach(function(p,i){if(e.target.elements['p'+i].checked&&!db.tasks.some(function(t){return t.vehicleId===vid&&t.name===p[0];})){db.tasks.push({id:uid(),vehicleId:vid,name:p[0],everyMiles:p[1],everyMonths:p[2],lastMiles:'',lastDate:'',notes:''});n++;}});closeSheet();save(n+' services added');});}
+function editTask(id,vid){var t=id?db.tasks.filter(function(x){return x.id===id;})[0]:null,x=t||{vehicleId:vid};
+  openSheet(head(t?esc(t.name):'New service')+'<form id="tf">'+inp('name','Service',x.name,'text','e.g. Oil & filter change')+
+    '<label class="f">Vehicle<select name="vehicleId">'+carOptions(x.vehicleId)+'</select></label>'+
+    '<div class="grid2">'+inp('everyMiles','Every … miles',x.everyMiles,'number')+inp('everyMonths','or every … months',x.everyMonths,'number')+'</div>'+
+    '<div style="margin-top:12px;font-weight:700;font-size:13px;color:var(--accent)">Last done</div><div class="grid2">'+inp('lastDate','Date',x.lastDate,'date')+inp('lastMiles','At mileage',x.lastMiles,'number')+'</div>'+
+    '<label class="f">Notes<textarea name="notes" placeholder="Oil type, part numbers…">'+esc(x.notes||'')+'</textarea></label>'+
+    '<div class="btns"><button class="btn acc" type="submit">Save</button>'+(t?'<button class="btn" type="button" data-act="doneTask" data-id="'+t.id+'">✅ Done today</button><button class="btn bad" type="button" data-act="delTask" data-id="'+t.id+'">Delete</button>':'')+'</div></form>');
+  var f=document.getElementById('tf');f.addEventListener('submit',function(e){e.preventDefault();var o=t||{id:uid()};
+    ['name','vehicleId','everyMiles','everyMonths','lastDate','lastMiles','notes'].forEach(function(k){o[k]=f.elements[k].value.trim();});
+    if(!o.name){alert('Please name the service.');return;}if(!(+o.everyMiles>0)&&!(+o.everyMonths>0)){alert('Set how often: miles, months or both.');return;}
+    if(!t)db.tasks.push(o);var v=car(o.vehicleId);if(v&&+o.lastMiles>0&&(curMiles(v)==null||+o.lastMiles>curMiles(v)))addReading(v,o.lastMiles,o.lastDate||todayKey());closeSheet();save('Saved');});}
+// Log a service (from "Done" or by hand): it updates the schedule and the mileage.
+function logService(pre){var x=pre||{};var v=x.vehicleId&&x.vehicleId!=='other'?car(x.vehicleId):db.vehicles.filter(function(c){return !c.sold;})[0];
+  var vid=x.vehicleId||(v?v.id:'other');
+  openSheet(head(x.id?'Edit service record':'Log a service')+'<form id="lf">'+inp('service','What was done',x.service,'text','e.g. Oil & filter change')+
+    '<label class="f">For<select name="vehicleId">'+carOptions(vid,true)+'</select></label>'+
+    '<div class="grid2">'+inp('date','Date',x.date||todayKey(),'date')+inp('miles','Mileage',x.miles!=null?x.miles:(v&&vid!=='other'?curMiles(v):''),'number')+'</div>'+
+    '<div class="grid2">'+inp('cost','Cost ($)',x.cost,'number')+inp('shop','Where',x.shop,'text','Shop or DIY')+'</div>'+
+    '<label class="f">Notes<textarea name="notes">'+esc(x.notes||'')+'</textarea></label>'+
+    '<div class="btns"><button class="btn acc" type="submit">Save</button>'+(x.id?'<button class="btn bad" type="button" data-act="delLog" data-id="'+x.id+'">Delete</button>':'')+'</div></form>');
+  var f=document.getElementById('lf');f.addEventListener('submit',function(e){e.preventDefault();var o=x.id?db.log.filter(function(l){return l.id===x.id;})[0]:{id:uid()};
+    ['service','vehicleId','date','miles','cost','shop','notes'].forEach(function(k){o[k]=f.elements[k].value.trim();});if(!o.service){alert('What was done?');return;}
+    if(!x.id)db.log.push(o);
+    var c=car(o.vehicleId);if(c&&+o.miles>0)addReading(c,o.miles,o.date);
+    // Matching schedule item: mark it done at this date/mileage.
+    if(x.taskId){var t=db.tasks.filter(function(q){return q.id===x.taskId;})[0];if(t&&(!t.lastDate||o.date>=t.lastDate)){t.lastDate=o.date;if(+o.miles>0)t.lastMiles=o.miles;}}
+    else if(c){db.tasks.forEach(function(t){if(t.vehicleId===c.id&&t.name.toLowerCase()===o.service.toLowerCase()&&(!t.lastDate||o.date>=t.lastDate)){t.lastDate=o.date;if(+o.miles>0)t.lastMiles=o.miles;}});}
+    if(x.otherId){var ot=db.other.filter(function(q){return q.id===x.otherId;})[0];if(ot)ot.lastDate=o.date;}
+    closeSheet();save('Logged');});}
+function editOther(id,pre){var o=id?db.other.filter(function(x){return x.id===id;})[0]:null,x=o||pre||{};
+  openSheet(head(o?esc(o.name):'New upkeep item')+'<form id="of">'+inp('name','What',x.name,'text','e.g. Replace air filter')+inp('everyMonths','Every … months',x.everyMonths,'number')+
+    inp('lastDate','Last done',x.lastDate,'date')+inp('where','Where / for',x.where,'text','e.g. Apartment, Bike')+'<label class="f">Notes<textarea name="notes" placeholder="Size, part number…">'+esc(x.notes||'')+'</textarea></label>'+
+    '<div class="btns"><button class="btn acc" type="submit">Save</button>'+(o?'<button class="btn bad" type="button" data-act="delOther" data-id="'+o.id+'">Delete</button>':'')+'</div></form>');
+  var f=document.getElementById('of');f.addEventListener('submit',function(e){e.preventDefault();var r=o||{id:uid()};['name','everyMonths','lastDate','where','notes'].forEach(function(k){r[k]=f.elements[k].value.trim();});
+    if(!r.name||!(+r.everyMonths>0)){alert('Please fill in what it is and how often.');return;}if(!o)db.other.push(r);closeSheet();save('Saved');});}
+function updateMiles(vid){var v=car(vid);
+  openSheet(head('Mileage · '+esc(carName(v)))+'<form id="mf">'+inp('miles','Odometer now',curMiles(v),'number')+'<div class="btns"><button class="btn acc" type="submit">Save</button></div></form><div class="small dim" style="margin-top:8px">Updating it now and then (once a month is plenty) keeps the "about when" dates accurate.</div>');
+  var f=document.getElementById('mf');var i=f.elements.miles;setTimeout(function(){i.focus();i.select();},50);
+  f.addEventListener('submit',function(e){e.preventDefault();var m=+i.value;if(!(m>0)){alert('Enter the odometer reading.');return;}var c=curMiles(v);if(c!=null&&m<c&&!confirm('That\'s less than the last reading ('+mi(c)+'). Save anyway?'))return;addReading(v,m,todayKey());closeSheet();save('Mileage saved');});}
+
+// ── Clicks ─────────────────────────────────────────────────────────
+document.getElementById('nav').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;tab=b.dataset.tab;render();window.scrollTo(0,0);});
+document.getElementById('fab').addEventListener('click',function(){if(tab==='car')editCar();else if(tab==='other')editOther();else logService();});
+document.addEventListener('change',function(e){if(e.target.dataset&&e.target.dataset.act==='toggleAuto'){db.settings.autoBackup=e.target.checked;save(e.target.checked?'Daily backup on':'Daily backup off');}});
+document.addEventListener('click',function(e){var el=e.target.closest('[data-act]');if(!el||el.tagName==='INPUT')return;var a=el.dataset.act,id=el.dataset.id;
+  if((a==='editTask'||a==='editOther')&&e.target.closest('button')&&e.target.closest('button')!==el)return;
+  switch(a){
+    case 'close':closeSheet();break;
+    case 'addCar':editCar();break;case 'editCar':editCar(id);break;
+    case 'delCar':if(!confirm('Delete this vehicle, its schedule and its history?'))break;db.vehicles=db.vehicles.filter(function(v){return v.id!==id;});db.tasks=db.tasks.filter(function(t){return t.vehicleId!==id;});db.log=db.log.filter(function(l){return l.vehicleId!==id;});closeSheet();save('Deleted');break;
+    case 'presets':askPresets(id);break;
+    case 'addTask':editTask(null,id);break;case 'editTask':editTask(id);break;
+    case 'delTask':if(!confirm('Delete this service from the schedule?'))break;db.tasks=db.tasks.filter(function(t){return t.id!==id;});closeSheet();save('Deleted');break;
+    case 'doneTask':{var t=db.tasks.filter(function(x){return x.id===id;})[0];if(!t)break;closeSheet();logService({service:t.name,vehicleId:t.vehicleId,taskId:t.id});break;}
+    case 'doneOther':{var o=db.other.filter(function(x){return x.id===id;})[0];if(!o)break;logService({service:o.name,vehicleId:'other',otherId:o.id});break;}
+    case 'addOther':editOther();break;case 'editOther':editOther(id);break;
+    case 'otherPreset':editOther(null,{name:el.dataset.n,everyMonths:el.dataset.m});break;
+    case 'delOther':if(!confirm('Delete this item?'))break;db.other=db.other.filter(function(x){return x.id!==id;});closeSheet();save('Deleted');break;
+    case 'editLog':{var l=db.log.filter(function(x){return x.id===id;})[0];if(l)logService(l);break;}
+    case 'delLog':if(!confirm('Delete this record?'))break;db.log=db.log.filter(function(x){return x.id!==id;});closeSheet();save('Deleted');break;
+    case 'miles':updateMiles(id);break;
+    case 'exportJson':exportJson();break;case 'importJson':document.getElementById('importFile').click();break;
+  }
+});
+window.handleAndroidBack=function(){
+  var appSheet=document.getElementById('appSheetWrap');if(appSheet&&appSheet.classList.contains('open')){appSheet.classList.remove('open');return true;}
+  if(SW.classList.contains('open')){closeSheet();return true;}if(tab!=='home'){tab='home';render();return true;}return false;
+};
+window.HR={summary:summary,exportJson:exportJson,db:function(){return db;}};
+render();share();autoBackup();
+document.addEventListener('visibilitychange',function(){if(!document.hidden){share();render();}});
+})();
+</script>
+</body>
+</html>

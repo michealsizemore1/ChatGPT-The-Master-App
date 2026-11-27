@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dates & Docs</title>
+<style>
+:root{--bg:#0e1517;--card:#162124;--card2:#1d2b2f;--line:#2a3b40;--text:#eef4f3;--muted:#9fb3b1;--dim:#6f8584;
+  --accent:#2dd4bf;--accent2:#14b8a6;--warn:#fbbf24;--bad:#fb7185;--good:#4ade80}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{padding:0 0 calc(76px + env(safe-area-inset-bottom))}
+header{position:sticky;top:0;z-index:20;background:var(--bg);padding:calc(12px + env(safe-area-inset-top)) 16px 10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line)}
+header h1{font-size:20px;margin:0;flex:1;letter-spacing:.01em}
+header h1 small{display:block;font-size:12px;color:var(--muted);font-weight:500}
+main{padding:12px 14px;max-width:720px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin:0 0 12px}
+.card h2{font-size:15px;margin:0 0 8px;display:flex;align-items:center;gap:8px}
+.card h2 .sp{flex:1}
+.muted{color:var(--muted)}.dim{color:var(--dim)}.small{font-size:12.5px}
+.row{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)}
+.row:first-of-type{border-top:none}
+.row .main{flex:1;min-width:0}
+.row .t{font-weight:600}
+.row .s{color:var(--muted);font-size:13px}
+.tag{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--card2);color:var(--muted);white-space:nowrap}
+.tag.bad{background:rgba(251,113,133,.15);color:var(--bad)}.tag.warn{background:rgba(251,191,36,.15);color:var(--warn)}.tag.good{background:rgba(74,222,128,.13);color:var(--good)}
+.tag.acc{background:rgba(45,212,191,.15);color:var(--accent)}
+button{font:inherit;cursor:pointer}
+.btn{background:var(--card2);border:1px solid var(--line);color:var(--text);border-radius:12px;padding:9px 14px;font-weight:600;font-size:14px}
+.btn.acc{background:var(--accent);border-color:var(--accent);color:#06201c}
+.btn.sm{padding:5px 10px;font-size:12.5px;border-radius:10px}
+.btn.bad{color:var(--bad)}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.iconbtn{background:none;border:none;color:var(--muted);font-size:20px;padding:4px 8px}
+.empty{color:var(--muted);font-size:13.5px;padding:6px 0}
+nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:#0b1113;border-top:1px solid var(--line);display:flex;padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+nav button{flex:1;background:none;border:none;color:var(--dim);font-size:11.5px;font-weight:600;padding:4px 0;display:flex;flex-direction:column;align-items:center;gap:2px}
+nav button .i{font-size:20px;line-height:1.1;filter:grayscale(.6);opacity:.75}
+nav button.on{color:var(--accent)}nav button.on .i{filter:none;opacity:1}
+.fab{position:fixed;right:16px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:25;background:var(--accent);color:#06201c;border:none;border-radius:18px;padding:13px 18px;font-weight:800;font-size:15px;box-shadow:0 6px 18px rgba(0,0,0,.4)}
+.seg{display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px}
+.seg button{background:var(--card);border:1px solid var(--line);color:var(--muted);border-radius:99px;padding:6px 12px;font-size:13px;font-weight:600;white-space:nowrap}
+.seg button.on{background:var(--accent);border-color:var(--accent);color:#06201c}
+.big{font-size:22px;font-weight:800}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px}
+.kv div:nth-child(odd){color:var(--muted)}
+a{color:var(--accent)}
+/* sheet */
+#sheetWrap{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;display:none;align-items:flex-end;justify-content:center}
+#sheetWrap.open{display:flex}
+#sheet{width:100%;max-width:620px;max-height:90vh;overflow:auto;background:#111a1c;border:1px solid var(--line);border-bottom:none;border-radius:18px 18px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom))}
+#sheet h3{margin:0 0 10px;font-size:17px;display:flex;align-items:center}
+#sheet h3 span{flex:1}
+label.f{display:block;margin:10px 0 0;font-size:12.5px;color:var(--muted);font-weight:600}
+input,select,textarea{width:100%;background:var(--card);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:10px;font:inherit;margin-top:4px}
+textarea{min-height:70px;resize:vertical}
+input[type=checkbox]{width:20px;height:20px;accent-color:var(--accent);margin:0}
+.chk{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+.labin{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--line)}
+.labin .n{flex:1;font-size:14px}.labin .n small{display:block;color:var(--dim);font-size:11.5px}
+.labin input{width:110px;margin:0}
+svg.trend{width:100%;height:150px;display:block;margin:6px 0}
+.spark{width:90px;height:30px;flex-shrink:0}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(140px + env(safe-area-inset-bottom));background:#e8fffb;color:#06201c;padding:10px 16px;border-radius:12px;font-weight:600;z-index:60;font-size:14px;box-shadow:0 6px 18px rgba(0,0,0,.4)}
+#printView{display:none}
+@media print{
+  body{background:#fff;color:#000;padding:0}
+  header,nav,main,.fab,#sheetWrap,.toast{display:none!important}
+  #printView{display:block;font:12px/1.4 system-ui,sans-serif;color:#000;padding:10px}
+  #printView h1{font-size:18px;margin:0 0 2px}#printView h2{font-size:13px;margin:14px 0 4px;border-bottom:1px solid #999}
+  #printView table{width:100%;border-collapse:collapse}#printView td,#printView th{text-align:left;padding:2px 6px 2px 0;vertical-align:top}
+}
+</style>
+<style>
+:root{--accent:#a78bfa;--accent2:#8b5cf6}
+.btn.acc,.fab,.seg button.on{color:#1b1033}
+.num{font-family:ui-monospace,Menlo,monospace;letter-spacing:.04em}
+.thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.thumbs img{width:76px;height:76px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
+#viewer{position:fixed;inset:0;background:#000;z-index:70;display:none;align-items:center;justify-content:center;flex-direction:column}
+#viewer.open{display:flex}#viewer img{max-width:100%;max-height:85vh}
+#viewer .bar{display:flex;gap:10px;margin-top:12px}
+.grp{font-size:12px;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;margin:16px 4px 6px}
+</style>
+</head>
+<body>
+<header>
+  <h1>🗂 Dates &amp; Docs<small>Renewals, important dates and where your papers are</small></h1>
+</header>
+<main id="view"></main>
+<button class="fab" id="fab" type="button">＋ Add</button>
+<nav id="nav">
+  <button data-tab="home" type="button"><span class="i">⏰</span>Coming up</button>
+  <button data-tab="dates" type="button"><span class="i">📅</span>Dates</button>
+  <button data-tab="docs" type="button"><span class="i">📄</span>Documents</button>
+  <button data-tab="more" type="button"><span class="i">⚙️</span>More</button>
+</nav>
+<div id="sheetWrap"><div id="sheet"></div></div>
+<div id="viewer"><img id="viewerImg" alt=""><div class="bar"><button class="btn" id="viewerClose" type="button">Close</button><button class="btn bad" id="viewerDel" type="button">Delete photo</button></div></div>
+<input type="file" id="importFile" accept="application/json,.json" style="display:none">
+<input type="file" id="photoFile" accept="image/*" style="display:none">
+
+<script>
+(function(){
+'use strict';
+// ════════════════════════════════════════════════════════════════════
+// Dates & Docs: anything that expires or comes around again (license, registration, insurance, passport,
+// warranties, subscriptions, birthdays, anniversaries) and a record of your important documents (number, who
+// issued it, where the original is kept, photos). Everything stays on this phone (plus your own backups).
+// BeyondStride's Today screen gets only "what's coming up", and only if you allow it.
+// ════════════════════════════════════════════════════════════════════
+var KEY='dates_docs_v1';
+var EMPTY={dates:[],docs:[],settings:{}};
+var db=load(),tab='home',docFilter='all';
+
+function load(){var d;try{d=JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){d=null;}d=d&&typeof d==='object'?d:{};
+  Object.keys(EMPTY).forEach(function(k){if(d[k]==null)d[k]=JSON.parse(JSON.stringify(EMPTY[k]));});return d;}
+function save(msg){db.updated=Date.now();try{localStorage.setItem(KEY,JSON.stringify(db));}catch(e){alert('Could not save — phone storage is full.');return;}
+  share();autoBackup();if(msg)toast(msg);render();}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function keyOf(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function todayKey(){return keyOf(new Date());}
+function parseD(k){if(!k)return null;var p=String(k).split('-');if(p.length!==3)return null;return new Date(+p[0],+p[1]-1,+p[2]);}
+function addMonths(k,n){var d=parseD(k);if(!d)return '';var day=d.getDate();d.setDate(1);d.setMonth(d.getMonth()+n);var last=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();d.setDate(Math.min(day,last));return keyOf(d);}
+function daysUntil(k){var d=parseD(k);if(!d)return null;return Math.round((d-parseD(todayKey()))/864e5);}
+function niceD(k){var d=parseD(k);if(!d)return '';return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
+function relDays(n){if(n==null)return '';if(n===0)return 'today';if(n===1)return 'tomorrow';if(n<0)return Math.abs(n)+(n===-1?' day':' days')+' ago';if(n<60)return 'in '+n+' days';var m=Math.round(n/30.4);return m<24?'in '+m+' months':'in '+Math.round(n/365)+' years';}
+function toast(m){document.querySelectorAll('.toast').forEach(function(x){x.remove();});var t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(function(){t.remove();},2200);}
+function mask(n){n=String(n||'');if(n.length<=4)return n;return '•••• '+n.slice(-4);}
+
+// ── Dates: kinds and how they repeat ──────────────────────────────
+// kind: 'renewal' (expires; "Renewed" moves it forward) or 'occasion' (birthday, anniversary: comes around every year).
+var REPEAT={none:0,monthly:1,quarterly:3,yearly:12,'2 years':24,'4 years':48,'5 years':60,'10 years':120};
+function nextOccasion(d){ // the next time a yearly occasion comes around (today counts)
+  var p=parseD(d.date);if(!p)return '';var t=parseD(todayKey());var n=new Date(t.getFullYear(),p.getMonth(),p.getDate());if(n<t)n.setFullYear(n.getFullYear()+1);return keyOf(n);}
+function dueOf(d){return d.kind==='occasion'?nextOccasion(d):d.date;}
+function remindOf(d){return d.remind!==''&&d.remind!=null?+d.remind:(d.kind==='occasion'?14:30);}
+function yearsAt(d){var p=parseD(d.date),n=parseD(nextOccasion(d));if(!p||!n||!d.showYears)return '';var y=n.getFullYear()-p.getFullYear();return y>0?y:'';}
+function upcoming(){
+  var out=[];
+  db.dates.forEach(function(d){var due=dueOf(d);if(!due)return;out.push({id:d.id,src:'dates',title:d.title,cat:d.category||'',due:due,days:daysUntil(due),remind:remindOf(d),kind:d.kind,item:d});});
+  db.docs.forEach(function(d){if(!d.expires)return;out.push({id:d.id,src:'docs',title:d.name+' expires',cat:d.category||'',due:d.expires,days:daysUntil(d.expires),remind:d.remind!==''&&d.remind!=null?+d.remind:60,kind:'doc',item:d});});
+  return out.sort(function(a,b){return a.due<b.due?-1:a.due>b.due?1:0;});
+}
+
+// ── Presets ───────────────────────────────────────────────────────
+var DATE_PRESETS=[['🚗','Vehicle registration','Vehicle','renewal','yearly'],['🛡','Car insurance renewal','Insurance','renewal','yearly'],['🪪','Driver\'s license','ID','renewal','none'],
+  ['🛂','Passport','ID','renewal','10 years'],['🏥','Health insurance open enrollment','Insurance','renewal','yearly'],['📺','Subscription renewal','Subscriptions','renewal','yearly'],
+  ['🧾','Warranty ends','Warranty','renewal','none'],['🎂','Birthday','Birthdays','occasion','yearly'],['💍','Anniversary','Anniversaries','occasion','yearly']];
+var DOC_PRESETS=[['🪪','Driver\'s license','ID'],['🛂','Passport','ID'],['🚗','Vehicle title','Vehicle'],['🚗','Vehicle registration','Vehicle'],['🛡','Car insurance card','Insurance'],
+  ['🏥','Health insurance card','Insurance'],['🧬','Birth certificate','Personal'],['💍','Marriage certificate','Personal'],['🔢','Social Security card','Personal'],
+  ['📜','Will / estate papers','Legal'],['🏦','Life insurance policy','Insurance'],['🎖','Military / DD-214','Personal'],['📄','Other document','Other']];
+
+// ── Summary for BeyondStride (read-only, only with your permission) ──
+function summary(){
+  var up=upcoming().filter(function(u){return u.days!=null&&u.days<=u.remind;});
+  return {updated:db.updated||Date.now(),app:'dates',
+    due:up.slice(0,6).map(function(u){return {title:u.title,date:u.due,days:u.days,kind:u.kind};}),
+    overdue:up.filter(function(u){return u.days<0;}).length,count:db.dates.length+db.docs.length};
+}
+function share(){try{if(window.AndroidApp&&AndroidApp.setSummary)AndroidApp.setSummary(JSON.stringify(summary()));}catch(e){}}
+
+// ── Photos (kept in this phone's app storage, not in the main list) ──
+var idb=null;
+function photoDb(cb){if(idb)return cb(idb);var r=indexedDB.open('dates_docs_photos',1);r.onupgradeneeded=function(){r.result.createObjectStore('p');};r.onsuccess=function(){idb=r.result;cb(idb);};r.onerror=function(){cb(null);};}
+function putPhoto(id,data,cb){photoDb(function(d){if(!d)return cb&&cb(false);var t=d.transaction('p','readwrite');t.objectStore('p').put(data,id);t.oncomplete=function(){cb&&cb(true);};t.onerror=function(){cb&&cb(false);};});}
+function getPhoto(id,cb){photoDb(function(d){if(!d)return cb(null);var q=d.transaction('p').objectStore('p').get(id);q.onsuccess=function(){cb(q.result||null);};q.onerror=function(){cb(null);};});}
+function delPhoto(id){photoDb(function(d){if(d)d.transaction('p','readwrite').objectStore('p').delete(id);});}
+function allPhotos(cb){photoDb(function(d){var out={};if(!d)return cb(out);var t=d.transaction('p'),s=t.objectStore('p'),c=s.openCursor();c.onsuccess=function(){var cur=c.result;if(cur){out[cur.key]=cur.value;cur.continue();}else cb(out);};c.onerror=function(){cb(out);};});}
+function shrink(file,cb){var rd=new FileReader();rd.onload=function(){var im=new Image();im.onload=function(){var M=1600,w=im.width,h=im.height,s=Math.min(1,M/Math.max(w,h));
+  var c=document.createElement('canvas');c.width=Math.round(w*s);c.height=Math.round(h*s);c.getContext('2d').drawImage(im,0,0,c.width,c.height);cb(c.toDataURL('image/jpeg',0.8));};im.onerror=function(){cb(null);};im.src=rd.result;};rd.readAsDataURL(file);}
+
+// ── Backups (photos included) ─────────────────────────────────────
+function backupJson(cb){allPhotos(function(ph){cb(JSON.stringify({app:'dates-docs',version:1,data:db,photos:ph}));});}
+function autoBackup(){
+  try{if(!window.AndroidApp||!AndroidApp.saveAutoBackup||db.settings.autoBackup===false)return;
+    var k=todayKey();if(localStorage.getItem('dd_autoBackupDay')===k)return;
+    backupJson(function(js){var where=AndroidApp.saveAutoBackup('dates-docs-auto-'+k+'.json',js);
+      if(where){localStorage.setItem('dd_autoBackupDay',k);localStorage.setItem('dd_autoBackupAt',String(Date.now()));localStorage.setItem('dd_autoBackupWhere',where);}});
+  }catch(e){}
+}
+function exportJson(){backupJson(function(js){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([js],{type:'application/json'}));a.download='dates-docs-backup-'+todayKey()+'.json';document.body.appendChild(a);a.click();a.remove();
+  toast(window.AndroidApp?'Saved to Downloads/Dates & Docs':'Backup downloaded');});}
+document.getElementById('importFile').addEventListener('change',function(e){var f=e.target.files&&e.target.files[0];if(!f)return;var rd=new FileReader();
+  rd.onload=function(){try{var j=JSON.parse(rd.result);if(!j||j.app!=='dates-docs'||!j.data)throw 0;if(!confirm('Replace everything in Dates & Docs with this backup?'))return;
+    db=j.data;Object.keys(EMPTY).forEach(function(k){if(db[k]==null)db[k]=JSON.parse(JSON.stringify(EMPTY[k]));});
+    var ph=j.photos||{},ids=Object.keys(ph),n=0;if(!ids.length)return save('Backup restored');ids.forEach(function(id){putPhoto(id,ph[id],function(){if(++n===ids.length)save('Backup restored');});});
+  }catch(x){alert('That file isn\'t a Dates & Docs backup.');}};rd.readAsText(f);e.target.value='';});
+
+// ── Rendering ───────────────────────────────────────────────────────
+var V=document.getElementById('view');
+function card(title,body,extra){return '<div class="card"><h2>'+title+'<span class="sp"></span>'+(extra||'')+'</h2>'+body+'</div>';}
+function render(){
+  document.querySelectorAll('#nav button').forEach(function(b){b.classList.toggle('on',b.dataset.tab===tab);});
+  var fab=document.getElementById('fab');fab.style.display=tab==='more'?'none':'';
+  fab.textContent={home:'＋ Add',dates:'＋ Date',docs:'＋ Document'}[tab]||'＋ Add';
+  V.innerHTML=({home:renderHome,dates:renderDates,docs:renderDocs,more:renderMore}[tab])();
+  loadThumbs();
+}
+function upRow(u){var n=u.days,cls=n<0?'bad':n<=Math.min(14,u.remind)?'warn':n<=u.remind?'acc':'';var y=u.src==='dates'?yearsAt(u.item):'';
+  return '<div class="row" data-act="open" data-src="'+u.src+'" data-id="'+u.id+'"><div class="main"><div class="t">'+esc(u.title)+(y?' <span class="muted">('+y+(u.item.kind==='occasion'&&/birth/i.test(u.item.category+u.item.title)?' years old':' years')+')</span>':'')+'</div>'+
+    '<div class="s">'+esc(niceD(u.due))+(u.cat?' · '+esc(u.cat):'')+'</div></div><span class="tag '+cls+'">'+(n<0?'overdue':relDays(n))+'</span>'+
+    (u.kind==='renewal'&&n<=u.remind?'<button class="btn sm" data-act="renewed" data-id="'+u.id+'">Renewed</button>':'')+'</div>';}
+function renderHome(){
+  var up=upcoming(),h='';
+  if(!db.dates.length&&!db.docs.length){
+    return card('👋 Welcome','<div class="muted">Add the things that expire or come around again — registration, insurance, license, passport, birthdays — and get a heads-up before each one. '+
+      'Keep a record of your important documents too: the number, who issued it, where the original is, and a photo.</div>'+
+      '<div class="btns"><button class="btn acc" data-act="addDate">＋ A date</button><button class="btn" data-act="addDoc">＋ A document</button></div>'+
+      '<div class="small dim" style="margin-top:8px">Everything stays on this phone. Turn on App lock (⚙ App, top right) to keep it private.</div>');
+  }
+  var od=up.filter(function(u){return u.days<0;}),soon=up.filter(function(u){return u.days>=0&&u.days<=u.remind;}),later=up.filter(function(u){return u.days>u.remind&&u.days<=365;});
+  if(od.length)h+=card('⚠️ Overdue',od.map(upRow).join(''));
+  h+=card('⏰ Coming up',soon.length?soon.map(upRow).join(''):'<div class="empty">✅ Nothing needs attention right now.</div>');
+  if(later.length)h+=card('📆 Later this year',later.slice(0,12).map(upRow).join(''));
+  return h;
+}
+function renderDates(){
+  if(!db.dates.length)return card('📅 Dates','<div class="empty">No dates yet. Tap ＋ Date — common ones (registration, insurance, license, passport, birthdays) are ready to pick.</div>');
+  var groups={};db.dates.forEach(function(d){var g=d.kind==='occasion'?'Birthdays & occasions':'Renewals & expirations';(groups[g]=groups[g]||[]).push(d);});
+  return Object.keys(groups).sort().reverse().map(function(g){return card(esc(g),groups[g].slice().sort(function(a,b){return dueOf(a)<dueOf(b)?-1:1;}).map(function(d){
+    return upRow({id:d.id,src:'dates',title:d.title,cat:d.category||'',due:dueOf(d),days:daysUntil(dueOf(d)),remind:remindOf(d),kind:d.kind,item:d});}).join(''));}).join('');
+}
+function renderDocs(){
+  if(!db.docs.length)return card('📄 Documents','<div class="empty">Keep a record of each important paper: the number, who issued it, where the original is kept, and a photo of it. Tap ＋ Document.</div>');
+  var cats={};db.docs.forEach(function(d){var c=d.category||'Other';(cats[c]=cats[c]||[]).push(d);});var names=Object.keys(cats).sort();
+  var h='<div class="seg"><button data-act="docFilter" data-c="all" class="'+(docFilter==='all'?'on':'')+'">All</button>'+names.map(function(c){return '<button data-act="docFilter" data-c="'+esc(c)+'" class="'+(docFilter===c?'on':'')+'">'+esc(c)+'</button>';}).join('')+'</div>';
+  names.filter(function(c){return docFilter==='all'||docFilter===c;}).forEach(function(c){
+    h+=card(esc(c),cats[c].slice().sort(function(a,b){return a.name.localeCompare(b.name);}).map(function(d){var n=d.expires?daysUntil(d.expires):null;
+      return '<div class="row" data-act="open" data-src="docs" data-id="'+d.id+'"><div class="main"><div class="t">'+esc(d.name)+((d.photos||[]).length?' <span class="dim">📷'+(d.photos.length>1?d.photos.length:'')+'</span>':'')+'</div>'+
+        '<div class="s">'+esc([d.number?mask(d.number):'',d.where?'Kept: '+d.where:''].filter(Boolean).join(' · '))+'</div></div>'+
+        (n!=null?'<span class="tag '+(n<0?'bad':n<=60?'warn':'')+'">'+(n<0?'expired':'exp. '+niceD(d.expires))+'</span>':'')+'</div>';}).join(''));});
+  return h;
+}
+function renderMore(){
+  var at=+localStorage.getItem('dd_autoBackupAt')||0;
+  return card('💾 Backup','<div class="muted small">Everything lives only on this phone. A backup (photos included) is saved automatically once a day'+(at?' (last: '+esc(new Date(at).toLocaleString())+')':'')+'.</div>'+
+    '<div class="btns"><button class="btn" data-act="exportJson">Back up now</button><button class="btn" data-act="importJson">Restore a backup</button></div>'+
+    '<label class="chk"><input type="checkbox" data-act="toggleAuto" '+(db.settings.autoBackup===false?'':'checked')+'> Daily automatic backup</label>')+
+    card('🔒 Privacy','<div class="muted small">Numbers show only their last 4 digits until you tap them. For very sensitive numbers (like Social Security) consider saving just the last 4 and where the card is kept. '+
+    'Turn on App lock from the ⚙ App button.</div>');
+}
+
+// ── Sheets / editing ──────────────────────────────────────────────
+var SH=document.getElementById('sheet'),SW=document.getElementById('sheetWrap');
+function openSheet(html){SH.innerHTML=html;SW.classList.add('open');}
+function closeSheet(){SW.classList.remove('open');SH.innerHTML='';}
+SW.addEventListener('click',function(e){if(e.target===SW)closeSheet();});
+function inp(name,label,val,type,ph){type=type||'text';return '<label class="f">'+label+'<input name="'+name+'" type="'+type+'" value="'+esc(val==null?'':val)+'" placeholder="'+esc(ph||'')+'"'+(type==='number'?' inputmode="numeric"':'')+'></label>';}
+
+function pickPreset(src){
+  var P=src==='dates'?DATE_PRESETS:DOC_PRESETS;
+  openSheet('<h3><span>'+(src==='dates'?'New date':'New document')+'</span><button class="iconbtn" data-act="close">✕</button></h3><div class="small dim">Pick one to start, or choose Other.</div><div class="btns">'+
+    P.map(function(p,i){return '<button class="btn" data-act="preset" data-src="'+src+'" data-i="'+i+'">'+p[0]+' '+esc(p[1])+'</button>';}).join('')+
+    (src==='dates'?'<button class="btn" data-act="preset" data-src="dates" data-i="-1">📌 Other</button>':'')+'</div>');
+}
+function editDate(id,preset){
+  var d=id?db.dates.filter(function(x){return x.id===id;})[0]:null,v=d||preset||{kind:'renewal',repeat:'yearly'};
+  openSheet('<h3><span>'+(d?'Edit date':'New date')+'</span><button class="iconbtn" data-act="close">✕</button></h3><form id="df">'+
+    inp('title','What',v.title,'text','e.g. Vehicle registration')+
+    '<label class="f">Kind<select name="kind"><option value="renewal"'+(v.kind!=='occasion'?' selected':'')+'>Renewal / expires (I renew it)</option><option value="occasion"'+(v.kind==='occasion'?' selected':'')+'>Birthday / anniversary (every year)</option></select></label>'+
+    inp('date',v.kind==='occasion'?'Date (birth or wedding date)':'Due / expires on',v.date,'date')+
+    '<label class="f">After renewing, the next one is<select name="repeat">'+Object.keys(REPEAT).map(function(r){return '<option value="'+r+'"'+((v.repeat||'none')===r?' selected':'')+'>'+(r==='none'?'no repeat (I\'ll set the new date)':r==='monthly'?'1 month later':r==='quarterly'?'3 months later':r==='yearly'?'1 year later':r+' later')+'</option>';}).join('')+'</select></label>'+
+    inp('remind','Heads-up how many days before',v.remind!=null&&v.remind!==''?v.remind:'','number',v.kind==='occasion'?'14':'30')+
+    inp('category','Category',v.category,'text','e.g. Vehicle, Insurance, ID')+
+    '<label class="chk"><input type="checkbox" name="showYears" '+(v.showYears?'checked':'')+'> Show how many years (age / anniversary)</label>'+
+    '<label class="f">Notes<textarea name="notes" placeholder="e.g. renew online at the DMV site">'+esc(v.notes||'')+'</textarea></label>'+
+    '<div class="btns"><button class="btn acc" type="submit">Save</button>'+(d?'<button class="btn bad" type="button" data-act="delDate" data-id="'+d.id+'">Delete</button>':'')+'</div></form>');
+  var f=document.getElementById('df');
+  f.elements.kind.addEventListener('change',function(){f.elements.repeat.closest('label').style.display=f.elements.kind.value==='occasion'?'none':'';});
+  if(v.kind==='occasion')f.elements.repeat.closest('label').style.display='none';
+  f.addEventListener('submit',function(e){e.preventDefault();var o=d||{id:uid(),created:Date.now()};
+    ['title','kind','date','repeat','remind','category','notes'].forEach(function(k){o[k]=f.elements[k].value.trim();});o.showYears=f.elements.showYears.checked;
+    if(!o.title||!o.date){alert('Please fill in what it is and the date.');return;}
+    if(o.kind==='occasion')o.repeat='yearly';if(!d)db.dates.push(o);closeSheet();save('Saved');});
+}
+function editDoc(id,preset){
+  var d=id?db.docs.filter(function(x){return x.id===id;})[0]:null,v=d||preset||{};
+  openSheet('<h3><span>'+(d?'Edit document':'New document')+'</span><button class="iconbtn" data-act="close">✕</button></h3><form id="cf">'+
+    inp('name','Document',v.name,'text','e.g. Driver\'s license')+inp('category','Category',v.category,'text','e.g. ID, Vehicle, Insurance')+
+    inp('number','Number (policy, ID, VIN…)',v.number,'text','Optional')+inp('issuer','Issued by',v.issuer,'text','e.g. Colorado DMV, State Farm')+
+    inp('issued','Issued on',v.issued,'date')+inp('expires','Expires on (optional)',v.expires,'date')+
+    inp('where','Where the original is kept',v.where,'text','e.g. fire safe, wallet, glove box')+
+    '<label class="f">Notes<textarea name="notes">'+esc(v.notes||'')+'</textarea></label>'+
+    '<div class="btns"><button class="btn acc" type="submit">Save</button>'+(d?'<button class="btn bad" type="button" data-act="delDoc" data-id="'+d.id+'">Delete</button>':'')+'</div></form>');
+  var f=document.getElementById('cf');
+  f.addEventListener('submit',function(e){e.preventDefault();var o=d||{id:uid(),created:Date.now(),photos:[]};
+    ['name','category','number','issuer','issued','expires','where','notes'].forEach(function(k){o[k]=f.elements[k].value.trim();});
+    if(!o.name){alert('Please name the document.');return;}if(!d)db.docs.push(o);closeSheet();save('Saved');if(!d)openDoc(o.id);});
+}
+function openDoc(id){
+  var d=db.docs.filter(function(x){return x.id===id;})[0];if(!d)return;var n=d.expires?daysUntil(d.expires):null;
+  openSheet('<h3><span>'+esc(d.name)+'</span><button class="iconbtn" data-act="close">✕</button></h3><div class="kv">'+
+    [['Category',d.category],['Number',d.number?'<span class="num" data-act="reveal" data-n="'+esc(d.number)+'">'+esc(mask(d.number))+'</span> <span class="dim small">(tap to show)</span>':''],['Issued by',esc(d.issuer||'')],
+     ['Issued',d.issued?esc(niceD(d.issued)):''],['Expires',d.expires?esc(niceD(d.expires))+' <span class="tag '+(n<0?'bad':n<=60?'warn':'')+'">'+(n<0?'expired':relDays(n))+'</span>':''],['Kept',esc(d.where||'')],['Notes',esc(d.notes||'')]]
+    .filter(function(x){return x[1];}).map(function(x){return '<div>'+x[0]+'</div><div>'+x[1]+'</div>';}).join('')+'</div>'+
+    '<div class="thumbs" id="docThumbs">'+(d.photos||[]).map(function(p){return '<img data-photo="'+p+'" data-doc="'+d.id+'" alt="photo">';}).join('')+'</div>'+
+    '<div class="btns"><button class="btn" data-act="addPhoto" data-id="'+d.id+'">📷 Add photo</button>'+(d.number?'<button class="btn" data-act="copyNum" data-n="'+esc(d.number)+'">Copy number</button>':'')+
+    '<button class="btn" data-act="editDoc" data-id="'+d.id+'">Edit</button></div>');
+  loadThumbs();
+}
+function loadThumbs(){document.querySelectorAll('img[data-photo]').forEach(function(im){if(im.src)return;getPhoto(im.dataset.photo,function(data){if(data)im.src=data;else im.remove();});});}
+
+// ── Clicks ─────────────────────────────────────────────────────────
+var photoFor=null,viewing=null;
+document.getElementById('photoFile').addEventListener('change',function(e){var f=e.target.files&&e.target.files[0];e.target.value='';if(!f||!photoFor)return;var docId=photoFor;
+  shrink(f,function(data){if(!data){alert('Could not read that picture.');return;}var pid='ph_'+uid();putPhoto(pid,data,function(ok){if(!ok){alert('Could not save the photo.');return;}
+    var d=db.docs.filter(function(x){return x.id===docId;})[0];if(!d)return;(d.photos=d.photos||[]).push(pid);save('Photo added');openDoc(docId);});});});
+document.getElementById('viewerClose').addEventListener('click',function(){document.getElementById('viewer').classList.remove('open');viewing=null;});
+document.getElementById('viewerDel').addEventListener('click',function(){if(!viewing||!confirm('Delete this photo?'))return;var d=db.docs.filter(function(x){return x.id===viewing.doc;})[0];
+  if(d){d.photos=(d.photos||[]).filter(function(p){return p!==viewing.photo;});delPhoto(viewing.photo);}document.getElementById('viewer').classList.remove('open');var id=viewing.doc;viewing=null;save('Photo deleted');openDoc(id);});
+document.getElementById('nav').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;tab=b.dataset.tab;render();window.scrollTo(0,0);});
+document.getElementById('fab').addEventListener('click',function(){
+  if(tab==='dates')pickPreset('dates');else if(tab==='docs')pickPreset('docs');
+  else openSheet('<h3><span>Add</span><button class="iconbtn" data-act="close">✕</button></h3><div class="btns" style="flex-direction:column"><button class="btn" data-act="addDate">📅 A date (renewal, birthday…)</button><button class="btn" data-act="addDoc">📄 A document</button></div>');
+});
+document.addEventListener('change',function(e){if(e.target.dataset&&e.target.dataset.act==='toggleAuto'){db.settings.autoBackup=e.target.checked;save(e.target.checked?'Daily backup on':'Daily backup off');}});
+document.addEventListener('click',function(e){
+  var im=e.target.closest('img[data-photo]');
+  if(im&&im.src){viewing={photo:im.dataset.photo,doc:im.dataset.doc};document.getElementById('viewerImg').src=im.src;document.getElementById('viewer').classList.add('open');return;}
+  var el=e.target.closest('[data-act]');if(!el||el.tagName==='INPUT')return;var a=el.dataset.act,id=el.dataset.id;
+  switch(a){
+    case 'close':closeSheet();break;
+    case 'addDate':closeSheet();pickPreset('dates');break;
+    case 'addDoc':closeSheet();pickPreset('docs');break;
+    case 'preset':{var i=+el.dataset.i;closeSheet();if(el.dataset.src==='dates'){var p=DATE_PRESETS[i];editDate(null,p?{title:p[1],category:p[2],kind:p[3],repeat:p[4],showYears:p[3]==='occasion'}:{kind:'renewal',repeat:'yearly'});}
+      else{var q=DOC_PRESETS[i];editDoc(null,{name:q[1]==='Other document'?'':q[1],category:q[2]});}break;}
+    case 'open':if(e.target.closest('button'))return;if(el.dataset.src==='docs')openDoc(id);else editDate(id);break;
+    case 'renewed':{var d=db.dates.filter(function(x){return x.id===id;})[0];if(!d)break;var m=REPEAT[d.repeat||'none'];
+      if(!m){editDate(id);toast('Set the new date');break;}var nd=d.date;do{nd=addMonths(nd,m);}while(daysUntil(nd)<0);d.date=nd;d.renewedAt=todayKey();save('Next one: '+niceD(nd));break;}
+    case 'delDate':if(!confirm('Delete this date?'))break;db.dates=db.dates.filter(function(x){return x.id!==id;});closeSheet();save('Deleted');break;
+    case 'delDoc':{if(!confirm('Delete this document and its photos?'))break;var dd=db.docs.filter(function(x){return x.id===id;})[0];(dd&&dd.photos||[]).forEach(delPhoto);db.docs=db.docs.filter(function(x){return x.id!==id;});closeSheet();save('Deleted');break;}
+    case 'editDoc':closeSheet();editDoc(id);break;
+    case 'addPhoto':photoFor=id;document.getElementById('photoFile').click();break;
+    case 'reveal':el.textContent=el.textContent.indexOf('•')>=0?el.dataset.n:mask(el.dataset.n);break;
+    case 'copyNum':try{navigator.clipboard.writeText(el.dataset.n).then(function(){toast('Copied');},function(){toast('Couldn\'t copy');});}catch(x){toast('Couldn\'t copy');}break;
+    case 'docFilter':docFilter=el.dataset.c;render();break;
+    case 'exportJson':exportJson();break;
+    case 'importJson':document.getElementById('importFile').click();break;
+  }
+});
+window.handleAndroidBack=function(){
+  var appSheet=document.getElementById('appSheetWrap');if(appSheet&&appSheet.classList.contains('open')){appSheet.classList.remove('open');return true;}
+  var vw=document.getElementById('viewer');if(vw.classList.contains('open')){vw.classList.remove('open');return true;}
+  if(SW.classList.contains('open')){closeSheet();return true;}
+  if(tab!=='home'){tab='home';render();return true;}return false;
+};
+window.HR={summary:summary,exportJson:exportJson,db:function(){return db;}};
+render();share();autoBackup();
+document.addEventListener('visibilitychange',function(){if(!document.hidden){share();render();}});
+})();
+</script>
+</body>
+</html>
