@@ -1,0 +1,194 @@
+# Builds the eBay business tracker (MCS Second Hand Treasures: the website's ebay-tracker.html, with its
+# Business Plan page) as a real Android app (APK) from the app's own copy in android-app/ebay/www/
+# (separate from the website's pages, so changing one never changes the other). The pages and Chart.js
+# are packed inside the APK, so it opens offline. Item photos can be taken with the camera; the Business
+# Report goes to Android's print screen (save as PDF or print).
+#
+# Uses the same APP_SIGNING_PASSWORD secret and saved signing key as the other apps. Their workflows are
+# not changed by this one.
+#
+# Every time the app's files change (or you press "Run workflow" on the Actions tab), a new APK appears
+# under Releases as "MCS Treasures app v1.N". Install it over the old one; your data stays.
+name: Build MCS Treasures app
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - android-app/ebay/**
+      - .github/workflows/ebay-app.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ebay-app
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
+      - name: Unlock signing key
+        env:
+          PW: ${{ secrets.APP_SIGNING_PASSWORD }}
+        run: |
+          if [ -z "$PW" ] || [ ! -f android-signing/key.enc ]; then
+            echo "::error::Needs the APP_SIGNING_PASSWORD secret and android-signing/key.enc (created by the M&C Money app build)."
+            exit 1
+          fi
+          KS="$RUNNER_TEMP/app.keystore"
+          openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in android-signing/key.enc -out "$KS" -pass env:PW \
+            || { echo "::error::APP_SIGNING_PASSWORD doesn't match the saved signing key."; exit 1; }
+          echo "KEYSTORE_FILE=$KS" >> "$GITHUB_ENV"
+
+      - name: Create Android project
+        run: |
+          A=android-build/app/src/main
+          J=$A/java/com/sizemore/ebay
+          mkdir -p $J $A/assets/www $A/res/values $A/res/mipmap-anydpi-v26 \
+                   $A/res/mipmap-xxxhdpi $A/res/drawable
+          cp android-app/ebay/java/*.java $J/
+          cp android-app/ebay/android-bridge.js $A/assets/www/
+          cp android-app/ebay/icon/ic_fg.xml android-app/ebay/icon/ic_mono.xml \
+             android-app/ebay/icon/ic_bg.xml $A/res/drawable/
+          cp android-app/ebay/icon/ic_launcher.png $A/res/mipmap-xxxhdpi/
+          cd android-build
+
+          cat > settings.gradle <<'EOF'
+          pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
+          dependencyResolutionManagement { repositories { google(); mavenCentral() } }
+          rootProject.name = "MCSTreasures"
+          include ':app'
+          EOF
+
+          cat > build.gradle <<'EOF'
+          plugins { id 'com.android.application' version '8.5.2' apply false }
+          EOF
+
+          echo "org.gradle.jvmargs=-Xmx2g" > gradle.properties
+
+          cat > app/build.gradle <<'EOF'
+          plugins { id 'com.android.application' }
+          android {
+              namespace 'com.sizemore.ebay'
+              compileSdk 34
+              defaultConfig {
+                  applicationId 'com.sizemore.ebay'
+                  minSdk 24
+                  targetSdk 34
+                  versionCode Integer.parseInt(System.getenv('VERSION_CODE') ?: '1')
+                  versionName "1." + (System.getenv('VERSION_CODE') ?: '1')
+              }
+              signingConfigs {
+                  release {
+                      storeFile file(System.getenv('KEYSTORE_FILE'))
+                      storePassword System.getenv('APP_SIGNING_PASSWORD')
+                      keyAlias 'mcmoney'
+                      keyPassword System.getenv('APP_SIGNING_PASSWORD')
+                  }
+              }
+              buildTypes {
+                  release {
+                      minifyEnabled false
+                      signingConfig signingConfigs.release
+                  }
+              }
+              compileOptions {
+                  sourceCompatibility JavaVersion.VERSION_17
+                  targetCompatibility JavaVersion.VERSION_17
+              }
+          }
+          EOF
+
+          cat > app/src/main/AndroidManifest.xml <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+              <uses-permission android:name="android.permission.INTERNET" />
+              <!-- In-app updates: lets Settings > App updates hand a newer APK to Android's installer. -->
+              <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+              <!-- App lock: fingerprint / screen lock when the app opens. -->
+              <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+              <queries>
+                  <intent><action android:name="android.media.action.IMAGE_CAPTURE" /></intent>
+                  <intent><action android:name="android.intent.action.VIEW" /><data android:mimeType="application/pdf" /></intent>
+                  <intent><action android:name="android.intent.action.VIEW" /><data android:mimeType="text/plain" /></intent>
+              </queries>
+              <application
+                  android:label="MCS Treasures"
+                  android:icon="@mipmap/ic_launcher"
+                  android:allowBackup="true"
+                  android:hardwareAccelerated="true"
+                  android:theme="@style/AppTheme">
+                  <activity
+                      android:name=".MainActivity"
+                      android:exported="true"
+                      android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboard|keyboardHidden|uiMode|density"
+                      android:windowSoftInputMode="adjustResize">
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
+                      </intent-filter>
+                  </activity>
+                  <receiver android:name=".Updater$UpdateReceiver" android:exported="false" />
+                  <provider
+                      android:name=".CaptureProvider"
+                      android:authorities="com.sizemore.ebay.capture"
+                      android:exported="false"
+                      android:grantUriPermissions="true" />
+              </application>
+          </manifest>
+          EOF
+
+          cat > app/src/main/res/values/styles.xml <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <color name="app_bg">#0F1117</color>
+              <style name="AppTheme" parent="android:Theme.Material.NoActionBar">
+                  <item name="android:statusBarColor">#0F1117</item>
+                  <item name="android:navigationBarColor">#0F1117</item>
+                  <item name="android:windowBackground">@color/app_bg</item>
+              </style>
+          </resources>
+          EOF
+
+          cat > app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+              <background android:drawable="@drawable/ic_bg" />
+              <foreground android:drawable="@drawable/ic_fg" />
+              <monochrome android:drawable="@drawable/ic_mono" />
+          </adaptive-icon>
+          EOF
+
+      - name: Copy the tracker into the APK
+        run: python3 android-app/ebay/bundle.py android-build/app/src/main/assets/www
+
+      - name: Build APK
+        env:
+          APP_SIGNING_PASSWORD: ${{ secrets.APP_SIGNING_PASSWORD }}
+          VERSION_CODE: ${{ github.run_number }}
+        run: |
+          cd android-build
+          gradle --no-daemon assembleRelease
+          cp app/build/outputs/apk/release/app-release.apk "$GITHUB_WORKSPACE/MCS-Treasures.apk"
+
+      - name: Publish to Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "ebay-app-${{ github.run_number }}" MCS-Treasures.apk \
+            --title "MCS Treasures app v1.${{ github.run_number }}" \
+            --notes "Download MCS-Treasures.apk on your phone and open it to install or update." \
+            --latest=false --target "$(git rev-parse HEAD)"
