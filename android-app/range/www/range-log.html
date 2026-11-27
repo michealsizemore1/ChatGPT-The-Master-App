@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Range Log</title>
+<style>
+:root{--bg:#0e1517;--card:#162124;--card2:#1d2b2f;--line:#2a3b40;--text:#eef4f3;--muted:#9fb3b1;--dim:#6f8584;
+  --accent:#2dd4bf;--accent2:#14b8a6;--warn:#fbbf24;--bad:#fb7185;--good:#4ade80}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{padding:0 0 calc(76px + env(safe-area-inset-bottom))}
+header{position:sticky;top:0;z-index:20;background:var(--bg);padding:calc(12px + env(safe-area-inset-top)) 16px 10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line)}
+header h1{font-size:20px;margin:0;flex:1;letter-spacing:.01em}
+header h1 small{display:block;font-size:12px;color:var(--muted);font-weight:500}
+main{padding:12px 14px;max-width:720px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin:0 0 12px}
+.card h2{font-size:15px;margin:0 0 8px;display:flex;align-items:center;gap:8px}
+.card h2 .sp{flex:1}
+.muted{color:var(--muted)}.dim{color:var(--dim)}.small{font-size:12.5px}
+.row{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)}
+.row:first-of-type{border-top:none}
+.row .main{flex:1;min-width:0}
+.row .t{font-weight:600}
+.row .s{color:var(--muted);font-size:13px}
+.tag{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--card2);color:var(--muted);white-space:nowrap}
+.tag.bad{background:rgba(251,113,133,.15);color:var(--bad)}.tag.warn{background:rgba(251,191,36,.15);color:var(--warn)}.tag.good{background:rgba(74,222,128,.13);color:var(--good)}
+.tag.acc{background:rgba(45,212,191,.15);color:var(--accent)}
+button{font:inherit;cursor:pointer}
+.btn{background:var(--card2);border:1px solid var(--line);color:var(--text);border-radius:12px;padding:9px 14px;font-weight:600;font-size:14px}
+.btn.acc{background:var(--accent);border-color:var(--accent);color:#06201c}
+.btn.sm{padding:5px 10px;font-size:12.5px;border-radius:10px}
+.btn.bad{color:var(--bad)}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.iconbtn{background:none;border:none;color:var(--muted);font-size:20px;padding:4px 8px}
+.empty{color:var(--muted);font-size:13.5px;padding:6px 0}
+nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:#0b1113;border-top:1px solid var(--line);display:flex;padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+nav button{flex:1;background:none;border:none;color:var(--dim);font-size:11.5px;font-weight:600;padding:4px 0;display:flex;flex-direction:column;align-items:center;gap:2px}
+nav button .i{font-size:20px;line-height:1.1;filter:grayscale(.6);opacity:.75}
+nav button.on{color:var(--accent)}nav button.on .i{filter:none;opacity:1}
+.fab{position:fixed;right:16px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:25;background:var(--accent);color:#06201c;border:none;border-radius:18px;padding:13px 18px;font-weight:800;font-size:15px;box-shadow:0 6px 18px rgba(0,0,0,.4)}
+.seg{display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px}
+.seg button{background:var(--card);border:1px solid var(--line);color:var(--muted);border-radius:99px;padding:6px 12px;font-size:13px;font-weight:600;white-space:nowrap}
+.seg button.on{background:var(--accent);border-color:var(--accent);color:#06201c}
+.big{font-size:22px;font-weight:800}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px}
+.kv div:nth-child(odd){color:var(--muted)}
+a{color:var(--accent)}
+/* sheet */
+#sheetWrap{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;display:none;align-items:flex-end;justify-content:center}
+#sheetWrap.open{display:flex}
+#sheet{width:100%;max-width:620px;max-height:90vh;overflow:auto;background:#111a1c;border:1px solid var(--line);border-bottom:none;border-radius:18px 18px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom))}
+#sheet h3{margin:0 0 10px;font-size:17px;display:flex;align-items:center}
+#sheet h3 span{flex:1}
+label.f{display:block;margin:10px 0 0;font-size:12.5px;color:var(--muted);font-weight:600}
+input,select,textarea{width:100%;background:var(--card);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:10px;font:inherit;margin-top:4px}
+textarea{min-height:70px;resize:vertical}
+input[type=checkbox]{width:20px;height:20px;accent-color:var(--accent);margin:0}
+.chk{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+.labin{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--line)}
+.labin .n{flex:1;font-size:14px}.labin .n small{display:block;color:var(--dim);font-size:11.5px}
+.labin input{width:110px;margin:0}
+svg.trend{width:100%;height:150px;display:block;margin:6px 0}
+.spark{width:90px;height:30px;flex-shrink:0}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(140px + env(safe-area-inset-bottom));background:#e8fffb;color:#06201c;padding:10px 16px;border-radius:12px;font-weight:600;z-index:60;font-size:14px;box-shadow:0 6px 18px rgba(0,0,0,.4)}
+#printView{display:none}
+@media print{
+  body{background:#fff;color:#000;padding:0}
+  header,nav,main,.fab,#sheetWrap,.toast{display:none!important}
+  #printView{display:block;font:12px/1.4 system-ui,sans-serif;color:#000;padding:10px}
+  #printView h1{font-size:18px;margin:0 0 2px}#printView h2{font-size:13px;margin:14px 0 4px;border-bottom:1px solid #999}
+  #printView table{width:100%;border-collapse:collapse}#printView td,#printView th{text-align:left;padding:2px 6px 2px 0;vertical-align:top}
+}
+</style>
+<style>
+:root{--accent:#4ade80;--accent2:#22c55e}
+.btn.acc,.fab,.seg button.on{color:#052e16}
+.thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.thumbs img{width:76px;height:76px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
+#viewer{position:fixed;inset:0;background:#000;z-index:70;display:none;align-items:center;justify-content:center;flex-direction:column}
+#viewer.open{display:flex}#viewer img{max-width:100%;max-height:85vh}
+#viewer .bar{display:flex;gap:10px;margin-top:12px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:var(--card2);border-radius:12px;padding:10px;text-align:center}
+.stat b{display:block;font-size:20px}.stat span{font-size:11.5px;color:var(--muted)}
+.shotrow{display:grid;grid-template-columns:1.4fr 1fr .8fr;gap:8px;align-items:end;padding:8px 0;border-top:1px solid var(--line)}
+.shotrow:first-child{border-top:none}
+.shotrow label.f{margin:0}
+.mini{font-size:12px;color:var(--dim)}
+svg.trend{width:100%;height:140px;display:block;margin:6px 0}
+</style>
+</head>
+<body>
+<header>
+  <h1>🎯 Range Log<small>Sessions, firearms, ammo and progress</small></h1>
+</header>
+<main id="view"></main>
+<button class="fab" id="fab" type="button">＋ Session</button>
+<nav id="nav">
+  <button data-tab="home" type="button"><span class="i">🎯</span>Range</button>
+  <button data-tab="log" type="button"><span class="i">📒</span>Sessions</button>
+  <button data-tab="guns" type="button"><span class="i">🔫</span>Firearms</button>
+  <button data-tab="ammo" type="button"><span class="i">📦</span>Ammo</button>
+  <button data-tab="more" type="button"><span class="i">⚙️</span>More</button>
+</nav>
+<div id="sheetWrap"><div id="sheet"></div></div>
+<div id="viewer"><img id="viewerImg" alt=""><div class="bar"><button class="btn" id="viewerClose" type="button">Close</button><button class="btn bad" id="viewerDel" type="button">Delete photo</button></div></div>
+<input type="file" id="importFile" accept="application/json,.json" style="display:none">
+<input type="file" id="photoFile" accept="image/*" style="display:none">
+
+<script>
+(function(){
+'use strict';
+// ════════════════════════════════════════════════════════════════════
+// Range Log: range sessions (rounds per firearm, distance, scores and group sizes, target photos, cost), firearms
+// (round counts, cleaning reminders, maintenance notes), ammo on hand (used rounds come off automatically, low-stock
+// alerts), ranges and memberships, and progress over time. Everything stays on this phone (plus your own backups).
+// BeyondStride's Today screen gets only "what's coming up" (cleaning due, low ammo, membership renewals), and only if
+// you allow it.
+// ════════════════════════════════════════════════════════════════════
+var KEY='range_log_v1';
+var EMPTY={sessions:[],guns:[],ammo:[],ranges:[],maint:[],settings:{}};
+var db=load(),tab='home';
+
+function load(){var d;try{d=JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){d=null;}d=d&&typeof d==='object'?d:{};
+  Object.keys(EMPTY).forEach(function(k){if(d[k]==null)d[k]=JSON.parse(JSON.stringify(EMPTY[k]));});return d;}
+function save(msg){db.updated=Date.now();try{localStorage.setItem(KEY,JSON.stringify(db));}catch(e){alert('Could not save — phone storage is full.');return;}
+  share();autoBackup();if(msg)toast(msg);render();}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function keyOf(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function todayKey(){return keyOf(new Date());}
+function parseD(k){if(!k)return null;var p=String(k).split('-');if(p.length!==3)return null;return new Date(+p[0],+p[1]-1,+p[2]);}
+function daysUntil(k){var d=parseD(k);if(!d)return null;return Math.round((d-parseD(todayKey()))/864e5);}
+function niceD(k){var d=parseD(k);if(!d)return '';return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:d.getFullYear()!==new Date().getFullYear()?'numeric':undefined});}
+function n0(v){return Math.round(+v||0).toLocaleString('en-US');}
+function money(n){return '$'+(+n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function toast(m){document.querySelectorAll('.toast').forEach(function(x){x.remove();});var t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(function(){t.remove();},2200);}
+function mask(n){n=String(n||'');return n.length<=4?n:'•••• '+n.slice(-4);}
+function byId(list,id){return db[list].filter(function(x){return x.id===id;})[0];}
+function gunName(g){return g?(g.name||[g.make,g.model].filter(Boolean).join(' ')||'Firearm'):'';}
+function ammoName(a){return a?[a.caliber,a.brand,a.grain?a.grain+' gr':'',a.kind].filter(Boolean).join(' · '):'';}
+
+// ── Counts ─────────────────────────────────────────────────────────
+function lines(s){return s.lines||[];}
+function sessionRounds(s){return lines(s).reduce(function(t,l){return t+(+l.rounds||0);},0);}
+function gunRounds(g){return (+g.startRounds||0)+db.sessions.reduce(function(t,s){return t+lines(s).filter(function(l){return l.gunId===g.id;}).reduce(function(a,l){return a+(+l.rounds||0);},0);},0);}
+function roundsSinceClean(g){var since=g.lastCleaned||'';return db.sessions.filter(function(s){return !since||s.date>since;}).reduce(function(t,s){return t+lines(s).filter(function(l){return l.gunId===g.id;}).reduce(function(a,l){return a+(+l.rounds||0);},0);},0);}
+function cleanDue(g){var every=+g.cleanEvery||0;if(!every)return null;var r=roundsSinceClean(g);return {since:r,every:every,left:every-r,due:r>=every};}
+function ammoUsed(a){return db.sessions.reduce(function(t,s){return t+lines(s).filter(function(l){return l.ammoId===a.id;}).reduce(function(x,l){return x+(+l.rounds||0);},0);},0);}
+function ammoLeft(a){return (+a.bought||0)-ammoUsed(a);}
+function costPerRound(a){return +a.boxQty>0&&+a.boxCost>0?(+a.boxCost)/(+a.boxQty):0;}
+function sessionCost(s){var c=+s.fee||0;lines(s).forEach(function(l){var a=byId('ammo',l.ammoId);if(a)c+=costPerRound(a)*(+l.rounds||0);});return c;}
+function lowAmmo(){return db.ammo.filter(function(a){return !a.archived&&+a.low>0&&ammoLeft(a)<=+a.low;});}
+function inPeriod(s,days){return daysUntil(s.date)>=-days;}
+function yearOf(s){return String(s.date).slice(0,4);}
+
+// ── Coming up (for the overview and BeyondStride) ─────────────────
+function attention(){
+  var out=[];
+  db.guns.filter(function(g){return !g.archived;}).forEach(function(g){var c=cleanDue(g);if(c&&c.left<=Math.max(50,c.every*0.1))out.push({title:'Clean '+gunName(g),sub:n0(c.since)+' rounds since last cleaning (every '+n0(c.every)+')',days:c.due?-1:9999,kind:'clean',id:g.id,left:c.left});});
+  lowAmmo().forEach(function(a){out.push({title:'Low ammo: '+ammoName(a),sub:n0(ammoLeft(a))+' rounds left',days:9999,kind:'ammo',id:a.id});});
+  db.ranges.forEach(function(r){if(!r.renew)return;var n=daysUntil(r.renew);if(n<=30)out.push({title:r.name+' membership renews',sub:niceD(r.renew),days:n,kind:'range',id:r.id,date:r.renew});});
+  return out;
+}
+function summary(){
+  var month=todayKey().slice(0,7),ms=db.sessions.filter(function(s){return String(s.date).slice(0,7)===month;});
+  var last=db.sessions.slice().sort(function(a,b){return a.date<b.date?1:-1;})[0];
+  return {updated:db.updated||Date.now(),app:'range',
+    due:attention().slice(0,6).map(function(x){return {title:x.title,date:x.date||'',days:x.days===9999?null:x.days,kind:x.kind};}),
+    roundsMonth:ms.reduce(function(t,s){return t+sessionRounds(s);},0),sessionsMonth:ms.length,lastSession:last?{date:last.date,range:last.rangeName||'',rounds:sessionRounds(last)}:null};
+}
+function share(){try{if(window.AndroidApp&&AndroidApp.setSummary)AndroidApp.setSummary(JSON.stringify(summary()));}catch(e){}}
+
+// ── Photos (target pictures) ──────────────────────────────────────
+var idb=null;
+function photoDb(cb){if(idb)return cb(idb);var r=indexedDB.open('range_log_photos',1);r.onupgradeneeded=function(){r.result.createObjectStore('p');};r.onsuccess=function(){idb=r.result;cb(idb);};r.onerror=function(){cb(null);};}
+function putPhoto(id,data,cb){photoDb(function(d){if(!d)return cb&&cb(false);var t=d.transaction('p','readwrite');t.objectStore('p').put(data,id);t.oncomplete=function(){cb&&cb(true);};t.onerror=function(){cb&&cb(false);};});}
+function getPhoto(id,cb){photoDb(function(d){if(!d)return cb(null);var q=d.transaction('p').objectStore('p').get(id);q.onsuccess=function(){cb(q.result||null);};q.onerror=function(){cb(null);};});}
+function delPhoto(id){photoDb(function(d){if(d)d.transaction('p','readwrite').objectStore('p').delete(id);});}
+function allPhotos(cb){photoDb(function(d){var out={};if(!d)return cb(out);var c=d.transaction('p').objectStore('p').openCursor();c.onsuccess=function(){var cur=c.result;if(cur){out[cur.key]=cur.value;cur.continue();}else cb(out);};c.onerror=function(){cb(out);};});}
+function shrink(file,cb){var rd=new FileReader();rd.onload=function(){var im=new Image();im.onload=function(){var M=1600,s=Math.min(1,M/Math.max(im.width,im.height));var c=document.createElement('canvas');c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext('2d').drawImage(im,0,0,c.width,c.height);cb(c.toDataURL('image/jpeg',0.8));};im.onerror=function(){cb(null);};im.src=rd.result;};rd.readAsDataURL(file);}
+function loadThumbs(){document.querySelectorAll('img[data-photo]').forEach(function(im){if(im.src)return;getPhoto(im.dataset.photo,function(d){if(d)im.src=d;else im.remove();});});}
+
+// ── Backups ────────────────────────────────────────────────────────
+function backupJson(cb){allPhotos(function(ph){cb(JSON.stringify({app:'range-log',version:1,data:db,photos:ph}));});}
+function autoBackup(){try{if(!window.AndroidApp||!AndroidApp.saveAutoBackup||db.settings.autoBackup===false)return;var k=todayKey();if(localStorage.getItem('rl_autoBackupDay')===k)return;
+  backupJson(function(js){if(AndroidApp.saveAutoBackup('range-log-auto-'+k+'.json',js)){localStorage.setItem('rl_autoBackupDay',k);localStorage.setItem('rl_autoBackupAt',String(Date.now()));}});}catch(e){}}
+function exportJson(){backupJson(function(js){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([js],{type:'application/json'}));a.download='range-log-backup-'+todayKey()+'.json';document.body.appendChild(a);a.click();a.remove();toast(window.AndroidApp?'Saved to Downloads/Range Log':'Backup downloaded');});}
+document.getElementById('importFile').addEventListener('change',function(e){var f=e.target.files&&e.target.files[0];if(!f)return;var rd=new FileReader();
+  rd.onload=function(){try{var j=JSON.parse(rd.result);if(!j||j.app!=='range-log'||!j.data)throw 0;if(!confirm('Replace everything in Range Log with this backup?'))return;db=j.data;Object.keys(EMPTY).forEach(function(k){if(db[k]==null)db[k]=JSON.parse(JSON.stringify(EMPTY[k]));});
+    var ph=j.photos||{},ids=Object.keys(ph),n=0;if(!ids.length)return save('Backup restored');ids.forEach(function(id){putPhoto(id,ph[id],function(){if(++n===ids.length)save('Backup restored');});});}catch(x){alert('That file isn\'t a Range Log backup.');}};rd.readAsText(f);e.target.value='';});
+
+// ── Rendering ──────────────────────────────────────────────────────
+var V=document.getElementById('view');
+function card(t,b,x){return '<div class="card"><h2>'+t+'<span class="sp"></span>'+(x||'')+'</h2>'+b+'</div>';}
+function render(){
+  document.querySelectorAll('#nav button').forEach(function(b){b.classList.toggle('on',b.dataset.tab===tab);});
+  var fab=document.getElementById('fab');fab.style.display=tab==='more'?'none':'';
+  fab.textContent={home:'＋ Session',log:'＋ Session',guns:'＋ Firearm',ammo:'＋ Ammo'}[tab]||'＋';
+  V.innerHTML=({home:renderHome,log:renderLog,guns:renderGuns,ammo:renderAmmo,more:renderMore}[tab])();loadThumbs();
+}
+var SAFETY=['Treat every firearm as if it is loaded.','Never point the muzzle at anything you are not willing to destroy.','Keep your finger off the trigger until your sights are on target and you are ready to shoot.','Be sure of your target and what is beyond it.','Eye and ear protection, every time. Follow the range officer and posted range rules.'];
+function sessRow(s){var r=sessionRounds(s),c=sessionCost(s),best=bestGroup(s);
+  return '<div class="row" data-act="openSess" data-id="'+s.id+'"><div class="main"><div class="t">'+esc(niceD(s.date))+(s.rangeName?' · '+esc(s.rangeName):'')+((s.photos||[]).length?' <span class="dim">📷</span>':'')+'</div>'+
+    '<div class="s">'+esc(lines(s).map(function(l){var g=byId('guns',l.gunId);return (g?gunName(g):'?')+' '+n0(l.rounds);}).join(' · '))+(best?' · best group '+best:'')+(s.rating?' · '+'★'.repeat(+s.rating):'')+'</div></div>'+
+    '<span class="tag acc">'+n0(r)+' rds</span>'+(c?'<span class="tag">'+money(c)+'</span>':'')+'</div>';}
+function bestGroup(s){var g=lines(s).filter(function(l){return +l.group>0;}).sort(function(a,b){return a.group-b.group;})[0];return g?g.group+'" @ '+(g.dist||'?')+' yd':'';}
+function renderHome(){
+  var h='';
+  if(!db.sessions.length){
+    var st=function(done,label,act){return '<button class="btn'+(done?'':' acc')+'" data-act="'+act+'">'+(done?'✅ ':'＋ ')+label+'</button>';};
+    h+=card('👋 Get started','<div class="muted">Log each range trip — rounds for each firearm, distance, scores or group sizes, a photo of your target and what it cost. Used rounds come off your ammo automatically, and you\'ll get a heads-up when a firearm is due for cleaning or ammo runs low.</div>'+
+      '<div class="btns">'+st(db.guns.length,'Add a firearm','addGun')+st(db.ammo.length,'Add ammo','addAmmo')+st(db.ranges.length,'Add a range','addRange')+(db.guns.length?'<button class="btn acc" data-act="newSess">🎯 Log a session</button>':'')+'</div>');
+  }
+  var yr=String(new Date().getFullYear()),month=todayKey().slice(0,7);
+  var ys=db.sessions.filter(function(s){return yearOf(s)===yr;}),ms=db.sessions.filter(function(s){return String(s.date).slice(0,7)===month;});
+  if(db.sessions.length)h+=card('📊 '+esc(new Date().toLocaleDateString('en-US',{month:'long'})),'<div class="stats"><div class="stat"><b>'+ms.length+'</b><span>sessions</span></div><div class="stat"><b>'+n0(ms.reduce(function(t,s){return t+sessionRounds(s);},0))+'</b><span>rounds</span></div><div class="stat"><b>'+money(ms.reduce(function(t,s){return t+sessionCost(s);},0)).replace('.00','')+'</b><span>spent</span></div></div>'+
+    '<div class="mini" style="margin-top:8px">This year: '+ys.length+' sessions · '+n0(ys.reduce(function(t,s){return t+sessionRounds(s);},0))+' rounds · '+money(ys.reduce(function(t,s){return t+sessionCost(s);},0))+'</div>');
+  var at=attention();
+  if(at.length)h+=card('⚠️ Needs attention',at.map(function(x){return '<div class="row" data-act="'+(x.kind==='clean'?'openGun':x.kind==='ammo'?'editAmmo':'editRange')+'" data-id="'+x.id+'"><div class="main"><div class="t">'+esc(x.title)+'</div><div class="s">'+esc(x.sub)+'</div></div>'+
+    (x.kind==='clean'?'<button class="btn sm" data-act="cleaned" data-id="'+x.id+'">Cleaned</button>':'<span class="tag warn">'+(x.kind==='ammo'?'low':'soon')+'</span>')+'</div>';}).join(''));
+  var recent=db.sessions.slice().sort(function(a,b){return a.date<b.date?1:-1;}).slice(0,3);
+  if(recent.length)h+=card('🕑 Recent sessions',recent.map(sessRow).join(''),'<button class="btn sm" data-act="tab" data-t="log">All</button>');
+  var tr=trendHtml();if(tr)h+=tr;
+  h+=card('🦺 Safety first','<ol style="margin:0;padding-left:18px;color:var(--muted);font-size:13.5px">'+SAFETY.map(function(s){return '<li style="margin:3px 0">'+esc(s)+'</li>';}).join('')+'</ol>');
+  return h;
+}
+// Group size over time for the firearm + distance you log most.
+function trendHtml(){
+  var pts={};db.sessions.forEach(function(s){lines(s).forEach(function(l){if(+l.group>0&&+l.dist>0){var k=l.gunId+'|'+l.dist;(pts[k]=pts[k]||[]).push({d:s.date,v:+l.group});}});});
+  var best=Object.keys(pts).sort(function(a,b){return pts[b].length-pts[a].length;})[0];if(!best||pts[best].length<2)return '';
+  var p=pts[best].sort(function(a,b){return a.d<b.d?-1:1;}).slice(-20),g=byId('guns',best.split('|')[0]),dist=best.split('|')[1];
+  var max=Math.max.apply(null,p.map(function(x){return x.v;}))*1.15,W=340,H=140,X=function(i){return 10+i*(W-20)/(p.length-1);},Y=function(v){return H-12-v*(H-24)/max;};
+  var first=p[0].v,last=p[p.length-1].v,better=last<first;
+  return card('📉 Group size · '+esc(gunName(g))+' @ '+esc(dist)+' yd','<svg class="trend" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none"><polyline points="'+p.map(function(x,i){return X(i)+','+Y(x.v);}).join(' ')+'" fill="none" stroke="#4ade80" stroke-width="2.5"/>'+
+    p.map(function(x,i){return '<circle cx="'+X(i)+'" cy="'+Y(x.v)+'" r="3.5" fill="#4ade80"/>';}).join('')+'</svg><div class="mini">'+p.length+' sessions · from '+first+'" to '+last+'" '+(better?'— tighter 👍':last>first?'— a bit wider':'')+' (smaller is better)</div>');
+}
+function renderLog(){
+  if(!db.sessions.length)return card('📒 Sessions','<div class="empty">No sessions yet. Tap ＋ Session after your next range trip.</div>');
+  var by={};db.sessions.forEach(function(s){var y=yearOf(s);(by[y]=by[y]||[]).push(s);});
+  return Object.keys(by).sort().reverse().map(function(y){var l=by[y].sort(function(a,b){return a.date<b.date?1:-1;});
+    return card(esc(y),l.map(sessRow).join(''),'<span class="tag acc">'+n0(l.reduce(function(t,s){return t+sessionRounds(s);},0))+' rds</span>');}).join('');
+}
+function renderGuns(){
+  var act=db.guns.filter(function(g){return !g.archived;}),old=db.guns.filter(function(g){return g.archived;});
+  var h=card('🔫 Firearms',act.length?act.map(function(g){var c=cleanDue(g);return '<div class="row" data-act="openGun" data-id="'+g.id+'"><div class="main"><div class="t">'+esc(gunName(g))+'</div><div class="s">'+esc([g.caliber,n0(gunRounds(g))+' rounds total',c?n0(c.since)+'/'+n0(c.every)+' since cleaning':''].filter(Boolean).join(' · '))+'</div>'+
+    (c?'<div class="bar" style="height:5px;border-radius:99px;background:var(--card2);margin-top:6px;overflow:hidden"><i style="display:block;height:100%;width:'+Math.min(100,c.since/c.every*100)+'%;background:'+(c.due?'#fb7185':c.left<=c.every*0.1?'#fbbf24':'#4ade80')+'"></i></div>':'')+'</div>'+(c&&c.due?'<span class="tag bad">clean</span>':'')+'</div>';}).join(''):'<div class="empty">Add each firearm to track its round count and cleaning.</div>');
+  if(old.length)h+=card('No longer owned',old.map(function(g){return '<div class="row" data-act="openGun" data-id="'+g.id+'"><div class="main"><div class="t">'+esc(gunName(g))+'</div><div class="s">'+n0(gunRounds(g))+' rounds</div></div></div>';}).join(''));
+  h+=card('📍 Ranges',(db.ranges.length?db.ranges.map(function(r){var n=r.renew?daysUntil(r.renew):null;return '<div class="row"><div class="main" data-act="editRange" data-id="'+r.id+'"><div class="t">'+esc(r.name)+'</div><div class="s">'+esc([r.fee?'Lane '+money(r.fee):'',r.hours,r.renew?'Membership renews '+niceD(r.renew):''].filter(Boolean).join(' · '))+'</div></div>'+
+    (r.phone?'<a class="btn sm" href="tel:'+esc(r.phone.replace(/[^\d+]/g,''))+'">📞</a>':'')+(r.address?'<a class="btn sm" href="https://maps.google.com/?q='+encodeURIComponent(r.address)+'" target="_blank" rel="noopener">Map</a>':'')+(n!=null&&n<=30?'<span class="tag warn">renew</span>':'')+'</div>';}).join(''):'<div class="empty">Add the ranges you go to: lane fee, hours, membership renewal.</div>'),'<button class="btn sm" data-act="addRange">＋</button>');
+  return h;
+}
+function renderAmmo(){
+  var act=db.ammo.filter(function(a){return !a.archived;});
+  if(!act.length)return card('📦 Ammo','<div class="empty">Add what you have on hand. Rounds you log in a session come off automatically.</div>');
+  var byCal={};act.forEach(function(a){(byCal[a.caliber||'Other']=byCal[a.caliber||'Other']||[]).push(a);});
+  return Object.keys(byCal).sort().map(function(cal){var list=byCal[cal],tot=list.reduce(function(t,a){return t+ammoLeft(a);},0);
+    return card(esc(cal),list.map(function(a){var left=ammoLeft(a),low=+a.low>0&&left<=+a.low,cpr=costPerRound(a);return '<div class="row" data-act="editAmmo" data-id="'+a.id+'"><div class="main"><div class="t">'+esc([a.brand,a.grain?a.grain+' gr':'',a.kind].filter(Boolean).join(' · ')||cal)+'</div><div class="s">'+n0(ammoUsed(a))+' used'+(cpr?' · '+money(cpr).replace(/^\$0/,'$0')+'/rd':'')+'</div></div>'+
+      '<span class="tag '+(left<=0?'bad':low?'warn':'good')+'">'+n0(left)+' left</span><button class="btn sm" data-act="buyAmmo" data-id="'+a.id+'">＋ Bought</button></div>';}).join(''),'<span class="tag">'+n0(tot)+'</span>');}).join('');
+}
+function renderMore(){
+  var at=+localStorage.getItem('rl_autoBackupAt')||0;
+  return card('💾 Backup','<div class="muted small">Everything lives only on this phone. A backup (target photos included) is saved automatically once a day'+(at?' (last: '+esc(new Date(at).toLocaleString())+')':'')+'.</div><div class="btns"><button class="btn" data-act="exportJson">Back up now</button><button class="btn" data-act="importJson">Restore a backup</button></div>'+
+    '<label class="chk"><input type="checkbox" data-act="toggleAuto" '+(db.settings.autoBackup===false?'':'checked')+'> Daily automatic backup</label>')+
+    card('🔒 Privacy','<div class="muted small">Serial numbers show only their last 4 until tapped. Turn on App lock from the App button (top right).</div>');
+}
+
+// ── Sheets ─────────────────────────────────────────────────────────
+var SH=document.getElementById('sheet'),SW=document.getElementById('sheetWrap');
+function openSheet(h){SH.innerHTML=h;SW.classList.add('open');}
+function closeSheet(){SW.classList.remove('open');SH.innerHTML='';}
+SW.addEventListener('click',function(e){if(e.target===SW)closeSheet();});
+function head(t){return '<h3><span>'+t+'</span><button class="iconbtn" data-act="close">✕</button></h3>';}
+function inp(n,l,v,t,ph){t=t||'text';return '<label class="f">'+l+'<input name="'+n+'" type="'+t+'" value="'+esc(v==null?'':v)+'" placeholder="'+esc(ph||'')+'"'+(t==='number'?' inputmode="decimal" step="any"':'')+'></label>';}
+function opts(list,sel,label,none){return (none?'<option value="">'+none+'</option>':'')+list.map(function(x){return '<option value="'+x.id+'"'+(x.id===sel?' selected':'')+'>'+esc(label(x))+'</option>';}).join('');}
+
+function lineHtml(l,i){l=l||{};var guns=db.guns.filter(function(g){return !g.archived||g.id===l.gunId;}),ammo=db.ammo.filter(function(a){return !a.archived||a.id===l.ammoId;});
+  return '<div class="card" style="padding:10px;margin:8px 0" data-line="'+i+'"><div class="grid2"><label class="f">Firearm<select name="gun">'+opts(guns,l.gunId,gunName,guns.length?'':'— add one first —')+'</select></label>'+
+    '<label class="f">Ammo<select name="ammo">'+opts(ammo,l.ammoId,ammoName,'— not tracked —')+'</select></label></div>'+
+    '<div class="grid2">'+inp('rounds','Rounds fired',l.rounds,'number')+inp('dist','Distance (yd)',l.dist,'number')+'</div>'+
+    '<div class="grid2">'+inp('group','Best group (in)',l.group,'number','e.g. 2.5')+inp('score','Score',l.score,'text','e.g. 86/100')+'</div>'+
+    inp('drill','Drill / target',l.drill,'text','e.g. B-8 slow fire, Bill drill')+(i>0?'<button class="btn sm bad" type="button" data-act="rmLine">Remove</button>':'')+'</div>';}
+function editSession(id){
+  var s=id?byId('sessions',id):null,x=s||{date:todayKey(),lines:[{}]};
+  if(!s){var lastS=db.sessions.slice().sort(function(a,b){return a.date<b.date?1:-1;})[0];if(lastS){x.rangeId=lastS.rangeId;x.lines=lines(lastS).map(function(l){return {gunId:l.gunId,ammoId:l.ammoId,dist:l.dist};});}}
+  openSheet(head(s?'Edit session':'New session')+'<form id="sf">'+inp('date','Date',x.date,'date')+
+    '<label class="f">Range<select name="range">'+opts(db.ranges,x.rangeId,function(r){return r.name;},'— other / not listed —')+'</select></label>'+
+    '<div class="grid2">'+inp('fee','Lane / range fee ($)',x.fee!=null?x.fee:(x.rangeId&&byId('ranges',x.rangeId)?byId('ranges',x.rangeId).fee:''),'number')+inp('mins','Time (minutes)',x.mins,'number')+'</div>'+
+    '<div id="linesBox">'+lines(x).map(lineHtml).join('')+'</div><button class="btn sm" type="button" data-act="addLine">＋ Another firearm</button>'+
+    '<label class="f">How did it go?<select name="rating"><option value="">—</option>'+[1,2,3,4,5].map(function(n){return '<option value="'+n+'"'+(+x.rating===n?' selected':'')+'>'+'★'.repeat(n)+'</option>';}).join('')+'</select></label>'+
+    '<label class="f">Notes<textarea name="notes" placeholder="What worked, what to work on next time">'+esc(x.notes||'')+'</textarea></label>'+
+    '<div class="btns"><button class="btn acc" type="submit">Save</button>'+(s?'<button class="btn bad" type="button" data-act="delSess" data-id="'+s.id+'">Delete</button>':'')+'</div></form>');
+  var f=document.getElementById('sf');
+  f.elements.range.addEventListener('change',function(){var r=byId('ranges',f.elements.range.value);if(r&&r.fee&&!f.elements.fee.value)f.elements.fee.value=r.fee;});
+  f.addEventListener('submit',function(e){e.preventDefault();
+    var ls=[].map.call(f.querySelectorAll('[data-line]'),function(c){var q=function(n){return c.querySelector('[name='+n+']').value.trim();};return {gunId:q('gun'),ammoId:q('ammo'),rounds:q('rounds'),dist:q('dist'),group:q('group'),score:q('score'),drill:q('drill')};}).filter(function(l){return l.gunId&&+l.rounds>0;});
+    if(!ls.length){alert('Add at least one firearm with the rounds you fired.');return;}
+    var o=s||{id:uid(),created:Date.now(),photos:[]},r=byId('ranges',f.elements.range.value);
+    o.date=f.elements.date.value||todayKey();o.rangeId=f.elements.range.value;o.rangeName=r?r.name:'';o.fee=f.elements.fee.value.trim();o.mins=f.elements.mins.value.trim();o.rating=f.elements.rating.value;o.notes=f.elements.notes.value.trim();o.lines=ls;
+    if(!s)db.sessions.push(o);closeSheet();save('Session saved · '+n0(sessionRounds(o))+' rounds');openSession(o.id);});
+}
+function openSession(id){var s=byId('sessions',id);if(!s)return;
+  openSheet(head(esc(niceD(s.date))+(s.rangeName?' · '+esc(s.rangeName):''))+
+    lines(s).map(function(l){var g=byId('guns',l.gunId),a=byId('ammo',l.ammoId);return '<div class="row"><div class="main"><div class="t">'+esc(gunName(g)||'?')+' · '+n0(l.rounds)+' rds</div><div class="s">'+esc([a?ammoName(a):'',l.dist?l.dist+' yd':'',l.group?'group '+l.group+'"':'',l.score?'score '+l.score:'',l.drill].filter(Boolean).join(' · '))+'</div></div></div>';}).join('')+
+    '<div class="mini" style="margin-top:6px">'+esc([s.mins?s.mins+' min':'',sessionCost(s)?'cost '+money(sessionCost(s))+' (fee + ammo)':'',s.rating?'★'.repeat(+s.rating):''].filter(Boolean).join(' · '))+'</div>'+
+    (s.notes?'<div class="muted" style="margin-top:8px;white-space:pre-wrap">'+esc(s.notes)+'</div>':'')+
+    '<div class="thumbs">'+(s.photos||[]).map(function(p){return '<img data-photo="'+p+'" data-sess="'+s.id+'" alt="target">';}).join('')+'</div>'+
+    '<div class="btns"><button class="btn" data-act="addPhoto" data-id="'+s.id+'">📷 Target photo</button><button class="btn" data-act="editSess" data-id="'+s.id+'">Edit</button></div>');loadThumbs();}
+function editGun(id){var g=id?byId('guns',id):null,x=g||{cleanEvery:500};
+  openSheet(head(g?'Edit firearm':'New firearm')+'<form id="gf">'+inp('name','Nickname (optional)',x.name)+'<div class="grid2">'+inp('make','Make',x.make)+inp('model','Model',x.model)+'</div>'+
+    '<div class="grid2">'+inp('caliber','Caliber',x.caliber,'text','e.g. 9mm')+'<label class="f">Type<select name="type">'+['','Handgun','Rifle','Shotgun','Rimfire','Other'].map(function(t){return '<option'+(x.type===t?' selected':'')+'>'+t+'</option>';}).join('')+'</select></label></div>'+
+    inp('serial','Serial number (optional)',x.serial)+'<div class="grid2">'+inp('bought','Purchased',x.bought,'date')+inp('price','Price ($)',x.price,'number')+'</div>'+
+    '<div class="grid2">'+inp('startRounds','Rounds before this app',x.startRounds,'number','0')+inp('cleanEvery','Clean every … rounds',x.cleanEvery,'number','e.g. 500')+'</div>'+inp('lastCleaned','Last cleaned',x.lastCleaned,'date')+
+    '<label class="f">Notes<textarea name="notes" placeholder="Optic, holster, zero distance…">'+esc(x.notes||'')+'</textarea></label>'+(g?'<label class="chk"><input type="checkbox" name="archived" '+(g.archived?'checked':'')+'> No longer own it</label>':'')+
+    '<div class="btns"><button class="btn acc" type="submit">Save</button>'+(g?'<button class="btn bad" type="button" data-act="delGun" data-id="'+g.id+'">Delete</button>':'')+'</div></form>');
+  var f=document.getElementById('gf');f.addEventListener('submit',function(e){e.preventDefault();var o=g||{id:uid()};['name','make','model','caliber','type','serial','bought','price','startRounds','cleanEvery','lastCleaned','notes'].forEach(function(k){o[k]=f.elements[k].value.trim();});
+    if(f.elements.archived)o.archived=f.elements.archived.checked;if(!o.name&&!o.make&&!o.model){alert('Please enter the make and model (or a nickname).');return;}if(!g)db.guns.push(o);closeSheet();save('Saved');});}
+function openGun(id){var g=byId('guns',id);if(!g)return;var c=cleanDue(g),ms=db.maint.filter(function(m){return m.gunId===id;}).sort(function(a,b){return a.date<b.date?1:-1;});
+  var ss=db.sessions.filter(function(s){return lines(s).some(function(l){return l.gunId===id;});});
+  openSheet(head(esc(gunName(g)))+'<div class="kv">'+[['Caliber',esc(g.caliber||'')],['Type',esc(g.type||'')],['Serial',g.serial?'<span data-act="reveal" data-n="'+esc(g.serial)+'">'+esc(mask(g.serial))+'</span> <span class="dim small">(tap)</span>':''],
+    ['Rounds',n0(gunRounds(g))+' total · '+ss.length+' sessions'],['Cleaning',c?n0(c.since)+' of '+n0(c.every)+' rounds'+(g.lastCleaned?' (last '+esc(niceD(g.lastCleaned))+')':''):''],['Purchased',esc([g.bought?niceD(g.bought):'',g.price?money(g.price):''].filter(Boolean).join(' · '))],['Notes',esc(g.notes||'')]]
+    .filter(function(x){return x[1];}).map(function(x){return '<div>'+x[0]+'</div><div>'+x[1]+'</div>';}).join('')+'</div>'+
+    '<div style="margin-top:12px;font-weight:700;font-size:13px;color:var(--accent)">Maintenance</div>'+(ms.length?ms.map(function(m){return '<div class="row"><div class="main"><div class="t">'+esc(m.what)+'</div><div class="s">'+esc(niceD(m.date))+(m.notes?' · '+esc(m.notes):'')+'</div></div><button class="iconbtn" data-act="delMaint" data-id="'+m.id+'" data-gun="'+id+'">🗑</button></div>';}).join(''):'<div class="empty">Nothing logged yet.</div>')+
+    '<div class="btns"><button class="btn acc" data-act="cleaned" data-id="'+id+'">🧽 Cleaned today</button><button class="btn" data-act="addMaint" data-id="'+id+'">＋ Maintenance</button><button class="btn" data-act="editGun" data-id="'+id+'">Edit</button></div>');}
+function editAmmo(id,pre){var a=id?byId('ammo',id):null,x=a||pre||{};
+  openSheet(head(a?'Edit ammo':'New ammo')+'<form id="af"><div class="grid2">'+inp('caliber','Caliber',x.caliber,'text','e.g. 9mm')+inp('brand','Brand',x.brand,'text','e.g. Federal')+'</div>'+
+    '<div class="grid2">'+inp('grain','Grain',x.grain,'number')+inp('kind','Type',x.kind,'text','FMJ, JHP…')+'</div>'+
+    (a?'':inp('bought','Rounds on hand now',x.bought,'number'))+'<div class="grid2">'+inp('boxQty','Rounds per box',x.boxQty,'number','50')+inp('boxCost','Price per box ($)',x.boxCost,'number')+'</div>'+
+    inp('low','Warn me when down to … rounds',x.low,'number','e.g. 100')+(a?'<div class="mini">On hand: '+n0(ammoLeft(a))+' ('+n0(a.bought)+' added, '+n0(ammoUsed(a))+' used). Use "＋ Bought" to add more, or fix the count below.</div>'+inp('fix','Correct the count to (optional)','','number'):'')+
+    (a?'<label class="chk"><input type="checkbox" name="archived" '+(a.archived?'checked':'')+'> Hide (don\'t use this one anymore)</label>':'')+
+    '<div class="btns"><button class="btn acc" type="submit">Save</button>'+(a?'<button class="btn bad" type="button" data-act="delAmmo" data-id="'+a.id+'">Delete</button>':'')+'</div></form>');
+  var f=document.getElementById('af');f.addEventListener('submit',function(e){e.preventDefault();var o=a||{id:uid(),bought:0};['caliber','brand','grain','kind','boxQty','boxCost','low'].forEach(function(k){o[k]=f.elements[k].value.trim();});
+    if(!a)o.bought=+f.elements.bought.value||0;if(a&&f.elements.fix.value!==''){o.bought=(+f.elements.fix.value)+ammoUsed(o);}if(a)o.archived=f.elements.archived.checked;
+    if(!o.caliber){alert('Please enter the caliber.');return;}if(!a)db.ammo.push(o);closeSheet();save('Saved');});}
+function buyAmmo(id){var a=byId('ammo',id);openSheet(head('Bought more · '+esc(ammoName(a)))+'<form id="bf">'+inp('qty','How many rounds',a.boxQty||'','number')+'<div class="btns"><button class="btn acc" type="submit">Add</button></div></form>');
+  document.getElementById('bf').addEventListener('submit',function(e){e.preventDefault();var q=+e.target.elements.qty.value;if(!(q>0))return;a.bought=(+a.bought||0)+q;closeSheet();save('Added '+n0(q)+' rounds');});}
+function editRange(id){var r=id?byId('ranges',id):null,x=r||{};
+  openSheet(head(r?'Edit range':'New range')+'<form id="rf">'+inp('name','Name',x.name)+inp('address','Address',x.address)+'<div class="grid2">'+inp('phone','Phone',x.phone,'tel')+inp('fee','Lane fee ($)',x.fee,'number')+'</div>'+inp('hours','Hours',x.hours,'text','e.g. Mon–Sat 9–8')+
+    inp('renew','Membership renews (optional)',x.renew,'date')+'<label class="f">Notes<textarea name="notes" placeholder="Max distance, rules, best times to go…">'+esc(x.notes||'')+'</textarea></label>'+
+    '<div class="btns"><button class="btn acc" type="submit">Save</button>'+(r?'<button class="btn bad" type="button" data-act="delRange" data-id="'+r.id+'">Delete</button>':'')+'</div></form>');
+  var f=document.getElementById('rf');f.addEventListener('submit',function(e){e.preventDefault();var o=r||{id:uid()};['name','address','phone','fee','hours','renew','notes'].forEach(function(k){o[k]=f.elements[k].value.trim();});if(!o.name){alert('Please name the range.');return;}if(!r)db.ranges.push(o);closeSheet();save('Saved');});}
+function addMaint(gid){openSheet(head('Maintenance')+'<form id="mf">'+inp('what','What was done',"",'text','e.g. Replaced recoil spring')+inp('date','Date',todayKey(),'date')+inp('notes','Notes','')+'<div class="btns"><button class="btn acc" type="submit">Save</button></div></form>');
+  document.getElementById('mf').addEventListener('submit',function(e){e.preventDefault();var w=e.target.elements.what.value.trim();if(!w)return;db.maint.push({id:uid(),gunId:gid,what:w,date:e.target.elements.date.value||todayKey(),notes:e.target.elements.notes.value.trim()});save('Saved');openGun(gid);});}
+
+// ── Clicks ─────────────────────────────────────────────────────────
+var photoFor=null,viewing=null;
+document.getElementById('photoFile').addEventListener('change',function(e){var f=e.target.files&&e.target.files[0];e.target.value='';if(!f||!photoFor)return;var sid=photoFor;
+  shrink(f,function(d){if(!d){alert('Could not read that picture.');return;}var pid='ph_'+uid();putPhoto(pid,d,function(ok){if(!ok){alert('Could not save the photo.');return;}var s=byId('sessions',sid);if(!s)return;(s.photos=s.photos||[]).push(pid);save('Photo added');openSession(sid);});});});
+document.getElementById('viewerClose').addEventListener('click',function(){document.getElementById('viewer').classList.remove('open');viewing=null;});
+document.getElementById('viewerDel').addEventListener('click',function(){if(!viewing||!confirm('Delete this photo?'))return;var s=byId('sessions',viewing.sess);if(s){s.photos=(s.photos||[]).filter(function(p){return p!==viewing.photo;});delPhoto(viewing.photo);}
+  document.getElementById('viewer').classList.remove('open');var id=viewing.sess;viewing=null;save('Photo deleted');openSession(id);});
+document.getElementById('nav').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;tab=b.dataset.tab;render();window.scrollTo(0,0);});
+document.getElementById('fab').addEventListener('click',function(){if(tab==='guns')editGun();else if(tab==='ammo')editAmmo();else{if(!db.guns.length){toast('Add a firearm first');editGun();return;}editSession();}});
+document.addEventListener('change',function(e){if(e.target.dataset&&e.target.dataset.act==='toggleAuto'){db.settings.autoBackup=e.target.checked;save(e.target.checked?'Daily backup on':'Daily backup off');}});
+document.addEventListener('click',function(e){
+  var im=e.target.closest('img[data-photo]');if(im&&im.src){viewing={photo:im.dataset.photo,sess:im.dataset.sess};document.getElementById('viewerImg').src=im.src;document.getElementById('viewer').classList.add('open');return;}
+  var el=e.target.closest('[data-act]');if(!el||el.tagName==='INPUT')return;var a=el.dataset.act,id=el.dataset.id;
+  if(e.target.closest('button,a')&&e.target.closest('button,a')!==el&&!el.matches('button'))return;
+  switch(a){
+    case 'close':closeSheet();break;case 'tab':tab=el.dataset.t;render();break;
+    case 'addGun':editGun();break;case 'editGun':closeSheet();editGun(id);break;case 'openGun':openGun(id);break;
+    case 'delGun':if(!confirm('Delete this firearm? Its rounds stay in your sessions.'))break;db.guns=db.guns.filter(function(x){return x.id!==id;});closeSheet();save('Deleted');break;
+    case 'cleaned':{var g=byId('guns',id);if(!g)break;g.lastCleaned=todayKey();db.maint.push({id:uid(),gunId:id,what:'Cleaned',date:todayKey(),notes:''});save('Marked cleaned');if(SW.classList.contains('open'))openGun(id);break;}
+    case 'addMaint':addMaint(id);break;
+    case 'delMaint':db.maint=db.maint.filter(function(x){return x.id!==id;});save();openGun(el.dataset.gun);break;
+    case 'addAmmo':editAmmo();break;case 'editAmmo':editAmmo(id);break;case 'buyAmmo':buyAmmo(id);break;
+    case 'delAmmo':if(!confirm('Delete this ammo?'))break;db.ammo=db.ammo.filter(function(x){return x.id!==id;});closeSheet();save('Deleted');break;
+    case 'addRange':editRange();break;case 'editRange':editRange(id);break;
+    case 'delRange':if(!confirm('Delete this range?'))break;db.ranges=db.ranges.filter(function(x){return x.id!==id;});closeSheet();save('Deleted');break;
+    case 'newSess':editSession();break;
+    case 'openSess':openSession(id);break;case 'editSess':closeSheet();editSession(id);break;
+    case 'delSess':{if(!confirm('Delete this session? Its rounds go back to your ammo.'))break;var s=byId('sessions',id);(s&&s.photos||[]).forEach(delPhoto);db.sessions=db.sessions.filter(function(x){return x.id!==id;});closeSheet();save('Deleted');break;}
+    case 'addLine':{var box=document.getElementById('linesBox');box.insertAdjacentHTML('beforeend',lineHtml({},box.children.length));break;}
+    case 'rmLine':el.closest('[data-line]').remove();break;
+    case 'addPhoto':photoFor=id;document.getElementById('photoFile').click();break;
+    case 'reveal':el.textContent=el.textContent.indexOf('•')>=0?el.dataset.n:mask(el.dataset.n);break;
+    case 'exportJson':exportJson();break;case 'importJson':document.getElementById('importFile').click();break;
+  }
+});
+window.handleAndroidBack=function(){var s=document.getElementById('appSheetWrap');if(s&&s.classList.contains('open')){s.classList.remove('open');return true;}
+  var vw=document.getElementById('viewer');if(vw.classList.contains('open')){vw.classList.remove('open');return true;}
+  if(SW.classList.contains('open')){closeSheet();return true;}if(tab!=='home'){tab='home';render();return true;}return false;};
+window.HR={summary:summary,exportJson:exportJson,db:function(){return db;}};
+render();share();autoBackup();
+document.addEventListener('visibilitychange',function(){if(!document.hidden){share();render();}});
+})();
+</script>
+</body>
+</html>
