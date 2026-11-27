@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>🎵 Cindy's Record Collection</title>
+<style>
+:root {
+  --bg:#111;--surface:#1c1c1c;--surface2:#262626;--border:#333;
+  --accent:#e8a020;--accent2:#f0c040;--text:#f0f0f0;--text2:#888;
+  --red:#c0392b;--green:#27ae60;--radius:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,'Segoe UI',sans-serif;min-height:100vh}
+
+/* ── HEADER ── */
+header{background:linear-gradient(135deg,#1a1a2e,#16213e);border-bottom:2px solid var(--accent);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo h1{font-size:1.4rem;color:var(--accent2);letter-spacing:.5px}
+.logo p{font-size:.75rem;color:var(--text2)}
+.stats-row{display:flex;gap:16px;flex-wrap:wrap}
+.stat{text-align:center}
+.stat-num{font-size:1.3rem;font-weight:700;color:var(--accent2)}
+.stat-lbl{font-size:.65rem;color:var(--text2);text-transform:uppercase;letter-spacing:1px}
+
+/* ── TOOLBAR ── */
+.toolbar{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.search-wrap{position:relative;flex:1;min-width:180px}
+.search-wrap input{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:24px;padding:8px 14px 8px 36px;font-size:.88rem;outline:none;transition:border-color .2s}
+.search-wrap input:focus{border-color:var(--accent)}
+.search-wrap .si{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text2)}
+select,.btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:var(--radius);padding:7px 12px;font-size:.82rem;cursor:pointer;outline:none;transition:all .2s;white-space:nowrap}
+select:hover,select:focus,.btn:hover{border-color:var(--accent)}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:#111;font-weight:700}
+.btn-primary:hover{background:var(--accent2);border-color:var(--accent2)}
+.btn-danger{background:transparent;border-color:var(--red);color:var(--red)}
+.btn-danger:hover{background:var(--red);color:#fff}
+.btn-sm{padding:4px 10px;font-size:.75rem}
+.view-btns{display:flex;gap:4px}
+.vbtn{padding:7px 10px;background:var(--surface2);border:1px solid var(--border);color:var(--text2);border-radius:var(--radius);cursor:pointer;font-size:1rem;transition:all .2s}
+.vbtn.active{background:var(--accent);border-color:var(--accent);color:#111}
+
+/* ── SCAN BUTTON ── */
+.btn-scan{background:linear-gradient(135deg,#6a11cb,#2575fc);border-color:#6a11cb;color:#fff;font-weight:700}
+.btn-scan:hover{filter:brightness(1.15)}
+
+/* ── MAIN ── */
+main{padding:20px 24px}
+
+/* ── GRID ── */
+.grid-view{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px}
+.record-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:all .2s;position:relative}
+.record-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 6px 20px rgba(232,160,32,.15)}
+.cover-area{position:relative;background:var(--surface2)}
+.cover-img{width:100%;display:block;height:auto}
+.cover-placeholder{min-height:180px;display:flex;align-items:center;justify-content:center;font-size:3rem}
+.cover-loading{min-height:180px;display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:.75rem;gap:6px}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.card-body{padding:10px}
+.card-artist{font-size:.7rem;color:var(--accent);font-weight:700;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-album{font-size:.82rem;font-weight:600;margin-top:2px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.badges{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.badge{font-size:.62rem;padding:2px 7px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.badge-genre{background:#1a1a3d;color:#8a8ae8;border:1px solid #3a3a6b}
+.badge-own{background:#0a3d1a;color:#4ae87a;border:1px solid #1a6b3a}
+.badge-want{background:#1a2b0a;color:#a8e84a;border:1px solid #3a5d1a}
+.badge-sold{background:#2a2a2a;color:#888;border:1px solid #444}
+.badge-cond{background:#2b1a0a;color:#e8a44a;border:1px solid #6b3a1a}
+.star-row{display:flex;gap:2px;margin-top:6px}
+.star{color:#444;font-size:.85rem;cursor:pointer;transition:color .1s}
+.star.lit{color:var(--accent2)}
+.card-actions{display:flex;gap:6px;margin-top:8px}
+.card-btn{flex:1;padding:4px;font-size:.72rem;text-align:center;border-radius:4px;cursor:pointer;border:1px solid var(--border);background:var(--surface2);color:var(--text2);transition:all .15s}
+.card-btn:hover{border-color:var(--accent);color:var(--accent)}
+.card-btn.del:hover{border-color:var(--red);color:var(--red)}
+.fav-btn{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.6);border:none;border-radius:50%;width:28px;height:28px;font-size:.85rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+
+/* ── LIST VIEW ── */
+.list-view table{width:100%;border-collapse:collapse}
+.list-view th{background:var(--surface);color:var(--text2);font-size:.72rem;text-transform:uppercase;letter-spacing:1px;padding:10px 12px;border-bottom:2px solid var(--border);text-align:left;cursor:pointer;white-space:nowrap;user-select:none}
+.list-view th:hover{color:var(--accent)}
+.list-view th.sorted{color:var(--accent)}
+.list-view tr:hover td{background:var(--surface2)}
+.list-view td{padding:8px 12px;border-bottom:1px solid var(--border);font-size:.85rem;vertical-align:middle}
+.list-thumb{width:36px;height:36px;object-fit:contain;border-radius:4px;display:block;background:var(--surface2)}
+.list-thumb-ph{width:36px;height:36px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;background:var(--surface2)}
+.row-actions{display:flex;gap:6px}
+.row-btn{padding:3px 8px;font-size:.72rem;border-radius:4px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text2);transition:all .15s}
+.row-btn:hover{border-color:var(--accent);color:var(--accent)}
+.row-btn.del:hover{border-color:var(--red);color:var(--red)}
+
+/* ── MODALS ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:100;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;width:100%;max-width:560px;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.modal-header{padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-header h2{font-size:1.1rem;color:var(--accent2)}
+.modal-close{background:none;border:none;color:var(--text2);font-size:1.3rem;cursor:pointer;padding:4px;border-radius:4px}
+.modal-close:hover{color:var(--text)}
+.modal-body{padding:18px 22px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-grid .full{grid-column:1/-1}
+.form-group{display:flex;flex-direction:column;gap:4px}
+.form-group label{font-size:.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.5px}
+.form-group input,.form-group select,.form-group textarea{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:var(--radius);padding:8px 12px;font-size:.88rem;outline:none;transition:border-color .2s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--accent)}
+.form-group textarea{resize:vertical;min-height:60px}
+.modal-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end}
+.star-picker{display:flex;gap:6px}
+.star-pick{font-size:1.4rem;cursor:pointer;color:#444;transition:color .1s}
+.star-pick.lit{color:var(--accent2)}
+
+/* ── SCAN OVERLAY ── */
+.scan-overlay{display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.8);align-items:center;justify-content:center;flex-direction:column;gap:16px}
+.scan-overlay.active{display:flex}
+.scan-spinner{width:52px;height:52px;border:4px solid var(--border);border-top-color:var(--accent2);border-radius:50%;animation:spin .8s linear infinite}
+.scan-label{color:var(--text);font-size:1.1rem;letter-spacing:.5px}
+.scan-sub{color:var(--text2);font-size:.82rem}
+
+/* ── SETTINGS MODAL ── */
+.settings-modal{display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.7);align-items:center;justify-content:center}
+.settings-modal.open{display:flex}
+.settings-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;width:min(480px,96vw);padding:28px;position:relative}
+.settings-box h2{color:var(--accent2);margin-bottom:6px}
+.settings-box p{color:var(--text2);font-size:.84rem;line-height:1.5;margin-bottom:12px}
+.settings-box label{display:block;font-size:.78rem;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;margin-top:12px}
+.settings-box input{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:var(--radius);padding:10px 12px;font-size:.9rem;outline:none;font-family:monospace}
+.settings-box input:focus{border-color:var(--accent)}
+.settings-actions{display:flex;gap:10px;margin-top:18px;justify-content:flex-end}
+.settings-close{position:absolute;top:14px;right:16px;background:none;border:none;color:var(--text2);font-size:1.3rem;cursor:pointer}
+.api-hint{background:var(--surface2);border-radius:6px;padding:10px 14px;margin-top:12px;font-size:.78rem;color:var(--text2);line-height:1.6}
+.api-hint a{color:var(--accent2)}
+
+/* ── DETAIL PANEL ── */
+.detail-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:90;align-items:center;justify-content:flex-end}
+.detail-overlay.open{display:flex}
+.detail-panel{background:var(--surface);border-left:2px solid var(--border);width:340px;height:100vh;overflow-y:auto;padding:24px 20px;display:flex;flex-direction:column;gap:14px}
+.detail-cover{width:100%;display:block;border-radius:8px}
+.detail-cover-ph{width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:4rem;background:var(--surface2);border-radius:8px}
+.detail-title{font-size:1.2rem;font-weight:700;line-height:1.3}
+.detail-artist{font-size:1rem;color:var(--accent2)}
+.detail-row{display:flex;justify-content:space-between;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--border);font-size:.84rem;gap:12px}
+.detail-row .key{color:var(--text2);font-size:.72rem;text-transform:uppercase;flex-shrink:0}
+.detail-row .val{text-align:right;font-size:.84rem}
+.detail-notes{background:var(--surface2);border-radius:var(--radius);padding:10px;font-size:.84rem;color:var(--text2);line-height:1.5;font-style:italic}
+.detail-close{position:absolute;top:14px;right:16px;background:none;border:none;color:var(--text2);font-size:1.3rem;cursor:pointer}
+.detail-tracks{margin-top:4px}
+.detail-tracks h3{font-size:.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.detail-tracks h3::after{content:'';flex:1;height:1px;background:var(--border)}
+.track-row{display:flex;align-items:baseline;gap:8px;padding:5px 0;border-bottom:1px solid #222}
+.track-num{font-size:.68rem;color:var(--text2);min-width:18px;text-align:right}
+.track-title{flex:1;font-size:.8rem}
+.track-dur{font-size:.7rem;color:var(--text2);flex-shrink:0}
+
+/* ── COVER PROGRESS ── */
+.cover-progress-bar{height:3px;background:var(--border);position:fixed;top:0;left:0;right:0;z-index:200;display:none}
+.cover-progress-fill{height:100%;background:var(--accent);width:0%;transition:width .3s}
+
+/* ── GENRE MANAGER ── */
+.genre-table{width:100%;border-collapse:collapse}
+.genre-table th{font-size:.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;padding:8px 10px;border-bottom:1px solid var(--border);text-align:left}
+.genre-table td{padding:8px 10px;border-bottom:1px solid var(--border);font-size:.88rem;vertical-align:middle}
+.genre-count{font-size:.72rem;color:var(--text2);background:var(--surface2);padding:1px 7px;border-radius:20px}
+
+/* ── EMPTY / TOAST ── */
+.empty{text-align:center;padding:60px 20px;color:var(--text2)}
+.empty-icon{font-size:3.5rem;margin-bottom:14px}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--surface);border:1px solid var(--accent);color:var(--text);padding:11px 16px;border-radius:var(--radius);font-size:.85rem;z-index:999;transform:translateY(80px);opacity:0;transition:all .3s;box-shadow:0 4px 16px rgba(0,0,0,.4)}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* ── SCAN HINT BOX ── */
+.scan-hint{padding:10px 12px;background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.scan-hint p{color:var(--text2);font-size:.82rem;flex:1;min-width:120px}
+
+/* ── COVER PREVIEW ── */
+#coverPreviewWrap{width:80px;flex-shrink:0;display:none}
+#coverPreviewImg{width:80px;height:80px;object-fit:contain;border-radius:4px;border:1px solid var(--border);display:block;background:var(--surface2)}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--surface)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:600px){
+  header,.toolbar,main{padding-left:14px;padding-right:14px}
+  .form-grid{grid-template-columns:1fr}
+  .detail-panel{width:100%}
+  .grid-view{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+}
+</style>
+</head>
+<body>
+
+<div class="cover-progress-bar" id="coverProgressBar"><div class="cover-progress-fill" id="coverProgressFill"></div></div>
+
+<header>
+  <div class="logo">
+    <div style="font-size:2rem">💿</div>
+    <div>
+      <h1>Cindy's Record Collection</h1>
+      <p>Personal record library tracker</p>
+    </div>
+  </div>
+  <div class="stats-row" id="statsRow"></div>
+</header>
+
+<div class="toolbar">
+  <div class="search-wrap">
+    <span class="si">🔍</span>
+    <input type="text" id="searchInput" placeholder="Search artist, album, genre…">
+  </div>
+  <select id="filterGenre"><option value="">All Genres</option></select>
+  <select id="filterStatus"><option value="">All Statuses</option><option>Own It</option><option>Wishlist</option><option>Sold</option></select>
+  <select id="sortBy">
+    <option value="dateAdded">Date Added</option>
+    <option value="artist">Artist A–Z</option>
+    <option value="album">Album A–Z</option>
+    <option value="genre">Genre</option>
+    <option value="year">Year</option>
+    <option value="rating">Rating</option>
+  </select>
+  <div class="view-btns">
+    <button class="vbtn active" id="btnGrid" title="Grid view">⊞</button>
+    <button class="vbtn" id="btnList" title="List view">☰</button>
+  </div>
+  <button class="btn" id="btnGenres">🏷 Genres</button>
+  <button class="btn" id="btnFetchCovers">🖼 Get Covers</button>
+  <button class="btn btn-primary" id="btnAdd">＋ Add Record</button>
+  <button class="btn" id="btnSettings" title="AI & Settings">⚙️</button>
+</div>
+
+<main><div id="recordContainer"></div></main>
+
+<!-- ADD / EDIT MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modalTitle">Add Record</h2>
+      <button class="modal-close" id="modalClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="scan-hint">
+        <p>📷 Point your camera at a record cover — AI will identify the artist, album, year and genre automatically.</p>
+        <label class="btn btn-scan" style="cursor:pointer;margin:0" title="Scan a record cover with AI">
+          📷 Scan Cover
+          <input type="file" id="scanFileInput" accept="image/*" capture="environment" style="display:none" onchange="handleScanUpload(this)">
+        </label>
+      </div>
+      <div class="form-grid">
+        <div class="form-group full"><label>Artist *</label><input type="text" id="fArtist" placeholder="Artist or band name"></div>
+        <div class="form-group full"><label>Album *</label><input type="text" id="fAlbum" placeholder="Album title"></div>
+        <div class="form-group"><label>Genre</label><input type="text" id="fGenre" list="genreList" placeholder="Rock, Country…" autocomplete="off"></div>
+        <div class="form-group"><label>Year</label><input type="number" id="fYear" placeholder="e.g. 1984" min="1900" max="2099"></div>
+        <div class="form-group"><label>Format</label>
+          <select id="fFormat"><option>LP</option><option>EP</option><option>Single</option><option>7"</option><option>10"</option><option>12"</option><option>Box Set</option></select>
+        </div>
+        <div class="form-group"><label>Status</label>
+          <select id="fStatus"><option>Own It</option><option>Wishlist</option><option>Sold</option></select>
+        </div>
+        <div class="form-group"><label>Condition</label>
+          <select id="fCondition"><option>Mint (M)</option><option>Near Mint (NM)</option><option>Very Good+ (VG+)</option><option>Very Good (VG)</option><option>Good (G)</option></select>
+        </div>
+        <div class="form-group"><label>Label</label><input type="text" id="fLabel" placeholder="Record label"></div>
+        <div class="form-group full">
+          <label>Cover Image <span style="color:var(--text2);font-size:.68rem;text-transform:none">(auto-fetched, or paste a URL / upload)</span></label>
+          <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap">
+            <div style="flex:1;min-width:160px;display:flex;flex-direction:column;gap:7px">
+              <input type="text" id="fCoverUrl" placeholder="https://… (leave blank to auto-fetch)" oninput="updateCoverPreview()">
+              <div style="display:flex;gap:8px">
+                <label class="btn btn-sm" style="cursor:pointer;margin:0">📁 Upload<input type="file" id="fCoverFile" accept="image/*" style="display:none" onchange="handleCoverUpload(this)"></label>
+                <button type="button" class="btn btn-sm" onclick="clearCover()">✕ Clear</button>
+              </div>
+            </div>
+            <div id="coverPreviewWrap"><img id="coverPreviewImg" src="" alt="" onerror="this.parentNode.style.display='none'"></div>
+          </div>
+        </div>
+        <div class="form-group full"><label>Your Rating</label>
+          <div class="star-picker" id="starPicker">
+            <span class="star-pick" data-v="1">★</span><span class="star-pick" data-v="2">★</span>
+            <span class="star-pick" data-v="3">★</span><span class="star-pick" data-v="4">★</span>
+            <span class="star-pick" data-v="5">★</span>
+          </div>
+        </div>
+        <div class="form-group full"><label>Notes</label><textarea id="fNotes" placeholder="Your thoughts, memories, purchase details…"></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" id="modalCancel">Cancel</button>
+      <button class="btn btn-primary" id="modalSave">Save Record</button>
+    </div>
+  </div>
+</div>
+
+<!-- AI SCAN OVERLAY -->
+<div class="scan-overlay" id="scanOverlay">
+  <div class="scan-spinner" id="scanSpinner"></div>
+  <div class="scan-label" id="scanLabel">Identifying record…</div>
+  <div class="scan-sub" id="scanSub">Claude AI is reading the cover</div>
+  <button id="scanDismiss" style="display:none;margin-top:16px;padding:10px 24px;background:var(--accent);border:none;border-radius:8px;color:#111;font-weight:700;font-size:1rem;cursor:pointer">Dismiss</button>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="settings-modal" id="settingsModal">
+  <div class="settings-box">
+    <button class="settings-close" id="settingsClose">✕</button>
+    <h2>⚙️ AI Settings</h2>
+    <p>Enter your Anthropic API key to enable the <strong>📷 Scan Cover</strong> feature. Your key is stored only in your browser and sent only to Anthropic.</p>
+    <label for="apiKeyInput">Anthropic API Key</label>
+    <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-…" autocomplete="off" spellcheck="false">
+    <div class="api-hint">
+      Get a free key at <a href="https://console.anthropic.com/settings/keys" target="_blank">console.anthropic.com</a> → API Keys → Create Key.<br>
+      Uses <strong>claude-haiku</strong> — costs fractions of a cent per scan.
+    </div>
+    <div class="settings-actions">
+      <button class="btn" id="settingsCancel">Cancel</button>
+      <button class="btn btn-primary" id="settingsSave">Save Key</button>
+    </div>
+    <hr style="border:none;border-top:1px solid var(--border);margin:20px 0">
+    <h3 style="margin:0 0 8px;font-size:.95rem;color:var(--text)">💾 Backup &amp; Restore</h3>
+    <p style="font-size:.82rem;color:var(--text2);margin:0 0 14px">Export your collection to a JSON file you can save as a backup, or reload it later on any device.</p>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button class="btn btn-primary" id="btnBackup">⬇️ Export Backup</button>
+      <button class="btn" id="btnRestoreTrigger">⬆️ Restore from Backup</button>
+      <input type="file" id="restoreFileInput" accept=".json" style="display:none">
+    </div>
+    <div id="restoreStatus" style="display:none;margin-top:10px;padding:10px;border-radius:var(--radius);font-size:.83rem"></div>
+  </div>
+</div>
+
+<!-- GENRE MANAGER MODAL -->
+<div class="modal-overlay" id="genreModalOverlay">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-header"><h2>🏷 Manage Genres</h2><button class="modal-close" id="genreModalClose">✕</button></div>
+    <div class="modal-body">
+      <p style="color:var(--text2);font-size:.83rem;margin-bottom:12px">Rename a genre to update all records at once.</p>
+      <table class="genre-table" id="genreTable"></table>
+      <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+        <p style="font-size:.72rem;color:var(--text2);margin-bottom:7px;text-transform:uppercase;letter-spacing:.5px">Add new genre</p>
+        <div style="display:flex;gap:8px">
+          <input type="text" id="newGenreInput" placeholder="New genre name…" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:var(--radius);padding:7px 12px;font-size:.88rem;outline:none">
+          <button class="btn btn-primary btn-sm" id="newGenreAdd">Add</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-primary" id="genreModalDone">Done</button></div>
+  </div>
+</div>
+
+<!-- DETAIL PANEL -->
+<div class="detail-overlay" id="detailOverlay">
+  <div class="detail-panel" id="detailPanel" style="position:relative"></div>
+</div>
+
+<datalist id="genreList"></datalist>
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── DEFAULT DATA ─────────────────────────────────────────────────────────────
+const STORE_KEY = 'vinylCollection_v1';
+const GENRE_KEY = 'vinylGenres_v1';
+
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2); }
+
+const DEFAULT_RECORDS = [
+  // Photo 1
+  {artist:"Bruce Springsteen",album:"Born in the U.S.A.",genre:"Rock",year:1984,format:"LP",iTunesSearch:"Bruce Springsteen Born in the USA"},
+  {artist:"Tesla",album:"Five Man Acoustical Jam",genre:"Rock",year:1990,format:"LP",iTunesSearch:"Tesla Five Man Acoustical Jam"},
+  {artist:"Stranger Things",album:"S3: Music from the Netflix Series",genre:"Soundtrack",year:2019,format:"LP",iTunesSearch:"Stranger Things Season 3 Soundtrack"},
+  {artist:"Stranger Things",album:"Music from the Netflix Series",genre:"Soundtrack",year:2016,format:"LP",iTunesSearch:"Stranger Things Soundtrack Netflix"},
+  {artist:"Matchbox Twenty",album:"Yourself or Someone Like You",genre:"Alternative",year:1996,format:"LP",iTunesSearch:"Matchbox Twenty Yourself or Someone Like You"},
+  {artist:"Sade",album:"The Best of Sade",genre:"R&B/Soul",year:1994,format:"LP",iTunesSearch:"Sade The Best of Sade"},
+  {artist:"Aerosmith",album:"Greatest Hits",genre:"Rock",year:1980,format:"LP",iTunesSearch:"Aerosmith Greatest Hits"},
+  {artist:"Various Artists",album:"Dirty Dancing: Original Soundtrack",genre:"Soundtrack",year:1987,format:"LP",iTunesSearch:"Dirty Dancing Original Soundtrack"},
+  {artist:"Creed",album:"Greatest Hits",genre:"Rock",year:2004,format:"LP",iTunesSearch:"Creed Greatest Hits"},
+  {artist:"AC/DC",album:"Back in Black",genre:"Rock",year:1980,format:"LP",iTunesSearch:"ACDC Back in Black"},
+  {artist:"The Fray",album:"How to Save a Life",genre:"Indie/Pop",year:2005,format:"LP",iTunesSearch:"The Fray How to Save a Life"},
+  {artist:"Dayglow",album:"Harmony House",genre:"Indie/Pop",year:2021,format:"LP",iTunesSearch:"Dayglow Harmony House"},
+  {artist:"Various Artists",album:"Footloose: Original Soundtrack",genre:"Soundtrack",year:1984,format:"LP",iTunesSearch:"Footloose Original Motion Picture Soundtrack"},
+  {artist:"George Michael & Wham!",album:"Last Christmas",genre:"Christmas",year:1984,format:"LP",iTunesSearch:"Wham Last Christmas"},
+  {artist:"Various Artists",album:"Jingle All the Way: 10 Holiday Classics",genre:"Christmas",year:1992,format:"LP",iTunesSearch:"Jingle All the Way Holiday Classics"},
+  {artist:"Richard Marx",album:"Christmas Spirit",genre:"Christmas",year:1994,format:"LP",iTunesSearch:"Richard Marx Christmas Spirit"},
+  {artist:"Michael Bublé",album:"Christmas",genre:"Christmas",year:2011,format:"LP",iTunesSearch:"Michael Buble Christmas"},
+  {artist:"Frank Sinatra",album:"Ultimate Christmas",genre:"Christmas",year:1968,format:"LP",iTunesSearch:"Frank Sinatra Ultimate Christmas"},
+  {artist:"Trans-Siberian Orchestra",album:"The Ghosts of Christmas Eve",genre:"Christmas",year:1999,format:"LP",iTunesSearch:"Trans-Siberian Orchestra Ghosts of Christmas Eve"},
+  {artist:"Eagles",album:"Greatest Hits Volume 1",genre:"Rock",year:1976,format:"LP",iTunesSearch:"Eagles Greatest Hits Volume 1"},
+  {artist:"Nickelback",album:"The Best of Nickelback Volume 2",genre:"Rock",year:2020,format:"LP",iTunesSearch:"Nickelback Best Of Volume 2"},
+  // Photo 2
+  {artist:"Various Artists",album:"The World of Strawberry Shortcake",genre:"Children's",year:1980,format:"LP",iTunesSearch:"World of Strawberry Shortcake"},
+  {artist:"Frank Sinatra",album:"Ultimate Sinatra",genre:"Jazz/Pop",year:2015,format:"LP",iTunesSearch:"Frank Sinatra Ultimate Sinatra"},
+  {artist:"Queen",album:"Greatest Hits II",genre:"Rock",year:1991,format:"LP",iTunesSearch:"Queen Greatest Hits II"},
+  {artist:"R.E.M.",album:"Best of R.E.M. at the BBC",genre:"Alternative",year:2006,format:"LP",iTunesSearch:"REM Best of BBC"},
+  {artist:"Chicago",album:"Greatest Hits 1982–1989",genre:"Rock/Pop",year:1989,format:"LP",iTunesSearch:"Chicago Greatest Hits 1982 1989"},
+  {artist:"Righteous Brothers",album:"The Best of the Righteous Brothers",genre:"R&B/Soul",year:1990,format:"LP",iTunesSearch:"Righteous Brothers Best Of"},
+  {artist:"Ratt",album:"Out of the Cellar",genre:"Rock",year:1984,format:"LP",iTunesSearch:"Ratt Out of the Cellar"},
+  {artist:"Dean Martin",album:"The Nashville Sessions",genre:"Country",year:1983,format:"LP",iTunesSearch:"Dean Martin Nashville Sessions"},
+  {artist:"Chris Stapleton",album:"Traveller",genre:"Country",year:2015,format:"LP",iTunesSearch:"Chris Stapleton Traveller"},
+  {artist:"Loretta Lynn",album:"Greatest Hits",genre:"Country",year:1968,format:"LP",iTunesSearch:"Loretta Lynn Greatest Hits"},
+  {artist:"Eric Clapton",album:"Icon",genre:"Rock",year:2010,format:"LP",iTunesSearch:"Eric Clapton Icon"},
+  {artist:"Rod Stewart",album:"Camouflage",genre:"Rock/Pop",year:1984,format:"LP",iTunesSearch:"Rod Stewart Camouflage"},
+  {artist:"Hall & Oates",album:"Their Ultimate Collection",genre:"R&B/Soul",year:2021,format:"LP",iTunesSearch:"Hall and Oates Their Ultimate Collection"},
+  {artist:"Eagles",album:"Their Greatest Hits: Volumes 1 & 2",genre:"Rock",year:2017,format:"LP",iTunesSearch:"Eagles Their Greatest Hits Volumes 1 2"},
+  {artist:"The Wallflowers",album:"Bringing Down the Horse",genre:"Alternative",year:1996,format:"LP",iTunesSearch:"Wallflowers Bringing Down the Horse"},
+  // Photo 3
+  {artist:"Brooks & Dunn",album:"Reboot II",genre:"Country",year:2021,format:"LP",iTunesSearch:"Brooks and Dunn Reboot II"},
+  {artist:"Various Artists",album:"Dr. Seuss' The Grinch: OST",genre:"Soundtrack",year:2018,format:"LP",iTunesSearch:"Grinch Original Motion Picture Soundtrack"},
+  {artist:"Tyler Childers",album:"Purgatory",genre:"Country",year:2017,format:"LP",iTunesSearch:"Tyler Childers Purgatory"},
+  {artist:"Disturbed",album:"The Sickness",genre:"Metal",year:2000,format:"LP",iTunesSearch:"Disturbed The Sickness"},
+  {artist:"Kenny Rogers",album:"Where Are You Going",genre:"Country",year:2000,format:"LP",iTunesSearch:"Kenny Rogers Where Are You Going"},
+  {artist:"Kenny Rogers",album:"21 Number Ones",genre:"Country",year:2004,format:"LP",iTunesSearch:"Kenny Rogers 21 Number Ones"},
+  {artist:"Dave Matthews Band",album:"Crash",genre:"Alternative",year:1996,format:"LP",iTunesSearch:"Dave Matthews Band Crash"},
+  {artist:"Billy Joel",album:"Storm Front",genre:"Rock/Pop",year:1989,format:"LP",iTunesSearch:"Billy Joel Storm Front"},
+  {artist:"Fleetwood Mac",album:"Greatest Hits",genre:"Rock",year:1988,format:"LP",iTunesSearch:"Fleetwood Mac Greatest Hits"},
+  {artist:"Dean Martin",album:"The Platinum Collection",genre:"Jazz/Pop",year:2005,format:"LP",iTunesSearch:"Dean Martin Platinum Collection"},
+  {artist:"Bing Crosby",album:"Christmas Classics",genre:"Christmas",year:1945,format:"LP",iTunesSearch:"Bing Crosby Christmas Classics"},
+  {artist:"George Strait",album:"#1's Volume 1",genre:"Country",year:1999,format:"LP",iTunesSearch:"George Strait Number Ones Volume 1"},
+  {artist:"Ronnie Milsap",album:"The Best of Ronnie Milsap",genre:"Country",year:1988,format:"LP",iTunesSearch:"Ronnie Milsap Best Of"},
+  {artist:"Seth MacFarlane",album:"Holiday for Swing!",genre:"Christmas",year:2014,format:"LP",iTunesSearch:"Seth MacFarlane Holiday for Swing"},
+  {artist:"Hinder",album:"Extreme Behavior",genre:"Rock",year:2005,format:"LP",iTunesSearch:"Hinder Extreme Behavior"},
+  {artist:"James Taylor",album:"At Christmas",genre:"Christmas",year:2006,format:"LP",iTunesSearch:"James Taylor At Christmas"},
+  {artist:"Richard Marx",album:"Repeat Offender",genre:"Rock/Pop",year:1989,format:"LP",iTunesSearch:"Richard Marx Repeat Offender"},
+  // Photo 4 (new additions)
+  {artist:"Elle King",album:"Come Get Your Wife",genre:"Rock",year:2023,format:"LP",iTunesSearch:"Elle King Come Get Your Wife"},
+  {artist:"Various Artists",album:"The Breakfast Club: Original Motion Picture Soundtrack",genre:"Soundtrack",year:1985,format:"LP",iTunesSearch:"Breakfast Club Original Motion Picture Soundtrack"},
+  {artist:"Conway Twitty",album:"#13: The Warner Bros. Years",genre:"Country",year:1994,format:"LP",iTunesSearch:"Conway Twitty Warner Bros Years"},
+  // Photo 5
+  {artist:"Green Day",album:"Greatest Hits: God's Favorite Band",genre:"Alternative",year:2017,format:"LP",iTunesSearch:"Green Day Greatest Hits Gods Favorite Band"},
+  {artist:"Pearl Jam",album:"Vitalogy",genre:"Alternative",year:1994,format:"LP",iTunesSearch:"Pearl Jam Vitalogy"},
+  {artist:"Guns N' Roses",album:"Greatest Hits",genre:"Rock",year:2004,format:"LP",iTunesSearch:"Guns N Roses Greatest Hits"},
+  {artist:"Pantera",album:"Vulgar Display of Power",genre:"Metal",year:1992,format:"LP",iTunesSearch:"Pantera Vulgar Display of Power"},
+  {artist:"Whitesnake",album:"Whitesnake",genre:"Rock",year:1987,format:"LP",iTunesSearch:"Whitesnake 1987"},
+  {artist:"Linkin Park",album:"Hybrid Theory",genre:"Alternative",year:2000,format:"LP",iTunesSearch:"Linkin Park Hybrid Theory"},
+  {artist:"Jim Croce",album:"You Don't Mess Around with Jim",genre:"Rock/Pop",year:1972,format:"LP",iTunesSearch:"Jim Croce You Dont Mess Around With Jim"},
+  {artist:"Jim Croce",album:"Life and Times",genre:"Rock/Pop",year:1973,format:"LP",iTunesSearch:"Jim Croce Life and Times"},
+  {artist:"Evanescence",album:"Fallen",genre:"Alternative",year:2003,format:"LP",iTunesSearch:"Evanescence Fallen"},
+  {artist:"blink-182",album:"Greatest Hits",genre:"Alternative",year:2005,format:"LP",iTunesSearch:"blink-182 Greatest Hits"},
+  {artist:"Metallica",album:"Ride the Lightning",genre:"Metal",year:1984,format:"LP",iTunesSearch:"Metallica Ride the Lightning"},
+  {artist:"Nirvana",album:"Nevermind",genre:"Alternative",year:1991,format:"LP",iTunesSearch:"Nirvana Nevermind"},
+  {artist:"Jim Croce",album:"The Faces I've Been",genre:"Rock/Pop",year:1975,format:"LP",iTunesSearch:"Jim Croce The Faces Ive Been"},
+  {artist:"Poison",album:"Greatest Hits 1986–1996",genre:"Rock",year:1996,format:"LP",iTunesSearch:"Poison Greatest Hits 1986 1996"},
+  {artist:"Jim Croce",album:"Life Song",genre:"Rock/Pop",year:1976,format:"LP",iTunesSearch:"Jim Croce Life Song"},
+  {artist:"Creedence Clearwater Revival",album:"Chronicle",genre:"Rock",year:1976,format:"LP",iTunesSearch:"Creedence Clearwater Revival Chronicle"},
+  {artist:"Foo Fighters",album:"Greatest Hits",genre:"Alternative",year:2009,format:"LP",iTunesSearch:"Foo Fighters Greatest Hits"},
+  {artist:"Goo Goo Dolls",album:"Greatest Hits Volume One: The Singles",genre:"Alternative",year:2007,format:"LP",iTunesSearch:"Goo Goo Dolls Greatest Hits Volume One Singles"},
+  {artist:"Bonnie Tyler",album:"Faster Than the Speed of Night",genre:"Rock/Pop",year:1983,format:"LP",iTunesSearch:"Bonnie Tyler Faster Than the Speed of Night"},
+  {artist:"Janis Joplin",album:"Greatest Hits",genre:"Rock",year:1973,format:"LP",iTunesSearch:"Janis Joplin Greatest Hits"},
+  // Photo 6
+  {artist:"Tesla",album:"Psychedelic Supper",genre:"Rock",year:2000,format:"LP",iTunesSearch:"Tesla Psychedelic Supper"},
+  {artist:"Nirvana",album:"Unplugged in New York",genre:"Alternative",year:1994,format:"LP",iTunesSearch:"Nirvana MTV Unplugged in New York"},
+  {artist:"Air Supply",album:"Greatest Hits",genre:"Rock/Pop",year:1983,format:"LP",iTunesSearch:"Air Supply Greatest Hits"},
+  {artist:"Jim Croce",album:"I Got a Name",genre:"Rock/Pop",year:1973,format:"LP",iTunesSearch:"Jim Croce I Got a Name"},
+  {artist:"Nirvana",album:"In Utero",genre:"Alternative",year:1993,format:"LP",iTunesSearch:"Nirvana In Utero"},
+  {artist:"Nirvana",album:"Incesticide",genre:"Alternative",year:1992,format:"LP",iTunesSearch:"Nirvana Incesticide"},
+  {artist:"Weezer",album:"Weezer (Blue Album)",genre:"Alternative",year:1994,format:"LP",iTunesSearch:"Weezer Blue Album"},
+  // Photo 7
+  {artist:"Patsy Cline",album:"The Patsy Cline Story",genre:"Country",year:1963,format:"LP",iTunesSearch:"Patsy Cline Story"},
+  {artist:"ABBA",album:"The Singles",genre:"Pop",year:1982,format:"LP",iTunesSearch:"ABBA The Singles"},
+  {artist:"The Beach Boys",album:"Sounds of Summer: The Very Best of The Beach Boys",genre:"Rock/Pop",year:2003,format:"LP",iTunesSearch:"Beach Boys Sounds of Summer Very Best"},
+  {artist:"Three Days Grace",album:"One X",genre:"Alternative",year:2006,format:"LP",iTunesSearch:"Three Days Grace One X"},
+  {artist:"David Bowie",album:"Legacy",genre:"Rock",year:2016,format:"LP",iTunesSearch:"David Bowie Legacy"},
+  {artist:"The Beatles",album:"1962-1966 (The Red Album)",genre:"Rock",year:1973,format:"LP",iTunesSearch:"Beatles 1962 1966 Red Album"},
+  {artist:"John Mayer",album:"Room for Squares",genre:"Rock/Pop",year:2001,format:"LP",iTunesSearch:"John Mayer Room for Squares"},
+  {artist:"Reba McEntire",album:"My Chains Are Gone",genre:"Country",year:2007,format:"LP",iTunesSearch:"Reba McEntire My Chains Are Gone"},
+  {artist:"Whitney Houston",album:"I Will Always Love You: The Best of Whitney Houston",genre:"R&B/Soul",year:2012,format:"LP",iTunesSearch:"Whitney Houston I Will Always Love You Best Of"},
+  {artist:"Ben E. King",album:"Greatest Hits",genre:"R&B/Soul",year:1975,format:"LP",iTunesSearch:"Ben E King Greatest Hits"},
+  {artist:"Christone \"Kingfish\" Ingram",album:"662",genre:"Blues",year:2021,format:"LP",iTunesSearch:"Christone Kingfish Ingram 662"},
+  {artist:"Counting Crows",album:"August and Everything After",genre:"Alternative",year:1993,format:"LP",iTunesSearch:"Counting Crows August and Everything After"},
+  {artist:"Roy Orbison",album:"The Ultimate Collection",genre:"Rock/Pop",year:2016,format:"LP",iTunesSearch:"Roy Orbison Ultimate Collection"},
+  {artist:"Fleetwood Mac",album:"Fleetwood Mac",genre:"Rock",year:1975,format:"LP",iTunesSearch:"Fleetwood Mac self titled 1975"},
+  {artist:"Dean Martin",album:"The Dean Martin Christmas Album",genre:"Christmas",year:1966,format:"LP",iTunesSearch:"Dean Martin Christmas Album"},
+  {artist:"Ronnie Milsap",album:"Greatest Hits",genre:"Country",year:1973,format:"LP",iTunesSearch:"Ronnie Milsap Greatest Hits"},
+  {artist:"Mötley Crüe",album:"Greatest Hits",genre:"Rock",year:2003,format:"LP",iTunesSearch:"Motley Crue Greatest Hits"},
+  {artist:"Bush",album:"Loaded: The Greatest Hits 1994-2023",genre:"Alternative",year:2023,format:"LP",iTunesSearch:"Bush Loaded Greatest Hits"},
+  {artist:"Bing Crosby",album:"Merry Christmas",genre:"Christmas",year:1945,format:"LP",iTunesSearch:"Bing Crosby Merry Christmas"},
+  {artist:"Belinda Carlisle",album:"Heaven on Earth",genre:"Rock/Pop",year:1987,format:"LP",iTunesSearch:"Belinda Carlisle Heaven on Earth"},
+  {artist:"Toby Keith",album:"35 Number Ones",genre:"Country",year:2008,format:"LP",iTunesSearch:"Toby Keith 35 Number Ones"},
+  // Photo 8
+  {artist:"Various Artists",album:"Beverly Hills Cop II: The Soundtrack",genre:"Soundtrack",year:1987,format:"LP",iTunesSearch:"Beverly Hills Cop II Soundtrack"},
+  {artist:"Billy Joel",album:"Greatest Hits Volume I & Volume II",genre:"Rock/Pop",year:1985,format:"LP",iTunesSearch:"Billy Joel Greatest Hits Volume I Volume II"},
+  {artist:"Loretta Lynn",album:"Coal Miner's Daughter",genre:"Country",year:1971,format:"LP",iTunesSearch:"Loretta Lynn Coal Miners Daughter"},
+  // Photo 9
+  {artist:"Various Artists",album:"Elf: Music from the Major Motion Picture",genre:"Christmas",year:2003,format:"LP",iTunesSearch:"Elf Music from the Major Motion Picture"},
+  {artist:"Burl Ives",album:"Rudolph the Red-Nosed Reindeer",genre:"Christmas",year:1964,format:"LP",iTunesSearch:"Burl Ives Rudolph Red Nosed Reindeer Original Soundtrack"},
+  {artist:"Dean Martin",album:"A Winter Romance",genre:"Christmas",year:1959,format:"LP",iTunesSearch:"Dean Martin A Winter Romance"},
+  {artist:"Randy Travis",album:"An Old Time Christmas",genre:"Christmas",year:1989,format:"LP",iTunesSearch:"Randy Travis An Old Time Christmas"},
+  {artist:"Various Artists",album:"The Polar Express: Original Motion Picture Soundtrack",genre:"Christmas",year:2004,format:"LP",iTunesSearch:"Polar Express Original Motion Picture Soundtrack"},
+  {artist:"Kenny G",album:"Miracles: The Holiday Album",genre:"Christmas",year:1994,format:"LP",iTunesSearch:"Kenny G Miracles Holiday Album"},
+  {artist:"Elvis Presley",album:"The Classic Christmas Album",genre:"Christmas",year:1970,format:"LP",iTunesSearch:"Elvis Presley Classic Christmas Album"},
+  {artist:"Vince Guaraldi Trio",album:"A Charlie Brown Christmas",genre:"Christmas",year:1965,format:"LP",iTunesSearch:"Vince Guaraldi Trio Charlie Brown Christmas"},
+  {artist:"Tony Bennett",album:"Snowfall: The Tony Bennett Christmas Album",genre:"Christmas",year:1968,format:"LP",iTunesSearch:"Tony Bennett Snowfall Christmas Album"},
+  {artist:"Bing Crosby",album:"Ultimate Christmas",genre:"Christmas",year:2003,format:"LP",iTunesSearch:"Bing Crosby Ultimate Christmas"},
+  {artist:"Various Artists",album:"Dr. Seuss' How the Grinch Stole Christmas! (Original TV Soundtrack)",genre:"Christmas",year:1966,format:"LP",iTunesSearch:"Grinch Stole Christmas Original TV Soundtrack 1966"},
+  {artist:"Pentatonix",album:"The Best of Pentatonix Christmas",genre:"Christmas",year:2019,format:"LP",iTunesSearch:"Pentatonix Best of Pentatonix Christmas"},
+  {artist:"Bing Crosby",album:"Bing's Hollywood: Holiday Inn",genre:"Soundtrack",year:1942,format:"LP",iTunesSearch:"Bing Crosby Holiday Inn Soundtrack"},
+  {artist:"Jim Nabors",album:"Christmas with Jim Nabors",genre:"Christmas",year:1967,format:"LP",iTunesSearch:"Jim Nabors Christmas"},
+  {artist:"Tina Turner",album:"Simply the Best",genre:"R&B/Soul",year:1991,format:"LP",iTunesSearch:"Tina Turner Simply the Best"},
+  {artist:"Alanis Morissette",album:"Jagged Little Pill",genre:"Alternative",year:1995,format:"LP",iTunesSearch:"Alanis Morissette Jagged Little Pill"},
+  {artist:"Various Artists",album:"The Greatest Showman: Original Motion Picture Soundtrack",genre:"Soundtrack",year:2017,format:"LP",iTunesSearch:"Greatest Showman Original Motion Picture Soundtrack"},
+  // Photo 10
+  {artist:"Various Artists",album:"The Color of Money: Original Motion Picture Soundtrack",genre:"Soundtrack",year:1986,format:"LP",iTunesSearch:"Color of Money Original Motion Picture Soundtrack"},
+  {artist:"Heart",album:"Bebe Le Strange",genre:"Rock",year:1980,format:"LP",iTunesSearch:"Heart Bebe Le Strange"},
+  {artist:"Various Artists",album:"Eddie and the Cruisers: Original Motion Picture Soundtrack",genre:"Soundtrack",year:1983,format:"LP",iTunesSearch:"Eddie and the Cruisers Soundtrack"},
+  {artist:"Charlie Daniels Band",album:"Travelin' Band",genre:"Country",year:1990,format:"LP",iTunesSearch:"Charlie Daniels Band Travelin Band"},
+  {artist:"Randy Travis",album:"Always & Forever",genre:"Country",year:1987,format:"LP",iTunesSearch:"Randy Travis Always and Forever"},
+  {artist:"Various Artists",album:"Urban Cowboy: Original Motion Picture Soundtrack",genre:"Soundtrack",year:1980,format:"LP",iTunesSearch:"Urban Cowboy Original Motion Picture Soundtrack"},
+  {artist:"Dean Martin",album:"Dean Martin's Greatest Hits Vol. 2",genre:"Jazz/Pop",year:1968,format:"LP",iTunesSearch:"Dean Martin Greatest Hits Volume 2"},
+  {artist:"Don Henley",album:"Building the Perfect Beast",genre:"Rock",year:1984,format:"LP",iTunesSearch:"Don Henley Building the Perfect Beast"},
+  {artist:"Charlie Daniels Band",album:"Saddle Tramp",genre:"Country",year:1976,format:"LP",iTunesSearch:"Charlie Daniels Band Saddle Tramp"},
+  // Photo 11
+  {artist:"Various Artists",album:"Pretty Woman: Original Motion Picture Soundtrack",genre:"Soundtrack",year:1990,format:"LP",iTunesSearch:"Pretty Woman Original Motion Picture Soundtrack"},
+  {artist:"Charlie Daniels Band",album:"Me and the Boys",genre:"Country",year:1985,format:"LP",iTunesSearch:"Charlie Daniels Band Me and the Boys"},
+  {artist:"Kenny Rogers",album:"Greatest Country Hits",genre:"Country",year:1989,format:"LP",iTunesSearch:"Kenny Rogers Greatest Country Hits"},
+  {artist:"David Bowie",album:"Labyrinth (Original Soundtrack)",genre:"Soundtrack",year:1986,format:"LP",iTunesSearch:"David Bowie Labyrinth Original Soundtrack"},
+  {artist:"Josh Turner",album:"I Serve a Savior",genre:"Country",year:2018,format:"LP",iTunesSearch:"Josh Turner I Serve a Savior"},
+  {artist:"Queen",album:"Greatest Hits",genre:"Rock",year:1981,format:"LP",iTunesSearch:"Queen Greatest Hits"},
+  {artist:"Elton John",album:"Greatest Hits",genre:"Rock/Pop",year:1974,format:"LP",iTunesSearch:"Elton John Greatest Hits"},
+  {artist:"Barenaked Ladies",album:"Disc One: All Their Greatest Hits 1991-2001",genre:"Alternative",year:2001,format:"LP",iTunesSearch:"Barenaked Ladies Disc One Greatest Hits"},
+  {artist:"Dean Martin",album:"Diamonds",genre:"Jazz/Pop",year:1992,format:"LP",iTunesSearch:"Dean Martin Diamonds"},
+  {artist:"Dean Martin",album:"Gentle on My Mind",genre:"Jazz/Pop",year:1968,format:"LP",iTunesSearch:"Dean Martin Gentle on My Mind"},
+  {artist:"Lynyrd Skynyrd",album:"Skynyrd's Innyrds: Their Greatest Hits",genre:"Rock",year:1989,format:"LP",iTunesSearch:"Lynyrd Skynyrd Skynyrd Innyrds Greatest Hits"},
+  {artist:"Journey",album:"Greatest Hits",genre:"Rock",year:1988,format:"LP",iTunesSearch:"Journey Greatest Hits"},
+  {artist:"Mumford & Sons",album:"Sigh No More",genre:"Alternative",year:2009,format:"LP",iTunesSearch:"Mumford and Sons Sigh No More"},
+  {artist:"Various Artists",album:"Top Gun: Original Motion Picture Soundtrack",genre:"Soundtrack",year:1986,format:"LP",iTunesSearch:"Top Gun Original Motion Picture Soundtrack"},
+  {artist:"Various Artists",album:"St. Elmo's Fire: Original Motion Picture Soundtrack",genre:"Soundtrack",year:1985,format:"LP",iTunesSearch:"St Elmos Fire Original Motion Picture Soundtrack"},
+  {artist:"Mozart",album:"Sonatas for Violin and Piano",genre:"Classical",year:1970,format:"LP",iTunesSearch:"Mozart Sonatas for Violin and Piano"},
+  {artist:"Lionel Richie",album:"The Definitive Collection",genre:"R&B/Soul",year:2003,format:"LP",iTunesSearch:"Lionel Richie Definitive Collection"},
+  {artist:"Bach",album:"Six Sonatas for Violin and Harpsichord",genre:"Classical",year:1975,format:"LP",iTunesSearch:"Bach Six Sonatas Violin Harpsichord Menuhin"},
+  {artist:"Bob Seger & The Silver Bullet Band",album:"Greatest Hits",genre:"Rock",year:1994,format:"LP",iTunesSearch:"Bob Seger Silver Bullet Band Greatest Hits"},
+  // Photo 12
+  {artist:"Perry Como",album:"Season's Greetings from Perry Como",genre:"Christmas",year:1959,format:"LP",iTunesSearch:"Perry Como Seasons Greetings"},
+  {artist:"Various Artists",album:"Coraline: Original Motion Picture Soundtrack (15th Anniversary Edition)",genre:"Soundtrack",year:2024,format:"LP",iTunesSearch:"Coraline Original Motion Picture Soundtrack Bruno Coulais"},
+  {artist:"Bon Jovi",album:"Greatest Hits",genre:"Rock",year:2010,format:"LP",iTunesSearch:"Bon Jovi Greatest Hits"},
+  {artist:"Huey Lewis and the News",album:"Winter Wonderland",genre:"Christmas",year:2014,format:"LP",iTunesSearch:"Huey Lewis and the News Winter Wonderland"},
+  {artist:"Huey Lewis and the News",album:"Collected",genre:"Rock/Pop",year:2017,format:"LP",iTunesSearch:"Huey Lewis and the News Collected"},
+  {artist:"Alabama",album:"16 Biggest Hits",genre:"Country",year:1999,format:"LP",iTunesSearch:"Alabama 16 Biggest Hits"},
+  {artist:"Alan Jackson",album:"The Greatest Hits Collection",genre:"Country",year:1995,format:"LP",iTunesSearch:"Alan Jackson Greatest Hits Collection"},
+  {artist:"Tom Petty & The Heartbreakers",album:"Greatest Hits",genre:"Rock",year:1993,format:"LP",iTunesSearch:"Tom Petty Heartbreakers Greatest Hits"},
+  {artist:"Alan Jackson",album:"Precious Memories Collection",genre:"Gospel",year:2013,format:"LP",iTunesSearch:"Alan Jackson Precious Memories Collection"},
+];
+
+const GENRE_EMOJI = {
+  "Rock":"🎸","Alternative":"🎶","Jazz/Pop":"🎷","Soundtrack":"🎬",
+  "Indie/Pop":"🎵","Christmas":"🎄","Metal":"🤘","Country":"🤠",
+  "Rock/Pop":"🎸","R&B/Soul":"🎤","Children's":"🧸","Classical":"🎻",
+  "Hip-Hop":"🎤","Pop":"🎵","Blues":"🎸","Folk":"🎵","Electronic":"🎧"
+};
+
+// ─── LOAD / SAVE ──────────────────────────────────────────────────────────────
+function loadRecords(){
+  try{
+    const s=JSON.parse(localStorage.getItem(STORE_KEY));
+    if(s&&s.length) return s;
+    return DEFAULT_RECORDS.map((r,i)=>({
+      id:uid(),dateAdded:Date.now()-i*60000,status:'Own It',
+      condition:'Very Good+ (VG+)',label:'',notes:'',rating:0,
+      coverUrl:undefined,tracks:undefined,...r
+    }));
+  }catch{return DEFAULT_RECORDS.map((r,i)=>({id:uid(),dateAdded:Date.now()-i*60000,status:'Own It',condition:'Very Good+ (VG+)',label:'',notes:'',rating:0,coverUrl:undefined,tracks:undefined,...r}));}
+}
+function saveRecords(){try{localStorage.setItem(STORE_KEY,JSON.stringify(records));}catch(e){if(e.name==='QuotaExceededError')showToast('⚠️ Storage full — try removing some uploaded images.');}}
+function loadGenres(){try{return JSON.parse(localStorage.getItem(GENRE_KEY))||[];}catch{return [];}}
+function saveGenres(){localStorage.setItem(GENRE_KEY,JSON.stringify(userGenres));}
+
+let records=loadRecords();
+let userGenres=loadGenres();
+
+// Records that were removed from the collection — purge from stored data too
+const REMOVED_RECORDS=[
+  'shirley bassey|sings heart songs',
+  'conway twitty|people in motion',
+  'jim croce|life song',
+  'tesla|five man acoustical jam',
+  'shirley horn|where are you going',
+  'reba mcentire|greatest hits',
+  'huey lewis and the news|winter wonderland',
+];
+const EXTRA_REMOVED_KEY='vinylExtraRemoved_v1';
+// Merge new default records + purge removed ones
+(function syncDefaults(){
+  // Combine hard-coded removals with any extra ones saved by a restore
+  const extraRemoved=JSON.parse(localStorage.getItem(EXTRA_REMOVED_KEY)||'[]');
+  const allRemoved=[...REMOVED_RECORDS,...extraRemoved];
+  // Remove purged records
+  const before=records.length;
+  records=records.filter(r=>{
+    const k=r.artist.toLowerCase()+'|'+r.album.toLowerCase();
+    return!allRemoved.includes(k);
+  });
+  // Add any missing defaults (skipped for records absent from a restore)
+  const keys=records.map(r=>r.artist.toLowerCase()+'|'+r.album.toLowerCase());
+  let added=0;
+  DEFAULT_RECORDS.forEach(d=>{
+    const k=d.artist.toLowerCase()+'|'+d.album.toLowerCase();
+    if(!allRemoved.includes(k)&&!keys.includes(k)){
+      records.push({id:uid(),dateAdded:Date.now(),status:'Own It',condition:'Very Good+ (VG+)',label:'',notes:'',rating:0,coverUrl:undefined,tracks:undefined,...d});
+      keys.push(k);added++;
+    }
+  });
+  if(added>0||records.length!==before) saveRecords();
+})();
+
+function allGenres(){
+  const fromRecs=records.map(r=>r.genre).filter(Boolean);
+  return[...new Set([...fromRecs,...userGenres])].sort();
+}
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let view='grid',search='',filterGenre='',filterStatus='',sortBy='dateAdded',sortDir=1;
+let editId=null,formRating=0;
+const fetchingSet=new Set();
+let coverCache={};   // id → {front,back}
+let trackCache={};   // id → [{num,disc,title,duration}]
+
+// ─── COVER FETCHING (MusicBrainz + iTunes fallback) ──────────────────────────
+async function fetchCoverForRecord(rec){
+  if(fetchingSet.has(rec.id)) return;
+  if(rec.coverUrl!==undefined&&rec.coverUrl!==null) return;
+  fetchingSet.add(rec.id);
+  let front=null,back=null;
+  try{
+    const artist=encodeURIComponent(rec.artist);
+    const album=encodeURIComponent(rec.album);
+    const mbRes=await fetch(`https://musicbrainz.org/ws/2/release/?query=artist:${artist}+release:${album}&fmt=json&limit=3`,{headers:{'User-Agent':'VinylTracker/1.0 (vinyl@example.com)'}});
+    const mbData=await mbRes.json();
+    for(const rel of(mbData.releases||[])){
+      if(!rel.id) continue;
+      try{
+        const caRes=await fetch(`https://coverartarchive.org/release/${rel.id}`);
+        if(!caRes.ok) continue;
+        const caData=await caRes.json();
+        for(const img of(caData.images||[])){
+          const types=(img.types||[]).map(t=>t.toLowerCase());
+          if(!front&&types.includes('front')) front=img.thumbnails?.['500']||img.thumbnails?.large||img.image;
+          if(!back&&types.includes('back'))   back=img.thumbnails?.['500']||img.thumbnails?.large||img.image;
+        }
+        if(front) break;
+      }catch{}
+    }
+    if(!front&&rec.iTunesSearch){
+      const q=encodeURIComponent(rec.iTunesSearch);
+      const itRes=await fetch(`https://itunes.apple.com/search?term=${q}&entity=album&limit=1`);
+      const itData=await itRes.json();
+      if(itData.results?.[0]) front=itData.results[0].artworkUrl100.replace('100x100','600x600');
+    }
+  }catch{}
+  rec.coverUrl=front||null;
+  rec.coverBack=back||null;
+  fetchingSet.delete(rec.id);
+  saveRecords();
+  updateCardCover(rec);
+}
+
+async function fetchTrackList(rec){
+  if(rec.tracks!==undefined) return;
+  try{
+    const q=encodeURIComponent(rec.iTunesSearch||`${rec.artist} ${rec.album}`);
+    const sRes=await fetch(`https://itunes.apple.com/search?term=${q}&entity=album&limit=1`);
+    const sData=await sRes.json();
+    const album=sData.results?.[0];
+    if(!album) return;
+    const lRes=await fetch(`https://itunes.apple.com/lookup?id=${album.collectionId}&entity=song`);
+    const lData=await lRes.json();
+    const tracks=(lData.results||[]).filter(t=>t.wrapperType==='track')
+      .sort((a,b)=>(a.discNumber-b.discNumber)||(a.trackNumber-b.trackNumber))
+      .map(t=>({num:t.trackNumber,disc:t.discNumber,title:t.trackName,duration:fmtMs(t.trackTimeMillis)}));
+    rec.tracks=tracks.length?tracks:null;
+    saveRecords();
+    const tl=document.getElementById(`tl-${rec.id}`);
+    if(tl) tl.outerHTML=tracklistHTML(rec);
+  }catch{}
+}
+
+function fmtMs(ms){if(!ms)return'';const s=Math.round(ms/1000);return`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;}
+
+function updateCardCover(rec){
+  const ca=document.querySelector(`.record-card[data-id="${rec.id}"] .cover-area`);
+  if(ca) ca.innerHTML=coverAreaHTML(rec);
+  const th=document.querySelector(`.list-thumb-wrap[data-id="${rec.id}"]`);
+  if(th) th.innerHTML=thumbHTML(rec);
+}
+
+async function fetchAllCovers(){
+  const missing=records.filter(r=>r.coverUrl===undefined||r.coverUrl===null);
+  if(!missing.length){showToast('All covers already fetched!');return;}
+  const bar=document.getElementById('coverProgressBar');
+  const fill=document.getElementById('coverProgressFill');
+  const btn=document.getElementById('btnFetchCovers');
+  bar.style.display='block';btn.disabled=true;
+  let done=0;
+  for(const rec of missing){
+    await fetchCoverForRecord(rec);done++;
+    fill.style.width=(done/missing.length*100)+'%';
+    btn.textContent=`⏳ ${done}/${missing.length}`;
+    await new Promise(r=>setTimeout(r,300));
+  }
+  setTimeout(()=>{bar.style.display='none';fill.style.width='0%';},600);
+  btn.disabled=false;btn.textContent='🖼 Get Covers';
+  showToast(`Covers fetched for ${done} records.`);render();
+}
+
+// ─── COVER IMAGE HELPERS ──────────────────────────────────────────────────────
+function compressImage(dataUrl){
+  return new Promise(resolve=>{
+    const img=new Image();
+    img.onload=()=>{
+      const MAX=500;const r=Math.min(MAX/img.width,MAX/img.height,1);
+      const w=Math.round(img.width*r),h=Math.round(img.height*r);
+      const c=document.createElement('canvas');c.width=w;c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      resolve(c.toDataURL('image/jpeg',.85));
+    };
+    img.onerror=()=>resolve(dataUrl);img.src=dataUrl;
+  });
+}
+function updateCoverPreview(){
+  const u=document.getElementById('fCoverUrl').value.trim();
+  const w=document.getElementById('coverPreviewWrap');
+  const i=document.getElementById('coverPreviewImg');
+  if(u){i.src=u;w.style.display='block';}else{w.style.display='none';i.src='';}
+}
+function handleCoverUpload(input){
+  if(!input.files||!input.files[0]) return;
+  const f=input.files[0];input.value='';
+  const reader=new FileReader();
+  reader.onload=async e=>{
+    try{
+      const compressed=await compressImage(e.target.result);
+      document.getElementById('fCoverUrl').value=compressed;updateCoverPreview();
+    }catch{showToast('Could not read image.');}
+  };
+  reader.readAsDataURL(f);
+}
+function clearCover(){document.getElementById('fCoverUrl').value='';updateCoverPreview();}
+
+// ─── HTML HELPERS ─────────────────────────────────────────────────────────────
+function genreEmoji(g){return GENRE_EMOJI[g]||'🎵';}
+
+function coverAreaHTML(rec){
+  if(rec.coverUrl===undefined) return`<div class="cover-loading"><span class="spinner"></span>Loading…</div>`;
+  if(rec.coverUrl) return`<img class="cover-img" src="${rec.coverUrl}" alt="" onerror="this.src='';this.className='cover-placeholder'">`;
+  return`<div class="cover-placeholder">${genreEmoji(rec.genre)}</div>`;
+}
+
+function thumbHTML(rec){
+  if(rec.coverUrl) return`<img class="list-thumb" src="${rec.coverUrl}" alt="" onerror="this.outerHTML='<div class=\\'list-thumb-ph\\'>${genreEmoji(rec.genre)}</div>'">`;
+  return`<div class="list-thumb-ph">${genreEmoji(rec.genre)}</div>`;
+}
+
+function starHTML(n,id){
+  return Array.from({length:5},(_,i)=>
+    `<span class="star ${i<n?'lit':''}" data-id="${id}" data-v="${i+1}">★</span>`
+  ).join('');
+}
+
+function statusBadge(s){
+  const map={'Own It':'badge-own','Wishlist':'badge-want','Sold':'badge-sold'};
+  return`<span class="badge ${map[s]||'badge-sold'}">${s}</span>`;
+}
+
+function tracklistHTML(rec){
+  if(rec.tracks===undefined) return`<div id="tl-${rec.id}" style="font-size:.78rem;color:var(--text2);padding:4px 0">Loading tracks…</div>`;
+  if(!rec.tracks) return`<div id="tl-${rec.id}" style="font-size:.78rem;color:var(--text2);padding:4px 0">Track list not found</div>`;
+  const discs=[...new Set(rec.tracks.map(t=>t.disc))];
+  const multi=discs.length>1;
+  let html=`<div id="tl-${rec.id}">`;
+  discs.forEach(d=>{
+    if(multi) html+=`<div style="font-size:.68rem;font-weight:700;color:var(--accent);text-transform:uppercase;margin:8px 0 3px">Side ${d}</div>`;
+    rec.tracks.filter(t=>t.disc===d).forEach(t=>{
+      html+=`<div class="track-row"><span class="track-num">${t.num}</span><span class="track-title">${t.title}</span><span class="track-dur">${t.duration}</span></div>`;
+    });
+  });
+  return html+`</div>`;
+}
+
+// ─── FILTER / SORT ────────────────────────────────────────────────────────────
+function filtered(){
+  let list=[...records];
+  const q=search.toLowerCase();
+  if(q) list=list.filter(r=>r.artist.toLowerCase().includes(q)||r.album.toLowerCase().includes(q)||(r.genre||'').toLowerCase().includes(q)||(r.notes||'').toLowerCase().includes(q));
+  if(filterGenre)  list=list.filter(r=>r.genre===filterGenre);
+  if(filterStatus) list=list.filter(r=>r.status===filterStatus);
+  list.sort((a,b)=>{
+    let av=a[sortBy]??'',bv=b[sortBy]??'';
+    if(sortBy==='artist'||sortBy==='album'){av=av.toLowerCase();bv=bv.toLowerCase();}
+    return av<bv?-sortDir:av>bv?sortDir:0;
+  });
+  return list;
+}
+
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+function renderStats(){
+  const total=records.length;
+  const own=records.filter(r=>r.status==='Own It').length;
+  const wish=records.filter(r=>r.status==='Wishlist').length;
+  const genres=allGenres().length;
+  const rated=records.filter(r=>r.rating>0);
+  const avg=rated.length?(rated.reduce((s,r)=>s+r.rating,0)/rated.length).toFixed(1):'–';
+  document.getElementById('statsRow').innerHTML=[
+    ['Records',total],['Own It',own],['Wishlist',wish],['Genres',genres],['Avg ★',avg]
+  ].map(([l,v])=>`<div class="stat"><div class="stat-num">${v}</div><div class="stat-lbl">${l}</div></div>`).join('');
+}
+
+function rebuildGenreFilter(){
+  const prev=document.getElementById('filterGenre').value;
+  document.getElementById('filterGenre').innerHTML='<option value="">All Genres</option>'+allGenres().map(g=>`<option ${g===prev?'selected':''}>${g}</option>`).join('');
+}
+
+function rebuildGenreDatalist(){
+  document.getElementById('genreList').innerHTML=allGenres().map(g=>`<option value="${g}">`).join('');
+}
+
+function renderGrid(list){
+  if(!list.length) return`<div class="empty"><div class="empty-icon">💿</div><h3>No records found</h3><p>Try adjusting your filters or add a record.</p></div>`;
+  return`<div class="grid-view">${list.map(rec=>`
+    <div class="record-card" data-id="${rec.id}">
+      <div class="cover-area" data-id="${rec.id}">${coverAreaHTML(rec)}</div>
+      <button class="fav-btn" onclick="event.stopPropagation();rateBook('${rec.id}')" title="Quick rate">${rec.rating?'⭐':'☆'}</button>
+      <div class="card-body">
+        <div class="card-artist">${rec.artist}</div>
+        <div class="card-album">${rec.album}</div>
+        <div class="badges">${statusBadge(rec.status)}<span class="badge badge-genre">${rec.genre||''}</span></div>
+        <div class="star-row">${starHTML(rec.rating,rec.id)}</div>
+        <div class="card-actions">
+          <button class="card-btn edit-btn" data-id="${rec.id}">Edit</button>
+          <button class="card-btn del del-btn" data-id="${rec.id}">Delete</button>
+        </div>
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+function renderList(list){
+  if(!list.length) return`<div class="empty"><div class="empty-icon">💿</div><h3>No records found</h3></div>`;
+  return`<div class="list-view"><table>
+    <thead><tr>
+      <th></th>
+      <th class="${sortBy==='artist'?'sorted':''}" data-sort="artist">Artist</th>
+      <th class="${sortBy==='album'?'sorted':''}" data-sort="album">Album</th>
+      <th class="${sortBy==='genre'?'sorted':''}" data-sort="genre">Genre</th>
+      <th class="${sortBy==='year'?'sorted':''}" data-sort="year">Year</th>
+      <th>Format</th><th>Status</th>
+      <th class="${sortBy==='rating'?'sorted':''}" data-sort="rating">Rating</th>
+      <th>Actions</th>
+    </tr></thead>
+    <tbody>${list.map(rec=>`<tr>
+      <td><div class="list-thumb-wrap" data-id="${rec.id}">${thumbHTML(rec)}</div></td>
+      <td style="font-weight:600">${rec.artist}</td>
+      <td style="color:var(--text2)">${rec.album}</td>
+      <td>${rec.genre||'–'}</td>
+      <td>${rec.year||'–'}</td>
+      <td>${rec.format||'–'}</td>
+      <td>${statusBadge(rec.status)}</td>
+      <td style="color:var(--accent2)">${'★'.repeat(rec.rating)}${'☆'.repeat(5-rec.rating)}</td>
+      <td><div class="row-actions">
+        <button class="row-btn view-btn-r" data-id="${rec.id}">View</button>
+        <button class="row-btn edit-btn" data-id="${rec.id}">Edit</button>
+        <button class="row-btn del del-btn" data-id="${rec.id}">Del</button>
+      </div></td>
+    </tr>`).join('')}</tbody>
+  </table></div>`;
+}
+
+function render(){
+  rebuildGenreFilter();rebuildGenreDatalist();
+  const list=filtered();
+  document.getElementById('recordContainer').innerHTML=view==='grid'?renderGrid(list):renderList(list);
+  renderStats();bindCardEvents();
+  // Kick off background cover fetches
+  const toFetch=records.filter(r=>r.coverUrl===undefined&&!fetchingSet.has(r.id));
+  const concurrency=/Mobi|Android/i.test(navigator.userAgent)?2:5;
+  toFetch.slice(0,concurrency).forEach(r=>fetchCoverForRecord(r));
+  // Kick off track lists (lower priority, start after 3s)
+  records.filter(r=>r.tracks===undefined).slice(0,3).forEach((r,i)=>setTimeout(()=>fetchTrackList(r),3000+i*600));
+}
+
+function bindCardEvents(){
+  const c=document.getElementById('recordContainer');
+  c.querySelectorAll('.edit-btn').forEach(el=>el.addEventListener('click',e=>{e.stopPropagation();openModal(el.dataset.id);}));
+  c.querySelectorAll('.del-btn').forEach(el=>el.addEventListener('click',e=>{e.stopPropagation();deleteRecord(el.dataset.id);}));
+  c.querySelectorAll('.view-btn-r').forEach(el=>el.addEventListener('click',e=>{e.stopPropagation();openDetail(el.dataset.id);}));
+  c.querySelectorAll('.star').forEach(el=>el.addEventListener('click',e=>{e.stopPropagation();setRating(el.dataset.id,+el.dataset.v);}));
+  c.querySelectorAll('.record-card').forEach(el=>el.addEventListener('click',()=>openDetail(el.dataset.id)));
+  c.querySelectorAll('[data-sort]').forEach(el=>el.addEventListener('click',()=>{
+    if(sortBy===el.dataset.sort) sortDir*=-1; else{sortBy=el.dataset.sort;sortDir=1;document.getElementById('sortBy').value=sortBy;}
+    render();
+  }));
+}
+
+// ─── CRUD ─────────────────────────────────────────────────────────────────────
+// ─── BACK-BUTTON TRAP (Android) ───────────────────────────────────────────────
+function pushOverlayState(){history.pushState({overlay:true},'');}
+let _suppressBack=false;
+function _hideOverlays(){
+  // Close without calling history.back() — used when popstate fires
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.getElementById('detailOverlay').classList.remove('open');
+  document.getElementById('genreModalOverlay').classList.remove('open');
+  document.getElementById('settingsModal').classList.remove('open');
+}
+window.addEventListener('popstate',()=>{
+  if(_suppressBack){_suppressBack=false;return;}
+  _hideOverlays();
+});
+// Patch close functions to suppress the echo popstate their history.back() triggers
+const _origClose={modal:closeModal,detail:closeDetail,genre:closeGenreModal,settings:closeSettings};
+function closeModal(){_suppressBack=true;document.getElementById('modalOverlay').classList.remove('open');history.back();}
+function closeDetail(){_suppressBack=true;document.getElementById('detailOverlay').classList.remove('open');history.back();}
+function closeGenreModal(){_suppressBack=true;document.getElementById('genreModalOverlay').classList.remove('open');history.back();render();}
+function closeSettings(){_suppressBack=true;document.getElementById('settingsModal').classList.remove('open');history.back();}
+
+function openModal(id){
+  editId=id||null;formRating=0;
+  const r=id?records.find(x=>x.id===id):null;
+  document.getElementById('modalTitle').textContent=r?'Edit Record':'Add Record';
+  document.getElementById('fArtist').value=r?.artist||'';
+  document.getElementById('fAlbum').value=r?.album||'';
+  document.getElementById('fGenre').value=r?.genre||'';
+  document.getElementById('fYear').value=r?.year||'';
+  document.getElementById('fFormat').value=r?.format||'LP';
+  document.getElementById('fStatus').value=r?.status||'Own It';
+  document.getElementById('fCondition').value=r?.condition||'Very Good+ (VG+)';
+  document.getElementById('fLabel').value=r?.label||'';
+  document.getElementById('fCoverUrl').value=(r?.coverUrl&&r.coverUrl!=='null')?r.coverUrl:'';
+  document.getElementById('fNotes').value=r?.notes||'';
+  formRating=r?.rating||0;updateStarPicker(formRating);
+  rebuildGenreDatalist();updateCoverPreview();
+  document.getElementById('modalOverlay').classList.add('open');
+  pushOverlayState();
+  document.getElementById('fArtist').focus();
+}
+// closeModal defined in back-button trap above
+
+function saveModal(){
+  const artist=document.getElementById('fArtist').value.trim();
+  const album=document.getElementById('fAlbum').value.trim();
+  if(!artist||!album){showToast('Artist and Album are required.');return;}
+  const genre=document.getElementById('fGenre').value.trim();
+  const coverInput=document.getElementById('fCoverUrl').value.trim();
+  const data={
+    artist,album,genre,
+    year:+document.getElementById('fYear').value||null,
+    format:document.getElementById('fFormat').value,
+    status:document.getElementById('fStatus').value,
+    condition:document.getElementById('fCondition').value,
+    label:document.getElementById('fLabel').value.trim(),
+    notes:document.getElementById('fNotes').value.trim(),
+    rating:formRating,
+    iTunesSearch:`${artist} ${album}`,
+    coverUrl:coverInput?coverInput:(editId?records.find(r=>r.id===editId)?.coverUrl:undefined),
+  };
+  if(genre&&!userGenres.includes(genre)){userGenres.push(genre);saveGenres();}
+  if(editId){
+    const idx=records.findIndex(r=>r.id===editId);
+    records[idx]={...records[idx],...data};showToast('Record updated ✓');
+  }else{
+    records.unshift({id:uid(),dateAdded:Date.now(),tracks:undefined,...data});showToast('Record added ✓');
+  }
+  saveRecords();closeModal();render();
+}
+
+function updateStarPicker(n){
+  document.querySelectorAll('.star-pick').forEach(s=>s.classList.toggle('lit',+s.dataset.v<=n));
+}
+document.getElementById('starPicker').addEventListener('click',e=>{
+  if(e.target.classList.contains('star-pick')){formRating=+e.target.dataset.v;updateStarPicker(formRating);}
+});
+
+function deleteRecord(id){
+  const r=records.find(x=>x.id===id);
+  if(!confirm(`Delete "${r?.album}" by ${r?.artist}?`)) return;
+  // If this record comes from DEFAULT_RECORDS, persist its key so syncDefaults
+  // won't add it back on the next page load.
+  if(r){
+    const k=r.artist.toLowerCase()+'|'+r.album.toLowerCase();
+    const isDefault=DEFAULT_RECORDS.some(d=>d.artist.toLowerCase()+'|'+d.album.toLowerCase()===k);
+    if(isDefault){
+      const existing=JSON.parse(localStorage.getItem(EXTRA_REMOVED_KEY)||'[]');
+      if(!existing.includes(k)){
+        existing.push(k);
+        localStorage.setItem(EXTRA_REMOVED_KEY,JSON.stringify(existing));
+      }
+    }
+  }
+  records=records.filter(x=>x.id!==id);saveRecords();render();showToast('Record removed.');
+}
+function setRating(id,v){
+  const r=records.find(x=>x.id===id);if(!r) return;
+  r.rating=r.rating===v?0:v;saveRecords();render();
+}
+function rateBook(id){openDetail(id);}
+
+// ─── DETAIL PANEL ─────────────────────────────────────────────────────────────
+function openDetail(id){
+  const r=records.find(x=>x.id===id);if(!r) return;
+  // Kick off track fetch if needed
+  if(r.tracks===undefined) fetchTrackList(r);
+
+  const coverHTML=r.coverUrl
+    ?`<img class="detail-cover" src="${r.coverUrl}" alt="${r.album}" onerror="this.outerHTML='<div class=\\'detail-cover-ph\\'>${genreEmoji(r.genre)}</div>'">`
+    :`<div class="detail-cover-ph">${genreEmoji(r.genre)}</div>`;
+
+  const panel=document.getElementById('detailPanel');
+  panel.innerHTML=`
+    <button class="detail-close" id="detailClose">✕</button>
+    ${coverHTML}
+    ${r.coverBack?`<img src="${r.coverBack}" alt="Back cover" style="width:100%;display:block;border-radius:8px;margin-top:8px" onerror="this.remove()">`:''}
+    <div class="detail-artist" style="margin-top:4px">${r.artist}</div>
+    <div class="detail-title">${r.album}</div>
+    <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">
+      ${statusBadge(r.status)}<span class="badge badge-genre">${r.genre||''}</span>
+    </div>
+    <div style="display:flex;gap:4px;margin-top:4px;color:var(--accent2);font-size:1.1rem">
+      ${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}
+    </div>
+    ${[
+      ['Year',r.year||'–'],['Format',r.format||'–'],['Label',r.label||'–'],
+      ['Condition',r.condition||'–'],['Added',new Date(r.dateAdded).toLocaleDateString()],
+    ].map(([k,v])=>`<div class="detail-row"><span class="key">${k}</span><span class="val">${v}</span></div>`).join('')}
+    ${r.notes?`<div style="font-size:.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-top:4px">Notes</div><div class="detail-notes">${r.notes}</div>`:''}
+    <div class="detail-tracks">
+      <h3>🎵 Track List</h3>
+      ${tracklistHTML(r)}
+    </div>
+    <div style="display:flex;gap:8px;margin-top:6px">
+      <button class="btn btn-primary" style="flex:1" onclick="openModal('${id}');closeDetail()">Edit</button>
+      <button class="btn btn-danger" onclick="deleteRecord('${id}');closeDetail()">Delete</button>
+    </div>
+  `;
+  document.getElementById('detailOverlay').classList.add('open');
+  pushOverlayState();
+  document.getElementById('detailClose').addEventListener('click',closeDetail);
+}
+// closeDetail defined in back-button trap above
+
+// ─── GENRE MANAGER ────────────────────────────────────────────────────────────
+function openGenreModal(){renderGenreTable();document.getElementById('genreModalOverlay').classList.add('open');pushOverlayState();}
+// closeGenreModal defined in back-button trap above
+
+function renderGenreTable(){
+  const genres=allGenres();const t=document.getElementById('genreTable');
+  if(!genres.length){t.innerHTML='<tr><td colspan="3" style="color:var(--text2);padding:16px;text-align:center">No genres yet.</td></tr>';return;}
+  t.innerHTML=`<thead><tr><th>Genre</th><th>Records</th><th>Actions</th></tr></thead><tbody>`+
+    genres.map(g=>{
+      const count=records.filter(r=>r.genre===g).length;
+      return`<tr id="gr-${CSS.escape(g)}">
+        <td><div id="gd-${CSS.escape(g)}" style="display:flex;align-items:center;justify-content:space-between">
+          <span>${genreEmoji(g)} ${g}</span><span class="genre-count">${count}</span>
+        </div>
+        <div id="ge-${CSS.escape(g)}" style="display:none;gap:6px;align-items:center">
+          <input type="text" value="${g}" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:var(--radius);padding:5px 10px;font-size:.85rem;outline:none">
+          <button class="btn btn-primary btn-sm" onclick="saveGenreRename('${g}',this.previousElementSibling.value)">Save</button>
+          <button class="btn btn-sm" onclick="cancelGenreEdit('${g}')">✕</button>
+        </div></td>
+        <td style="color:var(--text2);font-size:.82rem">${count}</td>
+        <td><div style="display:flex;gap:6px">
+          <button class="btn btn-sm" onclick="startGenreEdit('${g}')">✏ Rename</button>
+          ${count===0?`<button class="btn btn-sm btn-danger" onclick="deleteGenre('${g}')">✕</button>`:''}
+        </div></td>
+      </tr>`;
+    }).join('')+'</tbody>';
+}
+function startGenreEdit(g){
+  document.getElementById(`gd-${CSS.escape(g)}`).style.display='none';
+  const ge=document.getElementById(`ge-${CSS.escape(g)}`);ge.style.display='flex';ge.querySelector('input').focus();
+}
+function cancelGenreEdit(g){
+  document.getElementById(`gd-${CSS.escape(g)}`).style.display='flex';
+  document.getElementById(`ge-${CSS.escape(g)}`).style.display='none';
+}
+function saveGenreRename(old,newName){
+  newName=newName.trim();if(!newName){showToast('Name cannot be empty.');return;}
+  if(newName===old){cancelGenreEdit(old);return;}
+  let count=0;records.forEach(r=>{if(r.genre===old){r.genre=newName;count++;}});
+  const idx=userGenres.indexOf(old);if(idx!==-1)userGenres[idx]=newName;else if(!userGenres.includes(newName))userGenres.push(newName);
+  saveRecords();saveGenres();showToast(`"${old}" → "${newName}" (${count} updated)`);renderGenreTable();rebuildGenreDatalist();rebuildGenreFilter();
+}
+function deleteGenre(g){userGenres=userGenres.filter(x=>x!==g);saveGenres();renderGenreTable();showToast(`Genre "${g}" removed.`);}
+
+document.getElementById('newGenreAdd').addEventListener('click',()=>{
+  const v=document.getElementById('newGenreInput').value.trim();if(!v) return;
+  if(!userGenres.includes(v)&&!records.some(r=>r.genre===v)){userGenres.push(v);saveGenres();}
+  document.getElementById('newGenreInput').value='';renderGenreTable();rebuildGenreDatalist();showToast(`Genre "${v}" added.`);
+});
+document.getElementById('newGenreInput').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('newGenreAdd').click();});
+
+// ─── TOAST ────────────────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// ─── AI SETTINGS ──────────────────────────────────────────────────────────────
+function openSettings(){
+  document.getElementById('apiKeyInput').value=localStorage.getItem('anthropicApiKey')||'';
+  document.getElementById('settingsModal').classList.add('open');
+  pushOverlayState();
+  document.getElementById('apiKeyInput').focus();
+}
+// closeSettings defined in back-button trap above
+
+document.getElementById('btnSettings').addEventListener('click',openSettings);
+document.getElementById('settingsClose').addEventListener('click',closeSettings);
+document.getElementById('settingsCancel').addEventListener('click',closeSettings);
+document.getElementById('settingsModal').addEventListener('click',e=>{if(e.target===document.getElementById('settingsModal'))closeSettings();});
+document.getElementById('settingsSave').addEventListener('click',()=>{
+  const k=document.getElementById('apiKeyInput').value.trim();
+  if(!k){showToast('Please enter a valid API key.');return;}
+  localStorage.setItem('anthropicApiKey',k);showToast('API key saved ✓');closeSettings();
+});
+
+// ─── BACKUP & RESTORE ─────────────────────────────────────────────────────────
+document.getElementById('btnBackup').addEventListener('click',()=>{
+  const payload={
+    exportedAt:new Date().toISOString(),
+    appVersion:'Cindy\'s Record Collection',
+    records:records,
+    genres:JSON.parse(localStorage.getItem(GENRE_KEY)||'[]')
+  };
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const date=new Date().toISOString().slice(0,10);
+  a.href=url;a.download=`cindys-record-collection-${date}.json`;
+  document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(url);document.body.removeChild(a);},1000);
+  showToast('Backup downloaded ✓');
+});
+
+document.getElementById('btnRestoreTrigger').addEventListener('click',()=>{
+  document.getElementById('restoreStatus').style.display='none';
+  document.getElementById('restoreFileInput').value='';
+  document.getElementById('restoreFileInput').click();
+});
+
+document.getElementById('restoreFileInput').addEventListener('change',function(){
+  const file=this.files[0];
+  if(!file)return;
+  const statusEl=document.getElementById('restoreStatus');
+  statusEl.style.display='none';
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      // Accept either {records:[...]} wrapper or a bare array
+      const imported=Array.isArray(data)?data:(Array.isArray(data.records)?data.records:null);
+      if(!imported||imported.length===0){
+        statusEl.style.cssText='display:block;background:#3a1a1a;color:#ff6b6b;border:1px solid #ff6b6b;padding:10px;border-radius:var(--radius)';
+        statusEl.textContent='⚠️ No records found in this file.';
+        return;
+      }
+      // Restore genres if present
+      if(data.genres&&Array.isArray(data.genres)&&data.genres.length){
+        try{localStorage.setItem(GENRE_KEY,JSON.stringify(data.genres));}catch(e){}
+      }
+      // Normalise imported records
+      const newRecords=imported.map(r=>({
+        id:r.id||uid(),dateAdded:r.dateAdded||Date.now(),
+        status:r.status||'Own It',condition:r.condition||'Very Good+ (VG+)',
+        label:r.label||'',notes:r.notes||'',rating:r.rating||0,...r
+      }));
+      // Persist which DEFAULT_RECORDS are absent so syncDefaults won't re-add them on reload
+      const restoredKeys=newRecords.map(r=>r.artist.toLowerCase()+'|'+r.album.toLowerCase());
+      const extraRemoved=DEFAULT_RECORDS
+        .map(d=>d.artist.toLowerCase()+'|'+d.album.toLowerCase())
+        .filter(k=>!restoredKeys.includes(k)&&!REMOVED_RECORDS.includes(k));
+      localStorage.setItem(EXTRA_REMOVED_KEY,JSON.stringify(extraRemoved));
+      // Save records — if cover art makes it too large, strip art and retry
+      let savedOk=false,artStripped=false;
+      try{
+        localStorage.setItem(STORE_KEY,JSON.stringify(newRecords));
+        savedOk=true;
+      }catch(q){
+        if(q.name==='QuotaExceededError'){
+          try{
+            const slim=newRecords.map(r=>({...r,coverUrl:undefined,backCoverUrl:undefined}));
+            localStorage.setItem(STORE_KEY,JSON.stringify(slim));
+            savedOk=true;artStripped=true;
+          }catch(q2){}
+        }
+      }
+      if(!savedOk){
+        statusEl.style.cssText='display:block;background:#3a1a1a;color:#ff6b6b;border:1px solid #ff6b6b;padding:10px;border-radius:var(--radius)';
+        statusEl.textContent='⚠️ Backup is too large to save — try clearing cached cover art first.';
+        return;
+      }
+      // Store a toast message to show after the page reloads with the fresh data
+      const msg=artStripped
+        ?`Restored ${newRecords.length} records (cover art will reload when each record is opened).`
+        :`Restored ${newRecords.length} records ✓`;
+      localStorage.setItem('vinylRestoreMsg_v1',msg);
+      location.reload();
+    }catch(err){
+      statusEl.style.cssText='display:block;background:#3a1a1a;color:#ff6b6b;border:1px solid #ff6b6b;padding:10px;border-radius:var(--radius)';
+      statusEl.textContent='⚠️ Could not read file — is it a valid JSON backup?';
+    }
+  };
+  reader.readAsText(file);
+});
+
+// ─── AI RECORD SCANNER ────────────────────────────────────────────────────────
+const scanOverlay=document.getElementById('scanOverlay');
+const scanLabel=document.getElementById('scanLabel');
+const scanSub=document.getElementById('scanSub');
+const scanSpinner=document.getElementById('scanSpinner');
+const scanDismiss=document.getElementById('scanDismiss');
+scanDismiss.addEventListener('click',()=>{scanOverlay.classList.remove('active');});
+
+function scanError(msg){
+  scanSpinner.style.display='none';
+  scanLabel.textContent='Scan failed';
+  scanSub.textContent=msg;
+  scanDismiss.style.display='block';
+}
+function scanReset(){
+  scanSpinner.style.display='';
+  scanLabel.textContent='Identifying record…';
+  scanSub.textContent='Claude AI is reading the cover';
+  scanDismiss.style.display='none';
+  scanOverlay.classList.remove('active');
+}
+
+// Resize image via blob URL (memory-safe on Android)
+function resizeForApi(file){
+  return new Promise((resolve,reject)=>{
+    const blobUrl=URL.createObjectURL(file);
+    const img=new Image();
+    img.onload=()=>{
+      URL.revokeObjectURL(blobUrl);
+      const MAX=1024;
+      const scale=Math.min(MAX/img.width,MAX/img.height,1);
+      const w=Math.round(img.width*scale)||1,h=Math.round(img.height*scale)||1;
+      const c=document.createElement('canvas');c.width=w;c.height=h;
+      const ctx=c.getContext('2d');
+      if(!ctx){reject(new Error('Canvas not available'));return;}
+      ctx.drawImage(img,0,0,w,h);
+      const dataUrl=c.toDataURL('image/jpeg',0.88);
+      const b64=dataUrl.split(',')[1];
+      if(!b64){reject(new Error('Canvas export failed'));return;}
+      resolve(b64);
+    };
+    img.onerror=()=>{URL.revokeObjectURL(blobUrl);reject(new Error('Could not load image — try a different photo'));};
+    img.src=blobUrl;
+  });
+}
+
+async function handleScanUpload(input){
+  if(!input.files||!input.files[0]) return;
+  const apiKey=(localStorage.getItem('anthropicApiKey')||'').trim();
+  if(!apiKey){showToast('Set your Anthropic API key in ⚙️ Settings first.');openSettings();input.value='';return;}
+  const file=input.files[0];input.value='';
+
+  scanReset();
+  scanOverlay.classList.add('active');
+  scanLabel.textContent='Preparing image…';
+
+  const mediaType='image/jpeg';
+  let base64;
+  try{
+    base64=await resizeForApi(file);
+  }catch(e){scanError('Image error: '+e.message);return;}
+
+  scanLabel.textContent='Sending to Claude AI…';
+  scanSub.textContent='This may take 5–15 seconds';
+  try{
+    const response=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key':apiKey,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body:JSON.stringify({
+        model:'claude-haiku-4-5-20251001',max_tokens:600,
+        messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:mediaType,data:base64}},
+          {type:'text',text:`Identify this vinyl record cover and return ONLY a valid JSON object (no markdown) with these exact fields (use null for unknowns):
+{
+  "artist": "...",
+  "album": "...",
+  "year": 1984,
+  "genre": "...",
+  "label": "...",
+  "format": "LP",
+  "notes": "one-sentence description"
+}
+
+Pick genre from: Rock, Pop, Alternative, Country, Jazz/Pop, R&B/Soul, Metal, Soundtrack, Christmas, Indie/Pop, Classical, Hip-Hop, Blues, Folk, Electronic, Children's, or a concise custom genre.
+For format pick one of: LP, EP, Single, 7", 10", 12", Box Set.`}
+        ]}]
+      })
+    });
+    if(!response.ok){
+      let errMsg=`HTTP ${response.status}`;
+      try{const e=await response.json();errMsg=e?.error?.message||errMsg;}catch{}
+      throw new Error(errMsg);
+    }
+    const data=await response.json();
+    const text=(data.content?.[0]?.text||'').trim();
+    if(!text) throw new Error('Empty response from AI — check your API key and try again');
+    const jsonMatch=text.match(/\{[\s\S]*\}/);
+    if(!jsonMatch) throw new Error('AI response: '+text.slice(0,120));
+    const info=JSON.parse(jsonMatch[0]);
+    scanLabel.textContent='Filling in details…';
+    if(info.artist) document.getElementById('fArtist').value=info.artist;
+    if(info.album)  document.getElementById('fAlbum').value=info.album;
+    if(info.year)   document.getElementById('fYear').value=info.year;
+    if(info.genre)  document.getElementById('fGenre').value=info.genre;
+    if(info.label)  document.getElementById('fLabel').value=info.label;
+    if(info.format) document.getElementById('fFormat').value=info.format;
+    if(info.notes)  document.getElementById('fNotes').value=info.notes;
+    const g=info.genre;
+    if(g&&!userGenres.includes(g)){userGenres.push(g);saveGenres();rebuildGenreDatalist();}
+    // Try to fetch cover art
+    const tempRec={id:'__scan__',artist:info.artist||'',album:info.album||'',iTunesSearch:`${info.artist} ${info.album}`,coverUrl:undefined};
+    try{
+      await fetchCoverForRecord(tempRec);
+      if(tempRec.coverUrl){document.getElementById('fCoverUrl').value=tempRec.coverUrl;updateCoverPreview();}
+    }catch{}
+    scanReset();
+    showToast(`🎵 Identified: "${info.album||'Unknown'}" — review and save!`);
+  }catch(err){
+    scanError(err.message);
+  }
+}
+
+// ─── EVENT WIRING ─────────────────────────────────────────────────────────────
+document.getElementById('btnAdd').addEventListener('click',()=>openModal(null));
+document.getElementById('modalClose').addEventListener('click',closeModal);
+document.getElementById('modalCancel').addEventListener('click',closeModal);
+document.getElementById('modalSave').addEventListener('click',saveModal);
+document.getElementById('modalOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('modalOverlay'))closeModal();});
+document.getElementById('btnGenres').addEventListener('click',openGenreModal);
+document.getElementById('genreModalClose').addEventListener('click',closeGenreModal);
+document.getElementById('genreModalDone').addEventListener('click',closeGenreModal);
+document.getElementById('genreModalOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('genreModalOverlay'))closeGenreModal();});
+document.getElementById('btnFetchCovers').addEventListener('click',fetchAllCovers);
+document.getElementById('detailOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('detailOverlay'))closeDetail();});
+document.getElementById('searchInput').addEventListener('input',e=>{search=e.target.value;render();});
+document.getElementById('filterGenre').addEventListener('change',e=>{filterGenre=e.target.value;render();});
+document.getElementById('filterStatus').addEventListener('change',e=>{filterStatus=e.target.value;render();});
+document.getElementById('sortBy').addEventListener('change',e=>{sortBy=e.target.value;sortDir=1;render();});
+document.getElementById('btnGrid').addEventListener('click',()=>{view='grid';document.getElementById('btnGrid').classList.add('active');document.getElementById('btnList').classList.remove('active');render();});
+document.getElementById('btnList').addEventListener('click',()=>{view='list';document.getElementById('btnList').classList.add('active');document.getElementById('btnGrid').classList.remove('active');render();});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){closeModal();closeGenreModal();closeDetail();}
+  if((e.ctrlKey||e.metaKey)&&e.key==='n'){e.preventDefault();openModal(null);}
+});
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+render();
+// Show restore success message if we just reloaded after a restore
+(function(){
+  const msg=localStorage.getItem('vinylRestoreMsg_v1');
+  if(msg){localStorage.removeItem('vinylRestoreMsg_v1');setTimeout(()=>showToast(msg),400);}
+})();
+</script>
+</body>
+</html>
