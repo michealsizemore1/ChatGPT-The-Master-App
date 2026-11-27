@@ -1,13 +1,7 @@
 {
-  "updatedAt": "2026-11-26T21:55:29+00:00",
+  "updatedAt": "2026-11-27T09:04:45+00:00",
   "source": "Google News searches for college track & field",
   "news": [
-    {
-      "date": "2026-11-25",
-      "headline": "Florida Gators Track and Field 2027 Indoor and Outdoor Schedule",
-      "source": "World-Track",
-      "url": "https://news.google.com/rss/articles/CBMidEFVX3lxTFAtRDhPLUJpZmdNbExPRDRLaXo4XzROQ0NhbVdwVk9uLW4xR1p1NWpxMHhKbG90UHJFNFJtd2RaNXA2RmN1cWpMTXZvaWFkb0ZxdFVuZTVnVHNjU2xkMTZWbGRKTkJZclBZdGFCUl9hQXlBSWJl?oc=5"
-    },
     {
       "date": "2026-11-25",
       "headline": "Duke Unveils 2026-27 Indoor Track and Field Slate - Duke University",
@@ -73,6 +67,12 @@
       "headline": "After six years on the road, Mizzou track and field brings outdoor competition back to Columbia",
       "source": "Yahoo Sports",
       "url": "https://news.google.com/rss/articles/CBMiggFBVV95cUxQYnVLQjhHUVRvLWNJMExINVZvN1ktX0J3RFExWHVZX2MyWGxIbXpGdkFHdDBGeTFxY0oxckU4T3VSQzZoNHdQdXhoWWQxS3ZQcGprVmZSaE56cVpRZGhnVGV0VENCb21VNWY1R0FSdHU1aEE0aHBoczZ3dXg5TWZ0enFn?oc=5"
+    },
+    {
+      "date": "2026-11-10",
+      "headline": "CSUN Releases Track & Field Schedule",
+      "source": "CSUN Athletics",
+      "url": "https://news.google.com/rss/articles/CBMilAFBVV95cUxOYmt2aEdHN256aGJacHVIOERFZWZydWthdEgteUFzRTRxZGJJVXp1TVhtc2dldWNReHJZSnhUcWl6dmJ4Z2JLbFF4LXowaHpkd1lKV3E4ekhlc2phQWdpbWxVa1JRbklZYXFTWEpNSVpEWE0tRDNKUHBka3V3SnI5bndLMUFTeUYxNjU1WXI5QjBBODJQ?oc=5"
     }
   ]
 }
