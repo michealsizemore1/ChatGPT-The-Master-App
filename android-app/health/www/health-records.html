@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Health Records</title>
+<style>
+:root{--bg:#0e1517;--card:#162124;--card2:#1d2b2f;--line:#2a3b40;--text:#eef4f3;--muted:#9fb3b1;--dim:#6f8584;
+  --accent:#2dd4bf;--accent2:#14b8a6;--warn:#fbbf24;--bad:#fb7185;--good:#4ade80}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{padding:0 0 calc(76px + env(safe-area-inset-bottom))}
+header{position:sticky;top:0;z-index:20;background:var(--bg);padding:calc(12px + env(safe-area-inset-top)) 16px 10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line)}
+header h1{font-size:20px;margin:0;flex:1;letter-spacing:.01em}
+header h1 small{display:block;font-size:12px;color:var(--muted);font-weight:500}
+main{padding:12px 14px;max-width:720px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin:0 0 12px}
+.card h2{font-size:15px;margin:0 0 8px;display:flex;align-items:center;gap:8px}
+.card h2 .sp{flex:1}
+.muted{color:var(--muted)}.dim{color:var(--dim)}.small{font-size:12.5px}
+.row{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)}
+.row:first-of-type{border-top:none}
+.row .main{flex:1;min-width:0}
+.row .t{font-weight:600}
+.row .s{color:var(--muted);font-size:13px}
+.tag{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--card2);color:var(--muted);white-space:nowrap}
+.tag.bad{background:rgba(251,113,133,.15);color:var(--bad)}.tag.warn{background:rgba(251,191,36,.15);color:var(--warn)}.tag.good{background:rgba(74,222,128,.13);color:var(--good)}
+.tag.acc{background:rgba(45,212,191,.15);color:var(--accent)}
+button{font:inherit;cursor:pointer}
+.btn{background:var(--card2);border:1px solid var(--line);color:var(--text);border-radius:12px;padding:9px 14px;font-weight:600;font-size:14px}
+.btn.acc{background:var(--accent);border-color:var(--accent);color:#06201c}
+.btn.sm{padding:5px 10px;font-size:12.5px;border-radius:10px}
+.btn.bad{color:var(--bad)}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.iconbtn{background:none;border:none;color:var(--muted);font-size:20px;padding:4px 8px}
+.empty{color:var(--muted);font-size:13.5px;padding:6px 0}
+nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:#0b1113;border-top:1px solid var(--line);display:flex;padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+nav button{flex:1;background:none;border:none;color:var(--dim);font-size:11.5px;font-weight:600;padding:4px 0;display:flex;flex-direction:column;align-items:center;gap:2px}
+nav button .i{font-size:20px;line-height:1.1;filter:grayscale(.6);opacity:.75}
+nav button.on{color:var(--accent)}nav button.on .i{filter:none;opacity:1}
+.fab{position:fixed;right:16px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:25;background:var(--accent);color:#06201c;border:none;border-radius:18px;padding:13px 18px;font-weight:800;font-size:15px;box-shadow:0 6px 18px rgba(0,0,0,.4)}
+.seg{display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px}
+.seg button{background:var(--card);border:1px solid var(--line);color:var(--muted);border-radius:99px;padding:6px 12px;font-size:13px;font-weight:600;white-space:nowrap}
+.seg button.on{background:var(--accent);border-color:var(--accent);color:#06201c}
+.big{font-size:22px;font-weight:800}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px}
+.kv div:nth-child(odd){color:var(--muted)}
+a{color:var(--accent)}
+/* sheet */
+#sheetWrap{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;display:none;align-items:flex-end;justify-content:center}
+#sheetWrap.open{display:flex}
+#sheet{width:100%;max-width:620px;max-height:90vh;overflow:auto;background:#111a1c;border:1px solid var(--line);border-bottom:none;border-radius:18px 18px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom))}
+#sheet h3{margin:0 0 10px;font-size:17px;display:flex;align-items:center}
+#sheet h3 span{flex:1}
+label.f{display:block;margin:10px 0 0;font-size:12.5px;color:var(--muted);font-weight:600}
+input,select,textarea{width:100%;background:var(--card);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:10px;font:inherit;margin-top:4px}
+textarea{min-height:70px;resize:vertical}
+input[type=checkbox]{width:20px;height:20px;accent-color:var(--accent);margin:0}
+.chk{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+.labin{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--line)}
+.labin .n{flex:1;font-size:14px}.labin .n small{display:block;color:var(--dim);font-size:11.5px}
+.labin input{width:110px;margin:0}
+svg.trend{width:100%;height:150px;display:block;margin:6px 0}
+.spark{width:90px;height:30px;flex-shrink:0}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(140px + env(safe-area-inset-bottom));background:#e8fffb;color:#06201c;padding:10px 16px;border-radius:12px;font-weight:600;z-index:60;font-size:14px;box-shadow:0 6px 18px rgba(0,0,0,.4)}
+#printView{display:none}
+@media print{
+  body{background:#fff;color:#000;padding:0}
+  header,nav,main,.fab,#sheetWrap,.toast{display:none!important}
+  #printView{display:block;font:12px/1.4 system-ui,sans-serif;color:#000;padding:10px}
+  #printView h1{font-size:18px;margin:0 0 2px}#printView h2{font-size:13px;margin:14px 0 4px;border-bottom:1px solid #999}
+  #printView table{width:100%;border-collapse:collapse}#printView td,#printView th{text-align:left;padding:2px 6px 2px 0;vertical-align:top}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>❤️ Health Records<small id="hdrSub">Everything for your doctor visits, in one place</small></h1>
+</header>
+<main id="view"></main>
+<button class="fab" id="fab" type="button">＋ Add</button>
+<nav id="nav">
+  <button data-tab="home" type="button"><span class="i">🏠</span>Overview</button>
+  <button data-tab="meds" type="button"><span class="i">💊</span>Meds</button>
+  <button data-tab="labs" type="button"><span class="i">🧪</span>Labs</button>
+  <button data-tab="visits" type="button"><span class="i">🩺</span>Visits</button>
+  <button data-tab="more" type="button"><span class="i">📋</span>More</button>
+</nav>
+<div id="sheetWrap"><div id="sheet"></div></div>
+<div id="printView"></div>
+<input type="file" id="importFile" accept="application/json,.json" style="display:none">
+
+<script>
+(function(){
+'use strict';
+// ════════════════════════════════════════════════════════════════════
+// Health Records: meds & refills, lab results with trends, doctor visits & questions, vaccines, allergies,
+// conditions and doctors. Everything stays on this phone (plus your own backups). BeyondStride's Today screen
+// gets only a short summary, and only if you allow it.
+// ════════════════════════════════════════════════════════════════════
+var KEY='health_records_v1';
+var EMPTY={meds:[],labs:[],visits:[],questions:[],vaccines:[],allergies:[],conditions:[],doctors:[],profile:{},settings:{}};
+var db=load();
+var tab='home',labFilter='all';
+
+function load(){
+  var d;try{d=JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){d=null;}
+  d=d&&typeof d==='object'?d:{};
+  Object.keys(EMPTY).forEach(function(k){if(d[k]==null)d[k]=JSON.parse(JSON.stringify(EMPTY[k]));});
+  return d;
+}
+function save(msg){
+  db.updated=Date.now();
+  try{localStorage.setItem(KEY,JSON.stringify(db));}catch(e){alert('Could not save — phone storage is full.');return;}
+  share();autoBackup();
+  if(msg)toast(msg);
+  render();
+}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function todayKey(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function parseD(k){if(!k)return null;var p=String(k).split('-');if(p.length!==3)return null;return new Date(+p[0],+p[1]-1,+p[2]);}
+function keyOf(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function addDays(k,n){var d=parseD(k);if(!d)return '';d.setDate(d.getDate()+n);return keyOf(d);}
+function daysUntil(k){var d=parseD(k);if(!d)return null;var t=parseD(todayKey());return Math.round((d-t)/864e5);}
+function niceD(k,withYear){var d=parseD(k);if(!d)return '';return d.toLocaleDateString('en-US',{weekday:withYear?undefined:'short',month:'short',day:'numeric',year:withYear||d.getFullYear()!==new Date().getFullYear()?'numeric':undefined});}
+function niceT(t){if(!t)return '';var p=t.split(':');var h=+p[0],m=p[1]||'00';return (h%12||12)+':'+m+(h<12?' AM':' PM');}
+function relDays(n){if(n==null)return '';if(n===0)return 'today';if(n===1)return 'tomorrow';if(n===-1)return 'yesterday';return n>0?'in '+n+' days':Math.abs(n)+' days ago';}
+function toast(m){document.querySelectorAll('.toast').forEach(function(x){x.remove();});var t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(function(){t.remove();},2200);}
+
+// ── Meds ────────────────────────────────────────────────────────────
+function refillDue(m){if(!m.lastFill||!(+m.supply>0))return '';return addDays(m.lastFill,+m.supply);}
+function activeMeds(){return db.meds.filter(function(m){return m.active!==false;});}
+function medsByDue(){return activeMeds().slice().sort(function(a,b){var x=refillDue(a)||'9999',y=refillDue(b)||'9999';return x<y?-1:x>y?1:a.name.localeCompare(b.name);});}
+
+// ── Labs ────────────────────────────────────────────────────────────
+// Typical adult ranges, as a starting point. Labs differ: change a test's range to match the one on your report.
+var LAB_PRESETS=[
+  ['Total cholesterol','mg/dL','',200,'Lipids'],['LDL cholesterol','mg/dL','',100,'Lipids'],['HDL cholesterol','mg/dL',40,'','Lipids'],
+  ['Triglycerides','mg/dL','',150,'Lipids'],['A1C','%','',5.7,'Blood sugar'],['Glucose (fasting)','mg/dL',70,99,'Blood sugar'],
+  ['Potassium','mmol/L',3.5,5.0,'Kidney & electrolytes'],['Sodium','mmol/L',135,145,'Kidney & electrolytes'],['Calcium','mg/dL',8.6,10.3,'Kidney & electrolytes'],
+  ['Creatinine','mg/dL',0.7,1.3,'Kidney & electrolytes'],['eGFR','mL/min',60,'','Kidney & electrolytes'],['Uric acid','mg/dL',3.4,7.0,'Kidney & electrolytes'],
+  ['ALT','U/L',7,56,'Liver'],['AST','U/L',10,40,'Liver'],['TSH','mIU/L',0.4,4.0,'Thyroid'],['Vitamin D','ng/mL',30,100,'Vitamins'],
+  ['Vitamin B12','pg/mL',200,900,'Vitamins'],['Hemoglobin','g/dL',13.5,17.5,'Blood count'],['PSA','ng/mL','',4.0,'Other']];
+function presetGroup(name){var p=LAB_PRESETS.filter(function(x){return x[0]===name;})[0];return p?p[4]:'Other';}
+function labByName(n){return db.labs.filter(function(l){return l.name.toLowerCase()===String(n).toLowerCase();})[0];}
+function sortedResults(l){return (l.results||[]).slice().sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:0;});}
+function latest(l){var r=sortedResults(l);return r[r.length-1];}
+function flag(l,v){v=+v;if(isNaN(v))return '';if(l.lo!==''&&l.lo!=null&&v<+l.lo)return 'low';if(l.hi!==''&&l.hi!=null&&v>+l.hi)return 'high';return 'ok';}
+function rangeText(l){var lo=l.lo!==''&&l.lo!=null,hi=l.hi!==''&&l.hi!=null;if(lo&&hi)return l.lo+'–'+l.hi;if(hi)return 'under '+l.hi;if(lo)return 'over '+l.lo;return 'no range set';}
+function outOfRange(){return db.labs.map(function(l){var r=latest(l);return r&&flag(l,r.value)!=='ok'&&flag(l,r.value)?{l:l,r:r,f:flag(l,r.value)}:null;}).filter(Boolean);}
+function trendWord(l){var r=sortedResults(l);if(r.length<2)return '';var a=+r[r.length-2].value,b=+r[r.length-1].value;if(isNaN(a)||isNaN(b)||a===b)return '→ same';return (b>a?'↑ ':'↓ ')+Math.abs(Math.round((b-a)*100)/100);}
+
+// ── Visits / questions / vaccines ──────────────────────────────────
+function upcomingVisits(){var t=todayKey();return db.visits.filter(function(v){return v.date>=t;}).sort(function(a,b){return (a.date+(a.time||''))<(b.date+(b.time||''))?-1:1;});}
+function pastVisits(){var t=todayKey();return db.visits.filter(function(v){return v.date<t;}).sort(function(a,b){return a.date<b.date?1:-1;});}
+function openQs(doc){return db.questions.filter(function(q){return !q.done&&(!doc||!q.doctor||q.doctor===doc);});}
+function vaccinesDue(within){return db.vaccines.filter(function(v){var n=daysUntil(v.next);return v.next&&n!=null&&n<=within;}).sort(function(a,b){return a.next<b.next?-1:1;});}
+function doctorNames(){return db.doctors.map(function(d){return d.name;}).filter(Boolean);}
+
+// ── Summary for BeyondStride (read-only, only with your permission) ──
+function summary(){
+  var nv=upcomingVisits()[0];
+  return {updated:db.updated||Date.now(),
+    nextVisit:nv?{date:nv.date,time:nv.time||'',doctor:nv.doctor||'',reason:nv.reason||'',questions:openQs(nv.doctor).length}:null,
+    refills:medsByDue().filter(function(m){return refillDue(m);}).slice(0,4).map(function(m){return {name:m.name,due:refillDue(m),days:daysUntil(refillDue(m)),refillsLeft:m.refills===''||m.refills==null?null:+m.refills};}),
+    outOfRange:outOfRange().slice(0,4).map(function(o){return {name:o.l.name,value:o.r.value,unit:o.l.unit||'',date:o.r.date,flag:o.f};}),
+    vaccinesDue:vaccinesDue(30).slice(0,3).map(function(v){return {name:v.name,due:v.next};}),
+    questions:openQs().length,meds:activeMeds().length};
+}
+function share(){try{if(window.AndroidApp&&AndroidApp.setSummary)AndroidApp.setSummary(JSON.stringify(summary()));}catch(e){}}
+// One automatic backup a day (Downloads/Health Records/Auto backups, newest 7 kept).
+function autoBackup(){
+  try{if(!window.AndroidApp||!AndroidApp.saveAutoBackup||db.settings.autoBackup===false)return;
+    var k=todayKey();if(localStorage.getItem('hr_autoBackupDay')===k)return;
+    var where=AndroidApp.saveAutoBackup('health-records-auto-'+k+'.json',JSON.stringify(db));
+    if(where){localStorage.setItem('hr_autoBackupDay',k);localStorage.setItem('hr_autoBackupAt',String(Date.now()));localStorage.setItem('hr_autoBackupWhere',where);}
+  }catch(e){}
+}
+
+// ── Rendering ───────────────────────────────────────────────────────
+var V=document.getElementById('view');
+function card(title,body,extra){return '<div class="card"><h2>'+title+'<span class="sp"></span>'+(extra||'')+'</h2>'+body+'</div>';}
+function render(){
+  document.querySelectorAll('#nav button').forEach(function(b){b.classList.toggle('on',b.dataset.tab===tab);});
+  var fab=document.getElementById('fab');
+  fab.style.display=tab==='more'?'none':'';
+  fab.textContent={home:'＋ Add',meds:'＋ Medication',labs:'＋ Lab results',visits:'＋ Appointment'}[tab]||'＋ Add';
+  V.innerHTML=({home:renderHome,meds:renderMeds,labs:renderLabs,visits:renderVisits,more:renderMore}[tab])();
+}
+
+function renderHome(){
+  var h='';
+  var first=!db.meds.length&&!db.labs.length&&!db.visits.length&&!db.doctors.length;
+  if(first){
+    h+=card('👋 Welcome','<div class="muted">Keep your medications, lab results, appointments and questions for the doctor in one place. '+
+      'It all stays on this phone. Your BeyondStride Today screen can show a short summary (next appointment, refills coming due, labs to watch) if you allow it there.</div>'+
+      '<div class="btns"><button class="btn acc" data-act="starterMeds">Add HCTZ &amp; Rosuvastatin</button><button class="btn" data-act="addMed">Add a medication</button>'+
+      '<button class="btn" data-act="addResults">Add lab results</button></div>'+
+      '<div class="small dim" style="margin-top:8px">Tip: turn on App lock (App button on the More tab) to keep this private.</div>');
+  }
+  // Next appointment
+  var nv=upcomingVisits()[0];
+  if(nv){var n=daysUntil(nv.date),qs=openQs(nv.doctor);
+    h+=card('🩺 Next appointment','<div class="big">'+esc(niceD(nv.date))+(nv.time?' · '+niceT(nv.time):'')+'</div>'+
+      '<div class="muted">'+esc([nv.doctor,nv.kind,nv.reason].filter(Boolean).join(' · '))+'</div>'+
+      '<div class="btns"><button class="btn sm" data-act="questions" data-doc="'+esc(nv.doctor||'')+'">❓ '+qs.length+' question'+(qs.length===1?'':'s')+' to ask</button>'+
+      '<button class="btn sm" data-act="printSummary">🖨 Summary for the doctor</button></div>','<span class="tag '+(n<=2?'warn':'acc')+'">'+relDays(n)+'</span>');
+  }
+  // Refills
+  var due=medsByDue().filter(function(m){var d=refillDue(m);return d&&daysUntil(d)<=10;});
+  if(due.length)h+=card('💊 Refills coming due',due.map(medRow).join(''));
+  // Labs to watch
+  var oor=outOfRange();
+  if(oor.length)h+=card('🧪 Labs to watch',oor.map(function(o){return '<div class="row" data-act="openLab" data-id="'+o.l.id+'"><div class="main"><div class="t">'+esc(o.l.name)+'</div><div class="s">'+esc(o.r.value+' '+(o.l.unit||''))+' on '+esc(niceD(o.r.date,true))+' · range '+esc(rangeText(o.l))+'</div></div><span class="tag bad">'+o.f+'</span></div>';}).join('')+
+    '<div class="small dim" style="margin-top:6px">Outside the range you set for each test — worth asking your doctor about.</div>');
+  // Vaccines
+  var vd=vaccinesDue(60);
+  if(vd.length)h+=card('💉 Vaccines due',vd.map(function(v){var n=daysUntil(v.next);return '<div class="row"><div class="main"><div class="t">'+esc(v.name)+'</div><div class="s">Due '+esc(niceD(v.next,true))+'</div></div><span class="tag '+(n<0?'bad':'warn')+'">'+(n<0?'overdue':relDays(n))+'</span></div>';}).join(''));
+  // Open questions
+  var oq=openQs();
+  if(oq.length&&!nv)h+=card('❓ Questions for the doctor',oq.slice(0,5).map(qRow).join(''),'<button class="btn sm" data-act="questions">All</button>');
+  // At a glance
+  if(!first){
+    var meds=activeMeds();
+    h+=card('📋 At a glance','<div class="kv">'+
+      '<div>Medications</div><div>'+(meds.length?esc(meds.map(function(m){return m.name+(m.dose?' '+m.dose:'');}).join(', ')):'<span class="dim">none added</span>')+'</div>'+
+      '<div>Allergies</div><div>'+(db.allergies.length?esc(db.allergies.map(function(a){return a.name;}).join(', ')):'<span class="dim">none added</span>')+'</div>'+
+      '<div>Conditions</div><div>'+(db.conditions.length?esc(db.conditions.map(function(a){return a.name;}).join(', ')):'<span class="dim">none added</span>')+'</div>'+
+      '<div>Last visit</div><div>'+(pastVisits()[0]?esc(niceD(pastVisits()[0].date,true)+' · '+(pastVisits()[0].doctor||'')):'<span class="dim">—</span>')+'</div>'+
+      '</div>');
+    if(!nv&&!due.length&&!oor.length&&!vd.length)h+='<div class="empty" style="text-align:center">✅ Nothing coming up. Add your next appointment on the Visits tab.</div>';
+  }
+  return h;
+}
+
+function medRow(m){
+  var d=refillDue(m),n=d?daysUntil(d):null,cls=n==null?'':(n<0?'bad':n<=7?'warn':'good');
+  return '<div class="row" data-act="editMed" data-id="'+m.id+'"><div class="main"><div class="t">'+esc(m.name)+(m.dose?' <span class="muted">'+esc(m.dose)+'</span>':'')+'</div>'+
+    '<div class="s">'+esc([m.how,m.purpose].filter(Boolean).join(' · '))+(d?'<br>Refill '+(n<0?'was due ':'due ')+esc(niceD(d))+(m.refills!==''&&m.refills!=null?' · '+esc(m.refills)+' refill'+(+m.refills===1?'':'s')+' left':''):'')+'</div></div>'+
+    (d?'<span class="tag '+cls+'">'+(n<0?'overdue':relDays(n))+'</span>':'')+
+    (m.active!==false&&+m.supply>0?'<button class="btn sm" data-act="refilled" data-id="'+m.id+'">Refilled</button>':'')+'</div>';
+}
+function renderMeds(){
+  var act=medsByDue(),old=db.meds.filter(function(m){return m.active===false;});
+  var h=card('💊 Medications &amp; supplements',act.length?act.map(medRow).join(''):'<div class="empty">No medications yet. Tap ＋ Medication.</div>'+(db.meds.length?'':'<div class="btns"><button class="btn" data-act="starterMeds">Add HCTZ &amp; Rosuvastatin</button></div>'));
+  h+='<div class="small dim" style="padding:0 4px 12px">Tap "Refilled" when you pick one up: the next refill date moves forward by the days\' supply.</div>';
+  if(old.length)h+=card('Stopped',old.map(function(m){return '<div class="row" data-act="editMed" data-id="'+m.id+'"><div class="main"><div class="t">'+esc(m.name)+'</div><div class="s">'+esc(m.stopped?'Stopped '+niceD(m.stopped,true):'Stopped')+(m.notes?' · '+esc(m.notes):'')+'</div></div></div>';}).join(''));
+  return h;
+}
+
+function spark(l,w,hgt){
+  var r=sortedResults(l).filter(function(x){return !isNaN(+x.value);});if(r.length<2)return '';
+  var vals=r.map(function(x){return +x.value;}),lo=Math.min.apply(null,vals),hi=Math.max.apply(null,vals);
+  if(l.lo!==''&&l.lo!=null)lo=Math.min(lo,+l.lo);if(l.hi!==''&&l.hi!=null)hi=Math.max(hi,+l.hi);
+  var pad=(hi-lo)*0.1||1;lo-=pad;hi+=pad;
+  var X=function(i){return 4+i*(w-8)/(r.length-1);},Y=function(v){return hgt-4-(v-lo)*(hgt-8)/(hi-lo);};
+  var band='';var bl=l.lo!==''&&l.lo!=null?+l.lo:lo,bh=l.hi!==''&&l.hi!=null?+l.hi:hi;
+  if(l.lo!==''&&l.lo!=null||l.hi!==''&&l.hi!=null)band='<rect x="0" y="'+Y(bh)+'" width="'+w+'" height="'+Math.max(0,Y(bl)-Y(bh))+'" fill="rgba(74,222,128,.10)"/>';
+  var pts=r.map(function(x,i){return X(i)+','+Y(+x.value);}).join(' ');
+  var dots=r.map(function(x,i){var f=flag(l,x.value);return '<circle cx="'+X(i)+'" cy="'+Y(+x.value)+'" r="'+(w>200?4:2.5)+'" fill="'+(f==='ok'?'#4ade80':'#fb7185')+'"/>';}).join('');
+  return band+'<polyline points="'+pts+'" fill="none" stroke="#2dd4bf" stroke-width="'+(w>200?2.5:1.8)+'"/>'+dots;
+}
+function renderLabs(){
+  var groups={};db.labs.forEach(function(l){var g=l.group||presetGroup(l.name);(groups[g]=groups[g]||[]).push(l);});
+  var names=Object.keys(groups).sort();
+  if(!db.labs.length)return card('🧪 Lab results','<div class="empty">No results yet. Tap ＋ Lab results and enter the numbers from your report — common tests (cholesterol, A1C, potassium, kidney and liver tests…) are listed for you.</div>');
+  var h='<div class="seg"><button data-act="labFilter" data-g="all" class="'+(labFilter==='all'?'on':'')+'">All</button><button data-act="labFilter" data-g="watch" class="'+(labFilter==='watch'?'on':'')+'">To watch</button>'+
+    names.map(function(g){return '<button data-act="labFilter" data-g="'+esc(g)+'" class="'+(labFilter===g?'on':'')+'">'+esc(g)+'</button>';}).join('')+'</div>';
+  names.forEach(function(g){
+    var list=groups[g].filter(function(l){if(labFilter==='all')return true;if(labFilter==='watch'){var r=latest(l);return r&&flag(l,r.value)!=='ok';}return labFilter===g;});
+    if(!list.length)return;
+    h+=card(esc(g),list.sort(function(a,b){return a.name.localeCompare(b.name);}).map(function(l){var r=latest(l),f=r?flag(l,r.value):'';
+      return '<div class="row" data-act="openLab" data-id="'+l.id+'"><div class="main"><div class="t">'+esc(l.name)+'</div><div class="s">'+(r?esc(r.value+' '+(l.unit||''))+' · '+esc(niceD(r.date,true))+' '+esc(trendWord(l)):'no results')+'</div></div>'+
+        '<svg class="spark" viewBox="0 0 90 30">'+spark(l,90,30)+'</svg>'+(f?'<span class="tag '+(f==='ok'?'good':'bad')+'">'+(f==='ok'?'in range':f)+'</span>':'')+'</div>';}).join(''));
+  });
+  return h;
+}
+
+function qRow(q){return '<div class="row"><input type="checkbox" data-act="qDone" data-id="'+q.id+'" '+(q.done?'checked':'')+'><div class="main" data-act="editQ" data-id="'+q.id+'"><div class="t" style="font-weight:500'+(q.done?';text-decoration:line-through;color:var(--dim)':'')+'">'+esc(q.text)+'</div>'+
+  ((q.doctor||q.answer)?'<div class="s">'+esc([q.doctor,q.answer?'Answer: '+q.answer:''].filter(Boolean).join(' · '))+'</div>':'')+'</div></div>';}
+function visitRow(v){var n=daysUntil(v.date);return '<div class="row" data-act="editVisit" data-id="'+v.id+'"><div class="main"><div class="t">'+esc(niceD(v.date,true))+(v.time?' · '+niceT(v.time):'')+'</div><div class="s">'+esc([v.doctor,v.kind,v.reason].filter(Boolean).join(' · '))+
+  (v.notes?'<br>'+esc(v.notes.length>140?v.notes.slice(0,140)+'…':v.notes):'')+(v.followup?'<br>Follow-up: '+esc(v.followup):'')+'</div></div>'+(n>=0?'<span class="tag acc">'+relDays(n)+'</span>':'')+'</div>';}
+function renderVisits(){
+  var up=upcomingVisits(),past=pastVisits(),oq=openQs();
+  var h=card('📅 Upcoming',up.length?up.map(visitRow).join(''):'<div class="empty">No appointments coming up.</div>');
+  h+=card('❓ Questions for the doctor',(oq.length?oq.map(qRow).join(''):'<div class="empty">Write questions down as you think of them, so nothing gets forgotten at the visit.</div>'),'<button class="btn sm" data-act="addQ">＋ Question</button>');
+  var answered=db.questions.filter(function(q){return q.done;});
+  if(answered.length)h+=card('✅ Asked',answered.slice(-10).reverse().map(qRow).join(''));
+  h+=card('🗂 Past visits',past.length?past.map(visitRow).join(''):'<div class="empty">After a visit, open it to add notes: what the doctor said, changes, next steps.</div>');
+  return h;
+}
+
+function renderMore(){
+  var h='';
+  h+=card('🚨 Allergies',(db.allergies.length?db.allergies.map(function(a){return '<div class="row" data-act="edit" data-c="allergies" data-id="'+a.id+'"><div class="main"><div class="t">'+esc(a.name)+'</div>'+(a.reaction?'<div class="s">'+esc(a.reaction)+'</div>':'')+'</div></div>';}).join(''):'<div class="empty">None added.</div>'),'<button class="btn sm" data-act="add" data-c="allergies">＋</button>');
+  h+=card('🩹 Conditions',(db.conditions.length?db.conditions.map(function(a){return '<div class="row" data-act="edit" data-c="conditions" data-id="'+a.id+'"><div class="main"><div class="t">'+esc(a.name)+'</div><div class="s">'+esc([a.since?'Since '+a.since:'',a.notes].filter(Boolean).join(' · '))+'</div></div></div>';}).join(''):'<div class="empty">None added (for example high blood pressure, high cholesterol).</div>'),'<button class="btn sm" data-act="add" data-c="conditions">＋</button>');
+  h+=card('💉 Vaccines',(db.vaccines.length?db.vaccines.slice().sort(function(a,b){return (b.date||'')<(a.date||'')?-1:1;}).map(function(v){var n=v.next?daysUntil(v.next):null;return '<div class="row" data-act="edit" data-c="vaccines" data-id="'+v.id+'"><div class="main"><div class="t">'+esc(v.name)+'</div><div class="s">'+esc([v.date?'Got '+niceD(v.date,true):'',v.next?'Next '+niceD(v.next,true):''].filter(Boolean).join(' · '))+'</div></div>'+(n!=null&&n<=60?'<span class="tag '+(n<0?'bad':'warn')+'">'+(n<0?'overdue':relDays(n))+'</span>':'')+'</div>';}).join(''):'<div class="empty">Flu, COVID, shingles, tetanus… with the date of the next one.</div>'),'<button class="btn sm" data-act="add" data-c="vaccines">＋</button>');
+  h+=card('👩‍⚕️ Doctors &amp; pharmacy',(db.doctors.length?db.doctors.map(function(d){return '<div class="row"><div class="main" data-act="edit" data-c="doctors" data-id="'+d.id+'"><div class="t">'+esc(d.name)+'</div><div class="s">'+esc([d.specialty,d.address].filter(Boolean).join(' · '))+'</div></div>'+
+    (d.phone?'<a class="btn sm" href="tel:'+esc(d.phone.replace(/[^\d+]/g,''))+'">📞 Call</a>':'')+(d.portal?'<a class="btn sm" href="'+esc(/^https?:/.test(d.portal)?d.portal:'https://'+d.portal)+'" target="_blank" rel="noopener">Portal</a>':'')+'</div>';}).join(''):'<div class="empty">Add your doctors and pharmacy for one-tap calling.</div>'),'<button class="btn sm" data-act="add" data-c="doctors">＋</button>');
+  var p=db.profile||{};
+  h+=card('🪪 My info',(Object.keys(p).some(function(k){return p[k];})?'<div class="kv">'+[['Date of birth',p.dob?niceD(p.dob,true):''],['Blood type',p.blood],['Insurance',p.insurance],['Member ID',p.memberId],['Emergency contact',p.emergency]].filter(function(x){return x[1];}).map(function(x){return '<div>'+x[0]+'</div><div>'+esc(x[1])+'</div>';}).join('')+'</div>':'<div class="empty">Date of birth, blood type, insurance, emergency contact.</div>'),'<button class="btn sm" data-act="editProfile">Edit</button>');
+  var at=+localStorage.getItem('hr_autoBackupAt')||0;
+  h+=card('💾 Backup &amp; print','<div class="muted small">Everything lives only on this phone. A backup is saved automatically once a day'+(at?' (last: '+esc(new Date(at).toLocaleString())+', '+esc(localStorage.getItem('hr_autoBackupWhere')||'')+')':'')+'. You can also save one now or restore one.</div>'+
+    '<div class="btns"><button class="btn" data-act="exportJson">Back up now</button><button class="btn" data-act="importJson">Restore a backup</button><button class="btn" data-act="printSummary">🖨 Summary for the doctor</button></div>'+
+    '<label class="chk"><input type="checkbox" data-act="toggleAuto" '+(db.settings.autoBackup===false?'':'checked')+'> Daily automatic backup</label>');
+  return h;
+}
+
+// ── Editing ────────────────────────────────────────────────────────
+var SH=document.getElementById('sheet'),SW=document.getElementById('sheetWrap');
+function openSheet(html){SH.innerHTML=html;SW.classList.add('open');}
+function closeSheet(){SW.classList.remove('open');SH.innerHTML='';}
+SW.addEventListener('click',function(e){if(e.target===SW)closeSheet();});
+
+var FIELDS={
+  meds:[['name','Name','text'],['dose','Dose','text','e.g. 25 mg'],['how','How to take','text','e.g. 1 every morning'],['purpose','What it\'s for','text','e.g. blood pressure'],
+    ['prescriber','Prescribed by','doctor'],['pharmacy','Pharmacy','text'],['supply','Days\' supply','number','e.g. 90'],['lastFill','Last filled','date'],['refills','Refills left','number'],
+    ['active','Taking it now','check'],['stopped','Stopped on','date'],['notes','Notes','textarea']],
+  visits:[['date','Date','date'],['time','Time','time'],['doctor','Doctor','doctor'],['kind','Type','select',['','Checkup / physical','Follow-up','Specialist','Lab work','Dental','Eye','Urgent care','Other']],
+    ['reason','Reason','text'],['notes','Notes (what the doctor said)','textarea'],['followup','Follow-up / next steps','text']],
+  questions:[['text','Question','textarea'],['doctor','For which doctor','doctor'],['answer','Answer (after the visit)','textarea'],['done','Asked','check']],
+  vaccines:[['name','Vaccine','text','e.g. Flu, Shingles (Shingrix), Tdap'],['date','Date given','date'],['next','Next one due','date'],['notes','Notes','text']],
+  allergies:[['name','Allergic to','text'],['reaction','Reaction','text']],
+  conditions:[['name','Condition','text'],['since','Since','text','e.g. 2019'],['notes','Notes','text']],
+  doctors:[['name','Name','text','e.g. Dr. Lee or Walgreens'],['specialty','Specialty / role','text','e.g. Primary care, Pharmacy'],['phone','Phone','tel'],['address','Address','text'],['portal','Patient portal link','text'],['notes','Notes','text']],
+  labs:[['name','Test','text'],['unit','Unit','text'],['lo','Range low','number'],['hi','Range high','number'],['group','Group','text']]
+};
+var TITLES={meds:'Medication',visits:'Appointment',questions:'Question',vaccines:'Vaccine',allergies:'Allergy',conditions:'Condition',doctors:'Doctor or pharmacy',labs:'Lab test'};
+function fieldHtml(f,v){
+  var k=f[0],lab=f[1],t=f[2],ph=f[3]&&typeof f[3]==='string'?f[3]:'';v=v==null?'':v;
+  if(t==='check')return '<label class="chk"><input type="checkbox" name="'+k+'" '+(v!==false&&v!==''?'checked':'')+'> '+lab+'</label>';
+  if(t==='textarea')return '<label class="f">'+lab+'<textarea name="'+k+'" placeholder="'+esc(ph)+'">'+esc(v)+'</textarea></label>';
+  if(t==='select')return '<label class="f">'+lab+'<select name="'+k+'">'+f[3].map(function(o){return '<option'+(o===v?' selected':'')+'>'+esc(o)+'</option>';}).join('')+'</select></label>';
+  if(t==='doctor'){var ds=doctorNames();return '<label class="f">'+lab+'<input name="'+k+'" list="docList" value="'+esc(v)+'"></label><datalist id="docList">'+ds.map(function(d){return '<option value="'+esc(d)+'">';}).join('')+'</datalist>';}
+  return '<label class="f">'+lab+'<input name="'+k+'" type="'+(t==='number'?'number':t)+'"'+(t==='number'?' step="any" inputmode="decimal"':'')+' value="'+esc(v)+'" placeholder="'+esc(ph)+'"></label>';
+}
+function editItem(c,id,preset,after){
+  var item=id?db[c].filter(function(x){return x.id===id;})[0]:null;
+  var vals=item||preset||{};
+  if(!item&&c==='meds'&&vals.active==null)vals.active=true;
+  openSheet('<h3><span>'+(item?'Edit ':'New ')+TITLES[c]+'</span><button class="iconbtn" data-act="close">✕</button></h3><form id="ef">'+FIELDS[c].map(function(f){return fieldHtml(f,vals[f[0]]);}).join('')+
+    '<div class="btns"><button class="btn acc" type="submit">Save</button>'+(item?'<button class="btn bad" type="button" data-act="del">Delete</button>':'')+'</div></form>');
+  var form=document.getElementById('ef');
+  form.addEventListener('submit',function(e){e.preventDefault();
+    var o=item||{id:uid(),created:Date.now()};
+    FIELDS[c].forEach(function(f){var el=form.elements[f[0]];if(!el)return;o[f[0]]=f[2]==='check'?el.checked:el.value.trim();});
+    var need=FIELDS[c][0][0];if(!o[need]){alert('Please fill in '+FIELDS[c][0][1].toLowerCase()+'.');return;}
+    if(c==='meds'&&o.active&&o.stopped)o.stopped='';
+    if(c==='meds'&&!o.active&&!o.stopped)o.stopped=todayKey();
+    if(!item)db[c].push(o);
+    closeSheet();save('Saved');if(after)after(o);
+  });
+  var del=SH.querySelector('[data-act=del]');
+  if(del)del.addEventListener('click',function(){if(!confirm('Delete this '+TITLES[c].toLowerCase()+'?'))return;db[c]=db[c].filter(function(x){return x.id!==id;});closeSheet();save('Deleted');});
+}
+
+function addResults(){
+  var t=todayKey();
+  var names=db.labs.map(function(l){return l.name;});
+  LAB_PRESETS.forEach(function(p){if(names.map(function(n){return n.toLowerCase();}).indexOf(p[0].toLowerCase())<0)names.push(p[0]);});
+  var byGroup={};names.forEach(function(n){var l=labByName(n);var g=l&&l.group?l.group:presetGroup(n);(byGroup[g]=byGroup[g]||[]).push(n);});
+  var h='<h3><span>Add lab results</span><button class="iconbtn" data-act="close">✕</button></h3><form id="lf"><label class="f">Date of the test<input type="date" name="date" value="'+t+'"></label>'+
+    '<div class="small dim" style="margin:8px 0">Fill in the ones on your report; leave the rest blank.</div>';
+  Object.keys(byGroup).sort().forEach(function(g){
+    h+='<div style="margin-top:12px;font-weight:700;color:var(--accent);font-size:13px">'+esc(g)+'</div>';
+    byGroup[g].forEach(function(n){var l=labByName(n),p=LAB_PRESETS.filter(function(x){return x[0]===n;})[0];var unit=l?l.unit:(p?p[1]:'');
+      var lo=l?l.lo:(p?p[2]:''),hi=l?l.hi:(p?p[3]:'');var rt=rangeText({lo:lo,hi:hi});
+      h+='<div class="labin"><div class="n">'+esc(n)+'<small>'+esc(unit)+(rt!=='no range set'?' · range '+esc(rt):'')+'</small></div><input type="number" step="any" inputmode="decimal" data-n="'+esc(n)+'"></div>';});
+  });
+  h+='<div style="margin-top:14px;font-weight:700;color:var(--accent);font-size:13px">Another test</div><div class="grid2"><label class="f">Name<input name="xname"></label><label class="f">Result<input name="xval" type="number" step="any" inputmode="decimal"></label><label class="f">Unit<input name="xunit"></label><label class="f">Range (e.g. 10-40)<input name="xrange"></label></div>'+
+    '<div class="btns"><button class="btn acc" type="submit">Save results</button></div></form>';
+  openSheet(h);
+  var f=document.getElementById('lf');
+  f.addEventListener('submit',function(e){e.preventDefault();
+    var date=f.elements.date.value||t,count=0;
+    function put(n,v,unit,lo,hi){var l=labByName(n);
+      if(!l){var p=LAB_PRESETS.filter(function(x){return x[0]===n;})[0];l={id:uid(),name:n,unit:unit!=null?unit:(p?p[1]:''),lo:lo!=null?lo:(p?p[2]:''),hi:hi!=null?hi:(p?p[3]:''),group:p?p[4]:'Other',results:[]};db.labs.push(l);}
+      l.results=(l.results||[]).filter(function(r){return r.date!==date;});l.results.push({date:date,value:v});count++;}
+    f.querySelectorAll('input[data-n]').forEach(function(i){if(i.value!=='')put(i.dataset.n,+i.value);});
+    if(f.elements.xname.value.trim()&&f.elements.xval.value!==''){var m=(f.elements.xrange.value||'').match(/([\d.]+)\s*[-–]\s*([\d.]+)/);
+      put(f.elements.xname.value.trim(),+f.elements.xval.value,f.elements.xunit.value.trim(),m?+m[1]:'',m?+m[2]:'');}
+    if(!count){alert('Enter at least one result.');return;}
+    closeSheet();tab='labs';save(count+' result'+(count===1?'':'s')+' saved');
+  });
+}
+function openLab(id){
+  var l=db.labs.filter(function(x){return x.id===id;})[0];if(!l)return;
+  var r=sortedResults(l);
+  openSheet('<h3><span>'+esc(l.name)+'</span><button class="iconbtn" data-act="close">✕</button></h3>'+
+    '<div class="muted small">'+esc(l.unit||'')+' · range '+esc(rangeText(l))+' <span class="dim">(change it to match your lab report)</span></div>'+
+    (r.length>1?'<svg class="trend" viewBox="0 0 340 150" preserveAspectRatio="none">'+spark(l,340,150)+'</svg>':'')+
+    r.slice().reverse().map(function(x){var f=flag(l,x.value);return '<div class="row"><div class="main"><div class="t">'+esc(x.value+' '+(l.unit||''))+'</div><div class="s">'+esc(niceD(x.date,true))+'</div></div><span class="tag '+(f==='ok'?'good':'bad')+'">'+(f==='ok'?'in range':f)+'</span><button class="iconbtn" data-act="delResult" data-id="'+l.id+'" data-date="'+x.date+'">🗑</button></div>';}).join('')+
+    '<div class="btns"><button class="btn" data-act="editLab" data-id="'+l.id+'">Edit test &amp; range</button></div>');
+}
+function askQuestions(doc){
+  var qs=openQs(doc);
+  openSheet('<h3><span>❓ Questions'+(doc?' for '+esc(doc):'')+'</span><button class="iconbtn" data-act="close">✕</button></h3>'+
+    (qs.length?qs.map(qRow).join(''):'<div class="empty">No open questions.</div>')+
+    '<form id="qf" style="display:flex;gap:8px;margin-top:10px"><input name="q" placeholder="Add a question…" style="margin:0"><button class="btn acc" type="submit">Add</button></form>');
+  document.getElementById('qf').addEventListener('submit',function(e){e.preventDefault();var v=e.target.elements.q.value.trim();if(!v)return;db.questions.push({id:uid(),text:v,doctor:doc||'',done:false,created:Date.now()});save();askQuestions(doc);});
+}
+function editProfile(){
+  var p=db.profile||{};
+  var F=[['dob','Date of birth','date'],['blood','Blood type','text'],['insurance','Insurance','text'],['memberId','Member ID','text'],['emergency','Emergency contact','text','Name and phone']];
+  openSheet('<h3><span>My info</span><button class="iconbtn" data-act="close">✕</button></h3><form id="pf">'+F.map(function(f){return fieldHtml(f,p[f[0]]);}).join('')+'<div class="btns"><button class="btn acc" type="submit">Save</button></div></form>');
+  document.getElementById('pf').addEventListener('submit',function(e){e.preventDefault();F.forEach(function(f){p[f[0]]=e.target.elements[f[0]].value.trim();});db.profile=p;closeSheet();save('Saved');});
+}
+
+// ── Print: a one-page summary to hand to a doctor ──────────────────
+function buildPrint(){
+  var p=db.profile||{},meds=activeMeds();
+  var h='<h1>Health summary</h1><div>'+esc(new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}))+(p.dob?' · Born '+esc(niceD(p.dob,true)):'')+(p.blood?' · Blood type '+esc(p.blood):'')+'</div>';
+  h+='<h2>Medications &amp; supplements</h2>'+(meds.length?'<table>'+meds.map(function(m){return '<tr><td><b>'+esc(m.name)+'</b> '+esc(m.dose||'')+'</td><td>'+esc(m.how||'')+'</td><td>'+esc(m.purpose||'')+'</td></tr>';}).join('')+'</table>':'None');
+  h+='<h2>Allergies</h2>'+(db.allergies.length?esc(db.allergies.map(function(a){return a.name+(a.reaction?' ('+a.reaction+')':'');}).join('; ')):'None known');
+  h+='<h2>Conditions</h2>'+(db.conditions.length?esc(db.conditions.map(function(a){return a.name+(a.since?' (since '+a.since+')':'');}).join('; ')):'None listed');
+  var labs=db.labs.filter(function(l){return latest(l);});
+  if(labs.length)h+='<h2>Recent lab results</h2><table><tr><th>Test</th><th>Latest</th><th>Date</th><th>Previous</th><th>Range</th></tr>'+labs.map(function(l){var r=sortedResults(l),a=r[r.length-1],b=r[r.length-2];
+    return '<tr><td>'+esc(l.name)+'</td><td><b>'+esc(a.value+' '+(l.unit||''))+'</b>'+(flag(l,a.value)!=='ok'?' ('+flag(l,a.value)+')':'')+'</td><td>'+esc(niceD(a.date,true))+'</td><td>'+(b?esc(b.value+' · '+niceD(b.date,true)):'')+'</td><td>'+esc(rangeText(l))+'</td></tr>';}).join('')+'</table>';
+  var vac=db.vaccines.filter(function(v){return v.date;});
+  if(vac.length)h+='<h2>Vaccines</h2>'+esc(vac.map(function(v){return v.name+' '+niceD(v.date,true);}).join('; '));
+  var oq=openQs();if(oq.length)h+='<h2>Questions</h2><ol>'+oq.map(function(q){return '<li>'+esc(q.text)+'</li>';}).join('')+'</ol>';
+  if(p.emergency||p.insurance)h+='<h2>Contacts</h2>'+esc([p.insurance?'Insurance: '+p.insurance+(p.memberId?' #'+p.memberId:''):'',p.emergency?'Emergency: '+p.emergency:''].filter(Boolean).join(' · '));
+  document.getElementById('printView').innerHTML=h;
+}
+window.addEventListener('beforeprint',buildPrint);
+
+// ── Backup / restore ──────────────────────────────────────────────
+function exportJson(){
+  var blob=new Blob([JSON.stringify(db,null,1)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='health-records-backup-'+todayKey()+'.json';document.body.appendChild(a);a.click();a.remove();
+  toast(window.AndroidApp?'Saved to Downloads/Health Records':'Backup downloaded');
+}
+document.getElementById('importFile').addEventListener('change',function(e){
+  var f=e.target.files&&e.target.files[0];if(!f)return;var rd=new FileReader();
+  rd.onload=function(){try{var d=JSON.parse(rd.result);if(!d||typeof d!=='object'||!Array.isArray(d.meds))throw 0;
+    if(!confirm('Replace everything in Health Records with this backup?'))return;
+    db=d;Object.keys(EMPTY).forEach(function(k){if(db[k]==null)db[k]=JSON.parse(JSON.stringify(EMPTY[k]));});save('Backup restored');
+  }catch(x){alert('That file isn\'t a Health Records backup.');}};
+  rd.readAsText(f);e.target.value='';
+});
+
+// ── Clicks ─────────────────────────────────────────────────────────
+document.getElementById('nav').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;tab=b.dataset.tab;render();window.scrollTo(0,0);});
+document.getElementById('fab').addEventListener('click',function(){
+  if(tab==='meds')editItem('meds');else if(tab==='labs')addResults();else if(tab==='visits')editItem('visits');
+  else openSheet('<h3><span>Add</span><button class="iconbtn" data-act="close">✕</button></h3><div class="btns" style="flex-direction:column">'+
+    '<button class="btn" data-act="addMed">💊 Medication</button><button class="btn" data-act="addResults">🧪 Lab results</button><button class="btn" data-act="addVisit">🩺 Appointment</button>'+
+    '<button class="btn" data-act="addQ">❓ Question for the doctor</button><button class="btn" data-act="add" data-c="vaccines">💉 Vaccine</button><button class="btn" data-act="add" data-c="doctors">👩‍⚕️ Doctor or pharmacy</button></div>');
+});
+document.addEventListener('change',function(e){
+  var t=e.target;if(!t.dataset)return;
+  if(t.dataset.act==='qDone'){var q=db.questions.filter(function(x){return x.id===t.dataset.id;})[0];if(q){q.done=t.checked;q.doneAt=t.checked?Date.now():null;var open=SW.classList.contains('open');save();if(open&&SH.querySelector('#qf'))t.closest('.row').style.opacity=t.checked?.4:1;}}
+  if(t.dataset.act==='toggleAuto'){db.settings.autoBackup=t.checked;save(t.checked?'Daily backup on':'Daily backup off');}
+});
+document.addEventListener('click',function(e){
+  var el=e.target.closest('[data-act]');if(!el||el.tagName==='INPUT')return;
+  var a=el.dataset.act,id=el.dataset.id;
+  switch(a){
+    case 'close':closeSheet();break;
+    case 'addMed':closeSheet();editItem('meds');break;
+    case 'editMed':if(e.target.closest('button'))return;editItem('meds',id);break;
+    case 'refilled':{var m=db.meds.filter(function(x){return x.id===id;})[0];if(!m)break;
+      m.lastFill=todayKey();if(m.refills!==''&&m.refills!=null&&+m.refills>0)m.refills=String(+m.refills-1);
+      save('Refilled — next due '+niceD(refillDue(m)));break;}
+    case 'starterMeds':
+      [['HCTZ','blood pressure'],['Rosuvastatin','cholesterol']].forEach(function(x){if(!db.meds.some(function(m){return m.name.toLowerCase().indexOf(x[0].split(' ')[0].toLowerCase())===0;}))db.meds.push({id:uid(),name:x[0],dose:'',how:'',purpose:x[1],supply:'',lastFill:'',refills:'',active:true,created:Date.now()});});
+      tab='meds';save('Added — tap each one to fill in the dose and refill details');break;
+    case 'addResults':closeSheet();addResults();break;
+    case 'openLab':openLab(id);break;
+    case 'editLab':closeSheet();editItem('labs',id);break;
+    case 'delResult':{var l=db.labs.filter(function(x){return x.id===id;})[0];if(!l||!confirm('Delete this result?'))break;l.results=l.results.filter(function(r){return r.date!==el.dataset.date;});save();openLab(id);break;}
+    case 'labFilter':labFilter=el.dataset.g;render();break;
+    case 'addVisit':closeSheet();editItem('visits');break;
+    case 'editVisit':editItem('visits',id);break;
+    case 'addQ':closeSheet();editItem('questions',null,{done:false});break;
+    case 'editQ':editItem('questions',id);break;
+    case 'questions':askQuestions(el.dataset.doc||'');break;
+    case 'add':closeSheet();editItem(el.dataset.c);break;
+    case 'edit':editItem(el.dataset.c,id);break;
+    case 'editProfile':editProfile();break;
+    case 'exportJson':exportJson();break;
+    case 'importJson':document.getElementById('importFile').click();break;
+    case 'printSummary':closeSheet();buildPrint();window.print();break;
+  }
+});
+
+// Android Back: close the sheet, then go back to Overview, then leave.
+window.handleAndroidBack=function(){
+  var appSheet=document.getElementById('appSheetWrap');
+  if(appSheet&&appSheet.classList.contains('open')){appSheet.classList.remove('open');return true;}
+  if(SW.classList.contains('open')){closeSheet();return true;}
+  if(tab!=='home'){tab='home';render();return true;}
+  return false;
+};
+window.HR={summary:summary,exportJson:exportJson,db:function(){return db;}};
+
+render();share();autoBackup();
+// Refill days and "in N days" change at midnight: refresh what BeyondStride sees when the app comes back.
+document.addEventListener('visibilitychange',function(){if(!document.hidden){share();render();}});
+})();
+</script>
+</body>
+</html>
