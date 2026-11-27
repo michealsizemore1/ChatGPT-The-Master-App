@@ -63,3 +63,51 @@
     if (a && handle(a)) e.preventDefault();
   }, true);
 })();
+
+// 🏖️ Retirement summary for BeyondStride's Today screen (app only). After the planner recalculates, it hands the app a
+// few headline numbers: retirement date, plan confidence, total current assets, net worth, how long the money lasts and
+// the plan's monthly household budget. The app shares only these, and only with apps the owner allows (BeyondStride).
+(function () {
+  if (!window.AndroidApp || !window.AndroidApp.setSummary) return;
+  var last = "", timer = 0;
+  function send() {
+    try {
+      if (typeof lastCoachContext === "undefined" || !lastCoachContext) return;
+      var c = lastCoachContext, inp = c.inputs || {}, ctx = c.ctx || {}, res = c.result || {}, score = Number(c.score);
+      var n = function (v) { return Number(v) || 0; };
+      var total = n(inp.tradTSPBalance) + n(inp.rothTSPBalance) + n(inp.brokerageBalance) + n(inp.checkingBalance) + n(inp.savingsBalance) + n(inp.hysaBalance);
+      var ds = (typeof debts !== "undefined" && debts) ? debts : [];
+      var debt = 0, vehicles = 0;
+      ds.forEach(function (d) {
+        var future = d.startAge != null && d.startAge !== "" && +d.startAge > n(inp.currentAge);
+        if (!future) { debt += n(d.balance); if (d.category === "Auto Loan") vehicles += n(d.assetValue); }
+      });
+      var label = score >= 80 ? "Strong" : score >= 60 ? "Good" : score >= 40 ? "Uncertain" : "Needs attention";
+      var out = {
+        retireDate: String(inp.retirementDateRaw || ""), retireAge: n(inp.retirementAge), currentAge: n(inp.currentAge),
+        confidence: isFinite(score) ? Math.round(score) : null, label: label,
+        totalAssets: Math.round(total), tsp: Math.round(n(inp.tradTSPBalance) + n(inp.rothTSPBalance)),
+        brokerage: Math.round(n(inp.brokerageBalance)), cash: Math.round(n(inp.checkingBalance) + n(inp.savingsBalance) + n(inp.hysaBalance)),
+        netWorth: Math.round(total - n(inp.checkingBalance) + vehicles - debt),
+        depletionAge: res.depletionAge || null, lifeExpectancy: n(ctx.effectiveLifeExpectancy) || null,
+        // The plan's household budget in today's dollars (expenses + rent), per month — compared with M&C Money's actual spending.
+        plannedMonthly: Math.round((n(ctx.expensesTotal) + n(inp.rentMonthly) * 12) / 12),
+        basis: (typeof spendingBasis !== "undefined" ? String(spendingBasis) : "")
+      };
+      var json = JSON.stringify(out);
+      if (json === last) return;
+      last = json;
+      window.AndroidApp.setSummary(json);
+    } catch (e) {}
+  }
+  function hook() {
+    if (typeof window.render !== "function" || window.render.__bsHook) return false;
+    var real = window.render;
+    window.render = function () { var r = real.apply(this, arguments); clearTimeout(timer); timer = setTimeout(send, 1500); return r; };
+    window.render.__bsHook = true;
+    return true;
+  }
+  window.addEventListener("load", function () { hook(); setTimeout(send, 4000); });
+  setInterval(function () { hook(); send(); }, 5 * 60 * 1000);
+  document.addEventListener("visibilitychange", function () { if (document.hidden) send(); });
+})();

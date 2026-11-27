@@ -92,6 +92,15 @@
       var days = {}, tx = {}, now = new Date(), accts = {};
       (data.accounts || []).forEach(function (a) { if (a && a.id) accts[a.id] = a.name || ""; });
       for (var i = 13; i >= 0; i--) { var k0 = dk(new Date(now.getFullYear(), now.getMonth(), now.getDate() - i)); days[k0] = 0; tx[k0] = []; }
+      // Monthly totals for the last 6 months (this month so far included), for the plan-vs-actual line.
+      var months = {};
+      for (var mi = 5; mi >= 0; mi--) { var md = new Date(now.getFullYear(), now.getMonth() - mi, 1); months[md.getFullYear() + "-" + ("0" + (md.getMonth() + 1)).slice(-2)] = 0; }
+      data.transactions.forEach(function (t) {
+        var mk = String(t && t.date || "").slice(0, 7);
+        if (!(mk in months) || t.excludeFromBudget) return;
+        spendingAllocations(t).forEach(function (part) { months[mk] += Number(part.amount) || 0; });
+      });
+      Object.keys(months).forEach(function (k) { months[k] = Math.max(0, Math.round(months[k] * 100) / 100); });
       data.transactions.forEach(function (t) {
         var day = String(t && t.date || "").slice(0, 10);
         if (!(day in days) || t.excludeFromBudget) return;
@@ -105,7 +114,7 @@
           c: String(cat || ""), acct: String(accts[t.accountId] || ""), p: String(t.person || "") });
       });
       Object.keys(days).forEach(function (k) { days[k] = Math.max(0, Math.round(days[k] * 100) / 100); tx[k].sort(function (a, b) { return b.a - a.a; }); });
-      var json = JSON.stringify({ days: days, tx: tx });
+      var json = JSON.stringify({ days: days, tx: tx, months: months });
       if (json === last) return;
       last = json;
       window.AndroidApp.setSpending(json);

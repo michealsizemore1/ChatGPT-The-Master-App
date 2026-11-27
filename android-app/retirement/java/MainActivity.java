@@ -318,6 +318,12 @@ public class MainActivity extends Activity {
 
     /** Lets the page save backups and exports into the phone's Downloads folder, open vault documents, and update the app. */
     public class Bridge {
+        /** Headline numbers for BeyondStride's Today screen (see SummaryProvider). */
+        @JavascriptInterface
+        public void setSummary(String json) {
+            SummaryProvider.save(MainActivity.this, json);
+        }
+
         @JavascriptInterface
         public String saveAutoBackup(String name, String json) {
             return Backups.save(getApplicationContext(), name, json);

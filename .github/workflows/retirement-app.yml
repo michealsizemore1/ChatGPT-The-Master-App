@@ -120,6 +120,11 @@ jobs:
               <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
               <!-- App lock: fingerprint / screen lock when the app opens. -->
               <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+              <permission
+                  android:name="com.sizemore.retirement.READ_SUMMARY"
+                  android:label="Read Retirement Planner summary"
+                  android:description="@string/read_summary_desc"
+                  android:protectionLevel="dangerous" />
               <queries>
                   <intent><action android:name="android.media.action.IMAGE_CAPTURE" /></intent>
                   <intent><action android:name="android.intent.action.VIEW" /><data android:mimeType="application/pdf" /></intent>
@@ -143,6 +148,11 @@ jobs:
                   </activity>
                   <receiver android:name=".Updater$UpdateReceiver" android:exported="false" />
                   <provider
+                      android:name=".SummaryProvider"
+                      android:authorities="com.sizemore.retirement.summary"
+                      android:exported="true"
+                      android:readPermission="com.sizemore.retirement.READ_SUMMARY" />
+                  <provider
                       android:name=".CaptureProvider"
                       android:authorities="com.sizemore.retirement.capture"
                       android:exported="false"
@@ -155,6 +165,7 @@ jobs:
           <?xml version="1.0" encoding="utf-8"?>
           <resources>
               <color name="app_bg">#F4F6FA</color>
+              <string name="read_summary_desc">See your retirement plan's headline numbers (date, confidence, assets, net worth).</string>
               <style name="AppTheme" parent="android:Theme.Material.Light.NoActionBar">
                   <item name="android:statusBarColor">#0B1F3A</item>
                   <item name="android:navigationBarColor">#0B1F3A</item>
