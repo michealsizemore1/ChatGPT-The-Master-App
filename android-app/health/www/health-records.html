@@ -174,8 +174,8 @@ function share(){try{if(window.AndroidApp&&AndroidApp.setSummary)AndroidApp.setS
 function autoBackup(){
   try{if(!window.AndroidApp||!AndroidApp.saveAutoBackup||db.settings.autoBackup===false)return;
     var k=todayKey();if(localStorage.getItem('hr_autoBackupDay')===k)return;
-    var where=AndroidApp.saveAutoBackup('health-records-auto-'+k+'.json',JSON.stringify(db));
-    if(where){localStorage.setItem('hr_autoBackupDay',k);localStorage.setItem('hr_autoBackupAt',String(Date.now()));localStorage.setItem('hr_autoBackupWhere',where);}
+    backupJson(function(js){var where=AndroidApp.saveAutoBackup('health-records-auto-'+k+'.json',js);
+    if(where){localStorage.setItem('hr_autoBackupDay',k);localStorage.setItem('hr_autoBackupAt',String(Date.now()));localStorage.setItem('hr_autoBackupWhere',where);}});
   }catch(e){}
 }
 
@@ -188,6 +188,7 @@ function render(){
   fab.style.display=tab==='more'?'none':'';
   fab.textContent={home:'＋ Add',meds:'＋ Medication',labs:'＋ Lab results',visits:'＋ Appointment'}[tab]||'＋ Add';
   V.innerHTML=({home:renderHome,meds:renderMeds,labs:renderLabs,visits:renderVisits,more:renderMore}[tab])();
+  if(window.Attach)Attach.hydrate(V);
 }
 
 function renderHome(){
@@ -237,7 +238,7 @@ function renderHome(){
 
 function medRow(m){
   var d=refillDue(m),n=d?daysUntil(d):null,cls=n==null?'':(n<0?'bad':n<=7?'warn':'good');
-  return '<div class="row" data-act="editMed" data-id="'+m.id+'"><div class="main"><div class="t">'+esc(m.name)+(m.dose?' <span class="muted">'+esc(m.dose)+'</span>':'')+'</div>'+
+  return '<div class="row" data-act="editMed" data-id="'+m.id+'"><div class="main"><div class="t">'+esc(m.name)+(m.dose?' <span class="muted">'+esc(m.dose)+'</span>':'')+clip(m)+'</div>'+
     '<div class="s">'+esc([m.how,m.purpose].filter(Boolean).join(' · '))+(d?'<br>Refill '+(n<0?'was due ':'due ')+esc(niceD(d))+(m.refills!==''&&m.refills!=null?' · '+esc(m.refills)+' refill'+(+m.refills===1?'':'s')+' left':''):'')+'</div></div>'+
     (d?'<span class="tag '+cls+'">'+(n<0?'overdue':relDays(n))+'</span>':'')+
     (m.active!==false&&+m.supply>0?'<button class="btn sm" data-act="refilled" data-id="'+m.id+'">Refilled</button>':'')+'</div>';
@@ -280,7 +281,7 @@ function renderLabs(){
 
 function qRow(q){return '<div class="row"><input type="checkbox" data-act="qDone" data-id="'+q.id+'" '+(q.done?'checked':'')+'><div class="main" data-act="editQ" data-id="'+q.id+'"><div class="t" style="font-weight:500'+(q.done?';text-decoration:line-through;color:var(--dim)':'')+'">'+esc(q.text)+'</div>'+
   ((q.doctor||q.answer)?'<div class="s">'+esc([q.doctor,q.answer?'Answer: '+q.answer:''].filter(Boolean).join(' · '))+'</div>':'')+'</div></div>';}
-function visitRow(v){var n=daysUntil(v.date);return '<div class="row" data-act="editVisit" data-id="'+v.id+'"><div class="main"><div class="t">'+esc(niceD(v.date,true))+(v.time?' · '+niceT(v.time):'')+'</div><div class="s">'+esc([v.doctor,v.kind,v.reason].filter(Boolean).join(' · '))+
+function visitRow(v){var n=daysUntil(v.date);return '<div class="row" data-act="editVisit" data-id="'+v.id+'"><div class="main"><div class="t">'+esc(niceD(v.date,true))+(v.time?' · '+niceT(v.time):'')+clip(v)+'</div><div class="s">'+esc([v.doctor,v.kind,v.reason].filter(Boolean).join(' · '))+
   (v.notes?'<br>'+esc(v.notes.length>140?v.notes.slice(0,140)+'…':v.notes):'')+(v.followup?'<br>Follow-up: '+esc(v.followup):'')+'</div></div>'+(n>=0?'<span class="tag acc">'+relDays(n)+'</span>':'')+'</div>';}
 function renderVisits(){
   var up=upcomingVisits(),past=pastVisits(),oq=openQs();
@@ -301,6 +302,7 @@ function renderMore(){
     (d.phone?'<a class="btn sm" href="tel:'+esc(d.phone.replace(/[^\d+]/g,''))+'">📞 Call</a>':'')+(d.portal?'<a class="btn sm" href="'+esc(/^https?:/.test(d.portal)?d.portal:'https://'+d.portal)+'" target="_blank" rel="noopener">Portal</a>':'')+'</div>';}).join(''):'<div class="empty">Add your doctors and pharmacy for one-tap calling.</div>'),'<button class="btn sm" data-act="add" data-c="doctors">＋</button>');
   var p=db.profile||{};
   h+=card('🪪 My info',(Object.keys(p).some(function(k){return p[k];})?'<div class="kv">'+[['Date of birth',p.dob?niceD(p.dob,true):''],['Blood type',p.blood],['Insurance',p.insurance],['Member ID',p.memberId],['Emergency contact',p.emergency]].filter(function(x){return x[1];}).map(function(x){return '<div>'+x[0]+'</div><div>'+esc(x[1])+'</div>';}).join('')+'</div>':'<div class="empty">Date of birth, blood type, insurance, emergency contact.</div>'),'<button class="btn sm" data-act="editProfile">Edit</button>');
+  h+=generalDocsCard('Insurance cards, explanation-of-benefits letters, receipts, records from a visit — anything not tied to one appointment.');
   var at=+localStorage.getItem('hr_autoBackupAt')||0;
   h+=card('💾 Backup &amp; print','<div class="muted small">Everything lives only on this phone. A backup is saved automatically once a day'+(at?' (last: '+esc(new Date(at).toLocaleString())+', '+esc(localStorage.getItem('hr_autoBackupWhere')||'')+')':'')+'. You can also save one now or restore one.</div>'+
     '<div class="btns"><button class="btn" data-act="exportJson">Back up now</button><button class="btn" data-act="importJson">Restore a backup</button><button class="btn" data-act="printSummary">🖨 Summary for the doctor</button></div>'+
@@ -310,9 +312,25 @@ function renderMore(){
 
 // ── Editing ────────────────────────────────────────────────────────
 var SH=document.getElementById('sheet'),SW=document.getElementById('sheetWrap');
-function openSheet(html){SH.innerHTML=html;SW.classList.add('open');}
-function closeSheet(){SW.classList.remove('open');SH.innerHTML='';}
+function openSheet(html){SH.innerHTML=html;SW.classList.add('open');if(window.Attach)Attach.hydrate(SH);}
+function closeSheet(){SW.classList.remove('open');SH.innerHTML='';sheetFiles=null;sheetItem=null;}
 SW.addEventListener('click',function(e){if(e.target===SW)closeSheet();});
+// ── 📎 Receipts & documents (window.Attach, from attach.js) ─────────
+var sheetFiles=null,sheetItem=null;
+function filesBox(files,item){sheetFiles=(files||[]).slice();sheetItem=item||null;
+  return '<div style="margin-top:14px;font-weight:700;font-size:13px;color:var(--accent)">📎 Receipts &amp; documents</div><div id="attBox">'+(window.Attach&&Attach.html(sheetFiles)||'<div class="empty small">None yet.</div>')+'</div>'+
+    '<button type="button" class="btn sm" data-act="attachHere" style="margin-top:8px">📎 Add photo or file</button>';}
+function refreshAttBox(){var b=document.getElementById('attBox');if(b&&window.Attach){b.innerHTML=Attach.html(sheetFiles)||'<div class="empty small">None yet.</div>';Attach.hydrate(b);}}
+function clip(o){var n=(o&&o.files||[]).length;return n?' <span class="dim">📎'+(n>1?n:'')+'</span>':'';}
+function attachHere(){if(!window.Attach)return;Attach.pick(function(ids){if(!ids.length)return;sheetFiles=(sheetFiles||[]).concat(ids);if(sheetItem){sheetItem.files=sheetFiles.slice();save(ids.length+' file'+(ids.length>1?'s':'')+' attached');}refreshAttBox();});}
+function attachGeneral(){if(!window.Attach)return;Attach.pick(function(ids){if(!ids.length)return;db.files=(db.files||[]).concat(ids);save(ids.length+' file'+(ids.length>1?'s':'')+' added');});}
+function generalDocsCard(blurb){return card('📁 Documents &amp; receipts','<div class="muted small">'+blurb+'</div>'+((window.Attach&&Attach.html(db.files||[]))||'')+'<div class="btns"><button class="btn" data-act="attachGeneral">📎 Add photo or file</button></div>');}
+if(window.Attach)Attach.onDelete(function(id){
+  Object.keys(db).forEach(function(k){if(Array.isArray(db[k]))db[k].forEach(function(o){if(o&&Array.isArray(o.files))o.files=o.files.filter(function(x){return x!==id;});});});
+  db.files=(db.files||[]).filter(function(x){return x!==id;});if(sheetFiles)sheetFiles=sheetFiles.filter(function(x){return x!==id;});
+  save('File deleted');refreshAttBox();});
+document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-act=attachHere],[data-act=attachGeneral]');if(!b)return;e.stopPropagation();if(b.dataset.act==='attachHere')attachHere();else attachGeneral();},true);
+
 
 var FIELDS={
   meds:[['name','Name','text'],['dose','Dose','text','e.g. 25 mg'],['how','How to take','text','e.g. 1 every morning'],['purpose','What it\'s for','text','e.g. blood pressure'],
@@ -341,6 +359,7 @@ function editItem(c,id,preset,after){
   var vals=item||preset||{};
   if(!item&&c==='meds'&&vals.active==null)vals.active=true;
   openSheet('<h3><span>'+(item?'Edit ':'New ')+TITLES[c]+'</span><button class="iconbtn" data-act="close">✕</button></h3><form id="ef">'+FIELDS[c].map(function(f){return fieldHtml(f,vals[f[0]]);}).join('')+
+    (['meds','visits','vaccines','doctors','conditions'].indexOf(c)>=0?filesBox(item?item.files:[],item):'')+
     '<div class="btns"><button class="btn acc" type="submit">Save</button>'+(item?'<button class="btn bad" type="button" data-act="del">Delete</button>':'')+'</div></form>');
   var form=document.getElementById('ef');
   form.addEventListener('submit',function(e){e.preventDefault();
@@ -349,6 +368,7 @@ function editItem(c,id,preset,after){
     var need=FIELDS[c][0][0];if(!o[need]){alert('Please fill in '+FIELDS[c][0][1].toLowerCase()+'.');return;}
     if(c==='meds'&&o.active&&o.stopped)o.stopped='';
     if(c==='meds'&&!o.active&&!o.stopped)o.stopped=todayKey();
+    if(sheetFiles)o.files=sheetFiles.slice();
     if(!item)db[c].push(o);
     closeSheet();save('Saved');if(after)after(o);
   });
@@ -392,6 +412,7 @@ function openLab(id){
     '<div class="muted small">'+esc(l.unit||'')+' · range '+esc(rangeText(l))+' <span class="dim">(change it to match your lab report)</span></div>'+
     (r.length>1?'<svg class="trend" viewBox="0 0 340 150" preserveAspectRatio="none">'+spark(l,340,150)+'</svg>':'')+
     r.slice().reverse().map(function(x){var f=flag(l,x.value);return '<div class="row"><div class="main"><div class="t">'+esc(x.value+' '+(l.unit||''))+'</div><div class="s">'+esc(niceD(x.date,true))+'</div></div><span class="tag '+(f==='ok'?'good':'bad')+'">'+(f==='ok'?'in range':f)+'</span><button class="iconbtn" data-act="delResult" data-id="'+l.id+'" data-date="'+x.date+'">🗑</button></div>';}).join('')+
+    filesBox(l.files,l)+'<div class="small dim" style="margin-top:4px">Attach the lab report (PDF or a photo).</div>'+
     '<div class="btns"><button class="btn" data-act="editLab" data-id="'+l.id+'">Edit test &amp; range</button></div>');
 }
 function askQuestions(doc){
@@ -427,16 +448,18 @@ function buildPrint(){
 window.addEventListener('beforeprint',buildPrint);
 
 // ── Backup / restore ──────────────────────────────────────────────
-function exportJson(){
-  var blob=new Blob([JSON.stringify(db,null,1)],{type:'application/json'});
+// Backups carry the attached files too.
+function backupJson(cb){if(!window.Attach)return cb(JSON.stringify(db));Attach.all(function(f){cb(JSON.stringify({app:'health-records',version:2,data:db,files:f}));});}
+function exportJson(){backupJson(function(js){
+  var blob=new Blob([js],{type:'application/json'});
   var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='health-records-backup-'+todayKey()+'.json';document.body.appendChild(a);a.click();a.remove();
   toast(window.AndroidApp?'Saved to Downloads/Health Records':'Backup downloaded');
-}
+});}
 document.getElementById('importFile').addEventListener('change',function(e){
   var f=e.target.files&&e.target.files[0];if(!f)return;var rd=new FileReader();
-  rd.onload=function(){try{var d=JSON.parse(rd.result);if(!d||typeof d!=='object'||!Array.isArray(d.meds))throw 0;
+  rd.onload=function(){try{var d=JSON.parse(rd.result),files=null;if(d&&d.app==='health-records'&&d.data){files=d.files;d=d.data;}if(!d||typeof d!=='object'||!Array.isArray(d.meds))throw 0;
     if(!confirm('Replace everything in Health Records with this backup?'))return;
-    db=d;Object.keys(EMPTY).forEach(function(k){if(db[k]==null)db[k]=JSON.parse(JSON.stringify(EMPTY[k]));});save('Backup restored');
+    db=d;Object.keys(EMPTY).forEach(function(k){if(db[k]==null)db[k]=JSON.parse(JSON.stringify(EMPTY[k]));});if(files&&window.Attach)Attach.restore(files,function(){save('Backup restored');});else save('Backup restored');
   }catch(x){alert('That file isn\'t a Health Records backup.');}};
   rd.readAsText(f);e.target.value='';
 });
@@ -490,6 +513,7 @@ document.addEventListener('click',function(e){
 window.handleAndroidBack=function(){
   var appSheet=document.getElementById('appSheetWrap');
   if(appSheet&&appSheet.classList.contains('open')){appSheet.classList.remove('open');return true;}
+  if(window.Attach&&Attach.isOpen()){Attach.close();return true;}
   if(SW.classList.contains('open')){closeSheet();return true;}
   if(tab!=='home'){tab='home';render();return true;}
   return false;

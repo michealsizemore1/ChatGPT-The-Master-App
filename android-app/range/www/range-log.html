@@ -184,13 +184,13 @@ function shrink(file,cb){var rd=new FileReader();rd.onload=function(){var im=new
 function loadThumbs(){document.querySelectorAll('img[data-photo]').forEach(function(im){if(im.src)return;getPhoto(im.dataset.photo,function(d){if(d)im.src=d;else im.remove();});});}
 
 // ── Backups ────────────────────────────────────────────────────────
-function backupJson(cb){allPhotos(function(ph){cb(JSON.stringify({app:'range-log',version:1,data:db,photos:ph}));});}
+function backupJson(cb){allPhotos(function(ph){var go=function(f){cb(JSON.stringify({app:'range-log',version:2,data:db,photos:ph,files:f}));};if(window.Attach)Attach.all(go);else go({});});}
 function autoBackup(){try{if(!window.AndroidApp||!AndroidApp.saveAutoBackup||db.settings.autoBackup===false)return;var k=todayKey();if(localStorage.getItem('rl_autoBackupDay')===k)return;
   backupJson(function(js){if(AndroidApp.saveAutoBackup('range-log-auto-'+k+'.json',js)){localStorage.setItem('rl_autoBackupDay',k);localStorage.setItem('rl_autoBackupAt',String(Date.now()));}});}catch(e){}}
 function exportJson(){backupJson(function(js){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([js],{type:'application/json'}));a.download='range-log-backup-'+todayKey()+'.json';document.body.appendChild(a);a.click();a.remove();toast(window.AndroidApp?'Saved to Downloads/Range Log':'Backup downloaded');});}
 document.getElementById('importFile').addEventListener('change',function(e){var f=e.target.files&&e.target.files[0];if(!f)return;var rd=new FileReader();
   rd.onload=function(){try{var j=JSON.parse(rd.result);if(!j||j.app!=='range-log'||!j.data)throw 0;if(!confirm('Replace everything in Range Log with this backup?'))return;db=j.data;Object.keys(EMPTY).forEach(function(k){if(db[k]==null)db[k]=JSON.parse(JSON.stringify(EMPTY[k]));});
-    var ph=j.photos||{},ids=Object.keys(ph),n=0;if(!ids.length)return save('Backup restored');ids.forEach(function(id){putPhoto(id,ph[id],function(){if(++n===ids.length)save('Backup restored');});});}catch(x){alert('That file isn\'t a Range Log backup.');}};rd.readAsText(f);e.target.value='';});
+    if(j.files&&window.Attach)Attach.restore(j.files);var ph=j.photos||{},ids=Object.keys(ph),n=0;if(!ids.length)return save('Backup restored');ids.forEach(function(id){putPhoto(id,ph[id],function(){if(++n===ids.length)save('Backup restored');});});}catch(x){alert('That file isn\'t a Range Log backup.');}};rd.readAsText(f);e.target.value='';});
 
 // ── Rendering ──────────────────────────────────────────────────────
 var V=document.getElementById('view');
@@ -199,7 +199,7 @@ function render(){
   document.querySelectorAll('#nav button').forEach(function(b){b.classList.toggle('on',b.dataset.tab===tab);});
   var fab=document.getElementById('fab');fab.style.display=tab==='more'?'none':'';
   fab.textContent={home:'＋ Session',log:'＋ Session',guns:'＋ Firearm',ammo:'＋ Ammo'}[tab]||'＋';
-  V.innerHTML=({home:renderHome,log:renderLog,guns:renderGuns,ammo:renderAmmo,more:renderMore}[tab])();loadThumbs();
+  V.innerHTML=({home:renderHome,log:renderLog,guns:renderGuns,ammo:renderAmmo,more:renderMore}[tab])();loadThumbs();if(window.Attach)Attach.hydrate(V);
 }
 var SAFETY=['Treat every firearm as if it is loaded.','Never point the muzzle at anything you are not willing to destroy.','Keep your finger off the trigger until your sights are on target and you are ready to shoot.','Be sure of your target and what is beyond it.','Eye and ear protection, every time. Follow the range officer and posted range rules.'];
 function sessRow(s){var r=sessionRounds(s),c=sessionCost(s),best=bestGroup(s);
@@ -262,16 +262,32 @@ function renderAmmo(){
 }
 function renderMore(){
   var at=+localStorage.getItem('rl_autoBackupAt')||0;
-  return card('💾 Backup','<div class="muted small">Everything lives only on this phone. A backup (target photos included) is saved automatically once a day'+(at?' (last: '+esc(new Date(at).toLocaleString())+')':'')+'.</div><div class="btns"><button class="btn" data-act="exportJson">Back up now</button><button class="btn" data-act="importJson">Restore a backup</button></div>'+
+  return generalDocsCard('Receipts and papers not tied to one session or firearm: range membership, a class certificate, a permit…')+card('💾 Backup','<div class="muted small">Everything lives only on this phone. A backup (target photos included) is saved automatically once a day'+(at?' (last: '+esc(new Date(at).toLocaleString())+')':'')+'.</div><div class="btns"><button class="btn" data-act="exportJson">Back up now</button><button class="btn" data-act="importJson">Restore a backup</button></div>'+
     '<label class="chk"><input type="checkbox" data-act="toggleAuto" '+(db.settings.autoBackup===false?'':'checked')+'> Daily automatic backup</label>')+
     card('🔒 Privacy','<div class="muted small">Serial numbers show only their last 4 until tapped. Turn on App lock from the App button (top right).</div>');
 }
 
 // ── Sheets ─────────────────────────────────────────────────────────
 var SH=document.getElementById('sheet'),SW=document.getElementById('sheetWrap');
-function openSheet(h){SH.innerHTML=h;SW.classList.add('open');}
-function closeSheet(){SW.classList.remove('open');SH.innerHTML='';}
+function openSheet(h){SH.innerHTML=h;SW.classList.add('open');if(window.Attach)Attach.hydrate(SH);}
+function closeSheet(){SW.classList.remove('open');SH.innerHTML='';sheetFiles=null;sheetItem=null;}
 SW.addEventListener('click',function(e){if(e.target===SW)closeSheet();});
+// ── 📎 Receipts & documents (window.Attach, from attach.js) ─────────
+var sheetFiles=null,sheetItem=null;
+function filesBox(files,item){sheetFiles=(files||[]).slice();sheetItem=item||null;
+  return '<div style="margin-top:14px;font-weight:700;font-size:13px;color:var(--accent)">📎 Receipts &amp; documents</div><div id="attBox">'+(window.Attach&&Attach.html(sheetFiles)||'<div class="empty small">None yet.</div>')+'</div>'+
+    '<button type="button" class="btn sm" data-act="attachHere" style="margin-top:8px">📎 Add photo or file</button>';}
+function refreshAttBox(){var b=document.getElementById('attBox');if(b&&window.Attach){b.innerHTML=Attach.html(sheetFiles)||'<div class="empty small">None yet.</div>';Attach.hydrate(b);}}
+function clip(o){var n=(o&&o.files||[]).length;return n?' <span class="dim">📎'+(n>1?n:'')+'</span>':'';}
+function attachHere(){if(!window.Attach)return;Attach.pick(function(ids){if(!ids.length)return;sheetFiles=(sheetFiles||[]).concat(ids);if(sheetItem){sheetItem.files=sheetFiles.slice();save(ids.length+' file'+(ids.length>1?'s':'')+' attached');}refreshAttBox();});}
+function attachGeneral(){if(!window.Attach)return;Attach.pick(function(ids){if(!ids.length)return;db.files=(db.files||[]).concat(ids);save(ids.length+' file'+(ids.length>1?'s':'')+' added');});}
+function generalDocsCard(blurb){return card('📁 Documents &amp; receipts','<div class="muted small">'+blurb+'</div>'+((window.Attach&&Attach.html(db.files||[]))||'')+'<div class="btns"><button class="btn" data-act="attachGeneral">📎 Add photo or file</button></div>');}
+if(window.Attach)Attach.onDelete(function(id){
+  Object.keys(db).forEach(function(k){if(Array.isArray(db[k]))db[k].forEach(function(o){if(o&&Array.isArray(o.files))o.files=o.files.filter(function(x){return x!==id;});});});
+  db.files=(db.files||[]).filter(function(x){return x!==id;});if(sheetFiles)sheetFiles=sheetFiles.filter(function(x){return x!==id;});
+  save('File deleted');refreshAttBox();});
+document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-act=attachHere],[data-act=attachGeneral]');if(!b)return;e.stopPropagation();if(b.dataset.act==='attachHere')attachHere();else attachGeneral();},true);
+
 function head(t){return '<h3><span>'+t+'</span><button class="iconbtn" data-act="close">✕</button></h3>';}
 function inp(n,l,v,t,ph){t=t||'text';return '<label class="f">'+l+'<input name="'+n+'" type="'+t+'" value="'+esc(v==null?'':v)+'" placeholder="'+esc(ph||'')+'"'+(t==='number'?' inputmode="decimal" step="any"':'')+'></label>';}
 function opts(list,sel,label,none){return (none?'<option value="">'+none+'</option>':'')+list.map(function(x){return '<option value="'+x.id+'"'+(x.id===sel?' selected':'')+'>'+esc(label(x))+'</option>';}).join('');}
@@ -307,7 +323,7 @@ function openSession(id){var s=byId('sessions',id);if(!s)return;
     '<div class="mini" style="margin-top:6px">'+esc([s.mins?s.mins+' min':'',sessionCost(s)?'cost '+money(sessionCost(s))+' (fee + ammo)':'',s.rating?'★'.repeat(+s.rating):''].filter(Boolean).join(' · '))+'</div>'+
     (s.notes?'<div class="muted" style="margin-top:8px;white-space:pre-wrap">'+esc(s.notes)+'</div>':'')+
     '<div class="thumbs">'+(s.photos||[]).map(function(p){return '<img data-photo="'+p+'" data-sess="'+s.id+'" alt="target">';}).join('')+'</div>'+
-    '<div class="btns"><button class="btn" data-act="addPhoto" data-id="'+s.id+'">📷 Target photo</button><button class="btn" data-act="editSess" data-id="'+s.id+'">Edit</button></div>');loadThumbs();}
+    '<div class="btns"><button class="btn" data-act="addPhoto" data-id="'+s.id+'">📷 Target photo</button><button class="btn" data-act="editSess" data-id="'+s.id+'">Edit</button></div>'+filesBox(s.files,s)+'<div class="small dim">Lane receipt, scorecard, class certificate…</div>');loadThumbs();}
 function editGun(id){var g=id?byId('guns',id):null,x=g||{cleanEvery:500};
   openSheet(head(g?'Edit firearm':'New firearm')+'<form id="gf">'+inp('name','Nickname (optional)',x.name)+'<div class="grid2">'+inp('make','Make',x.make)+inp('model','Model',x.model)+'</div>'+
     '<div class="grid2">'+inp('caliber','Caliber',x.caliber,'text','e.g. 9mm')+'<label class="f">Type<select name="type">'+['','Handgun','Rifle','Shotgun','Rimfire','Other'].map(function(t){return '<option'+(x.type===t?' selected':'')+'>'+t+'</option>';}).join('')+'</select></label></div>'+
@@ -323,17 +339,18 @@ function openGun(id){var g=byId('guns',id);if(!g)return;var c=cleanDue(g),ms=db.
     ['Rounds',n0(gunRounds(g))+' total · '+ss.length+' sessions'],['Cleaning',c?n0(c.since)+' of '+n0(c.every)+' rounds'+(g.lastCleaned?' (last '+esc(niceD(g.lastCleaned))+')':''):''],['Purchased',esc([g.bought?niceD(g.bought):'',g.price?money(g.price):''].filter(Boolean).join(' · '))],['Notes',esc(g.notes||'')]]
     .filter(function(x){return x[1];}).map(function(x){return '<div>'+x[0]+'</div><div>'+x[1]+'</div>';}).join('')+'</div>'+
     '<div style="margin-top:12px;font-weight:700;font-size:13px;color:var(--accent)">Maintenance</div>'+(ms.length?ms.map(function(m){return '<div class="row"><div class="main"><div class="t">'+esc(m.what)+'</div><div class="s">'+esc(niceD(m.date))+(m.notes?' · '+esc(m.notes):'')+'</div></div><button class="iconbtn" data-act="delMaint" data-id="'+m.id+'" data-gun="'+id+'">🗑</button></div>';}).join(''):'<div class="empty">Nothing logged yet.</div>')+
+    filesBox(g.files,g)+'<div class="small dim">Purchase receipt, manual, warranty, transfer paperwork…</div>'+
     '<div class="btns"><button class="btn acc" data-act="cleaned" data-id="'+id+'">🧽 Cleaned today</button><button class="btn" data-act="addMaint" data-id="'+id+'">＋ Maintenance</button><button class="btn" data-act="editGun" data-id="'+id+'">Edit</button></div>');}
 function editAmmo(id,pre){var a=id?byId('ammo',id):null,x=a||pre||{};
   openSheet(head(a?'Edit ammo':'New ammo')+'<form id="af"><div class="grid2">'+inp('caliber','Caliber',x.caliber,'text','e.g. 9mm')+inp('brand','Brand',x.brand,'text','e.g. Federal')+'</div>'+
     '<div class="grid2">'+inp('grain','Grain',x.grain,'number')+inp('kind','Type',x.kind,'text','FMJ, JHP…')+'</div>'+
     (a?'':inp('bought','Rounds on hand now',x.bought,'number'))+'<div class="grid2">'+inp('boxQty','Rounds per box',x.boxQty,'number','50')+inp('boxCost','Price per box ($)',x.boxCost,'number')+'</div>'+
     inp('low','Warn me when down to … rounds',x.low,'number','e.g. 100')+(a?'<div class="mini">On hand: '+n0(ammoLeft(a))+' ('+n0(a.bought)+' added, '+n0(ammoUsed(a))+' used). Use "＋ Bought" to add more, or fix the count below.</div>'+inp('fix','Correct the count to (optional)','','number'):'')+
-    (a?'<label class="chk"><input type="checkbox" name="archived" '+(a.archived?'checked':'')+'> Hide (don\'t use this one anymore)</label>':'')+
+    (a?'<label class="chk"><input type="checkbox" name="archived" '+(a.archived?'checked':'')+'> Hide (don\'t use this one anymore)</label>':'')+filesBox(x.files,a)+
     '<div class="btns"><button class="btn acc" type="submit">Save</button>'+(a?'<button class="btn bad" type="button" data-act="delAmmo" data-id="'+a.id+'">Delete</button>':'')+'</div></form>');
   var f=document.getElementById('af');f.addEventListener('submit',function(e){e.preventDefault();var o=a||{id:uid(),bought:0};['caliber','brand','grain','kind','boxQty','boxCost','low'].forEach(function(k){o[k]=f.elements[k].value.trim();});
     if(!a)o.bought=+f.elements.bought.value||0;if(a&&f.elements.fix.value!==''){o.bought=(+f.elements.fix.value)+ammoUsed(o);}if(a)o.archived=f.elements.archived.checked;
-    if(!o.caliber){alert('Please enter the caliber.');return;}if(!a)db.ammo.push(o);closeSheet();save('Saved');});}
+    if(!o.caliber){alert('Please enter the caliber.');return;}if(sheetFiles)o.files=sheetFiles.slice();if(!a)db.ammo.push(o);closeSheet();save('Saved');});}
 function buyAmmo(id){var a=byId('ammo',id);openSheet(head('Bought more · '+esc(ammoName(a)))+'<form id="bf">'+inp('qty','How many rounds',a.boxQty||'','number')+'<div class="btns"><button class="btn acc" type="submit">Add</button></div></form>');
   document.getElementById('bf').addEventListener('submit',function(e){e.preventDefault();var q=+e.target.elements.qty.value;if(!(q>0))return;a.bought=(+a.bought||0)+q;closeSheet();save('Added '+n0(q)+' rounds');});}
 function editRange(id){var r=id?byId('ranges',id):null,x=r||{};
@@ -381,6 +398,7 @@ document.addEventListener('click',function(e){
 });
 window.handleAndroidBack=function(){var s=document.getElementById('appSheetWrap');if(s&&s.classList.contains('open')){s.classList.remove('open');return true;}
   var vw=document.getElementById('viewer');if(vw.classList.contains('open')){vw.classList.remove('open');return true;}
+  if(window.Attach&&Attach.isOpen()){Attach.close();return true;}
   if(SW.classList.contains('open')){closeSheet();return true;}if(tab!=='home'){tab='home';render();return true;}return false;};
 window.HR={summary:summary,exportJson:exportJson,db:function(){return db;}};
 render();share();autoBackup();

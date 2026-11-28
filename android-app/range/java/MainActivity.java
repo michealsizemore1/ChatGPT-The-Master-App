@@ -140,17 +140,24 @@ public class MainActivity extends Activity {
         pendingFiles = callback;
         cameraUri = null;
 
-        boolean images = false;
+        // Photos only, or photos AND documents (receipts, PDFs): the page's accept="" decides.
+        boolean images = false, others = false;
         String[] accept = params.getAcceptTypes();
         if (accept != null) {
-            for (String a : accept) {
-                if (a != null && a.trim().startsWith("image")) images = true;
+            for (String group : accept) {
+                if (group == null) continue;
+                for (String a : group.split(",")) {
+                    a = a.trim();
+                    if (a.isEmpty()) continue;
+                    if (a.startsWith("image")) images = true; else others = true;
+                }
             }
         }
 
         Intent pick = new Intent(Intent.ACTION_GET_CONTENT);
         pick.addCategory(Intent.CATEGORY_OPENABLE);
-        pick.setType(images ? "image/*" : "*/*");
+        pick.setType(images && !others ? "image/*" : "*/*");
+
         if (params.getMode() == WebChromeClient.FileChooserParams.MODE_OPEN_MULTIPLE) {
             pick.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         }
@@ -174,7 +181,7 @@ public class MainActivity extends Activity {
         if (camera != null && params.isCaptureEnabled()) {
             launch = camera;
         } else {
-            launch = Intent.createChooser(pick, images ? "Add a photo" : "Choose a file");
+            launch = Intent.createChooser(pick, images && !others ? "Add a photo" : images ? "Add a photo or file" : "Choose a file");
             if (camera != null) launch.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{camera});
         }
 

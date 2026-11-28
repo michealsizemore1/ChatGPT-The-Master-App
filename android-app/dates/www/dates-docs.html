@@ -174,7 +174,7 @@ function shrink(file,cb){var rd=new FileReader();rd.onload=function(){var im=new
   var c=document.createElement('canvas');c.width=Math.round(w*s);c.height=Math.round(h*s);c.getContext('2d').drawImage(im,0,0,c.width,c.height);cb(c.toDataURL('image/jpeg',0.8));};im.onerror=function(){cb(null);};im.src=rd.result;};rd.readAsDataURL(file);}
 
 // ── Backups (photos included) ─────────────────────────────────────
-function backupJson(cb){allPhotos(function(ph){cb(JSON.stringify({app:'dates-docs',version:1,data:db,photos:ph}));});}
+function backupJson(cb){allPhotos(function(ph){var go=function(f){cb(JSON.stringify({app:'dates-docs',version:2,data:db,photos:ph,files:f}));};if(window.Attach)Attach.all(go);else go({});});}
 function autoBackup(){
   try{if(!window.AndroidApp||!AndroidApp.saveAutoBackup||db.settings.autoBackup===false)return;
     var k=todayKey();if(localStorage.getItem('dd_autoBackupDay')===k)return;
@@ -187,7 +187,7 @@ function exportJson(){backupJson(function(js){var a=document.createElement('a');
 document.getElementById('importFile').addEventListener('change',function(e){var f=e.target.files&&e.target.files[0];if(!f)return;var rd=new FileReader();
   rd.onload=function(){try{var j=JSON.parse(rd.result);if(!j||j.app!=='dates-docs'||!j.data)throw 0;if(!confirm('Replace everything in Dates & Docs with this backup?'))return;
     db=j.data;Object.keys(EMPTY).forEach(function(k){if(db[k]==null)db[k]=JSON.parse(JSON.stringify(EMPTY[k]));});
-    var ph=j.photos||{},ids=Object.keys(ph),n=0;if(!ids.length)return save('Backup restored');ids.forEach(function(id){putPhoto(id,ph[id],function(){if(++n===ids.length)save('Backup restored');});});
+    if(j.files&&window.Attach)Attach.restore(j.files);var ph=j.photos||{},ids=Object.keys(ph),n=0;if(!ids.length)return save('Backup restored');ids.forEach(function(id){putPhoto(id,ph[id],function(){if(++n===ids.length)save('Backup restored');});});
   }catch(x){alert('That file isn\'t a Dates & Docs backup.');}};rd.readAsText(f);e.target.value='';});
 
 // ── Rendering ───────────────────────────────────────────────────────
@@ -198,7 +198,7 @@ function render(){
   var fab=document.getElementById('fab');fab.style.display=tab==='more'?'none':'';
   fab.textContent={home:'＋ Add',dates:'＋ Date',docs:'＋ Document'}[tab]||'＋ Add';
   V.innerHTML=({home:renderHome,dates:renderDates,docs:renderDocs,more:renderMore}[tab])();
-  loadThumbs();
+  loadThumbs();if(window.Attach)Attach.hydrate(V);
 }
 function upRow(u){var n=u.days,cls=n<0?'bad':n<=Math.min(14,u.remind)?'warn':n<=u.remind?'acc':'';var y=u.src==='dates'?yearsAt(u.item):'';
   return '<div class="row" data-act="open" data-src="'+u.src+'" data-id="'+u.id+'"><div class="main"><div class="t">'+esc(u.title)+(y?' <span class="muted">('+y+(u.item.kind==='occasion'&&/birth/i.test(u.item.category+u.item.title)?' years old':' years')+')</span>':'')+'</div>'+
@@ -230,14 +230,14 @@ function renderDocs(){
   var h='<div class="seg"><button data-act="docFilter" data-c="all" class="'+(docFilter==='all'?'on':'')+'">All</button>'+names.map(function(c){return '<button data-act="docFilter" data-c="'+esc(c)+'" class="'+(docFilter===c?'on':'')+'">'+esc(c)+'</button>';}).join('')+'</div>';
   names.filter(function(c){return docFilter==='all'||docFilter===c;}).forEach(function(c){
     h+=card(esc(c),cats[c].slice().sort(function(a,b){return a.name.localeCompare(b.name);}).map(function(d){var n=d.expires?daysUntil(d.expires):null;
-      return '<div class="row" data-act="open" data-src="docs" data-id="'+d.id+'"><div class="main"><div class="t">'+esc(d.name)+((d.photos||[]).length?' <span class="dim">📷'+(d.photos.length>1?d.photos.length:'')+'</span>':'')+'</div>'+
+      return '<div class="row" data-act="open" data-src="docs" data-id="'+d.id+'"><div class="main"><div class="t">'+esc(d.name)+((d.photos||[]).length?' <span class="dim">📷'+(d.photos.length>1?d.photos.length:'')+'</span>':'')+clip(d)+'</div>'+
         '<div class="s">'+esc([d.number?mask(d.number):'',d.where?'Kept: '+d.where:''].filter(Boolean).join(' · '))+'</div></div>'+
         (n!=null?'<span class="tag '+(n<0?'bad':n<=60?'warn':'')+'">'+(n<0?'expired':'exp. '+niceD(d.expires))+'</span>':'')+'</div>';}).join(''));});
   return h;
 }
 function renderMore(){
   var at=+localStorage.getItem('dd_autoBackupAt')||0;
-  return card('💾 Backup','<div class="muted small">Everything lives only on this phone. A backup (photos included) is saved automatically once a day'+(at?' (last: '+esc(new Date(at).toLocaleString())+')':'')+'.</div>'+
+  return generalDocsCard('Anything not tied to one date or document record.')+card('💾 Backup','<div class="muted small">Everything lives only on this phone. A backup (photos included) is saved automatically once a day'+(at?' (last: '+esc(new Date(at).toLocaleString())+')':'')+'.</div>'+
     '<div class="btns"><button class="btn" data-act="exportJson">Back up now</button><button class="btn" data-act="importJson">Restore a backup</button></div>'+
     '<label class="chk"><input type="checkbox" data-act="toggleAuto" '+(db.settings.autoBackup===false?'':'checked')+'> Daily automatic backup</label>')+
     card('🔒 Privacy','<div class="muted small">Numbers show only their last 4 digits until you tap them. For very sensitive numbers (like Social Security) consider saving just the last 4 and where the card is kept. '+
@@ -246,9 +246,25 @@ function renderMore(){
 
 // ── Sheets / editing ──────────────────────────────────────────────
 var SH=document.getElementById('sheet'),SW=document.getElementById('sheetWrap');
-function openSheet(html){SH.innerHTML=html;SW.classList.add('open');}
-function closeSheet(){SW.classList.remove('open');SH.innerHTML='';}
+function openSheet(html){SH.innerHTML=html;SW.classList.add('open');if(window.Attach)Attach.hydrate(SH);}
+function closeSheet(){SW.classList.remove('open');SH.innerHTML='';sheetFiles=null;sheetItem=null;}
 SW.addEventListener('click',function(e){if(e.target===SW)closeSheet();});
+// ── 📎 Receipts & documents (window.Attach, from attach.js) ─────────
+var sheetFiles=null,sheetItem=null;
+function filesBox(files,item){sheetFiles=(files||[]).slice();sheetItem=item||null;
+  return '<div style="margin-top:14px;font-weight:700;font-size:13px;color:var(--accent)">📎 Receipts &amp; documents</div><div id="attBox">'+(window.Attach&&Attach.html(sheetFiles)||'<div class="empty small">None yet.</div>')+'</div>'+
+    '<button type="button" class="btn sm" data-act="attachHere" style="margin-top:8px">📎 Add photo or file</button>';}
+function refreshAttBox(){var b=document.getElementById('attBox');if(b&&window.Attach){b.innerHTML=Attach.html(sheetFiles)||'<div class="empty small">None yet.</div>';Attach.hydrate(b);}}
+function clip(o){var n=(o&&o.files||[]).length;return n?' <span class="dim">📎'+(n>1?n:'')+'</span>':'';}
+function attachHere(){if(!window.Attach)return;Attach.pick(function(ids){if(!ids.length)return;sheetFiles=(sheetFiles||[]).concat(ids);if(sheetItem){sheetItem.files=sheetFiles.slice();save(ids.length+' file'+(ids.length>1?'s':'')+' attached');}refreshAttBox();});}
+function attachGeneral(){if(!window.Attach)return;Attach.pick(function(ids){if(!ids.length)return;db.files=(db.files||[]).concat(ids);save(ids.length+' file'+(ids.length>1?'s':'')+' added');});}
+function generalDocsCard(blurb){return card('📁 Documents &amp; receipts','<div class="muted small">'+blurb+'</div>'+((window.Attach&&Attach.html(db.files||[]))||'')+'<div class="btns"><button class="btn" data-act="attachGeneral">📎 Add photo or file</button></div>');}
+if(window.Attach)Attach.onDelete(function(id){
+  Object.keys(db).forEach(function(k){if(Array.isArray(db[k]))db[k].forEach(function(o){if(o&&Array.isArray(o.files))o.files=o.files.filter(function(x){return x!==id;});});});
+  db.files=(db.files||[]).filter(function(x){return x!==id;});if(sheetFiles)sheetFiles=sheetFiles.filter(function(x){return x!==id;});
+  save('File deleted');refreshAttBox();});
+document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-act=attachHere],[data-act=attachGeneral]');if(!b)return;e.stopPropagation();if(b.dataset.act==='attachHere')attachHere();else attachGeneral();},true);
+
 function inp(name,label,val,type,ph){type=type||'text';return '<label class="f">'+label+'<input name="'+name+'" type="'+type+'" value="'+esc(val==null?'':val)+'" placeholder="'+esc(ph||'')+'"'+(type==='number'?' inputmode="numeric"':'')+'></label>';}
 
 function pickPreset(src){
@@ -267,7 +283,7 @@ function editDate(id,preset){
     inp('remind','Heads-up how many days before',v.remind!=null&&v.remind!==''?v.remind:'','number',v.kind==='occasion'?'14':'30')+
     inp('category','Category',v.category,'text','e.g. Vehicle, Insurance, ID')+
     '<label class="chk"><input type="checkbox" name="showYears" '+(v.showYears?'checked':'')+'> Show how many years (age / anniversary)</label>'+
-    '<label class="f">Notes<textarea name="notes" placeholder="e.g. renew online at the DMV site">'+esc(v.notes||'')+'</textarea></label>'+
+    '<label class="f">Notes<textarea name="notes" placeholder="e.g. renew online at the DMV site">'+esc(v.notes||'')+'</textarea></label>'+filesBox(v.files,d)+
     '<div class="btns"><button class="btn acc" type="submit">Save</button>'+(d?'<button class="btn bad" type="button" data-act="delDate" data-id="'+d.id+'">Delete</button>':'')+'</div></form>');
   var f=document.getElementById('df');
   f.elements.kind.addEventListener('change',function(){f.elements.repeat.closest('label').style.display=f.elements.kind.value==='occasion'?'none':'';});
@@ -275,7 +291,7 @@ function editDate(id,preset){
   f.addEventListener('submit',function(e){e.preventDefault();var o=d||{id:uid(),created:Date.now()};
     ['title','kind','date','repeat','remind','category','notes'].forEach(function(k){o[k]=f.elements[k].value.trim();});o.showYears=f.elements.showYears.checked;
     if(!o.title||!o.date){alert('Please fill in what it is and the date.');return;}
-    if(o.kind==='occasion')o.repeat='yearly';if(!d)db.dates.push(o);closeSheet();save('Saved');});
+    if(sheetFiles)o.files=sheetFiles.slice();if(o.kind==='occasion')o.repeat='yearly';if(!d)db.dates.push(o);closeSheet();save('Saved');});
 }
 function editDoc(id,preset){
   var d=id?db.docs.filter(function(x){return x.id===id;})[0]:null,v=d||preset||{};
@@ -298,6 +314,7 @@ function openDoc(id){
      ['Issued',d.issued?esc(niceD(d.issued)):''],['Expires',d.expires?esc(niceD(d.expires))+' <span class="tag '+(n<0?'bad':n<=60?'warn':'')+'">'+(n<0?'expired':relDays(n))+'</span>':''],['Kept',esc(d.where||'')],['Notes',esc(d.notes||'')]]
     .filter(function(x){return x[1];}).map(function(x){return '<div>'+x[0]+'</div><div>'+x[1]+'</div>';}).join('')+'</div>'+
     '<div class="thumbs" id="docThumbs">'+(d.photos||[]).map(function(p){return '<img data-photo="'+p+'" data-doc="'+d.id+'" alt="photo">';}).join('')+'</div>'+
+    filesBox(d.files,d)+'<div class="small dim">PDFs, scans or photos of the document.</div>'+
     '<div class="btns"><button class="btn" data-act="addPhoto" data-id="'+d.id+'">📷 Add photo</button>'+(d.number?'<button class="btn" data-act="copyNum" data-n="'+esc(d.number)+'">Copy number</button>':'')+
     '<button class="btn" data-act="editDoc" data-id="'+d.id+'">Edit</button></div>');
   loadThumbs();
@@ -345,6 +362,7 @@ document.addEventListener('click',function(e){
 window.handleAndroidBack=function(){
   var appSheet=document.getElementById('appSheetWrap');if(appSheet&&appSheet.classList.contains('open')){appSheet.classList.remove('open');return true;}
   var vw=document.getElementById('viewer');if(vw.classList.contains('open')){vw.classList.remove('open');return true;}
+  if(window.Attach&&Attach.isOpen()){Attach.close();return true;}
   if(SW.classList.contains('open')){closeSheet();return true;}
   if(tab!=='home'){tab='home';render();return true;}return false;
 };

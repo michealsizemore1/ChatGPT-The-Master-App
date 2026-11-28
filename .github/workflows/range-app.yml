@@ -15,6 +15,7 @@ on:
   push:
     paths:
       - android-app/range/**
+      - android-app/attach.js
       - .github/workflows/range-app.yml
 
 permissions:
