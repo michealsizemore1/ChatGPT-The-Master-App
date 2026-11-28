@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pet Care</title>
+<style>
+:root{--bg:#0e1517;--card:#162124;--card2:#1d2b2f;--line:#2a3b40;--text:#eef4f3;--muted:#9fb3b1;--dim:#6f8584;
+  --accent:#2dd4bf;--accent2:#14b8a6;--warn:#fbbf24;--bad:#fb7185;--good:#4ade80}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{padding:0 0 calc(76px + env(safe-area-inset-bottom))}
+header{position:sticky;top:0;z-index:20;background:var(--bg);padding:calc(12px + env(safe-area-inset-top)) 16px 10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line)}
+header h1{font-size:20px;margin:0;flex:1;letter-spacing:.01em}
+header h1 small{display:block;font-size:12px;color:var(--muted);font-weight:500}
+main{padding:12px 14px;max-width:720px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin:0 0 12px}
+.card h2{font-size:15px;margin:0 0 8px;display:flex;align-items:center;gap:8px}
+.card h2 .sp{flex:1}
+.muted{color:var(--muted)}.dim{color:var(--dim)}.small{font-size:12.5px}
+.row{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)}
+.row:first-of-type{border-top:none}
+.row .main{flex:1;min-width:0}
+.row .t{font-weight:600}
+.row .s{color:var(--muted);font-size:13px}
+.tag{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--card2);color:var(--muted);white-space:nowrap}
+.tag.bad{background:rgba(251,113,133,.15);color:var(--bad)}.tag.warn{background:rgba(251,191,36,.15);color:var(--warn)}.tag.good{background:rgba(74,222,128,.13);color:var(--good)}
+.tag.acc{background:rgba(45,212,191,.15);color:var(--accent)}
+button{font:inherit;cursor:pointer}
+.btn{background:var(--card2);border:1px solid var(--line);color:var(--text);border-radius:12px;padding:9px 14px;font-weight:600;font-size:14px}
+.btn.acc{background:var(--accent);border-color:var(--accent);color:#06201c}
+.btn.sm{padding:5px 10px;font-size:12.5px;border-radius:10px}
+.btn.bad{color:var(--bad)}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.iconbtn{background:none;border:none;color:var(--muted);font-size:20px;padding:4px 8px}
+.empty{color:var(--muted);font-size:13.5px;padding:6px 0}
+nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:#0b1113;border-top:1px solid var(--line);display:flex;padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+nav button{flex:1;background:none;border:none;color:var(--dim);font-size:11.5px;font-weight:600;padding:4px 0;display:flex;flex-direction:column;align-items:center;gap:2px}
+nav button .i{font-size:20px;line-height:1.1;filter:grayscale(.6);opacity:.75}
+nav button.on{color:var(--accent)}nav button.on .i{filter:none;opacity:1}
+.fab{position:fixed;right:16px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:25;background:var(--accent);color:#06201c;border:none;border-radius:18px;padding:13px 18px;font-weight:800;font-size:15px;box-shadow:0 6px 18px rgba(0,0,0,.4)}
+.seg{display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px}
+.seg button{background:var(--card);border:1px solid var(--line);color:var(--muted);border-radius:99px;padding:6px 12px;font-size:13px;font-weight:600;white-space:nowrap}
+.seg button.on{background:var(--accent);border-color:var(--accent);color:#06201c}
+.big{font-size:22px;font-weight:800}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px}
+.kv div:nth-child(odd){color:var(--muted)}
+a{color:var(--accent)}
+/* sheet */
+#sheetWrap{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;display:none;align-items:flex-end;justify-content:center}
+#sheetWrap.open{display:flex}
+#sheet{width:100%;max-width:620px;max-height:90vh;overflow:auto;background:#111a1c;border:1px solid var(--line);border-bottom:none;border-radius:18px 18px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom))}
+#sheet h3{margin:0 0 10px;font-size:17px;display:flex;align-items:center}
+#sheet h3 span{flex:1}
+label.f{display:block;margin:10px 0 0;font-size:12.5px;color:var(--muted);font-weight:600}
+input,select,textarea{width:100%;background:var(--card);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:10px;font:inherit;margin-top:4px}
+textarea{min-height:70px;resize:vertical}
+input[type=checkbox]{width:20px;height:20px;accent-color:var(--accent);margin:0}
+.chk{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+.labin{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--line)}
+.labin .n{flex:1;font-size:14px}.labin .n small{display:block;color:var(--dim);font-size:11.5px}
+.labin input{width:110px;margin:0}
+svg.trend{width:100%;height:150px;display:block;margin:6px 0}
+.spark{width:90px;height:30px;flex-shrink:0}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(140px + env(safe-area-inset-bottom));background:#e8fffb;color:#06201c;padding:10px 16px;border-radius:12px;font-weight:600;z-index:60;font-size:14px;box-shadow:0 6px 18px rgba(0,0,0,.4)}
+#printView{display:none}
+@media print{
+  body{background:#fff;color:#000;padding:0}
+  header,nav,main,.fab,#sheetWrap,.toast{display:none!important}
+  #printView{display:block;font:12px/1.4 system-ui,sans-serif;color:#000;padding:10px}
+  #printView h1{font-size:18px;margin:0 0 2px}#printView h2{font-size:13px;margin:14px 0 4px;border-bottom:1px solid #999}
+  #printView table{width:100%;border-collapse:collapse}#printView td,#printView th{text-align:left;padding:2px 6px 2px 0;vertical-align:top}
+}
+</style>
+<style>
+:root{--accent:#38bdf8;--accent2:#0ea5e9}
+.btn.acc,.fab,.seg button.on{color:#082f49}
+.pet{display:flex;gap:12px;align-items:center}
+.pet .av{width:64px;height:64px;border-radius:50%;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:32px;overflow:hidden;flex-shrink:0}
+.pet .av .att-list{margin:0}.pet .av .att.img{width:64px;height:64px;border-radius:50%;border:none}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.stat{background:var(--card2);border-radius:12px;padding:10px;text-align:center}
+.stat b{display:block;font-size:18px}.stat span{font-size:11.5px;color:var(--muted)}
+.meter{height:8px;border-radius:99px;background:var(--card2);overflow:hidden;margin-top:6px}.meter i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.mini{font-size:12px;color:var(--dim)}
+svg.trend{width:100%;height:120px;display:block;margin:6px 0}
+</style>
+</head>
+<body>
+<header>
+  <h1>🐾 Pet Care<small>Your dogs: care, vet visits and pet insurance</small></h1>
+</header>
+<main id="view"></main>
+<button class="fab" id="fab" type="button">＋ Add</button>
+<nav id="nav">
+  <button data-tab="home" type="button"><span class="i">🐶</span>Dogs</button>
+  <button data-tab="care" type="button"><span class="i">💊</span>Care</button>
+  <button data-tab="vet" type="button"><span class="i">🩺</span>Vet</button>
+  <button data-tab="ins" type="button"><span class="i">🛡</span>Insurance</button>
+  <button data-tab="more" type="button"><span class="i">⚙️</span>More</button>
+</nav>
+<div id="sheetWrap"><div id="sheet"></div></div>
+<input type="file" id="importFile" accept="application/json,.json" style="display:none">
+
+<script>
+(function(){
+'use strict';
+// ════════════════════════════════════════════════════════════════════
+// Pet Care: your dogs (profile, photo, weight), recurring care (heartworm, flea & tick, vaccines, grooming…), vet
+// visits with costs, pet insurance (policy, deductible, reimbursement, claims from submitted to paid) and other
+// expenses. Receipts and documents attach anywhere (attach.js). Everything stays on this phone (plus your backups).
+// ════════════════════════════════════════════════════════════════════
+var KEY='pet_care_v1';
+var EMPTY={pets:[],care:[],visits:[],claims:[],expenses:[],weights:[],files:[],settings:{}};
+var db=load(),tab='home',petSel='all';
+
+function load(){var d;try{d=JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){d=null;}d=d&&typeof d==='object'?d:{};
+  Object.keys(EMPTY).forEach(function(k){if(d[k]==null)d[k]=JSON.parse(JSON.stringify(EMPTY[k]));});return d;}
+function save(msg){db.updated=Date.now();try{localStorage.setItem(KEY,JSON.stringify(db));}catch(e){alert('Could not save — phone storage is full.');return;}
+  share();autoBackup();if(msg)toast(msg);render();}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function keyOf(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function todayKey(){return keyOf(new Date());}
+function parseD(k){if(!k)return null;var p=String(k).split('-');if(p.length!==3)return null;return new Date(+p[0],+p[1]-1,+p[2]);}
+function addDays(k,n){var d=parseD(k);if(!d)return '';d.setDate(d.getDate()+n);return keyOf(d);}
+function addMonths(k,n){var d=parseD(k);if(!d)return '';var day=d.getDate();d.setDate(1);d.setMonth(d.getMonth()+n);var last=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();d.setDate(Math.min(day,last));return keyOf(d);}
+function daysUntil(k){var d=parseD(k);if(!d)return null;return Math.round((d-parseD(todayKey()))/864e5);}
+function niceD(k,y){var d=parseD(k);if(!d)return '';return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:y||d.getFullYear()!==new Date().getFullYear()?'numeric':undefined});}
+function money(n){return '$'+(+n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function relDays(n){if(n==null)return '';if(n===0)return 'today';if(n===1)return 'tomorrow';if(n<0)return Math.abs(n)+(n===-1?' day':' days')+' overdue';if(n<60)return 'in '+n+' days';return 'in '+Math.round(n/30.4)+' months';}
+function toast(m){document.querySelectorAll('.toast').forEach(function(x){x.remove();});var t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(function(){t.remove();},2200);}
+function byId(l,id){return db[l].filter(function(x){return x.id===id;})[0];}
+function pet(id){return byId('pets',id);}
+function petName(id){var p=pet(id);return p?p.name:'';}
+function age(p){var b=parseD(p.born);if(!b)return '';var n=new Date(),y=n.getFullYear()-b.getFullYear(),m=n.getMonth()-b.getMonth();if(n.getDate()<b.getDate())m--;if(m<0){y--;m+=12;}return y>0?y+' yr'+(y>1?'s':'')+(m?' '+m+' mo':''):m+' mo';}
+function lastWeight(pid){var w=db.weights.filter(function(x){return x.petId===pid;}).sort(function(a,b){return a.date<b.date?-1:1;});return w[w.length-1];}
+function forPet(list){return petSel==='all'?list:list.filter(function(x){return x.petId===petSel||x.petId==='both';});}
+
+// ── Recurring care ─────────────────────────────────────────────────
+// Common items as a starting point; your vet decides the real schedule (rabies may be every 1 or 3 years, etc.).
+var CARE_PRESETS=[['Heartworm prevention','med',0,1],['Flea & tick prevention','med',0,1],['Rabies vaccine','vaccine',0,36],['DHPP vaccine','vaccine',0,36],['Bordetella vaccine','vaccine',0,12],
+  ['Leptospirosis vaccine','vaccine',0,12],['Annual checkup','vet',0,12],['Dental cleaning','vet',0,12],['Nail trim','groom',30,0],['Grooming / bath','groom',42,0],['Teeth brushing','groom',7,0]];
+function careDue(c){if(!c.lastDate)return {date:'',days:null,status:'unknown'};var dt=+c.everyDays>0?addDays(c.lastDate,+c.everyDays):+c.everyMonths>0?addMonths(c.lastDate,+c.everyMonths):'';if(!dt)return {date:'',days:null,status:'ok'};
+  var n=daysUntil(dt),soon=+c.everyDays>0&&+c.everyDays<=14?1:7;return {date:dt,days:n,status:n<0?'overdue':n<=soon?'soon':'ok'};}
+function careList(){var rank={overdue:0,soon:1,unknown:2,ok:3};return forPet(db.care).map(function(c){return {c:c,d:careDue(c)};}).sort(function(a,b){return rank[a.d.status]-rank[b.d.status]||((a.d.date||'9')<(b.d.date||'9')?-1:1);});}
+function every(c){return +c.everyDays>0?(+c.everyDays===7?'weekly':'every '+c.everyDays+' days'):+c.everyMonths>0?(+c.everyMonths===1?'monthly':+c.everyMonths===12?'yearly':+c.everyMonths%12===0?'every '+(c.everyMonths/12)+' years':'every '+c.everyMonths+' months'):'';}
+
+// ── Insurance ──────────────────────────────────────────────────────
+// Policy year starts on the policy's start date (or Jan 1). Deductible is met by claimed vet bills in that year.
+function policyYearStart(p){var s=p.ins&&p.ins.start;if(!s)return new Date().getFullYear()+'-01-01';var d=parseD(s),t=parseD(todayKey());var y=t.getFullYear();var c=new Date(y,d.getMonth(),d.getDate());if(c>t)c.setFullYear(y-1);return keyOf(c);}
+function insStats(p){
+  var i=p.ins||{},from=policyYearStart(p),cl=db.claims.filter(function(c){return c.petId===p.id&&(c.vetDate||c.date)>=from&&c.status!=='denied';});
+  var billed=cl.reduce(function(t,c){return t+(+c.amount||0);},0),paid=db.claims.filter(function(c){return c.petId===p.id&&c.status==='paid'&&(c.paidDate||c.date)>=from;}).reduce(function(t,c){return t+(+c.paid||0);},0);
+  var ded=+i.deductible||0,met=Math.min(ded,billed),months=Math.max(1,Math.round((parseD(todayKey())-parseD(from))/(30.44*864e5))+0);
+  var premiums=(+i.premium||0)*Math.min(12,months);
+  var open=db.claims.filter(function(c){return c.petId===p.id&&(c.status==='submitted'||c.status==='draft'||c.status==='approved');});
+  return {from:from,billed:billed,paid:paid,ded:ded,met:met,premiums:premiums,open:open,max:+i.annualMax||0};
+}
+function expectBack(p,amount){var i=p.ins||{},s=insStats(p),left=Math.max(0,s.ded-s.met),pct=(+i.reimb||0)/100;return Math.max(0,(+amount-left)*pct);}
+var STATUS={draft:['Not sent yet',''],submitted:['Submitted','warn'],approved:['Approved','acc'],paid:['Paid','good'],denied:['Denied','bad']};
+
+// ── Summary (shared with BeyondStride only if allowed; not shown there at the moment) ──
+function summary(){var due=careList().filter(function(x){return x.d.status==='overdue'||x.d.status==='soon';});
+  return {updated:db.updated||Date.now(),app:'pets',due:due.slice(0,6).map(function(x){return {title:petName(x.c.petId)+': '+x.c.name,date:x.d.date,days:x.d.days,kind:'care'};}),
+    openClaims:db.claims.filter(function(c){return c.status==='submitted'||c.status==='approved';}).length};}
+function share(){try{if(window.AndroidApp&&AndroidApp.setSummary)AndroidApp.setSummary(JSON.stringify(summary()));}catch(e){}}
+function backupJson(cb){var go=function(f){cb(JSON.stringify({app:'pet-care',version:1,data:db,files:f}));};if(window.Attach)Attach.all(go);else go({});}
+function autoBackup(){try{if(!window.AndroidApp||!AndroidApp.saveAutoBackup||db.settings.autoBackup===false)return;var k=todayKey();if(localStorage.getItem('pc_autoBackupDay')===k)return;
+  backupJson(function(js){if(AndroidApp.saveAutoBackup('pet-care-auto-'+k+'.json',js)){localStorage.setItem('pc_autoBackupDay',k);localStorage.setItem('pc_autoBackupAt',String(Date.now()));}});}catch(e){}}
+function exportJson(){backupJson(function(js){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([js],{type:'application/json'}));a.download='pet-care-backup-'+todayKey()+'.json';document.body.appendChild(a);a.click();a.remove();toast(window.AndroidApp?'Saved to Downloads/Pet Care':'Backup downloaded');});}
+document.getElementById('importFile').addEventListener('change',function(e){var f=e.target.files&&e.target.files[0];if(!f)return;var rd=new FileReader();
+  rd.onload=function(){try{var j=JSON.parse(rd.result);if(!j||j.app!=='pet-care'||!j.data)throw 0;if(!confirm('Replace everything in Pet Care with this backup?'))return;db=j.data;Object.keys(EMPTY).forEach(function(k){if(db[k]==null)db[k]=JSON.parse(JSON.stringify(EMPTY[k]));});
+    if(j.files&&window.Attach)Attach.restore(j.files,function(){save('Backup restored');});else save('Backup restored');}catch(x){alert('That file isn\'t a Pet Care backup.');}};rd.readAsText(f);e.target.value='';});
+
+// ── Rendering ──────────────────────────────────────────────────────
+var V=document.getElementById('view');
+function card(t,b,x){return '<div class="card"><h2>'+t+'<span class="sp"></span>'+(x||'')+'</h2>'+b+'</div>';}
+function petPicker(){if(db.pets.length<2)return '';return '<div class="seg"><button data-act="petSel" data-p="all" class="'+(petSel==='all'?'on':'')+'">Both</button>'+db.pets.map(function(p){return '<button data-act="petSel" data-p="'+p.id+'" class="'+(petSel===p.id?'on':'')+'">'+esc(p.name)+'</button>';}).join('')+'</div>';}
+function render(){
+  document.querySelectorAll('#nav button').forEach(function(b){b.classList.toggle('on',b.dataset.tab===tab);});
+  var fab=document.getElementById('fab');fab.style.display=tab==='more'?'none':'';
+  fab.textContent={home:db.pets.length?'＋ Add':'＋ Add a dog',care:'＋ Care item',vet:'＋ Vet visit',ins:'＋ Claim'}[tab]||'＋';
+  V.innerHTML=({home:renderHome,care:renderCare,vet:renderVet,ins:renderIns,more:renderMore}[tab])();if(window.Attach)Attach.hydrate(V);
+}
+function careRow(x){var c=x.c,d=x.d,cls={overdue:'bad',soon:'warn',ok:'good',unknown:''}[d.status];
+  return '<div class="row" data-act="editCare" data-id="'+c.id+'"><div class="main"><div class="t">'+(db.pets.length>1?esc(petName(c.petId))+' · ':'')+esc(c.name)+clip(c)+'</div><div class="s">'+esc([every(c),d.date?(d.days<0?'was due ':'next ')+niceD(d.date):'set when it was last done'].filter(Boolean).join(' · '))+'</div></div>'+
+    '<span class="tag '+cls+'">'+(d.status==='unknown'?'set up':d.status==='ok'?relDays(d.days):d.status==='overdue'?'overdue':relDays(d.days))+'</span><button class="btn sm" data-act="careDone" data-id="'+c.id+'">Done</button></div>';}
+function renderHome(){
+  if(!db.pets.length)return card('👋 Welcome','<div class="muted">Add your dogs — then keep their care schedule (heartworm, flea &amp; tick, vaccines, grooming), vet visits and costs, weight, and pet insurance claims from "sent" to "paid" in one place. Attach vet invoices, vaccine records and insurance papers anywhere.</div>'+
+    '<div class="btns"><button class="btn acc" data-act="addPet">＋ Add a dog</button></div>');
+  var h='';
+  db.pets.forEach(function(p){var w=lastWeight(p.id),nx=careList().filter(function(x){return x.c.petId===p.id&&x.d.date;})[0],ins=p.ins&&p.ins.company?insStats(p):null;
+    h+='<div class="card" data-act="openPet" data-id="'+p.id+'"><div class="pet"><div class="av">'+(p.photo&&window.Attach?Attach.html([p.photo]):'🐕')+'</div><div style="flex:1;min-width:0"><div class="t" style="font-weight:800;font-size:17px">'+esc(p.name)+'</div>'+
+      '<div class="s muted small">'+esc([p.breed,age(p),w?w.lbs+' lb':''].filter(Boolean).join(' · '))+'</div>'+
+      (nx?'<div class="small" style="margin-top:2px">'+esc(nx.c.name)+' · <span class="'+(nx.d.status==='overdue'?'tag bad':nx.d.status==='soon'?'tag warn':'dim')+'">'+esc(relDays(nx.d.days))+'</span></div>':'')+
+      (ins?'<div class="small dim" style="margin-top:2px">🛡 '+esc(p.ins.company)+' · deductible '+money(ins.met).replace('.00','')+' of '+money(ins.ded).replace('.00','')+(ins.open.length?' · '+ins.open.length+' open claim'+(ins.open.length>1?'s':''):'')+'</div>':'')+'</div></div></div>';});
+  var due=careList().filter(function(x){return x.d.status==='overdue'||x.d.status==='soon';});
+  h+=card('⏰ Due now &amp; soon',due.length?due.map(careRow).join(''):'<div class="empty">✅ Nothing due this week.</div>');
+  var open=db.claims.filter(function(c){return c.status==='submitted'||c.status==='approved'||c.status==='draft';});
+  if(open.length)h+=card('🛡 Open claims',open.map(claimRow).join(''));
+  var yr=String(new Date().getFullYear()),spent=yearSpend(yr);
+  if(spent.total)h+=card('💵 '+yr+' so far','<div class="stats"><div class="stat"><b>'+money(spent.vet).replace('.00','')+'</b><span>vet</span></div><div class="stat"><b>'+money(spent.other).replace('.00','')+'</b><span>food &amp; other</span></div><div class="stat"><b>'+money(spent.back).replace('.00','')+'</b><span>insurance paid back</span></div></div>'+
+    '<div class="mini" style="margin-top:8px">Total spent '+money(spent.total)+(spent.prem?' (incl. '+money(spent.prem)+' premiums)':'')+' · net after insurance '+money(spent.total-spent.back)+'</div>');
+  return h;
+}
+function yearSpend(yr){var v=db.visits.filter(function(x){return String(x.date).slice(0,4)===yr;}).reduce(function(t,x){return t+(+x.cost||0);},0);
+  var o=db.expenses.filter(function(x){return String(x.date).slice(0,4)===yr;}),prem=o.filter(function(x){return x.cat==='Insurance premium';}).reduce(function(t,x){return t+(+x.amount||0);},0);
+  var other=o.reduce(function(t,x){return t+(+x.amount||0);},0);var back=db.claims.filter(function(c){return c.status==='paid'&&String(c.paidDate||c.date).slice(0,4)===yr;}).reduce(function(t,c){return t+(+c.paid||0);},0);
+  return {vet:v,other:other,prem:prem,back:back,total:v+other};}
+function renderCare(){var l=careList();
+  var h=petPicker()+card('💊 Care schedule',l.length?l.map(careRow).join(''):'<div class="empty">Nothing yet. Tap ＋ Care item — heartworm, flea &amp; tick, vaccines and grooming are ready to pick.</div>');
+  var w=forPet(db.weights);if(db.pets.length)h+=weightCard();
+  return h;}
+function weightCard(){var ps=petSel==='all'?db.pets:db.pets.filter(function(p){return p.id===petSel;});
+  return card('⚖️ Weight',ps.map(function(p){var w=db.weights.filter(function(x){return x.petId===p.id;}).sort(function(a,b){return a.date<b.date?-1:1;});var last=w[w.length-1],prev=w[w.length-2];
+    return '<div class="row"><div class="main"><div class="t">'+esc(p.name)+'</div><div class="s">'+(last?last.lbs+' lb on '+esc(niceD(last.date))+(prev?' ('+(last.lbs-prev.lbs>=0?'+':'')+(Math.round((last.lbs-prev.lbs)*10)/10)+' lb)':''):'No weights yet')+'</div>'+(w.length>1?spark(w):'')+'</div><button class="btn sm" data-act="addWeight" data-id="'+p.id+'">＋ Weight</button></div>';}).join(''));}
+function spark(w){w=w.slice(-12);var vals=w.map(function(x){return +x.lbs;}),lo=Math.min.apply(null,vals),hi=Math.max.apply(null,vals),pad=(hi-lo)*0.2||1;lo-=pad;hi+=pad;var W=300,H=60;
+  return '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:50px;margin-top:4px" preserveAspectRatio="none"><polyline fill="none" stroke="#38bdf8" stroke-width="2" points="'+w.map(function(x,i){return (5+i*(W-10)/(w.length-1))+','+(H-5-(x.lbs-lo)*(H-10)/(hi-lo));}).join(' ')+'"/></svg>';}
+function visitRow(v){var c=db.claims.filter(function(x){return x.visitId===v.id;})[0];
+  return '<div class="row" data-act="editVisit" data-id="'+v.id+'"><div class="main"><div class="t">'+esc(niceD(v.date))+' · '+esc(petName(v.petId))+clip(v)+'</div><div class="s">'+esc([v.reason,v.clinic].filter(Boolean).join(' · '))+'</div></div>'+
+    (v.cost?'<span class="tag">'+money(v.cost)+'</span>':'')+(c?'<span class="tag '+STATUS[c.status][1]+'">'+STATUS[c.status][0]+'</span>':(v.cost&&pet(v.petId)&&pet(v.petId).ins&&pet(v.petId).ins.company?'<button class="btn sm" data-act="claimFor" data-id="'+v.id+'">Claim</button>':''))+'</div>';}
+function renderVet(){var l=forPet(db.visits).slice().sort(function(a,b){return a.date<b.date?1:-1;}),up=l.filter(function(v){return v.date>=todayKey();}),past=l.filter(function(v){return v.date<todayKey();});
+  var h=petPicker();if(up.length)h+=card('📅 Upcoming',up.reverse().map(visitRow).join(''));
+  h+=card('🩺 Vet visits',past.length?past.map(visitRow).join(''):'<div class="empty">Log each visit with the cost and attach the invoice — then send it as an insurance claim with one tap.</div>');
+  var ex=forPet(db.expenses).slice().sort(function(a,b){return a.date<b.date?1:-1;});
+  h+=card('🧾 Other expenses',ex.length?ex.slice(0,15).map(function(x){return '<div class="row" data-act="editExp" data-id="'+x.id+'"><div class="main"><div class="t">'+esc(x.cat||'Expense')+(x.note?' · '+esc(x.note):'')+clip(x)+'</div><div class="s">'+esc(niceD(x.date))+' · '+esc(x.petId==='both'?'Both':petName(x.petId))+'</div></div><span class="tag">'+money(x.amount)+'</span></div>';}).join(''):'<div class="empty">Food, grooming, boarding, toys, premiums…</div>','<button class="btn sm" data-act="addExp">＋</button>');
+  return h;}
+function claimRow(c){var st=STATUS[c.status]||STATUS.draft,p=pet(c.petId);
+  return '<div class="row" data-act="editClaim" data-id="'+c.id+'"><div class="main"><div class="t">'+esc(petName(c.petId))+' · '+esc(c.reason||'Claim')+clip(c)+'</div><div class="s">'+esc([niceD(c.vetDate||c.date),'billed '+money(c.amount),c.status==='paid'?'paid back '+money(c.paid):p&&p.ins&&p.ins.reimb?'expect ~'+money(c.expected||0):'',c.claimNo?'#'+c.claimNo:''].filter(Boolean).join(' · '))+'</div></div><span class="tag '+st[1]+'">'+st[0]+'</span></div>';}
+function renderIns(){var h=petPicker(),ps=petSel==='all'?db.pets:db.pets.filter(function(p){return p.id===petSel;});
+  if(!db.pets.length)return card('🛡 Pet insurance','<div class="empty">Add your dogs first.</div>');
+  ps.forEach(function(p){var i=p.ins||{};if(!i.company){h+=card('🛡 '+esc(p.name),'<div class="empty">No policy added.</div><div class="btns"><button class="btn acc" data-act="editIns" data-id="'+p.id+'">Add policy</button></div>');return;}
+    var s=insStats(p);
+    h+=card('🛡 '+esc(p.name)+' · '+esc(i.company),'<div class="kv">'+[['Policy #',esc(i.policy||'')],['Reimburses',i.reimb?i.reimb+'% after deductible':''],['Annual limit',i.annualMax?money(i.annualMax).replace('.00',''):(i.unlimited?'Unlimited':'')],['Premium',i.premium?money(i.premium)+'/month':''],['Policy year',niceD(s.from,true)+' – '+niceD(addDays(addMonths(s.from,12),-1),true)],['Claims',i.phone?'<a href="tel:'+esc(i.phone.replace(/[^\d+]/g,''))+'">'+esc(i.phone)+'</a>':'']]
+      .filter(function(x){return x[1];}).map(function(x){return '<div>'+x[0]+'</div><div>'+x[1]+'</div>';}).join('')+'</div>'+
+      (s.ded?'<div class="small" style="margin-top:10px">Deductible: '+money(s.met)+' of '+money(s.ded)+(s.met>=s.ded?' ✅ met':'')+'</div><div class="meter"><i style="width:'+Math.min(100,s.met/s.ded*100)+'%"></i></div>':'')+
+      '<div class="stats"><div class="stat"><b>'+money(s.billed).replace('.00','')+'</b><span>claimed this year</span></div><div class="stat"><b>'+money(s.paid).replace('.00','')+'</b><span>paid back</span></div><div class="stat"><b>'+money(s.premiums).replace('.00','')+'</b><span>premiums (est.)</span></div></div>'+
+      Attach.html(i.files||[])+'<div class="btns">'+(i.portal?'<a class="btn sm" href="'+esc(/^https?:/.test(i.portal)?i.portal:'https://'+i.portal)+'" target="_blank" rel="noopener">Claims website</a>':'')+'<button class="btn sm" data-act="editIns" data-id="'+p.id+'">Edit policy</button></div>');});
+  var cl=forPet(db.claims).slice().sort(function(a,b){return (a.vetDate||a.date)<(b.vetDate||b.date)?1:-1;});
+  h+=card('📨 Claims',cl.length?cl.map(claimRow).join(''):'<div class="empty">Log a vet visit, then tap "Claim" on it — or tap ＋ Claim.</div>');
+  return h;}
+function renderMore(){var at=+localStorage.getItem('pc_autoBackupAt')||0;
+  return generalDocsCard('Adoption papers, AKC registration, microchip records, vaccine certificates, boarding forms…')+
+    card('💾 Backup','<div class="muted small">Everything lives only on this phone. A backup (files included) is saved automatically once a day'+(at?' (last: '+esc(new Date(at).toLocaleString())+')':'')+'.</div><div class="btns"><button class="btn" data-act="exportJson">Back up now</button><button class="btn" data-act="importJson">Restore a backup</button></div>'+
+    '<label class="chk"><input type="checkbox" data-act="toggleAuto" '+(db.settings.autoBackup===false?'':'checked')+'> Daily automatic backup</label>');}
+
+// ── Sheets ─────────────────────────────────────────────────────────
+var SH=document.getElementById('sheet'),SW=document.getElementById('sheetWrap');
+function openSheet(h){SH.innerHTML=h;SW.classList.add('open');if(window.Attach)Attach.hydrate(SH);}
+function closeSheet(){SW.classList.remove('open');SH.innerHTML='';sheetFiles=null;sheetItem=null;}
+SW.addEventListener('click',function(e){if(e.target===SW)closeSheet();});
+
+// ── 📎 Receipts & documents (window.Attach, from attach.js) ─────────
+var sheetFiles=null,sheetItem=null;
+function filesBox(files,item){sheetFiles=(files||[]).slice();sheetItem=item||null;
+  return '<div style="margin-top:14px;font-weight:700;font-size:13px;color:var(--accent)">📎 Receipts &amp; documents</div><div id="attBox">'+(window.Attach&&Attach.html(sheetFiles)||'<div class="empty small">None yet.</div>')+'</div>'+
+    '<button type="button" class="btn sm" data-act="attachHere" style="margin-top:8px">📎 Add photo or file</button>';}
+function refreshAttBox(){var b=document.getElementById('attBox');if(b&&window.Attach){b.innerHTML=Attach.html(sheetFiles)||'<div class="empty small">None yet.</div>';Attach.hydrate(b);}}
+function clip(o){var n=(o&&o.files||[]).length;return n?' <span class="dim">📎'+(n>1?n:'')+'</span>':'';}
+function attachHere(){if(!window.Attach)return;Attach.pick(function(ids){if(!ids.length)return;sheetFiles=(sheetFiles||[]).concat(ids);if(sheetItem){sheetItem.files=sheetFiles.slice();save(ids.length+' file'+(ids.length>1?'s':'')+' attached');}refreshAttBox();});}
+function attachGeneral(){if(!window.Attach)return;Attach.pick(function(ids){if(!ids.length)return;db.files=(db.files||[]).concat(ids);save(ids.length+' file'+(ids.length>1?'s':'')+' added');});}
+function generalDocsCard(blurb){return card('📁 Documents &amp; receipts','<div class="muted small">'+blurb+'</div>'+((window.Attach&&Attach.html(db.files||[]))||'')+'<div class="btns"><button class="btn" data-act="attachGeneral">📎 Add photo or file</button></div>');}
+if(window.Attach)Attach.onDelete(function(id){
+  Object.keys(db).forEach(function(k){if(Array.isArray(db[k]))db[k].forEach(function(o){if(o&&Array.isArray(o.files))o.files=o.files.filter(function(x){return x!==id;});});});
+  db.files=(db.files||[]).filter(function(x){return x!==id;});if(sheetFiles)sheetFiles=sheetFiles.filter(function(x){return x!==id;});
+  save('File deleted');refreshAttBox();});
+document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-act=attachHere],[data-act=attachGeneral]');if(!b)return;e.stopPropagation();if(b.dataset.act==='attachHere')attachHere();else attachGeneral();},true);
+
+function head(t){return '<h3><span>'+t+'</span><button class="iconbtn" data-act="close">✕</button></h3>';}
+function inp(n,l,v,t,ph){t=t||'text';return '<label class="f">'+l+'<input name="'+n+'" type="'+t+'" value="'+esc(v==null?'':v)+'" placeholder="'+esc(ph||'')+'"'+(t==='number'?' inputmode="decimal" step="any"':'')+'></label>';}
+function petSelect(sel,both){var d=sel||(petSel!=='all'?petSel:(db.pets[0]&&db.pets[0].id));return '<label class="f">Dog<select name="petId">'+db.pets.map(function(p){return '<option value="'+p.id+'"'+(p.id===d?' selected':'')+'>'+esc(p.name)+'</option>';}).join('')+(both?'<option value="both"'+(sel==='both'?' selected':'')+'>Both</option>':'')+'</select></label>';}
+function needPet(){if(db.pets.length)return false;toast('Add a dog first');editPet();return true;}
+function grab(f,keys,o){keys.forEach(function(k){if(f.elements[k])o[k]=f.elements[k].type==='checkbox'?f.elements[k].checked:f.elements[k].value.trim();});return o;}
+
+var PHOTO=null;
+function editPet(id){var p=id?pet(id):null,x=p||{};PHOTO=x.photo||null;
+  openSheet(head(p?'Edit '+esc(p.name):'New dog')+'<form id="pf">'+inp('name','Name',x.name)+'<div class="grid2">'+inp('breed','Breed',x.breed)+'<label class="f">Sex<select name="sex">'+['','Male','Female'].map(function(s){return '<option'+(x.sex===s?' selected':'')+'>'+s+'</option>';}).join('')+'</select></label></div>'+
+    '<div class="grid2">'+inp('born','Birthday',x.born,'date')+inp('color','Color / markings',x.color)+'</div>'+inp('chip','Microchip #',x.chip)+inp('vet','Vet clinic',x.vet)+inp('vetPhone','Vet phone',x.vetPhone,'tel')+
+    '<label class="f">Notes<textarea name="notes" placeholder="Food, allergies, quirks…">'+esc(x.notes||'')+'</textarea></label>'+
+    '<div class="btns"><button type="button" class="btn sm" data-act="petPhoto">📷 '+(x.photo?'Change photo':'Add photo')+'</button></div><div id="photoBox">'+(x.photo?Attach.html([x.photo]):'')+'</div>'+
+    filesBox(x.files,p)+'<div class="small dim">Adoption papers, registration, microchip and vaccine records…</div>'+
+    '<div class="btns"><button class="btn acc" type="submit">Save</button>'+(p?'<button class="btn bad" type="button" data-act="delPet" data-id="'+p.id+'">Delete</button>':'')+'</div></form>');
+  var f=document.getElementById('pf');f.addEventListener('submit',function(e){e.preventDefault();var o=grab(f,['name','breed','sex','born','color','chip','vet','vetPhone','notes'],p||{id:uid(),ins:{}});if(!o.name){alert('What\'s the dog\'s name?');return;}
+    o.photo=PHOTO;if(sheetFiles)o.files=sheetFiles.slice();var isNew=!p;if(isNew)db.pets.push(o);closeSheet();save('Saved');if(isNew)setupCare(o.id);});}
+function setupCare(pid){var p=pet(pid);
+  openSheet(head('Care schedule for '+esc(p.name))+'<div class="small dim">Pick what applies (your vet sets the real schedule — change any later). Then tap each one and set when it was last done.</div><form id="cf2">'+
+    CARE_PRESETS.map(function(c,i){return '<label class="chk"><input type="checkbox" name="c'+i+'" '+(i<3?'checked':'')+'> '+esc(c[0])+' <span class="dim small">'+esc(every({everyDays:c[2],everyMonths:c[3]}))+'</span></label>';}).join('')+
+    '<div class="btns"><button class="btn acc" type="submit">Add these</button><button class="btn" type="button" data-act="close">Skip</button></div></form>');
+  document.getElementById('cf2').addEventListener('submit',function(e){e.preventDefault();var n=0;CARE_PRESETS.forEach(function(c,i){if(e.target.elements['c'+i].checked){db.care.push({id:uid(),petId:pid,name:c[0],kind:c[1],everyDays:c[2]||'',everyMonths:c[3]||'',lastDate:'',notes:''});n++;}});closeSheet();tab='care';save(n+' care items added');});}
+function openPet(id){var p=pet(id);if(!p)return;var w=lastWeight(id);
+  openSheet(head(esc(p.name))+'<div class="pet"><div class="av">'+(p.photo?Attach.html([p.photo]):'🐕')+'</div><div class="kv" style="flex:1">'+[['Breed',esc(p.breed||'')],['Age',age(p)+(p.born?' (born '+esc(niceD(p.born,true))+')':'')],['Sex',esc(p.sex||'')],['Weight',w?w.lbs+' lb ('+esc(niceD(w.date))+')':''],['Color',esc(p.color||'')],['Microchip',esc(p.chip||'')],
+    ['Vet',esc(p.vet||'')+(p.vetPhone?' · <a href="tel:'+esc(p.vetPhone.replace(/[^\d+]/g,''))+'">'+esc(p.vetPhone)+'</a>':'')],['Notes',esc(p.notes||'')]].filter(function(x){return x[1];}).map(function(x){return '<div>'+x[0]+'</div><div>'+x[1]+'</div>';}).join('')+'</div></div>'+
+    filesBox(p.files,p)+'<div class="btns"><button class="btn" data-act="addWeight" data-id="'+id+'">＋ Weight</button><button class="btn" data-act="editPet" data-id="'+id+'">Edit</button><button class="btn" data-act="editIns" data-id="'+id+'">🛡 Insurance</button></div>');}
+function editCare(id,pre){var c=id?byId('care',id):null,x=c||pre||{};
+  openSheet(head(c?esc(c.name):'New care item')+'<form id="cf">'+petSelect(x.petId)+inp('name','What',x.name,'text','e.g. Heartworm prevention')+
+    '<div class="grid2">'+inp('everyMonths','Every … months',x.everyMonths,'number')+inp('everyDays','or every … days',x.everyDays,'number')+'</div>'+inp('lastDate','Last done',x.lastDate,'date')+
+    inp('product','Product / dose',x.product,'text','e.g. Heartgard Plus 51–100 lb')+'<label class="f">Notes<textarea name="notes">'+esc(x.notes||'')+'</textarea></label>'+filesBox(x.files,c)+
+    '<div class="btns"><button class="btn acc" type="submit">Save</button>'+(c?'<button class="btn bad" type="button" data-act="delCare" data-id="'+c.id+'">Delete</button>':'')+'</div></form>');
+  var f=document.getElementById('cf');f.addEventListener('submit',function(e){e.preventDefault();var o=grab(f,['petId','name','everyMonths','everyDays','lastDate','product','notes'],c||{id:uid()});
+    if(!o.name){alert('What is it?');return;}if(!(+o.everyMonths>0)&&!(+o.everyDays>0)){alert('How often? Set months or days.');return;}if(sheetFiles)o.files=sheetFiles.slice();if(!c)db.care.push(o);closeSheet();save('Saved');});}
+function editVisit(id,pre){var v=id?byId('visits',id):null,x=v||pre||{date:todayKey()};var p=pet(x.petId||(petSel!=='all'?petSel:db.pets[0]&&db.pets[0].id));
+  openSheet(head(v?'Vet visit':'New vet visit')+'<form id="vf">'+petSelect(x.petId)+'<div class="grid2">'+inp('date','Date',x.date,'date')+inp('cost','Total cost ($)',x.cost,'number')+'</div>'+
+    inp('clinic','Clinic',x.clinic!=null?x.clinic:(p&&p.vet)||'')+inp('reason','Reason',x.reason,'text','e.g. Ear infection, annual exam')+
+    '<label class="f">What the vet said / treatment<textarea name="notes">'+esc(x.notes||'')+'</textarea></label>'+filesBox(x.files,v)+'<div class="small dim">Attach the invoice and records — they carry over to the claim.</div>'+
+    '<div class="btns"><button class="btn acc" type="submit">Save</button>'+(v?'<button class="btn" type="button" data-act="claimFor" data-id="'+v.id+'">🛡 Claim</button><button class="btn bad" type="button" data-act="delVisit" data-id="'+v.id+'">Delete</button>':'')+'</div></form>');
+  var f=document.getElementById('vf');f.addEventListener('submit',function(e){e.preventDefault();var o=grab(f,['petId','date','cost','clinic','reason','notes'],v||{id:uid()});if(sheetFiles)o.files=sheetFiles.slice();if(!v)db.visits.push(o);closeSheet();save('Saved');
+    var pp=pet(o.petId);if(!v&&+o.cost>0&&pp&&pp.ins&&pp.ins.company&&confirm('Start an insurance claim for this visit?'))claimFor(o.id);});}
+function claimFor(vid){var v=byId('visits',vid);if(!v)return;var c=db.claims.filter(function(x){return x.visitId===vid;})[0];if(c)return editClaim(c.id);
+  editClaim(null,{petId:v.petId,visitId:v.id,vetDate:v.date,amount:v.cost,reason:v.reason,files:(v.files||[]).slice(),status:'draft'});}
+function editClaim(id,pre){var c=id?byId('claims',id):null,x=c||pre||{status:'draft',vetDate:todayKey()};var p=pet(x.petId||(db.pets[0]&&db.pets[0].id));
+  var exp=p&&p.ins&&p.ins.reimb&&x.amount?expectBack(p,x.amount):0;
+  openSheet(head(c?'Claim':'New claim')+'<form id="clf">'+petSelect(x.petId)+'<div class="grid2">'+inp('vetDate','Vet visit date',x.vetDate,'date')+inp('amount','Amount billed ($)',x.amount,'number')+'</div>'+inp('reason','For',x.reason)+
+    (exp?'<div class="mini">Estimated back: about '+money(exp)+' ('+p.ins.reimb+'% after any deductible left)</div>':'')+
+    '<label class="f">Status<select name="status">'+Object.keys(STATUS).map(function(k){return '<option value="'+k+'"'+(x.status===k?' selected':'')+'>'+STATUS[k][0]+'</option>';}).join('')+'</select></label>'+
+    '<div class="grid2">'+inp('date','Submitted on',x.date,'date')+inp('claimNo','Claim #',x.claimNo)+'</div><div class="grid2">'+inp('paid','Paid back ($)',x.paid,'number')+inp('paidDate','Paid on',x.paidDate,'date')+'</div>'+
+    '<label class="f">Notes<textarea name="notes">'+esc(x.notes||'')+'</textarea></label>'+filesBox(x.files,c)+'<div class="small dim">Invoice, medical records, the claim form, the explanation of benefits…</div>'+
+    '<div class="btns"><button class="btn acc" type="submit">Save</button>'+(p&&p.ins&&p.ins.portal?'<a class="btn" href="'+esc(/^https?:/.test(p.ins.portal)?p.ins.portal:'https://'+p.ins.portal)+'" target="_blank" rel="noopener">Claims website</a>':'')+(c?'<button class="btn bad" type="button" data-act="delClaim" data-id="'+c.id+'">Delete</button>':'')+'</div></form>');
+  var f=document.getElementById('clf');f.addEventListener('submit',function(e){e.preventDefault();var o=grab(f,['petId','vetDate','amount','reason','status','date','claimNo','paid','paidDate','notes'],c||{id:uid(),visitId:x.visitId||''});
+    if(o.status==='submitted'&&!o.date)o.date=todayKey();if(o.status==='paid'&&!o.paidDate)o.paidDate=todayKey();var pp=pet(o.petId);o.expected=pp?Math.round(expectBack(pp,o.amount)*100)/100:0;
+    if(sheetFiles)o.files=sheetFiles.slice();if(!c)db.claims.push(o);closeSheet();tab='ins';save('Claim saved');});}
+function editIns(pid){var p=pet(pid),i=p.ins||{};
+  openSheet(head('🛡 '+esc(p.name)+'\'s insurance')+'<form id="if">'+inp('company','Company',i.company,'text','e.g. Trupanion, Healthy Paws')+inp('policy','Policy #',i.policy)+
+    '<div class="grid2">'+inp('premium','Premium ($/month)',i.premium,'number')+inp('deductible','Deductible ($/year)',i.deductible,'number')+'</div>'+
+    '<div class="grid2">'+inp('reimb','Reimburses (%)',i.reimb,'number','e.g. 80')+inp('annualMax','Annual limit ($)',i.annualMax,'number','blank = unlimited')+'</div>'+
+    inp('start','Policy start date',i.start,'date')+inp('phone','Claims phone',i.phone,'tel')+inp('portal','Claims website / app link',i.portal)+
+    '<label class="f">Notes<textarea name="notes" placeholder="What\'s covered, waiting periods, exclusions…">'+esc(i.notes||'')+'</textarea></label>'+filesBox(i.files,null)+'<div class="small dim">The policy document, your ID card, coverage letters…</div>'+
+    '<div class="btns"><button class="btn acc" type="submit">Save</button></div></form>');
+  var f=document.getElementById('if');f.addEventListener('submit',function(e){e.preventDefault();p.ins=grab(f,['company','policy','premium','deductible','reimb','annualMax','start','phone','portal','notes'],p.ins||{});if(sheetFiles)p.ins.files=sheetFiles.slice();closeSheet();save('Policy saved');});}
+function editExp(id){var x0=id?byId('expenses',id):null,x=x0||{date:todayKey()};
+  openSheet(head(x0?'Expense':'New expense')+'<form id="ef">'+petSelect(x.petId||'both',true)+'<div class="grid2">'+inp('date','Date',x.date,'date')+inp('amount','Amount ($)',x.amount,'number')+'</div>'+
+    '<label class="f">Category<select name="cat">'+['Food','Treats','Grooming','Boarding / sitter','Training','Toys & gear','Medication','Insurance premium','Other'].map(function(c){return '<option'+(x.cat===c?' selected':'')+'>'+c+'</option>';}).join('')+'</select></label>'+inp('note','Note',x.note)+filesBox(x.files,x0)+
+    '<div class="btns"><button class="btn acc" type="submit">Save</button>'+(x0?'<button class="btn bad" type="button" data-act="delExp" data-id="'+x0.id+'">Delete</button>':'')+'</div></form>');
+  var f=document.getElementById('ef');f.addEventListener('submit',function(e){e.preventDefault();var o=grab(f,['petId','date','amount','cat','note'],x0||{id:uid()});if(!(+o.amount>0)){alert('Enter the amount.');return;}if(sheetFiles)o.files=sheetFiles.slice();if(!x0)db.expenses.push(o);closeSheet();save('Saved');});}
+function addWeight(pid){var p=pet(pid),w=lastWeight(pid);openSheet(head('Weight · '+esc(p.name))+'<form id="wf">'+inp('lbs','Pounds',w?w.lbs:'','number')+inp('date','Date',todayKey(),'date')+'<div class="btns"><button class="btn acc" type="submit">Save</button></div></form>');
+  document.getElementById('wf').addEventListener('submit',function(e){e.preventDefault();var l=+e.target.elements.lbs.value,d=e.target.elements.date.value||todayKey();if(!(l>0))return;db.weights=db.weights.filter(function(x){return !(x.petId===pid&&x.date===d);});db.weights.push({petId:pid,date:d,lbs:l});closeSheet();save('Weight saved');});}
+function pickPhoto(){if(!window.Attach)return;Attach.pick(function(ids){if(!ids.length)return;PHOTO=ids[0];var b=document.getElementById('photoBox');if(b){b.innerHTML=Attach.html([PHOTO]);Attach.hydrate(b);}});}
+
+// ── Clicks ─────────────────────────────────────────────────────────
+document.getElementById('nav').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;tab=b.dataset.tab;render();window.scrollTo(0,0);});
+document.getElementById('fab').addEventListener('click',function(){
+  if(tab==='care'){if(!needPet())editCare();}else if(tab==='vet'){if(!needPet())editVisit();}else if(tab==='ins'){if(!needPet())editClaim();}
+  else if(!db.pets.length)editPet();
+  else openSheet(head('Add')+'<div class="btns" style="flex-direction:column"><button class="btn" data-act="addPet">🐕 A dog</button><button class="btn" data-act="addVisit">🩺 Vet visit</button><button class="btn" data-act="addCareX">💊 Care item</button><button class="btn" data-act="addClaim">🛡 Insurance claim</button><button class="btn" data-act="addExp">🧾 Expense</button></div>');});
+document.addEventListener('change',function(e){if(e.target.dataset&&e.target.dataset.act==='toggleAuto'){db.settings.autoBackup=e.target.checked;save(e.target.checked?'Daily backup on':'Daily backup off');}});
+document.addEventListener('click',function(e){var el=e.target.closest('[data-act]');if(!el||el.tagName==='INPUT')return;var a=el.dataset.act,id=el.dataset.id;
+  if(e.target.closest('button,a')&&!el.matches('button,a')&&e.target.closest('button,a')!==el)return;
+  switch(a){
+    case 'close':closeSheet();break;case 'petSel':petSel=el.dataset.p;render();break;
+    case 'addPet':closeSheet();editPet();break;case 'editPet':closeSheet();editPet(id);break;case 'openPet':openPet(id);break;
+    case 'delPet':if(!confirm('Delete this dog and all of its records?'))break;['care','visits','claims','weights'].forEach(function(k){db[k]=db[k].filter(function(x){return x.petId!==id;});});db.pets=db.pets.filter(function(x){return x.id!==id;});closeSheet();save('Deleted');break;
+    case 'petPhoto':pickPhoto();break;
+    case 'addCareX':closeSheet();editCare();break;case 'editCare':editCare(id);break;
+    case 'careDone':{var c=byId('care',id);if(!c)break;c.lastDate=todayKey();save(c.name+' done — next '+niceD(careDue(c).date));break;}
+    case 'delCare':if(!confirm('Delete this care item?'))break;db.care=db.care.filter(function(x){return x.id!==id;});closeSheet();save('Deleted');break;
+    case 'addVisit':closeSheet();editVisit();break;case 'editVisit':editVisit(id);break;
+    case 'delVisit':if(!confirm('Delete this visit?'))break;db.visits=db.visits.filter(function(x){return x.id!==id;});closeSheet();save('Deleted');break;
+    case 'claimFor':closeSheet();claimFor(id);break;case 'addClaim':closeSheet();editClaim();break;case 'editClaim':editClaim(id);break;
+    case 'delClaim':if(!confirm('Delete this claim?'))break;db.claims=db.claims.filter(function(x){return x.id!==id;});closeSheet();save('Deleted');break;
+    case 'editIns':closeSheet();editIns(id);break;
+    case 'addExp':closeSheet();editExp();break;case 'editExp':editExp(id);break;
+    case 'delExp':if(!confirm('Delete this expense?'))break;db.expenses=db.expenses.filter(function(x){return x.id!==id;});closeSheet();save('Deleted');break;
+    case 'addWeight':addWeight(id);break;
+    case 'exportJson':exportJson();break;case 'importJson':document.getElementById('importFile').click();break;
+  }});
+window.handleAndroidBack=function(){var s=document.getElementById('appSheetWrap');if(s&&s.classList.contains('open')){s.classList.remove('open');return true;}
+  if(window.Attach&&Attach.isOpen()){Attach.close();return true;}
+  if(SW.classList.contains('open')){closeSheet();return true;}if(tab!=='home'){tab='home';render();return true;}return false;};
+window.HR={summary:summary,exportJson:exportJson,db:function(){return db;}};
+render();share();autoBackup();
+document.addEventListener('visibilitychange',function(){if(!document.hidden){share();render();}});
+})();
+</script>
+</body>
+</html>
